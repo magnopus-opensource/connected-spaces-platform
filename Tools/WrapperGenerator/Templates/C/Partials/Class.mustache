@@ -1,0 +1,20 @@
+#pragma region Class: {{ name }}
+
+#pragma region Fields: {{ name }}
+
+{{# fields }}
+{{> Class/Field }}
+
+{{/ fields }}
+#pragma endregion Fields: {{ name }}
+
+#pragma region Methods: {{ name }}
+
+{{# methods }}
+{{> Class/Method }}
+
+{{/ methods }}
+#pragma endregion Methods: {{ name }}
+
+#pragma endregion Class: {{ name }}
+

@@ -1,0 +1,21 @@
+{{# is_private }}
+protected
+{{/ is_private }}
+{{^ is_private }}
+public
+{{/ is_private }}
+{{ parent_class.name }}(
+{{# parameters }}
+    {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
+{{/ parameters }})
+{
+{{^ is_private }}
+    var np = {{ unique_name }}(
+{{# parameters }}
+        {{ name }}{{# type.is_pointer_or_reference }}._ptr{{/ type.is_pointer_or_reference }}{{> Comma }}
+{{/ parameters }}
+    );
+    _ptr = np.Pointer;
+    _ownsPtr = np.OwnsOwnData;
+{{/ is_private }}
+}

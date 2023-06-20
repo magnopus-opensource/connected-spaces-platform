@@ -1,0 +1,9 @@
+[DllImport(
+#if !UNITY_EDITOR && ENABLE_IL2CPP
+    "__Internal"
+#elif DEBUG
+    "OlympusFoundation_D"
+#else
+    "OlympusFoundation"
+#endif
+), SuppressUnmanagedCodeSecurity]

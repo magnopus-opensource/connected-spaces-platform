@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  </head>
+  <body>
+    <script async type="module">
+      import {Olympus} from "./olympus.foundation.js";
+
+      await Olympus.Foundation.ready;
+
+      Olympus.Foundation.OlympusFoundation.initialise("https://ogs-odev.magnoboard.com");
+
+      var systemsManager = Olympus.Foundation.SystemsManager.get();
+      var userSystem = systemsManager.getUserSystem();
+
+      var result = await userSystem.login("", "olyservice@rewind.co", "rcWbfc1MU3Yx");
+      var resCode = result.getResultCode();
+
+      if (resCode == Olympus.Foundation.EResultCode.Success) {
+        console.log("Logged in!");
+      }
+      else {
+        console.log("Failed to log in!");
+      }
+    </script>
+  </body>
+</html>
+
+

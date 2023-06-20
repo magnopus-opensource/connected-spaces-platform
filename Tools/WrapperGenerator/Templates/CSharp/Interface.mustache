@@ -1,0 +1,18 @@
+{{> Header }}
+
+{{> Usings }}
+
+{{# data }}
+{{> StartType }}
+
+    {{> DocComments }}
+    public interface {{ name }}
+    {
+{{# methods }}
+        {{> Interface/Method }}
+
+{{/ methods }}
+    }
+
+{{> EndType }}
+{{/ data }}

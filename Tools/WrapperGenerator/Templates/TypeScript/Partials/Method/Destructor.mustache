@@ -1,0 +1,12 @@
+delete(): void {
+    if (this.ownsPointer && !this.disposed) {
+        Module.ccall(
+            "{{ unique_name }}",
+            "void",
+            [ "number" ],
+            [ this.pointer ]
+        );
+
+        this.disposed = true;
+    }
+}

@@ -1,0 +1,324 @@
+/*
+ * Copyright 2023 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
+
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Users/UserSystem.h"
+#include "CSP/Web/HTTPResponseCodes.h"
+#include "Debug/Logging.h"
+#include "Memory/Memory.h"
+#include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
+
+#include <msgpack/v1/object_fwd_decl.hpp>
+
+using namespace csp::systems;
+
+namespace csp::multiplayer
+{
+csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
+	: ComponentBase(ComponentType::Conversation, Parent)
+	, ConversationSystem(Parent->GetSpaceEntitySystem()->GetMultiplayerConnection()->GetConversationSystem())
+{
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)]	 = "";
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)]		 = true;
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)]		 = true;
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Position)]		 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Rotation)]		 = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)]			 = "";
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Date)]			 = "";
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies)] = static_cast<int64_t>(0);
+
+	SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
+}
+
+void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)
+{
+	if (GetConversationId().IsEmpty())
+	{
+		const StringResultCallback CreateConversationIdCallback = [=](const StringResult& StringResult)
+		{
+			if (StringResult.GetResultCode() == csp::services::EResultCode::Success)
+			{
+				SetConversationId(StringResult.GetValue());
+			}
+			Callback(StringResult);
+		};
+		ConversationSystem->CreateConversation(Message, CreateConversationIdCallback);
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("This component already has an associated conversation! No new conversation was created as a result.");
+		Callback(StringResult::Invalid());
+	}
+}
+
+bool ConversationSpaceComponent::MoveConversationFromComponent(ConversationSpaceComponent& OtherConversationComponent)
+{
+	if (GetConversationId().IsEmpty())
+	{
+		const auto ConversationId = OtherConversationComponent.GetConversationId();
+		OtherConversationComponent.RemoveConversationId();
+		SetConversationId(ConversationId);
+		return true;
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("This component already has an associated conversation! The conversation was not moved as a result.");
+		return false;
+	}
+}
+
+void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCallback Callback)
+{
+	if (!GetConversationId().IsEmpty())
+	{
+		ConversationSystem->DeleteConversation(GetConversationId(), Callback);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to DeleteConversation was empty! No update to the conversation was issued as a result.");
+		Callback(NullResult::Invalid());
+	}
+}
+
+void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, MessageResultCallback Callback)
+{
+	if (!GetConversationId().IsEmpty())
+	{
+		csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult)
+		{
+			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::InProgress)
+			{
+				return;
+			}
+			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::Success)
+			{
+				this->ConversationSystem->AddMessageToConversation(GetConversationId(), GetProfileResult.GetProfile().DisplayName, Message, Callback);
+			}
+			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::Failed)
+			{
+				const MessageResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
+				Callback(InternalResult);
+			}
+		};
+		csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+		UserSystem->GetProfileByUserId(UserSystem->GetLoginState().UserId, GetProfileCallback);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to AddMessage was empty! No update to the conversation was issued as a result.");
+		Callback(MessageResult::Invalid());
+	}
+}
+
+void ConversationSpaceComponent::GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback)
+{
+	ConversationSystem->GetMessage(MessageId, Callback);
+}
+
+void ConversationSpaceComponent::GetAllMessages(MessageCollectionResultCallback Callback)
+{
+	if (!GetConversationId().IsEmpty())
+	{
+		ConversationSystem->GetMessagesFromConversation(GetConversationId(), nullptr, nullptr, Callback);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to GetAllMessages was empty! No update to the conversation was issued as a result.");
+		Callback(MessageCollectionResult::Invalid());
+	}
+}
+
+void ConversationSpaceComponent::DeleteMessage(const csp::common::String& MessageId, NullResultCallback Callback)
+{
+	ConversationSystem->DeleteMessage(MessageId, Callback);
+}
+
+bool ConversationSpaceComponent::GetIsVisible() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return false;
+}
+void ConversationSpaceComponent::SetIsVisible(const bool Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible), Value);
+}
+bool ConversationSpaceComponent::GetIsActive() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return false;
+}
+
+const csp::common::Vector3& ConversationSpaceComponent::GetPosition() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	{
+		return RepVal.GetVector3();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultVector3();
+}
+
+void ConversationSpaceComponent::SetPosition(const csp::common::Vector3& Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position), Value);
+}
+
+const csp::common::Vector4& ConversationSpaceComponent::GetRotation() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	{
+		return RepVal.GetVector4();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultVector4();
+}
+
+void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
+}
+
+void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
+{
+	if (!GetConversationId().IsEmpty())
+	{
+		ConversationSystem->GetConversationInformation(GetConversationId(), Callback);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("This component does not have an associated conversation.");
+		Callback(ConversationResult::Invalid());
+	}
+}
+
+void ConversationSpaceComponent::SetConversationInfo(const ConversationInfo& ConversationData, ConversationResultCallback Callback)
+{
+	if (!GetConversationId().IsEmpty())
+	{
+		ConversationSystem->SetConversationInformation(GetConversationId(), ConversationData, Callback);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("This component does not have an associated conversation.");
+		Callback(ConversationResult::Invalid());
+	}
+}
+
+void ConversationSpaceComponent::GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback)
+{
+	ConversationSystem->GetMessageInformation(MessageId, Callback);
+}
+
+void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback)
+{
+	ConversationSystem->SetMessageInformation(MessageId, MessageData, Callback);
+}
+
+void ConversationSpaceComponent::SetIsActive(const bool Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value);
+}
+
+void ConversationSpaceComponent::SetTitle(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title), Value);
+}
+
+const csp::common::String& ConversationSpaceComponent::GetTitle() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void ConversationSpaceComponent::SetDate(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date), Value);
+}
+
+const csp::common::String& ConversationSpaceComponent::GetDate() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies), Value);
+}
+
+const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	{
+		return RepVal.GetInt();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return 0;
+}
+
+void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId), Value);
+}
+
+void ConversationSpaceComponent::RemoveConversationId()
+{
+	RemoveProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId));
+}
+
+const csp::common::String& ConversationSpaceComponent::GetConversationId() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+} // namespace csp::multiplayer

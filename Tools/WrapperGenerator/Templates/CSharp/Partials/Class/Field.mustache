@@ -1,0 +1,35 @@
+{{> DocComments }}
+public {{# is_static }}static {{/ is_static }}{{# type }}{{> Type }}{{/ type }} {{ name }}
+{
+{{# type.is_template }}
+    get => new {{# type }}{{> Type }}{{/ type }}({{ unique_getter_name }}({{^ is_static }}_ptr{{/ is_static }}));
+    set => {{ unique_setter_name }}({{^ is_static }}_ptr, {{/ is_static }}value._ptr);
+{{/ type.is_template }}
+{{^ type.is_template }}
+    get => {{# type }}{{# is_pointer }}new {{> Type }}({{/ is_pointer }}{{# is_class_or_interface }}new {{> Type }}({{/ is_class_or_interface }}{{# is_string }}WrapperHelper.NativeUTF8ToString({{/ is_string }}{{ unique_getter_name }}({{^ is_static }}_ptr{{/ is_static }}){{# is_string }}){{/ is_string }}{{# is_class_or_interface }}){{/ is_class_or_interface }}{{# is_pointer }}){{/ is_pointer }}{{/ type }};
+    set => {{ unique_setter_name }}(
+{{^ is_static }}
+        _ptr,
+{{/ is_static }}
+{{# type }}
+{{# is_pointer }}
+        value._ptr
+{{/ is_pointer }}
+{{^ is_pointer }}
+{{# is_class_or_interface }}
+        value._ptr
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_string }}
+        WrapperHelper.StringToNativeUTF8(value)
+{{/ is_string }}
+{{^ is_string }}
+        value
+{{/ is_string }}
+{{/ is_class_or_interface }}
+{{/ is_pointer }}
+{{/ type }}
+    );
+{{/ type.is_template }}
+}
+

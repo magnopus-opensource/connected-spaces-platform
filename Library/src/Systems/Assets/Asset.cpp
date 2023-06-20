@@ -1,0 +1,440 @@
+/*
+ * Copyright 2023 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "CSP/Systems/Assets/Asset.h"
+
+#include "CSP/Common/StringFormat.h"
+#include "CSP/Systems/Assets/AssetCollection.h"
+#include "Common/Convert.h"
+#include "Memory/Memory.h"
+#include "Services/ApiBase/ApiBase.h"
+#include "Services/PrototypeService/AssetFileDto.h"
+#include "Services/PrototypeService/Dto.h"
+
+
+namespace chs = csp::services::generated::prototypeservice;
+
+
+namespace csp::systems
+{
+
+csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType)
+{
+	if (DTOAssetDetailType == "Image")
+		return csp::systems::EAssetType::IMAGE;
+	else if (DTOAssetDetailType == "Thumbnail")
+		return csp::systems::EAssetType::THUMBNAIL;
+	else if (DTOAssetDetailType == "Simulation")
+		return csp::systems::EAssetType::SIMULATION;
+	else if (DTOAssetDetailType == "Model")
+		return csp::systems::EAssetType::MODEL;
+	else if (DTOAssetDetailType == "Video")
+		return csp::systems::EAssetType::VIDEO;
+	else if (DTOAssetDetailType == "ScriptLibrary")
+		return csp::systems::EAssetType::SCRIPT_LIBRARY;
+	else if (DTOAssetDetailType == "HolocapVideo")
+		return csp::systems::EAssetType::HOLOCAP_VIDEO;
+	else if (DTOAssetDetailType == "HolocapAudio")
+		return csp::systems::EAssetType::HOLOCAP_AUDIO;
+	else if (DTOAssetDetailType == "Audio")
+		return csp::systems::EAssetType::AUDIO;
+	else
+	{
+		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
+		return csp::systems::EAssetType::IMAGE;
+	}
+}
+
+csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
+{
+	if (Platform == "Default")
+	{
+		return EAssetPlatform::DEFAULT;
+	}
+	else
+	{
+		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+		return EAssetPlatform::DEFAULT;
+	}
+}
+
+csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
+{
+	switch (Platform)
+	{
+		case EAssetPlatform::DEFAULT:
+			return "Default";
+	}
+
+	FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+	return "Default";
+}
+
+void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset)
+{
+	if (Dto.HasPrototypeId())
+	{
+		Asset.AssetCollectionId = Dto.GetPrototypeId();
+	}
+
+	if (Dto.HasId())
+	{
+		Asset.Id = Dto.GetId();
+	}
+
+	if (Dto.HasFileName())
+	{
+		Asset.FileName = Dto.GetFileName();
+	}
+
+	if (Dto.HasName())
+	{
+		Asset.Name = Dto.GetName();
+	}
+
+	if (Dto.HasLanguageCode())
+	{
+		Asset.LanguageCode = Dto.GetLanguageCode();
+	}
+
+	if (Dto.HasAssetType())
+	{
+		Asset.Type = ConvertDTOAssetDetailType(Dto.GetAssetType());
+	}
+
+	if (Dto.HasSupportedPlatforms())
+	{
+		const auto& Platforms = Dto.GetSupportedPlatforms();
+		Asset.Platforms		  = csp::common::Array<csp::systems::EAssetPlatform>(Platforms.size());
+
+		for (size_t i = 0; i < Platforms.size(); ++i)
+		{
+			// TODO Move this to a separate function when we have some different values than DEFAULT
+			Asset.Platforms[i] = ConvertStringToAssetPlatform(Platforms[i]);
+		}
+	}
+
+	if (Dto.HasStyle())
+	{
+		Asset.Styles = csp::common::Convert(Dto.GetStyle());
+	}
+
+	if (Dto.HasAddressableId())
+	{
+		// TODO CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
+		const auto& InAddressableId = Dto.GetAddressableId().Split('|');
+		if (InAddressableId.Size() == 2)
+		{
+			Asset.SetThirdPartyPlatformType(static_cast<EThirdPartyPlatform>(std::stoi(InAddressableId[1].c_str())));
+			Asset.SetThirdPartyPackagedAssetIdentifier(InAddressableId[0]);
+		}
+		else
+		{
+			Asset.SetThirdPartyPackagedAssetIdentifier(Dto.GetAddressableId());
+			Asset.SetThirdPartyPlatformType(EThirdPartyPlatform::NONE);
+		}
+	}
+	else
+	{
+		Asset.SetThirdPartyPackagedAssetIdentifier("");
+		Asset.SetThirdPartyPlatformType(EThirdPartyPlatform::NONE);
+	}
+
+	if (Dto.HasUri())
+	{
+		Asset.Uri = Dto.GetUri();
+	}
+
+	if (Dto.HasChecksum())
+	{
+		Asset.Checksum = Dto.GetChecksum();
+	}
+
+	if (Dto.HasVersion())
+	{
+		Asset.Version = std::stoi(Dto.GetVersion().c_str());
+	}
+
+	if (Dto.HasMimeType())
+	{
+		Asset.MimeType = Dto.GetMimeType();
+	}
+}
+} // namespace csp::systems
+
+
+namespace csp::systems
+{
+
+Asset::Asset() : Type(EAssetType::MODEL), Version(0), ThirdPartyPackagedAssetIdentifier(""), ThirdPartyPlatform(EThirdPartyPlatform::NONE)
+{
+}
+
+const csp::common::String& FileAssetDataSource::GetMimeType() const
+{
+	return MimeType;
+}
+
+void FileAssetDataSource::SetMimeType(const csp::common::String& InMimeType)
+{
+	MimeType = InMimeType;
+}
+
+void FileAssetDataSource::SetUploadContent(csp::web::WebClient* InWebClient,
+										   csp::web::HttpPayload* InPayload,
+										   const csp::systems::Asset& InAsset) const
+{
+	assert(!FilePath.IsEmpty());
+
+	auto Version = std::to_string(std::abs(InAsset.Version) /* Version should not be negative */);
+	InWebClient->SetFileUploadContentFromFile(InPayload, FilePath, Version.c_str(), MimeType);
+}
+
+
+BufferAssetDataSource::BufferAssetDataSource() : Buffer(nullptr), BufferLength(0)
+{
+}
+
+const csp::common::String& BufferAssetDataSource::GetMimeType() const
+{
+	return MimeType;
+}
+
+void BufferAssetDataSource::SetMimeType(const csp::common::String& InMimeType)
+{
+	MimeType = InMimeType;
+}
+
+void BufferAssetDataSource::SetUploadContent(csp::web::WebClient* InWebClient,
+											 csp::web::HttpPayload* InPayload,
+											 const csp::systems::Asset& InAsset) const
+{
+	assert(Buffer != nullptr);
+	assert(BufferLength > 0);
+	assert(!InAsset.FileName.IsEmpty());
+
+	auto Version = std::to_string(std::abs(InAsset.Version) /* Version should not be negative */);
+	InWebClient
+		->SetFileUploadContentFromBuffer(InPayload, reinterpret_cast<const char*>(Buffer), BufferLength, InAsset.FileName, Version.c_str(), MimeType);
+}
+
+
+Asset& AssetResult::GetAsset()
+{
+	return Asset;
+}
+
+const Asset& AssetResult::GetAsset() const
+{
+	return Asset;
+}
+
+void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* AssetDetailResponse			   = static_cast<chs::AssetDetailDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
+
+		AssetDetailDtoToAsset(*AssetDetailResponse, Asset);
+	}
+}
+
+
+AssetsResult AssetsResult::Invalid()
+{
+	static AssetsResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+
+	return result;
+}
+
+csp::common::Array<Asset>& AssetsResult::GetAssets()
+{
+	return Assets;
+}
+
+const csp::common::Array<Asset>& AssetsResult::GetAssets() const
+{
+	return Assets;
+}
+
+void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* AssetsResponse				   = static_cast<csp::services::DtoArray<chs::AssetDetailDto>*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		AssetsResponse->FromJson(Response->GetPayload().GetContent());
+
+		std::vector<chs::AssetDetailDto>& DetailsArray = AssetsResponse->GetArray();
+		Assets										   = csp::common::Array<csp::systems::Asset>(DetailsArray.size());
+
+		// Extract data from response in our Projects array
+		for (size_t i = 0; i < DetailsArray.size(); ++i)
+		{
+			AssetDetailDtoToAsset(DetailsArray[i], Assets[i]);
+		}
+	}
+}
+
+
+csp::common::String& UriResult::GetUri()
+{
+	return Uri;
+}
+
+const csp::common::String& UriResult::GetUri() const
+{
+	return Uri;
+}
+
+csp::common::String& UriResult::GetXErrorCode()
+{
+	return XCodeError;
+}
+
+const csp::common::String& UriResult::GetXErrorCode() const
+{
+	return XCodeError;
+}
+
+UriResult UriResult::Invalid()
+{
+	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+
+	return result;
+}
+
+UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)
+{
+	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+}
+
+void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	auto Headers = Response->GetPayload().GetHeaders();
+
+	if (!Headers["x-errorcode"].empty())
+	{
+		XCodeError = Headers["x-errorcode"].c_str();
+	}
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Uri = Response->GetPayload().GetContent();
+	}
+}
+
+
+AssetDataResult::AssetDataResult(void*) : Data(nullptr), DataLength(0)
+{
+}
+
+AssetDataResult::AssetDataResult(const AssetDataResult& Other) : Data(nullptr), DataLength(Other.DataLength), ResultBase(Other)
+{
+	if (DataLength > 0)
+	{
+		auto DataPtr = (char*) CSP_ALLOC(sizeof(char) * DataLength + 1);
+		memcpy(DataPtr, Other.Data, DataLength);
+		DataPtr[DataLength] = 0;
+
+		Data = DataPtr;
+	}
+}
+
+AssetDataResult::~AssetDataResult()
+{
+	if (Data)
+	{
+		CSP_FREE(Data);
+	}
+}
+
+void* AssetDataResult::GetData()
+{
+	return Data;
+}
+
+const void* AssetDataResult::GetData() const
+{
+	return Data;
+}
+
+size_t AssetDataResult::GetDataLength()
+{
+	return DataLength;
+}
+
+const size_t AssetDataResult::GetDataLength() const
+{
+	return DataLength;
+}
+
+void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* AssetResponse					   = static_cast<csp::services::AssetFileDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		AssetResponse->FromJson(Response->GetPayload().GetContent());
+
+		const char* PayLoad = Response->GetPayload().GetContent().c_str();
+		DataLength			= Response->GetPayload().GetContent().Length();
+
+		auto DataPtr = (char*) CSP_ALLOC(sizeof(char) * DataLength + 1);
+		memcpy(DataPtr, PayLoad, DataLength);
+		DataPtr[DataLength] = 0;
+
+		Data = DataPtr;
+	}
+}
+
+const csp::common::String& Asset::GetThirdPartyPackagedAssetIdentifier() const
+{
+	return ThirdPartyPackagedAssetIdentifier;
+}
+
+void Asset::SetThirdPartyPackagedAssetIdentifier(const csp::common::String& InThirdPartyPackagedAssetIdentifier)
+{
+	ThirdPartyPackagedAssetIdentifier = InThirdPartyPackagedAssetIdentifier;
+}
+
+void Asset::SetThirdPartyPlatformType(const EThirdPartyPlatform InThirdPartyPlatformType)
+{
+	ThirdPartyPlatform = InThirdPartyPlatformType;
+}
+
+const EThirdPartyPlatform Asset::GetThirdPartyPlatformType() const
+{
+	return ThirdPartyPlatform;
+}
+} // namespace csp::systems

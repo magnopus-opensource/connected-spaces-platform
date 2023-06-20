@@ -1,0 +1,4 @@
+{
+    "printWidth": 150,
+    "preprocessorSymbolSets": ["", "DEBUG", "DEBUG,CODE_STYLE"]
+}

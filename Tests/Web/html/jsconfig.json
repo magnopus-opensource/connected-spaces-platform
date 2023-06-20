@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "ES2020",
+    "target": "ES2020",
+    "checkJs": true,
+    "moduleResolution": "Classic",
+    "alwaysStrict": true
+  },
+  "exclude": ["node_modules", "**/node_modules/*", "assets"]
+}

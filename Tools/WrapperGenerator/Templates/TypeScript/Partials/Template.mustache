@@ -1,0 +1,39 @@
+{{# definition.translated_namespace }}
+export namespace {{ definition.translated_namespace }} {
+{{/ definition.translated_namespace }}
+
+export class {{ definition.name }}<{{# template_parameters }}{{ name }}{{> Comma }}{{/ template_parameters }}>
+    extends NativeClassWrapper 
+{{# definition.should_dispose }}
+    implements INativeResource
+{{/ definition.should_dispose }}
+{
+    /** @internal */
+    constructor(
+        pointer: NativePointer,
+{{# template_parameters }}
+        {{ name }}TypeFactory: ProxyClassFactory,
+        {{ name }}TypeName: string{{> Comma }}
+{{/ template_parameters }}
+    ) {
+        super(pointer);
+{{# template_parameters }}
+        this.{{ name }}TypeFactory = {{ name }}TypeFactory;
+        this.{{ name }}TypeName = {{ name }}TypeName;
+{{/ template_parameters }}
+    }
+
+{{# template_parameters }}
+    private {{ name }}TypeFactory: ProxyClassFactory;
+    private {{ name }}TypeName: string;
+{{/ template_parameters }}
+
+{{# definition.methods }}
+    {{> Template/Method }}
+
+{{/ definition.methods }}
+}
+
+{{# definition.translated_namespace }}
+}
+{{/ definition.translated_namespace }}

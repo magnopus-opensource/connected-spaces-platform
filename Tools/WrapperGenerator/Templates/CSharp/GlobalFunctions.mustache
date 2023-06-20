@@ -1,0 +1,183 @@
+{{> Header }}
+
+{{> Usings }}
+
+namespace Csp
+{
+    public static class Foundation
+    {
+        #region P/Invoke
+        
+{{# data }}
+        {{> DllImport }}
+        static extern
+{{# return_type }}
+{{# is_string }}
+        IntPtr
+{{/ is_string }}
+{{^ is_string }}
+{{# is_class_or_interface }}
+        NativePointer
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_pointer_or_reference }}
+{{# is_const }}
+        {{ name }}
+{{/ is_const }}
+{{^ is_const }}
+        IntPtr
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+        {{ name }}
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ is_string }}
+{{/ return_type }}
+{{^ return_type }}
+        void
+{{/ return_type }}
+        {{ unique_name }}(
+{{# parameters }}
+{{# type.is_class_or_interface }}
+                IntPtr
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# is_out }}
+                out {{ type.name }}
+{{/ is_out }}
+{{# is_in_out }}
+                ref {{ type.name }}
+{{/ is_in_out }}
+{{^ is_out }}
+{{^ is_in_out }}
+{{# type.is_pointer_or_reference }}
+                IntPtr
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+                {{ type.name }}
+{{/ type.is_pointer_or_reference }}
+{{/ is_in_out }}
+{{/ is_out }}
+{{/ type.is_class_or_interface }}
+                {{ name }}{{> Comma }}
+{{/ parameters }}
+        );
+        
+{{/ data }}
+        #endregion
+
+{{# data }}
+        {{> DocComments }}
+        public static
+{{# return_type }}
+{{# is_class_or_interface }}
+        {{> Type }}
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_pointer_or_reference }}
+{{# is_const }}
+        {{> Type }}
+{{/ is_const }}
+{{^ is_const }}
+        Ref<{{> Type }}>
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+        {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ return_type }}
+{{^ return_type }}
+        void
+{{/ return_type }}
+        {{ name }}(
+{{# parameters }}
+{{# is_out }}
+            out
+{{/ is_out }}
+{{# is_in_out }}
+            ref
+{{/ is_in_out }}
+{{# type }}
+            {{> Type }}
+{{# is_optional }}
+            ?
+{{/ is_optional }}
+{{/ type }}
+            {{ name }}{{> Comma }}
+{{/ parameters }})
+        {
+{{# return_type }}
+{{# is_string }}
+            var _result =
+{{/ is_string }}
+{{^ is_string }}
+            return
+{{# is_class_or_interface}}
+                new {{> Type }}(
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_pointer_or_reference }}
+{{^ is_const }}
+                new Ref<{{ name }}>(
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ is_string }}
+{{/ return_type }}
+                {{ unique_name }}(
+{{# parameters }}
+{{# type.is_optional }}
+                    {{ name }} == null ? IntPtr.Zero :
+{{/ type.is_optional }}
+{{# type.is_class_or_interface }}
+                    {{ name }}._ptr{{> Comma }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# is_out }}
+                    out {{ name }}{{> Comma }}
+{{/ is_out }}
+{{# is_in_out }}
+                    ref {{ name }}{{> Comma }}
+{{/ is_in_out }}
+{{^ is_out }}
+{{^ is_in_out }}
+{{# type.is_pointer_or_reference }}
+                    (IntPtr){{ name }}{{> Comma }}
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+                    {{ name }}{{> Comma }}
+{{/ type.is_pointer_or_reference }}
+{{/ is_in_out }}
+{{/ is_out }}
+{{/ type.is_class_or_interface }}
+{{/ parameters }}
+                )
+{{# return_type }}
+{{# is_class_or_interface }}
+                )
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_pointer_or_reference }}
+{{^ is_const }}
+                )
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ return_type }}
+            ;
+
+{{# return_type }}
+{{# is_string }}
+            var _stringResult = WrapperHelper.NativeUTF8ToString(_result);
+            Foundation.Free(_result);
+
+            return _stringResult;
+{{/ is_string }}
+{{/ return_type }}
+        }
+		
+{{/ data }}
+    }
+}

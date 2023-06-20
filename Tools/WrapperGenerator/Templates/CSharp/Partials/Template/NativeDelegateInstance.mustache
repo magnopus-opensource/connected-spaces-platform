@@ -1,0 +1,9 @@
+{{# is_operator_overload }}
+{{# is_index_operator }}
+{{ definition.name }}Delegates.{{ unique_name }}_GetDelegate {{ unique_name }}_Get;
+{{ definition.name }}Delegates.{{ unique_name }}_SetDelegate {{ unique_name }}_Set;
+{{/ is_index_operator }}
+{{/ is_operator_overload }}
+{{^ is_operator_overload }}
+{{ definition.name }}Delegates.{{ unique_name }}Delegate {{ unique_name }};
+{{/ is_operator_overload }}

@@ -1,0 +1,12 @@
+{{# is_operator_overload }}
+{{# is_index_operator }}
+ptr = Foundation.GetFunctionAddress($"{{ unique_name }}_Get{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}");
+{{ unique_name }}_Get = Marshal.GetDelegateForFunctionPointer<{{ definition.name }}Delegates.{{ unique_name }}_GetDelegate>(ptr);
+ptr = Foundation.GetFunctionAddress($"{{ unique_name }}_Set{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}");
+{{ unique_name }}_Set = Marshal.GetDelegateForFunctionPointer<{{ definition.name }}Delegates.{{ unique_name }}_SetDelegate>(ptr);
+{{/ is_index_operator }}
+{{/ is_operator_overload }}
+{{^ is_operator_overload }}
+ptr = Foundation.GetFunctionAddress($"{{ unique_name }}{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}");
+{{ unique_name }} = Marshal.GetDelegateForFunctionPointer<{{ definition.name }}Delegates.{{ unique_name }}Delegate>(ptr);
+{{/ is_operator_overload }}

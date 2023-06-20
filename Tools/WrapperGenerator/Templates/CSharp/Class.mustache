@@ -1,0 +1,267 @@
+{{> Header }}
+
+{{> Usings }}
+
+{{# data }}
+{{> StartType }}
+
+    {{> DocComments }}
+    public
+{{# has_nested_types }}
+    partial
+{{/ has_nested_types }}
+{{# is_static }}
+    static
+{{/ is_static }}
+    class {{ name }}
+{{^ is_static }}
+    : {{# base }}{{> Type }}{{/ base }}{{^ base }}NativeClassWrapper{{/ base }}{{/ is_static }}{{# interfaces }}, {{# type }}{{> Type }}{{/ type }}{{/ interfaces }}{{# should_dispose }}, IDisposable{{/ should_dispose }}
+    {
+{{^ is_static }}
+        internal override string _safeTypeName { get;} = "{{ full_safe_type_name }}";
+{{/ is_static }}
+
+        #region P/Invoke
+        #pragma warning disable IDE1006
+
+{{# events }}
+        {{> DllImport }}
+        static extern void
+        {{ unique_method_name }}(IntPtr @class, {{ delegate.name }} callback, IntPtr callbackStateObject);
+
+{{/ events }}
+
+{{# fields }}
+        {{> DllImport }}
+{{# type.is_template }}
+        static extern NativePointer
+{{/ type.is_template }}
+{{^ type.is_template }}
+{{# type.is_class_or_interface }}
+        static extern NativePointer
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+        static extern {{# type }}{{# is_pointer }}IntPtr{{/ is_pointer }}{{^ is_pointer }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ is_pointer }}{{/ type }}
+{{/ type.is_class_or_interface }}
+{{/ type.is_template }}
+        {{ unique_getter_name }}({{^ is_static }}IntPtr @class{{/ is_static }});
+
+        {{> DllImport }}
+        static extern void
+{{# type.is_template }}
+        {{ unique_setter_name }}({{^ is_static }}IntPtr @class, {{/ is_static }}IntPtr value);
+{{/ type.is_template }}
+{{^ type.is_template }}
+        {{ unique_setter_name }}({{^ is_static }}IntPtr @class, {{/ is_static }}{{# type }}{{# is_pointer }}IntPtr{{/ is_pointer }}{{^ is_pointer }}{{# is_class_or_interface }}IntPtr{{/ is_class_or_interface }}{{^ is_class_or_interface }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ is_class_or_interface }}{{/ is_pointer }}{{/ type }} value);
+{{/ type.is_template }}
+        
+{{/ fields }}
+        
+{{# methods }}
+{{# is_operator_overload }}
+{{# is_index_operator }}
+        {{> DllImport }}
+{{# return_type.is_class_or_interface }}
+        static extern {{# return_type }}{{# is_reference }}NativePointer{{/ is_reference }}{{^ is_reference }}{{> Type }}{{/ is_reference }}{{/ return_type }}
+{{/ return_type.is_class_or_interface }}
+{{^ return_type.is_class_or_interface }}
+{{# return_type.is_string }}
+        static extern IntPtr
+{{/ return_type.is_string }}
+{{^ return_type.is_string }}
+        static extern {{# return_type }}{{> Type }}{{/ return_type }}
+{{/ return_type.is_string }}
+{{/ return_type.is_class_or_interface }}
+        {{ unique_name }}_Get(IntPtr @class{{# parameters }}, {{# type }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ type }} {{ name }}{{/ parameters }});
+
+        {{> DllImport }}
+        static extern void
+{{# return_type.is_class_or_interface }}
+        {{ unique_name }}_Set(IntPtr @class{{# parameters }}, {{# type }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ type }} {{ name }}{{/ parameters }}, {{# return_type }}{{# is_reference }}IntPtr{{/ is_reference }}{{^ is_reference }}{{> Type }}{{/ is_reference }}{{/ return_type }} value);
+{{/ return_type.is_class_or_interface }}
+{{^ return_type.is_class_or_interface }}
+        {{ unique_name }}_Set(IntPtr @class{{# parameters }}, {{# type }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ type }} {{ name }}{{/ parameters }}, {{# return_type }}{{# is_string }}IntPtr{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ return_type }} value);
+{{/ return_type.is_class_or_interface }}
+{{/ is_index_operator }}
+{{/ is_operator_overload }}
+{{^ is_operator_overload }}
+{{^ is_event }}
+        {{> DllImport }}
+{{# is_constructor }}
+        static extern NativePointer
+        {{ unique_name }}({{# parameters }}{{# is_out }}out {{# type }}{{> Type }}{{/ type }}{{/ is_out }}{{^ is_out }}{{# type }}{{# is_pointer_or_reference }}IntPtr{{/ is_pointer_or_reference}}{{^ is_pointer_or_reference }}{{> Type }}{{/ is_pointer_or_reference }}{{/ type }}{{/ is_out }} {{ name }}{{> Comma }}{{/ parameters }});
+{{/ is_constructor }}
+{{# is_destructor }}
+        static extern void
+        {{ unique_name }}(IntPtr @class);
+{{/ is_destructor }}
+{{# is_task }}
+        static extern {{# return_type}}{{# is_pointer_or_reference }}IntPtr{{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{ name }}{{/ is_pointer_or_reference }}{{/ return_type }}{{^ return_type }}void{{/ return_type }}
+        {{ unique_name }}(
+            IntPtr @class,
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+            IntPtr
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+            {{ name }}
+{{/ is_pointer_or_reference }}
+{{/ type }}
+                {{ name }},
+{{/ parameters }}
+            {{ delegate.name }} callback, IntPtr callbackStateObject
+        );
+{{/ is_task }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{^ is_task }}
+        static extern
+{{# return_type }}
+{{# is_void_pointer }}
+        NativePointer
+{{/ is_void_pointer }}
+{{# is_string }}
+        IntPtr
+{{/ is_string }}
+{{^ is_void_pointer }}
+{{^ is_string }}
+{{# is_pointer_or_reference }}
+        NativePointer
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+        NativePointer
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+        {{> Type }}
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ is_string }}
+{{/ is_void_pointer }}
+{{/ return_type }}
+{{^ return_type }}
+        void
+{{/ return_type }}
+        {{ unique_name }}(
+{{^ is_static }}
+            IntPtr @class{{# has_parameters }}, {{/ has_parameters }}
+{{/ is_static }}
+{{# parameters }}
+{{# is_out }}
+            out {{ type.name }} {{ name }}{{> Comma }}
+{{/ is_out }}
+{{^ is_out }}
+{{# type.is_pointer_or_reference }}
+            IntPtr {{ name }}{{> Comma }}
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+{{# type.is_string }}
+            IntPtr {{ name }}{{> Comma }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_function_signature }}
+            _{{ delegate.name }} {{ name }},
+            IntPtr {{ name }}StateObject{{> Comma }}
+{{/ type.is_function_signature }}
+{{^ type.is_function_signature }}
+            {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
+{{/ type.is_function_signature }}
+{{/ type.is_string }}
+{{/ type.is_pointer_or_reference }}
+{{/ is_out }}
+{{/ parameters }}
+        );
+{{/ is_task }}
+{{/ is_destructor }}
+{{/ is_constructor }}
+{{/ is_event }}
+{{/ is_operator_overload }}
+
+{{/ methods }}
+        #pragma warning restore IDE1006
+        #endregion
+
+{{^ is_static }}
+        internal {{ name }}(NativePointer ptr)
+            : base(ptr)
+        {
+            
+        }
+
+{{# has_base_type }}
+        public {{ name }}({{# base }}{{> Type }}{{/ base }} baseInstance)
+            : base(new NativePointer(baseInstance._ptr, baseInstance._ownsPtr ? (byte)1 : (byte)0))        
+        {
+            // Prevent previous instance from freeing underlying pointer when destroyed
+            baseInstance._ownsPtr = false;
+        }
+{{/ has_base_type }}
+{{/ is_static }}
+        
+{{# delegates }}
+        delegate
+{{# return_type }}
+                {{> Type }}
+{{/ return_type }}
+{{^ return_type }}
+                void
+{{/ return_type }}
+                {{# include_managed }}_{{/ include_managed }}{{ name }}(
+                    IntPtr _StateObject__{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type.is_pointer_or_reference }}
+                    NativePointer
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+                    {{# type }}{{> Type }}{{/ type }}
+{{/ type.is_pointer_or_reference }}
+                    {{ name }}{{> Comma }}
+{{/ parameters }});
+{{# has_progress }}
+        public event EventHandler<ProgressEventArgs>? {{ method_name }}OnProgress;
+{{/ has_progress }}
+
+{{# include_managed }}
+        public delegate
+{{# return_type }}
+                {{> Type }}
+{{/ return_type }}
+{{^ return_type }}
+                void
+{{/ return_type }}
+                {{ name }}(
+{{# parameters }}
+                {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
+{{/ parameters }}
+                );
+{{/ include_managed }}
+{{/ delegates }}
+
+{{# has_events }}
+        readonly List<GCHandle> eventHandles = new List<GCHandle>();
+
+{{# events }}
+        {{> Class/Event }}
+{{/ events }}
+{{/ has_events }}
+        
+{{# fields }}
+        {{> Class/Field }}
+{{/ fields }}
+        
+{{# methods }}
+{{# is_task }}
+        {{> Class/TaskMethod }}
+{{/ is_task }}
+{{^ is_task }}
+{{^ is_event }}
+        {{> Class/Method }}
+{{/ is_event }}
+{{/ is_task }}
+
+{{/ methods }}
+    }
+
+{{> EndType }}
+{{/ data }}

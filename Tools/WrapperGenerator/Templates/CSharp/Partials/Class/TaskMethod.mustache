@@ -1,0 +1,95 @@
+{{! IL2CPP does not allow marshalling delegates that point to non-static methods, so we need to do this... }}
+#if !UNITY_EDITOR && ENABLE_IL2CPP
+[AOT.MonoPInvokeCallback (typeof ({{ delegate.name }}))]
+#endif
+static void {{ delegate.name }}Function(
+    IntPtr _StateObject__{{# has_results }},{{/ has_results }}
+{{# results }}
+{{# type }}
+{{# is_pointer_or_reference }}
+    NativePointer
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ type }} 
+        _{{ name }}{{> Comma }}
+{{/ results }}
+) {
+    var _handle = (GCHandle)_StateObject__;
+    var tcs = (TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>)_handle.Target;
+    var _this = ({{ class_name }})tcs.Task.AsyncState;
+
+    var task_result = {{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type.is_pointer_or_reference }}new {{# type }}{{> Type }}{{/ type }}({{/ type.is_pointer_or_reference }}_{{ name }}{{# type.is_pointer_or_reference }}){{/ type.is_pointer_or_reference }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }};
+    {{# results }}{{# type.is_result_base }}
+    if (task_result.GetResultCode() == Csp.Services.EResultCode.InProgress)
+    {
+        {{# is_async_result_with_progress }}
+        _this.{{ delegate.method_name }}OnProgress?.Invoke(_this, new ProgressEventArgs(task_result.GetRequestProgress()));
+        {{/ is_async_result_with_progress }}
+        
+        return;
+    }
+    {{/ type.is_result_base }}{{/ results }}
+    tcs.SetResult(task_result);
+    _handle.Free();
+}
+
+{{> DocComments }}
+public Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}> {{ name }}({{# parameters }}{{# type }}{{> Type }}{{# is_optional }}?{{/ is_optional }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
+{
+    var tcs = new TaskCompletionSource<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}>(this);
+    var handle = GCHandle.Alloc(tcs);
+    
+{{# parameters }}
+{{# type.is_optional }}
+{{^ type.is_string }}
+{{^ type.is_class_or_interface }}
+    var {{ name }}Pointer = IntPtr.Zero;
+
+    unsafe {
+        if ({{ name }}.HasValue) {
+            var ptr = stackalloc {{# type.translated_namespace }}{{ type.translated_namespace }}.{{/ type.translated_namespace }}{{ type.name }}[1];
+            *ptr = {{ name }}.Value;
+            {{ name }}Pointer = (IntPtr)ptr;
+        }
+    }
+{{/ type.is_class_or_interface }}
+{{/ type.is_string }}
+{{/ type.is_optional }}
+{{/ parameters }}
+
+    {{ unique_name }}(
+        _ptr{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type.is_pointer_or_reference }}
+{{# type.is_optional }}
+{{# type.is_class_or_interface }}
+            {{ name }}?._ptr ?? IntPtr.Zero
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+            {{ name }}Pointer
+{{/ type.is_class_or_interface }}
+{{/ type.is_optional }}
+{{^ type.is_optional }}
+{{# type.is_interface }}
+            ((NativeClassWrapper){{ name }})._ptr
+{{/ type.is_interface }}
+{{# type.is_class }}
+            {{ name }}._ptr
+{{/ type.is_class }}
+{{^ type.is_class_or_interface }}
+            (IntPtr){{ name }}
+{{/ type.is_class_or_interface }}
+{{/ type.is_optional }}
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{ name }}
+{{/ type.is_pointer_or_reference }}
+            ,
+{{/ parameters }}
+        {{ delegate.name }}Function, (IntPtr)handle
+    );
+    
+    return tcs.Task;
+}

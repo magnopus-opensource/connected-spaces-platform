@@ -1,0 +1,18 @@
+let _fixedValue = _unfixedValue < 0 ? _unfixedValue +
+{{# is_large }}
+    2n**64n
+{{/ is_large }}
+{{# is_small }}
+    2**16
+{{/ is_small }}
+{{# is_tiny }}
+    2**8
+{{/ is_tiny }}
+{{^ is_large }}
+{{^ is_small }}
+{{^ is_tiny }}
+    2**32
+{{/ is_tiny }}
+{{/ is_small }}
+{{/ is_large }}
+    : _unfixedValue;

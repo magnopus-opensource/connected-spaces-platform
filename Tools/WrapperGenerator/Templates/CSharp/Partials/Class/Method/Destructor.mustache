@@ -1,0 +1,21 @@
+{{^ is_private }}
+~{{ parent_class.name }}()
+{
+    RealDispose();
+}
+
+void RealDispose() {
+    if (_ownsPtr && !_disposed)
+    {
+        {{ unique_name }}(_ptr);
+        _disposed = true;
+    }
+
+    _disposed = true;
+}
+
+{{# has_base_type }}new {{/ has_base_type }}public void Dispose() {
+    RealDispose();
+    GC.SuppressFinalize(this);
+}
+{{/ is_private }}

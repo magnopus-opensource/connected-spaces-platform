@@ -1,0 +1,28 @@
+static create{{# parameters }}_{{ name }}{{/ parameters }}(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+): {{ parent_class.name }} {
+    var _ptr = Module._malloc(8);
+    Module.ccall(
+        "{{ unique_name }}",
+        "void",
+        [
+            "number",
+{{# parameters }}
+            "{{ type.call_param_type }}"
+        ,
+{{/ parameters }}
+        ],
+        [
+            _ptr,
+{{# parameters }}
+            {{ name }}{{ type.call_param_name_suffix }}
+            ,
+{{/ parameters }}
+        ]
+    );
+    var _nPtr = getNativePointer(_ptr);
+
+    return new {{ parent_class.name }}(_nPtr);
+}

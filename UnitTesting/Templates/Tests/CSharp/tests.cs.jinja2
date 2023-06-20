@@ -1,0 +1,268 @@
+{% from 'helpers.jinja2' import assert_are_equal %}
+
+using System;
+using System.Runtime.CompilerServices;
+
+using NUnit.Framework;
+using UnityEngine;
+
+
+namespace Olympus.Foundation.Tests {    
+    static class UnitTests {
+        /********************************/
+        /*       Global functions       */
+        /********************************/
+
+        /// Return types
+
+        // Primitives
+            
+        {% for p in config.primitives %}
+            {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
+                // Get {{ p.type }} min value by {{ x }}
+                [Test]
+                public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+                    {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+                }
+
+                // Get {{ p.type }} max value by {{ x }}
+                [Test]
+                public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+                    {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+                }
+            {% endfor %}
+
+            {# Pointers and references to primitive types are returned as Ref<T> instances #}
+            {% for x in ['Pointer', 'Reference'] %}
+                // Get {{ p.type }} min value by {{ x }}
+                [Test]
+                public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+                    var value = result.Get();
+
+                    {{ assert_are_equal(p.use_epsilon, "value", p.min) }}
+                }
+
+                // Get {{ p.type }} max value by {{ x }}
+                [Test]
+                public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+                    var value = result.Get();
+
+                    {{ assert_are_equal(p.use_epsilon, "value", p.max) }}
+                }
+            {% endfor %}
+        {% endfor %}
+
+
+        // String
+
+        {% for x in ['Value', 'ConstReference'] %}
+            // Get string by {{ x }}
+            [Test]
+            public static void GlobalFunctions_String_Return{{ x }}() {
+                var result = Foundation.GlobalFunctions_String_Return{{ x }}();
+
+                Assert.AreEqual(result, "{{ config.string_value }}");
+            }
+        {% endfor %}
+
+
+        // Classes
+
+        {% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+            // Get class by {{ x }}
+            [Test]
+            public static void GlobalFunctions_MyClass_Return{{ x }}() {
+                using var result = Foundation.GlobalFunctions_MyClass_Return{{ x }}();
+
+                Assert.IsTrue(result.PointerIsValid);
+                Assert.AreEqual(result.SomeValue, {{ config.class_int_value_first }});
+            }
+        {% endfor %}
+
+
+        // Parameter types
+
+        // Primitives
+
+        {% for p in config.primitives %}
+            // Pass {{ p.type }} min value by value
+            [Test]
+            public static void GlobalFunctions_Primitives_{{ p.type }}_PassValue_min() {
+                try {
+                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+
+            // Pass {{ p.type }} max value by value
+            [Test]
+            public static void GlobalFunctions_Primitives_{{ p.type }}_PassValue_max() {
+                try {
+                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+
+            // Get {{ p.type }} min value via out parameter
+            [Test]
+            public static void GlobalFunctions_Primitives_{{ p.type }}_PassOut_min() {
+                Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassOut_min(out var result);
+
+                {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+            }
+
+            // Get {{ p.type }} max value via out parameter
+            [Test]
+            public static void GlobalFunctions_Primitives_{{ p.type }}_PassOut_max() {
+                Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassOut_max(out var result);
+
+                {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+            }
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter
+            [Test]
+            public static void GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax() {
+                var value = {{ p.min }};
+
+                try {
+                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax(ref value);
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+
+                {{ assert_are_equal(p.use_epsilon, "value", p.max) }}
+            }
+        {% endfor %}
+
+
+        // String
+        {% for x in ['Value', 'ConstReference'] %}
+            // Pass string by {{ x }}
+            [Test]
+            public static void GlobalFunctions_String_Pass{{ x }}() {
+                try {
+                    Foundation.GlobalFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+        {% endfor %}
+
+
+        // Classes
+        {% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+            // Pass class by {{ x }}
+            [Test]
+            public static void GlobalFunctions_MyClass_Pass{{ x }}() {
+                using var instance = new MyClass({{ config.class_int_value_first }});
+
+                try {
+                    Foundation.GlobalFunctions_MyClass_Pass{{ x }}(instance);
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+        {% endfor %}
+
+
+        /********************************/
+        /*           Classes            */
+        /********************************/
+
+        /// Fields
+
+        // Primitives
+
+        [Test]
+        public static void Check_PrimitiveFieldTestClass_Fields() {
+            var instance = new PrimitiveFieldTestClass {
+                {% for p in config.primitives %}
+                    Field{{ loop.index0 }} = {{ p.min }}{{ ',' if not loop.last }}
+                {% endfor %}
+            };
+
+            try {
+                Foundation.Check_PrimitiveFieldTestClass_Fields(instance);
+            }
+            catch (RuntimeWrappedException e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public static void Set_PrimitiveFieldTestClass_Fields() {
+            var instance = new PrimitiveFieldTestClass();
+            Foundation.Set_PrimitiveFieldTestClass_Fields(instance);
+
+            {% for p in config.primitives %}
+                {% set field_name %}
+                    instance.Field{{ loop.index0 }}
+                {% endset %}
+
+                {{ assert_are_equal(p.use_epsilon, field_name, p.max) }}
+            {% endfor %}
+        }
+
+
+        // String
+        
+        [Test]
+        public static void Check_StringFieldTestClass_Field() {
+            var instance = new StringFieldTestClass {
+                Field = "{{ config.class_string_value_first }}"
+            };
+
+            try {
+                Foundation.Check_StringFieldTestClass_Field(instance);
+            }
+            catch (RuntimeWrappedException e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public static void Set_StringFieldTestClass_Field() {
+            var instance = new StringFieldTestClass();
+            Foundation.Set_StringFieldTestClass_Field(instance);
+
+            Assert.AreEqual(instance.Field, "{{ config.class_string_value_second }}");
+        }
+
+
+        // Classes
+
+        [Test]
+        public static void Check_ClassFieldTestClass_Field() {
+            var instance = new ClassFieldTestClass();
+            instance.Field.ACoolInteger = {{ config.class_int_value_first }};
+
+            try {
+                Foundation.Check_ClassFieldTestClass_Field(instance);
+            }
+            catch (RuntimeWrappedException e) {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [Test]
+        public static void Set_ClassFieldTestClass_Field() {
+            var instance = new ClassFieldTestClass();
+            Foundation.Set_ClassFieldTestClass_Field(instance);
+
+            Assert.AreEqual(instance.Field.ACoolInteger, {{ config.class_int_value_second }});
+        }
+    }
+}

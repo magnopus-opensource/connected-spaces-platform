@@ -1,0 +1,48 @@
+public {{# return_type }}{{> Type }}{{/ return_type }} this[{{# parameters }}{{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }}]
+{
+    get
+    {
+        var valuePtr = {{ unique_name }}_Get(
+            _ptr,
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+            WrapperHelper.ObjectToIntPtr({{ name }}, Is{{ type.name }}ProxyClass)
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{ name }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            {{ name }}
+{{/ type.is_template_argument }}
+            {{> Comma }}
+{{/ parameters }}
+        );
+
+        return ({{ return_type.name }})WrapperHelper.NativePointerToObject<{{ return_type.name }}>(valuePtr, Is{{ return_type.name }}ProxyClass);
+    }
+    set
+    {
+        var valuePtr = WrapperHelper.ObjectToIntPtr(value, Is{{ return_type.name }}ProxyClass);
+
+        {{ unique_name }}_Set(
+            _ptr,
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+            WrapperHelper.ObjectToIntPtr({{ name }}, Is{{ type.name }}ProxyClass)
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{ name }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            {{ name }}
+{{/ type.is_template_argument }}
+            ,
+{{/ parameters }}
+            valuePtr
+        );
+    }
+}

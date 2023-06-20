@@ -1,0 +1,135 @@
+{{ name }}(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+): {{# return_type }}{{> TypeName }}{{/ return_type }}
+{
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+    var [_{{ name }}Pointer, _{{ name }}ShouldFree] = objectToPointer({{ name }});
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{/ parameters }}
+
+{{! Allocate memory for return value if function returns NativePointer. }}
+{{# return_type.is_pointer_or_reference }}
+    var _ret = Module._malloc(8);
+{{/ return_type.is_pointer_or_reference }}
+{{^ return_type.is_pointer_or_reference }}
+{{# return_type.is_class_or_interface }}
+    var _ret = Module._malloc(8);
+{{/ return_type.is_class_or_interface }}
+{{/ return_type.is_pointer_or_reference }}
+
+{{# return_type }}
+{{^ is_void }}
+{{^ is_pointer_or_reference }}
+{{^ is_class_or_interface }}
+    var _returnValue =
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ is_void }}
+{{/ return_type }}
+    Module.ccall(
+        `{{ unique_name }}{{# template_parameters }}_${ this.{{ name }}TypeName }{{/ template_parameters }}`,
+{{# return_type }}
+{{# is_pointer_or_reference }}
+        "void"
+{{/ is_pointer_or_reference }}  
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+        "void"
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+        "{{ return_type.name }}"
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ return_type }}
+        ,
+        [
+{{# return_type.is_pointer_or_reference }}
+            "number",
+{{/ return_type.is_pointer_or_reference }}
+{{^ return_type.is_pointer_or_reference }}
+{{# return_type.is_class_or_interface }}
+            "number",
+{{/ return_type.is_class_or_interface }}
+{{/ return_type.is_pointer_or_reference }}
+            "number",
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+            "number"
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            "{{ type.call_param_type }}"
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            "{{ type.call_param_type }}"
+{{/ type.is_template_argument }}
+            ,
+{{/ parameters }}
+        ],
+        [
+{{# return_type.is_pointer_or_reference }}
+            _ret,
+{{/ return_type.is_pointer_or_reference }}
+{{^ return_type.is_pointer_or_reference }}
+{{# return_type.is_class_or_interface }}
+            _ret,
+{{/ return_type.is_class_or_interface }}
+{{/ return_type.is_pointer_or_reference }}
+            this.pointer,
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+            _{{ name }}Pointer
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{ name }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            {{ name }}{{ type.call_param_name_suffix }}
+{{/ type.is_template_argument }}
+            ,
+{{/ parameters }}
+        ]
+    );
+
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+    if (_{{ name }}ShouldFree)
+        Module._free(_{{ name }}Pointer);
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{/ parameters }}
+
+{{# has_return }}
+{{# return_type }}
+{{# is_pointer_or_reference }}
+    var _nPtr = getNativePointer(_ret);
+    Module._free(_ret);
+{{# is_template_argument }}
+    return (this.{{ name }}Factory(_nPtr) as {{ name }});
+{{/ is_template_argument }}
+{{# is_template }}
+    return ProxyClassFactories[`{{ template_safe_type_name }}{{# template_arguments }}_{{# type.is_template_argument }}${ this.{{ type.name }}TypeName }{{/ type.is_template_argument }}{{^ type.is_template_argument }}{{ full_safe_type_name }}{{/ type.is_template_argument }}{{/ template_arguments }}`](_nPtr);
+{{/ is_template }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+    var _nPtr = new {{> TypeName }}(getNativePointer(_ret));
+    Module._free(_ret);
+    return _nPtr;
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+    return _returnValue;
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ return_type }}
+{{/ has_return }}
+}

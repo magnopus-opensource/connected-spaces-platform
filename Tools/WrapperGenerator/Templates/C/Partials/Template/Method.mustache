@@ -1,0 +1,117 @@
+{{# is_constructor }}
+{{> Template/Method/Constructor }}
+{{/ is_constructor }}
+{{# is_destructor }}
+{{> Template/Method/Destructor }}
+{{/ is_destructor }}
+{{# is_operator_overload }}
+{{> Template/Method/Operator }}
+{{/ is_operator_overload }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{^ is_operator_overload }}
+{{ extra_data.c_export_macro }} {{# return_type }}{{# is_string }}const char*{{/ is_string }}{{^ is_string }}{{# is_const }}const {{/ is_const }}{{# is_pointer_or_reference }}NativePointer{{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{& name }}{{/ is_pointer_or_reference }}{{/ is_string }}{{/ return_type }}{{^ return_type }}void{{/ return_type }}
+{{ unique_name }}{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}(
+    {{# is_const }}const {{/ is_const }}{{# definition }}{{> Type }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>* inst{{# has_parameters }}, {{/ has_parameters }}
+{{# parameters }}
+{{# type.function_signature }}
+    {{> FunctionPointerParameter }}{{> Comma }}
+{{/ type.function_signature }}
+{{^ type.function_signature }}
+{{# type.is_template_argument }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+{{# type.is_string }}
+    char
+{{/ type.is_string }}
+{{^ type.is_string }}
+    {{# type }}{{# argument_name }}{{ name }}{{/ argument_name }}{{/ type }}
+{{/ type.is_string }}
+{{/ get_template_argument }}
+{{# type.is_pointer_or_reference }}
+    *
+{{/ type.is_pointer_or_reference }}
+    {{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+    {{> Parameter }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{/ type.function_signature }}
+{{/ parameters }}
+)
+{
+{{# parameters }}
+{{# type.is_reference }}
+{{^ type.is_optional }}
+    {{> NullCheck }}
+
+{{/ type.is_optional }}
+{{/ type.is_reference }}
+{{# type.is_function_signature }}
+    {{> NullCheck }}
+
+{{/ type.is_function_signature }}
+{{/ parameters }}
+    {{# return_type }}return {{# is_pointer_or_reference }}{{^ is_string }}NativePointer { {{# is_const }}(void*){{/ is_const }}{{# is_reference }}&{{/ is_reference }}{{/ is_string }}{{/ is_pointer_or_reference }}{{/ return_type }}{{^ is_static }}inst->{{/ is_static }}{{& name }}(
+{{# parameters }}
+{{# type.function_signature }}
+        [{{ name }}](
+{{# parameters }}
+            {{# type }}{{# is_const }}const {{/ is_const }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{# is_reference }}&{{/ is_reference }}{{# is_pointer }}*{{/ is_pointer }}{{/ type }} {{ name }}{{> Comma }}
+{{/ parameters }}
+        ) {
+{{# parameters }}
+{{# type.is_reference }}
+            auto* _{{ name }} = CSP_NEW {{# type }}{{> Type }}{{/ type }}({{ name }});
+{{/ type.is_reference }}
+{{/ parameters }}
+            {{ name }}({{# parameters }}{{# type.is_pointer_or_reference }}NativePointer { {{# type.is_reference }}_{{/ type.is_reference }}{{/ type.is_pointer_or_reference }}{{ name }}{{# type.is_pointer }}, false }{{/ type.is_pointer }}{{# type.is_reference }}, true }{{/ type.is_reference }}{{> Comma }}{{/ parameters }});
+        }{{> Comma }}
+{{/ type.function_signature }}
+{{^ type.function_signature }}
+{{# type.is_optional }}
+        ({{ name }} == nullptr) ? csp::common::Optional<{{# type }}{{# is_template }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ template_name }}<{{# template_arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ template_arguments }}>{{/ is_template }}{{^ is_template }}{{> Type }}{{/ is_template }}{{/ type }}>(nullptr) : {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}{{ name }}{{> Comma }}
+{{/ type.is_optional }}
+{{^ type.is_optional }}
+{{# type.is_string }}
+        csp::common::String(
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_reference }}
+{{# type.is_template_argument }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+{{# type }}
+{{^ is_pointer }}
+{{# is_class_or_interface }}
+        *
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{^ is_string }}
+        ({{> Type }})(uintptr_t)
+{{/ is_string }}
+{{/ is_class_or_interface }}
+{{/ is_pointer }}
+{{/ type }}
+{{/ get_template_argument }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+{{^ type.is_pointer }}
+        *
+{{/ type.is_pointer }}
+{{/ type.is_template_argument }}
+{{/ type.is_reference }}
+{{/ type.is_string }}
+        {{ name }}
+{{# type.is_string }}
+        )
+{{/ type.is_string }}
+        {{> Comma }}
+{{/ type.is_optional }}
+{{/ type.function_signature }}
+{{/ parameters }}
+    ){{# return_type }}{{# is_pointer_or_reference }}{{^ is_string }}, false }{{/ is_string }}{{/ is_pointer_or_reference }}{{# is_string }}{{# is_pointer }}->{{/ is_pointer }}{{^ is_pointer }}.{{/ is_pointer }}c_str(){{/ is_string }}{{/ return_type }};
+}
+{{/ is_operator_overload }}
+{{/ is_destructor }}
+{{/ is_constructor }}

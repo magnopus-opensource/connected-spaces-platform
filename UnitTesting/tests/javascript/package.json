@@ -1,0 +1,17 @@
+
+{
+  "name": "wasm_tests",
+  "version": "1.3.37",
+  "description": "Javascript unit tests for wrapper generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Magnopus",
+  "license": "Unlicensed",
+  "type": "module",
+  "devDependencies": {
+    "eslint": "^8.36.0"
+  }
+}
+        

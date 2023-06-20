@@ -1,0 +1,120 @@
+{{# parameters }}
+{{# type.is_function_signature }}
+static
+{{# delegate.return_type }}
+        {{> Type }}
+{{/ delegate.return_type }}
+{{^ delegate.return_type }}
+        void
+{{/ delegate.return_type }}
+        {{ delegate.name }}Function(
+            IntPtr _StateObject__,
+{{# delegate.parameters }}
+{{# type.is_pointer_or_reference }}
+            NativePointer
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{# type }}{{> Type }}{{/ type }}
+{{/ type.is_pointer_or_reference }}
+            {{ name }}{{> Comma }}
+{{/ delegate.parameters }}
+        ) {
+            var _handle = (GCHandle)_StateObject__;
+            var _{{ name }} = ({{ delegate.name }})_handle.Target;
+
+{{# delegate.parameters }}
+            var _{{ name }} =
+{{# type.is_class_or_interface }}
+                new {{# type }}{{> Type }}{{/ type }}({{ name }})
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+                {{ name }}
+{{/ type.is_class_or_interface }}
+            ;
+{{/ delegate.parameters }}
+
+            _{{ name }}(
+{{# delegate.parameters }}
+                _{{ name }}{{> Comma }}
+{{/ delegate.parameters }}
+            );
+
+            // TODO: Queue persistent callback handles to be freed on exit
+            // _handle.Free();
+        }
+{{/ type.is_function_signature }}
+{{/ parameters }}
+
+public
+{{# is_static }}
+static
+{{/ is_static }}
+{{# is_virtual }}
+{{^ is_override }}
+virtual
+{{/ is_override }}
+{{/ is_virtual }}
+{{# is_override }}
+{{^ is_interface_implementation }}
+override
+{{/ is_interface_implementation }}
+{{/ is_override }}
+{{# return_type }}
+    {{> Type }}
+{{/ return_type }}
+{{^ return_type }}
+    void
+{{/ return_type }}
+    {{ name }}(
+{{# parameters }}
+{{# is_out }}
+        out
+{{/ is_out }}
+{{# type.is_function_signature }}
+        {{ delegate.name }}
+{{/ type.is_function_signature }}
+{{^ type.is_function_signature }}
+        {{# type }}{{> Type }}{{/ type }}
+{{/ type.is_function_signature }}
+        {{ name }}{{> Comma }}
+{{/ parameters }})
+{
+{{# parameters }}
+{{# type.is_function_signature }}
+    var _{{ name }} = GCHandle.Alloc({{ name }});
+{{/ type.is_function_signature }}
+{{/ parameters }}
+
+    {{# return_type }}return {{# is_pointer_or_reference }}new {{> Type }}({{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# is_class_or_interface }}new {{> Type }}({{/ is_class_or_interface }}{{/ is_pointer_or_reference }}{{# is_string }}WrapperHelper.NativeUTF8ToString({{/ is_string }}{{/ return_type }}{{ unique_name }}(
+        {{^ is_static }}_ptr{{# has_parameters }},{{/ has_parameters }}{{/ is_static }}
+{{# parameters }}
+{{# is_out }}
+        out {{ name }}{{> Comma }}
+{{/ is_out }}
+{{^ is_out }}
+{{# type.is_string }}
+        WrapperHelper.StringToNativeUTF8({{ name }}){{> Comma }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_pointer_or_reference }}
+{{# type.is_interface }}
+        ((NativeClassWrapper){{ name }})._ptr{{> Comma }}
+{{/ type.is_interface }}
+{{^ type.is_interface }}
+        {{ name }}._ptr{{> Comma }}
+{{/ type.is_interface }}
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+{{# type.is_function_signature }}
+        {{ delegate.name }}Function,
+        (IntPtr)_{{ name }}{{> Comma }}
+{{/ type.is_function_signature }}
+{{^ type.is_function_signature }}
+        {{ name }}{{> Comma }}
+{{/ type.is_function_signature }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_string }}
+{{/ is_out }}
+{{/ parameters }}
+    ){{# return_type }}{{# is_void_pointer }}.Pointer{{/ is_void_pointer }}{{# is_pointer_or_reference }}){{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# is_class_or_interface }}){{/ is_class_or_interface }}{{/ is_pointer_or_reference }}{{# is_string }}){{/ is_string }}{{/ return_type }};
+}

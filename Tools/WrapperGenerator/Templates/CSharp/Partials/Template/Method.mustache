@@ -1,0 +1,69 @@
+{{# is_constructor }}
+{{> Template/Method/Constructor }}
+{{/ is_constructor }}
+{{# is_destructor }}
+{{> Template/Method/Destructor }}
+{{/ is_destructor }}
+{{# is_operator_overload }}
+{{> Template/Method/Operator }}
+{{/ is_operator_overload }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{^ is_operator_overload }}
+public
+{{# return_type }}
+    {{> Type }}
+{{/ return_type }}
+{{^ return_type }}
+    void
+{{/ return_type }}
+    {{ name }}(
+{{# parameters }}
+{{# is_out }}
+        out
+{{/ is_out }}
+{{# type }}
+        {{> Type }}
+{{/ type }}
+        {{ name }}{{> Comma }}
+{{/ parameters }}
+    )
+{
+{{# return_type }}
+    return
+{{# is_pointer_or_reference }}
+        new {{> Type }}(
+{{/ is_pointer_or_reference }}
+{{# is_string }}
+        WrapperHelper.NativeUTF8ToString(
+{{/ is_string }}
+{{/ return_type }}
+        {{ unique_name }}(
+            _ptr{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+            WrapperHelper.ObjectToIntPtr({{ name }}, Is{{ type.name }}ProxyClass)
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+            {{ name }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+{{# is_out }}
+            out
+{{/ is_out }}
+            {{ name }}
+{{^ is_out }}
+{{# type.is_pointer_or_reference }}
+                ._ptr
+{{/ type.is_pointer_or_reference }}
+{{/ is_out }}
+{{/ type.is_template_argument }}
+            {{> Comma }}
+{{/ parameters }}
+    ){{# return_type }}{{# is_void_pointer }}.Pointer{{/ is_void_pointer }}{{# is_pointer_or_reference }}){{/ is_pointer_or_reference }}{{# is_string }}){{/ is_string }}{{/ return_type }};
+}
+{{/ is_operator_overload }}
+{{/ is_destructor }}
+{{/ is_constructor }}

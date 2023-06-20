@@ -1,0 +1,129 @@
+enum NativeType {
+  None,
+  Int8,
+  UInt8,
+  Int16,
+  UInt16,
+  Int32,
+  UInt32,
+  Int64,
+  UInt64,
+  Float,
+  Double
+}
+
+export class NativeRef {
+  pointer: number;
+  type: NativeType;
+
+  constructor(pointer: number, nativeType: NativeType) {
+    this.pointer = pointer;
+    this.type = nativeType;
+  }
+
+  get value(): number | bigint {
+    let value;
+
+    switch (this.type) {
+      case NativeType.Int8:
+      {
+        value = Module.getValue(this.pointer, 'i8');
+        break;
+      }
+      case NativeType.UInt8:
+      {
+        value = Module.getValue(this.pointer, 'i8');
+        value = value < 0 ? value + 2**8 : value;
+        break;
+      }
+      case NativeType.Int16:
+      {
+        value = Module.getValue(this.pointer, 'i16');
+        break;
+      }
+      case NativeType.UInt16:
+      {
+        value = Module.getValue(this.pointer, 'i16');
+        value = value < 0 ? value + 2**16 : value;
+        break;
+      }
+      case NativeType.Int32:
+      {
+        value = Module.getValue(this.pointer, 'i32');
+        break;
+      }
+      case NativeType.UInt32:
+      {
+        value = Module.getValue(this.pointer, 'i32');
+        value = value < 0 ? value + 2**32 : value;
+        break;
+      }
+      case NativeType.Int64:
+      {
+        value = Module.getValue(this.pointer, 'i64');
+        break;
+      }
+      case NativeType.UInt64:
+      {
+        value = Module.getValue(this.pointer, 'i64');
+        value = value < 0 ? value + 2n**64n : value;
+        break;
+      }
+      case NativeType.Float:
+      {
+        value = Module.getValue(this.pointer, 'float');
+        break;
+      }
+      case NativeType.Double:
+      {
+        value = Module.getValue(this.pointer, 'double');
+        break;
+      }
+      default:
+        throw new Error("Unknown native type!");
+    }
+
+    return value;
+  }
+
+  set value(value: number | bigint) {
+    switch (this.type) {
+      case NativeType.Int8:
+      case NativeType.UInt8:
+      {
+        Module.setValue(this.pointer, 'i8', value);
+        break;
+      }
+      case NativeType.Int16:
+      case NativeType.UInt16:
+      {
+        Module.setValue(this.pointer, 'i16', value);
+        break;
+      }
+      case NativeType.Int32:
+      case NativeType.UInt32:
+      {
+        Module.setValue(this.pointer, 'i32', value);
+        break;
+      }
+      case NativeType.Int64:
+      case NativeType.UInt64:
+      {
+        Module.setValue(this.pointer, 'i64', value);
+        break;
+      }
+      case NativeType.Float:
+      {
+        Module.setValue(this.pointer, 'float', value);
+        break;
+      }
+      case NativeType.Double:
+      {
+        Module.setValue(this.pointer, 'double', value);
+        break;
+      }
+      default:
+        throw new Error("Unknown native type!");
+    }
+  }
+}

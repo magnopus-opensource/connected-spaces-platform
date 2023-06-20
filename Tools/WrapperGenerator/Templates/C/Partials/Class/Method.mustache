@@ -1,0 +1,16 @@
+{{# is_operator_overload }}
+{{> Class/Method/Operator }}
+{{/ is_operator_overload }}
+{{^ is_operator_overload }}
+{{# is_constructor }}
+{{> Class/Method/Constructor }}
+{{/ is_constructor }}
+{{# is_destructor }}
+{{> Class/Method/Destructor }}
+{{/ is_destructor }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{> Class/Method/Method }}
+{{/ is_destructor }}
+{{/ is_constructor }}
+{{/ is_operator_overload }}

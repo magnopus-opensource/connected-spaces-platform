@@ -1,0 +1,168 @@
+{{! -------------------------------- }}
+{{!    Template for class methods    }}
+{{! -------------------------------- }}
+
+async {{ name }}(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{# is_optional }} | null {{/ is_optional }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+{{# is_async_result_with_progress }}
+    , progressCallback: (requestProgress: number, responseProgress: number) => void
+{{/ is_async_result_with_progress }}
+): Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}> {
+    var _resolve;
+
+    var _promise = new Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}>(
+        (_r) => {
+            _resolve = _r
+        }
+    );
+
+    var _callbackPtr: number;
+    var _callback = (
+        _stateObject__ : number,
+{{# results }}
+        {{ name }}{{> Comma }}
+{{/ results }}
+    ) => {
+{{# results }}
+{{# type.is_class_or_interface }}
+        var _{{ name }}Ptr = getNativePointer({{ name }});
+        var _{{ name }}Instance = new {{# type }}{{> TypeName }}{{/ type }}(
+            _{{ name }}Ptr
+{{# type.template_arguments }}
+            ,
+{{# type }}
+{{# is_string }}
+            String, "String"
+{{/ is_string }}
+{{^ is_string }}
+{{# is_number }}
+            Number, "{{ full_safe_type_name }}"
+{{/ is_number }}
+{{^ is_number }}
+            {{> TypeName }}, "{{ full_safe_type_name }}"
+{{/ is_number }}
+{{/ is_string }}
+{{/ type }}
+{{/ type.template_arguments }}
+        );
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{/ type.is_class_or_interface }}
+
+{{# type.is_result_base }}
+        if (_{{ name }}Instance.getResultCode() == Services.EResultCode.InProgress) {
+{{# is_async_result_with_progress }}
+            if (progressCallback != null) {
+                progressCallback(_{{ name }}Instance.getRequestProgress(), _{{ name }}Instance.getResponseProgress());
+            }
+{{/ is_async_result_with_progress }}
+            return;
+        }
+{{/ type.is_result_base }}
+{{/ results }}
+
+        _resolve(
+{{# results }}
+{{# type.is_class_or_interface }}
+            _{{ name }}Instance{{> Comma }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# type.is_string }}
+            Module.UTF8ToString({{name}}){{> Comma }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+            {{# type.is_bool}}!!{{/ type.is_bool }}{{ name }}{{> Comma }}
+{{/ type.is_string }}
+{{/ type.is_class_or_interface }}
+{{/ results }}
+        )
+
+        Module.removeFunction(_callbackPtr);
+    };
+
+    _callbackPtr = Module.addFunction(
+        _callback,
+        "vi{{# results }}{{# type }}{{> Method/TypeShorthand }}{{/ type }}{{/ results }}"
+    );
+
+{{# parameters }}
+{{# type.is_optional }}
+{{^ type.is_string }}
+{{^ type.is_class_or_interface }}
+    var {{ name }}Pointer = 0;
+    if ({{ name }} != null) {
+        {{ name }}Pointer = Module._malloc(4);
+{{# type.is_float }}
+        Module.setValue({{ name }}Pointer, {{ name }}, "float");
+{{/ type.is_float }}
+{{^ type.is_float }}
+        Module.setValue({{ name }}Pointer, {{ name }}, "i32");
+{{/ type.is_float }}
+    }
+
+{{/ type.is_class_or_interface }}
+{{/ type.is_string }}
+{{/ type.is_optional }}
+{{/ parameters }}
+
+    Module.ccall(
+        "{{ unique_name }}",
+        "void",
+        [
+            "number",
+{{# parameters }}
+            "{{type.call_param_type}}"
+            ,
+{{/ parameters }}
+            "number",
+            "number"
+        ],
+        [
+            this.pointer,
+{{# parameters }}
+{{# type.is_optional }}
+{{# type.is_class_or_interface }}
+            {{ name }} != null ? {{ name }}.pointer : 0
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# type.is_string }}
+            {{ name }}{{ type.call_param_name_suffix }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+            {{ name }}Pointer
+{{/ type.is_string }}
+{{/ type.is_class_or_interface }}
+{{/ type.is_optional }}
+{{^ type.is_optional }}
+{{# type.is_interface }}
+{{# type.is_pointer_or_reference }}
+            ({{ name }} as unknown as NativeClassWrapper).pointer
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_interface }}
+{{^ type.is_interface }}
+            {{ name }}{{ type.call_param_name_suffix }}
+{{/ type.is_interface }}
+{{/ type.is_optional }}
+            ,
+{{/ parameters }}
+            _callbackPtr,
+            0
+        ]
+    );
+
+{{# parameters }}
+{{# type.is_optional }}
+{{^ type.is_string }}
+{{^ type.is_class_or_interface }}
+    if ({{ name }}Pointer){
+        Module._free({{ name }}Pointer);
+    }
+{{/ type.is_class_or_interface }}
+{{/ type.is_string }}
+{{/ type.is_optional }}
+{{/ parameters }}
+
+    return _promise;
+}

@@ -1,0 +1,182 @@
+{{! Print the C interface export macro ("CSP_C_API" by default) for the function }}
+{{ extra_data.c_export_macro }}
+{{! Print the function return type }}
+{{# return_type }}
+{{! If the return type is csp::common::String, we need to return the underlying C-String }}
+{{# is_string }}
+const char*
+{{/ is_string }}
+{{^ is_string }}
+{{! We need to make sure const return values are still returned as const so the compiler doesn't complain }}
+{{# is_const }}
+const
+{{/ is_const }}
+{{! Pointers and references require us to return a NativePointer struct so we can tell the wrapper if it owns the data and can free it }}
+{{# is_pointer_or_reference }}
+NativePointer
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{! We can't return class types by value, so we'll create a copy on the heap and return a pointer to it }}
+{{# is_class_or_interface }}
+NativePointer
+{{/ is_class_or_interface }}
+{{! Structs and primitive types get returned as-is }}
+{{^ is_class_or_interface }}
+{{> Type }}
+
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ is_string }}
+{{/ return_type }}
+{{! If the function does not return anything, neither will the C interface wrapper function }}
+{{^ return_type }}
+void
+{{/ return_type }}
+{{# parent_class.is_template_instance }}
+{{ unique_name }}({{^ is_static }}{{# is_const }}const {{/ is_const }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{> Comma }}{{/ parent_class.template_arguments }}>* inst{{# has_parameters }}, {{/ has_parameters }}{{/ is_static }}{{# parameters }}{{# type.function_signature }}{{> FunctionPointerParameter }}{{/ type.function_signature }}{{^ type.function_signature }}{{> Parameter }}{{/ type.function_signature }}{{> Comma }}{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}(
+{{^ is_static }}
+{{# is_const }}
+    const
+{{/ is_const }}
+    {{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.name }}* inst
+{{# has_parameters }}
+    ,
+{{/ has_parameters }}
+{{/ is_static }}
+{{# parameters }}
+{{# type.function_signature }}
+    {{> FunctionPointerParameter }}, void* {{ name }}_StateObject
+{{/ type.function_signature }}
+{{^ type.function_signature }}
+    {{> Parameter }}
+{{/ type.function_signature }}
+    {{> Comma }}
+{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{
+{{# parameters }}
+{{# type.is_reference }}
+{{^ type.is_optional }}
+    {{> NullCheck }}
+
+{{/ type.is_optional }}
+{{/ type.is_reference }}
+{{# type.is_function_signature }}
+    {{> NullCheck }}
+
+{{/ type.is_function_signature }}
+{{/ parameters }}
+{{# has_return }}
+    return
+{{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_string }}
+    NativePointer {
+{{# return_type.is_const }}
+        (void*)
+{{/ return_type.is_const }}
+{{# return_type.is_reference }}
+{{# is_static }}
+    &
+{{/ is_static }}
+{{^ is_static }}
+        CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+{{/ is_static }}
+{{/ return_type.is_reference }}
+{{/ return_type.is_string }}
+{{/ return_type.is_pointer_or_reference }}
+{{^ return_type.is_pointer_or_reference }}
+{{# return_type.is_class_or_interface }}
+    NativePointer {
+        CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+{{/ return_type.is_class_or_interface }}
+{{/ return_type.is_pointer_or_reference }}
+{{/ has_return }}
+{{# is_static }}
+        {{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.name }}::
+{{/ is_static }}
+{{^ is_static }}
+        inst->
+{{/ is_static }}
+        {{& name }}(
+{{# parameters }}
+{{# type.function_signature }}
+        [{{ name }}, {{ name }}_StateObject]({{# parameters }}{{# type }}{{# is_const }}const {{/ is_const }}{{> Type }}{{# is_reference }}&{{/ is_reference }}{{# is_pointer }}*{{/ is_pointer }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }}) {
+{{# parameters }}
+{{^ type.is_string }}
+{{# type.is_reference }}
+            auto* _{{ name }} = CSP_NEW {{# type.namespace }}{{ type.namespace }}::{{/ type.namespace }}{{ type.name }}({{ name }});
+{{/ type.is_reference }}
+{{/ type.is_string }}
+{{/ parameters }}
+            {{ name }}(
+                {{ name }}_StateObject,
+{{# parameters }}
+{{# type.is_string }}
+                {{ name }}.c_str()
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_pointer_or_reference }}
+                NativePointer {
+                    {{# type.is_reference }}_{{/ type.is_reference }}{{ name }}
+{{/ type.is_pointer_or_reference }}
+{{^ type.is_pointer_or_reference }}
+                {{ name }}
+{{/ type.is_pointer_or_reference }}
+{{# type.is_pointer }}
+                    , false
+                }
+{{/ type.is_pointer }}
+{{# type.is_reference }}
+                    , true
+                }
+{{/ type.is_reference }}
+{{/ type.is_string }}
+            {{> Comma }}
+{{/ parameters }});
+        }{{> Comma }}
+{{/ type.function_signature }}
+{{^ type.function_signature }}
+{{# type.is_optional }}
+        ({{ name }} == nullptr) ? csp::common::Optional<{{# type }}{{# is_template }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ template_name }}<{{# template_arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ template_arguments }}>{{/ is_template }}{{^ is_template }}{{> Type }}{{/ is_template }}{{/ type }}>(nullptr) : {{# type.is_pointer_or_reference }}{{# type.is_string }}csp::common::String({{/ type.is_string }}{{^ type.is_string }}*{{/ type.is_string }}{{/ type.is_pointer_or_reference }}{{ name }}{{# type.is_pointer_or_reference }}{{# type.is_string }}){{/ type.is_string }}{{/ type.is_pointer_or_reference }}{{> Comma }}
+{{/ type.is_optional }}
+{{^ type.is_optional }}
+        {{# type.is_string }}csp::common::String({{/ type.is_string }}{{^ type.is_string }}{{# type.is_reference }}*{{/ type.is_reference }}{{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{> Comma }}
+{{/ type.is_optional }}
+{{/ type.function_signature }}
+{{/ parameters }}
+    )
+{{# has_return }}
+{{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_string }}
+{{# return_type.is_pointer }}
+    , false }
+{{/ return_type.is_pointer }}
+{{# return_type.is_reference }}
+{{# is_static }}
+    , false }
+{{/ is_static }}
+{{^ is_static }}
+    ), true }
+{{/ is_static }}
+{{/ return_type.is_reference }}
+{{/ return_type.is_string }}
+{{/ return_type.is_pointer_or_reference }}
+{{^ return_type.is_pointer_or_reference }}
+{{# return_type.is_class_or_interface }}
+    ), true }
+{{/ return_type.is_class_or_interface }}
+{{/ return_type.is_pointer_or_reference }}
+{{# return_type.is_string }}
+{{# return_type.is_pointer }}
+    ->c_str()
+{{/ return_type.is_pointer }}
+{{^ return_type.is_pointer }}
+    .c_str()
+{{/ return_type.is_pointer }}
+{{/ return_type.is_string }}
+{{/ has_return }}
+    ;
+}

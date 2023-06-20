@@ -1,0 +1,174 @@
+{{ extra_data.c_export_macro }} NativePointer
+{{ unique_name }}_Get{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}(
+    {{# is_const }}const {{/ is_const }}{{# definition }}{{> Type }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>* inst,
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+{{# type.is_string }}
+    char
+{{/ type.is_string }}
+{{^ type.is_string }}
+    {{# type }}{{# argument_name }}{{ name }}{{/ argument_name }}{{/ type }}
+{{/ type.is_string }}
+{{/ get_template_argument }}
+{{# type.is_pointer_or_reference }}
+    *
+{{/ type.is_pointer_or_reference }}
+    {{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+    {{> Parameter }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{/ parameters }}
+)
+{
+{{# get_template_argument }}
+{{# parameter_name }}{{ return_type.name }}{{/ parameter_name }}
+{{# type }}
+{{# is_string }}
+    char* _Value;
+{{/ is_string }}
+{{^ is_string }}
+    {{> Type }}* _Value;
+{{/ is_string }}
+{{/ type }}
+    bool _OwnsPointer;
+
+{{# type.is_string }}
+    _OwnsPointer = false;
+    auto _Element = inst->{{ name }}(
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# _get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+{{^ type.is_string }}
+        {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}
+{{/ type.is_string }}
+{{/ _get_template_argument }}
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+        {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}
+{{/ type.is_template_argument }}
+        {{ name }}{{> Comma }}
+{{/ parameters }}
+    );
+    _Value = CSP_NEW char[_Element.Length() + 1];
+    std::memcpy(_Value, _Element.c_str(), _Element.Length());
+    _Value[_Element.Length()] = '\0';
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_class_or_interface }}
+    _OwnsPointer = {{# type.is_pointer }}false{{/ type.is_pointer }}{{^ type.is_pointer }}true{{/ type.is_pointer }};
+    auto _Element = 
+{{^ type.is_pointer }}
+    &
+{{/ type.is_pointer }}
+    inst->{{ name }}(
+{{# parameters }}
+{{^ type.is_template_argument }}
+{{^ type.is_string }}
+{{# type.is_pointer_or_reference }}
+    *
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_string }}
+    {{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+{{# _get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+        {{# type.is_class_or_interface }}*{{/ type.is_class_or_interface }}{{^ type.is_class_or_interface }}{{^ type.is_string }}{{# type }}({{> Type }})(uintptr_t){{/ type }}{{/ type.is_string }}{{/ type.is_class_or_interface }}
+{{/ _get_template_argument }}
+{{/ type.is_pointer_or_reference }}
+        {{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{/ parameters }}
+    );
+{{# type.is_pointer }}
+    _Value = _Element;
+{{/ type.is_pointer }}
+{{^ type.is_pointer }}
+    _Value = CSP_NEW {{# type }}{{> Type }}{{/ type }}(*_Element);
+{{/ type.is_pointer }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+    _OwnsPointer = false;
+    /* Return by value by casting to pointer */
+    _Value = ({{# type }}{{> Type }}{{/ type }}*)inst->{{ name }}(
+{{# parameters }}
+        {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}{{ name }}{{> Comma }}
+{{/ parameters }}
+    );
+{{/ type.is_class_or_interface }}
+{{/ type.is_string }}
+{{/ get_template_argument }}
+
+    return NativePointer { _Value, _OwnsPointer };
+}
+
+{{ extra_data.c_export_macro }} void
+{{ unique_name }}_Set{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}(
+    {{# is_const }}const {{/ is_const }}{{# definition }}{{> Type }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>* inst,
+{{# parameters }}
+{{# type.is_template_argument }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+{{# type.is_string }}
+    char
+{{/ type.is_string }}
+{{^ type.is_string }}
+    {{# type }}{{# argument_name }}{{ name }}{{/ argument_name }}{{/ type }}
+{{/ type.is_string }}
+{{/ get_template_argument }}
+{{# type.is_pointer_or_reference }}
+    *
+{{/ type.is_pointer_or_reference }}
+    {{ name }},
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+    {{> Parameter }},
+{{/ type.is_template_argument }}
+{{/ parameters }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ return_type.name }}{{/ parameter_name }}
+{{# type.is_string }}
+    char* value
+{{/ type.is_string }}
+{{^ type.is_string }}
+    {{# type }}{{> Type }}{{/ type }}* value
+{{/ type.is_string }}
+{{/ get_template_argument }}
+)
+{
+    inst->{{ name }}(
+{{# parameters }}
+{{^ type.is_template_argument }}
+        {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}{{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{# type.is_template_argument }}
+{{# type.is_pointer_or_reference }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ type.name }}{{/ parameter_name }}
+        {{# type.is_class_or_interface }}*{{/ type.is_class_or_interface }}{{^ type.is_class_or_interface }}{{^ type.is_string }}{{# type }}({{> Type }})(uintptr_t){{/ type }}{{/ type.is_string }}{{/ type.is_class_or_interface }}
+{{/ get_template_argument }}
+{{/ type.is_pointer_or_reference }}
+        {{ name }}{{> Comma }}
+{{/ type.is_template_argument }}
+{{/ parameters }}
+    ) =
+{{# get_template_argument }}
+{{# parameter_name }}{{ return_type.name }}{{/ parameter_name }}
+{{^ type.is_string }}
+{{# type.is_class_or_interface }}
+{{^ type.is_pointer_or_reference }}
+        *
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+        {{# type }}({{> Type }}){{# is_enum }}(int64_t){{/ is_enum }}{{^ is_enum }}(uintptr_t){{/ is_enum }}{{/ type }}
+{{/ type.is_class_or_interface }}
+{{/ type.is_string }}
+        value;
+{{/ get_template_argument }}
+}

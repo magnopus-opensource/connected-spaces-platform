@@ -1,0 +1,19 @@
+{{> Header }}
+
+{{> Usings }}
+
+{{# data }}
+{{> StartType }}
+
+    {{> DocComments }}
+    [StructLayout(LayoutKind.Sequential)]
+    public struct {{ name }}
+    {
+        {{# base }}public {{ base }} Base;{{/ base }}
+        {{# fields }}
+        public {{& type.name }} {{ name }};
+        {{/ fields }}
+    }
+
+{{> EndType }}
+{{/ data }}

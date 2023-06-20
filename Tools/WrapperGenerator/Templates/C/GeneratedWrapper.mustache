@@ -1,0 +1,50 @@
+#pragma once
+
+
+{{> Header }}
+
+
+#pragma region Generated Includes
+
+{{# includes }}
+{{> Include }}
+{{/ includes }}
+
+#pragma endregion Generated Includes
+
+#include "Memory/Memory.h"
+
+
+extern "C"
+{
+    typedef struct {
+        void* Pointer;
+        bool OwnsOwnData;
+    } NativePointer;
+
+    #pragma region Global Functions
+
+{{# functions }}
+    {{> GlobalFunction }}
+
+{{/ functions }}
+    #pragma endregion Global Functions
+
+
+    #pragma region Classes
+
+{{# classes }}
+    {{> Class }}
+
+{{/ classes }}
+    #pragma endregion Classes
+
+
+    #pragma region Templates
+
+{{# templates }}
+    {{> Template }}
+
+{{/ templates }}
+    #pragma endregion Templates
+}

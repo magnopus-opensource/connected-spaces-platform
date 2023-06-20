@@ -1,0 +1,13 @@
+{{# type }}
+{{# is_string }}
+StringFactory, "String"
+{{/ is_string }}
+{{^ is_string }}
+{{# is_number }}
+NumberFactory, "{{ full_safe_type_name }}"
+{{/ is_number }}
+{{^ is_number }}
+{{ full_safe_type_name }}Factory, "{{ full_safe_type_name }}"
+{{/ is_number }}
+{{/ is_string }}
+{{/ type }}

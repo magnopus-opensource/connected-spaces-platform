@@ -1,0 +1,7 @@
+{%- macro are_values_notequal(use_epsilon, var_name, unexpected_value) -%}
+    {%- if use_epsilon -%}
+        !FloatsAreEqual({{ var_name }}, {{ unexpected_value }})
+    {%- else -%}
+        {{ var_name }} != {{ unexpected_value }}
+    {%- endif -%}
+{%- endmacro -%}

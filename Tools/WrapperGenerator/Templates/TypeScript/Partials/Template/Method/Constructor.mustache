@@ -1,0 +1,43 @@
+{{! Create a factory function for this constructor for each template instance }}
+{{# instances }}
+{{! Use template argument names and parameter names to generate unique factory function name }}
+{{! eg. }}
+{{!  Array<int>() -> Array.ofInt() }}
+{{!  Array<int>(int size) -> Array.ofInt_size(size: number) }}
+{{!  Map<int, String> -> Map.ofIntAndString() }}
+static of{{# arguments }}{{ full_safe_type_name }}{{^ is_last }}And{{/ is_last }}{{/ arguments }}{{# parameters }}_{{ type.name }}{{/ parameters }}(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+): {{ definition.name }}<{{# arguments }}{{# type }}{{> TypeName }}{{/ type }}{{> Comma }}{{/ arguments }}> {
+    var _ret = Module._malloc(8);
+    Module.ccall(
+        "{{ unique_name }}{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}",
+        "void",
+        [
+            "number",
+{{# parameters }}
+            {{# type.call_param_type }} "{{type.call_param_type}}" {{/ type.call_param_type}}
+            ,
+{{/ parameters }}
+        ],
+        [
+            _ret,
+{{# parameters }}
+            {{ name }}{{# type.call_param_name_suffix}} {{type.call_param_name_suffix}} {{/ type.call_param_name_suffix}}
+            ,
+{{/ parameters }}
+        ]
+    );
+    var _inst = new {{ definition.name }}<{{# arguments }}{{# type }}{{> TypeName }}{{/ type }}{{> Comma }}{{/ arguments }}>(
+        getNativePointer(_ret),
+{{# arguments }}
+        {{> Template/ConstructorArguments }}{{> Comma }}
+{{/ arguments }}
+    );
+    Module._free(_ret);
+
+    return _inst;
+}
+
+{{/ instances }}

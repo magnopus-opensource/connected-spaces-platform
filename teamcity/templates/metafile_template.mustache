@@ -1,0 +1,65 @@
+  platformData:
+  - first:
+      Any: Any
+    second:
+      enabled: 0
+      settings:
+        Exclude Android: {{android_exclude}}
+        Exclude Editor: {{editor_exclude}}
+        Exclude Linux64: {{linux_exclude}}
+        Exclude OSXUniversal: {{mac_exclude}}
+        Exclude Win: {{windows_exclude}}
+        Exclude Win64: {{windows_exclude}}
+        Exclude iOS: {{ios_exclude}}
+  - first:
+      Any: 
+    second:
+      enabled: 1
+      settings: {}
+  - first:
+      Editor: Editor
+    second:
+      enabled: {{editor_enabled}}
+      settings:
+        CPU: {{editor_cpu}}
+        DefaultValueInitialized: true
+        OS: {{editor_os}}
+  - first:
+      Android: Android
+    second:
+      enabled: {{android_enabled}}
+      settings:
+        CPU: ARMv7
+  - first:
+      Standalone: Linux64
+    second:
+      enabled: {{linux_enabled}}
+      settings:
+        CPU: {{linux_cpu}}
+  - first:
+      Standalone: OSXUniversal
+    second:
+      enabled: {{mac_enabled}}
+      settings:
+        CPU: {{mac_cpu}}
+  - first:
+      Standalone: Win
+    second:
+      enabled: {{windows_enabled}}
+      settings:
+        CPU: {{windows_cpu}}
+  - first:
+      Standalone: Win64
+    second:
+      enabled: {{windows_enabled}}
+      settings:
+        CPU: {{windows_cpu}}
+  - first:
+      iPhone: iOS
+    second:
+      enabled: {{ios_enabled}}
+      settings:
+        AddToEmbeddedBinaries: false
+        CPU: {{ios_cpu}}
+        CompileFlags: 
+        FrameworkDependencies: 

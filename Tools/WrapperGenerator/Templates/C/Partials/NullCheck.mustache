@@ -1,0 +1,6 @@
+if ({{ name }} == nullptr)
+{
+    fprintf(stderr, "ERROR: {{ name }} cannot be null! (%s:%i)", __FILE__, __LINE__);
+
+    return{{# return_type }} {0}{{/ return_type }};
+}

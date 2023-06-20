@@ -1,0 +1,84 @@
+{{# translated_namespace }}
+export namespace {{ translated_namespace }} {
+{{/ translated_namespace }}
+
+export function {{ name }}(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+): {{# return_type }}{{> TypeName }}{{/ return_type }} {
+    {{^ return_type.is_void }}const _result = {{/ return_type.is_void }}Module.ccall(
+        "{{ unique_name }}",
+        "{{ return_type.name }}",
+        [
+{{# parameters }}
+            "{{ type.call_param_type }}"
+            ,
+{{/ parameters }}
+        ],
+        [
+{{# parameters }}
+            {{ name }}
+            ,
+{{/ parameters }}
+        ]
+    );
+
+{{# return_type }}
+{{^ is_void }}
+{{# is_integer }}
+{{^ is_pointer_or_reference }}
+{{# is_signed }}
+    return _result;
+{{/ is_signed }}
+{{^ is_signed }}
+    const _unfixedValue = _result;
+    {{> UnsignedFix }}
+    return _fixedValue;
+{{/ is_signed }}
+{{/ is_pointer_or_reference }}
+{{# is_pointer_or_reference }}
+{{# is_const }}
+{{# is_signed }}
+    return _result;
+{{/ is_signed }}
+{{^ is_signed }}
+    const _unfixedValue = _result;
+    {{> UnsignedFix }}
+    return _fixedValue;
+{{/ is_signed }}
+{{/ is_const }}
+{{^ is_const }}
+    return new NativeRef(
+        _result,
+{{# is_signed }}
+{{# is_large }}
+        NativeType.Int64
+{{/ is_large }}
+{{# is_small }}
+{{/ is_small }}
+{{# is_tiny }}
+{{/ is_tiny }}
+{{^ is_large }}
+{{^ is_small }}
+{{^ is_tiny }}
+{{/ is_tiny }}
+{{/ is_small }}
+{{/ is_large }}
+{{/ is_signed }}
+{{^ is_signed }}
+{{/ is_signed }}
+    );
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{/ is_integer }}
+{{^ is_integer }}
+    return _result;
+{{/ is_integer }}
+{{/ is_void }}
+{{/ return_type }}
+}
+
+{{# translated_namespace }}
+}
+{{/ translated_namespace }}

@@ -1,0 +1,12 @@
+{{^ is_private }}
+{{ extra_data.c_export_macro }} void
+{{# parent_class.is_template_instance }}
+{{ unique_name }}({{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{^ is_last }}, {{/ is_last }}{{/ parent_class.template_arguments }}>* inst)
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}({{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.name }}* inst)
+{{/ parent_class.is_template_instance }}
+{
+    CSP_DELETE(inst);
+}
+{{/ is_private }}

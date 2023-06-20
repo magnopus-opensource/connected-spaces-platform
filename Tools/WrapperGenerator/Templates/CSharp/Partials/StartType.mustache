@@ -1,0 +1,8 @@
+namespace {{ translated_namespace }}
+{
+{{# is_nested_type }}
+{{# surrounding_types }}
+    public partial class {{ . }}
+    {
+{{/ surrounding_types }}
+{{/ is_nested_type }}

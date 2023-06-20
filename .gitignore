@@ -1,0 +1,87 @@
+*.sln
+*.sln.DotSettings.user
+**/.vs/*
+**/.vscode/**
+*.bak
+*.vcxproj
+*.vcxproj.*
+*.csproj
+*.csproj.user
+*.idea
+**/Binaries/*
+**/Intermediate/*
+*Logs/**.*
+*Saved/*
+**/__pycache__/**
+imgui.ini
+**/bin/**
+**/obj/**
+ARM64/*
+**/node_modules/**
+
+# Ignore auto-generated OS-specific data files
+.DS_Store
+
+# Ignore auto-generated documentation
+Library/docs/build/**/*
+Library/docs/DoxygenOutput/**/*
+Library/docs/source/api/**/*
+
+# Ignore auto-generated code
+*/generated/*
+/Tools/WrapperGenerator/Output/*
+Library/codegen/generated/**/*
+
+# Ignore OlympusBuildTool intermediate files
+*/Tools/OlympusBuildTool/build/*
+OlympusBuildTool.spec
+
+# Ignore OlympusBuildTool local files
+*/Tools/OlympusBuildTool/Saved/*
+
+# Ignore codegen cache
+/Library/codegen/openapi30/*
+/Library/codegen/tmp
+
+# Ignore sonar scanner files
+.scannerwork/*
+*/Makefile
+Makefile
+BuildLog.log
+clang-tidy-tmp.txt
+clang-tidy.txt
+compile_commands.json
+SonarScanner.log
+vs-tmp.txt
+Tools/Emscripten/EmscriptenBuild.log
+
+# Ignore auto-generated XCode project files
+*.xcworkspace
+*.xcodeproj
+
+# Make an exception for the SpaceMigrationTool Visual Studio sln and proj
+!Tools/SpaceMigrationTool/SpaceMigrationTool.sln
+!Tools/SpaceMigrationTool/SpaceMigrationTool.vcxproj
+!Tools/SpaceMigrationTool/SpaceMigrationTool.vcxproj.filters
+
+/Library/include/Olympus/version.h
+/Tools/OlympusBuildTool/Saved/config.json
+
+# Ignore temporary Unity3D files
+/Tests/Unity/Library/**/*
+/Tests/Unity/Logs/**/*
+/Tests/Unity/UserSettings/**/*
+/Tests/Unity/Temp/**/*
+
+/Tests/Directory.Build.props
+
+# Include unit test project settings
+!UnitTesting/.vscode/settings.json
+
+# Ignore unit test artifacts
+UnitTesting/*.Make
+UnitTesting/include/**/*
+UnitTesting/src/**/*
+UnitTesting/tests/*_test_results.xml
+UnitTesting/tests/csharp/Assets/Tests/generated/**/*
+UnitTesting/tests/javascript/tests.js

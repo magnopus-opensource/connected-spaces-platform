@@ -1,0 +1,16 @@
+public {{ definition.name }}({{# parameters }}{{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
+{
+    InitialiseNativeDelegates();
+    
+{{# template_parameters }}
+    Is{{ name }}ProxyClass = typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}));
+{{/ template_parameters }}
+
+    var np = {{ unique_name }}(
+{{# parameters }}
+        {{ name }}{{# type.is_pointer_or_reference }}._ptr{{/ type.is_pointer_or_reference }}{{> Comma }}
+{{/ parameters }}
+    );
+    _ptr = np.Pointer;
+    _ownsPtr = np.OwnsOwnData;
+}

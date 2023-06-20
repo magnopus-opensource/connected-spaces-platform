@@ -1,0 +1,7 @@
+{{ extra_data.c_export_macro }} void
+{{ unique_name }}{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}(
+    {{# definition }}{{> Type }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>* inst
+)
+{
+    inst->~{{ definition.name }}();
+}

@@ -1,0 +1,225 @@
+{% from 'helpers.jinja2' import fix_unsigned_value, print_c_type, print_type, read_pointer, write_pointer %}
+
+{# Javascript doesn't support out parameters, so we need to move all this into a tuple to return #}
+{% set out_params = this.parameters | selectattr("modifier", "equalto", ParameterModifier.OUT) | list %}
+{% set inout_params = this.parameters | selectattr("modifier", "equalto", ParameterModifier.IN_OUT) | list %}
+{% set all_out_params = out_params + inout_params %}
+
+{# Loop through namespace parts for nested namespaces #}
+{% if this.namespace.parts | length > 1 %}
+export namespace {{ this.namespace | typescriptify }} {
+{% endif %}
+
+export function {{ this.name | typescriptify }}(
+{% for p in this.parameters -%}
+    {# We remove out parameters as they are handled internally and returns in an anonymous object #}
+    {% if p.modifier != ParameterModifier.OUT -%}
+        {# In-out parameters are kept as we need the user to pass in the initial value, but are passed as the underlying non-pointer type #}
+        {% if p.modifier == ParameterModifier.IN_OUT -%}
+            {{ p.name | typescriptify }}: {{ print_type(p.type, ignore_pointer=true) }},
+        {%- else -%}
+            {{ p.name | typescriptify }}: {{ print_type(p.type) }},
+        {%- endif %}
+    {%- endif %}
+{%- endfor %}
+): 
+    {# If we have in-out or out params, our return type needs to change #}
+    {% if all_out_params | length > 0 %}
+        {# When we have no return type and only 1 in-out or out param, it becomes the new return type #}
+        {% if all_out_params | length == 1 and this.return_type is none %}
+            {{ print_type(all_out_params[0].type, true) }}
+        {# Multiple in-out or out params means we need to return an anonymous object containing all in-out and out params (and the return value if there is one) #}
+        {% else %}
+            {
+                {% if this.return_type is not none -%}
+                    result: {{ print_type(this.return_type) }},
+                {%- endif %}
+                {% for p in all_out_params -%}
+                    {{ p.name | trim_prefix }}: {{ print_type(p.type, true) }},
+                {%- endfor %}
+            }
+        {% endif %}
+    {% else %}
+        {{ print_type(this.return_type) }}
+    {% endif %}
+{
+    {# If we have in-out or out parameters, we need to allocate memory for each one #}
+    {% for p in all_out_params -%}
+        const _p{{ p.name }} = Module._malloc(
+            {% if p.type.classification == TypeClassification.PRIMITIVE %}
+                {{ (p.type.primitive_info.width / 8) | int }}
+            {% else %}
+                {# TODO: Handle other parameter types #}
+            {% endif %}
+        );
+    {%- endfor %}
+
+    {# If we have any in-out parameters, we need to write the value passed in by the user to the memory we just allocated #}
+    {% for p in inout_params -%}
+        {% set pointer_var_name -%}
+            _p{{ p.name }}
+        {%- endset %}
+
+        {{- write_pointer(pointer_var_name, p.name | typescriptify, p.type.primitive_info) -}};
+    {%- endfor %}
+
+    {% if this.return_type is not none %}
+        {# If C function returns a NativePointer, allocate space to hold the struct and don't store a return value #}
+        {% if this.return_type.classification == TypeClassification.CLASS %}
+            var _ret = Module._malloc(8);   {# NativePointer is 8 bytes in size (4 for the pointer, 1 for the boolean, and 3 bytes padding) #}
+
+            {% set returns_pointer = true %}
+        {# Otherwise, just store the return value #}
+        {% else %}
+            let _result =
+
+            {% set returns_pointer = false %}
+        {% endif %}
+    {% endif %}
+    
+    {# Call Foundation via C wrapper #}
+    Module.ccall(
+        "{{ this.unique_name }}",
+        {% if this.return_type is none or returns_pointer -%}
+            "void",
+        {%- else -%}
+            "{{ print_c_type(this.return_type) }}",
+        {%- endif %}
+        [
+            {% if returns_pointer %}
+                "number",
+            {% endif %}
+            {% for p in this.parameters %}
+                "{{ print_c_type(p.type) }}",
+            {% endfor %}
+        ],
+        [
+            {# If C function returns NativePointer, pass pointer to hold struct as first argument #}
+            {# This is needed as this is how emscripten returns structs #}
+            {% if returns_pointer %}
+                _ret,
+            {% endif %}
+            {% for p in this.parameters %}
+                {% if p.modifier in [ParameterModifier.OUT, ParameterModifier.IN_OUT] %}
+                    _p{{ p.name }},
+                {% elif p.type.classification == TypeClassification.CLASS %}
+                    {{ p.name | typescriptify }}.pointer,
+                {% else %}
+                    {# TODO: Handle other parameter types #}
+                    {{ p.name | typescriptify }},
+                {% endif %}
+            {% endfor %}
+        ]
+    );
+
+    {# Transform in-out and out param pointers #}
+    {% for p in all_out_params -%}
+        {# Setting the name to a variable allows us to pass it to a macro without having to call the format filter #}
+        {% set pointer_var_name -%}
+            _p{{ p.name }}
+        {%- endset %}
+
+        {% if p.type.classification == TypeClassification.PRIMITIVE %}
+            let _{{ p.name | typescriptify }} = {{ read_pointer(pointer_var_name, p.type.primitive_info) }};
+            Module._free({{ pointer_var_name }});
+
+            {# Fix for unsigned values #}
+            {% if not p.type.primitive_info.is_signed
+                and not p.type.primitive_info.is_floating_point %}
+                // Unsigned fix for _{{ p.name | typescriptify }}
+                {
+                    const _unfixedValue = _{{ p.name | typescriptify }};
+                    {{ fix_unsigned_value(p.type.primitive_info) }}
+
+                    _{{ p.name | typescriptify }} = _fixedValue;
+                }
+            {% endif %}
+        {% else %}
+            {# TODO: Support other in-out/out param types #}
+            let _{{ p.name | typescriptify }} = _p{{ p.name }};
+        {% endif %}
+    {%- endfor %}
+
+    {# Return the result of the C call we stored earlier #}
+    {# If there is no return type, check for in-out and out params #}
+    {% if this.return_type is none %}
+        {# Return any in-out and out params #}
+        {% if all_out_params | length > 0 %}
+            {# If we only have a single in-out or out param, return it as is #}
+            {% if all_out_params | length == 1 %}
+                return _{{ all_out_params[0].name | typescriptify }};
+            {# Otherwise, return all in-out and out params in an anonymous object #}
+            {% else %}
+                return {
+                    {% for p in all_out_params -%}
+                        {{ p.name | trim_prefix }}: _{{ p.name | typescriptify }},
+                    {%- endfor %}
+                };
+            {% endif %}
+        {% endif %}
+    {% else %}
+        {% if this.return_type.classification == TypeClassification.PRIMITIVE %}
+            {# Primitive non-pointer and const pointer types are both returned by value in the C wrapper #}
+            {% if not this.return_type.pointer_type.is_pointer_or_reference()
+                or (this.return_type.pointer_type.is_pointer_or_reference()
+                    and TypeModifiers.CONST in this.return_type.modifiers) %}
+                {# If the return value is an unsigned integer type, we need to fix it as emscripten breaks it #}
+                {% if not this.return_type.primitive_info.is_signed
+                    and not this.return_type.primitive_info.is_floating_point %}
+                    const _unfixedValue = _result;
+                    {{ fix_unsigned_value(this.return_type.primitive_info) }}
+
+                    _result = _fixedValue;
+                {% endif %}
+            {# Value is a primitive non-const pointer type #}
+            {% else %}
+                _result = new NativeRef(
+                    _result,
+                    {% set _signed = this.return_type.primitive_info.is_signed %}
+
+                    {% if this.return_type.primitive_info.width == 8 %}
+                        NativeType.{{ 'U' if not _signed }}Int8
+                    {% elif this.return_type.primitive_info.width == 16 %}
+                        NativeType.{{ 'U' if not _signed }}Int16
+                    {% elif this.return_type.primitive_info.width == 32 %}
+                        {% if this.return_type.primitive_info.is_floating_point %}
+                            NativeType.Float
+                        {% else %}
+                            NativeType.{{ 'U' if not _signed }}Int32
+                        {% endif %}
+                    {% elif this.return_type.primitive_info.width == 64 %}
+                        {% if this.return_type.primitive_info.is_floating_point %}
+                            NativeType.Double
+                        {% else %}
+                            NativeType.{{ 'U' if not _signed }}Int64
+                        {% endif %}
+                    {% endif %}
+                );
+            {% endif %}
+        {% elif this.return_type.classification == TypeClassification.CLASS %}
+            const _result = new {{ print_type(this.return_type) }}(
+                getNativePointer(_ret)
+            );
+            Module._free(_ret);
+        {% else %}
+            {# TODO: Handle other return types #}
+        {% endif %}
+
+        {# If there are any in-out or out params, stick them and the return value in an anonymous object #}
+        {% if all_out_params | length > 0 %}
+            return {
+                result: _result,
+                {% for p in all_out_params -%}
+                    {{ p.name | trim_prefix }}: _{{ p.name | typescriptify }},
+                {%- endfor %}
+            };
+        {# Otherwise, just return our result #}
+        {% else %}
+            return _result;
+        {% endif %}
+    {% endif %}
+}
+
+{% if this.namespace.parts | length > 1 %}
+}
+{% endif %}

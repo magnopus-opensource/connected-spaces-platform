@@ -1,0 +1,107 @@
+{{# is_index_operator }}
+get(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+): {{# return_type }}{{> TypeName }}{{/ return_type }} {
+{{# parameters }}
+{{# type.is_template_argument }}
+    var [_{{ name }}, _{{ name }}ShouldFree] = objectToPointer({{ name }});
+{{/ type.is_template_argument }}
+{{/ parameters }}
+
+    var _ret = Module._malloc(8);
+    Module.ccall(
+        `{{ unique_name }}_Get{{# template_parameters }}_${ this.{{ name }}TypeName }{{/ template_parameters }}`,
+        "number",
+        [
+            "number",
+            "number",
+{{# parameters }}
+{{# type.is_template_argument }}
+            "number",
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            "{{ type.call_param_type }}",
+{{/ type.is_template_argument }}
+{{/ parameters }}
+        ],
+        [
+            _ret,
+            this.pointer,
+{{# parameters }}
+            {{# type.is_template_argument }}_{{/ type.is_template_argument }}{{ name }}{{ type.call_param_name_suffix }},
+{{/ parameters }}
+        ]
+    );
+    var _nPtr = getNativePointer(_ret);
+
+{{# parameters }}
+{{# type.is_template_argument }}
+    if (_{{ name }}ShouldFree)
+        Module._free(_{{ name }});
+{{/ type.is_template_argument }}
+{{/ parameters }}
+
+{{# return_type.is_template_argument }}
+    return (this.{{ return_type.name }}TypeFactory(_nPtr) as {{ return_type.name }});
+{{/ return_type.is_template_argument }}
+{{^ return_type.is_template_argument }}
+    return _nPtr.pointer;
+{{/ return_type.is_template_argument }}
+}
+
+set(
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }},
+{{/ parameters }}
+    value: {{# return_type }}{{> TypeName }}{{/ return_type }}
+): void {
+{{# parameters }}
+{{# type.is_template_argument }}
+    var [_{{ name }}, _{{ name }}ShouldFree] = objectToPointer({{ name }});
+{{/ type.is_template_argument }}
+{{/ parameters }}
+{{# return_type.is_template_argument }}
+    var [_value, _valueShouldFree] = objectToPointer(value);
+{{/ return_type.is_template_argument }}
+
+    Module.ccall(
+        `{{ unique_name }}_Set{{# template_parameters }}_${ this.{{ name }}TypeName }{{/ template_parameters }}`,
+        "void",
+        [
+            "number",
+{{# parameters }}
+{{# type.is_template_argument }}
+            "number",
+{{/ type.is_template_argument }}
+{{^ type.is_template_argument }}
+            "{{ type.call_param_type }}",
+{{/ type.is_template_argument }}
+{{/ parameters }}
+            "number"
+        ],
+        [
+            this.pointer,
+{{# parameters }}
+            {{# type.is_template_argument }}_{{/ type.is_template_argument }}{{ name }}{{ type.call_param_name_suffix }},
+{{/ parameters }}
+            {{# return_type.is_template_argument }}_{{/ return_type.is_template_argument }}value
+        ]
+    );
+
+{{# parameters }}
+{{# type.is_template_argument }}
+    if (_{{ name }}ShouldFree)
+        Module._free(_{{ name }});
+{{/ type.is_template_argument }}
+{{/ parameters }}
+{{# return_type.is_template_argument }}
+    if (_valueShouldFree)
+        Module._free(_value);
+{{/ return_type.is_template_argument }}
+}
+{{/ is_index_operator }}
+{{^ is_index_operator }}
+// {{ name }}
+{{/ is_index_operator }}

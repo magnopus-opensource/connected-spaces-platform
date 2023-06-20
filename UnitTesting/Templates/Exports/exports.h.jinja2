@@ -1,0 +1,242 @@
+#pragma once
+
+#include "CSP/CSPCommon.h"
+#include "CSP/Common/String.h"
+
+#include <cstdint>
+
+
+namespace csp {
+    // Helper function to free allocated memory from wrappers
+    CSP_API void Free(void* Pointer);
+
+
+    /********************************/
+    /*       Global functions       */
+    /********************************/
+
+    /// Return types
+
+    // Primitives
+
+    {% for p in config.primitives %}
+        // Return {{ p.type }} min value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_min();
+
+        // Return {{ p.type }} max value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_max();
+
+        // Return {{ p.type }} min value by pointer
+        CSP_API {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_min();
+
+        // Return {{ p.type }} max value by pointer
+        CSP_API {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_max();
+
+        // Return {{ p.type }} min value by const pointer
+        CSP_API const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min();
+
+        // Return {{ p.type }} max value by const pointer
+        CSP_API const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max();
+
+        // Return {{ p.type }} min value by reference
+        CSP_API {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_min();
+
+        // Return {{ p.type }} max value by reference
+        CSP_API {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_max();
+
+        // Return {{ p.type }} min value by const reference
+        CSP_API const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_min();
+
+        // Return {{ p.type }} max value by const reference
+        CSP_API const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_max();
+    {% endfor %}
+
+
+    // String
+
+    // Return string by value
+    CSP_API oly_common::String GlobalFunctions_String_ReturnValue();
+
+    // Return string by const reference
+    CSP_API const oly_common::String& GlobalFunctions_String_ReturnConstReference();
+
+
+    // Classes
+
+    class CSP_API MyClass {
+    public:
+        MyClass(int Value) : SomeValue(Value) {}
+
+        int SomeValue;
+    };
+
+    // Return class by value
+    CSP_API MyClass GlobalFunctions_MyClass_ReturnValue();
+    
+    // Return class by pointer
+    CSP_API MyClass* GlobalFunctions_MyClass_ReturnPointer();
+
+    // Return class by const pointer
+    CSP_API const MyClass* GlobalFunctions_MyClass_ReturnConstPointer();
+
+    // Return class by reference
+    CSP_API MyClass& GlobalFunctions_MyClass_ReturnReference();
+
+    // Return class by const reference
+    CSP_API const MyClass& GlobalFunctions_MyClass_ReturnConstReference();
+
+
+    /// Parameter types
+
+    // Primitives
+
+    {% for p in config.primitives %}
+        // Pass {{ p.type }} min value by value
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.type }} Value);
+
+        // Pass {{ p.type }} max value by value
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.type }} Value);
+
+        // Get {{ p.type }} min value via out parameter
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassOut_min(CSP_OUT {{ p.type }}& OutValue);
+
+        // Get {{ p.type }} max value via out parameter
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassOut_max(CSP_OUT {{ p.type }}& OutValue);
+
+        // Get {{ p.type }} min and max values via out parameters
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassOut_minmax(
+            CSP_OUT {{ p.type }}& OutMinValue,
+            CSP_OUT {{ p.type }}& OutMaxValue
+        );
+
+        // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max(
+            CSP_OUT {{ p.type }}& OutValue
+        );
+
+        // Get {{ p.type }} min and max values via out parameters and return {{ p.type }} min value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min(
+            CSP_OUT {{ p.type }}& OutMinValue,
+            CSP_OUT {{ p.type }}& OutMaxValue
+        );
+
+        // Pass {{ p.type }} min value and get max value via in-out parameter
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax(CSP_IN_OUT {{ p.type }}& InOutValue);
+
+        // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and get
+        // min value via another in-out parameter
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+            CSP_IN_OUT {{ p.type }}& InOutValue1,
+            CSP_IN_OUT {{ p.type }}& InOutValue2
+        );
+
+        // Pass {{ p.type }} min value and get max value via in-out-parameter, and return {{ p.type }} max value by
+        // value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max(
+            CSP_IN_OUT {{ p.type }}& InOutValue
+        );
+
+        // Pass {{ p.type }} min value and get max value via in-out-parameter, pass {{ p.type }} max value and get min
+        // value via another in-out parameter, and return {{ p.type }} max value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+            CSP_IN_OUT {{ p.type }}& InOutValue1,
+            CSP_IN_OUT {{ p.type }}& InOutValue2
+        );
+
+        // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via in-out
+        // parameter
+        CSP_API void GlobalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax(
+            CSP_OUT {{ p.type }}& OutValue1,
+            CSP_IN_OUT {{ p.type }}& InOutValue2
+        );
+
+        // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+        // parameter, and return {{ p.type }} max value by value
+        CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+            CSP_OUT {{ p.type }}& OutValue1,
+            CSP_IN_OUT {{ p.type }}& InOutValue2
+        );
+    {% endfor %}
+
+
+    // String
+
+    // Pass string by value
+    CSP_API void GlobalFunctions_String_PassValue(oly_common::String Value);
+
+    // Pass string by const reference
+    CSP_API void GlobalFunctions_String_PassConstReference(const oly_common::String& Value);
+
+
+    // Classes
+
+    // Pass class by value
+    CSP_API void GlobalFunctions_MyClass_PassValue(oly::MyClass Value);
+
+    // Pass class by pointer
+    CSP_API void GlobalFunctions_MyClass_PassPointer(oly::MyClass* Value);
+
+    // Pass class by const pointer
+    CSP_API void GlobalFunctions_MyClass_PassConstPointer(const oly::MyClass* Value);
+
+    // Pass class by reference
+    CSP_API void GlobalFunctions_MyClass_PassReference(oly::MyClass& Value);
+
+    // Pass class by const reference
+    CSP_API void GlobalFunctions_MyClass_PassConstReference(const oly::MyClass& Value);
+
+
+    /********************************/
+    /*           Classes            */
+    /********************************/
+
+    /// Fields
+
+    // Primitives
+
+    class CSP_API PrimitiveFieldTestClass {
+    public:
+        {% for p in config.primitives %}
+            {{ p.type }} Field{{ loop.index0 }};
+        {% endfor %}
+    };
+
+    // Pass class and check primitive field values
+    CSP_API void Check_PrimitiveFieldTestClass_Fields(const PrimitiveFieldTestClass& Instance);
+
+    // Pass class and set primitive field values
+    CSP_API void Set_PrimitiveFieldTestClass_Fields(PrimitiveFieldTestClass& Instance);
+
+
+    // String
+
+    class CSP_API StringFieldTestClass {
+    public:
+        oly_common::String Field;
+    };
+
+    // Pass class and check string field values
+    CSP_API void Check_StringFieldTestClass_Field(const StringFieldTestClass& Instance);
+
+    // Pass class and set string field values
+    CSP_API void Set_StringFieldTestClass_Field(StringFieldTestClass& Instance);
+
+
+    // Classes
+
+    class CSP_API MyCoolClass {
+    public:
+        int32_t ACoolInteger;
+    };
+
+    class CSP_API ClassFieldTestClass {
+    public:
+        MyCoolClass Field;
+    };
+
+    // Pass class and check class field values
+    CSP_API void Check_ClassFieldTestClass_Field(const ClassFieldTestClass& Instance);
+
+    // Pass class and set class field values
+    CSP_API void Set_ClassFieldTestClass_Field(ClassFieldTestClass& Instance);
+}

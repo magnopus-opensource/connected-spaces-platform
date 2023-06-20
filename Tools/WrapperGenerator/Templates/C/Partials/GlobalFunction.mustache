@@ -1,0 +1,137 @@
+{{# return_type }}
+{{ extra_data.c_export_macro }}
+{{# is_string }}
+    const char*
+{{/ is_string }}
+{{^ is_string }}
+{{# is_pointer_or_reference }}
+{{# is_class_or_interface }}
+    NativePointer
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_const }}
+    {{> Type }}
+{{/ is_const }}
+{{^ is_const }}
+    {{> Type }}*
+{{/ is_const }}
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+    NativePointer
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+    {{> Type }}
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ is_string }}
+{{/ return_type }}
+{{^ return_type }}
+{{ extra_data.c_export_macro }} void
+{{/ return_type }}
+    {{ unique_name }}(
+{{# parameters }}
+{{# type }}
+{{# is_string }}
+    const char*
+{{/ is_string }}
+{{^ is_string }}
+    {{> Type }}
+{{# is_pointer_or_reference }}
+    *
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+    *
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{/ is_string }}
+{{/ type }}
+    {{ name }}{{> Comma }}
+{{/ parameters }}
+)
+{
+{{# return_type }}
+{{# is_string }}
+    const auto& _result =
+{{/ is_string }}
+{{^ is_string }}
+    return
+{{/ is_string }}
+{{# is_class_or_interface }}
+    NativePointer {
+{{# is_pointer_or_reference }}
+{{# is_const }}
+        CSP_NEW {{> Type }}(
+{{# is_pointer }}
+        *
+{{/ is_pointer }}
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{# is_reference }}
+{{^ is_const }}
+        &
+{{/ is_const }}
+{{/ is_reference }}
+{{^ is_pointer_or_reference }}
+        CSP_NEW {{> Type }}(
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_const }}
+{{# is_pointer }}
+    *
+{{/ is_pointer }}
+{{/ is_const }}
+{{^ is_const }}
+{{# is_reference }}
+    &
+{{/ is_reference }}
+{{/ is_const }}
+{{/ is_class_or_interface }}
+{{/ return_type }}
+    {{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}(
+{{# parameters }}
+{{# type.is_string }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+{{# type.is_reference }}
+        *
+{{/ type.is_reference }}
+{{^ type.is_pointer_or_reference }}
+{{# type.is_class_or_interface }}
+        *
+{{/ type.is_class_or_interface }}
+{{/ type.is_pointer_or_reference }}
+{{/ type.is_string }}
+        {{ name }}{{> Comma }}
+{{/ parameters }}
+    )
+{{# return_type }}
+{{# is_class_or_interface }}
+{{# is_pointer_or_reference }}
+{{# is_const }}
+    ), true }
+{{/ is_const }}
+{{^ is_const }}
+    , false }
+{{/ is_const }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    ), true }
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ return_type }};
+
+{{# return_type }}
+{{# is_string }}
+    auto _resultBuffer = (char*)oly_memory::DllAlloc(_result.Length() + 1);
+    std::memcpy(_resultBuffer, _result.c_str(), _result.Length());
+    _resultBuffer[_result.Length()] = '\0';
+
+    return _resultBuffer;
+{{/ is_string }}
+{{/ return_type }}
+}
+

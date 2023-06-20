@@ -1,0 +1,5 @@
+{%- macro assert_are_equal(use_epsilon, var_name, expected_value) -%}
+    {# Evaluates to 'assert.areApproximatelyEqual(x, y)' for floats and doubles, #}
+    {# and 'assert.AreEqual(x, y)' for everything else #}
+    assert.are{{ 'Approximately' if use_epsilon }}Equal({{ var_name }}, {{ expected_value }});
+{%- endmacro -%}

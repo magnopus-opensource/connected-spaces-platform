@@ -1,0 +1,226 @@
+{{> Header }}
+
+var Module : any = {};
+
+Module["fetchSettings"] = function() {
+  return "{ credentials: 'include' }";
+};
+
+function assert(condition: unknown): asserts condition {
+  if (!condition) {
+    throw new Error("Assertion failed!");
+  }
+}
+
+export function stringToBuffer(jsString: string): [pointer: number, length: number] {
+  const len = Module.lengthBytesUTF8(jsString);
+  const ptr = Module._malloc(len + 1);
+  Module.stringToUTF8(jsString, ptr, len + 1);
+
+  return [ptr, len];
+}
+
+function objectToPointer(obj: any): [pointer: number, shouldFree: boolean] {
+  if (obj instanceof NativeClassWrapper) {
+    return [obj.pointer, false];
+  }
+
+  if (typeof(obj) == "string") {
+    var [ptr,] = stringToBuffer(obj);
+    return [ptr, true];
+  }
+
+  if (typeof(obj) == "number") {
+    return [obj, false];
+  }
+
+  throw new Error("Cannot convert object to pointer!");
+}
+
+export class FoundationOptions {
+  wrapperUrl: string
+  /**
+   * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
+   */
+  wasmUrl: string
+  /**
+   * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
+   */
+  workerUrl: string
+}
+
+export function ready(args: boolean | FoundationOptions = false) {
+  // If an instance of FoundationOptions is passed, we should use the paths provided to load any Foundation files
+  if (args instanceof FoundationOptions) {
+    Module["locateFile"] = function(path: string, scriptDirectory: string) {
+      if (Module["locateFilePaths"].hasOwnProperty(path)) {
+        let substitutePath: string = Module["locateFilePaths"][path];
+        
+        if (substitutePath[0] == '.')
+          return scriptDirectory + substitutePath;
+        
+        return substitutePath;
+      }
+      
+      return scriptDirectory + path;
+    };
+    
+    Module["locateFilePaths"] = {
+      "OlympusFoundation_WASM.wasm": args.wasmUrl,
+      "OlympusFoundation_WASM.worker.js": args.workerUrl
+    };
+
+    Module["mainScriptUrlOrBlob"] = args.wrapperUrl;
+
+    // Values are in page count. Pages are 64kb in size. 512 pages is 32mb, 4096 pages is 256mb.
+    if (typeof window !== "undefined" && window.navigator.userAgent.includes("iPhone")) {
+      Module["wasmMemory"] = new WebAssembly.Memory({
+        "initial": 512,
+        "maximum": 4096,
+        "shared": true,
+      });
+    }
+
+    return new Promise<any>((resolve) => {
+      // @ts-ignore
+      let importPromise = import(args.wrapperUrl);
+  
+      importPromise.then((loadedModule: any) => {
+        loadedModule.default(Module).then((mod: any) => {
+          console.log("Foundation binary ready!");
+          resolve(Module);
+        });
+      });
+    });
+  }
+  // Otherwise, we should load them from either the Debug or Release directories
+  else {
+    if (typeof window !== "undefined" && window.navigator.userAgent.includes("iPhone")) {
+      // Values are in page count. Pages are 64kb in size. 512 pages is 32mb, 4096 pages is 256mb.
+      Module["wasmMemory"] = new WebAssembly.Memory({
+        "initial": 512,
+        "maximum": 4096,
+        "shared": true,
+      });
+    }
+
+    return new Promise<any>((resolve) => {
+      let importPromise = args as boolean
+        ? // @ts-ignore
+          import("./Debug/OlympusFoundation_WASM.js")
+        : // @ts-ignore
+          import("./Release/OlympusFoundation_WASM.js");
+  
+      importPromise.then((loadedModule: any) => {
+        loadedModule.default(Module).then((mod: any) => {
+          console.log("Foundation binary ready!");
+          resolve(Module);
+        });
+      });
+    });
+  }
+}
+
+export function uint8ArrayToBuffer(array: Uint8Array) {
+  var buf = Module._malloc(array.length);
+  Module.HEAPU8.set(array, buf);
+
+  return buf;
+}
+
+export function bufferToUint8Array(buf: number, length: number) {
+  return Module.HEAPU8.subarray(buf, buf + length);
+}
+
+export function freeBuffer(buf: number) {
+  Module._free(buf);
+}
+
+
+{{> Limits }}
+
+{{> NativePointer }}
+
+{{> NativeClassWrapper }}
+
+{{> INativeResource }}
+
+{{> NativeRef }}
+
+
+type ProxyClassFactory = (nativePointer: NativePointer) => NativeClassWrapper | number | string;
+let ProxyClassFactories = new Map<string, ProxyClassFactory>();
+
+function StringFactory(nativePointer: NativePointer): string {
+  return Module.UTF8ToString(nativePointer.pointer);
+}
+ProxyClassFactories["String"] = StringFactory;
+
+function NumberFactory(nativePointer: NativePointer): number {
+  return nativePointer.pointer;
+}
+ProxyClassFactories["Number"] = NumberFactory;
+
+{{# enums }}
+function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): {{> TypeName }} {
+  return nativePointer.pointer as {{> TypeName }};
+}
+ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+
+{{/ enums }}
+
+{{# classes }}
+{{^ is_static }}
+function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): NativeClassWrapper {
+    return new {{> TypeName }}(nativePointer)
+}
+ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+{{/ is_static }}
+
+{{/ classes }}
+
+{{# templates }}
+{{# instances }}
+function {{ full_safe_type_name }}Factory(nativePointer: NativePointer): NativeClassWrapper {
+    return new {{# definition }}{{> TypeName }}{{/ definition }}<
+{{# arguments }}
+      {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ arguments }}
+    >(
+      nativePointer,
+{{# arguments }}
+      {{> Template/ConstructorArguments }}{{> Comma }}
+{{/ arguments }}
+    )
+}
+ProxyClassFactories["{{ full_safe_type_name }}"] = {{ full_safe_type_name }}Factory;
+
+{{/ instances }}
+
+{{/ templates}}
+
+
+{{# enums }}
+{{> Enum }}
+
+{{/ enums }}
+
+{{# interfaces }}
+{{> Interface }}
+
+{{/ interfaces }}
+
+{{# classes }}
+{{> Class }}
+
+{{/ classes }}
+
+{{# templates }}
+{{> Template }}
+
+{{/ templates}}
+
+{{# rendered_functions }}
+{{& . }}
+
+{{/ rendered_functions }}

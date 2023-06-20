@@ -1,0 +1,23 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.vs": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/__pycache__/": true,
+        "Binaries/": true,
+        "Intermediate/": true,
+        "tests/build/": true,
+        "tests/obj/": true,
+        "*.sln": true,
+        "*.vcxproj*": true,
+    },
+    "python.analysis.typeCheckingMode": "strict",
+    "python.languageServer": "Pylance",
+    "editor.rulers": [
+        120
+    ]
+}

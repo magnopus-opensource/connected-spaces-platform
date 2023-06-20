@@ -1,0 +1,84 @@
+{{! IL2CPP does not allow marshalling delegates that point to non-static methods, so we need to do this... }}
+#if !UNITY_EDITOR && ENABLE_IL2CPP
+[AOT.MonoPInvokeCallback (typeof ({{ delegate.name }}))]
+#endif
+static void {{ delegate.name }}Function(
+    IntPtr _StateObject__{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+    NativePointer
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ type }} 
+        _{{ name }}{{> Comma }}
+{{/ parameters }}
+) {
+    var _handle = (GCHandle)_StateObject__;
+    var _this = ({{ class_name }})_handle.Target;
+    _this.Real{{ name }}?.Invoke(
+        _this,
+{{# has_multiple_parameters }}
+        (
+{{/ has_multiple_parameters }}
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+            new {{> Type }}(
+{{/ is_pointer_or_reference }}
+{{/ type }}
+                _{{ name }}
+{{# type.is_pointer_or_reference }}
+            )
+{{/ type.is_pointer_or_reference }}
+        {{> Comma }}
+{{/ parameters }}
+{{# has_multiple_parameters }}
+        )
+{{/ has_multiple_parameters }}
+    );
+}
+
+bool {{ name }}Initialised = false;
+event EventHandler<
+{{# has_multiple_parameters }}
+    (
+{{/ has_multiple_parameters }}
+{{# parameters }}
+    {{# type }}{{> Type }}{{/ type }}{{# has_multiple_parameters }} {{ name }}{{> Comma }}{{/ has_multiple_parameters }}
+{{/ parameters }}
+{{# has_multiple_parameters }}
+    ){{/ has_multiple_parameters }}
+>? Real{{ name }};
+public event EventHandler<
+{{# has_multiple_parameters }}
+    (
+{{/ has_multiple_parameters }}
+{{# parameters }}
+        {{# type }}{{> Type }}{{/ type }}{{# has_multiple_parameters }} {{ name }}{{> Comma }}{{/ has_multiple_parameters }}
+{{/ parameters }}
+{{# has_multiple_parameters }}
+    )
+{{/ has_multiple_parameters }}
+> {{ name }}
+{
+    add
+    {
+        if (!{{ name }}Initialised)
+        {
+            var handle = GCHandle.Alloc(this);
+            {{ unique_method_name }}(_ptr, {{ delegate.name }}Function, (IntPtr)handle);
+            eventHandles.Add(handle);
+            {{ name }}Initialised = true;
+        }
+
+        Real{{ name }} += value;
+    }
+    remove
+    {
+        Real{{ name }} -= value;
+    }
+}
+

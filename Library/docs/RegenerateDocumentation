@@ -1,0 +1,20 @@
+#!/bin/bash
+
+ROOT=$(cd "$(dirname "$0")"; pwd -P)
+cd $ROOT
+
+echo Ensure Python prerequisites are met
+pip3 install -r requirements.txt
+
+DOXY="/Applications/Doxygen.app/Contents/Resources/doxygen"
+
+echo Remove existing documentation and intermediate files
+rm -f -R build
+rm -f -R DoxygenOutput
+rm -f -R source/api
+
+echo Generate XML formatted documentation from source via doxygen
+$DOXY Doxyfile
+
+echo "Generate HTML output via Python & Sphinx"
+make html

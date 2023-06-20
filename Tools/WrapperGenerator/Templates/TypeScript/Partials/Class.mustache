@@ -1,0 +1,122 @@
+{{# translated_namespace }}
+export namespace {{ translated_namespace }} {
+{{/ translated_namespace }}
+
+export class {{ name }}
+{{^ is_static }}
+{{# base }}
+    extends {{> TypeName }}
+{{/ base }}
+{{^ base }}
+    extends NativeClassWrapper
+{{/ base }}
+{{# has_interfaces }}
+    implements
+{{/ has_interfaces }}
+{{# interfaces }}
+    {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ interfaces }}
+{{# should_dispose }}
+{{^ has_interfaces }}
+    implements
+{{/ has_interfaces }}
+{{# has_interfaces }}
+    ,
+{{/ has_interfaces }}
+    INativeResource
+{{/ should_dispose }}
+{{/ is_static }} {
+{{^ is_static }}
+    /** @internal */
+    constructor(pointer: NativePointer) {
+        super(pointer);
+    }
+
+{{# has_base_type }}
+    static from{{ base.name }}(baseInstance: {{# base }}{{> TypeName }}{{/ base }}): {{> TypeName }} {
+        const nativeClassWrapper = (baseInstance as unknown as NativeClassWrapper);
+        return new {{> TypeName }}(new NativePointer(nativeClassWrapper.pointer, nativeClassWrapper.ownsPointer));
+    }
+{{/ has_base_type }}
+{{/ is_static }}
+
+{{# methods }}
+    {{> Method }}
+    
+{{/ methods }}
+
+{{# fields }}
+    {{# is_static }}static {{/ is_static }}get {{ name }}(): {{# type }}{{> TypeName }}{{/ type }} {
+{{# type.is_class_or_interface }}
+        const _ptr = Module._malloc(8);
+        Module.ccall(
+            "{{ unique_getter_name }}",
+            "void",
+            [
+                "number",
+                {{^ is_static }}"number"{{/ is_static }}
+            ],
+            [
+                _ptr,
+                {{^ is_static }}this.pointer{{/ is_static }}
+            ]
+        );
+
+        const _nPtr = getNativePointer(_ptr);
+        return new {{# type }}{{> TypeName }}{{/ type }}(
+            _nPtr
+{{# type.template_arguments }}
+            ,
+            {{> Template/ConstructorArguments }}
+{{/ type.template_arguments }}
+        );
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+        let _result = Module.ccall(
+            "{{ unique_getter_name }}",
+            "{{ type.call_param_type }}",
+            [
+                {{^ is_static }}"number"{{/ is_static }}
+            ],
+            [
+                {{^ is_static }}this.pointer{{/ is_static }}
+            ]
+        );
+
+{{# type.is_integer }}
+{{# type.is_signed }}
+        return _result;
+{{/ type.is_signed }}
+{{^ type.is_signed }}
+        const _unfixedValue = _result;
+        {{# type }}{{> UnsignedFix }}{{/ type }}
+        
+        return _fixedValue;
+{{/ type.is_signed }}
+{{/ type.is_integer }}
+
+        return _result;
+{{/ type.is_class_or_interface }}
+    }
+
+    {{# is_static }}static {{/ is_static }}set {{ name }}(value: {{# type }}{{> TypeName }}{{/ type }}) {
+        Module.ccall(
+            "{{ unique_setter_name }}",
+            "void",
+            [
+                {{^ is_static }}"number",{{/ is_static }}
+                "{{ type.call_param_type }}"
+            ],
+            [
+                {{^ is_static }}this.pointer,{{/ is_static }}
+                value{{ type.call_param_name_suffix }}
+            ]
+        );
+    }
+
+{{/ fields }}
+}
+
+{{# translated_namespace }}
+}
+{{/ translated_namespace }}

@@ -1,0 +1,34 @@
+
+[submodule "modules/premake"]
+	path = modules/premake
+	url = https://github.com/premake/premake-core
+[submodule "modules/googletest"]
+	path = modules/googletest
+	url = https://github.com/google/googletest
+[submodule "modules/mimalloc"]
+	path = modules/mimalloc
+	url = https://github.com/microsoft/mimalloc
+[submodule "modules/msgpack"]
+	path = modules/msgpack
+	url = https://github.com/msgpack/msgpack-c
+[submodule "modules/openssl"]
+	path = modules/openssl
+	url = https://github.com/openssl/openssl
+[submodule "modules/poco"]
+	path = modules/poco
+	url = https://github.com/pocoproject/poco
+[submodule "modules/rapidjson"]
+	path = modules/rapidjson
+	url = https://github.com/Tencent/rapidjson
+[submodule "modules/signalr"]
+	path = modules/signalr
+	url = https://github.com/SignalR/SignalR
+[submodule "Tools/WrapperGenerator/chevron"]
+	path = Tools/WrapperGenerator/chevron
+	url = https://github.com/noahmorrison/chevron.git
+[submodule "modules/olympus-foundation-chs"]
+	path = modules/olympus-foundation-chs
+	url = ../csp-services.git
+[submodule "modules/tinyspline"]
+	path = modules/tinyspline
+	url = https://github.com/msteinbeck/tinyspline

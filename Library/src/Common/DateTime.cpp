@@ -1,0 +1,88 @@
+/*
+ * Copyright 2023 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "Common/DateTime.h"
+
+#include <iomanip>
+#include <sstream>
+#include <stdio.h>
+
+
+namespace
+{
+
+#ifdef CSP_WINDOWS
+	#define timegm _mkgmtime
+#endif
+
+} // namespace
+
+
+namespace csp::common
+{
+
+DateTime::DateTime(const csp::common::String& DateString)
+{
+	int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
+	char OffsetModifier;
+#ifdef _MSC_VER
+	int _ = sscanf_s(DateString.c_str(),
+					 "%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+					 &Year,
+					 &Month,
+					 &Day,
+					 &Hour,
+					 &Minute,
+					 &Second,
+					 &Fraction,
+					 &OffsetModifier,
+					 1,
+					 &OffsetHours,
+					 &OffsetMinutes);
+#else
+	int _ = std::sscanf(DateString.c_str(),
+						"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
+						&Year,
+						&Month,
+						&Day,
+						&Hour,
+						&Minute,
+						&Second,
+						&Fraction,
+						&OffsetModifier,
+						&OffsetHours,
+						&OffsetMinutes);
+#endif
+
+	std::tm TM	= {Second, Minute, Hour, Day, Month - 1, Year - 1900};
+	TM.tm_isdst = -1;
+
+	if (OffsetModifier == '-')
+	{
+		OffsetHours = 0 - OffsetHours;
+	}
+
+	// TODO: Use OffsetHours and OffsetMinutes in case CHS decides not to send datetimes in UTC in the future
+	const std::time_t Time = timegm(&TM);
+	TimePoint			   = std::chrono::system_clock::from_time_t(Time);
+}
+
+const DateTime::Clock::time_point& DateTime::GetTimePoint() const
+{
+	return TimePoint;
+}
+
+} // namespace csp::common

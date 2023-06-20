@@ -1,0 +1,18 @@
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{# return_type }}
+{{> Type }}
+{{/ return_type }}
+{{^ return_type }}
+void
+{{/ return_type }}
+    {{ name }}(
+{{# parameters }}
+{{# is_out }}
+        out
+{{/ is_out }}
+        {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
+{{/ parameters }}
+    );
+{{/ is_destructor }}
+{{/ is_constructor }}

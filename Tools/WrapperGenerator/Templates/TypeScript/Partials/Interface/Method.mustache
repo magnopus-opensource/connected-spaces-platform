@@ -1,0 +1,8 @@
+{{ name }}: (
+{{# parameters }}
+    {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+) =>
+{{# return_type }}
+    {{> TypeName }};
+{{/ return_type }}

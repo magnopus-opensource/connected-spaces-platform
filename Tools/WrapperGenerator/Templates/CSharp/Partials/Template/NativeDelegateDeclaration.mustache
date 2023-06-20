@@ -1,0 +1,71 @@
+{{# is_constructor }}
+public delegate NativePointer {{ unique_name }}Delegate({{# parameters }}{{# type }}{{# is_pointer_or_reference }}IntPtr{{/ is_pointer_or_reference}}{{^ is_pointer_or_reference }}{{> Type }}{{/ is_pointer_or_reference }}{{/ type }} {{ name }}{{^ is_last }}, {{/ is_last }}{{/ parameters }});
+{{/ is_constructor }}
+{{# is_destructor }}
+public delegate void {{ unique_name }}Delegate(IntPtr @class);
+{{/ is_destructor }}
+{{# is_operator_overload }}
+{{# is_index_operator }}
+public delegate NativePointer {{ unique_name }}_GetDelegate(
+    IntPtr @class{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+    IntPtr
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ type }}
+        {{ name }}{{> Comma }}
+{{/ parameters }}
+);
+public delegate void {{ unique_name }}_SetDelegate(
+    IntPtr @class{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+    IntPtr
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ type }}
+        {{ name }}
+{{/ parameters }},
+    IntPtr value
+);
+{{/ is_index_operator }}
+{{/ is_operator_overload }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+{{^ is_operator_overload }}
+public delegate
+{{# return_type }}
+{{# is_pointer_or_reference }}
+    NativePointer
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ return_type }}
+{{^ return_type }}
+    void
+{{/ return_type }}
+    {{unique_name}}Delegate(
+        IntPtr @class{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type }}
+{{# is_pointer_or_reference }}
+        IntPtr
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+        {{> Type }}
+{{/ is_pointer_or_reference }}
+{{/ type }}
+            {{ name }}{{> Comma }}
+{{/ parameters }}
+    );
+{{/ is_operator_overload }}
+{{/ is_destructor }}
+{{/ is_constructor }}

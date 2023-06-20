@@ -1,0 +1,18 @@
+#pragma region Template: {{ definition.name }}
+
+{{# instances }}
+#pragma region Instance: {{ definition.name }}<{{# arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ arguments }}>
+
+#pragma region Methods: {{ definition.name }}<{{# arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ arguments }}>
+
+{{# definition.methods }}
+{{> Template/Method }}
+
+{{/ definition.methods }}
+#pragma endregion Methods: {{ definition.name }}<{{# arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ arguments }}>
+
+#pragma endregion Instance: {{ definition.name }}<{{# arguments }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ arguments }}>
+
+{{/ instances }}
+#pragma endregion Template: {{ definition.name }}
+

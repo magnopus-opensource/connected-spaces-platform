@@ -1,0 +1,20 @@
+{{^ is_private }}
+{{# is_constructor }}
+    {{> Template/Method/Constructor }}
+{{/ is_constructor }}
+{{^ is_constructor }}
+{{# is_destructor }}
+{{# definition.should_dispose }}
+    {{> Template/Method/Destructor }}
+{{/ definition.should_dispose }}
+{{/ is_destructor }}
+{{^ is_destructor }}
+{{# is_operator_overload }}
+    {{> Template/Method/Operator }}
+{{/ is_operator_overload }}
+{{^ is_operator_overload }}
+    {{> Template/Method/Method }}
+{{/ is_operator_overload }}
+{{/ is_destructor }}
+{{/ is_constructor }}
+{{/ is_private }}

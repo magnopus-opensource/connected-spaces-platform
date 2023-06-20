@@ -1,0 +1,55 @@
+public {{# return_type }}{{> Type }}{{/ return_type }} this[{{# parameters }}{{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }}]
+{
+    get
+    {
+{{# return_type }}
+{{# is_class_or_interface }}
+        return {{# is_reference }}new {{> Type }}({{/ is_reference }}{{ unique_name }}_Get(
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+        return
+{{# is_string }}
+        WrapperHelper.NativeUTF8ToString(
+{{/ is_string }}
+        {{ unique_name }}_Get(
+{{/ is_class_or_interface }}
+{{/ return_type }}
+            _ptr{{# has_parameters }},{{/ has_parameters }}
+{{# parameters }}
+{{# type.is_string }}
+            WrapperHelper.StringToNativeUTF8({{ name }}{{> Comma }})
+{{/ type.is_string }}
+{{^ type.is_string }}
+            {{ name }}{{> Comma }}
+{{/ type.is_string }}
+{{/ parameters }}
+        ){{# return_type }}{{# is_void_pointer }}.Pointer{{/ is_void_pointer }}{{# is_class_or_interface }}{{# is_reference }}){{/ is_reference }}{{/ is_class_or_interface }}{{# is_string }}){{/ is_string }}{{/ return_type }};
+    }
+    set
+    {
+        {{ unique_name }}_Set(
+            _ptr,
+{{# parameters }}
+{{# type.is_string }}
+            WrapperHelper.StringToNativeUTF8({{ name }}),
+{{/ type.is_string }}
+{{^ type.is_string }}
+            {{ name }},
+{{/ type.is_string }}
+{{/ parameters }}
+{{# return_type }}
+{{# is_class_or_interface }}
+            value._ptr
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+{{# is_string }}
+            WrapperHelper.StringToNativeUTF8(value)
+{{/ is_string }}
+{{^ is_string }}
+            value
+{{/ is_string }}
+{{/ is_class_or_interface }}
+{{/ return_type }}
+        );
+    }
+}

@@ -1,0 +1,27 @@
+{{# type.is_template }}
+{{ extra_data.c_export_macro }} NativePointer
+{{/ type.is_template }}
+{{^ type.is_template }}
+{{# type.is_class_or_interface }}
+{{ extra_data.c_export_macro }} NativePointer
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{ extra_data.c_export_macro }} {{# type}}{{# is_string }}const char*{{/ is_string }}{{^ is_string }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ is_string }}{{/ type }}
+{{/ type.is_class_or_interface }}
+{{/ type.is_template }}
+{{ unique_getter_name }}({{^ is_static }}{{# parent_type }}{{> Type }}{{/ parent_type }}* inst{{/ is_static }})
+{
+    return {{# type }}{{# is_template }}NativePointer { &{{/ is_template }}{{^ is_template }}{{# is_class_or_interface }}NativePointer { &{{/ is_class_or_interface }}{{/ is_template }}{{# is_reference }}&{{/ is_reference }}{{/ type }}{{# is_static }}{{# parent_type }}{{> Type }}{{/ parent_type }}::{{/ is_static }}{{^ is_static }}inst->{{/ is_static }}{{ name }}{{# type}} {{# is_string }}.c_str(){{/ is_string }}{{^ is_template }}{{# is_class_or_interface }}, false }{{/ is_class_or_interface }}{{/ is_template }}{{# is_template }}, false }{{/ is_template }}{{/ type }};
+}
+
+{{ extra_data.c_export_macro }} void
+{{# type.is_template }}
+{{ unique_setter_name }}({{# parent_type }}{{> Type }}{{/ parent_type }}* inst, {{# type }}{{ namespace }}::{{ template_name }}<{{# template_arguments }}{{# type }}{{> Type }}{{# is_pointer }}*{{/ is_pointer }}{{/ type }}{{^ is_last }}, {{/ is_last }}{{/ template_arguments }}>*{{/ type }} value)
+{{/ type.is_template }}
+{{^ type.is_template }}
+{{ unique_setter_name }}({{^ is_static }}{{# parent_type }}{{> Type }}{{/ parent_type }}* inst, {{/ is_static }}{{# type }}{{# is_string }}const char*{{/ is_string }}{{^ is_string }}{{> Type }}{{# is_class_or_interface }}*{{/ is_class_or_interface }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ is_string }}{{/ type }} value)
+{{/ type.is_template }}
+{
+    {{# is_static }}{{# parent_type }}{{> Type }}{{/ parent_type }}::{{/ is_static }}{{^ is_static }}inst->{{/ is_static }}{{ name }} = {{# type }}{{# is_template }}{{^ is_reference }}*{{/ is_reference }}{{/ is_template }}{{^ is_template }}{{# is_class_or_interface }}{{^ is_reference }}*{{/ is_reference }}{{/ is_class_or_interface }}{{/ is_template }}{{# is_reference }}*{{/ is_reference }}{{# is_string }}csp::common::String({{/ is_string }}value{{# is_string }}){{/ is_string }}{{/ type }};
+}
+

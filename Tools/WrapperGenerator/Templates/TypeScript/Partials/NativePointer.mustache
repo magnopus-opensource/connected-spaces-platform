@@ -1,0 +1,11 @@
+class NativePointer {
+    constructor(public pointer: number, public ownsOwnData: boolean) {
+    }
+}
+
+function getNativePointer(pointer: number): NativePointer {
+    return new NativePointer(
+        Module.getValue(pointer, "i32"),
+        !!Module.getValue(pointer + 4, "i8")
+    );
+}

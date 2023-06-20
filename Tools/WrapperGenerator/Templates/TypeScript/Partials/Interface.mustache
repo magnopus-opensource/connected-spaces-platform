@@ -1,0 +1,18 @@
+{{# translated_namespace }}
+export namespace {{ translated_namespace }} {
+{{/ translated_namespace }}
+
+export interface {{ name }} {
+{{# methods }}
+{{^ is_constructor }}
+{{^ is_destructor }}
+    {{> Interface/Method }}
+{{/ is_destructor }}
+{{/ is_constructor }}
+
+{{/ methods }}
+}
+
+{{# translated_namespace }}
+}
+{{/ translated_namespace }}

@@ -1,0 +1,31 @@
+{{ extra_data.c_export_macro }} NativePointer
+{{ unique_name }}{{# arguments }}_{{ full_safe_type_name }}{{/ arguments }}(
+{{# parameters }}
+{{# type.is_template }}
+    void* {{ name }}{{> Comma }}
+{{/ type.is_template }}
+{{^ type.is_template }}
+    {{> Parameter }}{{> Comma }}
+{{/ type.is_template }}
+{{/ parameters }}
+)
+{
+    void* inst = CSP_NEW {{# definition }}{{ namespace }}::{{ name }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>(
+{{# parameters }}
+{{# type.is_string }}
+        csp::common::String({{ name }}){{> Comma }}
+{{/ type.is_string }}
+{{# type.is_template }}
+{{! For now, assume this is our own class! We should add an extra field to determine if it really is }}
+        *({{# definition }}{{ namespace }}::{{ name }}{{/ definition }}<{{# arguments }}{{# type }}{{> Type }}{{# is_pointer_or_reference }}*{{/ is_pointer_or_reference }}{{/ type }}{{> Comma }}{{/ arguments }}>*){{ name }}{{> Comma }}
+{{/ type.is_template }}
+{{^ type.is_template }}
+{{^ type.is_string }}
+        {{# type.is_reference }}*{{/ type.is_reference }}{{ name }}{{> Comma }}
+{{/ type.is_string }}
+{{/ type.is_template }}
+{{/ parameters }}
+    );
+
+    return NativePointer { inst, true };
+}

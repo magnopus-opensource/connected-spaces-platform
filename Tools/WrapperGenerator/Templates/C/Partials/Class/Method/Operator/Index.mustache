@@ -1,0 +1,90 @@
+{{^ return_type.is_class_or_interface }}
+{{ extra_data.c_export_macro }}
+{{# return_type }}
+{{# is_string }}
+const char*
+{{/ is_string }}
+{{^ is_string }}
+{{> Type }}
+{{/ is_string }}
+{{/ return_type }}
+{{# parent_class.is_template_instance }}
+{{ unique_name }}_Get({{# parent_class }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ template_name }}<{{# template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{> Comma }}{{/ template_arguments }}{{/ parent_class }}>* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}{{> Comma }}{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}_Get({{# parent_class}}{{> Type }}{{/ parent_class }}* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}{{> Comma }}{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{
+    return inst->{{ name }}({{# parameters }}{{# type.is_string }}csp::common::String({{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{> Comma }}{{/ parameters }}){{# return_type.is_string }}.c_str(){{/ return_type.is_string }};
+}
+
+{{ extra_data.c_export_macro }} void
+{{# parent_class.is_template_instance }}
+{{ unique_name }}_Set({{# parent_class }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ template_name }}<{{# template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{> Comma }}{{/ template_arguments }}{{/ parent_class }}>* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}, {{/ parameters }}{{# return_type }}{{> Type }}{{/ return_type }} value)
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}_Set(
+{{# parent_class}}
+    {{> Type }}* inst
+{{/ parent_class }}
+{{# has_parameters }}
+    ,
+{{/ has_parameters }}
+{{# parameters }}
+    {{> Parameter }},
+{{/ parameters }}
+{{# return_type }}
+{{# is_string }}
+    const char*
+{{/ is_string }}
+{{^ is_string }}
+    {{> Type }}
+{{/ is_string }}
+{{/ return_type }}
+    value
+)
+{{/ parent_class.is_template_instance }}
+{
+    inst->{{ name }}({{# parameters }}{{# type.is_string }}csp::common::String({{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{/ parameters }}) =
+{{# return_type }}
+{{# is_string }}
+        csp::common::String(
+{{/ is_string }}
+        value
+{{# is_string }}
+        )
+{{/ is_string }}
+{{/ return_type }};
+}
+{{/ return_type.is_class_or_interface }}
+{{# return_type.is_class_or_interface }}
+{{ extra_data.c_export_macro }} {{# return_type }}{{# is_string }}const char*{{/ is_string }}{{^ is_string }}{{# is_const }}const {{/ is_const }}{{# is_pointer_or_reference }}NativePointer{{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{& name }}{{/ is_pointer_or_reference }}{{/ is_string }}{{/ return_type }}{{^ return_type }}void{{/ return_type }}
+{{# parent_class.is_template_instance }}
+{{ unique_name }}_Get({{# is_const }}const {{/ is_const }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{> Comma }}{{/ parent_class.template_arguments }}>* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}{{> Comma }}{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}_Get({{# is_const }}const {{/ is_const }}{{# parent_class}}{{> Type }}{{/ parent_class }}* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}{{> Comma }}{{/ parameters }})
+{{/ parent_class.is_template_instance }}
+{
+    {{# return_type.is_string }}
+    return inst->{{ name }}({{# parameters }}{{# type.is_string }}csp::common::String({{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{> Comma }}{{/ parameters }}).c_str();
+    {{/ return_type.is_string }}
+    {{^ return_type.is_string }}
+    auto& _ref = inst->{{ name }}({{# parameters }}{{ name }}{{> Comma }}{{/ parameters }});
+    auto* _result = CSP_NEW {{# return_type }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{/ return_type }}(_ref);
+
+    return NativePointer { _result, true };
+    {{/ return_type.is_string }}
+}
+
+{{ extra_data.c_export_macro }} void
+{{# parent_class.is_template_instance }}
+{{ unique_name }}_Set({{# is_const }}const {{/ is_const }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.template_name }}<{{# parent_class.template_arguments }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{ name }}{{> Comma }}{{/ parent_class.template_arguments }}>* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}, {{/ parameters }}{{# return_type }}{{# is_string }}const char{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ return_type }}* value)
+{{/ parent_class.is_template_instance }}
+{{^ parent_class.is_template_instance }}
+{{ unique_name }}_Set({{# is_const }}const {{/ is_const }}{{# namespace }}{{ namespace }}::{{/ namespace }}{{& parent_class.name }}* inst{{# has_parameters }}, {{/ has_parameters }}{{# parameters }}{{> Parameter }}, {{/ parameters }}{{# return_type }}{{# is_string }}const char{{/ is_string }}{{^ is_string }}{{> Type }}{{/ is_string }}{{/ return_type }}* value)
+{{/ parent_class.is_template_instance }}
+{
+    inst->{{ name }}({{# parameters }}{{# type.is_string }}csp::common::String({{/ type.is_string }}{{ name }}{{# type.is_string }}){{/ type.is_string }}{{/ parameters }}) = {{# return_type.is_string }}csp::common::String(value){{/ return_type.is_string }}{{^ return_type.is_string }}*value{{/ return_type.is_string }};
+}
+{{/ return_type.is_class_or_interface }}

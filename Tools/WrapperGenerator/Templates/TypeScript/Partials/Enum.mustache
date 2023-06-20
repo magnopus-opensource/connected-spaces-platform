@@ -1,0 +1,25 @@
+{{# translated_namespace }}
+export namespace {{ translated_namespace }} {
+{{/ translated_namespace }}
+
+{{# is_nested_type }}
+{{# surrounding_types }}
+export namespace {{ . }} {
+{{/ surrounding_types }}
+{{/ is_nested_type }}
+
+export enum {{ name }} {
+{{# fields }}
+    {{ name }}{{# value }} = {{ value }}{{/ value }},
+{{/ fields }}
+}
+
+{{# is_nested_type }}
+{{# surrounding_types }}
+}
+{{/ surrounding_types }}
+{{/ is_nested_type }}
+
+{{# translated_namespace }}
+}
+{{/ translated_namespace }}

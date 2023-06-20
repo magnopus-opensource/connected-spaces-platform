@@ -1,0 +1,77 @@
+{%- macro print_type(type, ignore_pointer = false) -%}
+    {%- if type is none -%}
+        void
+    {%- elif type.classification == TypeClassification.PRIMITIVE -%}
+        {%- if type.pointer_type.is_pointer_or_reference() and not ignore_pointer -%}
+            NativeRef
+        {%- else -%}
+            {%- if type.primitive_info.width == 64 -%}
+                BigInt
+            {%- else -%}
+                number
+            {%- endif -%}
+        {%- endif -%}
+    {%- elif type.classification == TypeClassification.STRING -%}
+        string
+    {%- elif type.classification == TypeClassification.CLASS -%}
+        {% set namespace = type.namespace | typescriptify %}
+        {{ namespace + '.' if namespace != '' }}{{ type.name }}
+    {%- elif type.classification == TypeClassification.NONE and type.pointer_type == PointerType.POINTER %}
+        {# void* #}
+        number
+    {%- else -%}
+        any
+    {%- endif -%}
+{%- endmacro -%}
+
+{%- macro print_c_type(type) -%}
+    {%- if type is none -%}
+        void
+    {%- elif type.classification == TypeClassification.STRING -%}
+        string
+    {%- elif type.pointer_type != PointerType.NONE
+        or type.classification == TypeClassification.CLASS
+        or type.classification == TypeClassification.INTERFACE
+        or type.classification == TypeClassification.TEMPLATE -%}
+        number
+    {%-else -%}
+        any
+    {%- endif -%}
+{%- endmacro -%}
+
+{%- macro fix_unsigned_value(info) -%}
+    let _fixedValue = _unfixedValue < 0 ? _unfixedValue +
+        2{{ 'n' if info.width == 64 }}**{{ info.width }}{{ 'n' if info.width == 64 }}
+        : _unfixedValue;
+{%- endmacro -%}
+
+{%- macro read_pointer(pointer, info) -%}
+    Module.getValue(
+        {{ pointer }},
+        {% if info.is_floating_point -%}
+            {% if info.width == 32 -%}
+                "float"
+            {%- else -%}
+                "double"
+            {%- endif %}
+        {%- else -%}
+            "i{{ info.width }}"
+        {%- endif %}
+    )
+{%- endmacro -%}
+
+{%- macro write_pointer(pointer, value, info) -%}
+    Module.setValue(
+        {{ pointer }},
+        {{ value }},
+        {% if info.is_floating_point -%}
+            {% if info.width == 32 -%}
+                "float"
+            {%- else -%}
+                "double"
+            {%- endif %}
+        {%- else -%}
+            "i{{ info.width }}"
+        {%- endif %}
+    )
+{%- endmacro -%}

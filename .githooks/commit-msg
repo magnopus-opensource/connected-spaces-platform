@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+
+commit_msg="${1}"
+commit_msg_lines=()
+error_msg="[COMMIT FAILED]"
+allowed_subject_verbs=('feat:' 'fix:' 'style:' 'refac:' 'test:' 'doc:' 'feat!:' 'fix!:' 'style!:' 'refac!:' 'test!:' 'doc!:')
+
+# Splits the commit msg into separate lines and adds them to an array
+split_commit_msg() {
+    while IFS= read -r line; do
+
+        # Trim trailing spaces from lines
+        shopt -s extglob
+        line="${line%%*( )}"
+        shopt -u extglob
+
+        # Ignore comments (lines starting with #)
+        if [[ ! "${line}" =~ ^# ]]; then
+            commit_msg_lines+=("${line}")
+        fi
+
+    done < <(cat ${commit_msg})
+}
+
+# Validates the commit msg
+validate_commit_msg() {
+    split_commit_msg
+
+    # Store the subject
+    local subject="${commit_msg_lines[0]}"
+
+    # Stop validation if the message is empty or no subject is set
+    if [[ -z "${commit_msg_lines[*]}" ]] || [[ -z "${subject}" ]]; then
+        exit 0
+    fi
+
+    # Check if the subject has leading whitespace(s)
+    if [[ "${subject}" =~ ^[[:space:]]+ ]]; then
+        echo "${error_msg} The subject can not have leading whitespace"
+        exit 1;
+    fi
+
+    # Check if the subject contains more than 1 word
+    if [[ $(echo "${subject}" | wc -w) -eq 1 ]]; then
+        echo "${error_msg} The subject has to contain more than 1 word"
+        exit 1
+    fi
+
+    # Check if the subject line is limited to 50 characters
+    if [[ "${#subject}" -gt 50 ]]; then
+        echo "${error_msg} Limit the subject line to 50 characters (${#commit_msg_lines[0]} characters used)"
+        exit 1
+    fi
+
+    # Check if the subject line does not end with a period
+    if [[ ! "${subject}" =~ [^\.]$ ]]; then
+        echo "${error_msg} Do not end the subject line with a period"
+        exit 1
+    fi
+
+    # Check if the subject starts with one of the allowed verbs
+    local first_word=$(echo "${subject}" | awk '{print $1;}')
+    local second_word=$(echo "${subject}" | awk '{print $2;}')
+    local is_allowed=false
+
+    
+    # Validate the ticket ID
+    re='^[0-9]+$'
+    first_character=${first_word:0:1}
+    last_character=${first_word: -1}
+    if [[ "$first_character" == *"["* ]] && [[ "$last_character" == *"]"* ]] && [[ "$first_word" == *"-"* ]]  ; then
+        truncated_first_word=${first_word#"["}
+        truncated_first_word=${truncated_first_word%"]"}
+        IFS='-' read -ra ADDR <<< "$truncated_first_word"
+        if ! [[ ${ADDR[0]} =~ $re ]] ; then
+            if [[ ${ADDR[1]} =~ $re ]] ; then
+                is_allowed=true
+            fi
+        fi
+    fi
+
+    if [[ "${is_allowed}" == true ]]; then
+        is_allowed=false
+        for verb in "${allowed_subject_verbs[@]}"; do
+            if [[ "${verb}" == "${second_word}" ]]; then
+                is_allowed=true
+            fi
+        done
+    fi
+
+    if [[ "${is_allowed}" == false ]]; then
+        echo "${error_msg} Use the imperative mood in the subject line"
+        echo "Your subject has to start with one of the following verbs:"
+        printf -- '    - %s\n' "${allowed_subject_verbs[@]}"
+        exit 1
+    fi
+
+    # Check if the body is wrapped at 72 characters (except for url's)
+    for line in "${commit_msg_lines[@]}"; do
+        if [[ "${line}" =~ ^[[:space:]]*(https?|ftp|file):\/\/[-A-Za-z0-9\+\&\@\#\/\%\?\=\~\_\|\!\:\,\.\;]*[-A-Za-z0-9\+\&\@\#\/\%\=\~\_\|] ]]; then
+            continue
+        elif [[ "${#line}" -gt 72 ]]; then
+            echo "${error_msg} Wrap the body at 72 characters (${#line} characters used)"
+            exit 1
+        fi
+    done
+}
+
+validate_commit_msg
+
+# Remove comment lines from the message
+sed -i.bak '/^#/ d' $1
+
+# Remove trailing blank lines
+sed -i.bak -e :a -e '/^\n*$/{$d;N;ba' -e '}' $1
+
+# Append the branch name to the commit message
+append_branch_name=$(git config --get git-hooks.append-branch-name)
+if [[ -n "${append_branch_name}" ]] && [[ "${append_branch_name}" = true ]]; then
+    branch="$(git symbolic-ref --short HEAD)"
+    if [[ -z "${branch}" ]]; then
+        echo "${error_msg} Could not determine the branch name"
+        exit 1
+    fi
+
+    printf "\n[branch: ${branch}]" >> $1
+fi
+

@@ -1,0 +1,21 @@
+{{> Header }}
+
+{{> Usings }}
+
+{{# data }}
+{{> StartType }}
+
+    {{> DocComments }}
+{{# is_flags }}
+    [Flags]
+{{/ is_flags }}
+    public enum {{ name }}{{# base }} : {{ base }}{{/ base }}
+    {
+        {{# fields }}
+        {{> DocComments }}
+        {{ name }}{{# value }} = {{& value }}{{/ value }},
+        {{/ fields }}
+    }
+
+{{> EndType }}
+{{/ data }}

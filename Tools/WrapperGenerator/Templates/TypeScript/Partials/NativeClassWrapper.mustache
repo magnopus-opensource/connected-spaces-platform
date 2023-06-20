@@ -1,0 +1,15 @@
+class NativeClassWrapper {
+    constructor(pointer: NativePointer) {
+        this.pointer = pointer.pointer;
+        this.ownsPointer = pointer.ownsOwnData;
+    }
+
+    pointerIsValid(): boolean {
+        return this.pointer != 0;
+    }
+
+    pointer: number;
+    ownsPointer: boolean;
+    
+    protected disposed: boolean = false;
+}

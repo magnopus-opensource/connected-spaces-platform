@@ -1,0 +1,29 @@
+[TICKETID] purpose: title
+
+####################### 50 ######################
+# TITLE
+# TICKETID - Replace with the Jira Ticket ID
+# purpose, select one of the following:
+# -> feat - The new feature you're adding to a 
+#           particular application.
+# -> fix - A bug fix.
+# -> style - Feature and updates related to 
+#            styling.
+# -> refac - Refactoring a specific section of 
+#            the codebase.
+# -> test - Everything related to testing.
+# -> doc - Everything related to documentation.
+# Optional Breaking Change Indicator - append 
+# onto the purpose a ! for a breaking change,
+# e.g. feat!: title
+# Title - Include a brief description without 
+#         going over the character count of the 
+#         title.
+################################## 72 #################################
+# DESCRIPTION
+# Include a bullet pointed list of what is included in the commit, what
+# do these changes add? Why has it been done this way? 
+# Remember to leave at lease one blank line between the title and the 
+# body.
+# Remember not to go over the body character limit of 72.
+################################## 72 #################################

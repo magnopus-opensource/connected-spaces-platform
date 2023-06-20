@@ -1,0 +1,51 @@
+{{ name }}(
+    callback:
+        (
+{{# parameters.0.type.function_signature }}
+{{# parameters }}
+            {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ parameters }}
+        ) => void
+{{/ parameters.0.type.function_signature }}
+) {
+{{# parameters.0.type.function_signature }}
+    var _callback = (
+        _stateObject__: number,
+{{# parameters }}
+        {{ name }}{{> Comma }}
+{{/ parameters }}
+    ) => {
+{{# parameters }}
+{{# type.is_class_or_interface }}
+        var _{{ name }} = new {{# type }}{{> TypeName }}{{/ type }}(
+            getNativePointer(
+                {{ name }}
+            )
+{{# type.template_arguments }}
+            ,
+            {{> Template/ConstructorArguments }}
+{{/ type.template_arguments }}
+        );
+{{/ type.is_class_or_interface }}
+{{/ parameters }}
+
+        callback(
+{{# parameters }}
+        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{ name }}{{> Comma }}
+{{/ parameters }}
+        );
+    };
+
+    var _callbackPtr = Module.addFunction(
+        _callback,
+        "vi{{# parameters }}{{# type }}{{> Method/TypeShorthand }}{{/ type }}{{/ parameters }}"
+    );
+{{/ parameters.0.type.function_signature }}
+
+    Module.ccall(
+        "{{ unique_name }}",
+        "void",
+        ["number", "number", "number"],
+        [this.pointer, _callbackPtr, 0]
+    );
+}

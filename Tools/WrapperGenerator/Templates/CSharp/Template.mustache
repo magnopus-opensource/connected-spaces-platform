@@ -1,0 +1,113 @@
+{{> Header }}
+
+{{> Usings }}
+
+{{# data }}
+namespace {{ definition.translated_namespace }}
+{
+    static class {{ definition.name }}Delegates
+    {
+{{# definition.methods }}
+        {{> Template/NativeDelegateDeclaration }}
+{{/ definition.methods }}
+    }
+
+    public class {{ definition.name }}<
+{{# template_parameters }}
+        {{ name }}{{> Comma }}
+{{/ template_parameters }}
+    > :
+{{# definition.base }}
+        {{> Type }}
+{{/ definition.base}}
+{{^ definition.base }}
+        NativeClassWrapper
+{{/ definition.base }}
+{{# definition.should_dispose }}
+        , IDisposable
+{{/ definition.should_dispose }}
+    {
+        string __safeTypeName;
+        internal override string _safeTypeName
+        {
+            get => __safeTypeName;
+        }
+
+{{# definition.methods }}
+        {{> Template/NativeDelegateInstance }}
+{{/ definition.methods }}
+
+        readonly bool
+{{# template_parameters }}
+            Is{{ name }}ProxyClass{{> Comma }}
+{{/ template_parameters }}
+            ;
+
+        void InitialiseNativeDelegates()
+        {
+            // TODO: Move this stuff into a static dictionary so we don't have to create instances to get the string
+            //  eg.
+            //  static class TemplateMetadata {
+            //    public static Dictionary<Type, string> SafeNames = {
+            //      [typeof(Csp.Systems.Anchor)] = "csp_systems_Anchor"
+            //    };
+            //    
+            //    /* Delegates here for template instance functions */
+            //  }
+            const BindingFlags ctorBindingFlags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            var ctorArgs = new object[] { NativePointer.Zero };
+
+{{# template_parameters }}
+            string {{ name }}TypeName;
+
+            if (typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}))) {
+                var instance = Activator.CreateInstance(typeof({{ name }}), ctorBindingFlags, null, ctorArgs, null);
+                {{ name }}TypeName = ((NativeClassWrapper)instance)._safeTypeName;
+            }
+            else if (typeof({{ name }}).IsEnum)
+            {
+                {{ name }}TypeName = typeof({{ name }}).Namespace switch
+                {
+                    "Csp" => "csp_",
+                    "Csp.Common" => "csp_common_",
+                    "Csp.Services" => "csp_services_",
+                    "Csp.Systems" => "csp_systems_",
+                    "Csp.Multiplayer" => "csp_multiplayer_",
+                    _ => throw new Exception("Unknown enum namespace!"),
+                };
+                {{ name }}TypeName += typeof({{ name }}).Name;
+            }
+            else
+                {{ name }}TypeName = typeof({{ name }}).Name;
+            
+{{/ template_parameters }}
+
+            __safeTypeName = $"{{ definition.full_safe_type_name }}{{# template_parameters }}_{ {{ name }}TypeName }{{/ template_parameters }}";
+
+            IntPtr ptr;
+
+{{# definition.methods }}
+            {{> Template/InitialiseDelegate }}
+
+{{/ definition.methods }}
+        }
+
+        internal {{ definition.name }}(NativePointer ptr)
+        {
+            InitialiseNativeDelegates();
+            
+{{# template_parameters }}
+            Is{{ name }}ProxyClass = typeof(NativeClassWrapper).IsAssignableFrom(typeof({{ name }}));
+{{/ template_parameters }}
+
+            _ptr = ptr.Pointer;
+            _ownsPtr = ptr.OwnsOwnData;
+        }
+
+{{# definition.methods }}
+        {{> Template/Method }}
+        
+{{/ definition.methods }}
+    }
+}
+{{/ data }}

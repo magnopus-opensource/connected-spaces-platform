@@ -1,0 +1,42 @@
+{{# is_void_pointer }}
+    number
+{{/ is_void_pointer }}
+{{^ is_void_pointer }}
+{{# translated_namespace }}
+    {{ translated_namespace }}.
+{{/ translated_namespace }}
+{{^ is_template }}
+{{# is_number }}
+{{# is_pointer_or_reference }}
+    NativeRef
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{ name }}
+{{/ is_pointer_or_reference }}
+{{/ is_number }}
+{{^ is_number }}
+    {{ name }}
+{{/ is_number }}
+{{/ is_template }}
+{{# is_template }}
+    {{ template_name }}<
+{{# template_arguments }}
+{{# type }}
+{{# is_template_argument }}
+{{^ get_template_argument }}
+        {{ name }}
+{{/ get_template_argument }}
+{{# get_template_argument }}
+{{# parameter_name }}{{ name }}{{/ parameter_name }}
+        {{# type }}{{> TypeName }}{{/ type }}
+{{/ get_template_argument }}
+{{/ is_template_argument }}
+{{^ is_template_argument }}
+        {{# type }}{{> TypeName }}{{/ type }}
+{{/ is_template_argument }}
+{{/ type }}
+    {{> Comma }}
+{{/ template_arguments }}
+    >
+{{/ is_template }}
+{{/ is_void_pointer }}
