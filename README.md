@@ -121,4 +121,3 @@ Our Work In Progress page details future planned work:
  ## ©️ License
 
  [Apache-2.0](https://github.com/magnopus/olympus-foundation/blob/main/LICENSE)
-
