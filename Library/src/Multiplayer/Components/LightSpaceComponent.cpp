@@ -38,6 +38,7 @@ LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 	Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId)] = "";
 	Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieType)]			   = static_cast<int64_t>(LightCookieType::NoCookie);
 	Properties[static_cast<uint32_t>(LightPropertyKeys::IsARVisible)]				   = true;
+	Properties[static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef)]	   = "";
 
 	SetScriptInterface(CSP_NEW LightSpaceComponentScriptInterface(this));
 }
@@ -263,6 +264,23 @@ LightCookieType LightSpaceComponent::GetLightCookieType() const
 void LightSpaceComponent::SetLightCookieType(LightCookieType Value)
 {
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieType), static_cast<int64_t>(Value));
+}
+
+const csp::common::String& LightSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void LightSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

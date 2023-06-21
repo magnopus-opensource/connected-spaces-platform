@@ -19,6 +19,7 @@
 
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
 namespace csp::multiplayer
 {
@@ -55,12 +56,13 @@ enum class AudioPropertyKeys
 	TimeSincePlay,
 	Volume,
 	IsEnabled,
+	ThirdPartyComponentRef,
 	Num
 };
 
 // @ingroup AudioSpaceComponent
 /// @brief Data representation of an AudioSpaceComponent.
-class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent
+class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
@@ -166,6 +168,14 @@ public:
 	virtual bool GetIsEnabled() const override;
 	/// @copydoc IEnableableComponent::SetIsEnabled()
 	virtual void SetIsEnabled(bool InValue) override;
+	/// @}
+
+	/// \addtogroup IThirdPartyComponentRef
+	/// @{
+	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
+	const csp::common::String& GetThirdPartyComponentRef() const override;
+	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
+	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
 	/// @}
 };
 

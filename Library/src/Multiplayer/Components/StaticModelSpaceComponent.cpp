@@ -25,13 +25,14 @@ namespace csp::multiplayer
 
 StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::StaticModel, Parent)
 {
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId)]	  = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]		  = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]		  = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]			  = csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]		  = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]		  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId)]		   = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId)]	   = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]			   = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]			   = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]				   = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]			   = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]			   = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }
@@ -155,6 +156,23 @@ bool StaticModelSpaceComponent::GetIsARVisible() const
 void StaticModelSpaceComponent::SetIsARVisible(bool InValue)
 {
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue);
+}
+
+const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer
