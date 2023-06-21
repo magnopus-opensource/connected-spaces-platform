@@ -1,0 +1,13 @@
+{
+  "name": "foundation-initialising-foundation-example",
+  "type": "module",
+  "scripts": {
+    "start": "serve . -p 8080"
+  },
+  "dependencies": {
+    "@magnopus/com.magnopus.olympus.foundation.web": "4.0.0"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
