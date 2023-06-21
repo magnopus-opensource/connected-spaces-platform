@@ -95,3 +95,6 @@ UnitTesting/src/**/*
 UnitTesting/tests/*_test_results.xml
 UnitTesting/tests/csharp/Assets/Tests/generated/**/*
 UnitTesting/tests/javascript/tests.js
+
+# Make an exception for the ServiceWire DLL
+!/Tests/Multiplayer/3rdparty/bin/**/*
