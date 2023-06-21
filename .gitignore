@@ -18,20 +18,17 @@ imgui.ini
 **/obj/**
 ARM64/*
 **/node_modules/**
-**/x64/**
+*.log
 
 # Allows Project files for Examples
-!/Examples/**/**.sln
 !/Examples/**/**.sln
 !/Examples/**/**.sln.DotSettings.user
 !/Examples/**/**/.vs/.*
 !/Examples/**/**/.vscode/**
 !/Examples/**/**.bak
-!/Examples/**/**.vcxproj
-!/Examples/**/**.vcxproj.*
-!/Examples/**/**.csproj
-!/Examples/**/**.csproj.user
-
+!/Examples/**/**.vcxproj*
+!/Examples/**/**.csproj*
+/Examples/**/**/x64/**
 # Ignore auto-generated OS-specific data files
 .DS_Store
 
