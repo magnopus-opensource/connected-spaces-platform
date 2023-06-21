@@ -23,9 +23,12 @@ _"An interoperable communication library for the next generation of the internet
   - [MacOS Build Instructions](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-MacOS)
   - [IOS Build Instructions](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-IOS)
 - [Usage](#%EF%B8%8F-usage)
-  - [Web HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Web)
-  - [C++ HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CPlusPlus/HelloWorld)
-  - [Unity C# HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CSharp/Foundation-Unity-Example)
+    - [Web Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/Web)
+    - [C++ Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
+    - [Unity C# Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 - [Tenant Keys](#-tenant-keys)
 - [Api Documentation](#-api-documentation)
 - [Contributions](#%EF%B8%8F-contributions)
@@ -82,12 +85,15 @@ For information on how to obtain a Tenant Key please see our Tenant page:
 HelloWorld Examples for each language supported in Foundation are below.
 
 - WebAssembly 
-    - [Web HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Web)
+    - [Web Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/Web)
 - C++
-    - [C++ HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CPlusPlus/HelloWorld)
+    - [C++ Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
 
 - C#
-    - [Unity C# HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CSharp/Foundation-Unity-Example)
+    - [Unity C# Initialising Foundation Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Basic Framework Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
 ****
 
@@ -121,3 +127,4 @@ Our Work In Progress page details future planned work:
  ## ©️ License
 
  [Apache-2.0](https://github.com/magnopus/olympus-foundation/blob/main/LICENSE)
+
