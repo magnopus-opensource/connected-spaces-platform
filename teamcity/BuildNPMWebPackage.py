@@ -10,17 +10,17 @@ class FileHandlingError(OlympusFoundationPyError): pass
 
 
 def get_arguments_commandline():
-    parser = argparse.ArgumentParser(description='Build the Olympus Foundation Release for NPM.')
+    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Foundation Release for NPM.')
 
     parser.add_argument('--version',
-                        help="Enter the version of the Build Olympus Foundation, Semantic Versioning Only.",
+                        help="Enter the version of the Build Connected Spaces Platform Foundation, Semantic Versioning Only.",
                         default="0.0.0")
     parser.add_argument('--name',
-                        help="Enter the name of the Build Olympus Foundation package.",
-                        default="@magnopus/olympus-foundation")
+                        help="Enter the name of the Build Connected Spaces Platform Foundation package.",
+                        default="@magnopus-opensource/csp-foundation")
     parser.add_argument('--display_name',
-                        help="Enter the display name of the Build Olympus Foundation package.",
-                        default="Olympus Foundation WASM")
+                        help="Enter the display name of the Build Connected Spaces Platform Foundation package.",
+                        default="Connected Spaces Platform Foundation WASM")
     parser.add_argument('--relative_destination_path',
                         help="Enter the relative path from root/teamcity for the libraries to be copied to.",
                         default="Library\\Binaries\\package\\wasm")
@@ -31,8 +31,8 @@ def get_arguments_commandline():
                         help="Enter the relative path from root/teamcity for typescript.",
                         default="Tools\\WrapperGenerator\\Output\\TypeScript")
     parser.add_argument('--license',
-                        help="Enter the license required for the Olympus Foundation package.",
-                        default="UNLICENSED")
+                        help="Enter the license required for the Connected Spaces Platform Foundation package.",
+                        default="Apache-2.0")
     parser.add_argument('--dependencies',
                         help="Enter the dependencies required for the Olympus Foundation package.",
                         default=None)
@@ -41,7 +41,7 @@ def get_arguments_commandline():
                         default="Exposes Olympus functionality via the Foundation API")
     parser.add_argument('--registry',
                         help="This is the upstream location of the package.",
-                        default="https://npm.pkg.github.io/@magnopus")
+                        default="https://npm.pkg.github.io/@magnopus-opensource")
     parser.add_argument('--generation_folder',
                         help="This is the package generation location.",
                         default="package_gen")
@@ -122,9 +122,9 @@ def create_package_file(input_args, output_path):
         '  "main": "./olympus.foundation.js",\n',
         '  "types": "./olympus.foundation.d.ts",\n',
         '  "publishConfig": {\n',
-       f'    "registry": "{input_args.registry}/@magnopus"\n',
+       f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
         '  },\n'
-        '  "repository": "https://github.com/magnopus/olympus-foundation"'
+        '  "repository": "https://github.com/magnopus-opensource/csp-foundation"'
         '}\n'
     ])
     f.close()
@@ -135,7 +135,7 @@ def generate_final_package(input_args, generation_folder):
     print("Attempting to generate and publish npm package...")
     os.chdir(generation_folder)
     
-    subprocess.call("docker run --rm -w /src -v " + generation_folder + ":/src node:lts-bullseye-slim npm install . --userconfig=.npmrc && npm " + input_args.release_mode + f" --\"@magnopus:registry={input_args.registry}\"", shell=True)
+    subprocess.call("docker run --rm -w /src -v " + generation_folder + ":/src node:lts-bullseye-slim npm install . --userconfig=.npmrc && npm " + input_args.release_mode + f" --\"@magnopus-opensource:registry={input_args.registry}\"", shell=True)
         
     print("Published npm package!")
 
