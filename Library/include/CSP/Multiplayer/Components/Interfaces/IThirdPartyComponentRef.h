@@ -26,6 +26,9 @@ namespace csp::multiplayer
 {
 
 /// @brief Controls access to a third party component reference.
+/// In order to enable customers to author CSP powered applications using
+/// the native features of their game engine of choice, we need to be
+/// able to map their engine component definition to the CSP component.
 CSP_INTERFACE class CSP_API IThirdPartyComponentRef
 {
 public:
