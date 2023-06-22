@@ -21,19 +21,19 @@ class FileHandlingError(OlympusFoundationPyError): pass
 
 
 def get_arguments_commandline():
-    parser = argparse.ArgumentParser(description='Build the Olympus Foundation Release for NPM.')
+    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Foundation Release for NPM.')
 
     parser.add_argument('--version',
-                        help="Enter the version of the Build Olympus Foundation, Semantic Versioning Only.", 
+                        help="Enter the version of the Build Connected Spaces Platform Foundation, Semantic Versioning Only.", 
                         default="0.0.0")
     parser.add_argument('--name',
-                        help="Enter the name of the Build Olympus Foundation package.", 
-                        default="@magnopus/olympus-foundation")
+                        help="Enter the name of the Build Connected Spaces Platform Foundation package.", 
+                        default="@magnopus-opensource/csp-foundation")
     parser.add_argument('--display_name',
-                        help="Enter the display name of the Build Olympus Foundation package.", 
+                        help="Enter the display name of the Build Connected Spaces Platform Foundation package.", 
                         default="Olympus Foundation")
     parser.add_argument('--assembly_name',
-                        help="Enter the assembly name of the Olympus Foundation package.",
+                        help="Enter the assembly name of the Connected Spaces Platform Foundation package.",
                         default="Olympus.Foundation")
     parser.add_argument('--relative_destination_path',
                         help="Enter the relative path from root/teamcity for the libraries to be copied to.", 
@@ -60,17 +60,17 @@ def get_arguments_commandline():
                         help="Enter the version of Unity supported, e.g. 2021.1.", 
                         default="2020.1")
     parser.add_argument('--license',
-                        help="Enter the license required for the Olympus Foundation package.", 
-                        default="UNLICENSED")
+                        help="Enter the license required for the Connected Spaces Platform Foundation package.", 
+                        default="Apache-2.0")
     parser.add_argument('--dependencies',
-                        help="Enter the dependencies required for the Olympus Foundation package.", 
+                        help="Enter the dependencies required for the Connected Spaces Platform Foundation package.", 
                         default=None)
     parser.add_argument('--description',
-                        help="This package provides the DLL's required to interface with the Olympus project servers.", 
-                        default="Exposes Olympus functionality via the Foundation API")
+                        help="This package provides the DLL's required to interface with the Connected Spaces Platform project servers.", 
+                        default="Exposes Connected Spaces Platform functionality via the Foundation API")
     parser.add_argument('--registry',
                         help="This is the upstream location of the package.", 
-                        default="http://packages.magnopus.local:8081/artifactory/api/npm/unitynpm/")
+                        default="https://npm.pkg.github.io/@magnopus-opensource")
     parser.add_argument('--generation_folder',
                         help="This is the package generation location.", 
                         default="package_gen")
@@ -208,9 +208,9 @@ def create_package_file(input_args, output_path):
         '  "dependencies": {\n'
         '  },\n',
         '  "publishConfig": {\n',
-       f'    "registry": "{input_args.registry}/@magnopus"\n',
+       f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
         '  },\n'
-        '  "repository": "https://github.com/magnopus/olympus-foundation"'
+        '  "repository": "https://github.com/magnopus-opensource/csp-foundation"'
         '}\n'
     ])
     f.close()
@@ -376,7 +376,7 @@ def generate_final_package(input_args, generation_folder):
     print("Attempting to generate and publish npm package...")
     os.chdir(generation_folder)
     
-    subprocess.call("docker run --env NODE_OPTIONS=\"--max-old-space-size=8192\" --rm -w /src -v " + generation_folder + ":/src node:lts-bullseye-slim npm install . --userconfig=.npmrc && npm " + input_args.release_mode + f" --\"@magnopus:registry={input_args.registry}\"", shell=True)
+    subprocess.call("docker run --env NODE_OPTIONS=\"--max-old-space-size=8192\" --rm -w /src -v " + generation_folder + ":/src node:lts-bullseye-slim npm install . --userconfig=.npmrc && npm " + input_args.release_mode + f" --\"@magnopus-opensource:registry={input_args.registry}\"", shell=True)
         
     print("Published npm package!")
 
