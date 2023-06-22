@@ -16,7 +16,7 @@ It affords client application developers across a range of language and platform
 ****
 
 ## 📦 Install
-NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus/packages?repo_name=csp-foundation)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=csp-foundation)
 
 - Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web@4.2.0`
 
