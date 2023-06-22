@@ -20,7 +20,7 @@ public class HelloWorld : MonoBehaviour
     [SerializeField] private AccountUI accountUI;
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string OKOTenant = "FOUNDATION_HELLO_WORLD";
+    private const string TenantKey = "FOUNDATION_HELLO_WORLD";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
     private readonly string exampleAssetName = "example.png";
@@ -61,7 +61,7 @@ public class HelloWorld : MonoBehaviour
         accountUI.OnExitSpace += ExitSpaceAsync;
         accountUI.OnDeleteSpace += DeleteSpaceAsync;
 
-        StartFoundation(endPointUri, OKOTenant, userAgent);
+        StartFoundation(endPointUri, TenantKey, userAgent);
     }
 
     /// <summary>

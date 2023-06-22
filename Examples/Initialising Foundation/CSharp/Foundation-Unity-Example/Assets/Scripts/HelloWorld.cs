@@ -3,17 +3,13 @@
 // ------------------------------------------------------------------
 
 using Olympus.Foundation;
-
-using FoundationCommon = Olympus.Foundation.Common;
-using FoundationSystems = Olympus.Foundation.Systems;
-using FoundationAsset = Olympus.Foundation.Systems.Asset;
 using UnityEngine;
 
 public class HelloWorld : MonoBehaviour
 {
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string OKOTenant = "FOUNDATION_HELLO_WORLD";
+    private const string TenantKey = "FOUNDATION_HELLO_WORLD";
     // Initialisation of Foundation
     private void Awake()
     {
@@ -27,7 +23,7 @@ public class HelloWorld : MonoBehaviour
             OlympusVersion = OlympusFoundation.GetBuildID()
         };
 
-        if (OlympusFoundation.Initialise(endPointUri, OKOTenant))
+        if (OlympusFoundation.Initialise(endPointUri, TenantKey))
         {
             Debug.Log("Successfully Initialised...");
 
