@@ -6,7 +6,9 @@
 
 _"An interoperable communication library for the next generation of the internet."_
 
-⚡️ Current Supported Languages : C++, C#, Web Assembly, Android, IOS and MacOS
+⚡️ Current Supported Languages : C++, C#, Web Assembly
+
+💻 Current Supported Platforms : Windows, Android, IOS and MacOS
 
 
 ****
@@ -38,16 +40,19 @@ _"An interoperable communication library for the next generation of the internet
 ****
 
 ## Background
-Foundation is a library providing an interface over a set of cloud hosted services. The library and the services combined form the Connected Spaces Platform and afford client application developers across a range of language and platforms with a means to build cross-reality, multi-user, interactive applications. Those applications then enable users to interact with either pre-authored content baked into the application, or user-generated content delivered on the fly.
+This is the client API for the Connected Spaces Platform, a library providing an interface over a set of cloud hosted services.
+
+It affords client application developers across a range of language and platforms with a means to build *interoperable cross-reality, multi-user applications*.
+
 
 ****
 
 ## 📦 Install
-Currently NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus/packages?repo_name=csp-foundation)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus/packages?repo_name=csp-foundation)
 
-- Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web@4.1.1`
+- Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web@4.2.0`
 
-- Unity Installation: `npm install @magnopus/com.magnopus.csp.foundation.unity.core@4.1.1`
+- Unity Installation: `npm install @magnopus/com.magnopus.csp.foundation.unity.core@4.2.0`
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/csp-foundation/releases).
 
