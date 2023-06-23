@@ -28,7 +28,7 @@
 	url = https://github.com/noahmorrison/chevron.git
 [submodule "modules/olympus-foundation-chs"]
 	path = modules/olympus-foundation-chs
-	url = ../csp-services.git
+	url = https://github.com/magnopus-opensource/csp-services.git
 [submodule "modules/tinyspline"]
 	path = modules/tinyspline
 	url = https://github.com/msteinbeck/tinyspline
