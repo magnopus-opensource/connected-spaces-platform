@@ -24,16 +24,17 @@ namespace csp::multiplayer
 
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::AnimatedModel, Parent)
 {
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ModelAssetId)]		= "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]			= csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]			= csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]				= csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]	= false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]			= false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]			= true;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]	= static_cast<int64_t>(-1);
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]		= true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ModelAssetId)]			 = "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AssetCollectionId)]		 = "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]				 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]				 = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]					 = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]		 = false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]				 = false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]				 = true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]		 = static_cast<int64_t>(-1);
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]			 = true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
 }
@@ -208,6 +209,23 @@ bool AnimatedModelSpaceComponent::GetIsARVisible() const
 void AnimatedModelSpaceComponent::SetIsARVisible(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value);
+}
+
+const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

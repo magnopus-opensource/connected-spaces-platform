@@ -8,7 +8,7 @@
 #include <string>
 #include <future>
 #include <filesystem>
-#include <ThirdParty/nlohmann/json.hpp>
+#include <nlohmann/json.hpp>
 #include "Olympus/Common/String.h"
 #include "Olympus/OlympusFoundation.h"
 #include "Olympus/Systems/SystemsManager.h"
