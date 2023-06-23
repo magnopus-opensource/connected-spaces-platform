@@ -61,10 +61,14 @@
         );
 {{/ type.is_class_or_interface }}
 {{/ type.function_signature.parameters }}
-
+    {{# type.function_signature.parameters }}
+        {{# type.is_string }}
+            const _{{ name }} = Module.UTF8ToString({{ name }});
+        {{/ type.is_string }}
+    {{/ type.function_signature.parameters }}
         {{ name }}(
 {{# type.function_signature.parameters }}
-        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{ name }}{{> Comma }}
+        {{# type.is_class_or_interface }}_{{/ type.is_class_or_interface }}{{# type.is_string }}_{{/ type.is_string }}{{ name }}{{> Comma }}
 {{/ type.function_signature.parameters }}
         );
     };
