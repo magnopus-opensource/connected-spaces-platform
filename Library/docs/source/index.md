@@ -1,4 +1,4 @@
-# Connected Spaces Platform
+# 🌎 Connected Spaces Platform
 
 _"An interoperable communication library for the next generation of the internet."_
 

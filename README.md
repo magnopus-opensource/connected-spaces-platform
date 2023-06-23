@@ -1,4 +1,4 @@
-# Connected Spaces Platform
+# 🌎 Connected Spaces Platform
 
 [![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
 [![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
