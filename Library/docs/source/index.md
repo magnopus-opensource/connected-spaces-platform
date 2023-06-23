@@ -16,9 +16,9 @@ This is the Connected Spaces Platform client API documentation. The API affords 
 ## 📦 Install
 NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=csp-foundation)
 
-- Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web@4.2.0`
+- Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web`
 
-- Unity Installation: `npm install @magnopus/com.magnopus.csp.foundation.unity.core@4.2.0`
+- Unity Installation: `npm install @magnopus/com.magnopus.csp.foundation.unity.core`
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/csp-foundation/releases).
 
