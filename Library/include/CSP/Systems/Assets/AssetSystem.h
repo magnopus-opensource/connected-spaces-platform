@@ -74,7 +74,7 @@ public:
 	/// @brief Deletes a given asset collection.
 	/// @param AssetCollection AssectCollection : asset collection to delete
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void DeleteAssetCollection(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
 
 	/// @brief Finds an asset collection by its Id.
 	/// @param AssetCollectionId csp::common::String : asset collection to delete

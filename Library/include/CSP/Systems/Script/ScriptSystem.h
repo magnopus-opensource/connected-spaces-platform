@@ -17,7 +17,9 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Systems/SystemsResult.h"
 
 #include <functional>
 #include <string>
@@ -33,6 +35,100 @@ public:
 	virtual ~IScriptBinding()												 = default;
 	virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
+
+
+class CSP_API ScriptModuleCollection
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	ScriptModuleCollection();
+	~ScriptModuleCollection();
+
+	const csp::common::String& GetId() const;
+	/// <summary>
+	/// Returns map of module names to Asset IDs
+	/// </summary>
+	/// <returns></returns>
+	const csp::common::Map<csp::common::String, csp::common::String>& GetLookupTable() const;
+
+private:
+	csp::common::String Id;
+	csp::common::Map<csp::common::String, csp::common::String> LookupTable;
+	csp::common::String LookupTableId;
+};
+
+
+class CSP_API ScriptModuleCollectionResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	ScriptModuleCollection& GetCollection();
+	const ScriptModuleCollection& GetCollection() const;
+
+private:
+	ScriptModuleCollectionResult(void*) {};
+	ScriptModuleCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+
+	// void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+private:
+	ScriptModuleCollection Collection;
+};
+
+
+class CSP_API ScriptModuleAsset
+{
+public:
+	ScriptModuleAsset();
+	~ScriptModuleAsset();
+
+	const csp::common::String& GetId() const;
+	const csp::common::String& GetModuleText() const;
+
+private:
+	csp::common::String Id;
+	csp::common::String ModuleText;
+};
+
+
+class CSP_API ScriptModuleAssetResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	ScriptModuleAsset& GetModule();
+	const ScriptModuleAsset& GetModule() const;
+
+private:
+	ScriptModuleAssetResult(void*) {};
+	ScriptModuleAssetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+
+	// void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+private:
+	ScriptModuleAsset Module;
+};
+
+
+typedef std::function<void(ScriptModuleCollectionResult& Result)> ScriptModuleCollectionResultCallback;
+typedef std::function<void(ScriptModuleAssetResult& Result)> ScriptModuleAssetResultCallback;
+
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
 class CSP_API CSP_NO_DISPOSE ScriptSystem
@@ -80,6 +176,23 @@ public:
 	size_t GetNumImportedModules(int64_t ContextId) const;
 	const char* GetImportedModule(int64_t ContextId, size_t Index) const;
 	CSP_END_IGNORE
+
+	CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
+	CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
+											   const csp::common::String& Name,
+											   const ScriptModuleAssetResultCallback& Callback);
+	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const ScriptModuleCollection& Collection,
+												  const csp::common::String& Name,
+												  const csp::common::String& ModuleText,
+												  const NullResultCallback& Callback);
+	CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const ScriptModuleCollection& Collection,
+												  const ScriptModuleAsset& Module,
+												  const csp::common::String& NewModuleText,
+												  const NullResultCallback& Callback);
+	CSP_ASYNC_RESULT void
+		DeleteScriptModuleAsset(const ScriptModuleCollection& Collection, const ScriptModuleAsset& Module, const NullResultCallback& Callback);
 
 private:
 	ScriptSystem();

@@ -59,7 +59,8 @@ enum class EAssetType
 	SCRIPT_LIBRARY,
 	HOLOCAP_VIDEO,
 	HOLOCAP_AUDIO,
-	AUDIO
+	AUDIO,
+	SCRIPT_MODULE
 };
 
 enum class EAssetPlatform
@@ -136,7 +137,8 @@ public:
 	virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
 
 	CSP_NO_EXPORT virtual void
-		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const = 0;
+		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
+		= 0;
 
 protected:
 	virtual ~AssetDataSource() = default;

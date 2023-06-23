@@ -43,6 +43,8 @@ csp::common::String ConvertAssetCollectionTypeToString(csp::systems::EAssetColle
 		return "Comment";
 	else if (AssetCollectionType == csp::systems::EAssetCollectionType::SPACE_THUMBNAIL)
 		return "SpaceThumbnail";
+	else if (AssetCollectionType == csp::systems::EAssetCollectionType::SCRIPT_MODULE_COLLECTION)
+		return "ScriptModuleCollection";
 	else
 	{
 		assert(false && "Unsupported AssetCollection Type!");
@@ -70,6 +72,8 @@ csp::common::String ConvertAssetTypeToString(csp::systems::EAssetType AssetType)
 		return "HolocapAudio";
 	else if (AssetType == csp::systems::EAssetType::AUDIO)
 		return "Audio";
+	else if (AssetType == csp::systems::EAssetType::SCRIPT_MODULE)
+		return "ScriptModule";
 	else
 	{
 		assert(false && "Unsupported Asset Type!");
@@ -183,22 +187,21 @@ void AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common:
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesPost(PrototypeInfo, ResponseHandler);
 }
 
-void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback)
+void AssetSystem::DeleteAssetCollection(const csp::common::String& AssetCollectionId, NullResultCallback Callback)
 {
-	const csp::common::String PrototypeId = AssetCollection.Id;
-
-	if (!PrototypeId.IsEmpty())
+	if (!AssetCollectionId.IsEmpty())
 	{
 		csp::services::ResponseHandlerPtr ResponseHandler
 			= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																										nullptr,
 																										csp::web::EResponseCodes::ResponseNoContent);
 
-		static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
+		static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(AssetCollectionId, ResponseHandler);
 	}
 	else
 	{
 		FOUNDATION_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
+
 		Callback(NullResult::Invalid());
 	}
 }

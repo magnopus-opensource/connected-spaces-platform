@@ -16,6 +16,7 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Systems/Assets/AssetSystem.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Memory/MemoryManager.h"
@@ -23,6 +24,8 @@
 #include "Systems/Script/ScriptContext.h"
 #include "Systems/Script/ScriptRuntime.h"
 #include "quickjspp.hpp"
+
+#include <rapidjson/document.h>
 
 // Enable optional 'os' and 'std' modules for file access etc
 // #define SCRIPTS_INCLUDE_STD_LIBS
@@ -35,15 +38,19 @@
 #include <sstream>
 
 
+using namespace csp::common;
+
 
 // For safer printfs
 constexpr int MAX_SCRIPT_FUNCTION_LEN = 256;
 
+constexpr auto ASSET_COLLECTION_NAME_PREFIX = "OKO_SCRIPTMODULENAMESPACE_";
+
 
 // Template specializations for some custom csp types we want to use
-template <> struct qjs::js_property_traits<csp::common::String>
+template <> struct qjs::js_property_traits<String>
 {
-	static void set_property(JSContext* ctx, JSValue this_obj, csp::common::String str, JSValue value)
+	static void set_property(JSContext* ctx, JSValue this_obj, String str, JSValue value)
 	{
 		int err = JS_SetPropertyStr(ctx, this_obj, str.c_str(), value);
 
@@ -51,15 +58,15 @@ template <> struct qjs::js_property_traits<csp::common::String>
 			throw exception {ctx};
 	}
 
-	static JSValue get_property(JSContext* ctx, JSValue this_obj, csp::common::String str) noexcept
+	static JSValue get_property(JSContext* ctx, JSValue this_obj, String str) noexcept
 	{
 		return JS_GetPropertyStr(ctx, this_obj, str.c_str());
 	}
 };
 
-template <> struct qjs::js_traits<csp::common::String>
+template <> struct qjs::js_traits<String>
 {
-	static csp::common::String unwrap(JSContext* ctx, JSValueConst v)
+	static String unwrap(JSContext* ctx, JSValueConst v)
 	{
 		size_t plen;
 		const char* ptr = JS_ToCStringLen(ctx, &plen, v);
@@ -67,10 +74,10 @@ template <> struct qjs::js_traits<csp::common::String>
 		if (!ptr)
 			throw exception {ctx};
 
-		return csp::common::String(ptr, plen);
+		return String(ptr, plen);
 	}
 
-	static JSValue wrap(JSContext* ctx, csp::common::String str) noexcept
+	static JSValue wrap(JSContext* ctx, String str) noexcept
 	{
 		return JS_NewStringLen(ctx, str.c_str(), str.Length());
 	}
@@ -124,7 +131,7 @@ void ScriptSystem::Shutdown()
 	}
 }
 
-bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& ScriptText)
+bool ScriptSystem::RunScript(int64_t ContextId, const String& ScriptText)
 {
 	// FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
 
@@ -139,7 +146,7 @@ bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& Scrip
 	return !HasErrors;
 }
 
-bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath)
+bool ScriptSystem::RunScriptFile(int64_t ContextId, const String& ScriptFilePath)
 {
 	FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
 
@@ -176,7 +183,7 @@ bool ScriptSystem::ResetContext(int64_t ContextId)
 }
 
 
-bool ScriptSystem::ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName)
+bool ScriptSystem::ExistsInContext(int64_t ContextId, const String& ObjectName)
 {
 	return TheScriptRuntime->ExistsInContext(ContextId, ObjectName);
 }
@@ -187,7 +194,7 @@ void* ScriptSystem::GetContext(int64_t ContextId)
 	return (void*) TheScriptRuntime->GetContext(ContextId)->Context;
 }
 
-void* ScriptSystem::GetModule(int64_t ContextId, const csp::common::String& ModuleName)
+void* ScriptSystem::GetModule(int64_t ContextId, const String& ModuleName)
 {
 	ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
 	return (void*) TheScriptContext->GetModule(ModuleName)->Module;
@@ -203,27 +210,27 @@ void ScriptSystem::UnregisterScriptBinding(IScriptBinding* ScriptBinding)
 	TheScriptRuntime->UnregisterScriptBinding(ScriptBinding);
 }
 
-void ScriptSystem::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
+void ScriptSystem::SetModuleSource(String ModuleUrl, String Source)
 {
 	TheScriptRuntime->SetModuleSource(ModuleUrl, Source);
 }
 
-void ScriptSystem::AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias)
+void ScriptSystem::AddModuleUrlAlias(const String& ModuleUrl, const String& ModuleUrlAlias)
 {
 	TheScriptRuntime->AddModuleUrlAlias(ModuleUrl, ModuleUrlAlias);
 }
 
-void ScriptSystem::ClearModuleSource(csp::common::String ModuleUrl)
+void ScriptSystem::ClearModuleSource(String ModuleUrl)
 {
 	TheScriptRuntime->ClearModuleSource(ModuleUrl);
 }
 
-csp::common::String ScriptSystem::GetModuleSource(csp::common::String ModuleUrl)
+String ScriptSystem::GetModuleSource(String ModuleUrl)
 {
 	return TheScriptRuntime->GetModuleSource(ModuleUrl);
 }
 
-bool ScriptSystem::GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias)
+bool ScriptSystem::GetModuleUrlAlias(const String& ModuleUrl, String& OutModuleUrlAlias)
 {
 	return TheScriptRuntime->GetModuleUrlAlias(ModuleUrl, OutModuleUrlAlias);
 }
@@ -236,6 +243,189 @@ size_t ScriptSystem::GetNumImportedModules(int64_t ContextId) const
 const char* ScriptSystem::GetImportedModule(int64_t ContextId, size_t Index) const
 {
 	return TheScriptRuntime->GetContext(ContextId)->GetImportedModule(Index);
+}
+
+
+ScriptModuleCollection::ScriptModuleCollection() {};
+ScriptModuleCollection::~ScriptModuleCollection() {};
+
+const String& ScriptModuleCollection::GetId() const
+{
+	return Id;
+}
+
+const Map<String, String>& ScriptModuleCollection::GetLookupTable() const
+{
+	return LookupTable;
+}
+
+ScriptModuleCollection& ScriptModuleCollectionResult::GetCollection()
+{
+	return Collection;
+}
+
+const ScriptModuleCollection& ScriptModuleCollectionResult::GetCollection() const
+{
+	return Collection;
+}
+
+
+ScriptModuleAsset::ScriptModuleAsset() {};
+
+ScriptModuleAsset ::~ScriptModuleAsset() {};
+
+const String& ScriptModuleAsset::GetId() const
+{
+	return Id;
+}
+
+const String& ScriptModuleAsset::GetModuleText() const
+{
+	return ModuleText;
+}
+
+
+ScriptModuleAsset& ScriptModuleAssetResult::GetModule()
+{
+	return Module;
+}
+
+const ScriptModuleAsset& ScriptModuleAssetResult::GetModule() const
+{
+	return Module;
+}
+
+
+void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
+{
+	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
+	AssetCollectionName.Append(Namespace);
+
+	auto AssetName = AssetCollectionName;
+	AssetName.Append("_LOOKUPTABLE");
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	AssetCollectionResultCallback CreateAssetCollectionCallback = [AssetSystem, AssetName, Callback](const AssetCollectionResult& Result)
+	{
+		const auto& AssetCollection = Result.GetAssetCollection();
+
+		AssetResultCallback CreateAssetCallback = [AssetSystem, Callback, AssetCollection](const AssetResult& Result)
+		{
+			const auto& Asset = Result.GetAsset();
+
+			AssetCollectionResultCallback UpdateAssetCollectionCallback = [AssetSystem, Asset, Callback](const AssetCollectionResult& Result)
+			{
+				const auto& AssetCollection = Result.GetAssetCollection();
+
+				BufferAssetDataSource AssetData;
+				AssetData.SetMimeType("application/json");
+				AssetData.Buffer	   = "{}";
+				AssetData.BufferLength = 2;
+
+				UriResultCallback UploadAssetDataCallback = [AssetCollection, Callback](const UriResult& Result)
+				{
+					ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+					auto& Collection		 = InternalResult.GetCollection();
+					Collection.Id			 = AssetCollection.Id;
+					Collection.LookupTableId = AssetCollection.GetMetadataImmutable()["lookup_table_id"];
+
+					Callback(InternalResult);
+				};
+
+				AssetSystem->UploadAssetData(AssetCollection, Asset, AssetData, UploadAssetDataCallback);
+			};
+
+			AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, {{"lookup_table_id", Asset.Id}}, UpdateAssetCollectionCallback);
+		};
+
+		// Create module lookup table
+		AssetSystem->CreateAsset(AssetCollection, AssetName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateAssetCallback);
+	};
+
+	// Create asset collection that represents script module collection
+	AssetSystem->CreateAssetCollection(nullptr,
+									   nullptr,
+									   AssetCollectionName,
+									   nullptr,
+									   EAssetCollectionType::SCRIPT_MODULE_COLLECTION,
+									   nullptr,
+									   CreateAssetCollectionCallback);
+}
+
+void ScriptSystem::GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
+{
+	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
+	AssetCollectionName.Append(Namespace);
+
+	auto AssetName = AssetCollectionName;
+	AssetName.Append("_LOOKUPTABLE");
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	AssetCollectionResultCallback GetAssetCollectionCallback = [AssetSystem, AssetName, Callback](const AssetCollectionResult& Result)
+	{
+		const auto& AssetCollection = Result.GetAssetCollection();
+		const auto& Metadata		= AssetCollection.GetMetadataImmutable();
+		const auto& LookupTableId	= Metadata["lookup_table_id"];
+
+		AssetResultCallback GetAssetCallback = [AssetSystem, AssetCollection, Callback](const AssetResult& Result)
+		{
+			const auto& Asset = Result.GetAsset();
+
+			AssetDataResultCallback DownloadAssetDataCallback = [AssetCollection, Callback](const AssetDataResult& Result)
+			{
+				ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+				auto& Collection = InternalResult.GetCollection();
+				Collection.Id	 = AssetCollection.Id;
+
+				const auto& Data = Result.GetData();
+				auto DataLength	 = Result.GetDataLength();
+
+				rapidjson::Document Json;
+				Json.Parse(reinterpret_cast<const char*>(Data), DataLength);
+
+				auto& LookupTable = Collection.LookupTable;
+
+				for (const auto& Entry : Json.GetObject())
+				{
+					LookupTable[Entry.name.GetString(), Entry.value.GetString()];
+				}
+
+				Collection.LookupTableId = AssetCollection.GetMetadataImmutable()["lookup_table_id"];
+
+				Callback(InternalResult);
+			};
+
+			AssetSystem->DownloadAssetData(Asset, DownloadAssetDataCallback);
+		};
+
+		AssetSystem->GetAssetById(AssetCollection.Id, LookupTableId, GetAssetCallback);
+	};
+
+	AssetSystem->GetAssetCollectionByName(AssetCollectionName, GetAssetCollectionCallback);
+}
+
+void ScriptSystem::DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback)
+{
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	AssetSystem->DeleteAssetCollection(Collection.GetId(), Callback);
+}
+
+void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collection,
+										   const csp::common::String& Name,
+										   const csp::common::String& ModuleText,
+										   const NullResultCallback& Callback)
+{
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	// check collection doesn't have module already. if it does create an invalid nullresult::invalid and set the response body to something
+	// meaningful create the script module asset that will hold the script create the asset data which stores moduleText and upload it get the
+	// lookuptable from the collection add entry to the lookup table, turn back into json and then uuse the lookuptableid to update the assetdata call
+	// callback
 }
 
 } // namespace csp::systems
