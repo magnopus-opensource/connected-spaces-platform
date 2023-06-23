@@ -1,4 +1,4 @@
-# 🧱 Foundation
+# Connected Spaces Platform
 
 [![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
 [![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
@@ -8,7 +8,7 @@ _"An interoperable communication library for the next generation of the internet
 
 ⚡️ Current Supported Languages : C++, C#, Web Assembly
 
-💻 Current Supported Platforms : Windows, Android, IOS and MacOS
+🖥️ Current Supported Platforms : Windows, Android, IOS and MacOS
 
 
 ****
@@ -25,11 +25,11 @@ _"An interoperable communication library for the next generation of the internet
   - [MacOS Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-MacOS)
   - [IOS Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-IOS)
 - [Usage](#%EF%B8%8F-usage)
-    - [Web Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
     - [Web Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/Web)
-    - [C++ Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
     - [C++ Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
-    - [Unity C# Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
     - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 - [Tenant Keys](#-tenant-keys)
 - [Api Documentation](#-api-documentation)
@@ -40,9 +40,7 @@ _"An interoperable communication library for the next generation of the internet
 ****
 
 ## Background
-This is the client API for the Connected Spaces Platform, a library providing an interface over a set of cloud hosted services.
-
-It affords client application developers across a range of language and platforms with a means to build *interoperable cross-reality, multi-user applications*.
+This is the Connected Spaces Platform client API, affording client application developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
 
 
 ****
@@ -59,24 +57,24 @@ For C++ based applications, you can find headers and precompiled binaries for al
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each language supported in Foundation are below.
+Build instructions for each language supported are below.
 
 - WebAssembly 
-    - [Building Foundation for Web](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Web)
+    - [Building for Web](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Web)
 - C++
-    - [Building Foundation for C++](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CPP)
+    - [Building for C++](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CPP)
 
 - C#
-    - [Building Foundation for C#](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CSharp)
+    - [Building for C#](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CSharp)
 
 - Android
-    - [Building Foundation for Android](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Android)
+    - [Building for Android](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Android)
 
 - MacOS
-    - [Building Foundation for MacOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-MacOS)
+    - [Building for MacOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-MacOS)
 
 - IOS
-    - [Building Foundation for IOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-IOS)
+    - [Building for IOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-IOS)
 
 ****
 
@@ -87,17 +85,17 @@ For information on how to obtain a Tenant Key please see our Tenant page:
 [Obtaining a Tenant Key](https://github.com/magnopus-opensource/csp-foundation/wiki) (WIP)
 ****
 ## 🖥️ Usage
-HelloWorld Examples for each language supported in Foundation are below.
+HelloWorld Examples for each language supported are below.
 
 - WebAssembly 
-    - [Web Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
     - [Web Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/Web)
 - C++
-    - [C++ Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
     - [C++ Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
 
 - C#
-    - [Unity C# Initialising Foundation Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
     - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
 ****
@@ -106,7 +104,7 @@ HelloWorld Examples for each language supported in Foundation are below.
 
  Our Api Documentation Page:
 
- - [Foundation Api Documentation](https://builds.magnoboard.com/foundation-docs/index.html)
+ - [CSP Api Documentation](https://builds.magnoboard.com/foundation-docs/index.html)
 
 
 ****
