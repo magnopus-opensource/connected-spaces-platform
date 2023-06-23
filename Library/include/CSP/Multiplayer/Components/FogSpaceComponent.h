@@ -20,6 +20,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 namespace csp::multiplayer
@@ -41,6 +42,7 @@ enum class FogPropertyKeys
 	IsVolumetric,
 	IsVisible,
 	IsARVisible,
+	ThirdPartyComponentRef,
 	Num
 };
 
@@ -54,7 +56,7 @@ enum class FogMode
 
 /// @ingroup FogSpaceComponent
 /// @brief Data representation of an FogSpaceComponent.
-class CSP_API FogSpaceComponent : public ComponentBase, public IVisibleComponent
+class CSP_API FogSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the fog space component, and associates it with the specified Parent space entity.
@@ -208,6 +210,14 @@ public:
 	bool GetIsARVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
+	/// @}
+
+	/// \addtogroup IThirdPartyComponentRef
+	/// @{
+	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
+	const csp::common::String& GetThirdPartyComponentRef() const override;
+	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
+	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
 	/// @}
 };
 

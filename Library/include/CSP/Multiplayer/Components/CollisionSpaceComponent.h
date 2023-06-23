@@ -21,6 +21,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
 
 namespace csp::multiplayer
@@ -36,6 +37,7 @@ enum class CollisionPropertyKeys
 	CollisionMode,
 	CollisionAssetId,
 	AssetCollectionId,
+	ThirdPartyComponentRef,
 	Num
 };
 
@@ -57,7 +59,7 @@ enum class CollisionMode
 
 /// @ingroup CollisionSpaceComponent
 /// @brief Data representation of an CollisionSpaceComponent.
-class CSP_API CollisionSpaceComponent : public ComponentBase
+class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
@@ -183,6 +185,14 @@ public:
 	/// @brief Gets the default half height for a capsule collision mesh.
 	/// @return The default half height for a capsule collision mesh.
 	static float GetDefaultCapsuleHalfHeight();
+
+	/// \addtogroup IThirdPartyComponentRef
+	/// @{
+	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
+	const csp::common::String& GetThirdPartyComponentRef() const override;
+	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
+	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+	/// @}
 };
 
 } // namespace csp::multiplayer
