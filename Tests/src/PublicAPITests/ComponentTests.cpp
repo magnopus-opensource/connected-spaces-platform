@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
+#include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -147,6 +151,37 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
 		VisibleComponent->SetIsARVisible(false);
 
 		EXPECT_FALSE(VisibleComponent->GetIsARVisible());
+
+		delete Component;
+	}
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
+{
+	SpaceEntity* MySpaceEntity = new SpaceEntity();
+
+	std::vector<ComponentBase*> Components {new AnimatedModelSpaceComponent(MySpaceEntity),
+											new AudioSpaceComponent(MySpaceEntity),
+											new CollisionSpaceComponent(MySpaceEntity),
+											new FogSpaceComponent(MySpaceEntity),
+											new LightSpaceComponent(MySpaceEntity),
+											new ReflectionSpaceComponent(MySpaceEntity),
+											new StaticModelSpaceComponent(MySpaceEntity)
+
+	};
+
+	for (auto Component : Components)
+	{
+		auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
+		EXPECT_EQ(ThirdPartyComponentRef->GetThirdPartyComponentRef(), "");
+	}
+
+	for (auto Component : Components)
+	{
+		auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
+		ThirdPartyComponentRef->SetThirdPartyComponentRef("ComponentRef");
+
+		EXPECT_EQ(ThirdPartyComponentRef->GetThirdPartyComponentRef(), "ComponentRef");
 
 		delete Component;
 	}

@@ -25,12 +25,13 @@ namespace csp::multiplayer
 
 ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Reflection, Parent)
 {
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name)]				 = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)] = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)]			 = csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Scale)]			 = csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)]	 = static_cast<int64_t>(ReflectionShape::UnitBox);
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name)]					  = "";
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)]	  = "";
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)]	  = "";
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)]				  = csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Scale)]				  = csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)]		  = static_cast<int64_t>(ReflectionShape::UnitBox);
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW ReflectionSpaceComponentScriptInterface(this));
 }
@@ -142,4 +143,22 @@ void ReflectionSpaceComponent::SetReflectionShape(ReflectionShape Value)
 {
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape), static_cast<int64_t>(Value));
 }
+
+const csp::common::String& ReflectionSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void ReflectionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef), InValue);
+}
+
 } // namespace csp::multiplayer
