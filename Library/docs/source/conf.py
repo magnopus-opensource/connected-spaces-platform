@@ -18,12 +18,12 @@ from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
-project = 'Foundation'
+project = 'Connected Spaces Platform'
 copyright = '2023, Magnopus'
 author = 'Magnopus'
 
 # The full version, including alpha/beta/rc tags
-release = 'v0.0.1'
+release = 'v1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,9 +41,9 @@ extensions = [
 
 # Setup the breathe extension
 breathe_projects = {
-    "Foundation": "../DoxygenOutput/xml"
+    "Connected Spaces Platform": "../DoxygenOutput/xml"
 }
-breathe_default_project = "Foundation"
+breathe_default_project = "Connected Spaces Platform"
 
 # Setup the exhale extension
 exhale_args = {
