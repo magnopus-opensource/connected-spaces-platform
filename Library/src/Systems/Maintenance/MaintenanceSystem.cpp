@@ -42,7 +42,7 @@ MaintenanceSystem::~MaintenanceSystem()
 
 void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
-	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](MaintenanceInfoResult& Result)
+	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](const MaintenanceInfoResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
@@ -61,7 +61,7 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 
 void MaintenanceSystem::IsInsideMaintenanceWindow(InsideMaintenanceWindowCallback Callback)
 {
-	MaintenanceInfoCallback InternalCallback = [Callback](MaintenanceInfoResult& Result)
+	MaintenanceInfoCallback InternalCallback = [Callback](const MaintenanceInfoResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{

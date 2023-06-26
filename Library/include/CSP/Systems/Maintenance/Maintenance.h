@@ -69,11 +69,20 @@ public:
 
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
-	[[nodiscard]] const csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses();
+	[[nodiscard]] csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses();
+
+	/// @brief Retrieves response data from the Maintenance Window Server
+	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
+	[[nodiscard]] const csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses() const;
 
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return MaintenanceInfo : return the closest maintenance information
-	[[nodiscard]] const MaintenanceInfo& GetLatestMaintenanceInfo();
+	[[nodiscard]] MaintenanceInfo& GetLatestMaintenanceInfo();
+
+	/// @brief Retrieves response data from the Maintenance Window Server
+	/// @return MaintenanceInfo : return the closest maintenance information
+	[[nodiscard]] const MaintenanceInfo& GetLatestMaintenanceInfo() const;
+
 
 	/// @brief Returns an Invalid state MaintenanceInfoResult.
 	CSP_NO_EXPORT static MaintenanceInfoResult Invalid();
@@ -103,6 +112,10 @@ public:
 	/// @return InsideMaintenanceInfo : return check for being inside a maintenance window
 	[[nodiscard]] InsideMaintenanceInfo& GetInsideMaintenanceInfo();
 
+	/// @brief Retrieves response data from the Maintenance Window Server
+	/// @return InsideMaintenanceInfo : return check for being inside a maintenance window
+	[[nodiscard]] const InsideMaintenanceInfo& GetInsideMaintenanceInfo() const;
+
 	/// @brief Returns an Invalid state InsideMaintenanceInfoResult.
 	CSP_NO_EXPORT static InsideMaintenanceInfoResult Invalid();
 
@@ -111,8 +124,8 @@ private:
 	InsideMaintenanceInfo InsideMaintenanceInfoResponse;
 };
 
-typedef std::function<void(MaintenanceInfoResult& Result)> MaintenanceInfoCallback;
-typedef std::function<void(InsideMaintenanceInfoResult& Result)> InsideMaintenanceWindowCallback;
+typedef std::function<void(const MaintenanceInfoResult& Result)> MaintenanceInfoCallback;
+typedef std::function<void(const InsideMaintenanceInfoResult& Result)> InsideMaintenanceWindowCallback;
 
 void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos);
 

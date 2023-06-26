@@ -64,12 +64,22 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 	}
 }
 
-const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses()
+csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses()
 {
 	return MaintenanceInfoResponses;
 }
 
-const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
+const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() const
+{
+	return MaintenanceInfoResponses;
+}
+
+MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
+{
+	return MaintenanceInfoResponses[0];
+}
+
+const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
 {
 	return MaintenanceInfoResponses[0];
 }
@@ -89,6 +99,11 @@ void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 }
 
 InsideMaintenanceInfo& InsideMaintenanceInfoResult::GetInsideMaintenanceInfo()
+{
+	return InsideMaintenanceInfoResponse;
+}
+
+const InsideMaintenanceInfo& InsideMaintenanceInfoResult::GetInsideMaintenanceInfo() const
 {
 	return InsideMaintenanceInfoResponse;
 }
