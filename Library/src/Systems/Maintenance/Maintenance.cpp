@@ -23,6 +23,14 @@
 namespace csp::systems
 {
 
+InsideMaintenanceInfo::InsideMaintenanceInfo(bool InIsInsideMaintenanceWindow, const MaintenanceInfo& InsideMaintenanceData)
+{
+	IsInsideMaintenanceWindow = InIsInsideMaintenanceWindow;
+	Description				  = InsideMaintenanceData.Description;
+	StartDateTimestamp		  = InsideMaintenanceData.StartDateTimestamp;
+	EndDateTimestamp		  = InsideMaintenanceData.EndDateTimestamp;
+}
+
 MaintenanceInfoResult MaintenanceInfoResult::Invalid()
 {
 	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
@@ -46,6 +54,8 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 			MaintenanceInfoResponses[i].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
 			MaintenanceInfoResponses[i].EndDateTimestamp   = JsonDoc[i]["End"].GetString();
 		}
+
+		SortMaintenanceInfos(MaintenanceInfoResponses);
 	}
 }
 
@@ -56,11 +66,9 @@ const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenance
 
 const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
 {
-	auto MaintenanceInfos = MaintenanceInfoResponses;
-	SortMaintenanceInfos(MaintenanceInfos);
-
-	return MaintenanceInfos[0];
+	return MaintenanceInfoResponses[0];
 }
+
 void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 {
 	const csp::common::DateTime CurrentTime(csp::common::DateTime::UtcTimeNow());
@@ -73,6 +81,23 @@ void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 
 						  return Item1Time.GetTimePoint() - CurrentTime.GetTimePoint() < Item2Time.GetTimePoint() - CurrentTime.GetTimePoint();
 					  });
+}
+
+InsideMaintenanceInfo& InsideMaintenanceInfoResult::GetInsideMaintenanceInfo()
+{
+	return InsideMaintenanceInfoResponse;
+}
+
+void InsideMaintenanceInfoResult::SetInsideMaintenanceInfo(bool InIsInsideWindow, const MaintenanceInfo& InMaintenanceInfo)
+{
+	InsideMaintenanceInfoResponse = InsideMaintenanceInfo(InIsInsideWindow, InMaintenanceInfo);
+}
+
+InsideMaintenanceInfoResult InsideMaintenanceInfoResult::Invalid()
+{
+	static InsideMaintenanceInfoResult result(csp::services::EResultCode::Failed,
+											  static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	return result;
 }
 
 } // namespace csp::systems

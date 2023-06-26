@@ -42,31 +42,48 @@ MaintenanceSystem::~MaintenanceSystem()
 
 void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
+	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](MaintenanceInfoResult& Result)
+	{
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		{
+			Callback(Result);
+		}
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		{
+			Callback(MaintenanceInfoResult::Invalid());
+		}
+	};
 	csp::services::ResponseHandlerPtr MaintenanceResponseHandler
-		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(Callback, nullptr);
+		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
+																													  nullptr);
 	static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(csp::CSPFoundation::GetClientUserAgentInfo().CHSEnvironment, MaintenanceResponseHandler);
 }
 
-void MaintenanceSystem::IsInsideMaintenanceWindow(BooleanResultCallback Callback)
+void MaintenanceSystem::IsInsideMaintenanceWindow(InsideMaintenanceWindowCallback Callback)
 {
 	MaintenanceInfoCallback InternalCallback = [Callback](MaintenanceInfoResult& Result)
 	{
-		BooleanResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
+			InsideMaintenanceInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			const auto TimeNow				 = csp::common::DateTime::UtcTimeNow().GetTimePoint();
 			const auto LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
 			if (csp::common::DateTime(LatestMaintenanceInfo.StartDateTimestamp).GetTimePoint() <= TimeNow
 				&& csp::common::DateTime(LatestMaintenanceInfo.EndDateTimestamp).GetTimePoint() >= TimeNow)
 			{
-				InternalResult.SetValue(true);
+				InternalResult.SetInsideMaintenanceInfo(true, LatestMaintenanceInfo);
 			}
 			else
 			{
-				InternalResult.SetValue(false);
+				InternalResult.SetInsideMaintenanceInfo(false, LatestMaintenanceInfo);
 			}
+
+			Callback(InternalResult);
 		}
-		Callback(InternalResult);
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		{
+			Callback(InsideMaintenanceInfoResult::Invalid());
+		}
 	};
 
 	GetMaintenanceInfo(InternalCallback);
