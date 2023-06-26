@@ -4388,6 +4388,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
+	EXPECT_EQ(LightSpaceComponentInstance->GetLightShadowType(), LightShadowType::None);
 
 	// test values
 	const float InnerConeAngle = 10.0f;
@@ -4399,6 +4400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 	LightSpaceComponentInstance->SetLightCookieAssetCollectionId(Asset.AssetCollectionId);
 	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
 	LightSpaceComponentInstance->SetLightType(LightType::Spot);
+	LightSpaceComponentInstance->SetLightShadowType(LightShadowType::Realtime);
 	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
 	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
 	LightSpaceComponentInstance->SetRange(Range);
@@ -4411,6 +4413,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
+	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightShadowType(), LightShadowType::Realtime);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
@@ -4949,6 +4952,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
+	EXPECT_EQ(LightSpaceComponentInstance->GetLightShadowType(), LightShadowType::None);
 	EXPECT_EQ(LightSpaceComponentInstance->GetInnerConeAngle(), 0.0f);
 	EXPECT_EQ(LightSpaceComponentInstance->GetOuterConeAngle(), 0.78539816339f);
 	EXPECT_EQ(LightSpaceComponentInstance->GetRange(), 1000.0f);
@@ -4964,6 +4968,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
 	LightSpaceComponentInstance->SetLightCookieType(LightCookieType::ImageCookie);
 	LightSpaceComponentInstance->SetLightType(LightType::Spot);
+	LightSpaceComponentInstance->SetLightShadowType(LightShadowType::Static);
 	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
 	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
 	LightSpaceComponentInstance->SetRange(Range);
@@ -4976,6 +4981,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
+	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightShadowType(), LightShadowType::Static);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
