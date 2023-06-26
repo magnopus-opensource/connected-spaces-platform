@@ -25,19 +25,20 @@ namespace csp::multiplayer
 
 FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Fog, Parent)
 {
-	Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)]		  = static_cast<int64_t>(FogMode::Linear);
-	Properties[static_cast<uint32_t>(FogPropertyKeys::Position)]	  = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(FogPropertyKeys::Rotation)]	  = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(FogPropertyKeys::Scale)]		  = csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(FogPropertyKeys::StartDistance)] = 0.f;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::EndDistance)]	  = 0.f;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::Color)]		  = csp::common::Vector3 {0.8f, 0.9f, 1.0f};
-	Properties[static_cast<uint32_t>(FogPropertyKeys::Density)]		  = 0.2f;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)] = 0.2f;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)]	  = 1.f;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)]  = false;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::IsVisible)]	  = true;
-	Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)]	  = true;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::FogMode)]				   = static_cast<int64_t>(FogMode::Linear);
+	Properties[static_cast<uint32_t>(FogPropertyKeys::Position)]			   = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(FogPropertyKeys::Rotation)]			   = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(FogPropertyKeys::Scale)]				   = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(FogPropertyKeys::StartDistance)]		   = 0.f;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::EndDistance)]			   = 0.f;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::Color)]				   = csp::common::Vector3 {0.8f, 0.9f, 1.0f};
+	Properties[static_cast<uint32_t>(FogPropertyKeys::Density)]				   = 0.2f;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::HeightFalloff)]		   = 0.2f;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::MaxOpacity)]			   = 1.f;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::IsVolumetric)]		   = false;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::IsVisible)]			   = true;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)]			   = true;
+	Properties[static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW FogSpaceComponentScriptInterface(this));
 }
@@ -264,4 +265,22 @@ void FogSpaceComponent::SetIsARVisible(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible), Value);
 }
+
+const csp::common::String& FogSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void FogSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef), InValue);
+}
+
 } // namespace csp::multiplayer

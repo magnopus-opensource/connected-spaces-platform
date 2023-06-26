@@ -266,10 +266,15 @@ def main():
 
     if git_repo:
         if input_args.initial_commit == '':
-            # Get commit ID of latest tag
-            latest_tag = git_repo.git.describe(tags=True, abbrev=0)
-            tag_commit_id = git_repo.git.rev_list(latest_tag, n=1)
-            input_args.initial_commit = tag_commit_id
+            # If there are no tags we go back to the first commit on the branch
+            if len(git_repo.tags) > 0:
+                # Get commit ID of latest tag
+                latest_tag = git_repo.git.describe(tags=True, abbrev=0)
+                tag_commit_id = git_repo.git.rev_list(latest_tag, n=1)
+                input_args.initial_commit = tag_commit_id
+            else:
+                first_commit = list(git_repo.iter_commits())[-1]
+                input_args.initial_commit = first_commit.hexsha
 
         commit_list = get_commits(input_args, git_repo)
 
