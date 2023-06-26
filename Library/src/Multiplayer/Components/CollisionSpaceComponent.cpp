@@ -32,13 +32,14 @@ namespace csp::multiplayer
 
 CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Collision, Parent)
 {
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Position)]			= csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Rotation)]			= csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Scale)]				= csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape)]	= static_cast<int64_t>(CollisionShape::Box);
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)]		= static_cast<int64_t>(CollisionMode::Collision);
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId)]	= "";
-	Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)] = "";
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Position)]				 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Rotation)]				 = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::Scale)]					 = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape)]		 = static_cast<int64_t>(CollisionShape::Box);
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)]			 = static_cast<int64_t>(CollisionMode::Collision);
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId)]		 = "";
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)]		 = "";
+	Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW CollisionSpaceComponentScriptInterface(this));
 }
@@ -195,6 +196,23 @@ float CollisionSpaceComponent::GetDefaultCapsuleHalfWidth()
 float CollisionSpaceComponent::GetDefaultCapsuleHalfHeight()
 {
 	return DefaultCapsuleHalfHeight;
+}
+
+const csp::common::String& CollisionSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

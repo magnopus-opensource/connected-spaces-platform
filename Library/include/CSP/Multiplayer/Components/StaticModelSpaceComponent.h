@@ -21,6 +21,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
@@ -39,13 +40,14 @@ enum class StaticModelPropertyKeys
 	Scale,
 	IsVisible,
 	IsARVisible,
+	ThirdPartyComponentRef,
 	Num
 };
 
 
 /// @ingroup StaticModelSpaceComponent
 /// @brief Data representation of an StaticModelSpaceComponent.
-class CSP_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent
+class CSP_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
@@ -136,6 +138,14 @@ public:
 	bool GetIsARVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
+	/// @}
+
+	/// \addtogroup IThirdPartyComponentRef
+	/// @{
+	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
+	const csp::common::String& GetThirdPartyComponentRef() const override;
+	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
+	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
 	/// @}
 };
 

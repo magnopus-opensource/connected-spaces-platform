@@ -30,16 +30,17 @@ namespace csp::multiplayer
 
 AudioSpaceComponent::AudioSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Audio, Parent)
 {
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::Position)]			= csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::PlaybackState)]		= static_cast<int64_t>(AudioPlaybackState::Reset);
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::AudioType)]			= static_cast<int64_t>(AudioType::Global);
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId)]		= "";
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)] = DefaultAttenuationRadius;
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback)]	= false;
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay)]		= 0.f;
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::Volume)]			= DefaultVolume;
-	Properties[static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)]			= true;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::Position)]				 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::PlaybackState)]			 = static_cast<int64_t>(AudioPlaybackState::Reset);
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::AudioType)]				 = static_cast<int64_t>(AudioType::Global);
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId)]			 = "";
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId)]		 = "";
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius)]		 = DefaultAttenuationRadius;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback)]		 = false;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay)]			 = 0.f;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::Volume)]				 = DefaultVolume;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::IsEnabled)]				 = true;
+	Properties[static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef)] = "";
 
 	SetScriptInterface(CSP_NEW AudioSpaceComponentScriptInterface(this));
 }
@@ -219,6 +220,23 @@ bool AudioSpaceComponent::GetIsEnabled() const
 void AudioSpaceComponent::SetIsEnabled(bool InValue)
 {
 	SetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled), InValue);
+}
+
+const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return ReplicatedValue::GetDefaultString();
+}
+
+void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
+{
+	SetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

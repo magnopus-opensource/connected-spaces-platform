@@ -21,6 +21,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
 
 namespace csp::multiplayer
@@ -36,6 +37,7 @@ enum class ReflectionPropertyKeys
 	Rotation,
 	Scale,
 	ReflectionShape,
+	ThirdPartyComponentRef,
 	Num
 };
 
@@ -48,7 +50,7 @@ enum class ReflectionShape
 
 /// @ingroup ReflectionSpaceComponent
 /// @brief Data representation of an ReflectionSpaceComponent.
-class CSP_API ReflectionSpaceComponent : public ComponentBase
+class CSP_API ReflectionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
@@ -111,6 +113,14 @@ public:
 	/// ReflectionShape.UnitSphere: Warps the texture into a spherical shape and projects it onto a surface.
 	/// @param Value ReflectionShape : Enum specifying whether the captured reflections are box (UnitCube) or spherical projected (UnitSphere).
 	void SetReflectionShape(ReflectionShape Value);
+
+	/// \addtogroup IThirdPartyComponentRef
+	/// @{
+	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
+	const csp::common::String& GetThirdPartyComponentRef() const override;
+	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
+	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+	/// @}
 };
 
 } // namespace csp::multiplayer

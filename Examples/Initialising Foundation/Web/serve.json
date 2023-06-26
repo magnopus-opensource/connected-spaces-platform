@@ -1,0 +1,23 @@
+{
+    "directoryListing":false,
+    "unlisted": [
+        ".yarn",
+        ".node_modules",
+        ".git"
+      ],
+    "headers": [
+      {
+        "source" : "**/*",
+        "headers" : [{
+          "key" : "Cross-Origin-Embedder-Policy",
+          "value" : "require-corp"
+        }]
+      }, {
+        "source" : "**/*",
+        "headers" : [{
+          "key" : "Cross-Origin-Opener-Policy",
+          "value" : "same-origin"
+        }]
+      }
+    ]
+  }
