@@ -79,10 +79,9 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 {
 	auto& SystemsManager	= SystemsManager::Get();
-	auto& MaintenanceSystem = *SystemsManager.GetMaintenanceSystem();
+	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = Awaitable(&csp::systems::MaintenanceSystem::GetMaintenanceInfo, &MaintenanceSystem).Await(RequestPredicate);
-
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetMaintenanceInfoResponses().Size(), 1);
