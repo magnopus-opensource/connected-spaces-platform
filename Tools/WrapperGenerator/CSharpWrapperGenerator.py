@@ -270,7 +270,7 @@ class CSharpWrapperGenerator:
                     for fp in p.type.function_signature.parameters:
                         self.__translate_type(fp.type)
         
-        with open(f"{self.__OUTPUT_DIRECTORY}Foundation.cs", 'w') as f:
+        with open(f"{self.__OUTPUT_DIRECTORY}Csp.cs", 'w') as f:
             print(chevron.render(global_functions_template, { 'data': list(functions.values()), 'extra_data': config }, self.__PARTIALS_DIRECTORY, warn=True), file=f)
 
         for i in interfaces.values():
@@ -355,7 +355,7 @@ class CSharpWrapperGenerator:
                         self.__translate_type(dp.type)
 
                         full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                        setattr(dp.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'oly_services', 'ResultBase', classes))
+                        setattr(dp.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'csp::services', 'ResultBase', classes))
                     
                     delegate = {
                         'name': f"{m.name}{param_name}Delegate",
@@ -505,7 +505,7 @@ class CSharpWrapperGenerator:
                         self.__translate_type(dp.type)
 
                         full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                        setattr(dp.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'oly_services', 'ResultBase', classes))
+                        setattr(dp.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'csp::services', 'ResultBase', classes))
                     
                     delegate = {
                         'name': f"{m.name}{param_name}Delegate",

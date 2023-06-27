@@ -1,7 +1,7 @@
 using System;
 
 
-namespace Olympus.Foundation.Tests {
+namespace Csp.Tests {
     public static class ExtensionMethods {
         public static bool NearlyEquals(this float a, float b) {
             var diff = Math.Abs(a - b);
