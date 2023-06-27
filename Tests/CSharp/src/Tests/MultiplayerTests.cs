@@ -2305,82 +2305,162 @@ namespace CSPEngine
 
             // Create space
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
-            string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
-
+            const string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
+            const string objectName = "TestObject";
+            const string applicationOrigin = "Application Origin";
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            {
+                var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
+                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
+                var connection = enterResult.GetConnection();
 
-            var entitySystem = connection.GetSpaceEntitySystem();
-            entitySystem.OnEntityCreated += (s, e) => { };
+                var entitySystem = connection.GetSpaceEntitySystem();
+                entitySystem.OnEntityCreated += (s, e) => { };
 
-            // Create object to represent the Custom Component
-            var objectName = "TestObject";
-            CreateObject(entitySystem, objectName, out var createdObject, false);
+                // Create object to represent the Custom Component
+                CreateObject(entitySystem, objectName, out var createdObject, false);
 
-            // Create Custom component
-            var component = createdObject.AddComponent(Multiplayer.ComponentType.Custom);
-            var customComponent = component.As<Multiplayer.CustomSpaceComponent>();
+                // Create Custom component
+                var component = createdObject.AddComponent(Multiplayer.ComponentType.Custom);
+                var customComponent = component.As<Multiplayer.CustomSpaceComponent>();
 
-            // Vector Check
-            {
-                customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1,1,1)));
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1,1,1).X);
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1,1,1).Y);
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1,1,1).Z);
-                
-                customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1,1,1,1)));
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
-                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
+                // Application Origin Check
+                customComponent.SetApplicationOrigin(applicationOrigin);
+                Assert.AreEqual(customComponent.GetApplicationOrigin(), applicationOrigin);
+
+                // Vector Check
+                {
+                    customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1, 1, 1)));
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
+
+                    customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1, 1, 1, 1)));
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
+                }
+
+                // String Check
+                {
+                    customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
+                    Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
+                }
+
+                // Boolean Check
+                {
+                    customComponent.SetCustomProperty("Boolean", new Multiplayer.ReplicatedValue(true));
+                    Assert.AreEqual(customComponent.GetCustomProperty("Boolean").GetBool(), true);
+                }
+
+                // Integer Check
+                {
+                    customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
+                    Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
+                }
+
+                // Float Check
+                {
+                    customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
+                    Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
+                }
+
+                // Has Key Check
+                {
+                    Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), true);
+                    Assert.AreEqual(customComponent.HasCustomProperty("BooleanFalse"), false);
+                }
+
+                // Size Check
+                {
+                    Assert.AreEqual(customComponent.GetNumProperties(), 6);
+                }
+
+                // Remove Key Check
+                {
+                    customComponent.RemoveCustomProperty("Boolean");
+                    Assert.AreEqual(customComponent.GetNumProperties(), 5);
+                }
+
+                entitySystem.QueueEntityUpdate(createdObject);
+                entitySystem.ProcessPendingEntityOperations();
+                Thread.Sleep(3000);
+
+                var exitSpaceResult = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
+                Assert.IsTrue(exitSpaceResult);
             }
-            
-            // String Check
+
             {
-                customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
-                Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
+                var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
+                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
+                var connection = enterResult.GetConnection();
+
+                var testComplete = false;
+                var entitySystem = connection.GetSpaceEntitySystem();
+                entitySystem.OnEntityCreated += (s, e) => {
+                    Assert.AreEqual(e.GetName(), objectName);
+
+                    Assert.AreEqual(e.GetComponents().Size(), (ulong)1);
+
+                    var component = e.GetComponent(0);
+                    Assert.AreEqual(component.GetComponentType(), Multiplayer.ComponentType.Custom);
+
+                    var customComponent = component.As<Multiplayer.CustomSpaceComponent>();
+
+                    // Application Origin Check
+                    Assert.AreEqual(customComponent.GetApplicationOrigin(), applicationOrigin);
+
+                    // Vector Check
+                    {
+                        customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1, 1, 1)));
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
+
+                        customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1, 1, 1, 1)));
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
+                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
+                    }
+
+                    // String Check
+                    {
+                        customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
+                        Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
+                    }
+
+                    // Integer Check
+                    {
+                        customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
+                        Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
+                    }
+
+                    // Float Check
+                    {
+                        customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
+                        Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
+                    }
+
+                    // Does Not Have Key Check
+                    {
+                        Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), false);
+                    }
+
+                    // Flag Tests Completed
+                    testComplete = true;
+                };
+
+                // Wait until test complete
+                while(!testComplete)
+                {
+                    Thread.Sleep(100);
+                }
             }
-            
-            // Boolean Check
-            {
-                customComponent.SetCustomProperty("Boolean", new Multiplayer.ReplicatedValue(true));
-                Assert.AreEqual(customComponent.GetCustomProperty("Boolean").GetBool(), true);
-            }
-            
-            // Integer Check
-            {
-                customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
-                Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
-            }
-            
-            // Float Check
-            {
-                customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
-                Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
-            }
-            
-            // Has Key Check
-            {
-                Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), true);
-                Assert.AreEqual(customComponent.HasCustomProperty("BooleanFalse"), false);
-            }
-            
-            // Size Check
-            {
-                Assert.AreEqual(customComponent.GetNumProperties(), 6);
-            }
-            
-            // Remove Key Check
-            {
-                customComponent.RemoveCustomProperty("Boolean");
-                Assert.AreEqual(customComponent.GetNumProperties(), 5);
-            }
-            
+
             // Disconnect from the SignalR server
-            
         }
 #endif
 
