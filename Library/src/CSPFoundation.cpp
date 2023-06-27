@@ -27,9 +27,9 @@
 #include <cstdio>
 
 #if defined(DEBUG)
-	#define LIB_NAME "CSPFoundation_D"
+	#define LIB_NAME "OlympusFoundation_D"
 #else
-	#define LIB_NAME "CSPFoundation"
+	#define LIB_NAME "OlympusFoundation"
 #endif
 
 #if defined(CSP_WINDOWS)

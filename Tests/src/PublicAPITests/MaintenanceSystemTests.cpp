@@ -79,16 +79,15 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 {
 	auto& SystemsManager	= SystemsManager::Get();
-	auto& MaintenanceSystem = *SystemsManager.GetMaintenanceSystem();
+	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = Awaitable(&csp::systems::MaintenanceSystem::GetMaintenanceInfo, &MaintenanceSystem).Await(RequestPredicate);
-
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetMaintenanceInfoResponses().Size(), 1);
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday at 2am PST");
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].StartDateTimestamp, "2022-04-30T02:00:00+0000");
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].EndDateTimestamp, "2022-04-30T03:00:00+0000");
+	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday 2122 at 2am PST");
+	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].StartDateTimestamp, "2122-04-30T02:00:00+0000");
+	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].EndDateTimestamp, "2122-04-30T03:00:00+0000");
 }
 #endif
 
@@ -98,13 +97,16 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfoTest)
 {
 	auto& SystemsManager	= SystemsManager::Get();
-	auto& MaintenanceSystem = *SystemsManager.GetMaintenanceSystem();
+	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = Awaitable(&MaintenanceSystem::IsInsideMaintenanceWindow, &MaintenanceSystem).Await(RequestPredicate);
+	auto [Result] = AWAIT(MaintenanceSystem, IsInsideMaintenanceWindow);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-	EXPECT_FALSE(Result.GetValue());
+	EXPECT_FALSE(Result.GetInsideMaintenanceInfo().IsInsideMaintenanceWindow);
+	EXPECT_EQ(Result.GetInsideMaintenanceInfo().Description, "Example downtime for a Saturday 2122 at 2am PST");
+	EXPECT_EQ(Result.GetInsideMaintenanceInfo().StartDateTimestamp, "2122-04-30T02:00:00+0000");
+	EXPECT_EQ(Result.GetInsideMaintenanceInfo().EndDateTimestamp, "2122-04-30T03:00:00+0000");
 }
 #endif
 
