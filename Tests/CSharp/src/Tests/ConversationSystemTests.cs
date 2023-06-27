@@ -25,7 +25,7 @@ namespace CSPEngine
         [Test]
         public static void TwoConversationsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -292,7 +292,7 @@ namespace CSPEngine
         public static void GetMessagesTest()
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _,
-                out _, out _, out _);
+                out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -488,7 +488,7 @@ namespace CSPEngine
         public static void EmptyConversationTest()
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _,
-                out _, out _, out _);
+                out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -570,7 +570,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationNewMessageCallbackTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -687,7 +687,7 @@ namespace CSPEngine
 [Test]
         public static void ConversationDeleteMessageCallbackTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -810,7 +810,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationNewConversationCallbackTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -921,7 +921,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationUpdateInfoTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -1076,7 +1076,7 @@ namespace CSPEngine
         [Test]
         public static void MessageUpdateInfoTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);

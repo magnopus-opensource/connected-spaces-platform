@@ -114,7 +114,7 @@ namespace CSharpTests
         }
 
         public static void GetFoundationSystems(out Systems.UserSystem userSystem, out Systems.SpaceSystem spaceSystem, out Systems.AssetSystem assetSystem, out Systems.PointOfInterestSystem poiSystem,
-                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem)
+                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem, out Systems.MaintenanceSystem maintenanceSystem)
         {
             var systemsManager = Systems.SystemsManager.Get();
             userSystem = systemsManager.GetUserSystem();
@@ -124,6 +124,8 @@ namespace CSharpTests
             anchorSystem = systemsManager.GetAnchorSystem();
             graphQLSystem = systemsManager.GetGraphQLSystem();
             settingsSystem = systemsManager.GetSettingsSystem();
+            maintenanceSystem = systemsManager.GetMaintenanceSystem();
+
         }
 
         public static Dictionary<string, object> ParseJsonObject(string data)
