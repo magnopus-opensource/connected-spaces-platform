@@ -2,15 +2,15 @@ Welcome to the Foundation Library! We are thrilled to have you contribute to our
 
 # Code of Conduct
 
-Foundation Library follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/). Please read and adhere to our [code of conduct](https://github.com/magnopus/olympus-foundation/blob/main/CONDUCT.md) to foster an inclusive and respectful community.
+Foundation Library follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/). Please read and adhere to our [code of conduct](https://github.com/magnopus-opensource/csp-foundation/blob/main/CONDUCT.md) to foster an inclusive and respectful community.
 
 # Getting Started
 
 To get started, you will need to have a basic understanding of C++ and familiarity with metaverse concepts. If you are new to the library, we recommend exploring our documentation and examples to gain a better understanding of its capabilities.
 
-1. Clone the repository: `git clone https://github.com/magnopus/csp-foundation.git`
-2. Install the necessary dependencies as outlined in the documentation, [Building Foundation for CPP](https://github.com/magnopus/csp-foundation/wiki/Building-Foundation-for-CPP).
-3. Build and run the project locally to ensure it is functioning correctly, you can find build instructions for our different platforms [here](https://github.com/magnopus/csp-foundation#-build-instructions).
+1. Clone the repository: `git clone https://github.com/magnopus-opensource/csp-foundation.git`
+2. Install the necessary dependencies as outlined in the documentation, [Building Foundation for CPP](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CPP).
+3. Build and run the project locally to ensure it is functioning correctly, you can find build instructions for our different platforms [here](https://github.com/magnopus-opensource/csp-foundation#-build-instructions).
 
 # Contributing
 
@@ -30,7 +30,7 @@ To contribute code changes or bug fixes, follow these steps:
 
 1. Fork the repository to your GitHub account.
 2. Create a new branch for your changes: `git checkout -b my-feature-branch`
-3. Make your desired changes and ensure the code follows the [programming guidelines](https://github.com/magnopus/csp-foundation/wiki/Programming-guidelines).
+3. Make your desired changes and ensure the code follows the [programming guidelines](https://github.com/magnopus-opensource/csp-foundation/wiki/Programming-guidelines).
 4. Write unit tests, if applicable, to validate the changes.
 5. Commit your changes with clear and concise commit messages.
 6. Push the changes to your forked repository.
@@ -41,13 +41,13 @@ Our team will review your pull request, provide feedback, and work with you to a
 
 # Style Guide
 
-Maintaining consistent code style helps improve readability and maintainability. Please follow the existing code style in the library and adhere to the following [programming guidelines](https://github.com/magnopus/csp-foundation/wiki/Programming-guidelines).
+Maintaining consistent code style helps improve readability and maintainability. Please follow the existing code style in the library and adhere to the following [programming guidelines](https://github.com/magnopus-opensource/csp-foundation/wiki/Programming-guidelines).
 
 # Documentation
 
 Good documentation is crucial for the success of an open-source project. When contributing to the Foundation Library, please ensure that your changes include relevant updates to the documentation. This includes code comments and any other documentation files.
 
-* Update code comments: Document your code changes using inline comments to explain the purpose and functionality of the code. Clear and concise comments help other developers understand your implementation. Ensure these comments follow our [programming guidelines](https://github.com/magnopus/csp-foundation/wiki/Programming-guidelines).
+* Update code comments: Document your code changes using inline comments to explain the purpose and functionality of the code. Clear and concise comments help other developers understand your implementation. Ensure these comments follow our [programming guidelines](https://github.com/magnopus-opensource/csp-foundation/wiki/Programming-guidelines).
 
 * Update documentation files: If your changes require updates to any other documentation files, such as tutorials, guides, or API references, make sure to include these updates as well, or if you do not have access to update these, you can request a change using a ticket, citing your Pull Request as a reference. Keep the documentation up to date with the latest changes in the library, if they are not already.
 
@@ -65,6 +65,6 @@ Maintaining a robust testing suite ensures the stability and reliability of the 
 
 # License
 
-The Foundation Library is released under the [Apache 2.0 License](https://github.com/magnopus/csp-foundation/blob/main/LICENSE). By contributing to this project, you agree to license your contributions under the same license.
+The Foundation Library is released under the [Apache 2.0 License](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE). By contributing to this project, you agree to license your contributions under the same license.
 
 Thank you for considering contributing to the Foundation Library. Your contributions play a vital role in improving the library and enabling developers to build incredible metaverse applications. We value your dedication and look forward to your contributions. Happy coding!
