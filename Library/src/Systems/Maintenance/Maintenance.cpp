@@ -23,6 +23,14 @@
 namespace csp::systems
 {
 
+InsideMaintenanceInfo::InsideMaintenanceInfo(bool InIsInsideMaintenanceWindow, const MaintenanceInfo& InsideMaintenanceData)
+{
+	IsInsideMaintenanceWindow = InIsInsideMaintenanceWindow;
+	Description				  = InsideMaintenanceData.Description;
+	StartDateTimestamp		  = InsideMaintenanceData.StartDateTimestamp;
+	EndDateTimestamp		  = InsideMaintenanceData.EndDateTimestamp;
+}
+
 MaintenanceInfoResult MaintenanceInfoResult::Invalid()
 {
 	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
@@ -39,28 +47,60 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 		JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
 		assert(JsonDoc.IsArray());
-		MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
+		auto LocalArray = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
+
+		const auto TimeNow		= csp::common::DateTime::UtcTimeNow().GetTimePoint();
+		uint32_t ArrayShrinkage = 0;
+
 		for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
 		{
-			MaintenanceInfoResponses[i].Description		   = JsonDoc[i]["Description"].GetString();
-			MaintenanceInfoResponses[i].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
-			MaintenanceInfoResponses[i].EndDateTimestamp   = JsonDoc[i]["End"].GetString();
+			// remove old maintenance windows
+			if (TimeNow <= csp::common::DateTime(JsonDoc[i]["End"].GetString()).GetTimePoint())
+			{
+				LocalArray[i - ArrayShrinkage].Description		  = JsonDoc[i]["Description"].GetString();
+				LocalArray[i - ArrayShrinkage].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
+				LocalArray[i - ArrayShrinkage].EndDateTimestamp	  = JsonDoc[i]["End"].GetString();
+			}
+			else
+			{
+				ArrayShrinkage++;
+			};
 		}
+
+		MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size() - ArrayShrinkage);
+
+		for (uint32_t i = 0; i < (JsonDoc.Size() - ArrayShrinkage); i++)
+		{
+			MaintenanceInfoResponses[i].Description		   = LocalArray[i].Description;
+			MaintenanceInfoResponses[i].StartDateTimestamp = LocalArray[i].StartDateTimestamp;
+			MaintenanceInfoResponses[i].EndDateTimestamp   = LocalArray[i].EndDateTimestamp;
+		}
+
+		// Sort maintenance windows by latest date
+		SortMaintenanceInfos(MaintenanceInfoResponses);
 	}
 }
 
-const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses()
+csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses()
 {
 	return MaintenanceInfoResponses;
 }
 
-const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
+const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenanceInfoResponses() const
 {
-	auto MaintenanceInfos = MaintenanceInfoResponses;
-	SortMaintenanceInfos(MaintenanceInfos);
-
-	return MaintenanceInfos[0];
+	return MaintenanceInfoResponses;
 }
+
+MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
+{
+	return MaintenanceInfoResponses[0];
+}
+
+const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
+{
+	return MaintenanceInfoResponses[0];
+}
+
 void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 {
 	const csp::common::DateTime CurrentTime(csp::common::DateTime::UtcTimeNow());
@@ -73,6 +113,28 @@ void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 
 						  return Item1Time.GetTimePoint() - CurrentTime.GetTimePoint() < Item2Time.GetTimePoint() - CurrentTime.GetTimePoint();
 					  });
+}
+
+InsideMaintenanceInfo& InsideMaintenanceInfoResult::GetInsideMaintenanceInfo()
+{
+	return InsideMaintenanceInfoResponse;
+}
+
+const InsideMaintenanceInfo& InsideMaintenanceInfoResult::GetInsideMaintenanceInfo() const
+{
+	return InsideMaintenanceInfoResponse;
+}
+
+void InsideMaintenanceInfoResult::SetInsideMaintenanceInfo(bool InIsInsideWindow, const MaintenanceInfo& InMaintenanceInfo)
+{
+	InsideMaintenanceInfoResponse = InsideMaintenanceInfo(InIsInsideWindow, InMaintenanceInfo);
+}
+
+InsideMaintenanceInfoResult InsideMaintenanceInfoResult::Invalid()
+{
+	static InsideMaintenanceInfoResult result(csp::services::EResultCode::Failed,
+											  static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	return result;
 }
 
 } // namespace csp::systems
