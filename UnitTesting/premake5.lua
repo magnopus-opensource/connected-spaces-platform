@@ -45,7 +45,6 @@ project "UnitTestingBinary"
         "%{prj.location}/../Library/include/CSP/CSPCommon.h",
         "%{prj.location}/../Library/include/CSP/Common/Array.h",
         "%{prj.location}/../Library/include/CSP/Common/String.h",
-        "%{prj.location}/../Library/src/Common/Array.cpp",
         "%{prj.location}/../Library/src/Common/String.cpp",
         "%{prj.location}/../Library/src/Memory/DllAllocator.cpp",
         "%{prj.location}/../Library/src/Memory/Memory.h",

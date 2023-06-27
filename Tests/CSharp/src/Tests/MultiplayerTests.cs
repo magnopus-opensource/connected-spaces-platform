@@ -124,7 +124,7 @@ namespace CSPEngine
         [Test]
         public static void ManualConnectionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -164,7 +164,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAvatarTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -211,7 +211,7 @@ namespace CSPEngine
         [Test]
         public static void CreateCreatorAvatarTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -257,7 +257,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateObjectTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             var spaceName = GenerateUniqueString("CSP_CSHARP_TEST_SPACE");
             var spaceDescription = "Created by C# test - UpdateObjectTest";
@@ -329,7 +329,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateRemoteObjectTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             var spaceName = GenerateUniqueString("CSP_CSHARP_TEST_SPACE");
             var spaceDescription = "Created by C# test - UpdateObjectTest";
@@ -432,7 +432,7 @@ namespace CSPEngine
         [Test]
         public static void RunScriptTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -500,7 +500,7 @@ namespace CSPEngine
         [Test]
         public static void UsePortalTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -593,7 +593,7 @@ namespace CSPEngine
         [Test]
         public static void PortalScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -664,7 +664,7 @@ namespace CSPEngine
         [Test]
         public static void PortalThumbnailTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -711,7 +711,7 @@ namespace CSPEngine
             // Test for OB-1046
             // If the rate limiter hasn't processed all PendingOutgoingUpdates after SpaceEntity deletion it will crash when trying to process them
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -767,7 +767,7 @@ namespace CSPEngine
         [Test]
         public static void AssetProcessedCallbackTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -840,7 +840,7 @@ namespace CSPEngine
         [Test]
         public static void DeleteScriptTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -927,7 +927,7 @@ namespace CSPEngine
             // Test for: OB-864
             // Second script deletion test adds a second component to the object with the script
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1005,7 +1005,7 @@ namespace CSPEngine
         public static void AddSecondScriptTest()
         {
             // Test for OB-1407
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1100,7 +1100,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1326,7 +1326,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentMoveTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -1452,7 +1452,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentScriptTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1522,7 +1522,7 @@ namespace CSPEngine
         [Test]
         public static void AudioComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1617,7 +1617,7 @@ namespace CSPEngine
         [Test]
         public static void ImageComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1692,7 +1692,7 @@ namespace CSPEngine
         [Test]
         public static void ReflectionComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1758,7 +1758,7 @@ namespace CSPEngine
         [Test]
         public static void VideoPlayerComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1853,7 +1853,7 @@ namespace CSPEngine
         [Test]
         public static void CollisionComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1978,7 +1978,7 @@ namespace CSPEngine
         [Test]
         public static void AudioScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2085,7 +2085,7 @@ namespace CSPEngine
         [Test]
         public static void ImageScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2165,7 +2165,7 @@ namespace CSPEngine
         [Test]
         public static void SplineComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2226,7 +2226,7 @@ namespace CSPEngine
         [Test]
         public static void SplineScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2298,7 +2298,7 @@ namespace CSPEngine
         [Test]
         public static void UseCustomTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2468,7 +2468,7 @@ namespace CSPEngine
         [Test]
         public static void CustomComponentScriptInterfaceSubscriptionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2536,7 +2536,7 @@ namespace CSPEngine
         [Test]
         public static void NetworkEventTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -2598,7 +2598,7 @@ namespace CSPEngine
         [Test]
         public static void RegisterActionHandlerTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2643,7 +2643,7 @@ namespace CSPEngine
         [Test]
         public static void FogComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2733,7 +2733,7 @@ namespace CSPEngine
         [Test]
         public static void FogScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2819,7 +2819,7 @@ namespace CSPEngine
         [Test]
         public static void MultiProcessTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -2894,7 +2894,7 @@ namespace CSPEngine
         [Test]
         public static void InvalidComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2968,7 +2968,7 @@ namespace CSPEngine
         [Test]
         public static void ClientElectionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";

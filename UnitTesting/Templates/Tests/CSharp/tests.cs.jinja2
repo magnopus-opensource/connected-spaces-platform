@@ -1,13 +1,16 @@
 {% from 'helpers.jinja2' import assert_are_equal %}
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using NUnit.Framework;
 using UnityEngine;
 
 
-namespace Olympus.Foundation.Tests {    
+namespace Csp.Tests {    
     static class UnitTests {
         /********************************/
         /*       Global functions       */
@@ -22,7 +25,7 @@ namespace Olympus.Foundation.Tests {
                 // Get {{ p.type }} min value by {{ x }}
                 [Test]
                 public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
-                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+                    var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
                     {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
                 }
@@ -30,7 +33,7 @@ namespace Olympus.Foundation.Tests {
                 // Get {{ p.type }} max value by {{ x }}
                 [Test]
                 public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
-                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+                    var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
                     {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
                 }
@@ -41,7 +44,7 @@ namespace Olympus.Foundation.Tests {
                 // Get {{ p.type }} min value by {{ x }}
                 [Test]
                 public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
-                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+                    var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
                     var value = result.Get();
 
                     {{ assert_are_equal(p.use_epsilon, "value", p.min) }}
@@ -50,7 +53,7 @@ namespace Olympus.Foundation.Tests {
                 // Get {{ p.type }} max value by {{ x }}
                 [Test]
                 public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
-                    var result = Foundation.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+                    var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
                     var value = result.Get();
 
                     {{ assert_are_equal(p.use_epsilon, "value", p.max) }}
@@ -65,7 +68,7 @@ namespace Olympus.Foundation.Tests {
             // Get string by {{ x }}
             [Test]
             public static void GlobalFunctions_String_Return{{ x }}() {
-                var result = Foundation.GlobalFunctions_String_Return{{ x }}();
+                var result = Global.GlobalFunctions_String_Return{{ x }}();
 
                 Assert.AreEqual(result, "{{ config.string_value }}");
             }
@@ -78,7 +81,7 @@ namespace Olympus.Foundation.Tests {
             // Get class by {{ x }}
             [Test]
             public static void GlobalFunctions_MyClass_Return{{ x }}() {
-                using var result = Foundation.GlobalFunctions_MyClass_Return{{ x }}();
+                using var result = Global.GlobalFunctions_MyClass_Return{{ x }}();
 
                 Assert.IsTrue(result.PointerIsValid);
                 Assert.AreEqual(result.SomeValue, {{ config.class_int_value_first }});
@@ -95,7 +98,7 @@ namespace Olympus.Foundation.Tests {
             [Test]
             public static void GlobalFunctions_Primitives_{{ p.type }}_PassValue_min() {
                 try {
-                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+                    Global.GlobalFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -106,7 +109,7 @@ namespace Olympus.Foundation.Tests {
             [Test]
             public static void GlobalFunctions_Primitives_{{ p.type }}_PassValue_max() {
                 try {
-                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+                    Global.GlobalFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -116,7 +119,7 @@ namespace Olympus.Foundation.Tests {
             // Get {{ p.type }} min value via out parameter
             [Test]
             public static void GlobalFunctions_Primitives_{{ p.type }}_PassOut_min() {
-                Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassOut_min(out var result);
+                Global.GlobalFunctions_Primitives_{{ p.type }}_PassOut_min(out var result);
 
                 {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
             }
@@ -124,7 +127,7 @@ namespace Olympus.Foundation.Tests {
             // Get {{ p.type }} max value via out parameter
             [Test]
             public static void GlobalFunctions_Primitives_{{ p.type }}_PassOut_max() {
-                Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassOut_max(out var result);
+                Global.GlobalFunctions_Primitives_{{ p.type }}_PassOut_max(out var result);
 
                 {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
             }
@@ -135,7 +138,7 @@ namespace Olympus.Foundation.Tests {
                 var value = {{ p.min }};
 
                 try {
-                    Foundation.GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax(ref value);
+                    Global.GlobalFunctions_Primitives_{{ p.type }}_PassInOut_minmax(ref value);
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -152,7 +155,7 @@ namespace Olympus.Foundation.Tests {
             [Test]
             public static void GlobalFunctions_String_Pass{{ x }}() {
                 try {
-                    Foundation.GlobalFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+                    Global.GlobalFunctions_String_Pass{{ x }}("{{ config.string_value }}");
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -169,7 +172,7 @@ namespace Olympus.Foundation.Tests {
                 using var instance = new MyClass({{ config.class_int_value_first }});
 
                 try {
-                    Foundation.GlobalFunctions_MyClass_Pass{{ x }}(instance);
+                    Global.GlobalFunctions_MyClass_Pass{{ x }}(instance);
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -181,6 +184,218 @@ namespace Olympus.Foundation.Tests {
         /********************************/
         /*           Classes            */
         /********************************/
+
+        /// Constructors
+
+        static List<ConstructorInfo> GetAllConstructors(this Type type) {
+            var flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance;
+            var ctors = type.GetConstructors(flags).ToList();
+
+            // Remove internal NativePointer constructor
+            ctors.Remove(
+                ctors.Find(
+                    c =>
+                        c.GetParameters().Length == 1
+                        && c.GetParameters()[0].ParameterType.Name == "NativePointer"
+                )
+            );
+
+            return ctors;
+        }
+
+        [Test]
+        public static void Check_DefaultConstructorClass_Constructors() {
+            var ctors = typeof(DefaultConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+
+            var ctor = ctors[0];
+
+            Assert.IsFalse(ctor.IsStatic);
+            Assert.IsFalse(ctor.IsVirtual);
+
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 0);
+        }
+
+        [Test]
+        public static void Create_DefaultConstructorClass() {
+            using var instance = new DefaultConstructorClass();
+
+            Assert.IsTrue(instance.PointerIsValid);
+            Assert.AreEqual(instance.SomeValue, {{ config.class_int_value_first }});
+        }
+
+        [Test]
+        public static void Check_ParameterConstructorClass_Constructors() {
+            var ctors = typeof(ParameterConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+
+            var ctor = ctors[0];
+
+            Assert.IsFalse(ctor.IsStatic);
+            Assert.IsFalse(ctor.IsVirtual);
+
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 1);
+            Assert.AreEqual(@params[0].ParameterType, typeof(int));
+        }
+
+        [Test]
+        public static void Create_ParameterConstructorClass() {
+            using var instance = new ParameterConstructorClass({{ config.class_int_value_first }});
+
+            Assert.IsTrue(instance.PointerIsValid);
+            Assert.AreEqual(instance.SomeValue, {{ config.class_int_value_first }});
+        }
+
+        [Test]
+        public static void Check_ParametersConstructorClass_Constructors() {
+            var ctors = typeof(ParametersConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+
+            var ctor = ctors[0];
+
+            Assert.IsFalse(ctor.IsStatic);
+            Assert.IsFalse(ctor.IsVirtual);
+
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 2);
+            Assert.AreEqual(@params[0].ParameterType, typeof(int));
+            Assert.AreEqual(@params[1].ParameterType, typeof(bool));
+        }
+
+        [Test]
+        public static void Create_ParametersConstructorClass() {
+            using var instance = new ParametersConstructorClass({{ config.class_int_value_first }}, true);
+
+            Assert.IsTrue(instance.PointerIsValid);
+            Assert.AreEqual(instance.SomeValue, {{ config.class_int_value_first }});
+            Assert.AreEqual(instance.AnotherValue, true);
+        }
+
+        [Test]
+        public static void Check_MultipleConstructorsClass_Constructors() {
+            var ctors = typeof(MultipleConstructorsClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 2);
+
+            bool found1 = false, found2 = false;
+
+            foreach (var ctor in ctors) {
+                Assert.IsFalse(ctor.IsStatic);
+                Assert.IsFalse(ctor.IsVirtual);
+
+                var @params = ctor.GetParameters();
+
+                if (@params.Length == 0) {
+                    found1 = true;
+                }
+                else if (@params.Length == 1) {
+                    Assert.AreEqual(@params[0].ParameterType, typeof(int));
+
+                    found2 = true;
+                }
+                else {
+                    Assert.Fail("Unexpected constructor found!");
+                }
+            }
+
+            Assert.IsTrue(found1 && found2);
+        }
+
+        [Test]
+        public static void Create_MultipleConstructorsClass() {
+            // Default
+            {
+                using var instance = new MultipleConstructorsClass();
+
+                Assert.IsTrue(instance.PointerIsValid);
+                Assert.AreEqual(instance.SomeValue, {{ config.class_int_value_first }});
+            }
+
+            // Single parameter
+            {
+                using var instance = new MultipleConstructorsClass({{ config.class_int_value_second }});
+
+                Assert.IsTrue(instance.PointerIsValid);
+                Assert.AreEqual(instance.SomeValue, {{ config.class_int_value_second }});
+            }
+        }
+
+        [Test]
+        public static void Check_ProtectedConstructorClass_Constructors() {
+            var ctors = typeof(ProtectedConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+            
+            var ctor = ctors[0];
+
+            Assert.IsTrue(ctor.IsFamily);
+            
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 0);
+        }
+
+        [Test]
+        public static void Check_PrivateConstructorClass_Constructors() {
+            var ctors = typeof(PrivateConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+            
+            var ctor = ctors[0];
+
+            Assert.IsTrue(ctor.IsFamily);
+            
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 0);
+        }
+
+        [Test]
+        public static void Check_DeletedConstructorClass_Constructors() {
+            var ctors = typeof(DeletedConstructorClass).GetAllConstructors();
+
+            Assert.AreEqual(ctors.Count, 1);
+            
+            var ctor = ctors[0];
+
+            Assert.IsTrue(ctor.IsFamily);
+            
+            var @params = ctor.GetParameters();
+
+            Assert.AreEqual(@params.Length, 0);
+        }
+
+
+        // Destructors
+
+        [Test]
+        public static void Check_PublicDestructorClass_Destructor() {
+            Assert.IsTrue(typeof(IDisposable).IsAssignableFrom(typeof(PublicDestructorClass)));
+        }
+
+        [Test]
+        public static void Check_ProtectedDestructorClass_Destructor() {
+            Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(ProtectedDestructorClass)));
+        }
+
+        [Test]
+        public static void Check_PrivateDestructorClass_Destructor() {
+            Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(PrivateDestructorClass)));
+        }
+
+        [Test]
+        public static void Check_DeletedDestructorClass_Destructor() {
+            Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(DeletedDestructorClass)));
+        }
+
 
         /// Fields
 
@@ -195,7 +410,7 @@ namespace Olympus.Foundation.Tests {
             };
 
             try {
-                Foundation.Check_PrimitiveFieldTestClass_Fields(instance);
+                Global.Check_PrimitiveFieldTestClass_Fields(instance);
             }
             catch (RuntimeWrappedException e) {
                 Assert.Fail(e.Message);
@@ -205,7 +420,7 @@ namespace Olympus.Foundation.Tests {
         [Test]
         public static void Set_PrimitiveFieldTestClass_Fields() {
             var instance = new PrimitiveFieldTestClass();
-            Foundation.Set_PrimitiveFieldTestClass_Fields(instance);
+            Global.Set_PrimitiveFieldTestClass_Fields(instance);
 
             {% for p in config.primitives %}
                 {% set field_name %}
@@ -226,7 +441,7 @@ namespace Olympus.Foundation.Tests {
             };
 
             try {
-                Foundation.Check_StringFieldTestClass_Field(instance);
+                Global.Check_StringFieldTestClass_Field(instance);
             }
             catch (RuntimeWrappedException e) {
                 Assert.Fail(e.Message);
@@ -236,7 +451,7 @@ namespace Olympus.Foundation.Tests {
         [Test]
         public static void Set_StringFieldTestClass_Field() {
             var instance = new StringFieldTestClass();
-            Foundation.Set_StringFieldTestClass_Field(instance);
+            Global.Set_StringFieldTestClass_Field(instance);
 
             Assert.AreEqual(instance.Field, "{{ config.class_string_value_second }}");
         }
@@ -250,7 +465,7 @@ namespace Olympus.Foundation.Tests {
             instance.Field.ACoolInteger = {{ config.class_int_value_first }};
 
             try {
-                Foundation.Check_ClassFieldTestClass_Field(instance);
+                Global.Check_ClassFieldTestClass_Field(instance);
             }
             catch (RuntimeWrappedException e) {
                 Assert.Fail(e.Message);
@@ -260,7 +475,7 @@ namespace Olympus.Foundation.Tests {
         [Test]
         public static void Set_ClassFieldTestClass_Field() {
             var instance = new ClassFieldTestClass();
-            Foundation.Set_ClassFieldTestClass_Field(instance);
+            Global.Set_ClassFieldTestClass_Field(instance);
 
             Assert.AreEqual(instance.Field.ACoolInteger, {{ config.class_int_value_second }});
         }

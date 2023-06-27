@@ -1,63 +1,56 @@
-# 🧱 Foundation
-
-[![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/magnopus/olympus-foundation/blob/main/LICENSE)
-[![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus/olympus-foundation/blob/main/LICENSE)
-
+# 🌎 Connected Spaces Platform
 
 _"An interoperable communication library for the next generation of the internet."_
 
-⚡️ Current Supported Languages : C++, C#, Web Assembly, Android, IOS and MacOS
+⚡️ Current Supported Languages : C++, C#, Web Assembly
+
+🖥️ Current Supported Platforms : Windows, Android, IOS and MacOS
 
 ****
 
 ## Background
-Foundation is a library providing an interface over a set of cloud hosted services. The library and the services combined form the Connected Spaces Platform and afford client application developers across a range of language and platforms with a means to build cross-reality, multi-user, interactive applications. Those applications then enable users to interact with either pre-authored content baked into the application, or user-generated content delivered on the fly.
+This is the Connected Spaces Platform client API documentation. The API affords client application developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
 
 ****
 
 ## 📦 Install
-Currently NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus/packages?repo_name=olympus-foundation)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform)
 
-- Web Installation:  `npm install @magnopus/com.magnopus.olympus.foundation.web@4.1.1`
+- Web Installation:  `npm install @magnopus-opensource/connected-spaces-platform.web`
 
-- Unity Installation: `npm install @magnopus/com.magnopus.olympus.foundation.unity.core@4.1.1`
+- Unity Installation: `npm install @magnopus-opensource/connected-spaces-platform.unity.core`
 
-For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus/olympus-foundation/releases).
+For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each language supported in Foundation are below.
+Build instructions for each language supported are below.
 
-- WebAssembly 
-    - [Building Foundation for Web](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-Web)
-- C++
-    - [Building Foundation for C++](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-CPP)
-
-- C#
-    - [Building Foundation for C#](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-CSharp)
-
-- Android
-    - [Building Foundation for Android](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-Android)
-
-- MacOS
-    - [Building Foundation for MacOS](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-MacOS)
-
-- IOS
-    - [Building Foundation for IOS](https://github.com/magnopus/olympus-foundation/wiki/Building-Foundation-for-IOS)
+- [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
+- [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
+- [Building for C#](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CSharp)
+- [Building for Android](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Android)
+- [Building for MacOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-MacOS)
+- [Building for IOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-IOS)
 
 ****
+
 ## 🖥️ Usage
-HelloWorld Examples for each language supported in Foundation are below.
+Examples for each language supported are below.
 
 - WebAssembly 
-    - [Web HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/Web)
+- WebAssembly 
+    - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/Web)
 - C++
-    - [C++ HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CPlusPlus/HelloWorld)
+    - [C++ Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
 
-- C#
-    - [Unity C# HelloWorld Example](https://github.com/magnopus/olympus-foundation/tree/main/Examples/CSharp/Foundation-Unity-Example)
-    
+- Unity C#
+    - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
+
 ****
  ## 📖 Api Documentation
 ```eval_rst
@@ -70,4 +63,4 @@ HelloWorld Examples for each language supported in Foundation are below.
 ****
  ## ©️ License
 
- [Apache-2.0](https://github.com/magnopus/olympus-foundation/blob/main/LICENSE)
+ [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)

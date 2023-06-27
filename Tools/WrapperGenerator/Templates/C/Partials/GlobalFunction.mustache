@@ -126,7 +126,7 @@
 
 {{# return_type }}
 {{# is_string }}
-    auto _resultBuffer = (char*)oly_memory::DllAlloc(_result.Length() + 1);
+    auto _resultBuffer = (char*)csp::memory::DllAlloc(_result.Length() + 1);
     std::memcpy(_resultBuffer, _result.c_str(), _result.Length());
     _resultBuffer[_result.Length()] = '\0';
 
