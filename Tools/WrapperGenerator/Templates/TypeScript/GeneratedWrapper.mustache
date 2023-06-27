@@ -37,7 +37,7 @@ function objectToPointer(obj: any): [pointer: number, shouldFree: boolean] {
   throw new Error("Cannot convert object to pointer!");
 }
 
-export class FoundationOptions {
+export class CspOptions {
   wrapperUrl: string
   /**
    * If this is a relative path, it is interpreted as being relative to the wrapperUrl path.
@@ -49,9 +49,9 @@ export class FoundationOptions {
   workerUrl: string
 }
 
-export function ready(args: boolean | FoundationOptions = false) {
-  // If an instance of FoundationOptions is passed, we should use the paths provided to load any Foundation files
-  if (args instanceof FoundationOptions) {
+export function ready(args: boolean | CspOptions = false) {
+  // If an instance of CspOptions is passed, we should use the paths provided to load any CSP files
+  if (args instanceof CspOptions) {
     Module["locateFile"] = function(path: string, scriptDirectory: string) {
       if (Module["locateFilePaths"].hasOwnProperty(path)) {
         let substitutePath: string = Module["locateFilePaths"][path];
@@ -87,7 +87,7 @@ export function ready(args: boolean | FoundationOptions = false) {
   
       importPromise.then((loadedModule: any) => {
         loadedModule.default(Module).then((mod: any) => {
-          console.log("Foundation binary ready!");
+          console.log("CSP binary ready!");
           resolve(Module);
         });
       });
@@ -113,7 +113,7 @@ export function ready(args: boolean | FoundationOptions = false) {
   
       importPromise.then((loadedModule: any) => {
         loadedModule.default(Module).then((mod: any) => {
-          console.log("Foundation binary ready!");
+          console.log("CSP binary ready!");
           resolve(Module);
         });
       });

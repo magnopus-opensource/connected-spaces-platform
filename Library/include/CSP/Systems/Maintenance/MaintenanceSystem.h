@@ -58,8 +58,8 @@ public:
 	CSP_ASYNC_RESULT void GetMaintenanceInfo(MaintenanceInfoCallback Callback);
 
 	/// @brief Checked to see if there is currently a planned maintenance outage
-	/// @param Callback BooleanResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void IsInsideMaintenanceWindow(BooleanResultCallback Callback);
+	/// @param Callback InsideMaintenanceWindowCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void IsInsideMaintenanceWindow(InsideMaintenanceWindowCallback Callback);
 
 private:
 	MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

@@ -77,7 +77,7 @@ export function {{ this.name | typescriptify }}(
         {% endif %}
     {% endif %}
     
-    {# Call Foundation via C wrapper #}
+    {# Call CSP via C wrapper #}
     Module.ccall(
         "{{ this.unique_name }}",
         {% if this.return_type is none or returns_pointer -%}

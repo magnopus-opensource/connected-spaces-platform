@@ -188,9 +188,6 @@ export const assert = {
      * @param {*} b 
      */
     areEqual(a, b) {
-        if (a === undefined || b === undefined)
-            throw new AssertionError('One of input values was undefined!');
-
         if (a != b)
             throw new AssertionError(`${a} == ${b}`);
     },
@@ -216,9 +213,6 @@ export const assert = {
      * @param {*} b 
      */
     areNotEqual(a, b) {
-        if (a === undefined || b === undefined)
-            throw new AssertionError('One of input values was undefined!');
-
         if (a == b)
             throw new AssertionError(`${a} != ${b}`);
     },

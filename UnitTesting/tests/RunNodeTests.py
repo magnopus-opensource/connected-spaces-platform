@@ -30,7 +30,7 @@ def main():
   "displayName": "olympus.foundation.dummy",
   "version": "1.3.37",
   "description": "Exposes dummy code for unit-testing Foundation for Web",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "dependencies": {
   },
   "main": "./olympus.foundation.js",
