@@ -752,7 +752,11 @@ class Parser:
             word = reader.next_word()
         
         if word == '=':
-            reader.next_word()   # Should be 'delete' or '0'
+            word = reader.next_word()   # Should be 'delete' or '0'
+
+            if word == 'delete':
+                _function.is_private = True
+
             word = reader.next_word()
         elif word == ':':
             word = reader.next_word()
@@ -1000,7 +1004,7 @@ class Parser:
                         res.is_explicit_converter = is_explicit
                         res.parent_class = _class
                         res.unique_name = self.__create_unique_function_name(res)
-                        res.is_private = modifier != AccessModifier.PUBLIC
+                        res.is_private = res.is_private or modifier != AccessModifier.PUBLIC
 
                         if modifier == AccessModifier.PUBLIC or (res.is_constructor or res.is_destructor):
                             methods.append(res)

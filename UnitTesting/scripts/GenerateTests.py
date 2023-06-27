@@ -60,7 +60,7 @@ def main():
     unity_tests_template = env.get_template('tests.cs.jinja2')
 
     with open('tests/csharp/Assets/Tests/generated/tests.cs', 'w') as f:
-        f.write(unity_tests_template.render(config=config))
+        f.write(unity_tests_template.render(config=_config))
 
     # Generate Node (JavaScript) tests
 

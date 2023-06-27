@@ -4,7 +4,7 @@
 
 namespace Csp
 {
-    public static class Foundation
+    public static class Global
     {
         #region P/Invoke
         
@@ -171,7 +171,7 @@ namespace Csp
 {{# return_type }}
 {{# is_string }}
             var _stringResult = WrapperHelper.NativeUTF8ToString(_result);
-            Foundation.Free(_result);
+            Global.Free(_result);
 
             return _stringResult;
 {{/ is_string }}
