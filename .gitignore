@@ -74,7 +74,7 @@ Tools/Emscripten/EmscriptenBuild.log
 !Tools/SpaceMigrationTool/SpaceMigrationTool.vcxproj
 !Tools/SpaceMigrationTool/SpaceMigrationTool.vcxproj.filters
 
-/Library/include/Olympus/version.h
+/Library/include/CSP/version.h
 /Tools/OlympusBuildTool/Saved/config.json
 
 # Ignore temporary Unity3D files

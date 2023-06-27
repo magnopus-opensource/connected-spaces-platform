@@ -55,10 +55,10 @@ namespace csp {
     // String
 
     // Return string by value
-    CSP_API oly_common::String GlobalFunctions_String_ReturnValue();
+    CSP_API csp::common::String GlobalFunctions_String_ReturnValue();
 
     // Return string by const reference
-    CSP_API const oly_common::String& GlobalFunctions_String_ReturnConstReference();
+    CSP_API const csp::common::String& GlobalFunctions_String_ReturnConstReference();
 
 
     // Classes
@@ -162,33 +162,104 @@ namespace csp {
     // String
 
     // Pass string by value
-    CSP_API void GlobalFunctions_String_PassValue(oly_common::String Value);
+    CSP_API void GlobalFunctions_String_PassValue(csp::common::String Value);
 
     // Pass string by const reference
-    CSP_API void GlobalFunctions_String_PassConstReference(const oly_common::String& Value);
+    CSP_API void GlobalFunctions_String_PassConstReference(const csp::common::String& Value);
 
 
     // Classes
 
     // Pass class by value
-    CSP_API void GlobalFunctions_MyClass_PassValue(oly::MyClass Value);
+    CSP_API void GlobalFunctions_MyClass_PassValue(csp::MyClass Value);
 
     // Pass class by pointer
-    CSP_API void GlobalFunctions_MyClass_PassPointer(oly::MyClass* Value);
+    CSP_API void GlobalFunctions_MyClass_PassPointer(csp::MyClass* Value);
 
     // Pass class by const pointer
-    CSP_API void GlobalFunctions_MyClass_PassConstPointer(const oly::MyClass* Value);
+    CSP_API void GlobalFunctions_MyClass_PassConstPointer(const csp::MyClass* Value);
 
     // Pass class by reference
-    CSP_API void GlobalFunctions_MyClass_PassReference(oly::MyClass& Value);
+    CSP_API void GlobalFunctions_MyClass_PassReference(csp::MyClass& Value);
 
     // Pass class by const reference
-    CSP_API void GlobalFunctions_MyClass_PassConstReference(const oly::MyClass& Value);
+    CSP_API void GlobalFunctions_MyClass_PassConstReference(const csp::MyClass& Value);
 
 
     /********************************/
     /*           Classes            */
     /********************************/
+
+    /// Constructors
+
+    class CSP_API DefaultConstructorClass {
+    public:
+        DefaultConstructorClass();
+
+        int SomeValue;
+    };
+
+    class CSP_API ParameterConstructorClass {
+    public:
+        ParameterConstructorClass(int SomeParameter);
+
+        int SomeValue;
+    };
+
+    class CSP_API ParametersConstructorClass {
+    public:
+        ParametersConstructorClass(int SomeParameter, bool AnotherParameter);
+
+        int SomeValue;
+        bool AnotherValue;
+    };
+
+    class CSP_API MultipleConstructorsClass {
+    public:
+        MultipleConstructorsClass();
+        MultipleConstructorsClass(int SomeParameter);
+
+        int SomeValue;
+    };
+
+    class CSP_API ProtectedConstructorClass {
+    protected:
+        ProtectedConstructorClass() {};
+    };
+
+    class CSP_API PrivateConstructorClass {
+    private:
+        PrivateConstructorClass() {};
+    };
+
+    class CSP_API DeletedConstructorClass {
+    public:
+        DeletedConstructorClass() = delete;
+    };
+
+    
+    // Destructors
+
+    class CSP_API PublicDestructorClass {
+    public:
+        ~PublicDestructorClass() {};
+    };
+
+    class CSP_API ProtectedDestructorClass {
+    protected:
+        ~ProtectedDestructorClass() {};
+    };
+
+    class CSP_API PrivateDestructorClass {
+    private:
+        ~PrivateDestructorClass() {};
+    };
+
+    class CSP_API DeletedDestructorClass {
+    public:
+        ~DeletedDestructorClass() = delete;
+    };
+
 
     /// Fields
 
@@ -212,7 +283,7 @@ namespace csp {
 
     class CSP_API StringFieldTestClass {
     public:
-        oly_common::String Field;
+        csp::common::String Field;
     };
 
     // Pass class and check string field values

@@ -273,7 +273,7 @@ class TypeScriptWrapperGenerator:
 
                     for pa in p.type.function_signature.parameters:
                         full_type_name = f"{pa.type.namespace}::{pa.type.name}"
-                        setattr(pa.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'oly_services', 'ResultBase', classes))
+                        setattr(pa.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'csp::services', 'ResultBase', classes))
 
                     m.parameters.remove(p)
                     
@@ -365,7 +365,7 @@ class TypeScriptWrapperGenerator:
 
                     for pa in p.type.function_signature.parameters:
                         full_type_name = f"{pa.type.namespace}::{pa.type.name}"
-                        setattr(pa.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'oly_services', 'ResultBase', classes))
+                        setattr(pa.type, 'is_result_base', full_type_name in classes and self.__class_derives_from(classes[full_type_name], 'csp::services', 'ResultBase', classes))
 
                     m.parameters.remove(p)
                     
