@@ -19,7 +19,7 @@ namespace CSPEngine
             using var MaintenanceInfoResponses = result.GetMaintenanceInfoResponses();
             Assert.AreEqual(MaintenanceInfoResponses.Size(), 1UL);
 
-            Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday at 2am PST");
+            Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday 2122 at 2am PST");
             Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].StartDateTimestamp, "2122-04-30T02:00:00+0000");
             Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].EndDateTimestamp, "2122-04-30T03:00:00+0000");
 
@@ -37,7 +37,7 @@ namespace CSPEngine
             using var InsideMaintenanceInfoResponse = result.GetInsideMaintenanceInfo();
             Assert.IsFalse(InsideMaintenanceInfoResponse.IsInsideMaintenanceWindow);
 
-            Assert.AreEqual(InsideMaintenanceInfoResponse.Description, "Example downtime for a Saturday at 2am PST");
+            Assert.AreEqual(InsideMaintenanceInfoResponse.Description, "Example downtime for a Saturday 2122 at 2am PST");
             Assert.AreEqual(InsideMaintenanceInfoResponse.StartDateTimestamp, "2122-04-30T02:00:00+0000");
             Assert.AreEqual(InsideMaintenanceInfoResponse.EndDateTimestamp, "2122-04-30T03:00:00+0000");
 

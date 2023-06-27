@@ -47,18 +47,35 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 		JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
 		assert(JsonDoc.IsArray());
-		MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
-		const auto TimeNow		 = csp::common::DateTime::UtcTimeNow().GetTimePoint();
+		auto LocalArray = csp::common::Array<MaintenanceInfo>(JsonDoc.Size());
+
+		const auto TimeNow		= csp::common::DateTime::UtcTimeNow().GetTimePoint();
+		uint32_t ArrayShrinkage = 0;
+
 		for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
 		{
 			// remove old maintenance windows
 			if (TimeNow <= csp::common::DateTime(JsonDoc[i]["End"].GetString()).GetTimePoint())
 			{
-				MaintenanceInfoResponses[i].Description		   = JsonDoc[i]["Description"].GetString();
-				MaintenanceInfoResponses[i].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
-				MaintenanceInfoResponses[i].EndDateTimestamp   = JsonDoc[i]["End"].GetString();
+				LocalArray[i - ArrayShrinkage].Description		  = JsonDoc[i]["Description"].GetString();
+				LocalArray[i - ArrayShrinkage].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
+				LocalArray[i - ArrayShrinkage].EndDateTimestamp	  = JsonDoc[i]["End"].GetString();
 			}
+			else
+			{
+				ArrayShrinkage++;
+			};
 		}
+
+		MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size() - ArrayShrinkage);
+
+		for (uint32_t i = 0; i < (JsonDoc.Size() - ArrayShrinkage); i++)
+		{
+			MaintenanceInfoResponses[i].Description		   = LocalArray[i].Description;
+			MaintenanceInfoResponses[i].StartDateTimestamp = LocalArray[i].StartDateTimestamp;
+			MaintenanceInfoResponses[i].EndDateTimestamp   = LocalArray[i].EndDateTimestamp;
+		}
+
 		// Sort maintenance windows by latest date
 		SortMaintenanceInfos(MaintenanceInfoResponses);
 	}
