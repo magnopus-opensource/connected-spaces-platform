@@ -2373,15 +2373,15 @@ namespace CSPEngine
                     Assert.AreEqual(customComponent.HasCustomProperty("BooleanFalse"), false);
                 }
 
-                // Size Check
+                // Size Check, Including Application Origin
                 {
-                    Assert.AreEqual(customComponent.GetNumProperties(), 6);
+                    Assert.AreEqual(customComponent.GetNumProperties(), 7);
                 }
 
                 // Remove Key Check
                 {
                     customComponent.RemoveCustomProperty("Boolean");
-                    Assert.AreEqual(customComponent.GetNumProperties(), 5);
+                    Assert.AreEqual(customComponent.GetNumProperties(), 6);
                 }
 
                 entitySystem.QueueEntityUpdate(createdObject);
