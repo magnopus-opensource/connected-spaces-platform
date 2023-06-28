@@ -30,6 +30,7 @@ namespace csp::multiplayer
 enum class CustomComponentPropertyKeys
 {
 	ApplicationOrigin,
+	CustomPropertyList,
 	Num
 };
 
@@ -84,7 +85,7 @@ public:
 	/// @brief Returns the hash of the provided Key.
 	/// @param Key The key for which an hash will be produced.
 	/// @return The resulting hash for the provided Key.
-	uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& Key);
+	uint32_t GetCustomPropertySubscriptionKey(const csp::common::String& Key) const;
 
 private:
 	void AddKey(const csp::common::String& Key);
