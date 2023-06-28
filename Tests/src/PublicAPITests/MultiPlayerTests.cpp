@@ -4604,28 +4604,23 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 
 			// Vector Check
 			{
-				CustomComponent->SetCustomProperty("Vector3", ReplicatedValue({10, 10, 10}));
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({10, 10, 10}));
 
-				CustomComponent->SetCustomProperty("Vector4", ReplicatedValue({10, 10, 10, 10}));
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({10, 10, 10, 10}));
 			}
 
 			// String Check
 			{
-				CustomComponent->SetCustomProperty("String", ReplicatedValue("OKO"));
 				EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
 			}
 
 			// Integer Check
 			{
-				CustomComponent->SetCustomProperty("Integer", ReplicatedValue(int64_t(1)));
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
 			}
 
 			// Float Check
 			{
-				CustomComponent->SetCustomProperty("Float", ReplicatedValue(1.00f));
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
 			}
 

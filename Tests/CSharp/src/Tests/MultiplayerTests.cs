@@ -2414,12 +2414,10 @@ namespace CSPEngine
 
                     // Vector Check
                     {
-                        customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1, 1, 1)));
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
 
-                        customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1, 1, 1, 1)));
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
                         Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
@@ -2428,19 +2426,16 @@ namespace CSPEngine
 
                     // String Check
                     {
-                        customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
                         Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
                     }
 
                     // Integer Check
                     {
-                        customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
                         Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
                     }
 
                     // Float Check
                     {
-                        customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
                         Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
                     }
 
