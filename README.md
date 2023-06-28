@@ -83,7 +83,7 @@ Examples for each language supported are below.
 
 You can always find up-to-date documentation on the API here.
 
- - [CSP API Documentation](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+ - [CSP API Documentation](https://builds.magnoboard.com/foundation-docs/index.html)
 
 
 ****
