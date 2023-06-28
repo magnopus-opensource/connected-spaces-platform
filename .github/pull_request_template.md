@@ -1,4 +1,4 @@
-Olympus Foundation Pull  Request
+connected-spaces-platform Pull Request
 
 **For the reviewer**
 
