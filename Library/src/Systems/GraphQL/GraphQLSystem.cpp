@@ -46,8 +46,8 @@ void GraphQLSystem::RunFullQuery(const csp::common::String QueryText, GraphQLRec
 {
 	std::ostringstream strm;
 	std::string QueryTextStr = QueryText.c_str();
-    	std::regex reg("\"");
-	QueryTextStr = std::regex_replace(QueryTextStr, reg, "\\\"");
+    // std::regex reg("\"");
+	// QueryTextStr = std::regex_replace(QueryTextStr, reg, "\\\"");
 	strm << QueryTextStr;
 	csp::services::ResponseHandlerPtr GraphQLResponseHandler
 		= GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr);
