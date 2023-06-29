@@ -61,7 +61,6 @@ if not POCO.NETSSL_OpenSSL then
             }
 
             links {
-                "WS2_32",
                 "crypt32",
                 "libcrypto.lib",
                 "libssl.lib",

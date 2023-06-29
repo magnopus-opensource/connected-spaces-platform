@@ -101,7 +101,7 @@ private:
 
 private:
 	// Allocate internally to avoid warning C4251 'needs to have dll-interface to be used by clients'
-	class LogCallbacks* Callbacks;
+	struct LogCallbacks* Callbacks;
 };
 
 } // namespace csp::systems

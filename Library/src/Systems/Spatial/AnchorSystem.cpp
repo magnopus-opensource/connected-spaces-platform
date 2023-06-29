@@ -148,7 +148,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
 
 	AnchorInfo->SetThirdPartyAnchorId(ThirdPartyAnchorId);
 	AnchorInfo->SetReferenceId(SpaceId);
-	AnchorInfo->SetAnchoredMultiplayerObjectId(SpaceEntityId);
+	AnchorInfo->SetAnchoredMultiplayerObjectId(static_cast<int32_t>(SpaceEntityId));
 	AnchorInfo->SetAnchoredPrototypeId(AssetCollectionId);
 
 	auto DTOLocation = std::make_shared<chs::GeoCoord>();
