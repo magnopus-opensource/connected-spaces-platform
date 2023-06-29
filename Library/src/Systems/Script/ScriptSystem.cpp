@@ -423,9 +423,86 @@ void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collect
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
 	// check collection doesn't have module already. if it does create an invalid nullresult::invalid and set the response body to something
-	// meaningful create the script module asset that will hold the script create the asset data which stores moduleText and upload it get the
-	// lookuptable from the collection add entry to the lookup table, turn back into json and then uuse the lookuptableid to update the assetdata call
+	// meaningful
+	// We need to fetch the lookuptable asset - create a function to do this for us and converts json into map.
+	const auto& LookupTable = Collection.GetLookupTable();
+	if (LookupTable.HasKey(Name))
+	{
+		NullResult InvalidNullResult = NullResult::Invalid();
+		Callback(InvalidNullResult);
+	}
+
+	// create the script module asset that will hold the script
+	// create the asset data which stores moduleText and upload it
+	// get the lookuptable from the collection
+	// add entry to the lookup table, turn back into json and then uuse the lookuptableid to update the assetdata call
 	// callback
+
+	csp::systems::AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id	 = Collection.GetId();
+	InternalAssetCollection.Type = EAssetCollectionType::SCRIPT_MODULE_COLLECTION;
+
+	AssetResultCallback CreateAssetCallback
+		= [AssetSystem, InternalAssetCollection, Collection, Name, ModuleText, Callback](const AssetResult& Result)
+	{
+		const auto& Asset = Result.GetAsset();
+
+		BufferAssetDataSource AssetData;
+		AssetData.SetMimeType("text/javascript");
+		AssetData.Buffer	   = const_cast<char*>(ModuleText.c_str());
+		AssetData.BufferLength = ModuleText.Length();
+
+		UriResultCallback UploadAssetDataCallback = [Collection, Name, Asset, InternalAssetCollection, AssetSystem, Callback](const UriResult& Result)
+		{
+			ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+			auto& InternalCollection = InternalResult.GetCollection();
+
+			AssetResultCallback GetAssetCallback = [InternalCollection, AssetSystem, InternalAssetCollection, Callback](const AssetResult& Result)
+			{
+				const auto& Asset = Result.GetAsset();
+
+				const auto& LookupTable = InternalCollection.GetLookupTable();
+				auto* Keys				= LookupTable.Keys();
+
+				rapidjson::Document JsonDoc(rapidjson::kObjectType);
+
+				for (auto idx = 0; idx < Keys->Size(); ++idx)
+				{
+					auto Key   = Keys->operator[](idx);
+					auto Value = LookupTable.operator[](Key);
+
+					rapidjson::Value ObjectKey;
+					ObjectKey.SetString(Key.c_str(), JsonDoc.GetAllocator());
+					rapidjson::Value ObjectValue;
+					ObjectValue.SetString(Value.c_str(), JsonDoc.GetAllocator());
+					JsonDoc.AddMember(ObjectKey, Value, JsonDoc.GetAllocator());
+				}
+
+				BufferAssetDataSource AssetData;
+				AssetData.SetMimeType("application/json");
+				AssetData.Buffer	   = const_cast<char*>(JsonDoc.GetString());
+				AssetData.BufferLength = 2;
+
+				UriResultCallback UploadAssetDataCallback = [Callback](const UriResult& Result)
+				{
+					NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+					Callback(InternalResult);
+				};
+
+				AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UploadAssetDataCallback);
+			};
+
+			// Get the Lookuptable Asset.
+			AssetSystem->GetAssetById(InternalCollection.GetId(), InternalCollection.LookupTableId, GetAssetCallback);
+		};
+
+		AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UploadAssetDataCallback);
+	};
+
+	// Change this to instead take the AssetCollectionId - update method
+	AssetSystem->CreateAsset(InternalAssetCollection, Name, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateAssetCallback);
 }
 
 } // namespace csp::systems

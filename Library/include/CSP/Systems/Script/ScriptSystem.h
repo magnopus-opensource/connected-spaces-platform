@@ -193,6 +193,7 @@ public:
 												  const NullResultCallback& Callback);
 	CSP_ASYNC_RESULT void
 		DeleteScriptModuleAsset(const ScriptModuleCollection& Collection, const ScriptModuleAsset& Module, const NullResultCallback& Callback);
+	// Will also need a means of getting the names/Ids of all modules associated with a namespace.
 
 private:
 	ScriptSystem();
