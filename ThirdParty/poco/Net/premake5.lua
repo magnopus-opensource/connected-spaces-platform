@@ -44,8 +44,8 @@ if not POCO.Net then
             disablewarnings {
                 "4005" -- 'NOMINMAX': macro redefinition
             }
+
             links {
-                "WS2_32",
                 "iphlpapi",
             }
         filter "platforms:Android"
