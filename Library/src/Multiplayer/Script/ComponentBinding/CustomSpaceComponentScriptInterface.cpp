@@ -87,7 +87,7 @@ const std::variant<bool, int64_t, float, std::string, std::vector<float>>
 			return ReturnVector;
 		}
 		default:
-			throw std::exception("Unknown ReplicatedValue type!");
+			throw std::runtime_error("Unknown ReplicatedValue type!");
 	}
 }
 

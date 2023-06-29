@@ -57,7 +57,7 @@ void SignalRMsgPackEntitySerialiser::WriteBool(bool Value)
 			CurrentArray.push_back(signalr::value(Value));
 			break;
 		default:
-			throw std::exception("WriteBool() function not supported in current state!");
+			throw std::runtime_error("WriteBool() function not supported in current state!");
 	}
 }
 
@@ -123,7 +123,7 @@ void SignalRMsgPackEntitySerialiser::WriteNull()
 			CurrentArray.push_back(signalr::value(signalr::value_type::null));
 			break;
 		default:
-			throw std::exception("WriteNull() function not supported in current state!");
+			throw std::runtime_error("WriteNull() function not supported in current state!");
 	}
 }
 
@@ -295,7 +295,7 @@ void SignalRMsgPackEntitySerialiser::AddViewComponent(uint16_t Id, const Replica
 			SValue = Value.GetInt();
 			break;
 		default:
-			throw std::exception("Unsupported ViewComponent type!");
+			throw std::runtime_error("Unsupported ViewComponent type!");
 	}
 
 	// Specific data packing for the component, we only store single values (though some are vectors) in these components,
@@ -358,7 +358,7 @@ bool SignalRMsgPackEntityDeserialiser::ReadBool()
 
 			return PropertyObjectHandle.get().via.boolean;
 		default:
-			throw std::exception("ReadBool() function not supported in current state!");
+			throw std::runtime_error("ReadBool() function not supported in current state!");
 	}
 }
 
@@ -377,7 +377,7 @@ uint8_t SignalRMsgPackEntityDeserialiser::ReadByte()
 
 			return PropertyObjectHandle.get().via.u64 & 0xFF;
 		default:
-			throw std::exception("ReadByte() function not supported in current state!");
+			throw std::runtime_error("ReadByte() function not supported in current state!");
 	}
 }
 
@@ -396,7 +396,7 @@ double SignalRMsgPackEntityDeserialiser::ReadDouble()
 
 			return PropertyObjectHandle.get().via.f64;
 		default:
-			throw std::exception("ReadDouble() function not supported in current state!");
+			throw std::runtime_error("ReadDouble() function not supported in current state!");
 	}
 }
 
@@ -416,7 +416,7 @@ int64_t SignalRMsgPackEntityDeserialiser::ReadInt64()
 
 			return PropertyObjectHandle.get().via.i64;
 		default:
-			throw std::exception("ReadInt64() function not supported in current state!");
+			throw std::runtime_error("ReadInt64() function not supported in current state!");
 	}
 }
 
@@ -435,7 +435,7 @@ uint64_t SignalRMsgPackEntityDeserialiser::ReadUInt64()
 
 			return PropertyObjectHandle.get().via.u64;
 		default:
-			throw std::exception("ReadUInt64() function not supported in current state!");
+			throw std::runtime_error("ReadUInt64() function not supported in current state!");
 	}
 }
 
@@ -458,7 +458,7 @@ csp::common::String SignalRMsgPackEntityDeserialiser::ReadString()
 
 			return csp::common::String(PropertyObjectHandle.get().via.str.ptr, PropertyObjectHandle.get().via.str.size);
 		default:
-			throw std::exception("ReadString() function not supported in current state!");
+			throw std::runtime_error("ReadString() function not supported in current state!");
 	}
 }
 
@@ -487,7 +487,7 @@ csp::common::Vector3 SignalRMsgPackEntityDeserialiser::ReadVector3()
 			return {(float) Array[0].via.f64, (float) Array[1].via.f64, (float) Array[2].via.f64};
 		}
 		default:
-			throw std::exception("ReadVector3() function not supported in current state!");
+			throw std::runtime_error("ReadVector3() function not supported in current state!");
 	}
 }
 
@@ -516,7 +516,7 @@ csp::common::Vector4 SignalRMsgPackEntityDeserialiser::ReadVector4()
 			return {(float) Array[0].via.f64, (float) Array[1].via.f64, (float) Array[2].via.f64, (float) Array[3].via.f64};
 		}
 		default:
-			throw std::exception("ReadVector4() function not supported in current state!");
+			throw std::runtime_error("ReadVector4() function not supported in current state!");
 	}
 }
 
@@ -529,7 +529,7 @@ bool SignalRMsgPackEntityDeserialiser::NextValueIsNull()
 		case SerialiserState::InArray:
 			return CurrentArrayIterator->is_null();
 		default:
-			throw std::exception("NextValueIsNull() function not supported in current state!");
+			throw std::runtime_error("NextValueIsNull() function not supported in current state!");
 	}
 }
 
@@ -752,7 +752,7 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 				return csp::common::Vector4 {(float) Array[0].via.f64, (float) Array[1].via.f64, (float) Array[2].via.f64, (float) Array[3].via.f64};
 			}
 			default:
-				throw std::exception("Unsupported property type!");
+				throw std::runtime_error("Unsupported property type!");
 		}
 	}
 	else
@@ -795,7 +795,7 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 				}
 			}
 			default:
-				throw std::exception("Unsupported property type!");
+				throw std::runtime_error("Unsupported property type!");
 		}
 	}
 }
@@ -842,7 +842,7 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::GetViewComponent(uint16_t Id)
 			return ReplicatedValue(static_cast<int64_t>(ComponentValue.as_uinteger()));
 		}
 		default:
-			throw std::exception("Unsupported ViewComponent type!");
+			throw std::runtime_error("Unsupported ViewComponent type!");
 	}
 }
 
@@ -859,7 +859,7 @@ void SignalRMsgPackEntityDeserialiser::Skip()
 			++CurrentFieldIterator;
 			break;
 		default:
-			throw std::exception("Skip() function not supported in current state!");
+			throw std::runtime_error("Skip() function not supported in current state!");
 	}
 }
 
