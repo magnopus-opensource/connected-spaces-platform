@@ -2418,9 +2418,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalThumbnailTest)
 	PortalComponent->SetSpaceId(Space.Id);
 	PortalComponent->GetSpaceThumbnail(Callback);
 
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!HasThumbailResult && TestTime < 20)
 	{
@@ -2678,9 +2678,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessedCallbackTest)
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -2770,9 +2770,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessGracefulFailureCallback
 										 });
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -5912,7 +5912,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
 	Connection	 = EnterResult.GetConnection();
 	EntitySystem = Connection->GetSpaceEntitySystem();
 
@@ -5934,7 +5936,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 	EntitySystem->ProcessPendingEntityOperations();
 
 	// Only 1 script component should be on the object
-	EXPECT_TRUE(SpaceEntity->GetComponents()->Size(), 1);
+	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
 	// Disconnect from the SignalR server
 	auto [Ok] = AWAIT(Connection, Disconnect);

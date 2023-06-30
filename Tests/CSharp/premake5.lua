@@ -41,8 +41,6 @@ if not Tests.CSharp then
             "System",
             "System.Core",
             "Microsoft.CSharp",
-            "OlympusFoundation",
-            "POCOFoundation",
             "CSharpWrapper",
             "MultiplayerTestClient"
         }

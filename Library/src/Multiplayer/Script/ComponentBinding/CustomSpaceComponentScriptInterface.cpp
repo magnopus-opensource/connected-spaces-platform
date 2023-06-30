@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 
 #include "CSP/Common/List.h"
@@ -85,6 +86,8 @@ const std::variant<bool, int64_t, float, std::string, std::vector<float>>
 			ReturnVector = {ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z};
 			return ReturnVector;
 		}
+		default:
+			throw std::runtime_error("Unknown ReplicatedValue type!");
 	}
 }
 
