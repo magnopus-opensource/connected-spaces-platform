@@ -133,7 +133,7 @@ EM_JS(void, set_device_id, (const char* cDeviceId), {
 // clang-format on
 #endif
 
-#if defined(!CSP_WASM)
+#if !defined(CSP_WASM)
 std::string DeviceIdPath()
 {
 	// For all platforms, we want to guarantee the current user has read/write access and to reduce public visibility of the file that holds the
