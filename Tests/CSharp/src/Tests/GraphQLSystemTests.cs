@@ -38,6 +38,16 @@ namespace CSPEngine
 
             // Check Response Contains Space Name
             Assert.IsTrue(test.Contains(testSpaceName));
+
+            //Test our full query endpoint.
+            var testFullQuery = "{\"query\":\"\n\nquery getSpaces($limit:Int!)  {\n  spaces(pagination: {limit:$limit}) {\n    items {\n      name\n    }\n  }\n}\n\n\",\"variables\":{\"limit\":5},\"operationName\":\"getSpaces\"}";
+
+            using var resultFQ = graphQLSystem.RunFullQuery(testFullQuery).Result;
+            var testFQ = resultFQ.GetResponse().ToString();
+
+            // Check Response Contains Space Name
+            Assert.IsTrue(testFQ.Contains(testSpaceName));
+
         }
 #endif
     }
