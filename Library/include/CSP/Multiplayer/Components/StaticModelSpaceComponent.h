@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
 
@@ -41,13 +42,14 @@ enum class StaticModelPropertyKeys
 	IsVisible,
 	IsARVisible,
 	ThirdPartyComponentRef,
+    IsShadowCaster,
 	Num
 };
 
 
 /// @ingroup StaticModelSpaceComponent
 /// @brief Data representation of an StaticModelSpaceComponent.
-class CSP_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef
+class CSP_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef, public IShadowCasterComponent
 {
 public:
 	/// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
@@ -146,6 +148,14 @@ public:
 	const csp::common::String& GetThirdPartyComponentRef() const override;
 	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
 	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
+	/// @}
+    
+    /// \addtogroup IShadowCasterComponent
+	/// @{
+	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
+    bool GetIsShadowCaster() const;
+	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
+    void SetIsShadowCaster(bool Value);
 	/// @}
 };
 
