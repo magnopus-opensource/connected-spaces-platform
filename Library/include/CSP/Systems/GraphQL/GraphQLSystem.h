@@ -51,13 +51,15 @@ class CSP_API CSP_NO_DISPOSE GraphQLSystem : public SystemBase
 public:
 	~GraphQLSystem();
 
-	/// @brief Make a request to the Magnopus Connect Services' GraphQL Server
-	/// @param RequestBody csp::common::String : graphql request body
+	/// @brief Make a request to the Magnopus Connect Services' GraphQL Server, can contain a query, variables and operationName.
+	/// @param RequestBody csp::common::String : graphql request body, JSON encoded string of full graphql request, can include a query, variables and
+	/// operationName.
 	/// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void RunRequest(const csp::common::String RequestBody, GraphQLReceivedCallback ApiResponse);
 
-	/// @brief Sends Query to the Magnopus Connect Services' GraphQL Server
-	/// @param QueryText csp::common::String : graphql query string
+	/// @brief Send basix query to the Magnopus Connect Services' GraphQL Server, this only supports single queries without variables. for variable
+	/// use please see RunRequest.
+	/// @param QueryText csp::common::String : graphql query string. does not use vaiables or operation names.
 	/// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback ApiResponse);
 
