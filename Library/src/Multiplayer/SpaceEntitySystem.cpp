@@ -851,11 +851,11 @@ void SpaceEntitySystem::TickEntityScripts()
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-	const auto CurrentTime	= std::chrono::system_clock::now();
-	const float DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
-	LastTickTime			= CurrentTime;
+	const auto CurrentTime = std::chrono::system_clock::now();
+	const auto DeltaTimeMS = std::chrono::duration_cast<std::chrono::milliseconds>(CurrentTime - LastTickTime).count();
+	LastTickTime		   = CurrentTime;
 
-	const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(DeltaTimeMS);
+	const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
 
 	if (IsLeaderElectionEnabled())
 	{

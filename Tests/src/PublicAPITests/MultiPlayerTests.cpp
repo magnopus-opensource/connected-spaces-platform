@@ -2418,9 +2418,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalThumbnailTest)
 	PortalComponent->SetSpaceId(Space.Id);
 	PortalComponent->GetSpaceThumbnail(Callback);
 
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!HasThumbailResult && TestTime < 20)
 	{
@@ -2678,9 +2678,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessedCallbackTest)
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -2770,9 +2770,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessGracefulFailureCallback
 										 });
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -4447,6 +4447,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
 	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
 
+	const csp::common::String ObjectName		= "Object 1";
+	const csp::common::String ApplicationOrigin = "Application Origin 1";
+
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
@@ -4474,7 +4477,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 			});
 
 		// Create object to represent the Custom fields
-		csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
@@ -4482,6 +4484,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 		auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
 
 		EXPECT_EQ(CustomComponent->GetCustomPropertyKeys().Size(), 0);
+
+		// Spectify the application origin and verify
+		CustomComponent->SetApplicationOrigin(ApplicationOrigin);
+
+		EXPECT_EQ(CustomComponent->GetApplicationOrigin(), ApplicationOrigin);
 
 		// Vector Check
 		{
@@ -4524,19 +4531,103 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 
 		// Key Size
 		{
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
+			// Custom properties including application origin
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 7);
 		}
 
 		// Remove Key
 		{
 			CustomComponent->RemoveCustomProperty("Boolean");
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 5);
+
+			// Custom properties including application origin
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
 		}
 
 		// List Check
 		{
 			auto Keys = CustomComponent->GetCustomPropertyKeys();
 			EXPECT_EQ(Keys.Size(), 5);
+		}
+
+		// Queue update process before exiting space
+		EntitySystem->QueueEntityUpdate(CreatedObject);
+		EntitySystem->ProcessPendingEntityOperations();
+
+		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	}
+
+	// Re-Enter space and verify contents
+	{
+		// Reload the space and verify the contents match
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+		Connection	 = EnterResult.GetConnection();
+		EntitySystem = Connection->GetSpaceEntitySystem();
+
+		// Retrieve all entities
+		auto GotAllEntities = false;
+		SpaceEntity* LoadedObject;
+
+		EntitySystem->SetEntityCreatedCallback(
+			[&](SpaceEntity* Entity)
+			{
+				if (Entity->GetName() == ObjectName)
+				{
+					GotAllEntities = true;
+					LoadedObject   = Entity;
+				}
+			});
+
+		// Wait until loaded
+		while (!GotAllEntities)
+		{
+			std::this_thread::sleep_for(100ms);
+		}
+
+		const auto& Components = *LoadedObject->GetComponents();
+		EXPECT_EQ(Components.Size(), 1);
+
+		// Retreive the custom component
+		auto LoadedComponent = Components[0];
+
+		// Verify the component type
+		EXPECT_EQ(LoadedComponent->GetComponentType(), ComponentType::Custom);
+
+		// Verify the application
+		auto* CustomComponent = (CustomSpaceComponent*) LoadedComponent;
+		EXPECT_EQ(CustomComponent->GetApplicationOrigin(), ApplicationOrigin);
+
+		// List Check
+		{
+			auto Keys = CustomComponent->GetCustomPropertyKeys();
+			EXPECT_EQ(Keys.Size(), 5);
+
+			// Vector Check
+			{
+				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({10, 10, 10}));
+
+				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({10, 10, 10, 10}));
+			}
+
+			// String Check
+			{
+				EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
+			}
+
+			// Integer Check
+			{
+				EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
+			}
+
+			// Float Check
+			{
+				EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
+			}
+
+			// Has Missing Key Check
+			{
+				EXPECT_EQ(CustomComponent->HasCustomProperty("Boolean"), false);
+			}
 		}
 
 		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
@@ -5821,7 +5912,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
 	Connection	 = EnterResult.GetConnection();
 	EntitySystem = Connection->GetSpaceEntitySystem();
 
@@ -5843,7 +5936,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 	EntitySystem->ProcessPendingEntityOperations();
 
 	// Only 1 script component should be on the object
-	EXPECT_TRUE(SpaceEntity->GetComponents()->Size(), 1);
+	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
 	// Disconnect from the SignalR server
 	auto [Ok] = AWAIT(Connection, Disconnect);

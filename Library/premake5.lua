@@ -130,7 +130,8 @@ if not Project then
 
 			disablewarnings {
                 "4251",  -- Ignore dll interface warnings
-                "4996"  -- Ignore deprecated warnings
+                "4996",  -- Ignore deprecated warnings
+                "4200"   -- Ignore nonstandard extension warnings (for quickjspp)
             }
 
             linkoptions {
@@ -294,6 +295,7 @@ if not Project then
 
         filter "platforms:not wasm"
             links {
+                "WS2_32",
                 "POCONetSSL_OpenSSL",
                 "mimalloc",
             }

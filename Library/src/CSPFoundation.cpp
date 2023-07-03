@@ -133,25 +133,9 @@ EM_JS(void, set_device_id, (const char* cDeviceId), {
 // clang-format on
 #endif
 
-std::string LoadDeviceId()
+#if !defined(CSP_WASM)
+std::string DeviceIdPath()
 {
-	// Use a unique code path for WASM to avoid using the awful async filesystem API
-#if defined(CSP_WASM)
-	auto DeviceId = get_device_id();
-
-	if (DeviceId == nullptr)
-	{
-		auto GeneratedDeviceId = csp::GenerateUUID();
-		set_device_id(GeneratedDeviceId.c_str());
-
-		return GeneratedDeviceId;
-	}
-
-	auto DeviceIdString = std::string(DeviceId);
-	free(DeviceId);
-
-	return DeviceIdString;
-#else
 	// For all platforms, we want to guarantee the current user has read/write access and to reduce public visibility of the file that holds the
 	// device ID
 	#if defined(CSP_WINDOWS)
@@ -176,6 +160,31 @@ std::string LoadDeviceId()
 	char CSPDataRoot[PATH_MAX];
 	sprintf(CSPDataRoot, "%s/Library/MagnopusCSP/", getenv("HOME"));
 	#endif
+
+	return CSPDataRoot;
+}
+#endif
+
+std::string LoadDeviceId()
+{
+	// Use a unique code path for WASM to avoid using the awful async filesystem API
+#if defined(CSP_WASM)
+	auto DeviceId = get_device_id();
+
+	if (DeviceId == nullptr)
+	{
+		auto GeneratedDeviceId = csp::GenerateUUID();
+		set_device_id(GeneratedDeviceId.c_str());
+
+		return GeneratedDeviceId;
+	}
+
+	auto DeviceIdString = std::string(DeviceId);
+	free(DeviceId);
+
+	return DeviceIdString;
+#else
+	const std::string CSPDataRoot = DeviceIdPath();
 
 	if (!FolderExists(CSPDataRoot))
 	{
