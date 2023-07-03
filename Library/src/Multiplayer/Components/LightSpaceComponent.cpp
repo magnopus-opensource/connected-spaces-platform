@@ -39,6 +39,7 @@ LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 	Properties[static_cast<uint32_t>(LightPropertyKeys::LightCookieType)]			   = static_cast<int64_t>(LightCookieType::NoCookie);
 	Properties[static_cast<uint32_t>(LightPropertyKeys::IsARVisible)]				   = true;
 	Properties[static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef)]	   = "";
+	Properties[static_cast<uint32_t>(LightPropertyKeys::LightShadowType)]              = static_cast<int64_t>(LightShadowType::None);
 
 	SetScriptInterface(CSP_NEW LightSpaceComponentScriptInterface(this));
 }
@@ -282,5 +283,23 @@ void LightSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& I
 {
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef), InValue);
 }
+
+LightShadowType LightSpaceComponent::GetLightShadowType() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	{
+		return static_cast<LightShadowType>(RepVal.GetInt());
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return LightShadowType::None;
+}
+
+void LightSpaceComponent::SetLightShadowType(LightShadowType Value)
+{
+	SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType), static_cast<int64_t>(Value));
+}
+
 
 } // namespace csp::multiplayer

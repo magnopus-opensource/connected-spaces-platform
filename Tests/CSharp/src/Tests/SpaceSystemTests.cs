@@ -9,6 +9,9 @@ using CSharpTests;
 using static CSharpTests.TestHelper;
 
 
+#nullable enable annotations
+
+
 namespace CSPEngine
 {
     static class SpaceSystemTests

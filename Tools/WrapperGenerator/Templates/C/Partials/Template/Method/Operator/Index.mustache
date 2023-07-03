@@ -95,7 +95,7 @@
 {{^ type.is_class_or_interface }}
     _OwnsPointer = false;
     /* Return by value by casting to pointer */
-    _Value = ({{# type }}{{> Type }}{{/ type }}*)inst->{{ name }}(
+    _Value = ({{# type }}{{> Type }}{{/ type }}*)(uintptr_t)inst->{{ name }}(
 {{# parameters }}
         {{# type.is_pointer_or_reference }}*{{/ type.is_pointer_or_reference }}{{ name }}{{> Comma }}
 {{/ parameters }}

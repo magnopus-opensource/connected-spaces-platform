@@ -2418,9 +2418,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalThumbnailTest)
 	PortalComponent->SetSpaceId(Space.Id);
 	PortalComponent->GetSpaceThumbnail(Callback);
 
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!HasThumbailResult && TestTime < 20)
 	{
@@ -2678,9 +2678,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessedCallbackTest)
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -2770,9 +2770,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessGracefulFailureCallback
 										 });
 
 	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
 
 	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
 	{
@@ -4388,6 +4388,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
+	EXPECT_EQ(LightSpaceComponentInstance->GetLightShadowType(), LightShadowType::None);
 
 	// test values
 	const float InnerConeAngle = 10.0f;
@@ -4399,6 +4400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 	LightSpaceComponentInstance->SetLightCookieAssetCollectionId(Asset.AssetCollectionId);
 	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
 	LightSpaceComponentInstance->SetLightType(LightType::Spot);
+	LightSpaceComponentInstance->SetLightShadowType(LightShadowType::Realtime);
 	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
 	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
 	LightSpaceComponentInstance->SetRange(Range);
@@ -4411,6 +4413,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
+	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightShadowType(), LightShadowType::Realtime);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
@@ -5040,6 +5043,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
 	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
+	EXPECT_EQ(LightSpaceComponentInstance->GetLightShadowType(), LightShadowType::None);
 	EXPECT_EQ(LightSpaceComponentInstance->GetInnerConeAngle(), 0.0f);
 	EXPECT_EQ(LightSpaceComponentInstance->GetOuterConeAngle(), 0.78539816339f);
 	EXPECT_EQ(LightSpaceComponentInstance->GetRange(), 1000.0f);
@@ -5055,6 +5059,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
 	LightSpaceComponentInstance->SetLightCookieType(LightCookieType::ImageCookie);
 	LightSpaceComponentInstance->SetLightType(LightType::Spot);
+	LightSpaceComponentInstance->SetLightShadowType(LightShadowType::Static);
 	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
 	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
 	LightSpaceComponentInstance->SetRange(Range);
@@ -5067,6 +5072,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
+	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightShadowType(), LightShadowType::Static);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
@@ -5912,7 +5918,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
 	Connection	 = EnterResult.GetConnection();
 	EntitySystem = Connection->GetSpaceEntitySystem();
 
@@ -5934,7 +5942,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
 	EntitySystem->ProcessPendingEntityOperations();
 
 	// Only 1 script component should be on the object
-	EXPECT_TRUE(SpaceEntity->GetComponents()->Size(), 1);
+	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
 	// Disconnect from the SignalR server
 	auto [Ok] = AWAIT(Connection, Disconnect);

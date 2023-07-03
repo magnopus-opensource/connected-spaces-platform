@@ -143,10 +143,7 @@ namespace CSPEngine
         [Test]
         public static void GetAvatarPortraitTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out var settingsSystem, out _);
-
-            var testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
-            var testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _);
 
             var userId = userSystem.TestLogIn(pushCleanupFunction: false);
 

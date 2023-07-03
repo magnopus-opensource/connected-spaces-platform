@@ -7,6 +7,9 @@ using static CSharpTests.TestHelper;
 using static CSPEngine.MultiplayerTests;
 
 
+#nullable enable annotations
+
+
 namespace CSPEngine
 {
     static class AnchorSystemTests

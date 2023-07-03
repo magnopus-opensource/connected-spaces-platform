@@ -83,7 +83,7 @@ Examples for each language supported are below.
 
 You can always find up-to-date documentation on the API here.
 
- - [CSP API Documentation](https://builds.magnoboard.com/foundation-docs/index.html)
+ - [CSP API Documentation](https://builds.magnoboard.com/connected-spaces-platform/index.html)
 
 
 ****

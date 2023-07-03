@@ -1358,7 +1358,7 @@ namespace CSPEngine
             var conversationComponent2 = component2.As<Multiplayer.ConversationSpaceComponent>();
 
             string conversationId;
-            string messageId;
+
             {
                 var result = conversationComponent1.CreateConversation("TestMessage").Result;
                 var resCode = result.GetResultCode();
