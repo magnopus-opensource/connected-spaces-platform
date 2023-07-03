@@ -47,6 +47,10 @@ namespace CSPEngine
             DefaultLoginPassword = creds[1];
             AlternativeLoginEmail = creds[2];
             AlternativeLoginPassword = creds[3];
+
+
+          //  LogDebug($"creds content {File.ReadAllText("test_account_creds.txt")}");
+          //  LogDebug($"loaded users creds {creds[0]}");
         }
 
         public static void LogOut(Systems.UserSystem userSystem)
@@ -62,14 +66,18 @@ namespace CSPEngine
         /// <returns>User Id</returns>
         public static string LogIn(Systems.UserSystem userSystem, string email = null, string password = null, Services.EResultCode expectedResult = Services.EResultCode.Success, bool pushCleanupFunction = true)
         {
+
             if (email == null)
                 email = DefaultLoginEmail;
 
             if (password == null)
                 password = DefaultLoginPassword;
 
+            LogDebug($"login as in (email: { email }, password {password})");
             using var result = userSystem.Login("", email, password).Result;
             var resCode = result.GetResultCode();
+
+            LogDebug($"login result code {result.GetHttpResultCode()}");
 
             Assert.AreEqual(resCode, expectedResult);
 

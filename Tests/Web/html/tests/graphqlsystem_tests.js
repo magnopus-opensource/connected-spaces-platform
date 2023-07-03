@@ -46,7 +46,7 @@ test('GraphQLSystemTests', 'QueryTest', async function() {
       };
     
     
-      const fqResult = await GraphQLSystem.runFullQuery(JSON.stringify(fullQuery));
+      const fqResult = await GraphQLSystem.runRequest(JSON.stringify(fullQuery));
       const fqResponse = fqResult.getResponse();
       fqResult.delete();
     
