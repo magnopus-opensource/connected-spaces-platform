@@ -57,9 +57,10 @@ public:
 	/// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void RunRequest(const csp::common::String RequestBody, GraphQLReceivedCallback ApiResponse);
 
-	/// @brief Send basix query to the Magnopus Connect Services' GraphQL Server, this only supports single queries without variables. for variable
-	/// use please see RunRequest.
-	/// @param QueryText csp::common::String : graphql query string. does not use vaiables or operation names.
+	/// @brief Send basic query to the Magnopus Connect Services' GraphQL Server, must be a simple query, QueryText will be wrapped with a basic
+	/// graphql request body. This function does not support variables. for variable use please see RunRequest.
+	/// @param QueryText csp::common::String : graphql query string. will be wrapped in a basic graphql request, this paramater will be the value of
+	/// request.query
 	/// @param Callback GraphQLReceivedCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback ApiResponse);
 
