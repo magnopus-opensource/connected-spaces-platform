@@ -42,23 +42,23 @@ GraphQLSystem::~GraphQLSystem()
 	CSP_DELETE(GraphQLAPI);
 }
 
-void GraphQLSystem::RunFullQuery(const csp::common::String QueryText, GraphQLReceivedCallback Callback)
-{
-	std::ostringstream strm;
-	std::string QueryTextStr = QueryText.c_str();
-	strm << QueryTextStr;
-	csp::services::ResponseHandlerPtr GraphQLResponseHandler
-		= GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr);
-	static_cast<chs::GraphQLApi*>(GraphQLAPI)->Query(strm.str().c_str(), GraphQLResponseHandler);
-}
-
 void GraphQLSystem::RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback Callback)
 {
-	std::ostringstream strm;
 	std::string QueryTextStr = QueryText.c_str();
+
 	std::regex reg("\"");
-	QueryTextStr = std::regex_replace(QueryTextStr, reg, "\\\"");
-	strm << "{\"query\":\"query{" << QueryTextStr << "}\"}";
+	QueryTextStr			= std::regex_replace(QueryTextStr, reg, "\\\"");
+	std::string RequestBody = "{\"query\":\"query{" + QueryTextStr + "}\"}";
+
+	RunRequest(csp::common::String(RequestBody.c_str()), Callback);
+}
+
+void GraphQLSystem::RunRequest(const csp::common::String RequestBody, GraphQLReceivedCallback Callback)
+{
+	std::ostringstream strm;
+	std::string QueryTextStr = RequestBody.c_str();
+	strm << QueryTextStr;
+
 	csp::services::ResponseHandlerPtr GraphQLResponseHandler
 		= GraphQLAPI->CreateHandler<GraphQLReceivedCallback, GraphQLResult, void, csp::services::NullDto>(Callback, nullptr);
 	static_cast<chs::GraphQLApi*>(GraphQLAPI)->Query(strm.str().c_str(), GraphQLResponseHandler);
