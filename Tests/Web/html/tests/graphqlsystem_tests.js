@@ -20,7 +20,7 @@ test('GraphQLSystemTests', 'QueryTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
+    const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
 
     const query = "spaces{items{name}}";
 
@@ -32,4 +32,23 @@ test('GraphQLSystemTests', 'QueryTest', async function() {
     result.delete();
 
     assert.isTrue(response.includes(spaceName));
+
+    const fullQuery = {
+        query: `query getSpaceNameById($spaceId:String!)  {
+                  spaceDetails(groupId: $spaceId) {
+                        name
+                      }
+                    }`,
+        variables: {
+          spaceId: space.id,
+        },
+        operationName: "getSpaceNameById",
+      };
+    
+    
+      const fqResult = await GraphQLSystem.runRequest(JSON.stringify(fullQuery));
+      const fqResponse = fqResult.getResponse();
+      fqResult.delete();
+    
+      assert.isTrue(fqResponse.includes(spaceName)); 
 });
