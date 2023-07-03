@@ -31,17 +31,17 @@ _"An interoperable communication library for the spatial internet."_
 Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
 <p align="center">
-    <img width="640" height="360" src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
+    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
 </p>
 
 The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
 
-It comes in the form of an open-source client-side library, effectively encoding the standards by which applications can interoperably communicate with one another in binary form. One that we can all contribute to.
+It comes in the form of an open-source client-side library, effectively encoding in binary form the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
 ****
 
 ## 📦 Install
-NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform).
 
 - Web Installation:  `npm install @magnopus-opensource/connected-spaces-platform.web`
 
