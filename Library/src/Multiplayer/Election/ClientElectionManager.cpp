@@ -65,6 +65,7 @@ ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySys
 	, TheElectionState(ElectionState::Idle)
 	, LocalClient(nullptr)
 	, Leader(nullptr)
+	, LastKeepAliveReceived(std::chrono::steady_clock::now())
 {
 	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 	csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -342,13 +343,15 @@ void ClientElectionManager::SetLeader(ClientProxy* Client)
 	if (Client != nullptr)
 	{
 		FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::SetLeader ClientId=%d", Client->GetId());
+		Client->SetAsLeader(true);
 	}
 	else
 	{
 		FOUNDATION_LOG_ERROR_MSG("ClientElectionManager::SetLeader Client is null");
 	}
 
-	Leader = Client;
+	Leader				  = Client;
+	LastKeepAliveReceived = std::chrono::steady_clock::now();
 
 	// Notify Scripts ready callback now we have a valid leader
 	if (ScriptSystemReadyCallback)
@@ -359,7 +362,57 @@ void ClientElectionManager::SetLeader(ClientProxy* Client)
 
 void ClientElectionManager::CheckLeaderIsValid()
 {
-	// Todo :- Ping leader and check they're still there
+	auto TimeNow = std::chrono::steady_clock::now();
+
+	if (Leader != nullptr)
+	{
+		if (IsLocalClientLeader())
+		{
+			// We are the leader, so send a heartbeat message to other clients
+			Leader->UpdateLeaderHeartbeat();
+		}
+		else
+		{
+			// How long since we've received a heartbeat message?
+			auto Elapsed = TimeNow - LastKeepAliveReceived;
+
+			if (Elapsed > (LeaderHeartbeatPeriod * 3))
+			{
+				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
+									  "*** Leader Lost: Time since last HB %f",
+									  double(Elapsed.count()) / 1000000000.0);
+
+				// We have heard from the Leader for a while
+				// Lets ask check in with the other clients
+
+				// Broadcast 'Leader Lost'
+				LocalClient->SendLeaderLost();
+			}
+		}
+
+		// Count proxies that have lost the leader
+		int LostLeaderCount = 0;
+		for (const auto& Client : Clients)
+		{
+			ClientProxy* Proxy = Client.second;
+			if (!Proxy->IsLeaderStillValid())
+			{
+				++LostLeaderCount;
+			}
+		}
+
+		if (LostLeaderCount > 0)
+		{
+			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "%d of %d proxies have lost leader", LostLeaderCount, Clients.size());
+		}
+
+		// If above threshold (more than half) then trigger re-election
+		if (LostLeaderCount > (Clients.size() / 2))
+		{
+			FOUNDATION_LOG_WARN_MSG("Triggered AsyncNegotiateLeader");
+			AsyncNegotiateLeader();
+		}
+	}
 }
 
 void ClientElectionManager::OnLeaderRemoved()
@@ -478,6 +531,24 @@ void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
 		SetLeader(Client);
 	}
 }
+
+void ClientElectionManager::OnLeaderHeartbeat(int64_t LeaderId)
+{
+	if (Leader && LeaderId == Leader->GetId())
+	{
+		FOUNDATION_LOG_WARN_MSG("*** OnLeaderHeartbeat ***");
+
+		// Received a heartbeat messsage from the leader, so log the time now
+		LastKeepAliveReceived = std::chrono::steady_clock::now();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("*** LeaderHeartbeat Unexpected !! ***");
+
+		// Not expecting a heartbeat or heartbeat from the wrong Id
+	}
+}
+
 
 bool ClientElectionManager::IsConnected() const
 {

@@ -42,15 +42,17 @@ class SpaceEntity;
 enum class ClientElectionState
 {
 	Idle,
-	Electing
+	Electing,
+	Leader
 };
-
 
 constexpr const char* ClientElectionMessage	 = "ClientElectionMessage";
 constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 
 // Default time to wait for a response from an election message
 constexpr const std::chrono::system_clock::duration DefaultElectionTimeOut = std::chrono::milliseconds(2000);
+
+constexpr std::chrono::milliseconds LeaderHeartbeatPeriod = std::chrono::milliseconds(5000);
 
 
 enum class ClientElectionMessageType
@@ -59,6 +61,8 @@ enum class ClientElectionMessageType
 	ElectionResponse,
 	ElectionLeader,
 	ElectionNotifyLeader,
+	LeaderHeartbeat,
+	LeaderLost,
 
 	NumElectionMessages
 };
@@ -98,14 +102,20 @@ public:
 
 	void RunScript(int64_t ContextId, const csp::common::String& ScriptText);
 
+	void UpdateLeaderHeartbeat();
+	void SendLeaderHeartbeat();
+	void SendLeaderLost();
+	void SetAsLeader(bool IsLeader);
+	bool IsLeaderStillValid() const;
+
 private:
 	void HandleIdleState();
 	void HandleElectingState();
+	void HandleLeaderState();
 
 	void SendElectionEvent(int64_t TargetClientId);
 	void SendElectionResponseEvent(int64_t TargetClientId);
 	void SendElectionLeaderEvent(int64_t TargetClientId);
-
 	void SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId);
 
 	void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
@@ -114,6 +124,8 @@ private:
 	void HandleElectionResponseEvent(int64_t ClientId);
 	void HandleElectionLeaderEvent(int64_t ClientId);
 	void HandleElectionNotifyLeaderEvent(int64_t ClientId);
+	void HandleLeaderHeartbeatEvent(int64_t ClientId);
+	void HandleLeaderLostEvent(int64_t ClientId);
 
 	bool IsThisClientLeader(const ClientMap& Clients) const;
 
@@ -130,6 +142,9 @@ private:
 	std::chrono::system_clock::time_point ElectionStartTime;
 
 	csp::common::CancellationToken* CancellationToken;
+
+	std::chrono::steady_clock::time_point LastHeartBeatTime;
+	bool IsLeaderValid;
 };
 
 } // namespace csp::multiplayer

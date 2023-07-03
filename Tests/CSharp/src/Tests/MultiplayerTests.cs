@@ -2923,7 +2923,7 @@ namespace CSPEngine
         }
 #endif
 
-#if RUN_MULTIPLAYER_CLIENTELECTIONTEST
+#if true//RUN_MULTIPLAYER_CLIENTELECTIONTEST
         private static void CreateMultiProcessTestScript(Multiplayer.SpaceEntitySystem entitySystem, out Multiplayer.SpaceEntity scriptEntity)
         {
             // we'll be using this in a few places below as part of the test, so we declare it upfront
@@ -2969,35 +2969,36 @@ namespace CSPEngine
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
             const bool EnableLeaderElection = true;
-            
+
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            const int numClientInstances = 4;
+            const int numClientInstances = 8;
+            const int startIndex = 1;
 
             IMultiplayerTestClient[] clients = new IMultiplayerTestClient[numClientInstances];
 
-            for (int i=0; i < numClientInstances; ++i)
+            for (int i = startIndex; i < numClientInstances; ++i)
             {
-                string clientId = String.Format("TestClient{0}", i+1);
-                string userId = String.Format("will.cowling+test{0}@magnopus.com", i+1);
+                string clientId = String.Format("TestClient{0}", i + 1);
+                string userId = String.Format("will.cowling+test{0}@magnopus.com", i + 1);
                 string pwd = "12345678";
 
                 IMultiplayerTestClient client = CreateMultiplayerTestClient(clientId);
                 client.Login(userId, pwd);
                 client.ConnectToSpace(space.Id, EnableLeaderElection);
                 clients[i] = client;
-                
+
                 // Create entity
-                string clientAvatarName = String.Format("TestAvatar{0}", i+1);
-                string clientAvatarId = String.Format("NotARealAvatarId{0}", i+1);
+                string clientAvatarName = String.Format("TestAvatar{0}", i + 1);
+                string clientAvatarId = String.Format("NotARealAvatarId{0}", i + 1);
                 client.CreateAvatar(clientAvatarName, clientAvatarId);
             }
 
-            
+
             var connection = CreateMultiplayerConnection(space.Id);
 
             // Enable Leader Election Feature flag
@@ -3021,7 +3022,7 @@ namespace CSPEngine
             CSPFoundation.Tick();
 
             int removedCount = 0;
-            
+
             const int totalFameCount = 40;
             int frameCount = 0;
             while (frameCount < totalFameCount)
@@ -3029,21 +3030,21 @@ namespace CSPEngine
                 Log("[ LocalClient ] ", ConsoleColor.Blue, $"Frame {frameCount} : Ticking...");
                 CSPFoundation.Tick();
 
-                for (int i = removedCount; i < numClientInstances; ++i)
+                for (int i = startIndex + removedCount; i < numClientInstances; ++i)
                 {
                     IMultiplayerTestClient client = clients[i];
                     client.Tick();
                 }
 
                 // Drop the leader half way through the test
-                if (frameCount == (totalFameCount/2))
+                if (frameCount == (totalFameCount / 2))
                 {
                     Log("[ LocalClient ] ", ConsoleColor.Blue, "*** Destroying Leader ***");
 
                     // Destroy the first client (which should be the leader)
                     // to force renegotiation
-                    IMultiplayerTestClient client = clients[0];
-                    
+                    IMultiplayerTestClient client = clients[startIndex];
+
                     client.DestroyAvatar();
                     client.Disconnect();
                     client.Logout();
@@ -3051,12 +3052,12 @@ namespace CSPEngine
 
                     ++removedCount;
                 }
-                
+
                 Thread.Sleep(200);
                 ++frameCount;
             }
-            
-            for (int i = removedCount; i < numClientInstances; ++i)
+
+            for (int i = startIndex + removedCount; i < numClientInstances; ++i)
             {
                 IMultiplayerTestClient client = clients[i];
 

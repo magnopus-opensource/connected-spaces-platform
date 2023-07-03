@@ -22,8 +22,17 @@
 namespace csp::multiplayer
 {
 
+constexpr const uint64_t ALL_CLIENTS_ID = -1;
+
 ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager)
-	: ElectionManagerPtr(ElectionManager), State(ClientElectionState::Idle), Id(Id), Eid(0), PendingElections(0), CancellationToken(nullptr)
+	: ElectionManagerPtr(ElectionManager)
+	, State(ClientElectionState::Idle)
+	, Id(Id)
+	, Eid(0)
+	, PendingElections(0)
+	, CancellationToken(nullptr)
+	, IsLeaderValid(true)
+	, LastHeartBeatTime(std::chrono::steady_clock::now())
 {
 }
 
@@ -131,6 +140,13 @@ void ClientProxy::HandleEvent(int64_t EventType, int64_t ClientId)
 			break;
 		case ClientElectionMessageType::ElectionNotifyLeader:
 			HandleElectionNotifyLeaderEvent(ClientId);
+			break;
+		case ClientElectionMessageType::LeaderHeartbeat:
+			HandleLeaderHeartbeatEvent(ClientId);
+			break;
+		case ClientElectionMessageType::LeaderLost:
+			HandleLeaderLostEvent(ClientId);
+			break;
 	}
 }
 
@@ -168,6 +184,28 @@ void ClientProxy::HandleElectingState()
 	// Nothing to do currently
 }
 
+void ClientProxy::HandleLeaderState()
+{
+	// Nothing to do currently
+}
+
+void ClientProxy::UpdateLeaderHeartbeat()
+{
+	if (State == ClientElectionState::Leader)
+	{
+		auto TimeNow = std::chrono::steady_clock::now();
+
+		// How long since we last sent a heartbeat message?
+		auto Elapsed = TimeNow - LastHeartBeatTime;
+
+		if (Elapsed > LeaderHeartbeatPeriod)
+		{
+			LastHeartBeatTime = TimeNow;
+			SendLeaderHeartbeat();
+		}
+	}
+}
+
 void ClientProxy::SendElectionEvent(int64_t TargetClientId)
 {
 	++PendingElections;
@@ -184,6 +222,39 @@ void ClientProxy::SendElectionResponseEvent(int64_t TargetClientId)
 void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 {
 	SendEvent(TargetClientId, static_cast<int64_t>(ClientElectionMessageType::ElectionLeader), Id);
+}
+
+void ClientProxy::SendLeaderHeartbeat()
+{
+	FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose, " *** ClientProxy::SendLeaderHeartbeat ***");
+
+	// Broadcast 'Heartbeat' message to all clients
+	SendEvent(ALL_CLIENTS_ID, static_cast<int64_t>(ClientElectionMessageType::LeaderHeartbeat), Id);
+}
+
+void ClientProxy::SendLeaderLost()
+{
+	// Broadcast 'Leader lost' message to all clients
+	SendEvent(ALL_CLIENTS_ID, static_cast<int64_t>(ClientElectionMessageType::LeaderLost), Id);
+}
+
+void ClientProxy::SetAsLeader(bool IsLeader)
+{
+	if (IsLeader)
+	{
+		IsLeaderValid = true;
+		State		  = ClientElectionState::Leader;
+	}
+	else
+	{
+		State = ClientElectionState::Idle;
+	}
+}
+
+
+bool ClientProxy::IsLeaderStillValid() const
+{
+	return IsLeaderValid;
 }
 
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
@@ -280,7 +351,8 @@ void ClientProxy::HandleElectionLeaderEvent(int64_t ClientId)
 {
 	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionLeaderEvent ClientId=%d", ClientId);
 
-	State = ClientElectionState::Idle;
+	State		  = ClientElectionState::Idle;
+	IsLeaderValid = true;
 
 	if (ElectionManagerPtr)
 	{
@@ -303,6 +375,30 @@ void ClientProxy::HandleElectionNotifyLeaderEvent(int64_t ClientId)
 	else
 	{
 		FOUNDATION_LOG_ERROR_MSG("ClientProxy::HandleElectionLeaderEvent - Null election manager pointer");
+	}
+}
+
+void ClientProxy::HandleLeaderHeartbeatEvent(int64_t ClientId)
+{
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleLeaderHeartbeatEvent ClientId=%d", ClientId);
+
+	if (ElectionManagerPtr)
+	{
+		ElectionManagerPtr->OnLeaderHeartbeat(ClientId);
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ClientProxy::HandleLeaderHeartbeatEvent - Null election manager pointer");
+	}
+}
+
+void ClientProxy::HandleLeaderLostEvent(int64_t ClientId)
+{
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleLeaderLost ClientId=%d", ClientId);
+
+	if (ClientId == Id)
+	{
+		IsLeaderValid = false;
 	}
 }
 

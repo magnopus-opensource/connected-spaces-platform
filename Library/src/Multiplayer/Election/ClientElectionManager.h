@@ -19,6 +19,8 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
 
+#include <chrono>
+
 namespace csp::multiplayer
 {
 
@@ -93,6 +95,7 @@ private:
 
 	void OnElectionComplete(int64_t LeaderId);
 	void OnLeaderNotification(int64_t LeaderId);
+	void OnLeaderHeartbeat(int64_t LeaderId);
 
 	// Async functions that may take a while as they initiate network events between all clients
 	void AsyncNegotiateLeader();
@@ -115,6 +118,8 @@ private:
 	ClientProxy* Leader;
 
 	csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
+
+	std::chrono::steady_clock::time_point LastKeepAliveReceived;
 };
 
 } // namespace csp::multiplayer
