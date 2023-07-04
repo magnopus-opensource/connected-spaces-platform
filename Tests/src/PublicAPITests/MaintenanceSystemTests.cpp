@@ -123,6 +123,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
 	else
 	{
 		// if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
+		EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
 		EXPECT_EQ(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
 		EXPECT_EQ(LatestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
 		EXPECT_EQ(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
