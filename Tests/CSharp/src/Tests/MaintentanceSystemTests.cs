@@ -33,8 +33,6 @@ namespace CSPEngine
             Assert.IsFalse(LatestMaintenanceInfo.IsInsideWindow());
         }
 #endif
-    }
-}
 
 #if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST
         [Test]
@@ -57,9 +55,9 @@ namespace CSPEngine
 	        {
 		        // if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
 		        Assert.IsFalse(latestMaintenanceInfo.IsInsideWindow());
-		        Assert.AreEqual(latestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
-		        Assert.AreEqual(latestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
-		        Assert.AreEqual(latestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
+		        Assert.AreEqual(latestMaintenanceInfo.Description, result.GetDefaultMaintenanceInfo().Description);
+		        Assert.AreEqual(latestMaintenanceInfo.StartDateTimestamp, result.GetDefaultMaintenanceInfo().StartDateTimestamp);
+		        Assert.AreEqual(latestMaintenanceInfo.EndDateTimestamp, result.GetDefaultMaintenanceInfo().EndDateTimestamp);
 	        }
         }
 #endif
