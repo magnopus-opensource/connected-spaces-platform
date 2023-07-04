@@ -76,6 +76,11 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 			MaintenanceInfoResponses[i].EndDateTimestamp   = LocalArray[i].EndDateTimestamp;
 		}
 
+		if (MaintenanceInfoResponses.Size() == 0)
+		{
+			FOUNDATION_LOG_WARN_MSG("No maintenance windows are defined by the services");
+		}
+
 		// Sort maintenance windows by latest date
 		SortMaintenanceInfos(MaintenanceInfoResponses);
 	}
@@ -91,14 +96,29 @@ const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenance
 	return MaintenanceInfoResponses;
 }
 
-MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo()
-{
-	return MaintenanceInfoResponses[0];
-}
-
 const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
 {
-	return MaintenanceInfoResponses[0];
+	if (HasAnyMaintenanceWindows())
+	{
+		return MaintenanceInfoResponses[0];
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("When asked to get the latest maintenance window info, there were none defined. A default maintenance window info is "
+								"being returned instead.");
+		return GetDefaultMaintenanceInfo();
+	}
+}
+
+bool MaintenanceInfoResult::HasAnyMaintenanceWindows() const
+{
+	return MaintenanceInfoResponses.Size() > 0;
+}
+
+const MaintenanceInfo& MaintenanceInfoResult::GetDefaultMaintenanceInfo()
+{
+	static MaintenanceInfo DefaultMaintenanceInfo;
+	return DefaultMaintenanceInfo;
 }
 
 void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)

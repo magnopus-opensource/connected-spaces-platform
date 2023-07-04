@@ -77,17 +77,19 @@ public:
 
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return MaintenanceInfo : return the closest maintenance information
-	[[nodiscard]] MaintenanceInfo& GetLatestMaintenanceInfo();
-
-	/// @brief Retrieves response data from the Maintenance Window Server
-	/// @return MaintenanceInfo : return the closest maintenance information
 	[[nodiscard]] const MaintenanceInfo& GetLatestMaintenanceInfo() const;
+
+	/// @brief Can be used to determine if any maintenance windows were defined by the services.
+	/// @return bool : will return true when `GetMaintenanceInfoResponses` returns a zero-sized array.
+	[[nodiscard]] bool HasAnyMaintenanceWindows() const;
 
 
 	/// @brief Returns an Invalid state MaintenanceInfoResult.
 	CSP_NO_EXPORT static MaintenanceInfoResult Invalid();
 
 private:
+	static const MaintenanceInfo& GetDefaultMaintenanceInfo();
+
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 	csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;
 };
