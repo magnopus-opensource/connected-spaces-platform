@@ -16,12 +16,6 @@ namespace CSPEngine
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-            using var MaintenanceInfoResponses = result.GetMaintenanceInfoResponses();
-            Assert.AreEqual(MaintenanceInfoResponses.Size(), 1UL);
-
-            Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday 2122 at 2am PST");
-            Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].StartDateTimestamp, "2122-04-30T02:00:00+0000");
-            Assert.AreEqual(result.GetMaintenanceInfoResponses()[0].EndDateTimestamp, "2122-04-30T03:00:00+0000");
 
         }
 #endif
@@ -32,15 +26,41 @@ namespace CSPEngine
         {
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem);
 
-            using var result = maintenanceSystem.IsInsideMaintenanceWindow().Result;
+            using var result = maintenanceSystem.GetMaintenanceInfo().Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-            using var InsideMaintenanceInfoResponse = result.GetInsideMaintenanceInfo();
-            Assert.IsFalse(InsideMaintenanceInfoResponse.IsInsideMaintenanceWindow);
 
-            Assert.AreEqual(InsideMaintenanceInfoResponse.Description, "Example downtime for a Saturday 2122 at 2am PST");
-            Assert.AreEqual(InsideMaintenanceInfoResponse.StartDateTimestamp, "2122-04-30T02:00:00+0000");
-            Assert.AreEqual(InsideMaintenanceInfoResponse.EndDateTimestamp, "2122-04-30T03:00:00+0000");
+            using var LatestMaintenanceInfo = result.GetLatestMaintenanceInfo();
+            Assert.IsFalse(LatestMaintenanceInfo.IsInsideWindow());
+        }
+#endif
+    }
+}
 
+#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST
+        [Test]
+        public static void GetLatestMaintenanceWindowInfoTest()
+        {
+            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem);
+
+            using var result = maintenanceSystem.GetMaintenanceInfo().Result;
+            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+
+            using var latestMaintenanceInfo = result.GetLatestMaintenanceInfo();
+	        if (result.HasAnyMaintenanceWindows())
+	        {
+		        // if any windows were retrieved, then we should expect these fields to all be filled
+		        Assert.AreNotEqual(latestMaintenanceInfo.Description, "");
+		        Assert.AreNotEqual(latestMaintenanceInfo.StartDateTimestamp, "");
+		        Assert.AreNotEqual(latestMaintenanceInfo.EndDateTimestamp, "");
+	        }
+	        else
+	        {
+		        // if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
+		        Assert.IsFalse(latestMaintenanceInfo.IsInsideWindow());
+		        Assert.AreEqual(latestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
+		        Assert.AreEqual(latestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
+		        Assert.AreEqual(latestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
+	        }
         }
 #endif
     }
