@@ -119,7 +119,8 @@ private:
 
 	csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
 
-	std::chrono::steady_clock::time_point LastKeepAliveReceived;
+	std::chrono::steady_clock::time_point LastKeepAliveReceivedTime;
+	uint64_t KeepAliveCounter;
 };
 
 } // namespace csp::multiplayer

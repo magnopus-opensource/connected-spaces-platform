@@ -22,8 +22,6 @@
 namespace csp::multiplayer
 {
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
-
 ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager)
 	: ElectionManagerPtr(ElectionManager)
 	, State(ClientElectionState::Idle)
@@ -198,7 +196,7 @@ void ClientProxy::UpdateLeaderHeartbeat()
 		// How long since we last sent a heartbeat message?
 		auto Elapsed = TimeNow - LastHeartBeatTime;
 
-		if (Elapsed > LeaderHeartbeatPeriod)
+		if (Elapsed > LEADER_HEARTBEAT_PERIOD)
 		{
 			LastHeartBeatTime = TimeNow;
 			SendLeaderHeartbeat();

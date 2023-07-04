@@ -3023,7 +3023,7 @@ namespace CSPEngine
 
             int removedCount = 0;
 
-            const int totalFameCount = 40;
+            const int totalFameCount = 100;
             int frameCount = 0;
             while (frameCount < totalFameCount)
             {

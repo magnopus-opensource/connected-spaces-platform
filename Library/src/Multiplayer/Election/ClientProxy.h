@@ -50,10 +50,14 @@ constexpr const char* ClientElectionMessage	 = "ClientElectionMessage";
 constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 
 // Default time to wait for a response from an election message
-constexpr const std::chrono::system_clock::duration DefaultElectionTimeOut = std::chrono::milliseconds(2000);
+constexpr const std::chrono::system_clock::duration DEFAULT_ELECTION_TIMEOUT = std::chrono::milliseconds(2000);
+// Period between leader heatbeats
+constexpr std::chrono::milliseconds LEADER_HEARTBEAT_PERIOD = std::chrono::milliseconds(5000);
+// Period to wait before sending leader lost message
+constexpr std::chrono::milliseconds LEADER_HEARTBEAT_LOST_PERIOD = LEADER_HEARTBEAT_PERIOD * 3;
 
-constexpr std::chrono::milliseconds LeaderHeartbeatPeriod = std::chrono::milliseconds(5000);
-
+constexpr uint64_t ALL_CLIENTS_ID		 = -1;
+constexpr double STEADY_TICKS_PER_SECOND = double(std::chrono::steady_clock::period::den) / double(std::chrono::steady_clock::period::num);
 
 enum class ClientElectionMessageType
 {

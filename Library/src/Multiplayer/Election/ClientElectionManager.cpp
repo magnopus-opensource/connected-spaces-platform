@@ -65,7 +65,8 @@ ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySys
 	, TheElectionState(ElectionState::Idle)
 	, LocalClient(nullptr)
 	, Leader(nullptr)
-	, LastKeepAliveReceived(std::chrono::steady_clock::now())
+	, LastKeepAliveReceivedTime(std::chrono::steady_clock::now())
+	, KeepAliveCounter(0)
 {
 	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 	csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
@@ -308,8 +309,6 @@ void ClientElectionManager::Update()
 		LocalClient->UpdateState();
 	}
 
-	CheckLeaderIsValid();
-
 	static ClientProxy* LastLeader = nullptr;
 
 	if (Leader != LastLeader)
@@ -350,8 +349,8 @@ void ClientElectionManager::SetLeader(ClientProxy* Client)
 		FOUNDATION_LOG_ERROR_MSG("ClientElectionManager::SetLeader Client is null");
 	}
 
-	Leader				  = Client;
-	LastKeepAliveReceived = std::chrono::steady_clock::now();
+	Leader					  = Client;
+	LastKeepAliveReceivedTime = std::chrono::steady_clock::now();
 
 	// Notify Scripts ready callback now we have a valid leader
 	if (ScriptSystemReadyCallback)
@@ -371,16 +370,16 @@ void ClientElectionManager::CheckLeaderIsValid()
 			// We are the leader, so send a heartbeat message to other clients
 			Leader->UpdateLeaderHeartbeat();
 		}
-		else
+		else if (KeepAliveCounter > 0)
 		{
 			// How long since we've received a heartbeat message?
-			auto Elapsed = TimeNow - LastKeepAliveReceived;
+			auto Elapsed = TimeNow - LastKeepAliveReceivedTime;
 
-			if (Elapsed > (LeaderHeartbeatPeriod * 3))
+			if (Elapsed > (LEADER_HEARTBEAT_LOST_PERIOD))
 			{
 				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
-									  "*** Leader Lost: Time since last HB %f",
-									  double(Elapsed.count()) / 1000000000.0);
+									  "Leader Lost: Time since last Heartbeat is %f seconds",
+									  double(Elapsed.count()) / STEADY_TICKS_PER_SECOND);
 
 				// We have heard from the Leader for a while
 				// Lets ask check in with the other clients
@@ -466,7 +465,7 @@ void ClientElectionManager::SetScriptSystemReadyCallback(csp::multiplayer::Space
 
 void ClientElectionManager::HandleElectionStateIdle()
 {
-	// Nothing needed currently
+	CheckLeaderIsValid();
 }
 
 void ClientElectionManager::HandleElectionStateRequested()
@@ -536,10 +535,20 @@ void ClientElectionManager::OnLeaderHeartbeat(int64_t LeaderId)
 {
 	if (Leader && LeaderId == Leader->GetId())
 	{
-		FOUNDATION_LOG_WARN_MSG("*** OnLeaderHeartbeat ***");
+		auto TimeNow = std::chrono::steady_clock::now();
+
+		if (KeepAliveCounter > 0)
+		{
+			auto Elapsed = TimeNow - LastKeepAliveReceivedTime;
+
+			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
+								  "OnLeaderHeartbeat : Interval from last tick is %f seconds",
+								  double(Elapsed.count()) / STEADY_TICKS_PER_SECOND);
+		}
 
 		// Received a heartbeat messsage from the leader, so log the time now
-		LastKeepAliveReceived = std::chrono::steady_clock::now();
+		LastKeepAliveReceivedTime = TimeNow;
+		++KeepAliveCounter;
 	}
 	else
 	{
