@@ -36,20 +36,11 @@ namespace csp::systems
 class CSP_API MaintenanceInfo
 {
 public:
+	bool IsInsideWindow() const;
+
 	csp::common::String Description;
 	csp::common::String StartDateTimestamp;
 	csp::common::String EndDateTimestamp;
-};
-
-/// @brief Represents thee latest maintenance window, provides description of the event and a start and end timestamp and whether the user is
-/// currently inside the window
-class CSP_API InsideMaintenanceInfo : public MaintenanceInfo
-{
-public:
-	explicit InsideMaintenanceInfo(void*) {};
-	InsideMaintenanceInfo() = default;
-	InsideMaintenanceInfo(bool InIsInsideMaintenanceWindow, const MaintenanceInfo& InsideMaintenanceData);
-	bool IsInsideMaintenanceWindow;
 };
 
 /// @ingroup CSPFoundation
@@ -75,59 +66,27 @@ public:
 	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
 	[[nodiscard]] const csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses() const;
 
-	/// @brief Retrieves response data from the Maintenance Window Server
-	/// @return MaintenanceInfo : return the closest maintenance information
-	[[nodiscard]] const MaintenanceInfo& GetLatestMaintenanceInfo() const;
-
 	/// @brief Can be used to determine if any maintenance windows were defined by the services.
 	/// @return bool : will return true when `GetMaintenanceInfoResponses` returns a zero-sized array.
 	[[nodiscard]] bool HasAnyMaintenanceWindows() const;
 
+	/// @brief Will return info for the future maintenance window closest to the current time, or default window info if none exist.
+	/// @return MaintenanceInfo : the closest maintenance window information
+	[[nodiscard]] const MaintenanceInfo& GetLatestMaintenanceInfo() const;
+
+	/// @brief Represents a default maintenance window object, which is used when the platform finds no future maintenance windows.
+	/// @return MaintenanceInfo : what the platform considers to be a default maintenance window
+	const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
 
 	/// @brief Returns an Invalid state MaintenanceInfoResult.
 	CSP_NO_EXPORT static MaintenanceInfoResult Invalid();
 
 private:
-	static const MaintenanceInfo& GetDefaultMaintenanceInfo();
-
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 	csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;
 };
 
-/// @ingroup CSPFoundation
-/// @brief Data class used to contain the latest maintenance window and a check for being inside the latest maintenance window received from
-/// Maintenance Window Server
-class CSP_API InsideMaintenanceInfoResult : public csp::services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class CSPFoundation;
-	friend class MaintenanceSystem;
-	CSP_END_IGNORE
-	/** @endcond */
-public:
-	InsideMaintenanceInfoResult() {};
-	InsideMaintenanceInfoResult(void*) {};
-	InsideMaintenanceInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-
-	/// @brief Retrieves response data from the Maintenance Window Server
-	/// @return InsideMaintenanceInfo : return check for being inside a maintenance window
-	[[nodiscard]] InsideMaintenanceInfo& GetInsideMaintenanceInfo();
-
-	/// @brief Retrieves response data from the Maintenance Window Server
-	/// @return InsideMaintenanceInfo : return check for being inside a maintenance window
-	[[nodiscard]] const InsideMaintenanceInfo& GetInsideMaintenanceInfo() const;
-
-	/// @brief Returns an Invalid state InsideMaintenanceInfoResult.
-	CSP_NO_EXPORT static InsideMaintenanceInfoResult Invalid();
-
-private:
-	void SetInsideMaintenanceInfo(bool InIsInsideWindow, const MaintenanceInfo& InMaintenanceInfo);
-	InsideMaintenanceInfo InsideMaintenanceInfoResponse;
-};
-
 typedef std::function<void(const MaintenanceInfoResult& Result)> MaintenanceInfoCallback;
-typedef std::function<void(const InsideMaintenanceInfoResult& Result)> InsideMaintenanceWindowCallback;
 
 void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos);
 
