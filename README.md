@@ -4,11 +4,11 @@
 [![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
 
 
-_"An interoperable communication library for the next generation of the internet."_
+_"An interoperable communication library for the spatial internet."_
 
 ⚡️ Current Supported Languages : C++, C#, WebAssembly
 
-🖥️ Current Supported Platforms : Windows, Android, IOS and MacOS
+🖥️ Current Supported Platforms : Windows, Android, iOS and MacOS
 
 
 ****
@@ -28,13 +28,20 @@ _"An interoperable communication library for the next generation of the internet
 ****
 
 ## Background
-This is the Connected Spaces Platform client API, affording client application developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
+<p align="center">
+    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
+</p>
+
+The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+
+It comes in the form of an open-source client-side library, effectively encoding in binary form the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
 ****
 
 ## 📦 Install
-NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform).
 
 - Web Installation:  `npm install @magnopus-opensource/connected-spaces-platform.web`
 
@@ -45,7 +52,7 @@ For C++ based applications, you can find headers and precompiled binaries for al
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each language supported are below.
+Build instructions for each supported language are below.
 
 - [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
 - [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
@@ -58,13 +65,15 @@ Build instructions for each language supported are below.
 
 ## 🔑 Tenant Keys
 
-For information on how to obtain a Tenant Key, head over here.
+If you choose to use the Connected Spaces Platform in conjunction with Magnopus Cloud Services, you'll need a Tenant Key.
 
-[Obtaining a Tenant Key](https://www.magnopus.com/platform)
+For information on how to obtain one, head over here.
+
+ - [Obtaining a Tenant Key](https://www.magnopus.com/platform)
 ****
 
 ## 🖥️ Usage
-Examples for each language supported are below.
+Examples for each supported language are below.
 
 - WebAssembly 
     - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
