@@ -57,7 +57,6 @@ public:
 	MaintenanceInfoResult(void*) {};
 	MaintenanceInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
-
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
 	[[nodiscard]] csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses();
@@ -76,7 +75,7 @@ public:
 
 	/// @brief Represents a default maintenance window object, which is used when the platform finds no future maintenance windows.
 	/// @return MaintenanceInfo : what the platform considers to be a default maintenance window
-	const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
+	[[nodiscard]] const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
 
 	/// @brief Returns an Invalid state MaintenanceInfoResult.
 	CSP_NO_EXPORT static MaintenanceInfoResult Invalid();

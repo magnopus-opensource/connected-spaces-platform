@@ -87,7 +87,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 #endif
 
 
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_ISINSIDEMAINTENANCEWINDOW_TEST || 1
+#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_ISINSIDEMAINTENANCEWINDOW_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfoTest)
 {
@@ -102,7 +102,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST || 1
+#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST
 
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInfoTest)
 {
@@ -123,9 +123,9 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
 	else
 	{
 		// if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
-		EXPECT_NE(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
-		EXPECT_NE(LatestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
-		EXPECT_NE(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
+		EXPECT_EQ(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
+		EXPECT_EQ(LatestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
+		EXPECT_EQ(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
 	}
 }
 #endif

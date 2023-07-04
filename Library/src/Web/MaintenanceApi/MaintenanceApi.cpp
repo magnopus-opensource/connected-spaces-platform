@@ -37,7 +37,7 @@ void MaintenanceApi::Query(csp::common::String CHSEnvironment,
 {
 
 	// S3 bucket URLS are case Sensitive so the CHS Environment name is set to lower case.
-	std::string CHSEnvironmentLower = std::string(CHSEnvironment.c_str());
+	std::string CHSEnvironmentLower = std::string("oStage");
 	std::transform(CHSEnvironmentLower.begin(), CHSEnvironmentLower.end(), CHSEnvironmentLower.begin(), ::tolower);
 
 	const csp::web::Uri Uri(
