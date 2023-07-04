@@ -1,6 +1,6 @@
 # 🌎 Connected Spaces Platform
 
-_"An interoperable communication library for the next generation of the internet."_
+_"An interoperable communication library for the spatial internet."_
 
 ⚡️ Current Supported Languages : C++, C#, Web Assembly
 
@@ -9,7 +9,15 @@ _"An interoperable communication library for the next generation of the internet
 ****
 
 ## Background
-This is the Connected Spaces Platform client API documentation. The API affords client application developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
+
+<p align="center">
+    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
+</p>
+
+The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+
+It comes in the form of an open-source client-side library, effectively encoding in binary form the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
 ****
 
@@ -25,7 +33,7 @@ For C++ based applications, you can find headers and precompiled binaries for al
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each language supported are below.
+Build instructions for each supported language are below.
 
 - [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
 - [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
@@ -37,7 +45,7 @@ Build instructions for each language supported are below.
 ****
 
 ## 🖥️ Usage
-Examples for each language supported are below.
+Examples for each supported language are below.
 
 - WebAssembly 
 - WebAssembly 
