@@ -388,7 +388,7 @@ void WebClient::PrintErrorMessages(const HttpResponse& Response)
 
 		for (uint32_t i = 0; i < ResponseArray.Size(); i++)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Response has failed with error: %s", ResponseArray[i].GetString());
+			FOUNDATION_LOG_ERROR_FORMAT("Services response has failed with error: %s", ResponseArray[i].GetString());
 		}
 	}
 }
