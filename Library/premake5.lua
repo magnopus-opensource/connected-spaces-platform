@@ -153,6 +153,10 @@ if not Project then
 			buildoptions{
 				"/bigobj"
 			}
+
+            links {
+                "WS2_32"
+            }
         filter "platforms:Android"
             defines { "CSP_ANDROID" }
             staticruntime("On")
@@ -295,7 +299,6 @@ if not Project then
 
         filter "platforms:not wasm"
             links {
-                "WS2_32",
                 "POCONetSSL_OpenSSL",
                 "mimalloc",
             }
