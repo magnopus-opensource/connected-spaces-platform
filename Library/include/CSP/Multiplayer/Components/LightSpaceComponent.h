@@ -37,6 +37,15 @@ enum class LightType
 	Num
 };
 
+/// @brief Enumerates the types of light shadows supported by the light component.
+enum class LightShadowType
+{
+	None = 0,
+	Static,
+	Realtime,
+	Num
+};
+
 /// @brief Enumerates the types of cookie supported by the light component.
 enum class LightCookieType
 {
@@ -64,6 +73,7 @@ enum class LightPropertyKeys
 	LightCookieType,
 	IsARVisible,
 	ThirdPartyComponentRef,
+    LightShadowType,
 	Num
 };
 
@@ -84,6 +94,14 @@ public:
 	/// @brief Sets the type of light of this light component.
 	/// @param Value The type of light of this light component.
 	void SetLightType(LightType Value);
+
+    /// @brief Gets the type of light shadow of this light component.
+	/// @return The type of light shadow of this light component.
+	LightShadowType GetLightShadowType() const;
+
+	/// @brief Sets the type of light shadow of this light component.
+	/// @param Value The type of light shadow of this light component.
+	void SetLightShadowType(LightShadowType Value);
 
 	/// @brief Gets the color of the light of this component.
 	/// @return The color of the light of this component.
