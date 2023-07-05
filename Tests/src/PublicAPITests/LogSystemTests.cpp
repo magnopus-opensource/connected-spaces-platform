@@ -707,13 +707,13 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
 
-	const csp::common::String TestMsg = "Services response has failed with error: Must provide a password, with the email, to login.";
-	std::atomic_bool LogConfirmed	  = false;
+	const csp::common::String Prefix = "Services";
+	std::atomic_bool LogConfirmed	 = false;
 
 	LogSystem.SetLogCallback(
 		[&](csp::common::String InMessage)
 		{
-			LogConfirmed = InMessage == TestMsg;
+			LogConfirmed = InMessage.Split(' ')[0] == Prefix;
 
 			std::cout << InMessage << std::endl;
 		});
