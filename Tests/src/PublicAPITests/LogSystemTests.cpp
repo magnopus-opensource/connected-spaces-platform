@@ -723,7 +723,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 	csp::common::String UserId;
 
 	// Log in with invalid credentials
-	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, "invalidlogin@csp.co", "", csp::services::EResultCode::Failed);
 
 	auto Start	   = std::chrono::steady_clock::now();
 	auto Current   = std::chrono::steady_clock::now();
