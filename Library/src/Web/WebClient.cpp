@@ -17,10 +17,10 @@
 
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Services/ApiBase/ApiBase.h"
 #include "Systems/Users/UserSystem.internal.h"
 
 #include <chrono>
-
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -319,7 +319,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 
 		const HttpResponse& Response = Request->GetResponse();
 
-		// Atempt Auto-retry if needed
+		// Attempt Auto-retry if needed
 		bool RetryIssued = Request->CheckForAutoRetry();
 
 		if (Request->GetCallback())
@@ -328,6 +328,11 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			{
 				if (!RetryIssued)
 				{
+					if (Response.GetResponseCode() == EResponseCodes::ResponseBadRequest)
+					{
+						PrintErrorMessages(Response);
+					}
+
 					Request->GetCallback()->OnHttpResponse(Response);
 				}
 
@@ -339,6 +344,11 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 				{
 					// This request is marked to be polled, so add to the queue
 					// to be issued on the next call to WebClient::ProcessResponses()
+					if (Response.GetResponseCode() == EResponseCodes::ResponseBadRequest)
+					{
+						PrintErrorMessages(Response);
+					}
+
 					PollRequests.Enqueue({Request});
 				}
 			}
@@ -368,4 +378,18 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 }
 #endif
 
+void WebClient::PrintErrorMessages(const HttpResponse& Response)
+{
+	rapidjson::Document ResponseJson;
+	ResponseJson.Parse(Response.GetPayload().GetContent().c_str());
+	if (ResponseJson.HasMember("errors"))
+	{
+		const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
+
+		for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+		{
+			FOUNDATION_LOG_ERROR_FORMAT("Response has failed with error: %s", ResponseArray[i].GetString());
+		}
+	}
+}
 } // namespace csp::web
