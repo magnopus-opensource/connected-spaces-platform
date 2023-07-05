@@ -15,6 +15,8 @@ function QuickJS.AddProject()
         "_HAS_EXCEPTIONS=0", 
     }
 
+    warnings "Off"
+
     filter "platforms:x64"
         defines { 
             "JS_STRICT_NAN_BOXING"
