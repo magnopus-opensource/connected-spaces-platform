@@ -707,8 +707,6 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
 
-	LogSystem.SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
-
 	const csp::common::String TestMsg = "Services response has failed with error: Must provide a password, with the email, to login.";
 	std::atomic_bool LogConfirmed	  = false;
 
