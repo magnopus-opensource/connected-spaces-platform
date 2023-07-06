@@ -9,9 +9,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using FoundationCommon = Csp.Common;
-using FoundationSystems = Csp.Systems;
-using FoundationAsset = Csp.Systems.Asset;
+using CspCommon = Csp.Common;
+using CspSystems = Csp.Systems;
+using CspAsset = Csp.Systems.Asset;
 using UnityEngine;
 using UnityEngine.Windows;
 
@@ -27,16 +27,16 @@ public class HelloWorld : MonoBehaviour
     private readonly string exampleAssetPath = "Assets/StreamingAssets/";
     private bool foundationHasStarted;
     private bool enteredSpace;
-    private FoundationSystems.UserSystem userSystem;
-    private FoundationSystems.SpaceSystem spaceSystem;
-    private FoundationSystems.AssetSystem assetSystem;
-    private FoundationSystems.GraphQLSystem graphQLSystem;
+    private CspSystems.UserSystem userSystem;
+    private CspSystems.SpaceSystem spaceSystem;
+    private CspSystems.AssetSystem assetSystem;
+    private CspSystems.GraphQLSystem graphQLSystem;
     private SpaceEntitySystem entitySystem;
     private MultiplayerConnection connection;
     private CancellationTokenSource cancellationTokenSource;
-    private FoundationSystems.Space createdSpace;
+    private CspSystems.Space createdSpace;
 
-    // Initialisation of Foundation
+    // Initialisation of Csp
 
     #region Initialisation
 
@@ -47,7 +47,7 @@ public class HelloWorld : MonoBehaviour
             CHSEnvironment = "OStage",
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
-            ClientSKU = "foundation-cSharp-examples",
+            ClientSKU = "csp-cSharp-examples",
             ClientVersion = "0.0.2",
             CSPVersion = CSPFoundation.GetBuildID()
         };
@@ -132,10 +132,10 @@ public class HelloWorld : MonoBehaviour
     /// </summary>
     private void InitializeSystems()
     {
-        userSystem = FoundationSystems.SystemsManager.Get().GetUserSystem();
-        spaceSystem = FoundationSystems.SystemsManager.Get().GetSpaceSystem();
-        assetSystem = FoundationSystems.SystemsManager.Get().GetAssetSystem();
-        graphQLSystem = FoundationSystems.SystemsManager.Get().GetGraphQLSystem();
+        userSystem = CspSystems.SystemsManager.Get().GetUserSystem();
+        spaceSystem = CspSystems.SystemsManager.Get().GetSpaceSystem();
+        assetSystem = CspSystems.SystemsManager.Get().GetAssetSystem();
+        graphQLSystem = CspSystems.SystemsManager.Get().GetGraphQLSystem();
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public class HelloWorld : MonoBehaviour
     /// </summary>
     private void StopFoundation()
     {
-        Debug.Log("Shutting down Olympus Foundation ...");
+        Debug.Log("Shutting down Csp Foundation ...");
         bool successShutdown = CSPFoundation.Shutdown();
         if (!successShutdown)
         {
@@ -152,7 +152,7 @@ public class HelloWorld : MonoBehaviour
             return;
         }
 
-        Debug.Log("Shutdown Olympus Foundation");
+        Debug.Log("Shutdown Csp Foundation");
         foundationHasStarted = false;
     }
 
@@ -209,9 +209,9 @@ public class HelloWorld : MonoBehaviour
     {
         Debug.Log($"Creating account with Email {email} ...");
 
-        using FoundationSystems.ProfileResult result =
+        using CspSystems.ProfileResult result =
             await userSystem.CreateUser(null, null, email, password, false, null, null);
-        FoundationSystems.Profile profile = result.GetProfile();
+        CspSystems.Profile profile = result.GetProfile();
 
         Debug.Log($"Created account with Email {profile.Email}. Please check your email to verify your account.");
     }
@@ -226,7 +226,7 @@ public class HelloWorld : MonoBehaviour
     {
         Debug.Log($"Logging in with Email {email} ...");
 
-        using FoundationSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password);
+        using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password);
 
         Debug.Log($"Logged in with Email {email}.");
     }
@@ -260,8 +260,8 @@ public class HelloWorld : MonoBehaviour
         {
             { "site", defaultSpaceSite }
         };
-        using FoundationSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
-            FoundationSystems.SpaceAttributes.Private, null, ToFoundationMap(metadata), null);
+        using CspSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
+            CspSystems.SpaceAttributes.Private, null, ToFoundationMap(metadata), null);
 
         createdSpace = spaceResult.GetSpace();
         Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
@@ -288,7 +288,7 @@ public class HelloWorld : MonoBehaviour
             targetSpaceId = spaceId;
         }
 
-        using FoundationSystems.SpaceResult spaceResult = await spaceSystem.GetSpace(targetSpaceId);
+        using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpace(targetSpaceId);
         var space = spaceResult.GetSpace();
         await EnterSpaceAsync(space);
     }
@@ -299,9 +299,9 @@ public class HelloWorld : MonoBehaviour
     /// <returns> Just the Task object to await. </returns>
     private async Task SearchSpacesAsync()
     {
-        using FoundationSystems.SpacesResult response = await spaceSystem.GetSpaces();
-        FoundationCommon.Array<FoundationSystems.Space> spaces = response.GetSpaces();
-        FoundationSystems.Space[] unitySpaces = ToUnityArray(spaces);
+        using CspSystems.SpacesResult response = await spaceSystem.GetSpaces();
+        CspCommon.Array<CspSystems.Space> spaces = response.GetSpaces();
+        CspSystems.Space[] unitySpaces = ToUnityArray(spaces);
 
         Debug.Log("Got " + unitySpaces.Length + " Spaces");
     }
@@ -313,7 +313,7 @@ public class HelloWorld : MonoBehaviour
     private async Task SearchSpacesUsingGraphQLAsync()
     {
         var query = FormulateGraphQLQueryString();
-        using FoundationSystems.GraphQLResult response = await graphQLSystem.RunQuery(query);
+        using CspSystems.GraphQLResult response = await graphQLSystem.RunQuery(query);
         var result = response.GetResponse();
 
         if (string.IsNullOrWhiteSpace(result))
@@ -331,10 +331,10 @@ public class HelloWorld : MonoBehaviour
     /// </summary>
     /// <param name="space">Space to enter.</param>
     /// <returns> Just the Task object to await. </returns>
-    private async Task EnterSpaceAsync(FoundationSystems.Space space)
+    private async Task EnterSpaceAsync(CspSystems.Space space)
     {
         await Task.Delay(100);
-        using FoundationSystems.EnterSpaceResult enterResult = await spaceSystem.EnterSpace(space.Id, false);
+        using CspSystems.EnterSpaceResult enterResult = await spaceSystem.EnterSpace(space.Id, false);
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
         await InitializeConnection(space.Id);
@@ -351,9 +351,9 @@ public class HelloWorld : MonoBehaviour
     }
 
     private void EntityUpdate(object sender,
-        (SpaceEntity entity, SpaceEntityUpdateFlags updateFLags, FoundationCommon.Array<ComponentUpdateInfo> info) e)
+        (SpaceEntity entity, SpaceEntityUpdateFlags updateFLags, CspCommon.Array<ComponentUpdateInfo> info) e)
     {
-        FoundationCommon.Vector3 receivedPosition = e.entity.GetPosition();
+        CspCommon.Vector3 receivedPosition = e.entity.GetPosition();
         var unityPosition = new Vector3(receivedPosition.X, receivedPosition.Y, receivedPosition.Z);
 
         Debug.Log($"Received Update for Entity {e.entity.GetName()} with position: {unityPosition}");
@@ -418,8 +418,8 @@ public class HelloWorld : MonoBehaviour
     private async Task<SpaceEntity> CreateAvatar()
     {
         SpaceEntity entity = await entitySystem.CreateAvatar("TestAvatar",
-            new SpaceTransform(FoundationCommon.Vector3.Zero(), FoundationCommon.Vector4.Identity(),
-                FoundationCommon.Vector3.One()), AvatarState.Idle, "id", AvatarPlayMode.Default);
+            new SpaceTransform(CspCommon.Vector3.Zero(), CspCommon.Vector4.Identity(),
+                CspCommon.Vector3.One()), AvatarState.Idle, "id", AvatarPlayMode.Default);
         Debug.Log("Created Avatar.");
         return entity;
     }
@@ -430,7 +430,7 @@ public class HelloWorld : MonoBehaviour
     /// <param name="spaceEntity">The Space entity which will be moved.</param>
     private void MoveAvatar(SpaceEntity spaceEntity)
     {
-        var newPos = FoundationCommon.Vector3.One();
+        var newPos = CspCommon.Vector3.One();
         var unityVector3 = new Vector3(newPos.X, newPos.Y, newPos.Z);
         spaceEntity.SetPosition(newPos);
         spaceEntity.QueueUpdate();
@@ -458,16 +458,16 @@ public class HelloWorld : MonoBehaviour
     {
         //create an asset collection associated with our space
         string assetCollectionName = Guid.NewGuid().ToString();
-        using FoundationSystems.AssetCollectionResult assetCollection = await assetSystem.CreateAssetCollection(spaceId,
+        using CspSystems.AssetCollectionResult assetCollection = await assetSystem.CreateAssetCollection(spaceId,
             null, assetCollectionName,
-            null, FoundationSystems.EAssetCollectionType.DEFAULT, null);
+            null, CspSystems.EAssetCollectionType.DEFAULT, null);
 
         // get the asset collection from the collection result
         var collection = assetCollection.GetAssetCollection();
 
         // create an asset
-        using FoundationSystems.AssetResult assetResult = await assetSystem.CreateAsset(collection, exampleAssetName,
-            null, null, FoundationSystems.EAssetType.IMAGE);
+        using CspSystems.AssetResult assetResult = await assetSystem.CreateAsset(collection, exampleAssetName,
+            null, null, CspSystems.EAssetType.IMAGE);
 
         // get the associated detail from the asset result
         var asset = assetResult.GetAsset();
@@ -480,20 +480,20 @@ public class HelloWorld : MonoBehaviour
         int size = bytes.Length;
         var uploadFileDataPtr = Marshal.AllocHGlobal(size);
         Marshal.Copy(bytes, 0, uploadFileDataPtr, size);
-        var source = new FoundationSystems.BufferAssetDataSource();
+        var source = new CspSystems.BufferAssetDataSource();
         source.Buffer = uploadFileDataPtr;
         source.BufferLength = (ulong)size;
         // set the mime type
         source.SetMimeType("image/png");
 
         // upload the file to the asset collection
-        using FoundationSystems.UriResult uploadResult = await assetSystem.UploadAssetData(collection, asset, source);
+        using CspSystems.UriResult uploadResult = await assetSystem.UploadAssetData(collection, asset, source);
 
         Debug.Log("Upload completed");
         // retrieve asset 
-        using FoundationSystems.AssetCollectionsResult assetCollectionResult =
+        using CspSystems.AssetCollectionsResult assetCollectionResult =
             await assetSystem.GetAssetCollectionsByCriteria(spaceId, null,
-                FoundationSystems.EAssetCollectionType.DEFAULT, null, null, null, null);
+                CspSystems.EAssetCollectionType.DEFAULT, null, null, null, null);
 
         var assets = assetCollectionResult.GetAssetCollections();
         Debug.Log("Asset collection size:" + assets.Size());
@@ -516,7 +516,7 @@ public class HelloWorld : MonoBehaviour
 
     #region Utils
 
-    private T[] ToUnityArray<T>(FoundationCommon.Array<T> array)
+    private T[] ToUnityArray<T>(CspCommon.Array<T> array)
     {
         if (array != null
             && array.PointerIsValid)
@@ -534,11 +534,11 @@ public class HelloWorld : MonoBehaviour
         return null;
     }
 
-    private FoundationCommon.Map<T, U> ToFoundationMap<T, U>(Dictionary<T, U> dict)
+    private CspCommon.Map<T, U> ToFoundationMap<T, U>(Dictionary<T, U> dict)
     {
         if (dict != null)
         {
-            var map = new FoundationCommon.Map<T, U>();
+            var map = new CspCommon.Map<T, U>();
 
             foreach (var keyVal in dict)
             {
@@ -552,7 +552,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Creates abasic GraphQL query for getting 10 spaces from the Foundation layer.
+    /// Creates abasic GraphQL query for getting 10 spaces from the Csp layer.
     /// More info at https://graphql.org/learn/queries/
     /// </summary>
     /// <returns>The formulated string query.</returns>
