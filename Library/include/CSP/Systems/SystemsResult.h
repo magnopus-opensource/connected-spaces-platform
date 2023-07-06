@@ -23,7 +23,9 @@
 
 namespace csp::multiplayer
 {
+
 class ConversationSystem;
+
 }
 
 namespace csp::services
@@ -47,10 +49,12 @@ class CSP_API NullResult : public csp::services::ResultBase
 	friend class SettingsSystem;
 	friend class UserSystem;
 	friend class csp::multiplayer::ConversationSystem;
+	friend class ScriptSystem;
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
+
 public:
 	/// @brief Creates an invalid NullResult instance that can be used to notify the user of an error.
 	/// @return NullResult : invalid NullResult instance

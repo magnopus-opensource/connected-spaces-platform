@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Script/ScriptSystem.h"
 
 #include "CSP/CSPFoundation.h"
@@ -82,6 +83,52 @@ template <> struct qjs::js_traits<String>
 		return JS_NewStringLen(ctx, str.c_str(), str.Length());
 	}
 };
+
+
+namespace
+{
+
+typedef Map<String, String> LookupTableMap;
+
+
+LookupTableMap JsonToLookupTable(const String& JsonString)
+{
+	rapidjson::Document Json;
+	Json.Parse(JsonString.c_str(), JsonString.Length());
+
+	LookupTableMap LookupTable;
+
+	for (const auto& Entry : Json.GetObject())
+	{
+		LookupTable[Entry.name.GetString(), Entry.value.GetString()];
+	}
+
+	return LookupTable;
+}
+
+String LookupTableToJson(const LookupTableMap& LookupTable)
+{
+	rapidjson::Document Json(rapidjson::kObjectType);
+	auto Object = Json.GetObject();
+
+	auto* Keys = LookupTable.Keys();
+
+	for (int i = 0; i < Keys->Size(); ++i)
+	{
+		auto& Key = Keys->operator[](i);
+
+		rapidjson::Value Name(Key.c_str(), Json.GetAllocator());
+		rapidjson::Value Value(LookupTable[Key].c_str(), Json.GetAllocator());
+
+		Object.AddMember(Name, Value, Json.GetAllocator());
+	}
+
+	CSP_DELETE(Keys);
+
+	return Json.GetString();
+}
+
+} // namespace
 
 
 namespace csp::systems
@@ -301,7 +348,7 @@ void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const S
 	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
 	AssetCollectionName.Append(Namespace);
 
-	auto AssetName = AssetCollectionName;
+	String AssetName = AssetCollectionName;
 	AssetName.Append("_LOOKUPTABLE");
 
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
@@ -354,12 +401,38 @@ void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const S
 									   CreateAssetCollectionCallback);
 }
 
+void ScriptSystem::GetLookupTableById(const String& CollectionId, const String& Id, std::function<void(const LookupTableMap&)> Callback)
+{
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	AssetResultCallback GetAssetCallback = [AssetSystem, Callback](const AssetResult& Result)
+	{
+		const auto& Asset = Result.GetAsset();
+
+		AssetDataResultCallback DownloadAssetDataCallback = [Callback](const AssetDataResult& Result)
+		{
+			auto Data		= Result.GetData();
+			auto DataLength = Result.GetDataLength();
+
+			auto LookupTable = JsonToLookupTable(String(reinterpret_cast<const char*>(Data), DataLength));
+
+			Callback(LookupTable);
+		};
+
+		// The table itself is stored as a JSON document
+		AssetSystem->DownloadAssetData(Asset, DownloadAssetDataCallback);
+	};
+
+	// A ScriptModuleCollection's lookup table is stored as an Asset
+	AssetSystem->GetAssetById(CollectionId, Id, GetAssetCallback);
+}
+
 void ScriptSystem::GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
 {
 	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
 	AssetCollectionName.Append(Namespace);
 
-	auto AssetName = AssetCollectionName;
+	String AssetName = AssetCollectionName;
 	AssetName.Append("_LOOKUPTABLE");
 
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
@@ -367,44 +440,27 @@ void ScriptSystem::GetScriptModuleCollection(const csp::common::String& Namespac
 	AssetCollectionResultCallback GetAssetCollectionCallback = [AssetSystem, AssetName, Callback](const AssetCollectionResult& Result)
 	{
 		const auto& AssetCollection = Result.GetAssetCollection();
+		String AssetCollectionId	= AssetCollection.Id;
 		const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 		const auto& LookupTableId	= Metadata["lookup_table_id"];
 
-		AssetResultCallback GetAssetCallback = [AssetSystem, AssetCollection, Callback](const AssetResult& Result)
+		auto GetLookupTableCallback = [AssetCollectionId, LookupTableId, Callback](const LookupTableMap& Result)
 		{
-			const auto& Asset = Result.GetAsset();
+			// TODO: Handle failures in GetLookupTableById
+			ScriptModuleCollectionResult InternalResult(csp::services::EResultCode::Success, 400);
 
-			AssetDataResultCallback DownloadAssetDataCallback = [AssetCollection, Callback](const AssetDataResult& Result)
-			{
-				ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+			auto& Collection		 = InternalResult.GetCollection();
+			Collection.Id			 = AssetCollectionId;
+			Collection.LookupTable	 = Result;
+			Collection.LookupTableId = LookupTableId;
 
-				auto& Collection = InternalResult.GetCollection();
-				Collection.Id	 = AssetCollection.Id;
-
-				const auto& Data = Result.GetData();
-				auto DataLength	 = Result.GetDataLength();
-
-				rapidjson::Document Json;
-				Json.Parse(reinterpret_cast<const char*>(Data), DataLength);
-
-				auto& LookupTable = Collection.LookupTable;
-
-				for (const auto& Entry : Json.GetObject())
-				{
-					LookupTable[Entry.name.GetString(), Entry.value.GetString()];
-				}
-
-				Collection.LookupTableId = AssetCollection.GetMetadataImmutable()["lookup_table_id"];
-
-				Callback(InternalResult);
-			};
-
-			AssetSystem->DownloadAssetData(Asset, DownloadAssetDataCallback);
+			Callback(InternalResult);
 		};
 
-		AssetSystem->GetAssetById(AssetCollection.Id, LookupTableId, GetAssetCallback);
+		GetLookupTableById(AssetCollection.Id, LookupTableId, GetLookupTableCallback);
 	};
 
+	// ScriptModuleCollection is stored as an AssetCollection on CHS
 	AssetSystem->GetAssetCollectionByName(AssetCollectionName, GetAssetCollectionCallback);
 }
 
@@ -416,8 +472,8 @@ void ScriptSystem::DeleteScriptModuleCollection(const ScriptModuleCollection& Co
 }
 
 void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collection,
-										   const csp::common::String& Name,
-										   const csp::common::String& ModuleText,
+										   const String& Name,
+										   const String& ModuleText,
 										   const NullResultCallback& Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
@@ -437,6 +493,7 @@ void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collect
 	// get the lookuptable from the collection
 	// add entry to the lookup table, turn back into json and then uuse the lookuptableid to update the assetdata call
 	// callback
+	// Create new functions for converting to/from json/map
 
 	csp::systems::AssetCollection InternalAssetCollection;
 	InternalAssetCollection.Id	 = Collection.GetId();
@@ -463,26 +520,12 @@ void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collect
 				const auto& Asset = Result.GetAsset();
 
 				const auto& LookupTable = InternalCollection.GetLookupTable();
-				auto* Keys				= LookupTable.Keys();
-
-				rapidjson::Document JsonDoc(rapidjson::kObjectType);
-
-				for (auto idx = 0; idx < Keys->Size(); ++idx)
-				{
-					auto Key   = Keys->operator[](idx);
-					auto Value = LookupTable.operator[](Key);
-
-					rapidjson::Value ObjectKey;
-					ObjectKey.SetString(Key.c_str(), JsonDoc.GetAllocator());
-					rapidjson::Value ObjectValue;
-					ObjectValue.SetString(Value.c_str(), JsonDoc.GetAllocator());
-					JsonDoc.AddMember(ObjectKey, Value, JsonDoc.GetAllocator());
-				}
+				auto Json				= LookupTableToJson(LookupTable);
 
 				BufferAssetDataSource AssetData;
 				AssetData.SetMimeType("application/json");
-				AssetData.Buffer	   = const_cast<char*>(JsonDoc.GetString());
-				AssetData.BufferLength = 2;
+				AssetData.Buffer	   = const_cast<char*>(Json.c_str());
+				AssetData.BufferLength = Json.Length();
 
 				UriResultCallback UploadAssetDataCallback = [Callback](const UriResult& Result)
 				{

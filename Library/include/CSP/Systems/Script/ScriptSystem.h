@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -199,6 +200,10 @@ private:
 	ScriptSystem();
 
 	class ScriptRuntime* TheScriptRuntime;
+
+	static void GetLookupTableById(const csp::common::String& CollectionId,
+								   const csp::common::String& Id,
+								   std::function<void(const csp::common::Map<csp::common::String, csp::common::String>&)> Callback);
 };
 
 } // namespace csp::systems
