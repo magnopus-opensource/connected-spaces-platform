@@ -2,16 +2,16 @@
 // Copyright (c) Magnopus. All Rights Reserved.
 // ------------------------------------------------------------------
 
-using Olympus.Foundation;
-using Olympus.Foundation.Multiplayer;
+using Csp;
+using Csp.Multiplayer;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using FoundationCommon = Olympus.Foundation.Common;
-using FoundationSystems = Olympus.Foundation.Systems;
-using FoundationAsset = Olympus.Foundation.Systems.Asset;
+using FoundationCommon = Csp.Common;
+using FoundationSystems = Csp.Systems;
+using FoundationAsset = Csp.Systems.Asset;
 using UnityEngine;
 using UnityEngine.Windows;
 
@@ -48,8 +48,8 @@ public class HelloWorld : MonoBehaviour
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
             ClientSKU = "foundation-cSharp-examples",
-            ClientVersion = "0.0.1",
-            OlympusVersion = OlympusFoundation.GetBuildID()
+            ClientVersion = "0.0.2",
+            CSPVersion = CSPFoundation.GetBuildID()
         };
 
         Application.quitting += QuitFoundation;
@@ -74,14 +74,14 @@ public class HelloWorld : MonoBehaviour
     private void StartFoundation(string backendEndpoint, string tenant, ClientUserAgent userAgent)
     {
         Debug.Log("Initializing Foundation ...");
-        bool successInit = OlympusFoundation.Initialise(backendEndpoint, tenant);
+        bool successInit = CSPFoundation.Initialise(backendEndpoint, tenant);
         if (!successInit)
         {
             Debug.Log("Failed to initialize Olympus Foundation. Error is within Foundation package.");
             return;
         }
 
-        OlympusFoundation.SetClientUserAgentInfo(userAgent);
+        CSPFoundation.SetClientUserAgentInfo(userAgent);
         Debug.Log("Initialized Foundation.");
 
         foundationHasStarted = true;
@@ -121,7 +121,7 @@ public class HelloWorld : MonoBehaviour
                 return;
             }
 
-            OlympusFoundation.Tick();
+            CSPFoundation.Tick();
 
             await Task.Delay(TickDelayMilliseconds);
         }
@@ -145,7 +145,7 @@ public class HelloWorld : MonoBehaviour
     private void StopFoundation()
     {
         Debug.Log("Shutting down Olympus Foundation ...");
-        bool successShutdown = OlympusFoundation.Shutdown();
+        bool successShutdown = CSPFoundation.Shutdown();
         if (!successShutdown)
         {
             Debug.Log("Failed to shut down Foundation. Error is within Foundation package.");
@@ -261,7 +261,7 @@ public class HelloWorld : MonoBehaviour
             { "site", defaultSpaceSite }
         };
         using FoundationSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
-            FoundationSystems.SpaceType.Private, null, ToFoundationMap(metadata), null);
+            FoundationSystems.SpaceAttributes.Private, null, ToFoundationMap(metadata), null);
 
         createdSpace = spaceResult.GetSpace();
         Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
