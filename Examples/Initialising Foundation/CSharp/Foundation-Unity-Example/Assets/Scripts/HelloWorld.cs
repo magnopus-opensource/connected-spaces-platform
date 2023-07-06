@@ -18,7 +18,7 @@ public class HelloWorld : MonoBehaviour
             CHSEnvironment = "OStage",
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
-            ClientSKU = "foundation-cSharp-examples",
+            ClientSKU = "csp-cSharp-examples",
             ClientVersion = "0.0.2",
             CSPVersion = CSPFoundation.GetBuildID()
         };
