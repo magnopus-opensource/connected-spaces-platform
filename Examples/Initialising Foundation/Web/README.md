@@ -1,4 +1,4 @@
-# Example project initialising Foundation with JavaScript
+# Example project initialising Connected Spaces Platform (CSP) with JavaScript
 
 ## Setup and Running examples
 
@@ -11,13 +11,13 @@ This example is set up as a small Node project. Using Yarn (or NPM) the followin
 
 ## Files
 
-- index.js - this is the main body of JavaScript that is responsible for talking to and using Foundation
+- index.js - this is the main body of JavaScript that is responsible for talking to and using CSP
 
 - helpers.js - this contains some useful code functions that assist with these hello world examples, either with data formatting, or basic UI functionality.
 
-## Foundation requirements (in a browser environment)
+## CSP requirements (in a browser environment)
 
-Due to the nature of the Foundation WASM binary requiring access to SharedArrayBuffer, an application that utilises Foundation in a browser environment must supply the following headers for http responses:
+Due to the nature of the CSP WASM binary requiring access to SharedArrayBuffer, an application that utilises CSP in a browser environment must supply the following headers for http responses:
 
 ```
       'Cross-Origin-Embedder-Policy': 'require-corp',
