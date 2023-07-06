@@ -8,13 +8,13 @@ import {
 import {
   ClientUserAgent,
   Multiplayer,
-  OlympusFoundation,
   Systems,
   ready,
   freeBuffer,
   Common,
   Services,
-} from "./node_modules/@magnopus/com.magnopus.olympus.foundation.web/olympus.foundation.js";
+  CSPFoundation,
+} from "./node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js";
 
 // Magnopus Services Endpoint to connect to.
 const ENDPOINT = "https://ogs-odev.magnoboard.com";
@@ -39,34 +39,34 @@ const runAllExamples = () => {
     return;
   }
 
-  // If we should use debug version of Foundation.
-  const debug = true;
+  // If we should use debug version of Connected Spaces Platform (CSP).
+  const debug = false;
 
-  // We call ready as promise, as to know Foundation is ready.
+  // We call ready as promise, as to know CSP is ready.
   ready(debug).then(async () => {
-    // Create Foundation user agent information.
+    // Create CSP user agent information.
     const userAgent = ClientUserAgent.create();
-    userAgent.clientSKU = "foundation-javascript-examples";
+    userAgent.clientSKU = "csp-javascript-examples";
     const agent = navigator.userAgent.toLowerCase();
     userAgent.clientOS = agent.split(/[()]/)[1];
-    userAgent.olympusVersion = OlympusFoundation.getBuildID();
+    userAgent.olympusVersion = CSPFoundation.getBuildID();
 
-    // Initialise Foundation against a given endpoint and tenant
-    OlympusFoundation.initialise(ENDPOINT, TENANT);
+    // Initialise CSP against a given endpoint and tenant
+    CSPFoundation.initialise(ENDPOINT, TENANT);
 
     // Set the user agent constructed above.
-    OlympusFoundation.setClientUserAgentInfo(userAgent);
+    CSPFoundation.setClientUserAgentInfo(userAgent);
 
-    // Get Foundation systems.
+    // Get CSP systems.
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
     const graphQLSystem = systemsManager.getGraphQLSystem();
 
-    // For Foundation to process updates, we can call `Tick` and a given rate.
+    // For CSP to process updates, we can call `Tick` and a given rate.
     setInterval(() => {
-      OlympusFoundation.tick();
+      CSPFoundation.tick();
     }, 1000 / 30); // 30 FPS
 
     // Attempt signup
@@ -189,13 +189,13 @@ const runAllExamples = () => {
     for (const asset of commonArrayToJSArray(
       assetListResult.getAssetCollections()
     )) {
-      console.log("asset found", asset.name);
+      console.log("Asset found", asset.name);
     }
     assetListResult.delete();
 
     // Delete asset
     const deleteResult = await assetSystem.deleteAsset(collection, detail);
-    console.log("asset deleted", resultStatus(deleteResult));
+    console.log("Asset deleted", resultStatus(deleteResult));
     deleteResult.delete();
 
     // Get all available spaces for current user
@@ -203,7 +203,7 @@ const runAllExamples = () => {
     console.log("Spaces available to user", resultStatus(availableSpaces));
 
     for (const space of commonArrayToJSArray(availableSpaces.getSpaces())) {
-      console.log("space found", space.name);
+      console.log("Space found", space.name);
     }
 
     // Run a query via graphQL with a partial name filter to search.
@@ -223,7 +223,7 @@ const runAllExamples = () => {
     // Parse JSON response.
     const spaceSearchRes = JSON.parse(graphQLResult.getResponse());
     console.log(
-      "GraphQL space search, found ",
+      "GraphQL space search: found ",
       spaceSearchRes.data.spaces.itemTotalCount,
       " spaces that match 'test'."
     );
@@ -331,8 +331,8 @@ const runAllExamples = () => {
       logoutResult.delete();
 
       // Shutdown
-      OlympusFoundation.shutdown();
-      console.log("Foundation shutdown");
+      CSPFoundation.shutdown();
+      console.log("CSP shutdown");
     }, 3000);
   });
 };
