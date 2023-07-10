@@ -45,7 +45,7 @@ time_t CSPTimeGM(struct tm* Time)
 	constexpr long long CumulativeDays[MonthsPerYear] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
 	const long long Year = 1900LL + Time->tm_year + Time->tm_mon / MonthsPerYear;
-	time_t Result		 = (Year - 1970) * 365L + CumulativeDays[Time->tm_mon % MonthsPerYear];
+	time_t Result		 = (Year - 1970) * 365 + CumulativeDays[Time->tm_mon % MonthsPerYear];
 
 	Result += (Year - 1968) / 4;
 	Result -= (Year - 1900) / 100;
@@ -57,11 +57,11 @@ time_t CSPTimeGM(struct tm* Time)
 	}
 
 	Result += static_cast<time_t>(Time->tm_mday) - 1;
-	Result *= 24L;
+	Result *= 24;
 	Result += Time->tm_hour;
-	Result *= 60L;
+	Result *= 60;
 	Result += Time->tm_min;
-	Result *= 60L;
+	Result *= 60;
 	Result += Time->tm_sec;
 
 	if (Time->tm_isdst == 1)
