@@ -461,8 +461,22 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String& UserId, UriRes
 				{
 					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
 					{
-						const UriResult InternalResult(AssetsResult.GetAssets()[0].Uri);
-						Callback(InternalResult);
+						const auto& Assets = AssetsResult.GetAssets();
+
+						if (Assets.Size() > 0)
+						{
+							const UriResult InternalResult(AssetsResult.GetAssets()[0].Uri);
+							Callback(InternalResult);
+						}
+						else
+						{
+							UriResult InternalResult(csp::services::EResultCode::Failed, 200);
+							InternalResult.SetResponseBody(
+								"Invalid avatar portrait AssetCollection. AssetCollection should contain an Asset but does not!");
+							InternalResult.Uri = "";
+
+							Callback(InternalResult);
+						}
 					}
 					else
 					{
