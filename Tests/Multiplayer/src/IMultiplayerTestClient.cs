@@ -1,4 +1,5 @@
-﻿namespace MultiplayerTestClient
+﻿
+namespace MultiplayerTestClient
 {
     /**
      * This is the interface for driving the MultiplayerTestClient Instance

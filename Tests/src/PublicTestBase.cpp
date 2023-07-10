@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "PublicTestBase.h"
 
 #include "CSP/CSPFoundation.h"
@@ -27,15 +28,23 @@ void PublicTestBase::SetUp()
 
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+	auto* LogSystem = csp::systems::SystemsManager::Get().GetLogSystem();
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
+	LogSystem->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+
+	LogSystem->SetEventCallback(
 		[](csp::common::String Message)
 		{
-			fprintf(stderr, "%s\n", Message.c_str());
+			std::cerr << "[ ::EVENT  ] " << Message.c_str() << std::endl;
 		});
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+	LogSystem->SetLogCallback(
+		[](csp::common::String Message)
+		{
+			std::cerr << "[ ::LOG    ] " << Message.c_str() << std::endl;
+		});
+
+	LogDebug("Foundation initialized!");
 }
 
 void PublicTestBase::TearDown()
@@ -44,13 +53,20 @@ void PublicTestBase::TearDown()
 
 	if (!csp::CSPFoundation::GetIsInitialised())
 	{
-		fprintf(stderr,
-				"%s\n",
-				"csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
+		LogError("csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
 
 		return;
 	}
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
+	while (!CleanupQueue.empty())
+	{
+		auto Function = CleanupQueue.top();
+		CleanupQueue.pop();
+
+		Function();
+	}
+
+	csp::systems::SystemsManager::Get().GetLogSystem()->ClearAllCallbacks();
 	csp::CSPFoundation::Shutdown();
+	LogDebug("Foundation uninitialized");
 }

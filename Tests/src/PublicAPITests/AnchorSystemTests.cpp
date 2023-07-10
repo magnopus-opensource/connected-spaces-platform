@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
@@ -76,9 +77,10 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem,
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
 		OutAnchor = Result.GetAnchor();
-		std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
+		LogDebug("Anchor Created: Id=%s", OutAnchor.Id.c_str());
 	}
 }
+
 
 void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem,
 						 const csp::common::String& SpaceId,
@@ -120,7 +122,7 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem,
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
 		OutAnchor = Result.GetAnchor();
-		std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
+		LogDebug("Anchor Created: Id=%s", OutAnchor.Id.c_str());
 	}
 }
 
@@ -134,8 +136,7 @@ void DeleteAnchors(csp::systems::AnchorSystem* AnchorSystem, const csp::common::
 	{
 		for (int idx = 0; idx < AnchorIDs.Size(); idx++)
 		{
-			std::cerr << "Anchor Deleted: "
-					  << "Id=" << AnchorIDs[idx] << std::endl;
+			LogDebug("Anchor Deleted: Id=%s", AnchorIDs[idx].c_str());
 		}
 	}
 }
@@ -193,8 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -216,7 +216,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-	LogOut(UserSystem);
 }
 #endif
 
@@ -240,15 +239,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, false);
-
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -300,7 +296,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
 }
 #endif
 
@@ -326,21 +321,27 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	char UniqueAssetCollectionName2[256];
 	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	auto* Connection   = EnterResult.GetConnection();
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	auto [Ok] = AWAIT(Connection, Connect);
+
+	EXPECT_TRUE(Ok);
+
+	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+	EXPECT_TRUE(Ok);
 
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
@@ -387,12 +388,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	std::tie(Ok) = AWAIT(Connection, Disconnect);
+	delete Connection;
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
 }
 #endif
 
@@ -416,23 +417,29 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	csp::common::Array<csp::common::String> SpaceIds(1);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 	SpaceIds[0] = Space.Id;
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	auto* Connection   = EnterResult.GetConnection();
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	auto [Ok] = AWAIT(Connection, Connect);
+
+	EXPECT_TRUE(Ok);
+
+	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+	EXPECT_TRUE(Ok);
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -525,19 +532,18 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	}
 	else
 	{
-		std::cerr << "GetAnchorsInArea failed with ResultCode: " << (int) Result.GetResultCode() << " HttpResultCode: " << Result.GetHttpResultCode()
-				  << std::endl;
+		LogError("GetAnchorsInArea failed with ResultCode: %i HttpResultCode: %i", (int) Result.GetResultCode(), Result.GetHttpResultCode());
 	}
 
 	csp::common::Array<csp::common::String> CreatedAnchorIds(1);
 	CreatedAnchorIds[0] = Anchor.Id;
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	std::tie(Ok) = AWAIT(Connection, Disconnect);
+	delete Connection;
+
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	LogOut(UserSystem);
 }
 #endif
 
@@ -563,15 +569,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	char UniqueAssetCollectionName2[256];
 	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	auto* Connection   = EnterResult.GetConnection();
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
@@ -579,10 +583,19 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 		{
 		});
 
+	auto [Ok] = AWAIT(Connection, Connect);
+
+	EXPECT_TRUE(Ok);
+
+	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+	EXPECT_TRUE(Ok);
+
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
 	csp::common::String ObjectName1 = "Object 1";
 	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
+
 	csp::common::String ObjectName2 = "Object 2";
 	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
 
@@ -613,15 +626,18 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	CreatedAnchorIds[1] = Anchor2.Id;
 
 	auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
+
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto Anchors = Result.GetAnchors();
+
 	EXPECT_EQ(Anchors.Size(), 2);
 
 	int AnchorsFound = 0;
 	for (size_t i = 0; i < Anchors.Size(); ++i)
 	{
 		EXPECT_EQ(Anchors[i].SpaceId, Space.Id);
+
 		if (Anchors[i].ThirdPartyAnchorId == Anchor1.ThirdPartyAnchorId || Anchors[i].ThirdPartyAnchorId == Anchor2.ThirdPartyAnchorId)
 		{
 			++AnchorsFound;
@@ -630,11 +646,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	EXPECT_EQ(AnchorsFound, 2);
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+
+	std::tie(Ok) = AWAIT(Connection, Disconnect);
+	delete Connection;
+
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
 }
 #endif
 
@@ -654,8 +672,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", "OLY-UNITTEST-ASSET-COLLECTION-REWIND", GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -701,7 +718,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 
 	DeleteAnchors(AnchorSystem, {Anchor1.Id, Anchor2.Id});
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-	LogOut(UserSystem);
 }
 #endif
 
@@ -725,21 +741,27 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	auto* Connection   = EnterResult.GetConnection();
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	auto [Ok] = AWAIT(Connection, Connect);
+
+	EXPECT_TRUE(Ok);
+
+	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+	EXPECT_TRUE(Ok);
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -768,9 +790,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	DeleteSpace(SpaceSystem, Space.Id);
+	std::tie(Ok) = AWAIT(Connection, Disconnect);
+	delete Connection;
 
-	LogOut(UserSystem);
+	DeleteSpace(SpaceSystem, Space.Id);
 }
 #endif

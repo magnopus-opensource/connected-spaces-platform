@@ -28,8 +28,11 @@
 
 namespace csp::multiplayer
 {
+
 class MultiplayerConnection;
+
 }
+
 
 namespace csp::services
 {
@@ -63,6 +66,7 @@ enum class CSP_FLAGS SpaceAttributes : uint8_t
 	/// @brief Discoverable, invite required
 	Gated = IsDiscoverable | RequiresInvite
 };
+
 
 CSP_START_IGNORE
 
@@ -152,6 +156,7 @@ private:
 	// must go through the SpaceSystem for all operations with POIs related to SpaceGeoLocations.
 	csp::common::String Id;
 };
+
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get a space.
@@ -344,22 +349,14 @@ class CSP_API EnterSpaceResult : public csp::services::ResultBase
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T> friend struct InvalidResult;
 	CSP_END_IGNORE
 	/** @endcond */
-
-public:
-	csp::multiplayer::MultiplayerConnection* GetConnection() const;
-
 
 private:
 	EnterSpaceResult(void*) {};
 	EnterSpaceResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 	EnterSpaceResult() {};
-
-
-	csp::multiplayer::MultiplayerConnection* Connection;
-	void SetConnection(csp::multiplayer::MultiplayerConnection* IncommingConnection);
-	bool EnterResponse;
 };
 
 

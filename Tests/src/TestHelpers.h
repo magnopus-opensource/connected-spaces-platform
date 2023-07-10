@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/StringFormat.h"
 #include "CSP/Services/WebService.h"
 #include "PublicTestBase.h"
 
@@ -23,6 +24,7 @@
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <stack>
 #include <thread>
 
 inline const char* TESTS_CLIENT_SKU = "CPPTest";
@@ -177,9 +179,28 @@ inline std::string GetUniqueHexString(int Length = 16)
 	return str;
 }
 
-inline void LogFatal(std::string Message)
+template <typename... Args> inline void LogDebug(const char* FormatString, Args... FormatArgs)
 {
-	std::cerr << "[ ERROR    ] " << Message << std::endl;
+	constexpr const char ANSI_YELLOW[] = "\x1b[1;33m";
+	constexpr const char ANSI_RESET[]  = "\x1b[0;0m";
+
+	std::cerr << ANSI_YELLOW << "[ DEBUG    ] " << ANSI_RESET
+			  << csp::common::StringFormat(FormatString, std::forward<decltype(FormatArgs)>(FormatArgs)...).c_str() << std::endl;
+}
+
+template <typename... Args> inline void LogError(const char* FormatString, Args... FormatArgs)
+{
+	constexpr const char ANSI_RED[]	  = "\x1b[1;31m";
+	constexpr const char ANSI_RESET[] = "\x1b[0;0m";
+
+	std::cerr << ANSI_RED << "[ ERROR    ] " << ANSI_RESET
+			  << csp::common::StringFormat(FormatString, std::forward<decltype(FormatArgs)>(FormatArgs)...).c_str() << std::endl;
+}
+
+template <typename... Args> inline void LogFatal(const char* FormatString, Args... FormatArgs)
+{
+	LogError(FormatString, std::forward<decltype(FormatArgs)>(FormatArgs)...);
+
 	exit(1);
 }
 
@@ -196,4 +217,13 @@ inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& End
 	ClientHeaderInfo.CHSEnvironment	   = "oDev";
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+}
+
+typedef std::function<void()> CleanupFunction;
+
+extern std::stack<CleanupFunction> CleanupQueue;
+
+inline void PushCleanupFunction(const CleanupFunction& Function)
+{
+	CleanupQueue.push(Function);
 }

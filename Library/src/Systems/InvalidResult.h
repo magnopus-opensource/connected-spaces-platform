@@ -16,15 +16,31 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+
+#include <type_traits>
 
 
-constexpr char* EndpointBaseURI = "https://ogs-odev-internal.magnoboard.com";
-
-
-class PublicTestBase : public ::testing::Test
+namespace csp::services
 {
-protected:
-	void SetUp() override;
-	void TearDown() override;
+
+class ResultBase;
+
+}
+
+
+namespace csp::systems
+{
+
+template <typename T> struct InvalidResult
+{
+	static_assert(std::is_base_of<csp::services::ResultBase, T>::value, "Template type must derive from `csp::services::ResultBase`");
+
+	static T Get()
+	{
+		static T Result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+
+		return Result;
+	}
 };
+
+} // namespace csp::systems

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -28,6 +29,7 @@
 
 #include "gtest/gtest.h"
 #include <filesystem>
+
 
 namespace
 {
@@ -50,6 +52,7 @@ bool RequestPredicateWithProgress(const csp::services::ResultBase& Result)
 }
 
 } // namespace
+
 
 void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 						   const csp::common::Optional<csp::common::String>& SpaceId,
@@ -301,10 +304,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -326,9 +327,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -347,10 +345,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create asset collection
 	csp::systems::AssetCollection NewAssetCollection;
@@ -365,9 +361,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, NewAssetCollection);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -394,10 +387,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 	char UniqueAssetCollectionName2[256];
 	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -438,12 +429,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_CREATEASSET_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
@@ -473,10 +460,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	std::cout << UserId << "\n";
 
@@ -508,9 +493,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -537,10 +519,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	std::cout << UserId << "\n";
 
@@ -565,12 +545,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPDATEXTERNALURIEASSET_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
@@ -601,10 +577,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -650,12 +624,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETSBYCOLLECTIONIDS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
@@ -684,10 +654,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 	SPRINTF(UniqueAssetName3, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -743,9 +711,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -775,9 +740,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	char UniqueAssetCollectionName3[256];
 	SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -897,11 +860,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
 
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETS_BY_DIFFERENT_CRITERIA_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
@@ -930,9 +890,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	char UniqueSecondAssetName[256];
 	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -947,35 +905,39 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	CreateAsset(AssetSystem, AssetCollection, UniqueSecondAssetName, nullptr, nullptr, SecondAsset);
 
 	{
-		// search by asset id
+		// Search by asset id
 		csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, AssetIds, nullptr, nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
 	}
 	{
-		// search by asset name
+		// Search by asset name
 		csp::common::Array<csp::common::String> AssetNames = {FirstAsset.Name};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
 	}
 	{
-		// search by asset names and types, both assets are of type Model
-		csp::common::Array<csp::common::String> AssetNames = {FirstAsset.Name, SecondAsset.Name};
-
+		// Search by asset names and types, both assets are of type Model
+		csp::common::Array<csp::common::String> AssetNames		= {FirstAsset.Name, SecondAsset.Name};
 		csp::common::Array<csp::systems::EAssetType> AssetTypes = {csp::systems::EAssetType::VIDEO};
+
 		auto [EmptyResult] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
+
 		EXPECT_EQ(EmptyResult.GetResultCode(), csp::services::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssets().Size(), 0);
 
 		// next to Model append Video too
 		AssetTypes	  = {csp::systems::EAssetType::VIDEO, csp::systems::EAssetType::MODEL};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 2);
 
@@ -1005,8 +967,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1142,10 +1102,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1231,9 +1189,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1261,10 +1216,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1286,7 +1239,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
-
 	EXPECT_EQ(Result.GetXErrorCode(), "assetdetail_invalidfilecontents");
 
 	// Delete asset
@@ -1297,9 +1249,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1321,10 +1270,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1401,9 +1348,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1432,10 +1376,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1493,9 +1435,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1524,10 +1463,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1582,9 +1519,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1613,10 +1547,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1680,9 +1612,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1707,10 +1636,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1721,12 +1648,14 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSpaceName, nullptr, nullptr, AssetCollection);
 
 	csp::systems::AssetCollection IdAssetCollection;
+
 	// Update MetaData
 	csp::common::Map<csp::common::String, csp::common::String> MetaDataMapIn;
 	csp::common::Map<csp::common::String, csp::common::String> MetaDataMapOut;
 	MetaDataMapIn[UniqueSpaceName] = UniqueSpaceName;
 
 	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, MetaDataMapOut);
+
 	EXPECT_TRUE(MetaDataMapOut.HasKey(UniqueSpaceName));
 
 	// Delete asset collection
@@ -1734,9 +1663,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -1759,10 +1685,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1771,6 +1695,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	// Create asset
 	csp::systems::Asset Asset;
 	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+
 	// Upload data
 	Asset.FileName				  = "asimplejsonfile.json";
 	csp::common::String AssetData = "{ \"some_value\": 42 }";
@@ -1803,9 +1728,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_THIRDPARTYPACKAGEDASSETIDENTIFIER_TEST
@@ -1835,10 +1757,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	csp::common::String ThirdPartyPackagedAssetIdentifier	   = "OKO interoperable assets Test";
 	csp::common::String ThirdPartyPackagedAssetIdentifierLocal = "OKO interoperable assets Test Local";
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	std::cout << UserId << "\n";
 
@@ -1862,6 +1782,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
 	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
 	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
+
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
@@ -1876,7 +1797,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::UNITY);
 
 	Assets[0].SetThirdPartyPackagedAssetIdentifier(ThirdPartyPackagedAssetIdentifierLocal);
+
 	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifierLocal);
+
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
@@ -1885,8 +1808,5 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif

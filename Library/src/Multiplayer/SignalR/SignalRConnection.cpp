@@ -145,7 +145,7 @@ void SignalRConnection::Invoke(const std::string& MethodName,
 			Connection.stop(
 				[this, ExceptionPtr](auto Exception)
 				{
-					// making a copy of the PendingStopCallback in case the SignalRConnection object gets deleted inside the callback itself
+					// Make a copy of the PendingStopCallback in case the SignalRConnection object gets deleted inside the callback itself
 					auto _PendingStopCallback = PendingStopCallback;
 					PendingStopCallback		  = nullptr;
 

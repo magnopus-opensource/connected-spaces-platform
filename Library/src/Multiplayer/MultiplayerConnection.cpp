@@ -530,7 +530,7 @@ void MultiplayerConnection::Cleanup()
 	{
 		SpaceEntity* Entity = SpaceEntitySystemPtr->GetEntityByIndex(i);
 
-		// we automatically invoke signalr deletion for all transient entities that were owned by this local client
+		// We automatically invoke signalr deletion for all transient entities that were owned by this local client
 		// as these are only ever valid for a single connected session
 		if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetClientId())
 		{
@@ -539,14 +539,14 @@ void MultiplayerConnection::Cleanup()
 												{
 												});
 		}
-		// otherwise we clear up all all locally represented entities
+		// Otherwise we clear up all all locally represented entities
 		else
 		{
 			SpaceEntitySystemPtr->LocalDestroyEntity(Entity);
 		}
 	}
 
-	// flush all pending adds/removes/updates
+	// Flush all pending adds/removes/updates
 	SpaceEntitySystemPtr->ProcessPendingEntityOperations();
 
 	SpaceEntitySystemPtr->UnlockEntityUpdate();

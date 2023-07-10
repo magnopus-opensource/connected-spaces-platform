@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -27,6 +28,8 @@
 
 
 using namespace std::chrono_literals;
+
+
 namespace
 {
 
@@ -70,23 +73,21 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, UserId, true);
+
 	EXPECT_EQ(SetNDATrue.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [GetNDAResult] = AWAIT(SettingsSystem, GetNDAStatus, UserId);
+
 	EXPECT_EQ(GetNDAResult.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(GetNDAResult.GetValue(), true);
 
 	auto [SetNDAFalse] = AWAIT(SettingsSystem, SetNDAStatus, UserId, false);
-	EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::services::EResultCode::Success);
 
-	// Log out
-	LogOut(UserSystem);
+	EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::services::EResultCode::Success);
 }
 #endif
 
@@ -97,23 +98,21 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, true);
+
 	EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [GetNewsletterResult] = AWAIT(SettingsSystem, GetNewsletterStatus, UserId);
+
 	EXPECT_EQ(GetNewsletterResult.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(GetNewsletterResult.GetValue(), true);
 
 	auto [SetNewsletterFalse] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, false);
-	EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::services::EResultCode::Success);
 
-	// Log out
-	LogOut(UserSystem);
+	EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::services::EResultCode::Success);
 }
 #endif
 
@@ -124,25 +123,25 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, UserId, "RecentSpace");
+
 	EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [GetRecentSpaces] = AWAIT(SettingsSystem, GetRecentlyVisitedSpaces, UserId);
+
 	EXPECT_EQ(GetRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
+
 	auto ReturnedStringArray = GetRecentSpaces.GetValue();
+
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("RecentSpace"));
 
 	auto [ClearRecentSpaces] = AWAIT(SettingsSystem, ClearRecentlyVisitedSpaces, UserId);
-	EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
-	// Log out
-	LogOut(UserSystem);
+	EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
 }
 #endif
 
@@ -153,29 +152,30 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+
 	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, "BlockedSpace");
+
 	EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+
 	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
+
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("BlockedSpace"));
 
 	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
-	// Log out
-	LogOut(UserSystem);
+	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 }
 #endif
 
@@ -186,10 +186,9 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
+
 	// Clear at start in case another test left something in the list
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
@@ -309,9 +308,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 	}
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
 
@@ -322,13 +318,12 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
 	// Log in
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+
 	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
 	constexpr int NUM_BLOCKED_SPACES = 10;
@@ -339,11 +334,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 		SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
 
 		auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpaceName);
+
 		EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 	}
 
 	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+
 	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
 
 	EXPECT_EQ(ReturnedStringArray.Size(), NUM_BLOCKED_SPACES);
@@ -358,10 +356,8 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 	}
 
 	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 
-	// Log out
-	LogOut(UserSystem);
+	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
 }
 #endif
 
@@ -374,9 +370,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	auto UserId = LogIn(UserSystem, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	{
 		csp::systems::FileAssetDataSource AvatarPortrait;
@@ -407,7 +401,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::services::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
-	LogOut(UserSystem);
 }
 #endif
 
@@ -421,10 +414,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
-
+	auto UserId = LogIn(UserSystem, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
 	FILE* UploadFile		 = fopen(UploadFilePath.string().c_str(), "rb");
@@ -441,13 +431,16 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 
 	auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, UserId, AvatarPortraitThumbnail);
+
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	// get asset uri
+
+	// Get asset uri
 	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
 	csp::systems::Asset Asset;
 	Asset.FileName = "OKO.png";
 	Asset.Uri	   = GetAvatarPortraitResult.GetUri().c_str();
 	printf("Downloading asset data...\n");
+
 	// Get data
 	auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
@@ -462,8 +455,5 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 	delete[] UploadFileData;
 	delete[] DownloadedAssetData;
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif

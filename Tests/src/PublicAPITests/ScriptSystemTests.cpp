@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
@@ -24,6 +25,7 @@
 
 #include "gtest/gtest.h"
 #include <atomic>
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPTSYSTEM_SCRIPT_BINDING_TEST
 CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)

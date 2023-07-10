@@ -18,6 +18,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Users/UserSystem.h"
 
+#include <optional>
 
 
 extern csp::common::String DefaultLoginEmail;
@@ -31,14 +32,24 @@ const char GeneratedTestAccountPassword[]	 = "3R{d2}3C<x[J7=jU";
 
 void LoadTestAccountCredentials();
 
-void LogIn(csp::systems::UserSystem* UserSystem,
-		   csp::common::String& OutUserId,
-		   const csp::common::String& Email			 = DefaultLoginEmail,
-		   const csp::common::String& Password		 = DefaultLoginPassword,
-		   csp::services::EResultCode ExpectedResult = csp::services::EResultCode::Success);
-void LogInAsGuest(csp::systems::UserSystem* UserSystem,
-				  csp::common::String& OutUserId,
-				  csp::services::EResultCode ExpectedResult = csp::services::EResultCode::Success);
 void LogOut(csp::systems::UserSystem* UserSystem, csp::services::EResultCode ExpectedResultCode = csp::services::EResultCode::Success);
+
+/// <summary>
+/// Attempts to log in with the provided details (or default account details if none provided).
+/// Queues a call to `LogOut` to be executed after the test exits, unless otherwise specified.
+/// </summary>
+csp::common::String LogIn(csp::systems::UserSystem* UserSystem,
+						  csp::common::Optional<csp::common::String> Email					   = nullptr,
+						  csp::common::Optional<csp::common::String> Password				   = nullptr,
+						  csp::common::Optional<csp::services::EResultCode> ExpectedResultCode = nullptr,
+						  bool ShouldPushCleanupFunction									   = true);
+
+/// <summary>
+/// Attempts to log in as a guest user.
+/// Queues a call to `LogOut` to be executed after the test exits, unless otherwise specified.
+/// </summary>
+csp::common::String LogInAsGuest(csp::systems::UserSystem* UserSystem,
+								 csp::common::Optional<csp::services::EResultCode> ExpectedResultCode = nullptr,
+								 bool ShouldPushCleanupFunction										  = true);
 
 csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSystem, const csp::common::String& UserId);

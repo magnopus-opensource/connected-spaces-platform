@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 
 #include "Debug/Logging.h"
@@ -23,9 +24,10 @@
 
 namespace csp::multiplayer
 {
+
 SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Spline, Parent)
 {
-	Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
+	Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0LL;
 
 	SetScriptInterface(CSP_NEW SplineSpaceComponentScriptInterface(this));
 }
@@ -33,6 +35,7 @@ SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)
 {
 	csp::common::List<csp::common::Vector3> ListPoints = GetWaypoints();
+
 	if (ListPoints.Size() != 0)
 	{
 		std::vector<tinyspline::real> Internalpoints;
@@ -60,11 +63,10 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
 csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() const
 {
 	csp::common::List<csp::common::Vector3> returnList;
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
 
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
 	{
-
 		for (int i = 0; i < RepVal.GetInt(); ++i)
 		{
 			returnList.Append(GetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i)).GetVector3());
@@ -86,4 +88,5 @@ void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vec
 		SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
 	}
 }
+
 } // namespace csp::multiplayer

@@ -25,6 +25,7 @@
 #include "gtest/gtest.h"
 using namespace csp::systems;
 
+
 namespace
 {
 
@@ -44,7 +45,6 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 	auto UserSystem		 = SystemsManager.GetUserSystem();
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
-	csp::common::String UserId;
 	csp::systems::Space Space;
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-MAGNOPUS";
@@ -54,7 +54,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::common::String testQuery = "spaces(pagination:{limit:10,skip:0},filters:{discoverable:false,requiresInvite:true}){itemTotalCount "
 									"items{groupId name discoverable requiresInvite createdAt}}";
@@ -71,8 +71,5 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 
 	// Delete Space
 	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log Out
-	LogOut(UserSystem);
 }
 #endif

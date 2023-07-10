@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -24,6 +25,7 @@
 #include "gtest/gtest.h"
 #include <Awaitable.h>
 #include <filesystem>
+
 
 namespace
 {
@@ -57,8 +59,8 @@ void RegisterAssetToLODChain(csp::systems::AssetSystem* AssetSystem,
 	Asset = Result.GetAsset();
 }
 
-
 } // namespace
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_GET_EMPTY_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
@@ -81,8 +83,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
 	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -101,10 +102,8 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 	// Cleanup
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_REGISTER_ASSETS_TO_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
@@ -135,8 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueHexString().c_str());
 
 	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	// Create space
 	csp::systems::Space Space;
@@ -175,10 +173,8 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
 }
 #endif
-
 
 #if RUN_LOD_GET_MUSUBI_LOD_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, GetMusubiLODTest)
@@ -189,8 +185,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetMusubiLODTest)
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 
 	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	const csp::common::String MusubiSpaceId			  = "63f77783e7557ee1fcc21141";
 	const csp::common::String MusubiAssetCollectionId = "63ff2eb1ed6078378cab7ebf";
@@ -212,7 +207,5 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetMusubiLODTest)
 
 	EXPECT_EQ(Chain.AssetCollectionId, MusubiAssetCollectionId);
 	EXPECT_EQ(Chain.LODAssets.Size(), 3);
-
-	LogOut(UserSystem);
 }
 #endif

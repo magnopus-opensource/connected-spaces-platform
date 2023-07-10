@@ -4,3 +4,6 @@
 #define CSP_API
 #define CSP_NO_EXPORT
 #define CSP_NEW new(csp::memory::DefaultAllocator())
+#define CSP_ASYNC_RESULT
+#define CSP_ASYNC_RESULT_WITH_PROGRESS
+#define CSP_EVENT

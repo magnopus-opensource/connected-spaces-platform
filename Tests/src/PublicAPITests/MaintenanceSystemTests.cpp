@@ -70,18 +70,19 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
 	}
 
 	return "";
+}
 
 } // namespace
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GETMAINTENANCEINFO_TEST
-
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 {
 	auto& SystemsManager	= SystemsManager::Get();
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
+
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetMaintenanceInfoResponses().Size(), 1);
@@ -91,9 +92,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 }
 #endif
 
-
 #if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_ISINSIDEMAINTENANCEWINDOW_TEST
-
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfoTest)
 {
 	auto& SystemsManager	= SystemsManager::Get();
@@ -110,9 +109,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 }
 #endif
 
-
 #if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_SORTMAINTENANCEINFOS_TEST
-
 CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 {
 	csp::common::DateTime CurrentTime = csp::common::DateTime::UtcTimeNow();
@@ -140,7 +137,4 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, SortMaintenanceInfosTest)
 
 	EXPECT_EQ(MaintenanceInfos2[0].Description, "Info2");
 }
-
 #endif
-
-} // namespace

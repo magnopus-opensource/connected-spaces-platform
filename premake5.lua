@@ -2,7 +2,6 @@
 
 include "premake5_helpers.lua"
 include "Tests/premake5.lua"
-include "Tests/CSharp/premake5.lua"
 include "Tests/Multiplayer/premake5.lua"
 include "Library/premake5.lua"
 
@@ -69,10 +68,6 @@ solution( "OlympusFoundation" )
     if not CSP.IsWebAssemblyGeneration() then
         if not CSP.IsGeneratingCSharpOnMac() then
             Tests.AddProject()
-        end
-
-        if not CSP.IsGeneratingCPPOnMac() then
-            Tests.CSharp.AddProject()
         end
         
         if not CSP.IsGeneratingCPPOnMac() then

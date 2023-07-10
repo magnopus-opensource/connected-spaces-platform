@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
@@ -25,28 +26,35 @@
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "Memory/Memory.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
 
+
 using namespace csp::multiplayer;
 
-#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS
+
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_APPLICATION_ORIGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	auto MySpaceEntity = CSP_NEW SpaceEntity;
 	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
 
 	csp::common::String TestApplicationOrigin = "UE::CSP";
 	MyCustomComponent.SetApplicationOrigin(TestApplicationOrigin);
 
 	EXPECT_TRUE(MyCustomComponent.GetApplicationOrigin() == TestApplicationOrigin);
-}
 
+	CSP_DELETE(MySpaceEntity);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_SETGET_CUSTOM_PROPERTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SetGetCustomPropertyTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
-	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+	SpaceEntity MySpaceEntity;
+	CustomSpaceComponent MyCustomComponent(&MySpaceEntity);
 
 	const csp::common::String PropertyKey("MyPropertyKey");
 	const csp::common::String MyString("MyTestString");
@@ -56,11 +64,13 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SetGetCustomPropertyTest)
 
 	EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_GET_REMOVED_PROPERTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
-	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+	SpaceEntity MySpaceEntity;
+	CustomSpaceComponent MyCustomComponent(&MySpaceEntity);
 
 	const csp::common::String PropertyKey("MyPropertyKey");
 	const csp::common::String MyString("MyTestString");
@@ -71,11 +81,13 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 
 	EXPECT_FALSE(MyCustomComponent.HasCustomProperty(PropertyKey));
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_REPLACE_PROPERTY_TYPE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ReplacePropertyWithNewTypeTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
-	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+	SpaceEntity MySpaceEntity;
+	CustomSpaceComponent MyCustomComponent(&MySpaceEntity);
 
 	const csp::common::String PropertyKey("MyPropertyKey");
 	const csp::common::String MyString("MyTestString");
@@ -90,13 +102,16 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ReplacePropertyWithNewTypeTest)
 
 	EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestIntValue);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_GET_KEYS_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
-	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+	SpaceEntity MySpaceEntity;
+	CustomSpaceComponent MyCustomComponent(&MySpaceEntity);
 
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 0);
+
 	const csp::common::String PropertyKey1("MyPropertyKey1");
 	const csp::common::String MyString1("MyTestString1");
 	const csp::common::String PropertyKey2("MyPropertyKey2");
@@ -105,43 +120,54 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
 	ReplicatedValue TestStringValue2(MyString2);
 
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
+
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey1));
+
 	MyCustomComponent.RemoveCustomProperty(PropertyKey1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 0);
 	EXPECT_FALSE(MyCustomComponent.HasCustomProperty(PropertyKey1));
 
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
 	MyCustomComponent.SetCustomProperty(PropertyKey2, TestStringValue2);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 2);
+
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
 	MyCustomComponent.SetCustomProperty(PropertyKey2, TestStringValue2);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 2);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey1));
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey2));
+
 	MyCustomComponent.RemoveCustomProperty(PropertyKey1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey2));
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_APPLICATION_ORIGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	SpaceEntity MySpaceEntity;
 
-	std::vector<ComponentBase*> Components {new AnimatedModelSpaceComponent(MySpaceEntity),
-											new ButtonSpaceComponent(MySpaceEntity),
-											new ImageSpaceComponent(MySpaceEntity),
-											new LightSpaceComponent(MySpaceEntity),
-											new StaticModelSpaceComponent(MySpaceEntity),
-											new VideoPlayerSpaceComponent(MySpaceEntity)
-
-	};
+	std::vector<ComponentBase*> Components {new AnimatedModelSpaceComponent(&MySpaceEntity),
+											new ButtonSpaceComponent(&MySpaceEntity),
+											new ImageSpaceComponent(&MySpaceEntity),
+											new LightSpaceComponent(&MySpaceEntity),
+											new StaticModelSpaceComponent(&MySpaceEntity),
+											new VideoPlayerSpaceComponent(&MySpaceEntity)};
 
 	for (auto Component : Components)
 	{
 		auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
+
 		EXPECT_TRUE(VisibleComponent->GetIsARVisible());
 	}
 
@@ -155,24 +181,25 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
 		delete Component;
 	}
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS || RUN_COMPONENT_THIRDPARTY_COMPONENTREF_TEST
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 {
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	SpaceEntity MySpaceEntity;
 
-	std::vector<ComponentBase*> Components {new AnimatedModelSpaceComponent(MySpaceEntity),
-											new AudioSpaceComponent(MySpaceEntity),
-											new CollisionSpaceComponent(MySpaceEntity),
-											new FogSpaceComponent(MySpaceEntity),
-											new LightSpaceComponent(MySpaceEntity),
-											new ReflectionSpaceComponent(MySpaceEntity),
-											new StaticModelSpaceComponent(MySpaceEntity)
-
-	};
+	std::vector<ComponentBase*> Components {new AnimatedModelSpaceComponent(&MySpaceEntity),
+											new AudioSpaceComponent(&MySpaceEntity),
+											new CollisionSpaceComponent(&MySpaceEntity),
+											new FogSpaceComponent(&MySpaceEntity),
+											new LightSpaceComponent(&MySpaceEntity),
+											new ReflectionSpaceComponent(&MySpaceEntity),
+											new StaticModelSpaceComponent(&MySpaceEntity)};
 
 	for (auto Component : Components)
 	{
 		auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
+
 		EXPECT_EQ(ThirdPartyComponentRef->GetThirdPartyComponentRef(), "");
 	}
 

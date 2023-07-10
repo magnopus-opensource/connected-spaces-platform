@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
@@ -30,7 +31,6 @@
 #include <CSP/Systems/Spatial/SpatialDataTypes.h>
 
 
-
 namespace
 {
 
@@ -40,7 +40,6 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 }
 
 } // namespace
-
 
 
 namespace
@@ -100,7 +99,7 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem,
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
 		OutPOI = Result.GetPointOfInterest();
-		std::cerr << "POI Created: Name=" << OutPOI.Name << " Id=" << OutPOI.Id << std::endl;
+		LogDebug("POI Created: Name=%s Id=%s", OutPOI.Name.c_str(), OutPOI.Id.c_str());
 	}
 }
 
@@ -111,7 +110,7 @@ void DeletePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
 
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
-		std::cerr << "POI Deleted: Name=" << POI.Name << " Id=" << POI.Id << std::endl;
+		LogDebug("POI Deleted: Name=%s Id=%s", POI.Name.c_str(), POI.Id.c_str());
 	}
 }
 
@@ -181,16 +180,12 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::PointOfInterest PointOfInterest;
 	CreatePointOfInterest(POISystem, nullptr, nullptr, nullptr, PointOfInterest);
 
 	DeletePointOfInterest(POISystem, PointOfInterest);
-
-	LogOut(UserSystem);
 }
 #endif
 
@@ -203,9 +198,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::common::Optional<csp::common::Array<csp::common::String>> Tags(2);
 	(*Tags)[0] = "POITag1";
@@ -215,8 +208,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 	CreatePointOfInterest(POISystem, Tags, nullptr, nullptr, PointOfInterest);
 
 	DeletePointOfInterest(POISystem, PointOfInterest);
-
-	LogOut(UserSystem);
 }
 #endif
 
@@ -229,9 +220,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	csp::systems::GeoLocation POILocation;
 	POILocation.Latitude  = 45.0;
@@ -281,8 +270,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	EXPECT_TRUE(POIFound);
 
 	DeletePointOfInterest(POISystem, PointOfInterest);
-
-	LogOut(UserSystem);
 }
 #endif
 
@@ -297,9 +284,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem);
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -330,7 +315,5 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	DeletePointOfInterest(POISystem, PointOfInterest);
-
-	LogOut(UserSystem);
 }
 #endif
