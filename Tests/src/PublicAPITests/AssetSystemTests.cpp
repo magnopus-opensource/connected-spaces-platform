@@ -15,10 +15,13 @@
  */
 
 #include "AssetSystemTestHelpers.h"
+#include "CSP/CSPFoundation.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "MultiplayerTestHelpers.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -27,12 +30,19 @@
 #include <Awaitable.h>
 /**/
 
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "Multiplayer/NetworkEventManagerImpl.h"
+
 #include "gtest/gtest.h"
 #include <filesystem>
 
+using namespace csp::multiplayer;
 
 namespace
 {
+MultiplayerConnection* Connection;
+SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
@@ -1004,9 +1014,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	char UniqueSecondAssetName[256];
 	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
 
-	csp::common::String UserId;
-
-	LogIn(UserSystem, UserId);
+	auto UserId = LogIn(UserSystem);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceType::Private, nullptr, nullptr, nullptr, Space);
@@ -1072,8 +1080,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	DeleteAssetCollection(AssetSystem, SecondAssetCollection);
 
 	DeleteSpace(SpaceSystem, Space);
-
-	LogOut(UserSystem);
 }
 	#endif
 #endif
@@ -1805,6 +1811,204 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, assetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSET_PROCESSED_CALLBACK_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+
+	// Log in
+	auto UserId = LogIn(UserSystem);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	Connection	 = CreateMultiplayerConnection(Space.Id);
+	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	Connect(Connection);
+
+	// Setup Asset callback
+	bool AssetDetailBlobChangedCallbackCalled = false;
+	csp::common::String CallbackAssetId;
+
+	auto AssetDetailBlobChangedCallback
+		= [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
+	{
+		if (AssetDetailBlobChangedCallbackCalled)
+		{
+			return;
+		}
+
+		EXPECT_EQ(Params.ChangeType, EAssetChangeType::Created);
+		EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
+
+		CallbackAssetId						 = Params.AssetId;
+		AssetDetailBlobChangedCallbackCalled = true;
+	};
+
+	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+
+	// Upload data
+	auto FilePath = std::filesystem::absolute("assets/test.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	Source.SetMimeType("application/json");
+
+	csp::common::String Uri;
+	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
+
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
+	EXPECT_EQ(CallbackAssetId, Asset.Id);
+
+	SpaceSystem->ExitSpace();
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSET_PROCESS_GRACEFUL_FAILURE_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallbackTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	// Log in
+	auto UserId = LogIn(UserSystem);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	Connection	 = CreateMultiplayerConnection(Space.Id);
+	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	Connect(Connection);
+
+	// Setup Asset callback
+	bool AssetDetailBlobChangedCallbackCalled = false;
+
+	auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
+	{
+		if (AssetDetailBlobChangedCallbackCalled)
+		{
+			return;
+		}
+
+		EXPECT_EQ(Params.ChangeType, EAssetChangeType::Invalid);
+		EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::IMAGE);
+
+		AssetDetailBlobChangedCallbackCalled = true;
+	};
+
+	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+
+	ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
+	ReplicatedValue Param2 = "";
+	ReplicatedValue Param3 = "";
+	ReplicatedValue Param4 = "";
+	ReplicatedValue Param5 = "";
+
+	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
+										 {Param1, Param2, Param3, Param4, Param5},
+										 Connection->GetClientId(),
+										 [](bool ok)
+										 {
+											 EXPECT_TRUE(ok);
+										 });
+
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

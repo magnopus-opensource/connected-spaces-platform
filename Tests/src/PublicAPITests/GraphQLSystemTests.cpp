@@ -37,6 +37,7 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 } // namespace
 
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 {
@@ -68,6 +69,15 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 
 	// Search Space Name
 	EXPECT_NE(std::string(Result.GetResponse().c_str()).find(expectedResponse), std::string::npos);
+
+	csp::common::String testQueryFull = "{\"query\":\"\n\nquery getSpaces($limit:Int!)  {\n  spaces(pagination: {limit:$limit}) {\n    items {\n     "
+										" name\n    }\n  }\n}\n\n\",\"variables\":{\"limit\":5},\"operationName\":\"getSpaces\"}";
+
+	// run full query
+	auto [ResultFull] = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQueryFull);
+
+	// Search Space Name
+	EXPECT_NE(std::string(ResultFull.GetResponse().c_str()).find(expectedResponse), std::string::npos);
 
 	// Delete Space
 	DeleteSpace(SpaceSystem, Space.Id);

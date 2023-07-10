@@ -35,6 +35,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : 
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]		 = static_cast<int64_t>(-1);
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]			 = true;
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]		 = false;
 
 	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
 }
@@ -226,6 +227,23 @@ const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRe
 void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef), InValue);
+}
+
+bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return false;
+}
+
+void AnimatedModelSpaceComponent::SetIsShadowCaster(bool Value)
+{
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster), Value);
 }
 
 } // namespace csp::multiplayer

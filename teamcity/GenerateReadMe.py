@@ -128,8 +128,9 @@ def cleanhtml(raw_html):
   return cleantext
 
 
-def create_summary_list(commit_title, commit_id, jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list):
+def create_summary_list(commit_title, commit_id, jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list):
     raw_commit_title = cleanhtml(commit_title)
+
     commit_list = raw_commit_title.split(': ')
 
     if len(commit_list) > 1:
@@ -138,48 +139,56 @@ def create_summary_list(commit_title, commit_id, jira_job_id, feature_commit_lis
 
         if "feat" in commit_tag:
             if jira_job_id != None:
-                feature_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                feature_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                feature_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                feature_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "fix" in commit_tag:
+        elif "fix" in commit_tag:
             if jira_job_id != None:
-                fix_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                fix_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                fix_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                fix_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "style" in commit_tag:
+        elif "style" in commit_tag:
             if jira_job_id != None:
-                style_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                style_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                style_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                style_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "test" in commit_tag:
+        elif "test" in commit_tag:
             if jira_job_id != None:
-                test_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                test_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                test_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                test_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "doc" in commit_tag:
+        elif "doc" in commit_tag:
             if jira_job_id != None:
-                doc_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                doc_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                doc_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                doc_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "refac" in commit_tag:
+        elif "refac" in commit_tag:
             if jira_job_id != None:
-                refactor_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                refactor_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                refactor_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                refactor_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        if "!" in commit_tag:
+        elif "!" in commit_tag:
             if jira_job_id != None:
-                breaking_commit_list.append(jira_job_id + " - " + commit_id + " - " + commit_description)
+                breaking_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
-                breaking_commit_list.append("No Ticket - " + commit_id + " - " + commit_description)
+                breaking_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
+        
+        # Case to cover situations where the commit has been modified in a bad format that still contains a tag but not a recognised one
+        else:
+            misc_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
+    # Case to cover situations where the commit has been modified to not comply to our standard format, with the tag. We want to avoid printing merge commits from internal branches, however.
+    else:
+        if 'magnopus-opensource/develop' not in raw_commit_title and 'magnopus-opensource/main' not in raw_commit_title and 'magnopus-opensource/staging' not in raw_commit_title:
+            misc_commit_list.append("No Ticket - " + raw_commit_title.capitalize() + " - " + commit_id )
 
 
-def create_summaries_text(input_args, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list):
+def create_summaries_text(input_args, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list):
     output_text = "<h1>Built from changelist ID " + input_args.initial_commit + "</h1>\n<h2>Summary Lists</h2>\n"
 
     if feature_commit_list:
@@ -237,6 +246,14 @@ def create_summaries_text(input_args, feature_commit_list, fix_commit_list, styl
             output_text += "<li>" + commit + "</li>"
 
         output_text += "</ul>"
+
+    if misc_commit_list:
+        output_text += "<h3><p>&#x1F9E9; Misc Changes</p></h3>\n<ul>"
+
+        for commit in misc_commit_list:
+            output_text += "<li>" + commit + "</li>"
+
+        output_text += "</ul>"
     return output_text
 
 
@@ -261,6 +278,7 @@ def main():
     test_commit_list = []
     doc_commit_list = []
     breaking_commit_list = []
+    misc_commit_list = []
 
     git_repo = init_git()
 
@@ -298,12 +316,15 @@ def main():
                     change_desc, commit_title = process_change_description(message, hexsha)
                     
                     jira_job_id = get_jira_id(message)
-                    create_summary_list(commit_title, hexsha, jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list)
+                    
+                    # Only include merge commits as these are the commits that are the results of a PR. We do further screening inside the create_summary_list method to ensure we only print the merges we want to.
+                    if (cleanhtml(commit_title).startswith("merge pull request")):
+                        create_summary_list(change_desc, hexsha, jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list)
                     write_file_line(hexsha, author.name, change_desc, file_out)
 
             write_file_footer(file_out)
             file_out.close()
-            prepend_summaries = create_summaries_text(input_args, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list)
+            prepend_summaries = create_summaries_text(input_args, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list)
             write_prepend_to_output_file(readme_path, prepend_summaries)
             print("Finished processing file, now exiting process")
         else:
