@@ -20,6 +20,7 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "TestHelpers.h"
+#include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
 #include <atomic>
@@ -746,5 +747,46 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
 	LogSystem.ClearAllCallbacks();
 
 	csp::CSPFoundation::Shutdown();
+}
+
+#endif
+#if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_FAILURE_MESSAGE_TEST
+CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
+{
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto& LogSystem		 = *SystemsManager.GetLogSystem();
+
+	const csp::common::String Prefix = "Services";
+	std::atomic_bool LogConfirmed	 = false;
+
+	LogSystem.SetLogCallback(
+		[&](csp::common::String InMessage)
+		{
+			LogConfirmed = InMessage.Split(' ')[0] == Prefix;
+
+			std::cout << InMessage << std::endl;
+		});
+
+	csp::common::String UserId;
+
+	// Log in with invalid credentials
+	LogIn(UserSystem, UserId, "invalidlogin@csp.co", "", csp::services::EResultCode::Failed);
+
+	auto Start	   = std::chrono::steady_clock::now();
+	auto Current   = std::chrono::steady_clock::now();
+	float TestTime = 0;
+
+	while (!LogConfirmed && TestTime < 20)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	EXPECT_TRUE(LogConfirmed);
 }
 #endif

@@ -33,8 +33,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]			   = true;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]			   = true;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]		   = false;
-
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]		   = true;
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }

@@ -35,7 +35,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : 
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]		 = static_cast<int64_t>(-1);
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]			 = true;
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]		 = false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]		 = true;
 
 	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
 }

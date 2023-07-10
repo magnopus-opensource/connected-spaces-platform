@@ -2,7 +2,7 @@
 // Copyright (c) Magnopus. All Rights Reserved.
 // ------------------------------------------------------------------
 
-using Olympus.Foundation;
+using Csp;
 using UnityEngine;
 
 public class HelloWorld : MonoBehaviour
@@ -18,12 +18,12 @@ public class HelloWorld : MonoBehaviour
             CHSEnvironment = "OStage",
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
-            ClientSKU = "foundation-cSharp-examples",
-            ClientVersion = "0.0.1",
-            OlympusVersion = OlympusFoundation.GetBuildID()
+            ClientSKU = "csp-cSharp-examples",
+            ClientVersion = "0.0.2",
+            CSPVersion = CSPFoundation.GetBuildID()
         };
 
-        if (OlympusFoundation.Initialise(endPointUri, TenantKey))
+        if (CSPFoundation.Initialise(endPointUri, TenantKey))
         {
             Debug.Log("Successfully Initialised...");
 
@@ -33,9 +33,9 @@ public class HelloWorld : MonoBehaviour
             Debug.Log("Failed to Initialise...");
         }
 
-        if (OlympusFoundation.GetIsInitialised())
+        if (CSPFoundation.GetIsInitialised())
         {
-            if(OlympusFoundation.Shutdown())
+            if(CSPFoundation.Shutdown())
             {
                 Debug.Log("Successfully Shutdown...");
             }else
