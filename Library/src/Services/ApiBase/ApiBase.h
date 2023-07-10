@@ -205,11 +205,6 @@ public:
 		// Set the appropriate response code from the Http response
 		ApiResp.SetResponseCode(Response.GetResponseCode(), ValidResponse);
 
-		if (ApiResp.GetResponseCode() == EResponseCode::ResponseFailed)
-		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Response has failed: %s ", Response.GetPayload().GetContent().c_str());
-		}
-
 		// Let the response object extract what it needs
 		ResponseObjectPtr->OnResponse(&ApiResp);
 
