@@ -270,6 +270,8 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 		if (ClientId > HighestResponseId)
 		{
 			// Remember the highest ClientId from all the responses
+			// We then use this below to check this matches the elected leader
+			// as (currently) we use the highest ClientId as our election criteria
 			HighestResponseId = ClientId;
 		}
 
