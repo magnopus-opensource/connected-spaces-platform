@@ -11,9 +11,8 @@ _"An interoperable communication library for the spatial internet."_
 ## Background
 Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
-<p align="center">
-    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
-</p>
+
+![image info](./_static/interop.gif)
 
 The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
 
