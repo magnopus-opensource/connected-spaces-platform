@@ -23,7 +23,13 @@ namespace csp::multiplayer
 {
 
 ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager)
-	: ElectionManagerPtr(ElectionManager), State(ClientElectionState::Idle), Id(Id), Eid(0), PendingElections(0), CancellationToken(nullptr)
+	: ElectionManagerPtr(ElectionManager)
+	, State(ClientElectionState::Idle)
+	, Id(Id)
+	, HighestResponseId(0)
+	, Eid(0)
+	, PendingElections(0)
+	, CancellationToken(nullptr)
 {
 }
 
@@ -62,6 +68,7 @@ void ClientProxy::StartLeaderElection(const ClientMap& Clients)
 	State			  = ClientElectionState::Electing;
 	ElectionStartTime = std::chrono::system_clock::now();
 	PendingElections  = 0;
+	HighestResponseId = Id;
 
 	if (IsThisClientLeader(Clients))
 	{
@@ -260,12 +267,39 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 	{
 		--PendingElections;
 
+		if (ClientId > HighestResponseId)
+		{
+			// Remember the highest ClientId from all the responses
+			HighestResponseId = ClientId;
+		}
+
 		// All done
 		if (ElectionManagerPtr && PendingElections == 0)
 		{
 			FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionResponseEvent All expected reponses received");
-			State = ClientElectionState::Idle;
-			ElectionManagerPtr->OnElectionComplete(ClientId);
+
+			// We should have received a valid leader event by now so check this is as expected
+			if (ElectionManagerPtr)
+			{
+				if (ElectionManagerPtr->Leader)
+				{
+					if (ElectionManagerPtr->Leader->GetId() == HighestResponseId)
+					{
+						FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
+										   "ClientProxy::HandleElectionResponseEvent Highest response matches elected leader");
+					}
+					else
+					{
+						FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
+										   "ClientProxy::HandleElectionResponseEvent Highest response Id does not match elected leader");
+					}
+				}
+				else
+				{
+					FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
+									   "ClientProxy::HandleElectionResponseEvent Expected a valid leader by now!");
+				}
+			}
 		}
 	}
 	else
@@ -276,15 +310,16 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 	// @Todo :- Handle response timeout (but this shouldn't happen with SignalR/TCP reliable connection)
 }
 
-void ClientProxy::HandleElectionLeaderEvent(int64_t ClientId)
+void ClientProxy::HandleElectionLeaderEvent(int64_t LeaderId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionLeaderEvent ClientId=%d", ClientId);
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionLeaderEvent LeaderId=%d", LeaderId);
 
 	State = ClientElectionState::Idle;
 
 	if (ElectionManagerPtr)
 	{
-		ElectionManagerPtr->OnElectionComplete(ClientId);
+		// Election complete so set leader client
+		ElectionManagerPtr->OnElectionComplete(LeaderId);
 	}
 	else
 	{
