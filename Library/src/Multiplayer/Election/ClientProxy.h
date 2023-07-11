@@ -121,6 +121,7 @@ private:
 
 	ClientElectionState State;
 	ClientId Id;
+	ClientId HighestResponseId;
 	EventId Eid;
 
 	ElectionEvent PendingEvent;
