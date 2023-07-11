@@ -38,22 +38,28 @@ namespace csp::common
 // we cannot assume it is reliably implemented across platforms, and is in fact
 // known to have issues with Emscripten, for example.
 // Based on https://stackoverflow.com/questions/530519/stdmktime-and-timezone-info.
+// Note - we rely on the `Time` parameter that is passed adhering to the cpp spec
+// https://en.cppreference.com/w/c/chrono/tm.
 
 time_t CSPTimeGM(struct tm* Time)
 {
-	constexpr long long MonthsPerYear				  = 12;
-	constexpr long long CumulativeDays[MonthsPerYear] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+	// note - we use this constant array for calculating days into the year instead of
+	// relying on tm::tm_yday, as we expect calling code to more reliably provide values for `tm::tm_mon`
+	constexpr long long CumulativeDaysInYear[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-	const long long Year = 1900LL + Time->tm_year + Time->tm_mon / MonthsPerYear;
-	time_t Result		 = (Year - 1970) * 365 + CumulativeDays[Time->tm_mon % MonthsPerYear];
+	const long long Year = 1900LL + Time->tm_year;
+	time_t Result		 = (Year - 1970) * 365 + CumulativeDaysInYear[Time->tm_mon];
 
-	Result += (Year - 1968) / 4;
-	Result -= (Year - 1900) / 100;
-	Result += (Year - 1600) / 400;
-
-	if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && (Time->tm_mon % MonthsPerYear) < 2)
+	// leap year offsets
 	{
-		Result--;
+		Result += (Year - 1968) / 4;
+		Result -= (Year - 1900) / 100;
+		Result += (Year - 1600) / 400;
+
+		if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2)
+		{
+			Result--;
+		}
 	}
 
 	Result += static_cast<time_t>(Time->tm_mday) - 1;
