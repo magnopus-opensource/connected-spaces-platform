@@ -70,6 +70,7 @@ class CSP_API BooleanResult : public csp::services::ResultBase
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
 	friend class MaintenanceSystem;
+	friend class SpaceSystem;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

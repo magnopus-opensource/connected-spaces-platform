@@ -126,18 +126,19 @@ SpaceSystem::~SpaceSystem()
 	CSP_DELETE(GroupAPI);
 }
 
-void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpaceResultCallback Callback)
+void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
 	SpaceResultCallback GetSpaceCallback = [=](const SpaceResult& GetSpaceResult)
 	{
 		if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
+			NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
+
 			Callback(InternalResult);
 		}
 		else if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Success)
 		{
-			auto RefreshedSpace = GetSpaceResult.GetSpace();
+			const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
 			FOUNDATION_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
 
@@ -157,48 +158,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpace
 										   = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
 									   EnterSpaceEvent->AddString("SpaceId", SpaceId);
 									   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
-									   EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-									   if (AutoConnect)
-									   {
-										   auto* Connection = new csp::multiplayer::MultiplayerConnection(SpaceId);
+									   NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-										   SetConnectionCallbacks(Connection);
-
-										   Connection->Connect(
-											   [=](bool Ok)
-											   {
-												   if (Ok)
-												   {
-													   Connection->InitialiseConnection(
-														   [=](bool Ok)
-														   {
-															   if (Ok)
-															   {
-																   EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(),
-																								   GetSpaceResult.GetHttpResultCode());
-																   InternalResult.SetConnection(Connection);
-																   Callback(InternalResult);
-															   }
-															   else
-															   {
-																   FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server");
-																   Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(),
-																							 GetSpaceResult.GetHttpResultCode()));
-															   }
-														   });
-												   }
-												   else
-												   {
-													   FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server")
-													   Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-												   }
-											   });
-									   }
-									   else
-									   {
-										   Callback(InternalResult);
-									   }
+									   Callback(InternalResult);
 								   }
 							   });
 			}
@@ -231,6 +194,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpace
 						}
 					}
 				}
+
 				if (EnterSuccess)
 				{
 					CurrentSpace = GetSpaceResult.GetSpace();
@@ -239,79 +203,15 @@ void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpace
 					EnterSpaceEvent->AddString("SpaceId", SpaceId);
 					csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 
-					if (AutoConnect)
-					{
-						auto Connection = new csp::multiplayer::MultiplayerConnection(SpaceId);
+					NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-						SetConnectionCallbacks(Connection);
-
-						Connection->Connect(
-							[=](bool Ok)
-							{
-								if (Ok)
-								{
-									Connection->InitialiseConnection(
-										[=](bool Ok)
-										{
-											if (Ok)
-											{
-												EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
-												InternalResult.SetConnection(Connection);
-												Callback(InternalResult);
-											}
-											else
-											{
-												FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server");
-												Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-											}
-										});
-								}
-								else
-								{
-									FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server")
-									Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-								}
-							});
-					}
-					else
-					{
-						Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-					}
+					Callback(InternalResult);
 				}
 			}
 		}
 	};
 
 	GetSpace(SpaceId, GetSpaceCallback);
-}
-
-void SpaceSystem::ExitSpaceAndDisconnect(csp::multiplayer::MultiplayerConnection* Connection, BoolCallback Callback)
-{
-	FOUNDATION_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
-
-	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
-	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
-	csp::events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
-
-	if (Connection->GetConnectionState() != csp::multiplayer::ConnectionState::Disconnected
-		&& Connection->GetConnectionState() != csp::multiplayer::ConnectionState::Disconnecting)
-	{
-		Connection->Disconnect(
-			[=](bool Ok)
-			{
-				if (Ok)
-				{
-					CurrentSpace = Space();
-					Callback(true);
-				}
-				else
-				{
-					FOUNDATION_LOG_ERROR_MSG("Failed to Exit Space: Disconnect Failed");
-
-					Callback(false);
-				}
-			});
-	}
 }
 
 void SpaceSystem::ExitSpace()
@@ -332,21 +232,6 @@ bool SpaceSystem::IsInSpace()
 const Space& SpaceSystem::GetCurrentSpace() const
 {
 	return CurrentSpace;
-}
-
-CSP_EVENT void SpaceSystem::SetEntityCreatedCallback(csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback)
-{
-	EntityCreatedCallback = Callback;
-}
-
-CSP_EVENT void SpaceSystem::SetInitialEntitiesRetrievedCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback)
-{
-	InitialEntitiesRetrievedCallback = Callback;
-}
-
-CSP_EVENT void SpaceSystem::SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback)
-{
-	ScriptSystemReadyCallback = Callback;
 }
 
 void SpaceSystem::CreateSpace(const String& Name,
@@ -1584,22 +1469,6 @@ void SpaceSystem::GetSpaceGeoLocationInternal(const csp::common::String& SpaceId
 	auto& SystemsManager	= csp::systems::SystemsManager::Get();
 	auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
 	POIInternalSystem->GetSpaceGeoLocation(SpaceId, Callback);
-}
-
-void SpaceSystem::SetConnectionCallbacks(csp::multiplayer::MultiplayerConnection* Connection)
-{
-	if (!EntityCreatedCallback || !InitialEntitiesRetrievedCallback || !ScriptSystemReadyCallback)
-	{
-		FOUNDATION_LOG_WARN_MSG("Space connection callbacks have not been set.");
-		return;
-	}
-
-	if (Connection)
-	{
-		Connection->GetSpaceEntitySystem()->SetEntityCreatedCallback(EntityCreatedCallback);
-		Connection->GetSpaceEntitySystem()->SetInitialEntitiesRetrievedCallback(InitialEntitiesRetrievedCallback);
-		Connection->GetSpaceEntitySystem()->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-	}
 }
 
 void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)

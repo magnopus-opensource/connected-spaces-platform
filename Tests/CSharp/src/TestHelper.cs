@@ -17,6 +17,7 @@ namespace CSharpTests
         public static readonly Random Rand = new Random();
 
         static readonly Stack<Action> cleanupFunctions = new Stack<Action>();
+        static Systems.LogSystem LogSystem;
 
         [Conditional("DEBUG")]
         public static void LogDebug(string message)
@@ -70,19 +71,26 @@ namespace CSharpTests
             cleanupFunctions.Push(function);
         }
 
+        static void OnLogEvent(object s, string e)
+        {
+            Log("[ ::EVENT  ]", ConsoleColor.Blue, e);
+        }
+
+        static void OnLogMessage(object s, string e)
+        {
+            Log("[ ::LOG    ]", ConsoleColor.Blue, e);
+        }
+
         public static void StartupTest()
         {
             cleanupFunctions.Clear();
             InitialiseFoundationWithUserAgentInfo(CHSEndpointBaseUri);
 
-            Systems.SystemsManager.Get().GetLogSystem().OnEvent += (object s, string e) =>
-            {
-                Log("[ ::EVENT  ]", ConsoleColor.Blue, e);
-            };
-            Systems.SystemsManager.Get().GetLogSystem().OnLog += (object s, string e) =>
-            {
-                Log("[ ::LOG    ]", ConsoleColor.Blue, e);
-            };
+            LogSystem = Systems.SystemsManager.Get().GetLogSystem();
+            GC.SuppressFinalize(LogSystem);
+            LogSystem.OnEvent += OnLogEvent;
+            LogSystem.OnLog += OnLogMessage;
+
             LogDebug("Foundation initialized");
         }
 
@@ -91,9 +99,11 @@ namespace CSharpTests
             while (cleanupFunctions.Count > 0)
                 cleanupFunctions.Pop()();
 
-            Systems.SystemsManager.Get().GetLogSystem().ClearAllCallbacks();
+            LogSystem.ClearAllCallbacks();
             Csp.CSPFoundation.Shutdown();
             LogDebug("Foundation uninitialized");
+
+            LogSystem = null;
         }
 
         public static string GetUniqueHexString(int length = 16)
