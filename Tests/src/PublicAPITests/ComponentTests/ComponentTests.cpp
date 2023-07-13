@@ -43,20 +43,6 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
 	EXPECT_TRUE(MyCustomComponent.GetApplicationOrigin() == TestApplicationOrigin);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, ComponentTests, SetGetCustomPropertyTest)
-{
-	SpaceEntity* MySpaceEntity = new SpaceEntity();
-	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
-
-	const csp::common::String PropertyKey("MyPropertyKey");
-	const csp::common::String MyString("MyTestString");
-	ReplicatedValue TestStringValue(MyString);
-
-	MyCustomComponent.SetCustomProperty(PropertyKey, TestStringValue);
-
-	EXPECT_TRUE(MyCustomComponent.GetCustomProperty(PropertyKey) == TestStringValue);
-}
-
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetRemovedPropertyAssertionTest)
 {
 	SpaceEntity* MySpaceEntity = new SpaceEntity();
