@@ -31,19 +31,19 @@
 #include <chrono>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_USE_SPLINE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
@@ -75,16 +75,29 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 	const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
 	{
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
+
+		// Set up multiplayer connection
+		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+		auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
+			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
+
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
+
+			EXPECT_TRUE(Ok);
+
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+			EXPECT_TRUE(Ok);
+		}
 
 		// Ensure we're in the first space
 		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
@@ -106,6 +119,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 
 		{
 			auto Result = SplineComponent->GetLocationAlongSpline(1);
+
 			EXPECT_EQ(Result.X, 0);
 			EXPECT_EQ(Result.Y, 0);
 			EXPECT_EQ(Result.Z, 0);
@@ -118,7 +132,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 
 			EXPECT_EQ(Result.Size(), WayPoints.Size());
 
-			// expect final waypoint to be the same
+			// Expect final waypoint to be the same
 			EXPECT_EQ(Result[0], WayPoints[0]);
 		}
 
@@ -126,11 +140,14 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 			// Calculated cubic interpolate spline
 			auto Result = SplineComponent->GetLocationAlongSpline(1);
 
-			// expect final waypoint to be the same
+			// Expect final waypoint to be the same
 			EXPECT_EQ(Result, WayPoints[WayPoints.Size() - 1]);
 		}
 
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+		AWAIT(Connection, Disconnect);
+		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	// Delete space
@@ -164,15 +181,29 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create object to represent the spline
 	csp::common::String ObjectName = "Object 1";
@@ -207,7 +238,10 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	// expect final waypoint to be the same
 	EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

@@ -32,19 +32,19 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_REFLECTION_TESTS || RUN_REFLECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
@@ -73,22 +73,29 @@ CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect to the SignalR server
-	auto [Ok] = AWAIT(Connection, Connect);
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
 
-	EXPECT_TRUE(Ok);
+		EXPECT_TRUE(Ok);
 
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
 
-	EXPECT_TRUE(Ok);
+		EXPECT_TRUE(Ok);
+	}
 
 	bool AssetDetailBlobChangedCallbackCalled = false;
 	csp::common::String CallbackAssetId;
@@ -108,7 +115,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
 
 	// Check component was created
 	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
+	EXPECT_EQ(Components.Size(), 1);
 
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
@@ -160,7 +167,10 @@ CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
 	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionAssetId(), Asset.Id);
 	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionShape(), ReflectionShape::UnitSphere);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

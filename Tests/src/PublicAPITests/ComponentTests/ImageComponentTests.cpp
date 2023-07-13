@@ -34,19 +34,19 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_IMAGE_TESTS || RUN_IMAGE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
@@ -75,22 +75,29 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect to the SignalR server
-	auto [Ok] = AWAIT(Connection, Connect);
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
 
-	EXPECT_TRUE(Ok);
+		EXPECT_TRUE(Ok);
 
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
 
-	EXPECT_TRUE(Ok);
+		EXPECT_TRUE(Ok);
+	}
 
 	bool AssetDetailBlobChangedCallbackCalled = false;
 	csp::common::String CallbackAssetId;
@@ -110,7 +117,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 
 	// Check component was created
 	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
+	EXPECT_EQ(Components.Size(), 1);
 
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
@@ -172,7 +179,10 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 	EXPECT_EQ(StoredImageSpaceComponent->GetIsARVisible(), false);
 	EXPECT_EQ(StoredImageSpaceComponent->GetIsEmissive(), true);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -205,17 +215,29 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
 
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create object to represent the image
 	csp::common::String ObjectName = "Object 1";
@@ -259,7 +281,10 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 	EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSidedReversed);
 	EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Billboard);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

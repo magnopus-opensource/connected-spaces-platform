@@ -32,19 +32,19 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_CUSTOM_TESTS || RUN_CUSTOM_PROPERTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, CustomTests, SetGetCustomPropertyTest)
@@ -95,16 +95,29 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	{
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
+
+		// Set up multiplayer connection
+		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+		auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
+			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
+
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
+
+			ASSERT_TRUE(Ok);
+
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+			ASSERT_TRUE(Ok);
+		}
 
 		// Create object to represent the Custom fields
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -123,33 +136,39 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		// Vector Check
 		{
 			CustomComponent->SetCustomProperty("Vector3", ReplicatedValue({10, 10, 10}));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({10, 10, 10}));
 
 			CustomComponent->SetCustomProperty("Vector4", ReplicatedValue({10, 10, 10, 10}));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({10, 10, 10, 10}));
 		}
 
 		// String Check
 		{
 			CustomComponent->SetCustomProperty("String", ReplicatedValue("OKO"));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
 		}
 
 		// Boolean Check
 		{
 			CustomComponent->SetCustomProperty("Boolean", ReplicatedValue(true));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("Boolean").GetBool(), true);
 		}
 
 		// Integer Check
 		{
 			CustomComponent->SetCustomProperty("Integer", ReplicatedValue(int64_t(1)));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
 		}
 
 		// Float Check
 		{
 			CustomComponent->SetCustomProperty("Float", ReplicatedValue(1.00f));
+
 			EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
 		}
 
@@ -176,6 +195,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		// List Check
 		{
 			auto Keys = CustomComponent->GetCustomPropertyKeys();
+
 			EXPECT_EQ(Keys.Size(), 5);
 		}
 
@@ -183,16 +203,22 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+		AWAIT(Connection, Disconnect);
+		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	// Re-Enter space and verify contents
 	{
 		// Reload the space and verify the contents match
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
+
+		// Set up multiplayer connection
+		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+		auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 		// Retrieve all entities
 		auto GotAllEntities = false;
@@ -208,6 +234,17 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 				}
 			});
 
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
+
+			EXPECT_TRUE(Ok);
+
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+			EXPECT_TRUE(Ok);
+		}
+
 		// Wait until loaded
 		while (!GotAllEntities)
 		{
@@ -215,6 +252,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		}
 
 		const auto& Components = *LoadedObject->GetComponents();
+
 		EXPECT_EQ(Components.Size(), 1);
 
 		// Retreive the custom component
@@ -225,6 +263,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 		// Verify the application
 		auto* CustomComponent = (CustomSpaceComponent*) LoadedComponent;
+
 		EXPECT_EQ(CustomComponent->GetApplicationOrigin(), ApplicationOrigin);
 
 		// List Check
@@ -235,7 +274,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			// Vector Check
 			{
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({10, 10, 10}));
-
 				EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({10, 10, 10, 10}));
 			}
 
@@ -260,7 +298,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+		AWAIT(Connection, Disconnect);
+		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	// Delete space

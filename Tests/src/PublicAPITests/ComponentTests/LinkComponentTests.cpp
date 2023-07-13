@@ -32,19 +32,19 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_LINK_TESTS || RUN_EXTERNAL_LINK_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
@@ -73,23 +73,29 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	{
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+		// Set up multiplayer connection
 		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 		auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
+			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
 
-		// Connect to the SignalR server
-		auto [Ok] = AWAIT(Connection, Connect);
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+			EXPECT_TRUE(Ok);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+			EXPECT_TRUE(Ok);
+		}
 
 		csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -100,47 +106,54 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 
 		const csp::common::String ExternalLinkName = "MyExternalLink";
 		ExternalLinkComponent->SetName(ExternalLinkName);
+
 		EXPECT_EQ(ExternalLinkComponent->GetName(), ExternalLinkName);
 
 		const csp::common::String ExternalLinkUrl = "https://oko.live";
 		ExternalLinkComponent->SetLinkUrl(ExternalLinkUrl);
+
 		EXPECT_EQ(ExternalLinkComponent->GetLinkUrl(), ExternalLinkUrl);
 
 		const csp::common::Vector3 Position(123.0f, 456.0f, 789.0f);
 		ExternalLinkComponent->SetPosition(Position);
+
 		EXPECT_EQ(ExternalLinkComponent->GetPosition(), Position);
 
 		const csp::common::Vector4 Rotation(1.0f, 2.0f, 3.0f, 4.0f);
 		ExternalLinkComponent->SetRotation(Rotation);
+
 		EXPECT_EQ(ExternalLinkComponent->GetRotation(), Rotation);
 
 		const csp::common::Vector3 Scale(123.0f, 456.0f, 789.0f);
 		ExternalLinkComponent->SetScale(Scale);
+
 		EXPECT_EQ(ExternalLinkComponent->GetScale(), Scale);
 
 		const csp::common::String DisplayText = "A great link";
 		ExternalLinkComponent->SetDisplayText(DisplayText);
+
 		EXPECT_EQ(ExternalLinkComponent->GetDisplayText(), DisplayText);
 
 		bool IsEnabled = false;
 		ExternalLinkComponent->SetIsEnabled(IsEnabled);
+
 		EXPECT_EQ(ExternalLinkComponent->GetIsEnabled(), IsEnabled);
 
 		bool IsVisible = false;
 		ExternalLinkComponent->SetIsVisible(IsVisible);
+
 		EXPECT_EQ(ExternalLinkComponent->GetIsVisible(), IsVisible);
 
 		bool IsARVisible = false;
 		ExternalLinkComponent->SetIsARVisible(IsARVisible);
+
 		EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
 
 		// Disconnect from the SignalR server
-		std::tie(Ok) = AWAIT(Connection, Disconnect);
-
-		EXPECT_TRUE(Ok);
-
-		// Delete MultiplayerConnection
+		AWAIT(Connection, Disconnect);
 		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	// Delete space
