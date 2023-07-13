@@ -338,12 +338,7 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
         await InitializeConnection(space.Id);
-        
-        // Note: This flag is persistent beyond this Multiplayer connection.
-        // If you set this to true, it's set for your account across sessions.
-        // Turn this off when you don't want to receive OnEntityCreated for entities you create.
-        await connection.SetAllowSelfMessagingFlag(true);
-        
+
         StartTickLoop();
         Debug.Log("Connected to Multiplayer");
 
