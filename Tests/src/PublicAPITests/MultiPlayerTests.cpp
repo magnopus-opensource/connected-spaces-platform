@@ -507,8 +507,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
 
 	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	EntitySystem	 = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)

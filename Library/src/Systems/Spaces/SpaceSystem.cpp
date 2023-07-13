@@ -163,6 +163,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 									   Callback(InternalResult);
 								   }
+								   else
+								   {
+									   NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
+
+									   Callback(InternalResult);
+								   }
 							   });
 			}
 			else
@@ -204,6 +210,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 					csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 
 					NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
+
+					Callback(InternalResult);
+				}
+				else
+				{
+					NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
 
 					Callback(InternalResult);
 				}
