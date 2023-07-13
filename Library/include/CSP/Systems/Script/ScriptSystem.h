@@ -201,9 +201,11 @@ private:
 
 	class ScriptRuntime* TheScriptRuntime;
 
+	// TODO: Change this to use a typedef'd callback signature and change the callback to return a ResultBase-derived class that contains the lookup
+	// table so we can handle failures
 	static void GetLookupTableById(const csp::common::String& CollectionId,
 								   const csp::common::String& Id,
-								   std::function<void(const csp::common::Map<csp::common::String, csp::common::String>&)> Callback);
+								   std::function<void(csp::common::Map<csp::common::String, csp::common::String>)> Callback);
 };
 
 } // namespace csp::systems

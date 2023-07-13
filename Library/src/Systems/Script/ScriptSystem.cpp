@@ -17,6 +17,7 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
@@ -401,7 +402,7 @@ void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const S
 									   CreateAssetCollectionCallback);
 }
 
-void ScriptSystem::GetLookupTableById(const String& CollectionId, const String& Id, std::function<void(const LookupTableMap&)> Callback)
+void ScriptSystem::GetLookupTableById(const String& CollectionId, const String& Id, std::function<void(LookupTableMap)> Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
@@ -482,18 +483,14 @@ void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collect
 	// meaningful
 	// We need to fetch the lookuptable asset - create a function to do this for us and converts json into map.
 	const auto& LookupTable = Collection.GetLookupTable();
+
 	if (LookupTable.HasKey(Name))
 	{
 		NullResult InvalidNullResult = NullResult::Invalid();
 		Callback(InvalidNullResult);
 	}
 
-	// create the script module asset that will hold the script
-	// create the asset data which stores moduleText and upload it
-	// get the lookuptable from the collection
-	// add entry to the lookup table, turn back into json and then uuse the lookuptableid to update the assetdata call
-	// callback
-	// Create new functions for converting to/from json/map
+	auto AssetName = StringFormat("%s_%s", Collection.GetId(), Name);
 
 	csp::systems::AssetCollection InternalAssetCollection;
 	InternalAssetCollection.Id	 = Collection.GetId();
@@ -511,41 +508,38 @@ void ScriptSystem::CreateScriptModuleAsset(const ScriptModuleCollection& Collect
 
 		UriResultCallback UploadAssetDataCallback = [Collection, Name, Asset, InternalAssetCollection, AssetSystem, Callback](const UriResult& Result)
 		{
-			ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-
-			auto& InternalCollection = InternalResult.GetCollection();
-
-			AssetResultCallback GetAssetCallback = [InternalCollection, AssetSystem, InternalAssetCollection, Callback](const AssetResult& Result)
+			std::function<void(LookupTableMap&)> GetLookupTableCallback
+				= [AssetSystem, InternalAssetCollection, Asset, Name, Callback](LookupTableMap Result)
 			{
-				const auto& Asset = Result.GetAsset();
+				Result[Name] = Asset.Id;
 
-				const auto& LookupTable = InternalCollection.GetLookupTable();
-				auto Json				= LookupTableToJson(LookupTable);
+				// TODO: Wrap this uploading of lookup table data in a function that directly takes the lookup table object
+				auto Json = LookupTableToJson(Result);
 
 				BufferAssetDataSource AssetData;
 				AssetData.SetMimeType("application/json");
 				AssetData.Buffer	   = const_cast<char*>(Json.c_str());
 				AssetData.BufferLength = Json.Length();
 
-				UriResultCallback UploadAssetDataCallback = [Callback](const UriResult& Result)
+				UriResultCallback UpdateLookupTableCallback = [Callback](const UriResult& Result)
 				{
 					NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
 					Callback(InternalResult);
 				};
 
-				AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UploadAssetDataCallback);
+				AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UpdateLookupTableCallback);
 			};
 
-			// Get the Lookuptable Asset.
-			AssetSystem->GetAssetById(InternalCollection.GetId(), InternalCollection.LookupTableId, GetAssetCallback);
+			// Get the Lookuptable Asset
+			GetLookupTableById(Collection.Id, Collection.LookupTableId, GetLookupTableCallback);
 		};
 
 		AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UploadAssetDataCallback);
 	};
 
-	// Change this to instead take the AssetCollectionId - update method
-	AssetSystem->CreateAsset(InternalAssetCollection, Name, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateAssetCallback);
+	// TODO: Change this to instead take the AssetCollectionId - update method
+	AssetSystem->CreateAsset(InternalAssetCollection, AssetName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateAssetCallback);
 }
 
 } // namespace csp::systems
