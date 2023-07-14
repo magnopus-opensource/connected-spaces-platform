@@ -32,19 +32,19 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+
 namespace
 {
-
-MultiplayerConnection* Connection;
-SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::services::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
 }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_PORTAL_TESTS || RUN_USE_PORTAL_TEST
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
@@ -87,20 +87,29 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 	const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
 	{
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
 
-		// Ensure we're in the first space
-		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
+		// Set up multiplayer connection
+		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+		auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
-		// Create Avatar
 		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
+			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
+
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
+
+			EXPECT_TRUE(Ok);
+
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+			EXPECT_TRUE(Ok);
+		}
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
@@ -115,7 +124,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		PortalSpaceID = PortalComponent->GetSpaceId();
 
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+		AWAIT(Connection, Disconnect);
+		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	/*
@@ -123,20 +135,36 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 	*/
 
 	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		// Create Avatar
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+		// Set up multiplayer connection
+		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+		auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
 		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
+			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
 
+		// Connect and initialise
+		{
+			auto [Ok] = AWAIT(Connection, Connect);
+
+			EXPECT_TRUE(Ok);
+
+			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+			EXPECT_TRUE(Ok);
+		}
+
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+		AWAIT(Connection, Disconnect);
+		delete Connection;
+
+		SpaceSystem->ExitSpace();
 	}
 
 	// Delete space
@@ -177,15 +205,29 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, Source, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create object to represent the portal
 	csp::common::String ObjectName = "Object 1";
@@ -224,7 +266,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
 	EXPECT_TRUE(HasThumbailResult);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -257,15 +302,29 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create object to represent the portal
 	csp::common::String ObjectName = "Object 1";
@@ -313,10 +372,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
 
 	// Cleanup
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete MultiplayerConnection
+	AWAIT(Connection, Disconnect);
 	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
@@ -29,7 +30,9 @@
 
 #include "gtest/gtest.h"
 
+
 using namespace csp::multiplayer;
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS
 CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ApplicationOriginTest)
@@ -83,6 +86,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
 	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
 
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 0);
+
 	const csp::common::String PropertyKey1("MyPropertyKey1");
 	const csp::common::String MyString1("MyTestString1");
 	const csp::common::String PropertyKey2("MyPropertyKey2");
@@ -91,23 +95,33 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, GetKeysPropertyAssertionTest)
 	ReplicatedValue TestStringValue2(MyString2);
 
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
+
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey1));
+
 	MyCustomComponent.RemoveCustomProperty(PropertyKey1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 0);
 	EXPECT_FALSE(MyCustomComponent.HasCustomProperty(PropertyKey1));
 
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
 	MyCustomComponent.SetCustomProperty(PropertyKey2, TestStringValue2);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 2);
+
 	MyCustomComponent.SetCustomProperty(PropertyKey1, TestStringValue1);
 	MyCustomComponent.SetCustomProperty(PropertyKey2, TestStringValue2);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 2);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey1));
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey2));
+
 	MyCustomComponent.RemoveCustomProperty(PropertyKey1);
+
 	EXPECT_EQ(MyCustomComponent.GetCustomPropertyKeys().Size(), 1);
 	EXPECT_TRUE(MyCustomComponent.GetCustomPropertyKeys().Contains(PropertyKey2));
 }
@@ -121,13 +135,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
 											new ImageSpaceComponent(MySpaceEntity),
 											new LightSpaceComponent(MySpaceEntity),
 											new StaticModelSpaceComponent(MySpaceEntity),
-											new VideoPlayerSpaceComponent(MySpaceEntity)
-
-	};
+											new VideoPlayerSpaceComponent(MySpaceEntity)};
 
 	for (auto Component : Components)
 	{
 		auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
+
 		EXPECT_TRUE(VisibleComponent->GetIsARVisible());
 	}
 
@@ -152,13 +165,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 											new FogSpaceComponent(MySpaceEntity),
 											new LightSpaceComponent(MySpaceEntity),
 											new ReflectionSpaceComponent(MySpaceEntity),
-											new StaticModelSpaceComponent(MySpaceEntity)
-
-	};
+											new StaticModelSpaceComponent(MySpaceEntity)};
 
 	for (auto Component : Components)
 	{
 		auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
+
 		EXPECT_EQ(ThirdPartyComponentRef->GetThirdPartyComponentRef(), "");
 	}
 

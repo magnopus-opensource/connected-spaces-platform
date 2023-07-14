@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Threading;
 using System.IO;
 
@@ -13,8 +9,9 @@ using Multiplayer = Csp.Multiplayer;
 
 using CSharpTests;
 using MultiplayerTestClient;
-using static CSharpTests.TestHelper;
 
+using static CSharpTests.TestHelper;
+using System;
 
 namespace CSPEngine
 {
@@ -48,9 +45,12 @@ namespace CSPEngine
         static void DeleteEntity(Multiplayer.SpaceEntitySystem entitySystem, Multiplayer.SpaceEntity entity, bool disposeFoundationResources = true)
         {
             var id = entity.GetId();
-            entitySystem.DestroyEntity(entity);
 
-            LogDebug($"Entity deleted (Id: { id })");
+            var ok = entitySystem.DestroyEntity(entity).Result;
+
+            Assert.IsTrue(ok);
+
+            LogDebug($"Entity deleted (Id: {id})");
 
             if (disposeFoundationResources)
                 entity.Dispose();
@@ -58,51 +58,52 @@ namespace CSPEngine
 
         static void CreateAvatar(Multiplayer.SpaceEntitySystem entitySystem, string name, string avatarId, out Multiplayer.SpaceEntity entity, bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
-            var transform = new Multiplayer.SpaceTransform();
+            using var transform = new Multiplayer.SpaceTransform();
             var res = entitySystem.CreateAvatar(name, transform, Multiplayer.AvatarState.Idle, avatarId, Multiplayer.AvatarPlayMode.Default).Result;
 
             Assert.IsTrue(res.PointerIsValid);
 
             entity = res;
-            LogDebug($"Avatar created (Id: { entity.GetId() })");
-
             var outEntity = entity;
+
+            LogDebug($"Avatar created (Id: {entity.GetId()})");
 
             if (pushCleanupFunction)
                 PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity, disposeFoundationResources));
         }
 
-
         static void CreateCreatorAvatar(Multiplayer.SpaceEntitySystem entitySystem, string name, string avatarId, out Multiplayer.SpaceEntity entity)
         {
-            var transform = new Multiplayer.SpaceTransform();
+            using var transform = new Multiplayer.SpaceTransform();
             var res = entitySystem.CreateAvatar(name, transform, Multiplayer.AvatarState.Idle, avatarId, Multiplayer.AvatarPlayMode.Creator).Result;
 
             Assert.IsTrue(res.PointerIsValid);
 
             entity = res;
-            LogDebug($"Avatar created (Id: { entity.GetId() })");
             var outEntity = entity;
+
+            LogDebug($"Avatar created (Id: {entity.GetId()})");
+
             PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity));
         }
 
         public static void CreateObject(Multiplayer.SpaceEntitySystem entitySystem, string name, out Multiplayer.SpaceEntity entity, bool pushCleanupFunction = true)
         {
-            var transform = new Multiplayer.SpaceTransform();
+            using var transform = new Multiplayer.SpaceTransform();
             var res = entitySystem.CreateObject(name, transform).Result;
 
             Assert.IsTrue(res.PointerIsValid);
 
             entity = res;
-            LogDebug($"Object created (Id: { entity.GetId() })");
-
             var outEntity = entity;
+
+            LogDebug($"Object created (Id: {entity.GetId()})");
 
             if (pushCleanupFunction)
                 PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity));
         }
 
-        static Multiplayer.MultiplayerConnection CreateMultiplayerConnection(string spaceId, bool pushCleanupFunction = true)
+        public static Multiplayer.MultiplayerConnection CreateMultiplayerConnection(string spaceId, bool pushCleanupFunction = true)
         {
             var connection = new Multiplayer.MultiplayerConnection(spaceId);
 
@@ -115,16 +116,18 @@ namespace CSPEngine
         static void OnEntityUpdate(object sender, (Multiplayer.SpaceEntity entity, Multiplayer.SpaceEntityUpdateFlags arg2, Common.Array<Multiplayer.ComponentUpdateInfo>) eventArgs)
         {
             var transform = eventArgs.entity.GetTransform();
-            LogDebug($"Received update (Entity Id: { eventArgs.entity.GetId() }, " +
-                $"Pos: [{ transform.Position.X:0.##}, { transform.Position.Y:0.##}, { transform.Position.Z:0.##}], " +
-                $"Rot: [{ transform.Rotation.X:0.##}, { transform.Rotation.Y:0.##}, { transform.Rotation.Z:0.##}, { transform.Rotation.W:0.##}])");
+
+            LogDebug($"Received update (Entity Id: {eventArgs.entity.GetId()}, " +
+                $"Pos: [{transform.Position.X:0.##}, {transform.Position.Y:0.##}, {transform.Position.Z:0.##}], " +
+                $"Rot: [{transform.Rotation.X:0.##}, {transform.Rotation.Y:0.##}, {transform.Rotation.Z:0.##}, {transform.Rotation.W:0.##}])");
         }
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_CONNECTION_TEST
         [Test]
         public static void ManualConnectionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -136,18 +139,11 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             var connection = CreateMultiplayerConnection(space.Id);
-
-            var res = connection.Connect().Result;
-
-            Assert.IsTrue(res);
-
-            res = connection.InitialiseConnection().Result;
-
-            Assert.IsTrue(res);
-
-            Assert.AreEqual(connection.GetConnectionState(),Multiplayer.ConnectionState.Connected);
-            
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
+
+            Assert.AreEqual(connection.GetConnectionState(), Multiplayer.ConnectionState.Connected);
 
             // Create object
             var name = "TestObject";
@@ -155,8 +151,6 @@ namespace CSPEngine
 
             Assert.AreEqual(entity.GetEntityType(), Multiplayer.SpaceEntityType.Object);
             Assert.AreEqual(entity.GetName(), name);
-            entity.Dispose();
-            Disconnect(connection);
         }
 #endif
 
@@ -164,7 +158,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAvatarTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -175,11 +169,10 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
 
             // Create entity
             var name = "TestAvatar";
@@ -202,8 +195,6 @@ namespace CSPEngine
 
             Assert.AreEqual(avatarComponent.GetAvatarId(), avatarId);
             Assert.AreEqual(avatarComponent.GetLocomotionModel(), locomotionModel);
-
-            entity.Dispose();
         }
 #endif
 
@@ -211,7 +202,7 @@ namespace CSPEngine
         [Test]
         public static void CreateCreatorAvatarTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -222,11 +213,10 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
 
             // Create entity
             var name = "TestAvatar";
@@ -248,8 +238,6 @@ namespace CSPEngine
 
             Assert.AreEqual(avatarComponent.GetAvatarId(), avatarId);
             Assert.AreEqual(avatarComponent.GetAvatarPlayMode(), Multiplayer.AvatarPlayMode.Creator);
-
-            entity.Dispose();
         }
 #endif
 
@@ -257,7 +245,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateObjectTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             var spaceName = GenerateUniqueString("CSP_CSHARP_TEST_SPACE");
             var spaceDescription = "Created by C# test - UpdateObjectTest";
@@ -270,11 +258,10 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
 
             // Create object
             var name = "TestObject";
@@ -309,19 +296,20 @@ namespace CSPEngine
             {
                 var component = entity.AddComponent(Multiplayer.ComponentType.StaticModel);
                 componentKey = component.GetId();
+
                 var staticModel = component.As<Multiplayer.StaticModelSpaceComponent>();
                 staticModel.SetModelAssetId(modelAssetId);
 
                 LogDebug("Sending entity update...");
+
                 entity.QueueUpdate();
                 entitySystem.ProcessPendingEntityOperations();
+
                 LogDebug("Entity update sent!");
 
                 while (!gotUpdate)
                     Thread.Sleep(10);
             }
-
-            entity.Dispose();
         }
 #endif
 
@@ -329,7 +317,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateRemoteObjectTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             var spaceName = GenerateUniqueString("CSP_CSHARP_TEST_SPACE");
             var spaceDescription = "Created by C# test - UpdateObjectTest";
@@ -340,19 +328,18 @@ namespace CSPEngine
             // Create space
             var InviteUser1 = new Systems.InviteUserRoleInfo { UserEmail = UserSystemTests.DefaultLoginEmail, UserRole = Systems.SpaceUserRole.User };
             Systems.InviteUserRoleInfo[] InviteUsers = { InviteUser1 };
-            
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers.ToFoundationArray<Systems.InviteUserRoleInfo>(), null,false);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers.ToFoundationArray(), null, pushCleanupFunction: false);
 
+            var connection = CreateMultiplayerConnection(space.Id, false);
             var entitySystem = connection.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) =>
             {
                 LogDebug("Created Entity");
             };
+
+            Connect(connection, false);
 
             // Create object
             var name = "TestObject";
@@ -365,21 +352,18 @@ namespace CSPEngine
 
             Assert.AreEqual(entity.GetEntityType(), Multiplayer.SpaceEntityType.Object);
             Assert.AreEqual(entity.GetName(), name);
+
             var entityID = entity.GetId();
 
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
-            
+            Disconnect(connection);
+            connection.Dispose();
+
             UserSystemTests.LogOut(userSystem);
 
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            connection.Dispose();
             // Connect
-            var enterResult2 = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult2.GetResultCode(), Services.EResultCode.Success);
-            connection = enterResult2.GetConnection();
-
+            connection = CreateMultiplayerConnection(space.Id, pushCleanupFunction: false);
             entitySystem = connection.GetSpaceEntitySystem();
 
             var resetEvent = new ManualResetEvent(false);
@@ -389,6 +373,8 @@ namespace CSPEngine
                 if (e.GetId() == entityID)
                     resetEvent.Set();
             };
+
+            Connect(connection, pushCleanupFunction: false);
 
             resetEvent.WaitOne(10000);
 
@@ -407,22 +393,14 @@ namespace CSPEngine
             Assert.AreEqual(3.0f, otherUserEntity.GetPosition().Z);
             Assert.AreNotEqual(originalOwnerID, otherUserEntity.GetOwnerId());
 
-            {
-                ok = entitySystem.DestroyEntity(otherUserEntity).Result;
-
-                Assert.IsTrue(ok);
-            }
-
-            ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
-
+            DeleteEntity(entitySystem, otherUserEntity);
+            Disconnect(connection);
+            connection.Dispose();
 
             UserSystemTests.LogOut(userSystem);
 
             // Log in
             _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Services.EResultCode.Success);
-
-            entity.Dispose();
 
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
         }
@@ -432,7 +410,7 @@ namespace CSPEngine
         [Test]
         public static void RunScriptTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -441,13 +419,21 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            var scriptSystemReady = new ManualResetEvent(false);
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+            entitySystem.OnScriptSystemReady += (s, e) => {
+                Console.WriteLine("ScriptSystemReady called");
+
+                scriptSystemReady.Set();
+            };
+
+            Connect(connection);
 
             // we'll be using this in a few places below as part of the test, so we declare it upfront
             const string ScriptText = @"
@@ -461,8 +447,14 @@ namespace CSPEngine
                 }
 
                 ThisEntity.subscribeToMessage(""entityTick"", ""onTick"");
-
             ";
+
+            // A local avatar needs to be created in order for LeaderElection to initialise the script system
+            CreateAvatar(entitySystem, "Player 1", "MyCoolAvatar", out var avatar);
+
+            var ok = scriptSystemReady.WaitOne(5000);
+
+            Assert.IsTrue(ok);
 
             // Create an AnimatedModelComponent and have the script update it's position
             const string name = "ScriptTestObject";
@@ -478,20 +470,19 @@ namespace CSPEngine
             entitySystem.ProcessPendingEntityOperations();
 
             scriptComponent.SetScriptSource(ScriptText);
-            entity.GetScript().Invoke();
+
+            ok = entity.GetScript().Invoke();
+
+            Assert.IsTrue(ok);
 
             CSPFoundation.Tick();
 
             var ScriptHasErrors = entity.GetScript().HasError();
 
             Assert.IsFalse(ScriptHasErrors);
-            Assert.AreEqual(animatedModelComponent.GetPosition().X, 10.0);
-            Assert.AreEqual(animatedModelComponent.GetPosition().Y, 10.0);
-            Assert.AreEqual(animatedModelComponent.GetPosition().Z, 10.0);
-
-            // Cleanup
-
-            SpaceSystemTests.DeleteSpace(spaceSystem, space);
+            Assert.AreEqual(animatedModelComponent.GetPosition().X, 10f);
+            Assert.AreEqual(animatedModelComponent.GetPosition().Y, 10f);
+            Assert.AreEqual(animatedModelComponent.GetPosition().Z, 10f);
         }
 
 #endif
@@ -500,7 +491,7 @@ namespace CSPEngine
         [Test]
         public static void UsePortalTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -518,13 +509,19 @@ namespace CSPEngine
             string portalSpaceId;
 
             {
-                var enterResult = spaceSystem.EnterSpace(space1.Id, true).Result;
-                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-                var connection = enterResult.GetConnection();
+                using var result = spaceSystem.EnterSpace(space1.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            {
+                using var connection = CreateMultiplayerConnection(space1.Id, false);
                 var entitySystem = connection.GetSpaceEntitySystem();
+
                 entitySystem.OnEntityCreated += (s, e) => { };
-                
+
+                Connect(connection, false);
 
                 // Ensure we're in the first space
                 Assert.AreEqual(spaceSystem.GetCurrentSpace().Id, space1.Id);
@@ -546,23 +543,29 @@ namespace CSPEngine
                 portalSpaceId = portalComponent.GetSpaceId();
 
                 // Disconnect from the SignalR server
-                var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-                Assert.IsTrue(ok);
+                Disconnect(connection);
+            }
 
-                }
+            spaceSystem.ExitSpace();
 
             /*
 		        User would now interact with the portal
 	        */
 
             {
-                var enterResult = spaceSystem.EnterSpace(space2.Id, true).Result;
-                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-                var connection = enterResult.GetConnection();
+                using var result = spaceSystem.EnterSpace(space2.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            {
+                using var connection = CreateMultiplayerConnection(space2.Id, false);
                 var entitySystem = connection.GetSpaceEntitySystem();
+
                 entitySystem.OnEntityCreated += (s, e) => { };
-                
+
+                Connect(connection, false);
 
                 // Ensure we're in the second space
                 using var spaceIds = new Common.Array<string>(1);
@@ -576,7 +579,7 @@ namespace CSPEngine
 
                 using var spaces = result.GetSpaces();
                 using var portalSpace = spaces[0];
-                
+
                 Assert.AreEqual(spaceSystem.GetCurrentSpace().Id, portalSpaceId);
 
                 // Create Avatar
@@ -584,8 +587,11 @@ namespace CSPEngine
                 var avatarId = "NotARealAvatarId";
                 CreateAvatar(entitySystem, name, avatarId, out var entity, false);
 
-                // Cleanup
-                }
+                // Clean up
+                Disconnect(connection);
+            }
+
+            spaceSystem.ExitSpace();
         }
 #endif
 
@@ -593,7 +599,7 @@ namespace CSPEngine
         [Test]
         public static void PortalScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -604,12 +610,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the portal
             var objectName = "TestObject";
@@ -655,8 +661,6 @@ namespace CSPEngine
             Assert.AreEqual(portalComponent.GetPosition().Y, 5.5f);
             Assert.AreEqual(portalComponent.GetPosition().Z, 6.6f);
             Assert.AreEqual(portalComponent.GetRadius(), 456.456f);
-
-            // Cleanup
         }
 #endif
 
@@ -664,7 +668,7 @@ namespace CSPEngine
         [Test]
         public static void PortalThumbnailTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -680,12 +684,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the portal
             var objectName = "TestObject";
@@ -700,7 +704,6 @@ namespace CSPEngine
 
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             Assert.IsFalse(string.IsNullOrEmpty(result.GetUri()));
-
         }
 #endif
 
@@ -711,7 +714,7 @@ namespace CSPEngine
             // Test for OB-1046
             // If the rate limiter hasn't processed all PendingOutgoingUpdates after SpaceEntity deletion it will crash when trying to process them
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -722,12 +725,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create 3 seperate objects to ensure there is too many updates for the rate limiter to process in one tick
 
@@ -758,8 +761,6 @@ namespace CSPEngine
             createdObject3.Dispose();
             createdObject2.Dispose();
             createdObject.Dispose();
-
-            // Clean-up
         }
 #endif
 
@@ -780,12 +781,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Setup Asset callback
             var assetDetailBlobChangedCallbackCalled = false;
@@ -831,8 +832,6 @@ namespace CSPEngine
 
             Assert.IsTrue(assetDetailBlobChangedCallbackCalled);
             Assert.AreEqual(callbackAssetId, asset.Id);
-
-            // Cleanup
         }
 #endif
 
@@ -853,12 +852,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Setup script
             const string scriptText = @"
@@ -915,8 +914,6 @@ namespace CSPEngine
             Assert.AreEqual(position.X, 0);
             Assert.AreEqual(position.Y, 0);
             Assert.AreEqual(position.Z, 0);
-
-            // Cleanup
         }
 #endif
 
@@ -940,13 +937,13 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
-            
+
+            Connect(connection);
+
             // Setup script
             const string scriptText = @"
 
@@ -995,104 +992,6 @@ namespace CSPEngine
 
             createdObject.QueueUpdate();
             entitySystem.ProcessPendingEntityOperations();
-
-            // Cleanup
-        }
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ADD_SECOND_SCRIPT_TEST
-        [Test]
-        public static void AddSecondScriptTest()
-        {
-            // Test for OB-1407
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
-
-            // Log in
-            _ = UserSystemTests.LogIn(userSystem);
-
-            // Create space
-            string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
-            string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
-            string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
-            string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
-
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
-            var entitySystem = connection.GetSpaceEntitySystem();
-            entitySystem.OnEntityCreated += (s, e) => { };
-
-            // Setup script
-            const string scriptText = @"
-
-                var entities = TheEntitySystem.getEntities();
-		        var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		        globalThis.onTick = () => {
-			        var entity = entities[entityIndex];
-			        entity.position = [1, 1, 1];
-		        }
- 
-		        ThisEntity.subscribeToMessage(""entityTick"", ""onTick"");
-
-            ";
-
-            // Create object
-            var objectName = "TestObject";
-
-            CreateObject(entitySystem, objectName, out var createdObject, false);
-
-            // Create script
-            var component = createdObject.AddComponent(Multiplayer.ComponentType.ScriptData);
-            var scriptComponent = component.As<Multiplayer.ScriptSpaceComponent>();
-
-            scriptComponent.SetScriptSource(scriptText);
-            createdObject.GetScript().Invoke();
-
-            createdObject.QueueUpdate();
-            entitySystem.ProcessPendingEntityOperations();
-
-            // Delete script component
-            createdObject.RemoveComponent(scriptComponent.GetId());
-
-            createdObject.QueueUpdate();
-            entitySystem.ProcessPendingEntityOperations();
-
-            CSPFoundation.Tick();
-
-            // Ensure position is set to 0
-            var position = createdObject.GetPosition();
-
-            Assert.AreEqual(position.X, 0);
-            Assert.AreEqual(position.Y, 0);
-            Assert.AreEqual(position.Z, 0);
-
-            // Re-add script component
-            component = createdObject.AddComponent(Multiplayer.ComponentType.ScriptData);
-            scriptComponent = component.As<Multiplayer.ScriptSpaceComponent>();
-
-            scriptComponent.SetScriptSource(scriptText);
-            createdObject.GetScript().Invoke();
-
-            createdObject.QueueUpdate();
-            entitySystem.ProcessPendingEntityOperations();
-
-            // Ensure re-bound script works
-            CSPFoundation.Tick();
-
-            createdObject.QueueUpdate();
-            entitySystem.ProcessPendingEntityOperations();
-
-            position = createdObject.GetPosition();
-
-            Assert.AreEqual(position.X, 1);
-            Assert.AreEqual(position.Y, 1);
-            Assert.AreEqual(position.Z, 1);
-
-            // Cleanup
         }
 #endif
 
@@ -1100,7 +999,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1111,12 +1010,19 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            {
+                var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the conversation
             var objectName = "TestObject";
@@ -1174,6 +1080,7 @@ namespace CSPEngine
 
             string conversationId;
             string messageId;
+
             {
                 var result = conversationComponent.CreateConversation("TestMessage").Result;
 
@@ -1183,9 +1090,12 @@ namespace CSPEngine
 
                 {
                     using var resultInfo = conversationComponent.GetConversationInfo().Result;
+
                     Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
                     Assert.IsFalse(resultInfo.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform TestdefaultTransform = new Multiplayer.SpaceTransform();
+
+                    using var TestdefaultTransform = new Multiplayer.SpaceTransform();
+
                     Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.X, TestdefaultTransform.Position.X);
                     Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Y, TestdefaultTransform.Position.Y);
                     Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Z, TestdefaultTransform.Position.Z);
@@ -1206,6 +1116,7 @@ namespace CSPEngine
 
             {
                 using var result = conversationComponent.GetConversationInfo().Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsFalse(result.GetConversationInfo().Resolved);
 
@@ -1225,13 +1136,14 @@ namespace CSPEngine
             }
 
             {
-                Multiplayer.ConversationInfo newData = new Multiplayer.ConversationInfo();
-                Multiplayer.SpaceTransform cameraTransformValue = new Multiplayer.SpaceTransform(
-                    new Common.Vector3(1f, 1f, 1f), new Common.Vector4(1f, 1f, 1f, 1f), new Common.Vector3(1f, 1f, 1f));
+                using var newData = new Multiplayer.ConversationInfo();
+                using var cameraTransformValue = new Multiplayer.SpaceTransform(Common.Vector3.One(), Common.Vector4.One(), Common.Vector3.One());
                 newData.Resolved = true;
                 newData.CameraPosition = cameraTransformValue;
                 newData.Message = "TestMessage1";
+
                 using var result = conversationComponent.SetConversationInfo(newData).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsTrue(result.GetConversationInfo().Resolved);
 
@@ -1251,8 +1163,7 @@ namespace CSPEngine
             }
 
             {
-                var result = conversationComponent.AddMessage("Test").Result;
-
+                using var result = conversationComponent.AddMessage("Test").Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -1263,62 +1174,55 @@ namespace CSPEngine
             }
 
             {
-                var result = conversationComponent.GetMessage(messageId).Result;
-
+                using var result = conversationComponent.GetMessage(messageId).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
-
                 Assert.AreEqual(messageId, result.GetMessageInfo().Id);
 
             }
 
             {
                 using var result = conversationComponent.GetMessageInfo(messageId).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsFalse(result.GetMessageInfo().Edited);
             }
 
             {
-                Multiplayer.MessageInfo newData = new Multiplayer.MessageInfo();
+                using var newData = new Multiplayer.MessageInfo();
                 newData.Message = "newTest";
+
                 using var result = conversationComponent.SetMessageInfo(messageId, newData).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsTrue(result.GetMessageInfo().Edited);
             }
 
             {
                 var result = conversationComponent.GetAllMessages().Result;
-
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
-
                 Assert.AreEqual(result.GetTotalCount().ToString(), "1");
-
                 Assert.AreEqual(messageId, result.GetMessages()[0].Id);
             }
 
             {
                 var result = conversationComponent.DeleteMessage(messageId).Result;
-
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
-
             }
 
             {
                 var result = conversationComponent.DeleteConversation().Result;
-
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
-
             }
 
-
-            // Cleanup
+            spaceSystem.ExitSpace();
         }
 #endif
 
@@ -1326,7 +1230,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentMoveTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             var defaultTestUserId = UserSystemTests.LogIn(userSystem);
@@ -1338,16 +1242,24 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            {
+                var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the conversation
             var objectName1 = "TestObject1";
             CreateObject(entitySystem, objectName1, out var createdObject1, false);
+
             var objectName2 = "TestObject2";
             CreateObject(entitySystem, objectName2, out var createdObject2, false);
 
@@ -1366,10 +1278,11 @@ namespace CSPEngine
                 conversationId = result.GetValue();
             }
 
-            Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
+            using var defaultTransform = new Multiplayer.SpaceTransform();
 
             {
                 using var resultInfo = conversationComponent1.GetConversationInfo().Result;
+
                 Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
@@ -1393,22 +1306,26 @@ namespace CSPEngine
             }
 
             {
-                var result = conversationComponent2.GetConversationInfo().Result;
+                using var result = conversationComponent2.GetConversationInfo().Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
 
             {
-                var result = conversationComponent2.MoveConversationFromComponent(conversationComponent1);
-                Assert.IsTrue(result);
+                var ok = conversationComponent2.MoveConversationFromComponent(conversationComponent1);
+
+                Assert.IsTrue(ok);
             }
 
             {
-                var result = conversationComponent1.GetConversationInfo().Result;
+                using var result = conversationComponent1.GetConversationInfo().Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
 
             {
                 using var resultInfo = conversationComponent2.GetConversationInfo().Result;
+
                 Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
@@ -1433,18 +1350,19 @@ namespace CSPEngine
 
             {
                 // Test moving when the destination component already has a conversation associated
-                var result = conversationComponent2.MoveConversationFromComponent(conversationComponent1);
-                Assert.IsFalse(result);
+                var ok = conversationComponent2.MoveConversationFromComponent(conversationComponent1);
+
+                Assert.IsFalse(ok);
             }
 
             {
-                var result = conversationComponent2.DeleteConversation().Result;
+                using var result = conversationComponent2.DeleteConversation().Result;
                 var resCode = result.GetResultCode();
+
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-
-            // Cleanup
+            spaceSystem.ExitSpace();
         }
 #endif
 
@@ -1452,7 +1370,7 @@ namespace CSPEngine
         [Test]
         public static void ConversationComponentScriptTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1463,11 +1381,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the audio
             var objectName = "TestObject";
@@ -1499,21 +1418,18 @@ namespace CSPEngine
             Assert.IsFalse(conversationComponent.GetIsVisible());
             Assert.IsFalse(conversationComponent.GetIsActive());
 
-            var newPosition = new Common.Vector3(1, 2, 3);
+            using var newPosition = new Common.Vector3(1, 2, 3);
+
             Assert.AreEqual(conversationComponent.GetPosition().X, newPosition.X);
             Assert.AreEqual(conversationComponent.GetPosition().Y, newPosition.Y);
             Assert.AreEqual(conversationComponent.GetPosition().Z, newPosition.Z);
 
-            var newRotation = new Common.Vector4(4, 5, 6, 7);
+            using var newRotation = new Common.Vector4(4, 5, 6, 7);
+
             Assert.AreEqual(conversationComponent.GetRotation().W, newRotation.W);
             Assert.AreEqual(conversationComponent.GetRotation().X, newRotation.X);
             Assert.AreEqual(conversationComponent.GetRotation().Y, newRotation.Y);
             Assert.AreEqual(conversationComponent.GetRotation().Z, newRotation.Z);
-
-            // Cleanup
-           var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-           Assert.IsTrue(ok);
-
         }
 #endif
 
@@ -1534,12 +1450,12 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             // Connect to the SignalR server
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1581,6 +1497,7 @@ namespace CSPEngine
             audioComponent.SetIsEnabled(false);
 
             // Ensure values are set correctly
+            pos.Dispose();
             pos = audioComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 1);
@@ -1598,17 +1515,23 @@ namespace CSPEngine
 
             // Test invalid volume values
             audioComponent.SetVolume(1.5f);
+
             Assert.AreEqual(audioComponent.GetVolume(), 0.33f);
+
             audioComponent.SetVolume(-2.5f);
+
             Assert.AreEqual(audioComponent.GetVolume(), 0.33f);
 
             // Test boundary volume values
             audioComponent.SetVolume(1.0f);
+
             Assert.AreEqual(audioComponent.GetVolume(), 1.0f);
+
             audioComponent.SetVolume(0.0f);
+
             Assert.AreEqual(audioComponent.GetVolume(), 0.0f);
 
-            // Cleanup
+            pos.Dispose();
         }
 #endif
 
@@ -1630,11 +1553,11 @@ namespace CSPEngine
 
             // Connect to the SignalR server
             var connection = CreateMultiplayerConnection(space.Id);
-
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection, false);
+            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1670,6 +1593,7 @@ namespace CSPEngine
             imageComponent.SetIsEmissive(true);
 
             // Ensure values are set correctly
+            pos.Dispose();
             pos = imageComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 1);
@@ -1682,8 +1606,7 @@ namespace CSPEngine
             Assert.AreEqual(imageComponent.GetIsARVisible(), false);
             Assert.AreEqual(imageComponent.GetIsEmissive(), true);
 
-            // Cleanup
-            Disconnect(connection);
+            pos.Dispose();
         }
 #endif
 
@@ -1705,11 +1628,11 @@ namespace CSPEngine
 
             // Connect to the SignalR server
             var connection = CreateMultiplayerConnection(space.Id);
-
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection, false);
+            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1739,6 +1662,7 @@ namespace CSPEngine
             reflectionComponent.SetReflectionShape(Multiplayer.ReflectionShape.UnitSphere);
 
             // Ensure values are set correctly
+            pos.Dispose();
             pos = reflectionComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 1);
@@ -1748,8 +1672,7 @@ namespace CSPEngine
             Assert.AreEqual(reflectionComponent.GetReflectionAssetId(), assetId);
             Assert.AreEqual(reflectionComponent.GetReflectionShape(), Multiplayer.ReflectionShape.UnitSphere);
 
-            // Cleanup
-            Disconnect(connection);
+            pos.Dispose();
         }
 #endif
 
@@ -1769,12 +1692,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1825,6 +1748,7 @@ namespace CSPEngine
             videoComponent.SetVideoPlayerSourceType(Multiplayer.VideoPlayerSourceType.URLSource);
             videoComponent.SetIsVisible(false);
 
+            pos.Dispose();
             pos = videoComponent.GetPosition();
 
             // Ensure values are set correctly
@@ -1845,7 +1769,7 @@ namespace CSPEngine
             Assert.AreEqual(videoComponent.GetVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.URLSource);
             Assert.AreEqual(videoComponent.GetIsVisible(), false);
 
-            // Cleanup
+            pos.Dispose();
         }
 #endif
 
@@ -1864,12 +1788,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the Collision component
             var objectName = "TestObject";
@@ -1925,12 +1849,14 @@ namespace CSPEngine
             collisionComponent.SetAssetCollectionId("TestAssetCollectionID");
 
             // Ensure values are set correctly
+            pos.Dispose();
             pos = collisionComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 1);
             Assert.AreEqual(pos.Y, 1);
             Assert.AreEqual(pos.Z, 1);
 
+            scale.Dispose();
             scale = collisionComponent.GetScale();
 
             Assert.AreEqual(scale.X, 2);
@@ -1967,18 +1893,16 @@ namespace CSPEngine
             Assert.AreEqual(defaultCapsuleHalfWidth, 0.5f);
             Assert.AreEqual(defaultCapsuleHalfHeight, 1.0f);
 
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
-
+            pos.Dispose();
+            scale.Dispose();
         }
 #endif
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AUDIO_SCRIPT_INTERFACE_TEST
         [Test]
         public static void AudioScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1989,12 +1913,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the audio
             var objectName = "TestObject";
@@ -2035,7 +1959,7 @@ namespace CSPEngine
             const string assetId = "TEST_ASSET_ID";
             const string assetCollectionId = "TEST_COLLECTION_ID";
 
-            var pos = audioComponent.GetPosition();
+            using var pos = audioComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 1);
             Assert.AreEqual(pos.Y, 1);
@@ -2074,8 +1998,6 @@ namespace CSPEngine
             createdObject.GetScript().Invoke();
             entitySystem.ProcessPendingEntityOperations();
             Assert.AreEqual(audioComponent.GetVolume(), 0.0f);
-
-            // Cleanup
         }
 #endif
 
@@ -2085,7 +2007,7 @@ namespace CSPEngine
         [Test]
         public static void ImageScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2096,14 +2018,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-
-            var connection = enterResult.GetConnection();
-            
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the image
             var objectName = "TestObject";
@@ -2141,7 +2061,7 @@ namespace CSPEngine
 
             entitySystem.ProcessPendingEntityOperations();
 
-            var pos = imageComponent.GetPosition();
+            using var pos = imageComponent.GetPosition();
 
             Assert.AreEqual(pos.X, 2);
             Assert.AreEqual(pos.Y, 1);
@@ -2150,13 +2070,6 @@ namespace CSPEngine
             Assert.AreEqual(imageComponent.GetDisplayMode(), Multiplayer.DisplayMode.DoubleSidedReversed);
             Assert.AreEqual(imageComponent.GetIsVisible(), false);
             Assert.AreEqual(imageComponent.GetIsEmissive(), true);
-
-            // Cleanup
-            var ok = spaceSystem.ExitSpaceAndDisconnect(enterResult.GetConnection()).Result;
-            enterResult.Dispose();
-
-            Assert.IsTrue(ok);
-
         }
 #endif
 
@@ -2176,12 +2089,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the spline component
             var objectName = "TestObject";
@@ -2190,16 +2103,16 @@ namespace CSPEngine
             // Create spline component
             var component = createdObject.AddComponent(Multiplayer.ComponentType.Spline);
             var splineComponent = component.As<Multiplayer.SplineSpaceComponent>();
-            
-            // build waypoints list
-            Csp.Common.List<Common.Vector3> wayPoints =
-                new Csp.Common.List<Common.Vector3> {};
-            Common.Vector3 pos0 = new Common.Vector3(0, 0, 0);
-            Common.Vector3 pos1 = new Common.Vector3(0, 1000, 0);
-            Common.Vector3 pos2 = new Common.Vector3(0, 2000, 0);
-            Common.Vector3 pos3 = new Common.Vector3(0, 3000, 0);
-            Common.Vector3 pos4 = new Common.Vector3(0, 4000, 0);
-            Common.Vector3 pos5 = new Common.Vector3(0, 5000, 0);
+
+            // Build waypoints list
+            using var wayPoints = new Common.List<Common.Vector3> { };
+            using var pos0 = new Common.Vector3(0, 0, 0);
+            using var pos1 = new Common.Vector3(0, 1000, 0);
+            using var pos2 = new Common.Vector3(0, 2000, 0);
+            using var pos3 = new Common.Vector3(0, 3000, 0);
+            using var pos4 = new Common.Vector3(0, 4000, 0);
+            using var pos5 = new Common.Vector3(0, 5000, 0);
+
             wayPoints.Append(pos0);
             wayPoints.Append(pos1);
             wayPoints.Append(pos2);
@@ -2213,20 +2126,19 @@ namespace CSPEngine
                 // Evaluate cubic interpolate spline
                 var result = splineComponent.GetLocationAlongSpline(1.0f);
 
-                // expect final waypoint to be the same
+                // Expect final waypoint to be the same
                 Assert.AreEqual(result.X, wayPoints[wayPoints.Size() - 1].X);
                 Assert.AreEqual(result.Y, wayPoints[wayPoints.Size() - 1].Y);
                 Assert.AreEqual(result.Z, wayPoints[wayPoints.Size() - 1].Z);
-                
             }
-            // Cleanup
         }
 #endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SPLINE_SCRIPT_INTERFACE_TEST
         [Test]
         public static void SplineScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2237,12 +2149,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the spline
             var objectName = "TestObject";
@@ -2251,25 +2163,25 @@ namespace CSPEngine
             // Create spline component
             var component = createdObject.AddComponent(Multiplayer.ComponentType.Spline);
             var splineComponent = component.As<Multiplayer.SplineSpaceComponent>();
-            
+
             createdObject.QueueUpdate();
             entitySystem.ProcessPendingEntityOperations();
-            
-            Csp.Common.List<Common.Vector3> wayPoints =
-                new Csp.Common.List<Common.Vector3> {};
-            Common.Vector3 pos0 = new Common.Vector3(0, 0, 0);
-            Common.Vector3 pos1 = new Common.Vector3(0, 1000, 0);
-            Common.Vector3 pos2 = new Common.Vector3(0, 2000, 0);
-            Common.Vector3 pos3 = new Common.Vector3(0, 3000, 0);
-            Common.Vector3 pos4 = new Common.Vector3(0, 4000, 0);
-            Common.Vector3 pos5 = new Common.Vector3(0, 5000, 0);
+
+            using var wayPoints = new Common.List<Common.Vector3> { };
+            using var pos0 = new Common.Vector3(0, 0, 0);
+            using var pos1 = new Common.Vector3(0, 1000, 0);
+            using var pos2 = new Common.Vector3(0, 2000, 0);
+            using var pos3 = new Common.Vector3(0, 3000, 0);
+            using var pos4 = new Common.Vector3(0, 4000, 0);
+            using var pos5 = new Common.Vector3(0, 5000, 0);
+
             wayPoints.Append(pos0);
             wayPoints.Append(pos1);
             wayPoints.Append(pos2);
             wayPoints.Append(pos3);
             wayPoints.Append(pos4);
             wayPoints.Append(pos5);
-            
+
             // Setup script
             const string splineScriptText = @"
 		        var spline = ThisEntity.getSplineComponents()[0];
@@ -2283,14 +2195,11 @@ namespace CSPEngine
             createdObject.GetScript().Invoke();
 
             entitySystem.ProcessPendingEntityOperations();
-            
+
             Assert.AreEqual(splineComponent.GetWaypoints()[wayPoints.Size() - 1].X, wayPoints[wayPoints.Size() - 1].X);
             Assert.AreEqual(splineComponent.GetWaypoints()[wayPoints.Size() - 1].Y, wayPoints[wayPoints.Size() - 1].Y);
             Assert.AreEqual(splineComponent.GetWaypoints()[wayPoints.Size() - 1].Z, wayPoints[wayPoints.Size() - 1].Z);
-            
             Assert.AreEqual(splineComponent.GetWaypoints().Size(), wayPoints.Size());
-            
-            // Cleanup
         }
 #endif
 
@@ -2298,7 +2207,7 @@ namespace CSPEngine
         [Test]
         public static void UseCustomTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2311,12 +2220,12 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             {
-                var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-                var connection = enterResult.GetConnection();
-
+                using var connection = CreateMultiplayerConnection(space.Id, false);
                 var entitySystem = connection.GetSpaceEntitySystem();
+
                 entitySystem.OnEntityCreated += (s, e) => { };
+
+                Connect(connection, false);
 
                 // Create object to represent the Custom Component
                 CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2327,79 +2236,70 @@ namespace CSPEngine
 
                 // Application Origin Check
                 customComponent.SetApplicationOrigin(applicationOrigin);
+
                 Assert.AreEqual(customComponent.GetApplicationOrigin(), applicationOrigin);
 
                 // Vector Check
-                {
-                    customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1, 1, 1)));
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
+                customComponent.SetCustomProperty("Vector3", new Multiplayer.ReplicatedValue(new Common.Vector3(1, 1, 1)));
 
-                    customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1, 1, 1, 1)));
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
-                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
-                }
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
+
+                customComponent.SetCustomProperty("Vector4", new Multiplayer.ReplicatedValue(new Common.Vector4(1, 1, 1, 1)));
+
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
+                Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
 
                 // String Check
-                {
-                    customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
-                    Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
-                }
+                customComponent.SetCustomProperty("String", new Multiplayer.ReplicatedValue("OKO"));
+
+                Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
 
                 // Boolean Check
-                {
-                    customComponent.SetCustomProperty("Boolean", new Multiplayer.ReplicatedValue(true));
-                    Assert.AreEqual(customComponent.GetCustomProperty("Boolean").GetBool(), true);
-                }
+                customComponent.SetCustomProperty("Boolean", new Multiplayer.ReplicatedValue(true));
+
+                Assert.AreEqual(customComponent.GetCustomProperty("Boolean").GetBool(), true);
 
                 // Integer Check
-                {
-                    customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
-                    Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
-                }
+                customComponent.SetCustomProperty("Integer", new Multiplayer.ReplicatedValue(1));
+
+                Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
 
                 // Float Check
-                {
-                    customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
-                    Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
-                }
+                customComponent.SetCustomProperty("Float", new Multiplayer.ReplicatedValue(1.0f));
+
+                Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
 
                 // Has Key Check
-                {
-                    Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), true);
-                    Assert.AreEqual(customComponent.HasCustomProperty("BooleanFalse"), false);
-                }
+                Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), true);
+                Assert.AreEqual(customComponent.HasCustomProperty("BooleanFalse"), false);
 
                 // Size Check, Including Application Origin
-                {
-                    Assert.AreEqual(customComponent.GetNumProperties(), 7);
-                }
+                Assert.AreEqual(customComponent.GetNumProperties(), 7);
 
                 // Remove Key Check
-                {
-                    customComponent.RemoveCustomProperty("Boolean");
-                    Assert.AreEqual(customComponent.GetNumProperties(), 6);
-                }
+                customComponent.RemoveCustomProperty("Boolean");
+
+                Assert.AreEqual(customComponent.GetNumProperties(), 6);
 
                 entitySystem.QueueEntityUpdate(createdObject);
                 entitySystem.ProcessPendingEntityOperations();
                 Thread.Sleep(3000);
 
-                var exitSpaceResult = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-                Assert.IsTrue(exitSpaceResult);
+                Disconnect(connection);
             }
 
             {
-                var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-                var connection = enterResult.GetConnection();
+                using var connection = CreateMultiplayerConnection(space.Id, false);
+                var entitySystem = connection.GetSpaceEntitySystem();
 
                 var testComplete = false;
-                var entitySystem = connection.GetSpaceEntitySystem();
-                entitySystem.OnEntityCreated += (s, e) => {
+
+                entitySystem.OnEntityCreated += (s, e) =>
+                {
                     Assert.AreEqual(e.GetName(), objectName);
 
                     Assert.AreEqual(e.GetComponents().Size(), (ulong)1);
@@ -2413,49 +2313,41 @@ namespace CSPEngine
                     Assert.AreEqual(customComponent.GetApplicationOrigin(), applicationOrigin);
 
                     // Vector Check
-                    {
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().X, new Common.Vector3(1, 1, 1).X);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Y, new Common.Vector3(1, 1, 1).Y);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector3").GetVector3().Z, new Common.Vector3(1, 1, 1).Z);
 
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
-                        Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
-                    }
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().W, new Common.Vector4(1, 1, 1, 1).W);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().X, new Common.Vector4(1, 1, 1, 1).X);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Y, new Common.Vector4(1, 1, 1, 1).Y);
+                    Assert.AreEqual(customComponent.GetCustomProperty("Vector4").GetVector4().Z, new Common.Vector4(1, 1, 1, 1).Z);
 
                     // String Check
-                    {
-                        Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
-                    }
+                    Assert.AreEqual(customComponent.GetCustomProperty("String").GetString(), "OKO");
 
                     // Integer Check
-                    {
-                        Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
-                    }
+                    Assert.AreEqual(customComponent.GetCustomProperty("Integer").GetInt(), 1);
 
                     // Float Check
-                    {
-                        Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
-                    }
+                    Assert.AreEqual(customComponent.GetCustomProperty("Float").GetFloat(), 1.0f);
 
                     // Does Not Have Key Check
-                    {
-                        Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), false);
-                    }
+                    Assert.AreEqual(customComponent.HasCustomProperty("Boolean"), false);
 
                     // Flag Tests Completed
                     testComplete = true;
                 };
 
+                Connect(connection, false);
+
                 // Wait until test complete
-                while(!testComplete)
+                while (!testComplete)
                 {
                     Thread.Sleep(100);
                 }
-            }
 
-            // Disconnect from the SignalR server
+                Disconnect(connection);
+            }
         }
 #endif
 
@@ -2463,7 +2355,7 @@ namespace CSPEngine
         [Test]
         public static void CustomComponentScriptInterfaceSubscriptionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2474,12 +2366,15 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+            
+            Connect(connection);
+
+            // A local avatar needs to be created in order for LeaderElection to initialise the script system
+            CreateAvatar(entitySystem, "Player 1", "MyCoolAvatar", out var avatar);
 
             // Create object to represent the audio
             var objectName = "TestObject";
@@ -2491,7 +2386,7 @@ namespace CSPEngine
 
             customComponent.SetCustomProperty("Number", new Multiplayer.ReplicatedValue(0));
             customComponent.SetCustomProperty("NumberChanged", new Multiplayer.ReplicatedValue(false));
-            
+
             createdObject.QueueUpdate();
             entitySystem.ProcessPendingEntityOperations();
 
@@ -2500,10 +2395,12 @@ namespace CSPEngine
                 var custom = ThisEntity.getCustomComponents()[0];
                 custom.setCustomProperty(""testFloat"", 1.234);
                 custom.setCustomProperty(""testInt"", 1234);
+
                 globalThis.onValueChanged = () => {
                   custom.setCustomProperty(""NumberChanged"", true);
                 }  
-                // subscribe to entity events 
+
+                // Subscribe to entity events 
                 ThisEntity.subscribeToPropertyChange(custom.id, custom.getCustomPropertySubscriptionKey(""Number""), ""valueChanged"");
                 ThisEntity.subscribeToMessage(""valueChanged"", ""onValueChanged"");    
             ";
@@ -2512,6 +2409,7 @@ namespace CSPEngine
             createdObject.GetScript().Invoke();
 
             entitySystem.ProcessPendingEntityOperations();
+
             Assert.AreEqual(customComponent.GetCustomProperty("testFloat").GetFloat(), 1.234f);
             Assert.AreEqual(customComponent.GetCustomProperty("testInt").GetInt(), 1234);
             Assert.AreEqual(customComponent.GetCustomProperty("Number").GetInt(), 0);
@@ -2521,8 +2419,6 @@ namespace CSPEngine
 
             Assert.AreEqual(customComponent.GetCustomProperty("Number").GetInt(), 100);
             Assert.IsTrue(customComponent.GetCustomProperty("NumberChanged").GetBool());
-
-            // Cleanup
         }
 #endif
 
@@ -2531,7 +2427,7 @@ namespace CSPEngine
         [Test]
         public static void NetworkEventTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
@@ -2542,17 +2438,17 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
 
             bool gotEvent = false;
 
             //TODO: Create callback delegate for recieve event
-            Multiplayer.MultiplayerConnection.ListenNetworkEventCallbackDelegate ListenDelegate = (s, e) => {
-            for (ulong i = 0; i < e.Size(); i++)
+            void ListenDelegate(bool s, Common.Array<Multiplayer.ReplicatedValue> e)
+            {
+                for (ulong i = 0; i < e.Size(); i++)
                 {
                     switch (i)
                     {
@@ -2566,26 +2462,23 @@ namespace CSPEngine
                 }
 
                 gotEvent = true;
-            };
+            }
 
             // Listen for network event
             connection.ListenNetworkEvent("TestEvent", ListenDelegate);
 
             // Send Network event to self
-            Multiplayer.ReplicatedValue TestString = new Multiplayer.ReplicatedValue("TestString");
-            Multiplayer.ReplicatedValue TestFloat = new Multiplayer.ReplicatedValue(42.127f);
-            Common.Array<Multiplayer.ReplicatedValue> Params = new Common.Array<Multiplayer.ReplicatedValue>(2);
+            using var TestString = new Multiplayer.ReplicatedValue("TestString");
+            using var TestFloat = new Multiplayer.ReplicatedValue(42.127f);
+            using var Params = new Common.Array<Multiplayer.ReplicatedValue>(2);
+
             Params[0] = TestString;
             Params[1] = TestFloat;
+
             connection.SendNetworkEventToClient("TestEvent", Params, connection.GetClientId());
 
             while (!gotEvent)
                 Thread.Sleep(10);
-            
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
-
-
         }
 #endif
 
@@ -2605,10 +2498,11 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             // Connect to the SignalR server
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
+            Connect(connection);
+            
             // Create object to represent the spline component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2616,9 +2510,10 @@ namespace CSPEngine
             // Create spline component
             var component = createdObject.AddComponent(Multiplayer.ComponentType.Spline);
             var splineComponent = component.As<Multiplayer.SplineSpaceComponent>();
+
             bool ActionCalled = false;
-            Multiplayer.ComponentBase.RegisterActionHandlerActionHandlerDelegate TestDelegate = (arg1, arg2, arg3) => { };
-            splineComponent.RegisterActionHandler("TestAction", (arg1, arg2, arg3) => 
+
+            splineComponent.RegisterActionHandler("TestAction", (arg1, arg2, arg3) =>
             {
                 ActionCalled = true;
             });
@@ -2626,11 +2521,6 @@ namespace CSPEngine
             splineComponent.InvokeAction("TestAction", "TestParam");
 
             Assert.IsTrue(ActionCalled);
-
-            // Cleanup
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
-
         }
 #endif
 
@@ -2638,7 +2528,7 @@ namespace CSPEngine
         [Test]
         public static void FogComponentTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2649,12 +2539,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+            
+            Connect(connection);
 
             // Create object to represent the fog
             var objectName = "TestObject";
@@ -2719,8 +2609,6 @@ namespace CSPEngine
             Assert.AreEqual(fogComponent.GetHeightFalloff(), 4.0f);
             Assert.AreEqual(fogComponent.GetMaxOpacity(), 5.0f);
             Assert.IsTrue(fogComponent.GetIsVolumetric());
-
-            // Cleanup
         }
 #endif
 
@@ -2728,7 +2616,7 @@ namespace CSPEngine
         [Test]
         public static void FogScriptInterfaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -2739,12 +2627,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-
+            var connection = CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            Connect(connection);
 
             // Create object to represent the fog
             var objectName = "TestObject";
@@ -2795,12 +2683,10 @@ namespace CSPEngine
             Assert.AreEqual(fogComponent.GetColor().X, 1);
             Assert.AreEqual(fogComponent.GetColor().Y, 1);
             Assert.AreEqual(fogComponent.GetColor().Z, 1);
-            Assert.AreEqual(fogComponent.GetDensity(), 3.0f);
-            Assert.AreEqual(fogComponent.GetHeightFalloff(), 4.0f);
-            Assert.AreEqual(fogComponent.GetMaxOpacity(), 5.0f);
+            Assert.AreEqual(fogComponent.GetDensity(), 3.3f);
+            Assert.AreEqual(fogComponent.GetHeightFalloff(), 4.4f);
+            Assert.AreEqual(fogComponent.GetMaxOpacity(), 5.5f);
             Assert.IsTrue(fogComponent.GetIsVolumetric());
-
-            // Cleanup
         }
 #endif
 
@@ -2885,6 +2771,7 @@ namespace CSPEngine
             }
         }
 #endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INVALID_COMPONENT_TEST
         [Test]
         public static void InvalidComponentTest()
@@ -2902,11 +2789,11 @@ namespace CSPEngine
 
             // Connect to the SignalR server
             var connection = CreateMultiplayerConnection(space.Id);
-
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection, false);
+            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -2917,9 +2804,6 @@ namespace CSPEngine
 
             createdObject.QueueUpdate();
             entitySystem.ProcessPendingEntityOperations();
-
-            // Cleanup
-            Disconnect(connection);
         }
 #endif
 
