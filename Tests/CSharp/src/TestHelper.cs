@@ -289,14 +289,16 @@ namespace CSharpTests
             Csp.CSPFoundation.SetClientUserAgentInfo(userAgentInfo);
         }
 
-        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId)
+        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId, string SessionDirectory, string SessionName, long SessionStart)
         {
             Process multiPlayerTestClient = new Process();
 
             multiPlayerTestClient.StartInfo.FileName = "MultiplayerTestClient.exe";
 
+            string ArgsString = String.Format("{0} {1} {2} {3}", ClientId, SessionDirectory, SessionName, SessionStart);
+
             // Pass the client process a handle to the server.
-            multiPlayerTestClient.StartInfo.Arguments = ClientId;
+            multiPlayerTestClient.StartInfo.Arguments = ArgsString;
             multiPlayerTestClient.StartInfo.UseShellExecute = false;
             multiPlayerTestClient.Start();
 
