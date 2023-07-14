@@ -338,7 +338,7 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
         await InitializeConnection(space.Id);
-        await connection.SetAllowSelfMessagingFlag(true);
+
         StartTickLoop();
         Debug.Log("Connected to Multiplayer");
 
