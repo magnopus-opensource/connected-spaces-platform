@@ -125,36 +125,6 @@ public:
 									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 									  const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
 									  SpaceResultCallback Callback);
-
-	/// @brief Creates a new space Using BufferAssetDataSource.
-	/// @param Name csp::common::String : name for the new space
-	/// @param Description csp::common::String : description for the new space
-	/// @param Type csp::systems::SpaceType : type of the new space
-	/// @param InviteUsers csp::common::Array<csp::systems::InviteUserRoleInfo> : optional array of users to be invited into the space
-	/// @param Metadata csp::common::String : metadata information for the new space
-	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
-	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void CreateSpaceWithBuffer(const csp::common::String& Name,
-												const csp::common::String& Description,
-												SpaceAttributes Attributes,
-												const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
-												const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-												const csp::systems::BufferAssetDataSource& Thumbnail,
-												SpaceResultCallback Callback);
-
-	/// @brief Updates the name and/or the description of a Space
-	/// @param Space Space : the Space to update
-	/// @param Name csp::common::Optional<csp::common::String> : if a new name is provided it will be used to update the Space name
-	/// @param Description csp::common::Optional<csp::common::String> : if a new description is provided it will be used to update the Space
-	/// description
-	/// @param Type csp::common::Optional<csp::systems::SpaceType> : if a new type is provided it will be used to update the Space type
-	/// @param Callback BasicSpaceResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& SpaceId,
-									  const csp::common::Optional<csp::common::String>& Name,
-									  const csp::common::Optional<csp::common::String>& Description,
-									  const csp::common::Optional<SpaceAttributes>& Type,
-									  BasicSpaceResultCallback Callback);
-
 	/// @brief Deletes a given space and the corresponding UserService group.
 	/// @param Space Space : space to delete
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
@@ -277,27 +247,44 @@ public:
 	/// @param Callback SpaceMetadataResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetSpaceMetadata(const csp::common::String& SpaceId, SpaceMetadataResultCallback Callback);
 
-	/// @brief Updates the Space thumbnail image or adds one if it didn't have it previously using FileAssetDataSource
-	/// @param Space Space : Space for which the thumbnail will be updated
-	/// @param NewThumbnail csp::systems::FileAssetDataSource : New thumbnail information
-	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void
-		UpdateSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& NewThumbnail, NullResultCallback Callback);
-
-	/// @brief Updates the Space thumbnail image or adds one if it didn't have it previously using BufferAssetDataSource
-	/// @param Space Space : Space for which the thumbnail will be updated
-	/// @param NewThumbnail csp::systems::BufferAssetDataSource : New thumbnail information
-	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void UpdateSpaceThumbnailWithBuffer(const csp::common::String& SpaceId,
-														 const csp::systems::BufferAssetDataSource& NewThumbnail,
-														 NullResultCallback Callback);
-
 	/// @brief Retrieves the space thumbnail information associated with the space
 	/// If the space does not have a thumbnail associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
 	/// and the Uri field inside the UriResult will be empty
 	/// @param Space Space : Space for which the thumbnail information will be retrieved
 	/// @param Callback UriResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetSpaceThumbnail(const csp::common::String& SpaceId, UriResultCallback Callback);
+
+	/// @brief Adds a thumbnail to a space using a FileAssetDataSource.
+	/// @param @param SpaceId csp::common::String : the id of the space for which the thumbnail added
+	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	void AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
+
+	/// @brief Adds a thumbnail to a space using a BufferAssetDataSource.
+	/// @param SpaceId csp::common::String : the id of the space for which the thumbnail added
+	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	void AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId,
+									 const csp::systems::BufferAssetDataSource& ImageDataSource,
+									 NullResultCallback Callback);
+
+	/// @brief Adds metadata to a space.
+	/// @param SpaceId csp::common::String : the id of the space for which the Metadata is being added
+	/// @param Metadata csp::common::Map<csp::common::String, csp::common::String> : the metadata being added to the space
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	void AddMetadata(const csp::common::String& SpaceId,
+					 const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+					 NullResultCallback Callback);
+
+	/// @brief remove metadata from a space.
+	/// @param SpaceId csp::common::String : the id of the space for which the Metadata is being removed
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
+
+	/// @brief Remove a thumbnail from a space.
+	/// @param SpaceId csp::common::String : the id of the space thumbnail being removed
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
 	/// @brief Adds user to group banned list. Banned list can be retrieved from the space
 	/// @param Space Space : Space for which the ban will be issued on
@@ -312,19 +299,6 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void
 		DeleteUserFromSpaceBanList(const csp::common::String& SpaceId, const csp::common::String& RequestedUserId, NullResultCallback Callback);
-
-	/// @brief Add or update a GeoLocation for the space
-	/// @param SpaceId csp::common::String : Id of the space to udpate
-	/// @param Location csp::common::Optional<GeoLocation> : The latitude and longitude of the geo location
-	/// @param Orientation csp::common::Optional<double> : The compass direction the space points. Must be between 0 (north) and 360 (inclusive)
-	/// @param GeoFence csp::common::Optional<csp::common::Array<GeoLocation>> : Array of points that creates a geo fence for the space.
-	///                                                                        Must be in clockwise order and start and end with the same value.
-	/// @param Callback SpaceGeoLocationResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
-												 const csp::common::Optional<GeoLocation>& Location,
-												 const csp::common::Optional<float>& Orientation,
-												 const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-												 SpaceGeoLocationResultCallback Callback);
 
 	/// @brief Get the geo location details for the given space id
 	/// @param SpaceId csp::common::String : Id of the space
@@ -345,19 +319,9 @@ private:
 	// Space Metadata
 	void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
 	void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-	void AddMetadata(const csp::common::String& SpaceId,
-					 const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-					 NullResultCallback Callback);
-	void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
-	// Space Thumbnail
-	void AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
-	void AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId,
-									 const csp::systems::BufferAssetDataSource& ImageDataSource,
-									 NullResultCallback Callback);
 	void GetSpaceThumbnailAssetCollection(const csp::common::String& SpaceId, AssetCollectionsResultCallback Callback);
 	void GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback);
-	void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
 	void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
