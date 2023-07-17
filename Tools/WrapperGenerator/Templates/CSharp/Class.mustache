@@ -127,7 +127,17 @@
 {{^ is_void_pointer }}
 {{^ is_string }}
 {{# is_pointer_or_reference }}
+{{# is_primitive }}
+{{# is_const }}
+        {{> Type }}
+{{/ is_const }}
+{{^ is_const }}
+        IntPtr
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
         NativePointer
+{{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
