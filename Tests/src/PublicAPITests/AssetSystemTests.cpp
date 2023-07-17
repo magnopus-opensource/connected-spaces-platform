@@ -318,7 +318,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -411,7 +411,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collections
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2;
@@ -492,7 +492,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -618,7 +618,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -701,7 +701,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collections
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2;
@@ -790,7 +790,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	LogIn(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 	const auto Tag = csp::common::Array<csp::common::String>({Space.Id});
 
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2, AssetCollection3;
@@ -945,7 +945,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	LogIn(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
@@ -1159,7 +1159,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1278,7 +1278,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1449,7 +1449,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1541,7 +1541,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1630,7 +1630,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1724,7 +1724,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1854,7 +1854,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection assetCollection;
@@ -1931,7 +1931,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -2030,7 +2030,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);

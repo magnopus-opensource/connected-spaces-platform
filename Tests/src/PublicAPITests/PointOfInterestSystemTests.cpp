@@ -312,7 +312,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem, Space, UniqueAssetCollectionName, AssetCollection);

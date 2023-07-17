@@ -174,7 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -263,7 +263,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	std::atomic_bool ScriptSystemReady = false;
 
@@ -383,7 +383,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -482,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -559,7 +559,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, PortalScriptInterfaceTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -652,7 +652,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -743,7 +743,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -833,7 +833,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	std::atomic_bool ScriptSystemReady = false;
 
@@ -978,7 +978,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AudioScriptInterfaceTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1106,7 +1106,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, SplineScriptInterfaceTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1183,7 +1183,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1262,7 +1262,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	std::atomic_bool ScriptSystemReady = false;
 
@@ -1374,7 +1374,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ImageScriptInterfaceTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 
@@ -1461,7 +1461,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, FogScriptInterfaceTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1548,7 +1548,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ConversationComponentScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
@@ -1647,7 +1647,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
@@ -1717,7 +1717,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();

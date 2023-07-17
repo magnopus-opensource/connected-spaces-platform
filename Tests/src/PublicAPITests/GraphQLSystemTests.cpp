@@ -61,7 +61,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 									"items{groupId name discoverable requiresInvite createdAt}}";
 
 	// Create Space
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	csp::common::String expectedResponse = UniqueSpaceName;
 

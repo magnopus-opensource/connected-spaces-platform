@@ -312,7 +312,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
@@ -384,7 +384,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	InitialiseTestingConnection();
 
@@ -430,7 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	InitialiseTestingConnection();
 
@@ -486,7 +486,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	InitialiseTestingConnection();
 
@@ -561,7 +561,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 
@@ -657,7 +657,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -733,7 +733,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -811,7 +811,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -887,7 +887,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	InitialiseTestingConnection();
 
@@ -947,7 +947,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1054,7 +1054,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1164,7 +1164,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1254,7 +1254,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	InitialiseTestingConnection();
 
@@ -1549,7 +1549,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
@@ -1655,10 +1655,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UsePortalTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	csp::systems::Space Space2;
-	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription2, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space2);
+	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription2, csp::systems::SpaceAttributes::Private, nullptr, Space2);
 
 	csp::common::String PortalSpaceID;
 
@@ -1757,7 +1757,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalThumbnailTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, Source, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
+
+	auto [AddFileSource] = AWAIT_PRE(SpaceSystem, AddSpaceThumbnail, RequestPredicate, Space.Id, Source);
+
+	EXPECT_EQ(AddFileSource.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1842,7 +1846,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1923,7 +1927,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -1998,7 +2002,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConversationComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	const csp::common::String UserName		= "Player 1";
 	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -2241,7 +2245,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConversationComponentMoveTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	{
 
@@ -2381,7 +2385,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AudioComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -2484,7 +2488,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, VideoPlayerComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -2591,7 +2595,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CollisionComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -2684,7 +2688,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UseSplineTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	const csp::common::String UserName		= "Player 1";
 	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -2784,7 +2788,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -2932,7 +2936,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	{
 
@@ -3135,7 +3139,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ExternalLinkComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	{
 
@@ -3241,7 +3245,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ActionHandlerTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -3320,7 +3324,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
@@ -3468,7 +3472,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ImageComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
@@ -3602,7 +3606,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ReflectionComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
 	auto* EntitySystem = Connection->GetSpaceEntitySystem();
@@ -3733,7 +3737,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FogComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -3828,7 +3832,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -4029,7 +4033,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -4094,7 +4098,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);

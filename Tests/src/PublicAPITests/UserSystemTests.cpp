@@ -319,7 +319,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInWithTokenTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 

@@ -86,7 +86,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create collection
 	csp::systems::AssetCollection AssetCollection;
@@ -140,7 +140,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, Space);
 
 	// Create collection
 	csp::systems::AssetCollection AssetCollection;
