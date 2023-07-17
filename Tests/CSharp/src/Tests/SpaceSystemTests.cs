@@ -1150,7 +1150,7 @@ namespace CSPEngine
                 };
                 spaceThumbnail.SetMimeType("model/gltf-binary");
 
-                using var result = spaceSystem.UpdateSpaceThumbnail(space.Id, spaceThumbnail).Result;
+                using var result = spaceSystem.AddSpaceThumbnail(space.Id, spaceThumbnail).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 
@@ -1200,7 +1200,7 @@ namespace CSPEngine
                 };
                 source.SetMimeType("image/png");
 
-                using var result = spaceSystem.UpdateSpaceThumbnailWithBuffer(space.Id, source).Result;
+                using var result = spaceSystem.AddSpaceThumbnailWithBuffer(space.Id, source).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 
@@ -1467,7 +1467,7 @@ namespace CSPEngine
 
             {
                 // A guest shouldn't be able to update the space thumbnail
-                using var result = spaceSystem.UpdateSpaceThumbnail(space.Id, updateSpaceThumbnail).Result;
+                using var result = spaceSystem.AddSpaceThumbnail(space.Id, updateSpaceThumbnail).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
