@@ -2222,17 +2222,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 }
 #endif
 
-// Derived type that allows us to access protected members of SpaceEntitySystem
-struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
-{
-	void ClearEntities()
-	{
-		std::scoped_lock<std::recursive_mutex> EntitiesLocker(*EntitiesLock);
-
-		Entities.Clear();
-	}
-};
-
 // Disabled by default as it can be slow
 #if RUN_MULTIPLAYER_MANYENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
