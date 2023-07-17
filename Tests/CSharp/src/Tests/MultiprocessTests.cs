@@ -181,7 +181,7 @@ namespace CSPEngine
          * facilitate multiplayer testing and uses hardwired creds.
          */
 
-#if true//RUN_MULTIPROCESS_CLIENTELECTIONTEST
+#if RUN_MULTIPROCESS_CLIENTELECTIONTEST
         [Test]
         public static void ClientElectionTest()
         {
