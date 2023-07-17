@@ -16,12 +16,11 @@
 #include "PublicAPITests/UserSystemTestHelpers.h"
 #include "TestHelpers.h"
 
-#include "gtest/gtest.h"
-
-
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-	LoadTestAccountCredentials();
 	testing::InitGoogleTest(&argc, argv);
+
+	LoadTestAccountCredentials();
+
 	return RUN_ALL_TESTS();
 }

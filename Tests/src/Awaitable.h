@@ -19,6 +19,7 @@
 #include <chrono>
 #include <functional>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 
 using namespace std::chrono_literals;

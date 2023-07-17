@@ -4,7 +4,7 @@ import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn,
 import { createSpace, deleteSpace, getSpace, getSpacesByIds, updateSpace } from './spacesystem_tests_helpers.js'
 import { createAsset, createAssetCollection, createBufferAssetDataSource, uploadAssetData } from './assetsystem_tests_helpers.js';
 
-import { freeBuffer, OlympusFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
 import { commonArrayToJSArray } from '../conversion_helpers.js';
 
 
@@ -85,6 +85,8 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
 
 test('MultiplayerTests', 'ManualConnectionTest', async function() {
 
+    console.log("test start")
+
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
@@ -92,13 +94,17 @@ test('MultiplayerTests', 'ManualConnectionTest', async function() {
     const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
     const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
 
+    console.log("about to login")
+
     // Log in
     await logIn(userSystem);
 
-    // Create space
-    const space = await createSpace(spaceSystem, SpaceName, spaceDescription, Systems.SpaceAttributes.Private);
+    console.log("logged in")
 
-    const connection = Multiplayer.MultiplayerConnection.create_spaceId(space.id);
+    // Create space
+    //const space = await createSpace(spaceSystem, SpaceName, spaceDescription, Systems.SpaceAttributes.Private);
+
+    const connection = Multiplayer.MultiplayerConnection.create_spaceId("test");
     const entitySystem = connection.getSpaceEntitySystem();
 
     entitySystem.setEntityCreatedCallback((e) => {});
@@ -130,6 +136,8 @@ test('MultiplayerTests', 'ManualConnectionTest', async function() {
     // Cleanup
     await connection.disconnect();
     connection.delete();
+
+    console.log("test end")
 });
 
 test('MultiplayerTests', 'RunScriptTest', async function() {
@@ -189,7 +197,7 @@ test('MultiplayerTests', 'RunScriptTest', async function() {
     scriptComponent.setScriptSource(scriptText);
     entity.getScript().invoke();
 
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     const err = entity.getScript().hasError();
 
@@ -584,7 +592,7 @@ test('MultiplayerTests', 'DeleteMultipleEntitiesTest', async function() {
     entitySystem.destroyEntity(createdObject2);
     entitySystem.destroyEntity(createdObject3);
     
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Cleanup
 var ok = await spaceSystem.exitSpaceAndDisconnect(connection);
@@ -740,7 +748,7 @@ test('MultiplayerTests', 'DeleteScriptTest', async function() {
     entitySystem.processPendingEntityOperations();
 
     // Tick to attempt to call scripts tick event
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Ensure position is still set to 0
     {
@@ -826,7 +834,7 @@ test('MultiplayerTests', 'DeleteAndChangeComponentTest', async function() {
     entitySystem.processPendingEntityOperations();
     createdObject.delete();
     // Ensure entity update doesn't crash
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
     
     // Cleanup
    var ok = await spaceSystem.exitSpaceAndDisconnect(connection);
@@ -891,7 +899,7 @@ test('MultiplayerTests', 'AddSecondScriptTest', async function() {
     createdObject.queueUpdate();
     entitySystem.processPendingEntityOperations();
 
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Ensure position is set to 0
     {
@@ -915,7 +923,7 @@ test('MultiplayerTests', 'AddSecondScriptTest', async function() {
     entitySystem.processPendingEntityOperations();
 
     // Ensure re-bound script works
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     createdObject.queueUpdate();
     entitySystem.processPendingEntityOperations();
@@ -1797,7 +1805,7 @@ test('MultiplayerTests', 'SplineComponentTest', async function() {
     const splineComponent = Multiplayer.SplineSpaceComponent.fromComponentBase(component);
     createdObject.delete();
 
-    var waypoints = Common.List.ofoly_common_Vector3();  //[[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
+    var waypoints = Common.List.ofcsp_common_Vector3();  //[[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
     waypoints.append(Common.Vector3.create_x_y_z(0, 0, 0));
     waypoints.append(Common.Vector3.create_x_y_z(0, 1000, 0));
     waypoints.append(Common.Vector3.create_x_y_z(0, 2000, 0));
@@ -1869,7 +1877,7 @@ test('MultiplayerTests', 'SplineScriptInterfaceTest', async function() {
     createdObject.queueUpdate();
     entitySystem.processPendingEntityOperations();
 
-    var waypoints = Common.List.ofoly_common_Vector3();  //[[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
+    var waypoints = Common.List.ofcsp_common_Vector3();  //[[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
     waypoints.append(Common.Vector3.create_x_y_z(0, 0, 0));
     waypoints.append(Common.Vector3.create_x_y_z(0, 1000, 0));
     waypoints.append(Common.Vector3.create_x_y_z(0, 2000, 0));
@@ -2129,7 +2137,7 @@ test('MultiplayerTests', 'ConversationComponentTest', async function() {
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.NewMessage)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(conversationId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());
@@ -2617,7 +2625,7 @@ test('MultiplayerTests', 'NetworkEventTest', async function() {
     var eventRecieved = false;
 
     const arg1 = false;
-    const arg2 = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+    const arg2 = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
     connection.listenNetworkEvent("TestEvent", (arg1, arg2) => 
     {
         assert.areEqual(arg2.get(0).getFloat(), 1234);
@@ -2627,7 +2635,7 @@ test('MultiplayerTests', 'NetworkEventTest', async function() {
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_floatValue(1234));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue("TestingString"));
         await connection.sendNetworkEventToClient("TestEvent",array,connection.getClientId());

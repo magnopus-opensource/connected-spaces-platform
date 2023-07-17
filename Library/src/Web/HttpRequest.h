@@ -29,6 +29,8 @@ namespace csp::web
 
 class WebClient;
 
+#pragma push_macro("DELETE")
+#undef DELETE
 enum class ERequestVerb : uint8_t
 {
 	Get	   = 0,
@@ -43,6 +45,8 @@ enum class ERequestVerb : uint8_t
 	DELETE = Delete,
 	HEAD   = Head
 };
+
+#pragma pop_macro("DELETE")
 
 constexpr uint32_t DefaultNumRequestRetries = 4;
 constexpr uint32_t DefaultRetriesDelayInMs	= 100;

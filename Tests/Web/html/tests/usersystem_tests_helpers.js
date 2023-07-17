@@ -3,9 +3,9 @@ import { assert, pushCleanupFunction } from '../test_framework.js';
 import { Services, Systems } from '../olympus_foundation.js';
 
 
-export const DEFAULT_LOGIN_EMAIL = "olyservice.WASM@magnopus.com";
-export const ALT_LOGIN_EMAIL = "olyservice.WASM+1@magnopus.com";
-export const DEFAULT_LOGIN_PASSWORD = "nQ30ZE78G*DmEiEk";
+export const DEFAULT_LOGIN_EMAIL = "matthew.voisey@magnopus.com";
+export const ALT_LOGIN_EMAIL = "matthew.voisey+1@magnopus.com";
+export const DEFAULT_LOGIN_PASSWORD = "Rew1nd2022!";
 
 
 /**
@@ -34,6 +34,10 @@ export async function logOut(userSystem) {
  * @returns {Promise<?string>} the userId of the logged in account
  */
 export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
+    console.log("testttt")
+    console.log(email)
+    console.log(password)
+    
     const result = await userSystem.login('', email, password);
     const resCode = result.getResultCode();
 

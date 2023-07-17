@@ -49,6 +49,7 @@ csp::common::String AlternativeLoginPassword;
 
 void LoadTestAccountCredentials()
 {
+#ifndef CSP_WASM
 	if (!std::filesystem::exists("test_account_creds.txt"))
 	{
 		LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
@@ -73,6 +74,13 @@ void LoadTestAccountCredentials()
 	DefaultLoginPassword	 = _DefaultLoginPassword.c_str();
 	AlternativeLoginEmail	 = _AlternativeLoginEmail.c_str();
 	AlternativeLoginPassword = _AlternativeLoginPassword.c_str();
+
+#else
+	DefaultLoginEmail		 = "matthew.voisey@magnopus.com";
+	DefaultLoginPassword	 = "Rew1nd2022!";
+	AlternativeLoginEmail	 = "matthew.voisey+1@magnopus.com";
+	AlternativeLoginPassword = "Rew1nd2022!";
+#endif
 }
 
 void LogIn(csp::systems::UserSystem* UserSystem,
