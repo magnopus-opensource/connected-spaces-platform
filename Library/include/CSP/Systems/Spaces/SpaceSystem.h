@@ -113,18 +113,27 @@ public:
 	/// @brief Creates a new space.
 	/// @param Name csp::common::String : name for the new space
 	/// @param Description csp::common::String : description for the new space
-	/// @param Type csp::systems::SpaceType : type of the new space
-	/// @param InviteUsers csp::common::Array<csp::systems::InviteUserRoleInfo> : optional array of users to be invited into the space
+	/// @param Attributes SpaceAttributes : type of the new space
 	/// @param Metadata csp::common::String : metadata information for the new space
-	/// @param FileThumbnail csp::systems::FileAssetDataSource : optional thumbnail image for the new space
 	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateSpace(const csp::common::String& Name,
 									  const csp::common::String& Description,
 									  SpaceAttributes Attributes,
-									  const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
 									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-									  const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
 									  SpaceResultCallback Callback);
+
+	/// @brief Updates the name and/or the description of a Space
+	/// @param Space Space : the Space to update
+	/// @param Name csp::common::Optional<csp::common::String> : if a new name is provided it will be used to update the Space name
+	/// @param Description csp::common::Optional<csp::common::String> : if a new description is provided it will be used to update the Space
+	/// description
+	/// @param Type csp::common::Optional<csp::systems::SpaceType> : if a new type is provided it will be used to update the Space type
+	/// @param Callback BasicSpaceResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void UpdateSpace(const csp::common::String& SpaceId,
+									  const csp::common::Optional<csp::common::String>& Name,
+									  const csp::common::Optional<csp::common::String>& Description,
+									  const csp::common::Optional<SpaceAttributes>& Type,
+									  BasicSpaceResultCallback Callback);
 	/// @brief Deletes a given space and the corresponding UserService group.
 	/// @param Space Space : space to delete
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes

@@ -352,9 +352,7 @@ CSP_EVENT void SpaceSystem::SetScriptSystemReadyCallback(csp::multiplayer::Space
 void SpaceSystem::CreateSpace(const String& Name,
 							  const String& Description,
 							  SpaceAttributes Attributes,
-							  const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
-							  const Map<String, String>& Metadata,
-							  const Optional<FileAssetDataSource>& Thumbnail,
+							  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 							  SpaceResultCallback Callback)
 {
 	FOUNDATION_PROFILE_SCOPED();
@@ -367,9 +365,65 @@ void SpaceSystem::CreateSpace(const String& Name,
 
 			return;
 		}
+
+		const auto& Space = CreateSpaceResult.GetSpace();
+
+		NullResultCallback AddMetadataCallback = [=](const NullResult& _AddMetadataResult)
+		{
+			SpaceResult InternalResult(_AddMetadataResult);
+
+			if (_AddMetadataResult.GetResultCode() == csp::services::EResultCode::Failed)
+			{
+				// Delete the space as it can be considered broken without any space metadata
+				DeleteSpace(Space.Id, nullptr);
+			}
+
+			if (_AddMetadataResult.GetResultCode() != csp::services::EResultCode::Success)
+			{
+				Callback(InternalResult);
+
+				return;
+			}
+		};
+
+		AddMetadata(Space.Id, Metadata, AddMetadataCallback);
 	};
 
 	::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
+}
+
+void SpaceSystem::UpdateSpace(const String& SpaceId,
+							  const Optional<String>& Name,
+							  const Optional<String>& Description,
+							  const Optional<SpaceAttributes>& Attributes,
+							  BasicSpaceResultCallback Callback)
+{
+	FOUNDATION_PROFILE_SCOPED();
+
+	auto LiteGroupInfo = std::make_shared<chs::GroupLiteDto>();
+
+	if (Name.HasValue())
+	{
+		LiteGroupInfo->SetName(*Name);
+	}
+
+	if (Description.HasValue())
+	{
+		LiteGroupInfo->SetDescription(*Description);
+	}
+
+	if (Attributes.HasValue())
+	{
+		LiteGroupInfo->SetDiscoverable(HasFlag(*Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
+		LiteGroupInfo->SetRequiresInvite(HasFlag(*Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+
+		LiteGroupInfo->SetAutoModerator(false);
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= GroupAPI->CreateHandler<BasicSpaceResultCallback, BasicSpaceResult, void, chs::GroupLiteDto>(Callback, nullptr);
+
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdLitePut(SpaceId, LiteGroupInfo, ResponseHandler);
 }
 
 void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback)
