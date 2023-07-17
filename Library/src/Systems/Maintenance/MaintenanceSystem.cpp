@@ -53,6 +53,7 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 			Callback(MaintenanceInfoResult::Invalid());
 		}
 	};
+
 	csp::services::ResponseHandlerPtr MaintenanceResponseHandler
 		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
 																													  nullptr);

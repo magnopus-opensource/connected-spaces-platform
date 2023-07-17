@@ -64,15 +64,10 @@ public:
 	/// @brief Enter a space.
 	/// @param Space Space : space to enter into
 	/// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, bool AutoConnect, EnterSpaceResultCallback Callback);
+	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
 
 	/// @brief Send exit current space event to EventSystem.
 	void ExitSpace();
-
-	/// @brief Send exit current space event to EventSystem.
-	/// @param Connection csp::multiplayer::MultiplayerConnection : optional Connection to disconnect MultiplayerConnection
-	/// @param Callback BoolCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void ExitSpaceAndDisconnect(csp::multiplayer::MultiplayerConnection* Connection, BoolCallback Callback);
 
 	/// @brief Get whether user is currently in a space.
 	/// @return Result of whether they are in a Space.
@@ -81,26 +76,6 @@ public:
 	/// @brief Get the user's current space.
 	/// @return The space data object the user is currently in
 	const Space& GetCurrentSpace() const;
-
-	/**
-	 * @brief Sets a callback to be executed when an entity is remotely created.
-	 * Only one callback may be registered, calling this function again will override whatever was previously set.
-	 * If this is not set, some patch functions may fail.
-	 * @param Callback EntityCreatedCallback : the callback to execute.
-	 */
-	CSP_EVENT void SetEntityCreatedCallback(csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback);
-
-	/*
-	 * @brief Sets a callback to be executed when all existing entities have been retrieved after entering a space.
-	 * @param Callback CallbackHandler : the callback to execute.
-	 */
-	CSP_EVENT void SetInitialEntitiesRetrievedCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback);
-
-	/*
-	 * @brief Sets a callback to be executed when the script system is ready to run scripts.
-	 * @param Callback CallbackHandler : the callback to execute.
-	 */
-	CSP_EVENT void SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback);
 
 	/** @} */
 
@@ -346,14 +321,8 @@ private:
 
 	void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
-	void SetConnectionCallbacks(csp::multiplayer::MultiplayerConnection* Connection);
-
 	csp::services::ApiBase* GroupAPI;
 	Space CurrentSpace;
-
-	csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback EntityCreatedCallback;
-	csp::multiplayer::SpaceEntitySystem::CallbackHandler InitialEntitiesRetrievedCallback;
-	csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
 };
 
 } // namespace csp::systems

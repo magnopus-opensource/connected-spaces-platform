@@ -25,6 +25,11 @@ namespace csp::systems
 
 bool MaintenanceInfo::IsInsideWindow() const
 {
+	if (StartDateTimestamp.IsEmpty() || EndDateTimestamp.IsEmpty())
+	{
+		return false;
+	}
+
 	const auto TimeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
 	return (csp::common::DateTime(StartDateTimestamp).GetTimePoint() <= TimeNow && csp::common::DateTime(EndDateTimestamp).GetTimePoint() >= TimeNow);
 }

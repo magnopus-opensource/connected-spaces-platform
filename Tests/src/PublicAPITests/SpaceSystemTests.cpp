@@ -1131,13 +1131,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Ensure alt test account can join space
 	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
 
-		auto [Ok] = AWAIT(SpaceSystem, ExitSpaceAndDisconnect, EnterResult.GetConnection());
-
-		ASSERT_TRUE(Ok);
+		SpaceSystem->ExitSpace();
 	}
 
 	// Log out and log in again using default test account
@@ -1700,7 +1698,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	String AltUserId;
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, false);
+	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 	ASSERT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
@@ -1715,7 +1713,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	// Exit and re-enter space to verify its OK to always add self to public space
 	SpaceSystem->ExitSpace();
 	{
-		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, false);
+		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
@@ -2013,13 +2011,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, Space);
 
 	{
-		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, true);
+		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-		auto [Ok] = AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Result.GetConnection());
-
-		EXPECT_TRUE(Ok);
+		SpaceSystem->ExitSpace();
 	}
 
 	LogOut(UserSystem);
@@ -2028,7 +2024,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	{
-		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, true);
+		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 	}
@@ -2070,7 +2066,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	{
-		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, true);
+		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 	}
@@ -2129,13 +2125,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	// Note the space is now out of date and does not have the new user in it's lists
 
 	{
-		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id, true);
+		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-		auto [Ok] = AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Result.GetConnection());
-
-		EXPECT_TRUE(Ok);
+		SpaceSystem->ExitSpace();
 	}
 
 	LogOut(UserSystem);

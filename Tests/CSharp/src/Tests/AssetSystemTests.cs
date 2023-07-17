@@ -62,7 +62,7 @@ namespace CSPEngine
 
         static void GetAssetCollectionsByCriteria(Systems.AssetSystem assetSystem, Systems.Space space, string parentId, Systems.EAssetCollectionType? type, Common.Array<string>? tags, Common.Array<string>? names, int? ResultsSkipNumber, int? ResultsMaxNumber, out Common.Array<Systems.AssetCollection> assetCollections)
         {
-            using var result = assetSystem.GetAssetCollectionsByCriteria(space.Id, parentId, type, tags, names, ResultsSkipNumber, ResultsMaxNumber).Result;
+            using var result = assetSystem.GetAssetCollectionsByCriteria(space?.Id, parentId, type, tags, names, ResultsSkipNumber, ResultsMaxNumber).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);

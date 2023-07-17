@@ -1,8 +1,10 @@
 using System.Threading;
+
 using Common = Csp.Common;
 using Services = Csp.Services;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
+
 using CSharpTests;
 using static CSharpTests.TestHelper;
 
@@ -11,7 +13,6 @@ namespace CSPEngine
 {
     static class ConversationSystemTests
     {
-
         public static Multiplayer.MessageInfo AddMessageToConversation(Multiplayer.ConversationSystem convSystem, string ConversationId, string SenderDisplayName, string Message)
         {
             var result = convSystem.AddMessageToConversation(ConversationId, SenderDisplayName, Message).Result;
@@ -21,11 +22,12 @@ namespace CSPEngine
             return result.GetMessageInfo();
         }
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_TWO_CONVERSATIONS_TEST
         [Test]
         public static void TwoConversationsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _,out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -36,8 +38,6 @@ namespace CSPEngine
             // Create space
             using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
 
-            
-
             // Add the second test user to the space
             {
                 using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true).Result;
@@ -45,13 +45,35 @@ namespace CSPEngine
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
-            
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
+            var entitySystem = connection.GetSpaceEntitySystem();
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
 
             var conversationSystem = connection.GetConversationSystem();
-            
+
             string firstConversationId;
             string secondConversationId;
 
@@ -64,30 +86,33 @@ namespace CSPEngine
             // Add message to the first conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
+
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
 
                 using var createdMessageInfo = AddMessageToConversation(conversationSystem, newConversationId.GetValue(), defaultTestUserDisplayName, defaultConversationMessage);
 
@@ -97,8 +122,8 @@ namespace CSPEngine
 
                 firstConversationId = createdMessageInfo.ConversationId;
 
-                LogDebug($"Conversation created. Id: { firstConversationId }");
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { defaultTestUserDisplayName } to conversation Id: { firstConversationId }");
+                LogDebug($"Conversation created. Id: {firstConversationId}");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {defaultTestUserDisplayName} to conversation Id: {firstConversationId}");
             }
 
             // add message to the first conversation
@@ -112,7 +137,7 @@ namespace CSPEngine
 
                 firstMessageIdToBeDeleted = createdMessageInfo.Id;
 
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { defaultTestUserDisplayName } to conversation Id: { firstConversationId }");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {defaultTestUserDisplayName} to conversation Id: {firstConversationId}");
             }
 
             // add message to the first conversation
@@ -126,7 +151,7 @@ namespace CSPEngine
 
                 firstConversationId = createdMessageInfo.ConversationId;
 
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { defaultTestUserDisplayName } to conversation Id: { firstConversationId }");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {defaultTestUserDisplayName} to conversation Id: {firstConversationId}");
             }
 
             UserSystemTests.LogOut(userSystem);
@@ -146,7 +171,7 @@ namespace CSPEngine
                 Assert.AreEqual(createdMessageInfo.UserDisplayName, alternativeTestUserDisplayName);
                 Assert.AreEqual(createdMessageInfo.ConversationId, firstConversationId);
 
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { alternativeTestUserDisplayName } to conversation Id: { firstConversationId }");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {alternativeTestUserDisplayName} to conversation Id: {firstConversationId}");
             }
 
             {
@@ -157,37 +182,40 @@ namespace CSPEngine
                 Assert.AreEqual(createdMessageInfo.UserDisplayName, alternativeTestUserDisplayName);
                 Assert.AreEqual(createdMessageInfo.ConversationId, firstConversationId);
 
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { alternativeTestUserDisplayName } to conversation Id: { firstConversationId }");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {alternativeTestUserDisplayName} to conversation Id: {firstConversationId}");
             }
 
             // Create a new conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
-                Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, altUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, alternativeTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
 
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
+                Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, altUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, alternativeTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+
                 using var createdMessageInfo = AddMessageToConversation(conversationSystem, newConversationId.GetValue(), alternativeTestUserDisplayName, defaultConversationMessage);
 
                 Assert.AreEqual(createdMessageInfo.UserID, altUserId);
@@ -197,8 +225,8 @@ namespace CSPEngine
                 secondConversationId = createdMessageInfo.ConversationId;
                 secondMessageIdToBeDeleted = createdMessageInfo.Id;
 
-                LogDebug($"Conversation created. Id: { secondConversationId }");
-                LogDebug($"Message with Id: { createdMessageInfo.Id } was added by { alternativeTestUserDisplayName } to conversation Id: { secondConversationId }");
+                LogDebug($"Conversation created. Id: {secondConversationId}");
+                LogDebug($"Message with Id: {createdMessageInfo.Id} was added by {alternativeTestUserDisplayName} to conversation Id: {secondConversationId}");
             }
 
             // Retrieve all messages from first conversation
@@ -276,8 +304,18 @@ namespace CSPEngine
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
+
+            // Disconnect
+            {
+                var ok = connection.Disconnect().Result;
+
                 Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
+
             UserSystemTests.LogOut(userSystem);
 
             // Log in with the space creator in order to delete it
@@ -309,14 +347,35 @@ namespace CSPEngine
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-            
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
+            var entitySystem = connection.GetSpaceEntitySystem();
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
 
             var conversationSystem = connection.GetConversationSystem();
-
-
 
             string conversationId;
             string firstMessageId;
@@ -327,33 +386,36 @@ namespace CSPEngine
 
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
-                Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
 
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
+                Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
 
                 using var createdMessageInfo = AddMessageToConversation(conversationSystem, newConversationId.GetValue(), defaultTestUserDisplayName, defaultConversationMessage);
+
                 conversationId = createdMessageInfo.ConversationId;
                 firstMessageId = createdMessageInfo.Id;
             }
@@ -476,8 +538,15 @@ namespace CSPEngine
             }
 
             // Cleanup
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
+            {
+                var ok = connection.Disconnect().Result;
+
                 Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
 
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
             UserSystemTests.LogOut(userSystem);
@@ -497,15 +566,38 @@ namespace CSPEngine
             var defaultTestUserId = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create space
-            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
-            
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
+            var entitySystem = connection.GetSpaceEntitySystem();
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
 
             var conversationSystem = connection.GetConversationSystem();
 
-            string conversationId; 
+            string conversationId;
             string firstMessageId;
 
             var defaultTestUserDisplayName = UserSystemTests.GetFullProfileByUserId(userSystem, defaultTestUserId).DisplayName;
@@ -525,16 +617,18 @@ namespace CSPEngine
                 Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
                 Assert.IsFalse(result.GetConversationInfo().Edited);
                 Assert.IsFalse(result.GetConversationInfo().Resolved);
-                Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
@@ -549,23 +643,28 @@ namespace CSPEngine
                 Assert.AreEqual(newConversationId.GetValue(), conversationId);
             }
 
+            // Cleanup
             {
                 var result = conversationSystem.DeleteConversation(conversationId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
+            {
+                var ok = connection.Disconnect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
+
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
-
-            // Cleanup
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-
-            Assert.IsTrue(ok);
-
             UserSystemTests.LogOut(userSystem);
         }
 #endif
-        
+
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_NEWMESSAGE_NETWORKEVENT_TEST
         [Test]
         public static void ConversationNewMessageCallbackTest()
@@ -584,13 +683,32 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
 
             // Setup Asset callback
             var gotMessage = false;
@@ -615,33 +733,31 @@ namespace CSPEngine
 
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
 
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
 
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
 
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
+                var defaultTransform = new Multiplayer.SpaceTransform();
 
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
-                
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+
                 conversationId = newConversationId.GetValue();
             }
 
@@ -656,7 +772,7 @@ namespace CSPEngine
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.NewMessage);
                 array[1] = new Multiplayer.ReplicatedValue(conversationId);
-                connection.SendNetworkEventToClient("ConversationSystem",array,connection.GetClientId());
+                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -669,22 +785,30 @@ namespace CSPEngine
                 elapsed += 50;
             }
 
+            Assert.IsTrue(gotMessage);
+
+            // Cleanup
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
-            Assert.IsTrue(gotMessage);
+            {
+                var ok = connection.Disconnect().Result;
 
-            // Cleanup
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
                 Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
         }
 #endif
-        
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETEMESSAGE_NETWORKEVENT_TEST
-[Test]
+
+        // Disabling because it's written in a way that will never work. We will always get notifications about new messages before the other ones...
+#if false //RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETEMESSAGE_NETWORKEVENT_TEST
+        [Test]
         public static void ConversationDeleteMessageCallbackTest()
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
@@ -701,84 +825,109 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
 
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
 
             // Setup Asset callback
             var gotMessage = false;
             var conversationId = "";
             var messageId = "";
-            
+
             var conversationSystem = connection.GetConversationSystem();
 
             // Create conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
+
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+
                 conversationId = newConversationId.GetValue();
             }
 
             // Add message
             {
                 using var result = conversationSystem.AddMessageToConversation(conversationId, "Test", "test").Result;
-                
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+
                 messageId = result.GetMessageInfo().Id;
             }
-            
+
             connection.OnConversationSystem += (s, p) =>
             {
                 if (gotMessage)
                 {
                     return;
                 }
+
                 Assert.AreEqual(p.MessageType, Multiplayer.ConversationMessageType.DeleteMessage);
                 Assert.AreEqual(p.MessageValue, messageId);
 
                 gotMessage = true;
             };
-            
+
             // Delete message
             {
-                using var result = conversationSystem.DeleteConversation(messageId).Result;
-                
+                using var result = conversationSystem.DeleteMessage(messageId).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-            
+
             {
                 // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.DeleteMessage);
                 array[1] = new Multiplayer.ReplicatedValue(messageId);
-                connection.SendNetworkEventToClient("ConversationSystem",array,connection.GetClientId());
+                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -791,22 +940,30 @@ namespace CSPEngine
                 elapsed += 50;
             }
 
+            Assert.IsTrue(gotMessage);
+
+            // Clean up
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
-            Assert.IsTrue(gotMessage);
+            {
+                var ok = connection.Disconnect().Result;
 
-            // Cleanup
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
                 Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
 
         }
 #endif
-        
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETECONVERSATION_NETWORKEVENT_TEST
+
+        // Disabling because it's written in a way that will never work. We will always get notifications about new messages before the other ones...
+#if false // RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_DELETECONVERSATION_NETWORKEVENT_TEST
         [Test]
         public static void ConversationNewConversationCallbackTest()
         {
@@ -824,15 +981,33 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            // Setup Asset callback
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            // Setup Asset callback
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var gotMessage = false;
             var conversationId = "";
 
@@ -841,30 +1016,34 @@ namespace CSPEngine
             // Create conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
+
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+
                 conversationId = newConversationId.GetValue();
             }
 
@@ -881,6 +1060,7 @@ namespace CSPEngine
                 {
                     return;
                 }
+
                 Assert.AreEqual(p.MessageType, Multiplayer.ConversationMessageType.DeleteConversation);
                 Assert.AreEqual(p.MessageValue, conversationId);
 
@@ -892,13 +1072,13 @@ namespace CSPEngine
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-            
+
             {
                 // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.DeleteConversation));
                 array[1] = new Multiplayer.ReplicatedValue(conversationId);
-                connection.SendNetworkEventToClient("ConversationSystem",array,connection.GetClientId());
+                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -910,14 +1090,23 @@ namespace CSPEngine
                 Thread.Sleep(50);
                 elapsed += 50;
             }
+
             Assert.IsTrue(gotMessage);
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
+
+            // Disconnect
+            {
+                var ok = connection.Disconnect().Result;
+
                 Assert.IsTrue(ok);
+            }
 
+            connection.Dispose();
 
+            spaceSystem.ExitSpace();
         }
 #endif
-        #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_UPDATE_INFO_TEST
+
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATION_UPDATE_INFO_TEST
         [Test]
         public static void ConversationUpdateInfoTest()
         {
@@ -933,14 +1122,35 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-OKO");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-OKO");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);            
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
-            // Setup Asset callback
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
+            var entitySystem = connection.GetSpaceEntitySystem();
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var gotMessage = false;
             var conversationId = "";
 
@@ -950,6 +1160,7 @@ namespace CSPEngine
                 {
                     return;
                 }
+
                 Assert.AreEqual(p.MessageType, Multiplayer.ConversationMessageType.ConversationInformation);
                 Assert.AreEqual(p.MessageValue, conversationId);
 
@@ -961,36 +1172,41 @@ namespace CSPEngine
             // Create conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
+
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
-                    Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
-                    Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                    Assert.IsFalse(result.GetConversationInfo().Edited);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                }
-                
+
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetConversationInfo().ConversationId, newConversationId.GetValue());
+                Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
+                Assert.AreEqual(result.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+                Assert.IsFalse(result.GetConversationInfo().Edited);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+
+
                 conversationId = newConversationId.GetValue();
             }
 
             {
                 using var result = conversationSystem.GetConversationInformation(conversationId).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.AreEqual(result.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
@@ -998,29 +1214,33 @@ namespace CSPEngine
                 Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
                 Assert.IsFalse(result.GetConversationInfo().Edited);
                 Assert.IsFalse(result.GetConversationInfo().Resolved);
-                Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
+
+                var defaultTransform = new Multiplayer.SpaceTransform();
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-                
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-                
+
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
             }
 
             {
-                Multiplayer.ConversationInfo newData = new Multiplayer.ConversationInfo();
-                Multiplayer.SpaceTransform cameraTransformValue = new Multiplayer.SpaceTransform(
-                    new Common.Vector3(1f, 1f, 1f), new Common.Vector4(1f, 1f, 1f, 1f), new Common.Vector3(1f, 1f, 1f));
+                using var newData = new Multiplayer.ConversationInfo();
+                using var cameraTransformValue = new Multiplayer.SpaceTransform(Common.Vector3.One(), Common.Vector4.One(), Common.Vector3.One());
+
                 newData.Message = "TestMessage1";
                 newData.Resolved = true;
                 newData.CameraPosition = cameraTransformValue;
+
                 using var result = conversationSystem.SetConversationInformation(conversationId, newData).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.AreEqual(result.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(result.GetConversationInfo().UserID, defaultTestUserId);
@@ -1047,14 +1267,14 @@ namespace CSPEngine
             var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
             array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.ConversationInformation));
             array[1] = new Multiplayer.ReplicatedValue(conversationId);
-            connection.SendNetworkEventToClient("ConversationSystem",array,connection.GetClientId());
-            
+            connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-            
+
             // Wait for message
             const int WAIT_FOR_TEST_TIMEOUT_LIMIT_MS = 10000;   // 10 seconds
             var elapsed = 0;
@@ -1064,15 +1284,24 @@ namespace CSPEngine
                 Thread.Sleep(50);
                 elapsed += 50;
             }
+
             Assert.IsTrue(gotMessage);
-                            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
+
+            // Disconnect
+            {
+                var ok = connection.Disconnect().Result;
+
                 Assert.IsTrue(ok);
+            }
 
+            connection.Dispose();
 
+            spaceSystem.ExitSpace();
         }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_MESSAGE_UPDATE_INFO_TEST
+        // Disabling because it's written in a way that will never work. We will always get notifications about new messages before the other ones...
+#if false // RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_MESSAGE_UPDATE_INFO_TEST
         [Test]
         public static void MessageUpdateInfoTest()
         {
@@ -1088,12 +1317,34 @@ namespace CSPEngine
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-OKO");
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-            // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
-            // Setup Asset callback
+
+            // Add self to space and fire EnterSpace event
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+            }
+
+            var connection = new Multiplayer.MultiplayerConnection(space.Id);
+            var entitySystem = connection.GetSpaceEntitySystem();
+
+            entitySystem.OnEntityCreated += (s, e) => { };
+
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var gotMessage = false;
             var conversationId = "";
             var messageId = "";
@@ -1104,53 +1355,47 @@ namespace CSPEngine
                 {
                     return;
                 }
+
                 Assert.AreEqual(p.MessageType, Multiplayer.ConversationMessageType.MessageInformation);
                 Assert.AreEqual(p.MessageValue, messageId);
 
                 gotMessage = true;
-                                var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-                Assert.IsTrue(ok);
-
             };
-            
+
             var conversationSystem = connection.GetConversationSystem();
 
             // Create conversation
             {
                 var newConversationId = conversationSystem.CreateConversation("TestMessage").Result;
+
                 Assert.AreEqual(newConversationId.GetResultCode(), Services.EResultCode.Success);
-                {
-                    using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue())
-                        .Result;
-                    Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
-                    Assert.IsFalse(result.GetConversationInfo().Resolved);
-                    Multiplayer.SpaceTransform defaultTransform = new Multiplayer.SpaceTransform();
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X,
-                        defaultTransform.Position.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y,
-                        defaultTransform.Position.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z,
-                        defaultTransform.Position.Z);
 
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W,
-                        defaultTransform.Rotation.W);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X,
-                        defaultTransform.Rotation.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y,
-                        defaultTransform.Rotation.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z,
-                        defaultTransform.Rotation.Z);
+                using var result = conversationSystem.GetConversationInformation(newConversationId.GetValue()).Result;
 
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
-                    Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
-                }
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.IsFalse(result.GetConversationInfo().Resolved);
+
+                using var defaultTransform = new Multiplayer.SpaceTransform();
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
+
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
+                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+                Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
+
                 conversationId = newConversationId.GetValue();
             }
-            
+
             {
-                using var result = conversationSystem.AddMessageToConversation(conversationId,"test","test").Result;
+                using var result = conversationSystem.AddMessageToConversation(conversationId, "test", "test").Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 
@@ -1159,14 +1404,17 @@ namespace CSPEngine
 
             {
                 using var result = conversationSystem.GetMessageInformation(messageId).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsFalse(result.GetMessageInfo().Edited);
             }
 
             {
-                Multiplayer.MessageInfo newData = new Multiplayer.MessageInfo();
+                using var newData = new Multiplayer.MessageInfo();
                 newData.Message = "newTest";
+
                 using var result = conversationSystem.SetMessageInformation(messageId, newData).Result;
+
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
                 Assert.IsTrue(result.GetMessageInfo().Edited);
                 Assert.AreEqual(newData.Message, result.GetMessageInfo().Message);
@@ -1177,14 +1425,14 @@ namespace CSPEngine
             var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
             array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.MessageInformation));
             array[1] = new Multiplayer.ReplicatedValue(messageId);
-            connection.SendNetworkEventToClient("ConversationSystem",array,connection.GetClientId());
+            connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
 
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
-            
+
             // Wait for message
             const int WAIT_FOR_TEST_TIMEOUT_LIMIT_MS = 10000;   // 10 seconds
             var elapsed = 0;
@@ -1196,10 +1444,17 @@ namespace CSPEngine
             }
 
             Assert.IsTrue(gotMessage);
-            var ok = spaceSystem.ExitSpaceAndDisconnect(connection).Result;
-            Assert.IsTrue(ok);
 
-            // Cleanup
+            // Disconnect
+            {
+                var ok = connection.Disconnect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            connection.Dispose();
+
+            spaceSystem.ExitSpace();
         }
 #endif
     }
