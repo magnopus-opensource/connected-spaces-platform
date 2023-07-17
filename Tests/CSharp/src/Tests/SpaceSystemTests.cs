@@ -47,10 +47,26 @@ namespace CSPEngine
                 };
             }
 
-            using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
+            using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, testMetadata).Result;
             var resCode = result.GetResultCode();
-
+            
             Assert.AreEqual(resCode, Services.EResultCode.Success);
+            
+            if (inviteUsers != null)
+            {
+                using var inviteResult = spaceSystem.BulkInviteToSpace(result.GetSpace().Id,inviteUsers).Result;
+                var inviteResCode = result.GetResultCode();
+            
+                Assert.AreEqual(inviteResCode, Services.EResultCode.Success);
+            }
+
+            if (thumbnail != null)
+            {
+                using var thumbnailResult = spaceSystem.AddSpaceThumbnail(result.GetSpace().Id, thumbnail).Result;
+                var thumbnailResCode = result.GetResultCode();
+
+                Assert.AreEqual(thumbnailResCode, Services.EResultCode.Success);
+            }
 
             var space = result.GetSpace();
             LogDebug($"Space created (Id: {space.Id}, Name: {space.Name})");
@@ -75,11 +91,24 @@ namespace CSPEngine
                 testMetadata["site"] = "Void";
             }
 
-            using var result = spaceSystem.CreateSpaceWithBuffer(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
+            using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, testMetadata).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);
 
+            if (inviteUsers != null)
+            {
+                using var inviteResult = spaceSystem.BulkInviteToSpace(result.GetSpace().Id,inviteUsers).Result;
+                var inviteResCode = result.GetResultCode();
+            
+                Assert.AreEqual(inviteResCode, Services.EResultCode.Success);
+            }
+            
+            using var thumbnailResult = spaceSystem.AddSpaceThumbnailWithBuffer(result.GetSpace().Id,thumbnail).Result;
+            var thumbnailResCode = result.GetResultCode();
+            
+            Assert.AreEqual(thumbnailResCode, Services.EResultCode.Success);
+            
             var space = result.GetSpace();
             LogDebug($"Space created (Id: {space.Id}, Name: {space.Name})");
 

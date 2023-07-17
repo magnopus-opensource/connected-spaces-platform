@@ -376,12 +376,14 @@ void SpaceSystem::CreateSpace(const String& Name,
 			{
 				// Delete the space as it can be considered broken without any space metadata
 				DeleteSpace(Space.Id, nullptr);
+				Callback(InternalResult);
+				return;
 			}
 
-			if (_AddMetadataResult.GetResultCode() != csp::services::EResultCode::Success)
+			if (_AddMetadataResult.GetResultCode() == csp::services::EResultCode::Success)
 			{
+				InternalResult.SetSpace(CreateSpaceResult.GetSpace());
 				Callback(InternalResult);
-
 				return;
 			}
 		};
@@ -600,8 +602,25 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const Array<InviteUse
 		GroupInvites.push_back(GroupInvite);
 	}
 
+	NullResultCallback BulkInviteCallback = [=](const NullResult& _BulkInviteResult)
+	{
+		SpaceResult InternalResult(_BulkInviteResult);
+
+		if (_BulkInviteResult.GetResultCode() == csp::services::EResultCode::Failed)
+		{
+			Callback(InternalResult);
+
+			return;
+		}
+
+		if (_BulkInviteResult.GetResultCode() == csp::services::EResultCode::Success)
+		{
+			Callback(InternalResult);
+		}
+	};
+
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
+		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(BulkInviteCallback,
 																								nullptr,
 																								csp::web::EResponseCodes::ResponseNoContent);
 
@@ -1439,6 +1458,81 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 			else
 			{
 				NullResult Result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
+				Callback(Result);
+			}
+		}
+	};
+
+	GetSpace(SpaceId, GetSpaceCallback);
+}
+
+void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
+										 const csp::common::Optional<GeoLocation>& Location,
+										 const csp::common::Optional<float>& Orientation,
+										 const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
+										 SpaceGeoLocationResultCallback Callback)
+{
+
+	SpaceGeoLocationResultCallback GetSpaceGeoLocationCallback = [=](const SpaceGeoLocationResult& GetGeoLocationResult)
+	{
+		if (GetGeoLocationResult.GetResultCode() == csp::services::EResultCode::Failed)
+		{
+			Callback(GetGeoLocationResult);
+		}
+		else if (GetGeoLocationResult.GetResultCode() == csp::services::EResultCode::Success)
+		{
+			auto& SystemsManager	= csp::systems::SystemsManager::Get();
+			auto* POIInternalSystem = static_cast<PointOfInterestInternalSystem*>(SystemsManager.GetPointOfInterestSystem());
+
+			if (GetGeoLocationResult.HasGeoLocation)
+			{
+				POIInternalSystem
+					->UpdateSpaceGeoLocation(SpaceId, GetGeoLocationResult.GetSpaceGeoLocation().Id, Location, Orientation, GeoFence, Callback);
+			}
+			else
+			{
+				POIInternalSystem->AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
+			}
+		}
+	};
+
+	// First refresh the space to ensure the user has access to the space
+	SpaceResultCallback GetSpaceCallback = [=](const SpaceResult& GetSpaceResult)
+	{
+		if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Failed)
+		{
+			SpaceGeoLocationResult Result(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
+			Callback(Result);
+		}
+		else if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Success)
+		{
+			const auto RefreshedSpace = GetSpaceResult.GetSpace();
+
+			const auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+
+			// First check if the user is the owner
+			bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
+
+			// If the user is not the owner check are they a moderator
+			if (!UserCanModifySpace)
+			{
+				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
+				{
+					if (RefreshedSpace.ModeratorIds[i] == UserId)
+					{
+						UserCanModifySpace = true;
+						break;
+					}
+				}
+			}
+
+			if (UserCanModifySpace)
+			{
+				GetSpaceGeoLocationInternal(RefreshedSpace.Id, GetSpaceGeoLocationCallback);
+			}
+			else
+			{
+				SpaceGeoLocationResult Result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 				Callback(Result);
 			}
 		}

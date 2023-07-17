@@ -267,15 +267,16 @@ public:
 	/// @param @param SpaceId csp::common::String : the id of the space for which the thumbnail added
 	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	void AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void
+		AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
 
 	/// @brief Adds a thumbnail to a space using a BufferAssetDataSource.
 	/// @param SpaceId csp::common::String : the id of the space for which the thumbnail added
 	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	void AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId,
-									 const csp::systems::BufferAssetDataSource& ImageDataSource,
-									 NullResultCallback Callback);
+	CSP_ASYNC_RESULT void AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId,
+													  const csp::systems::BufferAssetDataSource& ImageDataSource,
+													  NullResultCallback Callback);
 
 	/// @brief Adds metadata to a space.
 	/// @param SpaceId csp::common::String : the id of the space for which the Metadata is being added
@@ -319,7 +320,18 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback);
 
-	///@}
+	/// @brief Add or update a GeoLocation for the space
+	/// @param SpaceId csp::common::String : Id of the space to udpate
+	/// @param Location csp::common::Optional<GeoLocation> : The latitude and longitude of the geo location
+	/// @param Orientation csp::common::Optional<double> : The compass direction the space points. Must be between 0 (north) and 360 (inclusive)
+	/// @param GeoFence csp::common::Optional<csp::common::Array<GeoLocation>> : Array of points that creates a geo fence for the space.
+	///                                                                        Must be in clockwise order and start and end with the same value.
+	/// @param Callback SpaceGeoLocationResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
+												 const csp::common::Optional<GeoLocation>& Location,
+												 const csp::common::Optional<float>& Orientation,
+												 const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
+												 SpaceGeoLocationResultCallback Callback);
 
 private:
 	SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
