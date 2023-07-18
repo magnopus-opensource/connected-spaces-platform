@@ -1,11 +1,11 @@
 {
-  "name": "oly-web-tests",
+  "name": "csp-web-tests",
   "version": "1.0.0",
-  "description": "Foundation for Web tests",
+  "description": "Connected Spaces Platform for Web tests",
   "main": "index.js",
-  "author": "Michael Kelley",
-  "license": "MIT",
+  "author": "Magnopus",
+  "license": "Apache-2.0",
   "dependencies": {
-    "@magnopus/com.magnopus.olympus.foundation.web": "^3.1.315"
+    "@magnopus-opensource/connected-spaces-platform.web": "^4.4.0"
   }
 }

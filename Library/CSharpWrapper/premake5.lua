@@ -22,7 +22,7 @@ if not WrapperGenerator then
     function WrapperGenerator.AddProject()
         project "CSharpWrapper"
         location "Library/CSharpWrapper"
-        targetname "Olympus.Foundation"
+        targetname "ConnectedSpacesPlatform"
         kind "SharedLib"
         targetdir "%{wks.location}/Library/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
         language "C#"

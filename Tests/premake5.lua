@@ -72,9 +72,9 @@ if not Tests then
             "{COPY} %{prj.location}\\assets\\ %{cfg.buildtarget.directory}\\assets\\"
         }
         
-        -- The tests project depend on foundation first finishing in order to be able to guarantee the DLLs exist before we copy them
-        -- NOTE: This will slow builds down as it effectively means we need to build foundation twice in a linear fashion, so we need to address this in a better manner long-term.
-        dependson {"OlympusFoundation"}
+        -- The tests project depend on ConnectedSpacesPlatform first finishing in order to be able to guarantee the DLLs exist before we copy them
+        -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
+        dependson {"ConnectedSpacesPlatform"}
             
         postbuildcommands {
             "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}"
