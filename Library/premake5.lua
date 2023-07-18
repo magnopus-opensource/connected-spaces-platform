@@ -234,7 +234,7 @@ if not Project then
                 "-pthread",                                                     -- enable threading
                 "-fwasm-exceptions",                                            -- enable native wasm exceptions
                 "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
-                "-sEXPORTED_FUNCTIONS=['_malloc']",                             -- force export _malloc function
+                "-sEXPORTED_FUNCTIONS=['_malloc','_free']",                     -- force export _malloc and _free function
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
                 "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Foundation

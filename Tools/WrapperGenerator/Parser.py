@@ -21,6 +21,19 @@ COLOUR_ERROR = '\033[91m'    # Bright red
 COLOUR_WARNING = '\033[93m'  # Bright yellow
 COLOUR_RESET = '\033[0m'
 
+PRIMITIVE_TYPES = [
+    'int8_t',
+    'uint8_t',
+    'int16_t', 'short', 'signed short', 'short int', 'signed short int',
+    'uint16_t', 'unsigned short', 'unsigned short int',
+    'int32_t', 'int', 'signed int', 'long', 'signed long', 'long int', 'signed long int',
+    'uint32_t', 'unsigned int', 'unsigned long', 'unsigned long int',
+    'int64_t', 'long long', 'signed long long', 'long long int', 'signed long long int',
+    'uint64_t', 'unsigned long long', 'unsigned long long int',
+    'float',
+    'double'
+]
+
 
 def error_in_file(filename: str, line: int, message: str) -> None:
     print(f"{COLOUR_ERROR}** Error in file: {filename} line: {line}  {message}{COLOUR_RESET}", file=sys.stderr)
@@ -373,7 +386,8 @@ class Parser:
             template_name=name,
             template_arguments=template_arguments,
             is_optional=is_optional,
-            is_inline_forward=is_inline_forward
+            is_inline_forward=is_inline_forward,
+            is_primitive=name in PRIMITIVE_TYPES
         ), word)
 
 
