@@ -8,12 +8,27 @@
 {{^ is_template }}
 {{# is_number }}
 {{# is_pointer_or_reference }}
-{{# is_optional }}
+{{# is_const }}
+{{# is_large }}
+    bigint
+{{/ is_large }}
+{{^ is_large }}
     number
+{{/ is_large }}
+{{/ is_const }}
+{{^ is_const }}
+{{# is_optional }}
+{{# is_large }}
+    bigint
+{{/ is_large }}
+{{^ is_large }}
+    number
+{{/ is_large }}
 {{/ is_optional }}
 {{^ is_optional }}
     NativeRef
 {{/ is_optional }}
+{{/ is_const }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
     {{ name }}

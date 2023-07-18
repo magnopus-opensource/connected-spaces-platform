@@ -100,6 +100,7 @@ class TypeMetadata:
     is_enum: bool = False
     is_inline_forward: bool = False
     is_template_argument: bool = False
+    is_primitive: bool = False
 
 
 @dataclass

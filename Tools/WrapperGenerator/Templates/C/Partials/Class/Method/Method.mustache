@@ -9,11 +9,25 @@ const char*
 {{^ is_string }}
 {{! We need to make sure const return values are still returned as const so the compiler doesn't complain }}
 {{# is_const }}
+{{^ is_primitive }}
 const
+{{/ is_primitive }}
 {{/ is_const }}
 {{! Pointers and references require us to return a NativePointer struct so we can tell the wrapper if it owns the data and can free it }}
 {{# is_pointer_or_reference }}
+{{! However, pointers and references to primitive types should be returned as raw pointers, or by value for const references/pointers }}
+{{# is_primitive }}
+{{# is_const }}
+{{> Type }}
+
+{{/ is_const }}
+{{^ is_const }}
+{{> Type }}*
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
 NativePointer
+{{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{! We can't return class types by value, so we'll create a copy on the heap and return a pointer to it }}
@@ -72,6 +86,19 @@ void
 {{# has_return }}
     return
 {{# return_type.is_pointer_or_reference }}
+{{# return_type.is_primitive }}
+{{# return_type.is_const }}
+{{# return_type.is_pointer }}
+    *
+{{/ return_type.is_pointer }}
+{{/ return_type.is_const }}
+{{^ return_type.is_const }}
+{{# return_type.is_reference }}
+        &
+{{/ return_type.is_reference }}
+{{/ return_type.is_const }}
+{{/ return_type.is_primitive }}
+{{^ return_type.is_primitive }}
 {{^ return_type.is_string }}
     NativePointer {
 {{# return_type.is_const }}
@@ -79,13 +106,14 @@ void
 {{/ return_type.is_const }}
 {{# return_type.is_reference }}
 {{# is_static }}
-    &
+        &
 {{/ is_static }}
 {{^ is_static }}
         CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
 {{/ is_static }}
 {{/ return_type.is_reference }}
 {{/ return_type.is_string }}
+{{/ return_type.is_primitive }}
 {{/ return_type.is_pointer_or_reference }}
 {{^ return_type.is_pointer_or_reference }}
 {{# return_type.is_class_or_interface }}
@@ -150,6 +178,7 @@ void
     )
 {{# has_return }}
 {{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_primitive }}
 {{^ return_type.is_string }}
 {{# return_type.is_pointer }}
     , false }
@@ -163,6 +192,7 @@ void
 {{/ is_static }}
 {{/ return_type.is_reference }}
 {{/ return_type.is_string }}
+{{/ return_type.is_primitive }}
 {{/ return_type.is_pointer_or_reference }}
 {{^ return_type.is_pointer_or_reference }}
 {{# return_type.is_class_or_interface }}

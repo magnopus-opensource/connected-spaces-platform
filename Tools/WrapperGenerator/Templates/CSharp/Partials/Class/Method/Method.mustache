@@ -60,7 +60,22 @@ override
 {{/ is_interface_implementation }}
 {{/ is_override }}
 {{# return_type }}
+{{# is_pointer_or_reference }}
+{{# is_primitive }}
+{{# is_const }}
     {{> Type }}
+{{/ is_const }}
+{{^ is_const }}
+    Ref<{{> Type }}>
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
+    {{> Type }}
+{{/ is_primitive }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+    {{> Type }}
+{{/ is_pointer_or_reference }}
 {{/ return_type }}
 {{^ return_type }}
     void
@@ -85,36 +100,82 @@ override
 {{/ type.is_function_signature }}
 {{/ parameters }}
 
-    {{# return_type }}return {{# is_pointer_or_reference }}new {{> Type }}({{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# is_class_or_interface }}new {{> Type }}({{/ is_class_or_interface }}{{/ is_pointer_or_reference }}{{# is_string }}WrapperHelper.NativeUTF8ToString({{/ is_string }}{{/ return_type }}{{ unique_name }}(
-        {{^ is_static }}_ptr{{# has_parameters }},{{/ has_parameters }}{{/ is_static }}
+{{# return_type }}
+    return
+{{# is_pointer_or_reference }}
+{{# is_primitive }}
+{{^ is_const }}
+        new Ref<{{> Type }}>(
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
+        new {{> Type }}(
+{{/ is_primitive }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+        new {{> Type }}(
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{# is_string }}
+        WrapperHelper.NativeUTF8ToString(
+{{/ is_string }}
+{{/ return_type }}
+        {{ unique_name }}(
+{{^ is_static }}
+            _ptr {{# has_parameters }},{{/ has_parameters }}
+{{/ is_static }}
 {{# parameters }}
 {{# is_out }}
-        out {{ name }}{{> Comma }}
+            out {{ name }}{{> Comma }}
 {{/ is_out }}
 {{^ is_out }}
 {{# type.is_string }}
-        WrapperHelper.StringToNativeUTF8({{ name }}){{> Comma }}
+            WrapperHelper.StringToNativeUTF8({{ name }}){{> Comma }}
 {{/ type.is_string }}
 {{^ type.is_string }}
 {{# type.is_pointer_or_reference }}
 {{# type.is_interface }}
-        ((NativeClassWrapper){{ name }})._ptr{{> Comma }}
+            ((NativeClassWrapper){{ name }})._ptr{{> Comma }}
 {{/ type.is_interface }}
 {{^ type.is_interface }}
-        {{ name }}._ptr{{> Comma }}
+            {{ name }}._ptr{{> Comma }}
 {{/ type.is_interface }}
 {{/ type.is_pointer_or_reference }}
 {{^ type.is_pointer_or_reference }}
 {{# type.is_function_signature }}
-        {{ delegate.name }}Function,
-        (IntPtr)_{{ name }}{{> Comma }}
+            {{ delegate.name }}Function,
+            (IntPtr)_{{ name }}{{> Comma }}
 {{/ type.is_function_signature }}
 {{^ type.is_function_signature }}
-        {{ name }}{{> Comma }}
+            {{ name }}{{> Comma }}
 {{/ type.is_function_signature }}
 {{/ type.is_pointer_or_reference }}
 {{/ type.is_string }}
 {{/ is_out }}
 {{/ parameters }}
-    ){{# return_type }}{{# is_void_pointer }}.Pointer{{/ is_void_pointer }}{{# is_pointer_or_reference }}){{/ is_pointer_or_reference }}{{^ is_pointer_or_reference }}{{# is_class_or_interface }}){{/ is_class_or_interface }}{{/ is_pointer_or_reference }}{{# is_string }}){{/ is_string }}{{/ return_type }};
+        )
+{{# return_type }}
+{{# is_void_pointer }}
+        .Pointer
+{{/ is_void_pointer }}
+{{# is_pointer_or_reference }}
+{{# is_primitive }}
+{{^ is_const }}
+        )
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
+        )
+{{/ is_primitive }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+        )
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+{{# is_string }}
+        )
+{{/ is_string }}
+{{/ return_type }};
 }

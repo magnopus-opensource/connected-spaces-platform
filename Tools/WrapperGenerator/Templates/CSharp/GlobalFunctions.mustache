@@ -75,6 +75,7 @@ namespace Csp
         {{> Type }}
 {{/ is_class_or_interface }}
 {{^ is_class_or_interface }}
+{{# is_primitive }}
 {{# is_pointer_or_reference }}
 {{# is_const }}
         {{> Type }}
@@ -83,6 +84,7 @@ namespace Csp
         Ref<{{> Type }}>
 {{/ is_const }}
 {{/ is_pointer_or_reference }}
+{{/ is_primitive }}
 {{^ is_pointer_or_reference }}
         {{> Type }}
 {{/ is_pointer_or_reference }}
@@ -119,9 +121,11 @@ namespace Csp
 {{/ is_class_or_interface }}
 {{^ is_class_or_interface }}
 {{# is_pointer_or_reference }}
+{{# is_primitive }}
 {{^ is_const }}
                 new Ref<{{ name }}>(
 {{/ is_const }}
+{{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{/ is_class_or_interface }}
 {{/ is_string }}
