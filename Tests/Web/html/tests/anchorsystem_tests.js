@@ -1,6 +1,6 @@
 import { test, assert } from '../test_framework.js';
 import { generateUniqueString } from '../test_helpers.js';
-import { freeBuffer, Systems, Common, Multiplayer } from '../olympus_foundation.js';
+import { freeBuffer, Systems, Common, Multiplayer } from '../connected_spaces_platform.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { jsArrayToCommonArray } from '../conversion_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js'

@@ -3,7 +3,7 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { Systems } from '../olympus_foundation.js';
+import { Systems } from '../connected_spaces_platform.js';
 
 
 test('GraphQLSystemTests', 'QueryTest', async function() {

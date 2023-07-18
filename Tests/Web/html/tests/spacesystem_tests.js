@@ -3,7 +3,7 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn, logInAsGuest, logOut, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, ALT_LOGIN_EMAIL, } from './usersystem_tests_helpers.js';
 import { createSpace, getSpace, getSpacesByIds, updateSpace, createInviteUsers, deleteSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../olympus_foundation.js';
+import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../connected_spaces_platform.js';
 
 
 test('SpaceSystemTests', 'CreateSpaceTest', async function() {

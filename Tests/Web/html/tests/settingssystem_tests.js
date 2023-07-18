@@ -3,9 +3,8 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, uint8ArrayToBuffer, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, Systems } from '../connected_spaces_platform.js';
 import { createBufferAssetDataSource} from './assetsystem_tests_helpers.js'
-import { bufferToUint8Array } from '../node_modules/@magnopus/com.magnopus.olympus.foundation.web/olympus.foundation.js';
 
 
 test('SettingsSystemTests', 'BlockSpaceTest', async function() {
@@ -146,7 +145,7 @@ test('SettingsSystemTests', 'UpdateAvatarPortraitWithBuffer', async function() {
 
     {
         // Create Avatar Portrait
-        var avatarPortrait = await createBufferAssetDataSource("/assets/dog.png","image/png");
+        var avatarPortrait = await createBufferAssetDataSource("/assets/OKO.png","image/png");
 
         const result = await settingsSystem.updateAvatarPortraitWithBuffer(userID, avatarPortrait);
         freeBuffer(avatarPortrait.buffer);

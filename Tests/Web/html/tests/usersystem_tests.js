@@ -4,7 +4,7 @@ import { jsArrayToCommonArray } from '../conversion_helpers.js';
 import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn, logOut } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { Services, Systems } from '../olympus_foundation.js';
+import { Services, Systems } from '../connected_spaces_platform.js';
 
 
 const ThirdPartyAuthenticationDefines = 

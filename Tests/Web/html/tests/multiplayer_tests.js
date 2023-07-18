@@ -4,7 +4,7 @@ import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn,
 import { createSpace, deleteSpace, getSpace, getSpacesByIds, updateSpace } from './spacesystem_tests_helpers.js'
 import { createAsset, createAssetCollection, createBufferAssetDataSource, uploadAssetData } from './assetsystem_tests_helpers.js';
 
-import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../connected_spaces_platform.js';
 import { commonArrayToJSArray } from '../conversion_helpers.js';
 
 

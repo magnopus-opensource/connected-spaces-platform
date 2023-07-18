@@ -5,7 +5,7 @@ import { createSpace } from './spacesystem_tests_helpers.js';
 import { createAsset, createAssetCollection, getAssetsByCriteria, getAssetCollectionsByCriteria, uploadAssetData } from './assetsystem_tests_helpers.js'
 import { jsArrayToCommonArray } from '../conversion_helpers.js';
 
-import { freeBuffer, stringToBuffer, Services, Systems } from '../olympus_foundation.js';
+import { freeBuffer, stringToBuffer, Services, Systems } from '../connected_spaces_platform.js';
 
 async function getLODChain(assetSystem, assetCollection) {
     const result = await assetSystem.getLODChain(assetCollection);
