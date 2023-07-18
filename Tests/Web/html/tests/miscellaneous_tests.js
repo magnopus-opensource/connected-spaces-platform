@@ -1,10 +1,10 @@
 import { test, assert } from '../test_framework.js';
 
-import { OlympusFoundation, Common } from '../olympus_foundation.js';
+import { CSPFoundation, Common } from '../olympus_foundation.js';
 
 
 test('MiscellaneousTests', 'GetVersionTest', async function() {
-    const version = OlympusFoundation.getVersion();
+    const version = CSPFoundation.getVersion();
 
     assert.areEqual(typeof version, 'string');
 });
