@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.IO;
+using System.Threading;
+
 using ServiceWire;
 using ServiceWire.NamedPipes;
 using LogLevel = ServiceWire.LogLevel;
+
 using Common = Csp.Common;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
-using System.Collections.Concurrent;
-using System.Threading;
-using System.IO;
-using System.Diagnostics;
-using Csp.Systems;
 
 namespace MultiplayerTestClient
 {
@@ -25,18 +26,18 @@ namespace MultiplayerTestClient
     {
         public static readonly string CHSEndpointBaseUri = "https://ogs-odev.magnoboard.com";
 
-        private NpHost nphost = null;
+        private NpHost nphost;
         private bool isRunning = false;
         private string clientId = string.Empty;
         private string sessionDirectory = string.Empty;
         private string sessionName = string.Empty;
         private long sessionStart = 0;
 
-        private Multiplayer.SpaceEntity avatar = null;
-        private Multiplayer.SpaceEntity scriptEntity = null;
+        private Multiplayer.SpaceEntity avatar;
+        private Multiplayer.SpaceEntity scriptEntity;
 
-        private Csp.Multiplayer.MultiplayerConnection connection = null;
-        private Csp.Systems.LogSystem logSystem = null;
+        private Csp.Multiplayer.MultiplayerConnection connection;
+        private Csp.Systems.LogSystem logSystem;
 
         public struct LogEvent
         {
@@ -46,8 +47,8 @@ namespace MultiplayerTestClient
             public string message;
         }
 
-        private ConcurrentQueue<LogEvent> eventQueue = null;
-        private Thread eventLogThread = null;
+        private ConcurrentQueue<LogEvent> eventQueue;
+        private Thread eventLogThread;
 
         // Log event background thread
         private void EventLoggerThreadFunction()
@@ -68,14 +69,14 @@ namespace MultiplayerTestClient
 
         private void WriteLogEventToFile(LogEvent logEvent)
         {
-            string FileName = String.Format("{0}\\{1}_{2}.txt", sessionDirectory, sessionName, logEvent.clientId);
+            var fileName = $"{sessionDirectory}\\{sessionName}_{logEvent.clientId}.txt";
 
             if (!Directory.Exists(sessionDirectory))
             {
                 Directory.CreateDirectory(sessionDirectory);
             }
             
-            using (StreamWriter outputFile = new StreamWriter(FileName, append: true))
+            using (StreamWriter outputFile = new StreamWriter(fileName, append: true))
             {
                 double ns = 1000000000.0 * (double)logEvent.ticks / Stopwatch.Frequency;
                 string eventText = String.Format("[{0:D12}|{1}|{2}] {3}", (long)ns/100, logEvent.clientId, logEvent.timeStamp.ToString("hh:mm:ss.fffffff"), logEvent.message);

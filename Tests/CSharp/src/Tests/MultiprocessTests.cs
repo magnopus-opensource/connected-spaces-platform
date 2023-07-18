@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-using Common = Csp.Common;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
@@ -17,31 +16,6 @@ namespace CSPEngine
 {
     static class MultiprocessTests
     {
-        static void Disconnect(Multiplayer.MultiplayerConnection connection)
-        {
-            var res = connection.Disconnect().Result;
-
-            Assert.IsTrue(res);
-
-            LogDebug("Multiplayer disconnected");
-        }
-
-        static void Connect(Multiplayer.MultiplayerConnection connection, bool pushCleanupFunction = true)
-        {
-            var res = connection.Connect().Result;
-
-            Assert.IsTrue(res);
-
-            res = connection.InitialiseConnection().Result;
-
-            Assert.IsTrue(res);
-
-            LogDebug("Multiplayer connected");
-
-            if (pushCleanupFunction)
-                PushCleanupFunction(() => Disconnect(connection));
-        }
-
         static void DeleteEntity(Multiplayer.SpaceEntitySystem entitySystem, Multiplayer.SpaceEntity entity, bool disposeFoundationResources = true)
         {
             var id = entity.GetId();
@@ -51,36 +25,6 @@ namespace CSPEngine
 
             if (disposeFoundationResources)
                 entity.Dispose();
-        }
-
-        static void CreateAvatar(Multiplayer.SpaceEntitySystem entitySystem, string name, string avatarId, out Multiplayer.SpaceEntity entity, bool pushCleanupFunction = true, bool disposeFoundationResources = true)
-        {
-            var transform = new Multiplayer.SpaceTransform();
-            var res = entitySystem.CreateAvatar(name, transform, Multiplayer.AvatarState.Idle, avatarId, Multiplayer.AvatarPlayMode.Default).Result;
-
-            Assert.IsTrue(res.PointerIsValid);
-
-            entity = res;
-            LogDebug($"Avatar created (Id: { entity.GetId() })");
-
-            var outEntity = entity;
-
-            if (pushCleanupFunction)
-                PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity, disposeFoundationResources));
-        }
-
-
-        static void CreateCreatorAvatar(Multiplayer.SpaceEntitySystem entitySystem, string name, string avatarId, out Multiplayer.SpaceEntity entity)
-        {
-            var transform = new Multiplayer.SpaceTransform();
-            var res = entitySystem.CreateAvatar(name, transform, Multiplayer.AvatarState.Idle, avatarId, Multiplayer.AvatarPlayMode.Creator).Result;
-
-            Assert.IsTrue(res.PointerIsValid);
-
-            entity = res;
-            LogDebug($"Avatar created (Id: { entity.GetId() })");
-            var outEntity = entity;
-            PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity));
         }
 
         public static void CreateObject(Multiplayer.SpaceEntitySystem entitySystem, string name, out Multiplayer.SpaceEntity entity, bool pushCleanupFunction = true)
@@ -97,24 +41,8 @@ namespace CSPEngine
 
             if (pushCleanupFunction)
                 PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity));
-        }
 
-        static Multiplayer.MultiplayerConnection CreateMultiplayerConnection(string spaceId, bool pushCleanupFunction = true)
-        {
-            var connection = new Multiplayer.MultiplayerConnection(spaceId);
-
-            if (pushCleanupFunction)
-                PushCleanupFunction(() => connection.Dispose());
-
-            return connection;
-        }
-
-        static void OnEntityUpdate(object sender, (Multiplayer.SpaceEntity entity, Multiplayer.SpaceEntityUpdateFlags arg2, Common.Array<Multiplayer.ComponentUpdateInfo>) eventArgs)
-        {
-            var transform = eventArgs.entity.GetTransform();
-            LogDebug($"Received update (Entity Id: { eventArgs.entity.GetId() }, " +
-                $"Pos: [{ transform.Position.X:0.##}, { transform.Position.Y:0.##}, { transform.Position.Z:0.##}], " +
-                $"Rot: [{ transform.Rotation.X:0.##}, { transform.Rotation.Y:0.##}, { transform.Rotation.Z:0.##}, { transform.Rotation.W:0.##}])");
+            transform.Dispose();
         }
 
         private static void MergeLogFiles(string sessionDirectory, string sessionName)
@@ -124,7 +52,7 @@ namespace CSPEngine
             if (Directory.Exists(sessionDirectory))
             {
                 // Make a list of all events sorted by the event time
-                SortedList<long, string> eventMap = new SortedList<long, string>();
+                var eventMap = new SortedList<long, string>();
 
                 var files = Directory.EnumerateFiles(sessionDirectory);
 
@@ -135,11 +63,10 @@ namespace CSPEngine
                         if (line != null)
                         {
                             string[] eventElements;
-                            eventElements = line.Split(new char[] { '[', '|' });
-                            long timeStamp = 0;
+                            eventElements = line.Split(new[] { '[', '|' });
 
                             // Check line is as expected
-                            if (eventElements.Length>2  && long.TryParse(eventElements[1], out timeStamp))
+                            if (eventElements.Length > 2 && long.TryParse(eventElements[1], out var timeStamp))
                             {
                                 eventMap[timeStamp] = line;
                             }
@@ -149,7 +76,7 @@ namespace CSPEngine
 
                 foreach (var item in eventMap)
                 {
-                    string fileName = String.Format("{0}\\{1}_AllClients.txt", sessionDirectory, sessionName);
+                    string fileName = $"{sessionDirectory}\\{sessionName}_AllClients.txt";
 
                     using (StreamWriter outputFile = new StreamWriter(fileName, append: true))
                     {
@@ -173,6 +100,7 @@ namespace CSPEngine
                     }
                 }
             }
+
             return -1;
         }
 
@@ -223,8 +151,8 @@ namespace CSPEngine
 
             for (int i = 0; i < NumClientInstances; i++)
             {
-                string clientId = String.Format("TestClient{0}", i+1);
-                string userId = String.Format("will.cowling+test{0}@magnopus.com", i + EmailIndexOffset);
+                string clientId = $"TestClient{i + 1}";
+                string userId = $"will.cowling+test{i + EmailIndexOffset}@magnopus.com";
                 string pwd = "12345678";
 
                 Log("[ ClientElectionTest ] ", ConsoleColor.Blue, $"Create Client {i+1} of {NumClientInstances} - {clientId}");
@@ -236,8 +164,8 @@ namespace CSPEngine
                 clientValid[i] = true;
 
                 // Create entity
-                string clientAvatarName = String.Format("TestAvatar{0}", i+1);
-                string clientAvatarId = String.Format("NotARealAvatarId{0}", i+1);
+                string clientAvatarName = String.Format("TestAvatar{0}", i + 1);
+                string clientAvatarId = String.Format("NotARealAvatarId{0}", i + 1);
                 client.CreateAvatar(clientAvatarName, clientAvatarId);
             }
 
@@ -265,6 +193,7 @@ namespace CSPEngine
             }
 
             int frameCount = 0;
+
             while (frameCount < TotalFameCount)
             {
                 Log("[ ClientElectionTest ] ", ConsoleColor.Blue, $"Frame {frameCount} : Ticking...");
@@ -297,7 +226,7 @@ namespace CSPEngine
                             leader.Logout();
                             leader.Close();
 
-                            ++removedCount;
+                            removedCount++;
                         }
                     }
                 }
@@ -319,7 +248,7 @@ namespace CSPEngine
                 //}
 
                 Thread.Sleep(MillisecondsPerFrame);
-                ++frameCount;
+                frameCount++;
             }
 
             for (int i = 0; i < NumClientInstances; ++i)
@@ -346,5 +275,3 @@ namespace CSPEngine
 #endif
     }
 }
-
-
