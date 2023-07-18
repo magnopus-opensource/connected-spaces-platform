@@ -69,7 +69,7 @@ If you choose to use the Connected Spaces Platform in conjunction with Magnopus 
 
 For information on how to obtain one, head over here.
 
- - [Obtaining a Tenant Key](https://www.magnopus.com/platform)
+ - [Obtaining a Tenant Key](https://www.magnopus.com/csp/for-developers#tenant-key)
 ****
 
 ## 🖥️ Usage
