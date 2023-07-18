@@ -60,7 +60,7 @@ project "UnitTestingBinary"
     }
     
     filter "platforms:x64"
-        targetname "OlympusFoundation_D"
+        targetname "ConnectedSpacesPlatform_D"
         kind "SharedLib"
 
         externalincludedirs {
@@ -80,7 +80,7 @@ project "UnitTestingBinary"
             "mimalloc"
         }
     filter "platforms:wasm"
-        targetname "OlympusFoundation_WASM.js"
+        targetname "ConnectedSpacesPlatform_WASM.js"
         kind "None"
 
         defines {
@@ -100,7 +100,7 @@ project "UnitTestingBinary"
             "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
             "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
             "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
-            "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Foundation
+            "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
             "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
             "-sENVIRONMENT='node,worker'",                                  -- only compile for node and worker (worker is required for multi-threading)
             "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory

@@ -10,13 +10,13 @@ def get_editor_path_cachefile_path():
     filename = 'editor_filepath.cfg'
 
     if sys.platform == 'win32':
-        return f"{ os.getenv('LOCALAPPDATA') }/Magnopus/FoundationForUnityUnitTests/{ filename }"
+        return f"{ os.getenv('LOCALAPPDATA') }/Magnopus/CSPForUnityUnitTests/{ filename }"
     
     if sys.platform == 'darwin':
-        return f"~/Library/Application Support/MagnopusFoundationForUnityUnitTests/{ filename }"
+        return f"~/Library/Application Support/MagnopusCSPForUnityUnitTests/{ filename }"
     
     if sys.platform == 'linux':
-        return f"~/.local/share/MagnopusFoundationForUnityUnitTests/{ filename }"
+        return f"~/.local/share/MagnopusCSPForUnityUnitTests/{ filename }"
 
 
 def get_unity_hub_path():
@@ -78,13 +78,13 @@ def main():
     current_directory = os.path.dirname(os.path.realpath(__file__))
     project_path = os.path.join(current_directory, 'csharp')
 
-    print('Creating `Foundation for Unity` dummy package...')
+    print('Creating `CSP for Unity` dummy package...')
 
-    dummy_package_path = os.path.join(project_path, 'Packages', 'com.magnopus.olympus.foundation.dummy')
+    dummy_package_path = os.path.join(project_path, 'Packages', 'connected-spaces-platform.dummy')
     dummy_package_source_path = os.path.join(dummy_package_path, 'Source')
     dummy_package_generated_source_path = os.path.join(dummy_package_source_path, 'generated')
 
-    # Remove existing Foundation dummy package
+    # Remove existing CSP dummy package
     shutil.rmtree(dummy_package_path, ignore_errors=True)
 
     # Recreate dummy package folder structure
@@ -95,22 +95,22 @@ def main():
     with open(os.path.join(dummy_package_path, 'package.json'), 'w') as f:
         f.write('''
 {
-  "name": "com.magnopus.olympus.foundation.dummy",
-  "displayName": "olympus.foundation.dummy",
+  "name": "connected-spaces-platform.dummy",
+  "displayName": "connected-spaces-platform.dummy",
   "unity": "2020.3",
   "version": "1.3.37",
-  "description": "Exposes dummy code for unit-testing Foundation for Unity",
-  "license": "UNLICENSED",
+  "description": "Exposes dummy code for unit-testing CSP for Unity",
+  "license": "Apache-2.0",
   "dependencies": {
   }
 }
         ''')
     
-    with open(os.path.join(dummy_package_source_path, 'Olympus.Foundation.asmdef'), 'w') as f:
+    with open(os.path.join(dummy_package_source_path, 'connected-spaces-platform.asmdef'), 'w') as f:
         f.write('''
 {
-  "name": "Olympus.Foundation",
-  "rootNamespace": "Olympus.Foundation",
+  "name": "ConnectedSpacesPlatform",
+  "rootNamespace": "ConnectedSpacesPlatform",
   "references": [],
   "includePlatforms": [],
   "excludePlatforms": [],
@@ -125,8 +125,8 @@ def main():
 
         ''')
     
-    # Copy Foundation DLL and C# wrapper code into dummy package
-    shutil.copy('../Binaries/x64/Debug/OlympusFoundation_D.dll', dummy_package_path)
+    # Copy CSP DLL and C# wrapper code into dummy package
+    shutil.copy('../Binaries/x64/Debug/ConnectedSpacesPlatform_D.dll', dummy_package_path)
 
     csharp_src_path = '../../Library/CSharpWrapper/src/'
     files = os.listdir(csharp_src_path)
