@@ -91,7 +91,7 @@ test('ConversationSystemTests', 'ConversationNewMessageCallbackTest', async func
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.NewMessage)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(conversationId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());
@@ -216,7 +216,7 @@ test('ConversationSystemTests', 'ConversationDeleteMessageCallbackTest', async f
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.DeleteMessage)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(messageId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());
@@ -338,7 +338,7 @@ test('ConversationSystemTests', 'ConversationDeleteConversationCallbackTest', as
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.DeleteConversation)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(conversationId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());
@@ -477,7 +477,7 @@ test('ConversationSystemTests', 'ConversationUpdateInfoTest', async function() {
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.ConversationInformation)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(conversationId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());
@@ -618,7 +618,7 @@ test('ConversationSystemTests', 'MessageUpdateInfoTest', async function() {
 
     {
         // Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-        var array = Common.Array.ofoly_multiplayer_ReplicatedValue_number(2);
+        var array = Common.Array.ofcsp_multiplayer_ReplicatedValue_number(2);
         array.set(0,Multiplayer.ReplicatedValue.create_longValue(BigInt(Multiplayer.ConversationMessageType.MessageInformation)));
         array.set(1,Multiplayer.ReplicatedValue.create_stringValue(messageId));
         await connection.sendNetworkEventToClient("ConversationSystem",array,connection.getClientId());

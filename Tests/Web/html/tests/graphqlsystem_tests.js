@@ -13,8 +13,8 @@ test('GraphQLSystemTests', 'QueryTest', async function() {
     const GraphQLSystem = systemsManager.getGraphQLSystem()
 
     // Generate space name
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);

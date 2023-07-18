@@ -13,8 +13,8 @@ test('SettingsSystemTests', 'BlockSpaceTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const settingsSystem = systemsManager.getSettingsSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     const userId = await logIn(userSystem);
@@ -65,8 +65,8 @@ test('SettingsSystemTests', 'UnBlockSpaceTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const settingsSystem = systemsManager.getSettingsSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     const userId = await logIn(userSystem);

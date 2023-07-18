@@ -127,7 +127,7 @@ export async function updateSpace(spaceSystem, space, newName = null, newDescrip
 }
 
 export function createInviteUsers() {
-    const inviteUsers = Common.Array.ofoly_systems_InviteUserRoleInfo_number(4);
+    const inviteUsers = Common.Array.ofcsp_systems_InviteUserRoleInfo_number(4);
 
     const inviteUser1 = Systems.InviteUserRoleInfo.create();
     inviteUser1.userEmail = "testnopus.pokemon+1@magnopus.com";

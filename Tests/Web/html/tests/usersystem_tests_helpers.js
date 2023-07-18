@@ -7,7 +7,6 @@ export const DEFAULT_LOGIN_EMAIL = "olyservice.WASM@magnopus.com";
 export const ALT_LOGIN_EMAIL = "olyservice.WASM+1@magnopus.com";
 export const DEFAULT_LOGIN_PASSWORD = "nQ30ZE78G*DmEiEk";
 
-
 /**
  * 
  * @param {!Systems.UserSystem} userSystem 

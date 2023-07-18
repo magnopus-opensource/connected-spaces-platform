@@ -25,10 +25,10 @@ test('LODTests', 'GetEmptyLODChainTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
-    const testAssetCollectionName = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
 
     // Log in
     await logIn(userSystem);
@@ -51,12 +51,12 @@ test('LODTests', 'RegisterAssetsToLODChainTest', async function() {
         const spaceSystem = systemsManager.getSpaceSystem();
         const assetSystem = systemsManager.getAssetSystem();
     
-        const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-        const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+        const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+        const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
     
-        const testAssetCollectionName = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-        const testAsset1Name = generateUniqueString('OLY-TESTS-WASM-ASSET1');
-        const testAsset2Name = generateUniqueString('OLY-TESTS-WASM-ASSET2');
+        const testAssetCollectionName = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+        const testAsset1Name = generateUniqueString('CSP-TESTS-WASM-ASSET1');
+        const testAsset2Name = generateUniqueString('CSP-TESTS-WASM-ASSET2');
         
         // Log in
         await logIn(userSystem);

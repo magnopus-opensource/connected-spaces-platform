@@ -14,12 +14,12 @@ test('AssetSystemTests', 'GetAssetCollectionsByDifferentCriteriaTest', async fun
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
-    const testAssetCollectionName1 = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const testAssetCollectionName2 = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const testAssetCollectionName3 = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName1 = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName2 = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName3 = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
 
     await logIn(userSystem);
 
@@ -121,14 +121,14 @@ test('AssetSystemTests', 'GetAssetsFromMultipleAssetCollectionsTest', async func
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
-    const testAssetCollectionName1 = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const testAssetCollectionName2 = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName1 = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetCollectionName2 = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
 
-    const testAssetName1 = generateUniqueString('OLY-TESTS-WASM-ASSET');
-    const testAssetName2 = generateUniqueString('OLY-TESTS-WASM-ASSET');
+    const testAssetName1 = generateUniqueString('CSP-TESTS-WASM-ASSET');
+    const testAssetName2 = generateUniqueString('CSP-TESTS-WASM-ASSET');
 
     await logIn(userSystem);
 
@@ -185,8 +185,8 @@ test('AssetSystemTests', 'GetAssetDataSizeTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const assetCollectionName = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const assetName = generateUniqueString('OLY-TESTS-WASM-ASSET');
+    const assetCollectionName = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const assetName = generateUniqueString('CSP-TESTS-WASM-ASSET');
 
     await logIn(userSystem);
 
@@ -255,8 +255,8 @@ test('AssetSystemTests', 'ThirdPartyPackagedAssetIdentifierTest', async function
     const userSystem = systemsManager.getUserSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const assetCollectionName = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const assetName = generateUniqueString('OLY-TESTS-WASM-ASSET');
+    const assetCollectionName = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const assetName = generateUniqueString('CSP-TESTS-WASM-ASSET');
     const thirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
 
     await logIn(userSystem);
