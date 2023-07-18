@@ -17,9 +17,9 @@ import { runTests } from './test_framework.js'
 
 async function runAllTests() {
     var options = new CspOptions();
-    options.wrapperUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Release/OlympusFoundation_WASM.js";
-    options.wasmUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Release/OlympusFoundation_WASM.wasm";
-    options.workerUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Release/OlympusFoundation_WASM.worker.js";
+    options.wrapperUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Debug/OlympusFoundation_WASM.js";
+    options.wasmUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Debug/OlympusFoundation_WASM.wasm";
+    options.workerUrl = "http://localhost:8080/node_modules/@magnopus/com.magnopus.olympus.foundation.web/Debug/OlympusFoundation_WASM.worker.js";
 
     var Module = await ready(options);
     console.log(`Foundation build Id: ${CSPFoundation.getBuildID()}`);
