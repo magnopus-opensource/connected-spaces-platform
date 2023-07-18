@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
+using Csp.Systems;
 
 namespace MultiplayerTestClient
 {
@@ -35,6 +36,7 @@ namespace MultiplayerTestClient
         private Multiplayer.SpaceEntity scriptEntity = null;
 
         private Csp.Multiplayer.MultiplayerConnection connection = null;
+        private Csp.Systems.LogSystem logSystem = null;
 
         public struct LogEvent
         {
@@ -131,7 +133,7 @@ namespace MultiplayerTestClient
             eventLogThread = new Thread(EventLoggerThreadFunction);
             eventLogThread.Start();
 
-            Log(String.Format("Starting Multiplayer Client Session - {0}", sessionName));
+            Log($"Starting Multiplayer Client Session - {sessionName}");
 
             var logger = new Logger(logLevel: LogLevel.Debug);
             var stats = new Stats();
@@ -152,7 +154,9 @@ namespace MultiplayerTestClient
             if (isRunning)
             {
                 InitialiseFoundationWithUserAgentInfo(CHSEndpointBaseUri);
-                Systems.SystemsManager.Get().GetLogSystem().OnLog += LogHandler;
+                
+                logSystem = Systems.SystemsManager.Get().GetLogSystem();
+                logSystem.OnLog += LogHandler;
             }
         }
 
@@ -176,12 +180,12 @@ namespace MultiplayerTestClient
 
                 if (entitySystem != null)
                 {
-                    Log(String.Format("Tick Frame {0} - Leader is {1}", frameCount, entitySystem.GetLeaderId()));
+                    Log($"Tick Frame {frameCount} - Leader is {entitySystem.GetLeaderId()}");
                 }
             }
             else
             {
-                Log(String.Format("Tick Frame {0} - Connection is null", frameCount));
+                Log($"Tick Frame {frameCount} - Connection is null");
             }
         }
 
@@ -264,6 +268,7 @@ namespace MultiplayerTestClient
         {
             var transform = new Multiplayer.SpaceTransform();
             var res = entitySystem.CreateObject(name, transform).Result;
+            transform.Dispose();
 
             entity = res;
             var outEntity = entity;
@@ -313,6 +318,7 @@ namespace MultiplayerTestClient
             Log("Simulate Leader Lost");
             var array = new Common.Array<Multiplayer.ReplicatedValue>();
             connection.SendNetworkEvent("DebugLeaderDropoutMessage", array);
+            array.Dispose();
         }
 
         public void Close()
@@ -322,7 +328,8 @@ namespace MultiplayerTestClient
             isRunning = false;
 
             // Prevent stragler async events from trying to call invalid callbacks
-            Systems.SystemsManager.Get().GetLogSystem().ClearAllCallbacks();
+            logSystem.ClearAllCallbacks();
+            logSystem = null;
         }
     }
 }

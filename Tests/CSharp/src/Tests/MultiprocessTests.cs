@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 using Common = Csp.Common;
 using Systems = Csp.Systems;
@@ -8,9 +10,8 @@ using Multiplayer = Csp.Multiplayer;
 
 using CSharpTests;
 using MultiplayerTestClient;
+
 using static CSharpTests.TestHelper;
-using System.Diagnostics;
-using System.Threading;
 
 namespace CSPEngine
 {
@@ -209,18 +210,18 @@ namespace CSPEngine
 
             long sessionStart = Stopwatch.GetTimestamp();
 
-            string sessionName = String.Format("ClientElectionTest_{0}", DateTime.Now.ToString("yyyy_MMdd_HHmm_ss_fff"));
-            string sessionDirectory = String.Format("D:\\Temp\\MultiPlayerLogging\\{0}", sessionName);
+            var sessionName = $"ClientElectionTest_{DateTime.Now:yyyy_MMdd_HHmm_ss_fff}";
+            var sessionDirectory = $"D:\\Temp\\MultiPlayerLogging\\{sessionName}";
 
             Log("[ ClientElectionTest ] ", ConsoleColor.Blue, $"Session: {sessionName}");
             Log("[ ClientElectionTest ] ", ConsoleColor.Blue, $"Using working directory: {sessionDirectory}");
 
-            IMultiplayerTestClient[] clients = new IMultiplayerTestClient[NumClientInstances];
+            var clients = new IMultiplayerTestClient[NumClientInstances];
 
             // Keep track of which clients are valid and which ones have been dropped or destroyed
-            bool[] clientValid = new bool[NumClientInstances];
+            var clientValid = new bool[NumClientInstances];
 
-            for (int i = 0; i < NumClientInstances; ++i)
+            for (int i = 0; i < NumClientInstances; i++)
             {
                 string clientId = String.Format("TestClient{0}", i+1);
                 string userId = String.Format("will.cowling+test{0}@magnopus.com", i + EmailIndexOffset);
