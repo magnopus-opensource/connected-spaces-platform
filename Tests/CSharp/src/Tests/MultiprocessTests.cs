@@ -164,8 +164,8 @@ namespace CSPEngine
                 clientValid[i] = true;
 
                 // Create entity
-                string clientAvatarName = String.Format("TestAvatar{0}", i + 1);
-                string clientAvatarId = String.Format("NotARealAvatarId{0}", i + 1);
+                string clientAvatarName = $"TestAvatar{i + 1}";
+                string clientAvatarId = $"NotARealAvatarId{i + 1}";
                 client.CreateAvatar(clientAvatarName, clientAvatarId);
             }
 
