@@ -19,33 +19,29 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IScaleComponent.h"
+#include "CSP/Multiplayer/SpaceTransform.h"
 
 
 namespace csp::multiplayer
 {
 
 /// @brief Controls the visibility of the component when in default mode or in AR mode.
-CSP_INTERFACE class CSP_API IVisibleComponent
+CSP_INTERFACE class CSP_API ITransformComponent : public IPositionComponent, public IRotationComponent, public IScaleComponent
 {
 public:
-	/// @brief Checks if the component is visible when in default mode.
-	/// @return True if the component is visible, false otherwise.
-	virtual bool GetIsVisible() const = 0;
+	/// @brief Gets the transform of this component in world space.
+	/// @return SpaceTransform : The 3D transform as an object containing position, rotation, and scale.
+	virtual SpaceTransform GetTransform() const = 0;
 
-	/// @brief Sets if the component is visible when in default mode.
-	/// @param InValue True if the component is visible, false otherwise.
-	virtual void SetIsVisible(bool InValue) = 0;
-
-	/// @brief Checks if the component is visible when in AR mode.
-	/// @return True if the component is visible when in AR mode, false otherwise.
-	virtual bool GetIsARVisible() const = 0;
-
-	/// @brief Sets if the component is visible in AR mode.
-	/// @param InValue True if the component is visible in AR mode, false otherwise.
-	virtual void SetIsARVisible(bool InValue) = 0;
+	/// @brief Sets the transform of this component in world space to the specified value.
+	/// @param InValue SpaceTransform : The new value expressed as a SpaceTransform.
+	virtual void SetTransform(const SpaceTransform& InValue) = 0;
 
 protected:
-	virtual ~IVisibleComponent() = default;
+	virtual ~ITransformComponent() = default;
 };
 
 } // namespace csp::multiplayer

@@ -31,6 +31,7 @@ public:
 	/// @brief Checks if the component is enabled.
 	/// @return True if the component is enabled, false otherwise.
 	virtual bool GetIsEnabled() const = 0;
+
 	/// @brief Sets if the component is enabled.
 	/// @param InValue True to set the component to enabled, false otherwise.
 	virtual void SetIsEnabled(bool InValue) = 0;
