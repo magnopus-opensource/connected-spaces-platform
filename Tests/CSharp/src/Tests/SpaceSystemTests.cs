@@ -56,7 +56,7 @@ namespace CSPEngine
             if (inviteUsers != null)
             {
                 using var inviteResult = spaceSystem.BulkInviteToSpace(result.GetSpace().Id,inviteUsers).Result;
-                var inviteResCode = result.GetResultCode();
+                var inviteResCode = inviteResult.GetResultCode();
             
                 Assert.AreEqual(inviteResCode, Services.EResultCode.Success);
             }
@@ -64,7 +64,7 @@ namespace CSPEngine
             if (thumbnail != null)
             {
                 using var thumbnailResult = spaceSystem.AddSpaceThumbnail(result.GetSpace().Id, thumbnail).Result;
-                var thumbnailResCode = result.GetResultCode();
+                var thumbnailResCode = thumbnailResult.GetResultCode();
 
                 Assert.AreEqual(thumbnailResCode, Services.EResultCode.Success);
             }
