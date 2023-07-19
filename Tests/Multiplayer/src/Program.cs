@@ -6,8 +6,17 @@ namespace MultiplayerTestClient
     {
         static void Main(string[] args)
         {
+            // NamedPipe name used by ServiceWire for inter process comms
             var pipeName = args[0];
-            var testClient = new MultiplayerTestClient(pipeName);
+            // Working directory to store log files
+            var sessionDirectory = args[1];
+            // Unique session name based on start time and date of test run
+            var sessionName = args[2];
+            // 100ns resolution start time from system timer
+            // used to synchronise timestamps across processes
+            long sessionStart = long.Parse(args[3]);
+
+            var testClient = new MultiplayerTestClient(pipeName, sessionDirectory, sessionName, sessionStart);
 
             while (testClient.IsRunning())
             {
