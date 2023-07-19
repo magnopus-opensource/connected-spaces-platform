@@ -17,6 +17,7 @@
 
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
@@ -108,6 +109,11 @@ MaintenanceSystem* SystemsManager::GetMaintenanceSystem()
 	return MaintenanceSystem;
 }
 
+EventTicketingSystem* SystemsManager::GetEventTicketingSystem()
+{
+	return EventTicketingSystem;
+}
+
 SystemsManager::SystemsManager()
 	: WebClient(nullptr)
 	, UserSystem(nullptr)
@@ -122,6 +128,7 @@ SystemsManager::SystemsManager()
 	, GraphQLSystem(nullptr)
 	, AnalyticsSystem(nullptr)
 	, MaintenanceSystem(nullptr)
+	, EventTicketingSystem(nullptr)
 {
 }
 
@@ -153,6 +160,7 @@ void SystemsManager::CreateSystems()
 	ScriptSystem		  = CSP_NEW csp::systems::ScriptSystem();
 	VoipSystem			  = CSP_NEW csp::systems::VoipSystem();
 	MaintenanceSystem	  = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
+	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem();
 }
 
 void SystemsManager::DestroySystems()
@@ -171,6 +179,7 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(WebClient);
 	CSP_DELETE(LogSystem);
 	CSP_DELETE(MaintenanceSystem);
+	CSP_DELETE(EventTicketingSystem);
 }
 
 void SystemsManager::Instantiate()
