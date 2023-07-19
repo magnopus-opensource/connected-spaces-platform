@@ -17,11 +17,13 @@
 /// @brief Definitions and support for animated models.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
+#include "CSP/Multiplayer/Components/Interfaces/IExternalResourceComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
@@ -42,8 +44,8 @@ enum class AnimatedModelActions
 enum class AnimatedModelPropertyKeys
 {
 	Name = 0,
-	ModelAssetId,
-	AssetCollectionId,
+	ExternalResourceAssetId,
+	ExternalResourceAssetCollectionId,
 	Position,
 	Rotation,
 	Scale,
@@ -54,36 +56,41 @@ enum class AnimatedModelPropertyKeys
 	AnimationIndex,
 	IsARVisible,
 	ThirdPartyComponentRef,
-    IsShadowCaster,
+	IsShadowCaster,
 	Num
 };
 
 
 /// @ingroup AnimatedModelSpaceComponent
 /// @brief Data representation of an AnimatedModelSpaceComponent.
-class CSP_API AnimatedModelSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef, public IShadowCasterComponent
+class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
+											public IVisibleComponent,
+											public IExternalResourceComponent,
+											public IThirdPartyComponentRef,
+											public IShadowCasterComponent
 {
 public:
 	/// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
 	AnimatedModelSpaceComponent(SpaceEntity* Parent);
 
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]] const csp::common::String&
-		GetModelAssetId() const;
+	/* clang-format off */
+	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    const csp::common::String& GetExternalResourceAssetId() const override;
 
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]] void
-		SetModelAssetId(const csp::common::String& Value);
-
+	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    void SetExternalResourceAssetId(const csp::common::String& Value) override;
+	/* clang-format on */
 
 	/// @brief Gets the ID of the asset collection associated with this component.
 	/// @note To retrieve this component's animated asset, both the Asset ID and the Asset Collection ID are required.
 	/// @return The ID of the asset collection associated with this component.
-	const csp::common::String& GetAssetCollectionId() const;
+	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
 	/// @brief Sets the ID of the asset collection associated with this component.
 	/// @note To retrieve this component's animated asset, both the Asset ID and the Asset Collection ID are required.
 	/// @param Value The ID of the asset collection associated with this component.
-	void SetAssetCollectionId(const csp::common::String& Value);
+	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 
 	/// @brief Gets the position of the origin of this component in world space.
 	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
@@ -187,12 +194,12 @@ public:
 	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
 	/// @}
 
-    /// \addtogroup IShadowCasterComponent
+	/// \addtogroup IShadowCasterComponent
 	/// @{
 	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
-    bool GetIsShadowCaster() const;
+	bool GetIsShadowCaster() const;
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-    void SetIsShadowCaster(bool Value);
+	void SetIsShadowCaster(bool Value);
 	/// @}
 };
 

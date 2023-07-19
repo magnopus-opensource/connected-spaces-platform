@@ -28,7 +28,7 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the visibility of the component when in default mode or in AR mode.
+/// @brief Controls the 3D position (in world space), rotation, and scale of the component.
 CSP_INTERFACE class CSP_API ITransformComponent : public IPositionComponent, public IRotationComponent, public IScaleComponent
 {
 public:

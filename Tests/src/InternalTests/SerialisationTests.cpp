@@ -81,8 +81,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 
 	EXPECT_TRUE(Array[0].is_uinteger() && Array[0].as_uinteger() == User->Id);
 	EXPECT_TRUE(Array[1].is_uinteger() && Array[1].as_uinteger() == (int) SpaceEntityType::Avatar);
-	EXPECT_TRUE(Array[2].is_bool() && !Array[2].as_bool()); // IsTransferable
-	EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
+	EXPECT_TRUE(Array[2].is_bool() && !Array[2].as_bool());					   // IsTransferable
+	EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool());					   // IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
 	EXPECT_TRUE(Array[5].is_null());										   // ParentId
 	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8); // Components
@@ -262,9 +262,9 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	auto& Array = SerialisedObject.as_array();
 
 	EXPECT_TRUE(Array[0].is_uinteger() && Array[0].as_uinteger() == Object->Id);
-	EXPECT_TRUE(Array[1].is_uinteger() && Array[1].as_uinteger() == 2); // PrefabId
-	EXPECT_TRUE(Array[2].is_bool() && Array[2].as_bool());				// IsTransferable
-	EXPECT_TRUE(Array[3].is_bool());									// IsPersistant
+	EXPECT_TRUE(Array[1].is_uinteger() && Array[1].as_uinteger() == 2);		   // PrefabId
+	EXPECT_TRUE(Array[2].is_bool() && Array[2].as_bool());					   // IsTransferable
+	EXPECT_TRUE(Array[3].is_bool());										   // IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == Object->OwnerId);
 	EXPECT_TRUE(Array[5].is_null());										   // ParentId
 	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4); // Components
@@ -355,7 +355,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	Object->OwnerId		   = 42;
 
 	auto* NewComponent = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
-	NewComponent->SetAssetCollectionId("blah");
+	NewComponent->SetExternalResourceAssetCollectionId("blah");
 	NewComponent->SetIsVisible(true);
 
 	Object->Serialise(Serialiser);
@@ -380,7 +380,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedComponent->GetComponentType(), ComponentType::StaticModel);
 
 	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1);
-	EXPECT_EQ(DeserialisedComponent->GetAssetCollectionId(), "blah");
+	EXPECT_EQ(DeserialisedComponent->GetExternalResourceAssetCollectionId(), "blah");
 	EXPECT_EQ(DeserialisedComponent->GetIsVisible(), true);
 
 	CSP_DELETE(DeserialisedObject);

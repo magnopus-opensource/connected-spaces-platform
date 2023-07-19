@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
@@ -25,24 +26,25 @@ namespace csp::multiplayer
 
 StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::StaticModel, Parent)
 {
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId)]		   = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId)]	   = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]			   = csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]			   = csp::common::Vector4::Identity();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]				   = csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]			   = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]			   = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]		   = true;
-
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)]			  = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]						  = csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]						  = csp::common::Vector4::Identity();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]							  = csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]						  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]						  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)]			  = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]					  = true;
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }
 
 
-const csp::common::String& StaticModelSpaceComponent::GetModelAssetId() const
+/* IExternalResourceComponent */
+
+const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId));
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId));
 
 	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
@@ -54,15 +56,15 @@ const csp::common::String& StaticModelSpaceComponent::GetModelAssetId() const
 	return ReplicatedValue::GetDefaultString();
 }
 
-void StaticModelSpaceComponent::SetModelAssetId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId), Value);
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
 
-const csp::common::String& StaticModelSpaceComponent::GetAssetCollectionId() const
+const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId));
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId));
 
 	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
@@ -74,9 +76,9 @@ const csp::common::String& StaticModelSpaceComponent::GetAssetCollectionId() con
 	return ReplicatedValue::GetDefaultString();
 }
 
-void StaticModelSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId), Value);
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
 

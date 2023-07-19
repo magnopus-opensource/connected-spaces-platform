@@ -21,6 +21,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IExternalResourceComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
@@ -34,8 +35,8 @@ namespace csp::multiplayer
 enum class StaticModelPropertyKeys
 {
 	Name = 0,
-	ModelAssetId,
-	AssetCollectionId,
+	ExternalResourceAssetId,
+	ExternalResourceAssetCollectionId,
 	Position,
 	Rotation,
 	Scale,
@@ -52,6 +53,7 @@ enum class StaticModelPropertyKeys
 class CSP_API StaticModelSpaceComponent : public ComponentBase,
 										  public ITransformComponent,
 										  public IVisibleComponent,
+										  public IExternalResourceComponent,
 										  public IThirdPartyComponentRef,
 										  public IShadowCasterComponent
 {
@@ -60,21 +62,23 @@ public:
 	/// @param Parent The Space entity that owns this component.
 	StaticModelSpaceComponent(SpaceEntity* Parent);
 
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]] const csp::common::String&
-		GetModelAssetId() const;
+	/* clang-format off */
+	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    const csp::common::String& GetExternalResourceAssetId() const override;
 
-	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]] void
-		SetModelAssetId(const csp::common::String& Value);
+	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
+    void SetExternalResourceAssetId(const csp::common::String& Value) override;
+	/* clang-format on */
 
 	/// @brief Gets the ID of the asset collection associated with this component.
 	/// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
 	/// @return The ID of the asset collection associated with this component.
-	const csp::common::String& GetAssetCollectionId() const;
+	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
 	/// @brief Sets the ID of the asset collection associated with this component.
 	/// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
 	/// @param Value The ID of the asset collection associated with this component.
-	void SetAssetCollectionId(const csp::common::String& Value);
+	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 
 	/// \addtogroup ITransformComponent
 	/// @{

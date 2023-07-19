@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
 #include <string>
 #include <vector>
+
 
 namespace csp::multiplayer
 {
@@ -30,8 +32,8 @@ class AnimatedModelSpaceComponentScriptInterface : public ComponentScriptInterfa
 public:
 	AnimatedModelSpaceComponentScriptInterface(AnimatedModelSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, ModelAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
+	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
 
 	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
 	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);

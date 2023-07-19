@@ -645,8 +645,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 		EXPECT_EQ(CreatedObject->GetScale(), ObjectTransform.Scale);
 
 		auto ModelComponent = dynamic_cast<StaticModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::StaticModel));
-		ModelComponent->SetModelAssetId("SomethingElse");
-		ModelComponent->SetAssetCollectionId("Something");
+		ModelComponent->SetExternalResourceAssetId("SomethingElse");
+		ModelComponent->SetExternalResourceAssetCollectionId("Something");
 
 		bool EntityUpdated = false;
 
@@ -1118,7 +1118,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	auto* StaticModelComponent	 = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	auto StaticModelComponentKey = StaticModelComponent->GetId();
-	StaticModelComponent->SetModelAssetId(ModelAssetId);
+	StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
 	Object->QueueUpdate();
 
 	while (PatchPending)
@@ -1139,7 +1139,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 	EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
 	auto* RealStaticModelComponent = (StaticModelSpaceComponent*) _StaticModelComponent;
 
-	EXPECT_EQ(RealStaticModelComponent->GetModelAssetId(), ModelAssetId);
+	EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 
 	const csp::common::String ImageAssetId = "AlsoNotARealId";
 
@@ -1243,7 +1243,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
 	auto* StaticModelComponent	 = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	auto StaticModelComponentKey = StaticModelComponent->GetId();
-	StaticModelComponent->SetModelAssetId(ModelAssetId);
+	StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
 	auto* ImageComponent   = (ImageSpaceComponent*) Object->AddComponent(ComponentType::Image);
 	auto ImageComponentKey = ImageComponent->GetId();
 	ImageComponent->SetImageAssetId("TestID");
@@ -1268,7 +1268,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
 	auto* RealStaticModelComponent = (StaticModelSpaceComponent*) _StaticModelComponent;
 
-	EXPECT_EQ(RealStaticModelComponent->GetModelAssetId(), ModelAssetId);
+	EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 
 	Object->RemoveComponent(StaticModelComponentKey);
 	Object->RemoveComponent(ImageComponentKey);

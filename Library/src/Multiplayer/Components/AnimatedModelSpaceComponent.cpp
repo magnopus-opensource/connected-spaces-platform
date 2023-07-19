@@ -13,36 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
+
 namespace csp::multiplayer
 {
 
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::AnimatedModel, Parent)
 {
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ModelAssetId)]			 = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AssetCollectionId)]		 = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]				 = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]				 = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]					 = csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]		 = false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]				 = false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]				 = true;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]		 = static_cast<int64_t>(-1);
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]			 = true;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]          = true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId)]			= "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]							= csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]							= csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]								= csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]					= false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]							= false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]							= true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]					= static_cast<int64_t>(-1);
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]						= true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)]			= "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]					= true;
 
 	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
 }
 
-const csp::common::String& AnimatedModelSpaceComponent::GetModelAssetId() const
+
+/* IExternalResourceComponent */
+
+const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ModelAssetId));
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId));
 		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
@@ -52,14 +57,14 @@ const csp::common::String& AnimatedModelSpaceComponent::GetModelAssetId() const
 	return ReplicatedValue::GetDefaultString();
 }
 
-void AnimatedModelSpaceComponent::SetModelAssetId(const csp::common::String& Value)
+void AnimatedModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ModelAssetId), Value);
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
-const csp::common::String& AnimatedModelSpaceComponent::GetAssetCollectionId() const
+const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AssetCollectionId));
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId));
 		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
@@ -69,10 +74,11 @@ const csp::common::String& AnimatedModelSpaceComponent::GetAssetCollectionId() c
 	return ReplicatedValue::GetDefaultString();
 }
 
-void AnimatedModelSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void AnimatedModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AssetCollectionId), Value);
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
+
 
 const csp::common::Vector3& AnimatedModelSpaceComponent::GetPosition() const
 {
@@ -176,6 +182,7 @@ void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex), Value);
 }
 
+
 /* IVisibleComponent */
 
 bool AnimatedModelSpaceComponent::GetIsVisible() const
@@ -224,10 +231,16 @@ const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRe
 	return ReplicatedValue::GetDefaultString();
 }
 
+
+/* IThirdPartyRefComponent */
+
 void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
+
+
+/* IShadowCasterComponent */
 
 bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
 {

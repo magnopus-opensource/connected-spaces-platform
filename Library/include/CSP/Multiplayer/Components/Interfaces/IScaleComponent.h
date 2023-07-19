@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// @file IVisibleComponent.h
-/// @brief Visibility control for components.
 
 #pragma once
 
@@ -25,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the visibility of the component when in default mode or in AR mode.
+/// @brief Controls the 3D scale of the component.
 CSP_INTERFACE class CSP_API IScaleComponent
 {
 public:
