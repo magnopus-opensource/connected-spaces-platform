@@ -103,7 +103,7 @@ class CSharpWrapperGenerator:
             setattr(obj, 'translated_namespace', None)
     
 
-    def __translate_comments(self, comments: List[str] | None) -> None:
+    def __translate_comments(self, comments: List[str]) -> None:
         if comments is None:
             return
             
