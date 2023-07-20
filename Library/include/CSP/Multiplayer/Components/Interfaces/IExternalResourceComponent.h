@@ -23,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-/// @brief Controls the visibility of the component when in default mode or in AR mode.
+/// @brief Controls the asset and asset collection IDs used for storing external data.
 CSP_INTERFACE class CSP_API IExternalResourceComponent
 {
 public:
