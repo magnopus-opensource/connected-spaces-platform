@@ -47,13 +47,15 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : 
 
 const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -62,15 +64,18 @@ void AnimatedModelSpaceComponent::SetExternalResourceAssetId(const csp::common::
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
+
 const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -80,15 +85,19 @@ void AnimatedModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp
 }
 
 
+/* ITransformComponent */
+
 const csp::common::Vector3& AnimatedModelSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -97,15 +106,18 @@ void AnimatedModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Position), Value);
 }
 
+
 const csp::common::Vector4& AnimatedModelSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -114,15 +126,18 @@ void AnimatedModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation), Value);
 }
 
+
 const csp::common::Vector3& AnimatedModelSpaceComponent::GetScale() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -131,15 +146,36 @@ void AnimatedModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale), Value);
 }
 
+
+SpaceTransform AnimatedModelSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void AnimatedModelSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
+
 bool AnimatedModelSpaceComponent::GetIsLoopPlayback() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -148,15 +184,18 @@ void AnimatedModelSpaceComponent::SetIsLoopPlayback(bool Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback), Value);
 }
 
+
 bool AnimatedModelSpaceComponent::GetIsPlaying() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -165,15 +204,18 @@ void AnimatedModelSpaceComponent::SetIsPlaying(bool Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying), Value);
 }
 
+
 int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
 	{
 		return RepVal.GetInt();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return 0;
 }
 
@@ -187,13 +229,15 @@ void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 
 bool AnimatedModelSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -202,15 +246,18 @@ void AnimatedModelSpaceComponent::SetIsVisible(bool Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible), Value);
 }
 
+
 bool AnimatedModelSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -219,20 +266,22 @@ void AnimatedModelSpaceComponent::SetIsARVisible(bool Value)
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible), Value);
 }
 
+
+/* IThirdPartyRefComponent */
+
 const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRef() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
-
-
-/* IThirdPartyRefComponent */
 
 void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
@@ -244,13 +293,15 @@ void AnimatedModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::S
 
 bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
