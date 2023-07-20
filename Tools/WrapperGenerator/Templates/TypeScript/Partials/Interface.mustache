@@ -2,7 +2,14 @@
 export namespace {{ translated_namespace }} {
 {{/ translated_namespace }}
 
-export interface {{ name }} {
+export interface {{ name }}
+{{# has_interfaces }}
+    extends
+{{# interfaces }}
+    {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
+{{/ interfaces }}
+{{/ has_interfaces }}
+{
 {{# methods }}
 {{^ is_constructor }}
 {{^ is_destructor }}
