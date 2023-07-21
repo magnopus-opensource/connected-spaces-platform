@@ -502,14 +502,14 @@ test('set_ClassFieldTestClass_Field', async function() {
     {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_min();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
             {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
         });
 
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_max();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
             {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
         });
@@ -518,16 +518,46 @@ test('set_ClassFieldTestClass_Field', async function() {
     {% for x in ['Pointer', 'Reference'] %}
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_min();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
             {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
         });
 
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_max();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
             {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
         });
     {% endfor %}
+{% endfor %}
+
+
+// String
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    test('classFunctions_String_Return{{ x }}', async function() {
+        const instance = dummy.StringReturnTestClass.create();
+        const result = instance.classFunctions_String_Return{{ x }}();
+
+        assert.areEqual(result, "{{ config.string_value }}");
+    });
+{% endfor %}
+
+
+// Classes
+
+{# All class return types are returned from the C wrapper by pointer, regardless of the C++ return type #}
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }}
+    test('classFunctions_MyClass_Return{{ x }}', async function() {
+        const instance = dummy.ClassReturnTestClass.create();
+        const result = instance.classFunctions_MyClass_Return{{ x }}();
+
+        assert.isTrue(result.pointerIsValid());
+        assert.areEqual(result.someValue, {{ config.class_int_value_first }});
+
+        result.delete();
+    });
 {% endfor %}

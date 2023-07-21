@@ -174,10 +174,10 @@ namespace Csp
 
 {{# return_type }}
 {{# is_string }}
-            var _stringResult = WrapperHelper.NativeUTF8ToString(_result);
+            var _resultString = WrapperHelper.NativeUTF8ToString(_result);
             Global.Free(_result);
 
-            return _stringResult;
+            return _resultString;
 {{/ is_string }}
 {{/ return_type }}
         }
