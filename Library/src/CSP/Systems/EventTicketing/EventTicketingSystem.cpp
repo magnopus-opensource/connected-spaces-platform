@@ -15,13 +15,60 @@
  */
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 
+#include "Services/AggregationService/Api.h"
+#include "Services/AggregationService/Dto.h"
+
+
+namespace chs = csp::services::generated::aggregationservice;
+
+csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor& Vendor)
+{
+	switch (Vendor)
+	{
+		case csp::systems::EventTicketingVendor::Eventbrite:
+			return "Eventbrite";
+		default:
+			FOUNDATION_LOG_WARN_MSG("Unknown ticketed event vendor");
+			return "Unknown";
+	}
+}
+
 namespace csp::systems
 {
 
-void EventTicketingSystem::Dummy(NullResultCallback Callback)
+
+EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	Callback(NullResult::Invalid());
+	EventTicketingAPI = CSP_NEW chs::TicketedSpaceApi(InWebClient);
 }
 
+EventTicketingSystem::~EventTicketingSystem()
+{
+	CSP_DELETE(EventTicketingAPI);
+}
+
+void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceId,
+											   EventTicketingVendor Vendor,
+											   const csp::common::String& VendorEventId,
+											   const csp::common::String& VendorEventUri,
+											   bool IsTicketingActive,
+											   TicketedEventResultCallback Callback)
+{
+	auto Request = std::make_shared<chs::SpaceEventDto>();
+
+	Request->SetSpaceId(SpaceId);
+	Request->SetVendorName(GetVendorNameString(Vendor));
+	Request->SetVendorEventId(VendorEventId);
+	Request->SetVendorEventUri(VendorEventUri);
+	Request->SetIsTicketingActive(IsTicketingActive);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesSpaceIdEventsPost(SpaceId, Request, ResponseHandler);
+}
 
 } // namespace csp::systems

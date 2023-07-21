@@ -160,7 +160,7 @@ void SystemsManager::CreateSystems()
 	ScriptSystem		  = CSP_NEW csp::systems::ScriptSystem();
 	VoipSystem			  = CSP_NEW csp::systems::VoipSystem();
 	MaintenanceSystem	  = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
-	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem();
+	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
 }
 
 void SystemsManager::DestroySystems()
