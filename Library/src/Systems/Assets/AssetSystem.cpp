@@ -499,6 +499,7 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 										 std::nullopt,
 										 std::nullopt,
 										 std::nullopt,
+										 std::nullopt,
 										 PrototypeIds,
 										 std::nullopt,
 										 ResponseHandler);
@@ -575,6 +576,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,
 										 std::nullopt,
 										 AssetDetailTypes,
+										 std::nullopt,
 										 AssetDetailNames,
 										 std::nullopt,
 										 PrototypeIds,
@@ -606,7 +608,15 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 
 	// Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(std::nullopt, std::nullopt, std::nullopt, std::nullopt, std::nullopt, Ids, std::nullopt, ResponseHandler);
+		->apiV1PrototypesAssetDetailsGet(std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
+										 Ids,
+										 std::nullopt,
+										 ResponseHandler);
 }
 
 void AssetSystem::UploadAssetData(const AssetCollection& AssetCollection,
