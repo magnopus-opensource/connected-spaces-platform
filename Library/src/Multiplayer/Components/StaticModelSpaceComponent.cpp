@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 
 #include "Debug/Logging.h"
@@ -25,63 +26,75 @@ namespace csp::multiplayer
 
 StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::StaticModel, Parent)
 {
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId)]		   = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId)]	   = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]			   = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]			   = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]				   = csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]			   = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]			   = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]		   = true;
-    
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)]			  = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]						  = csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]						  = csp::common::Vector4::Identity();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]							  = csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]						  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]						  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)]			  = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]					  = true;
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }
 
-const csp::common::String& StaticModelSpaceComponent::GetModelAssetId() const
+
+/* IExternalResourceComponent */
+
+const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
 
-void StaticModelSpaceComponent::SetModelAssetId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ModelAssetId), Value);
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
-const csp::common::String& StaticModelSpaceComponent::GetAssetCollectionId() const
+
+const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
 
-void StaticModelSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
+void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::AssetCollectionId), Value);
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
+
+
+/* ITransformComponent */
 
 const csp::common::Vector3& StaticModelSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -90,15 +103,18 @@ void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position), Value);
 }
 
+
 const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -107,15 +123,18 @@ void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), Value);
 }
 
+
 const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -124,17 +143,38 @@ void StaticModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), Value);
 }
 
+
+SpaceTransform StaticModelSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void StaticModelSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
+
 /* IVisibleComponent */
 
 bool StaticModelSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -143,15 +183,18 @@ void StaticModelSpaceComponent::SetIsVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), InValue);
 }
 
+
 bool StaticModelSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
 	{
 		return RepVal.GetBool();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 
@@ -160,15 +203,18 @@ void StaticModelSpaceComponent::SetIsARVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue);
 }
 
+
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		return RepVal.GetString();
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -187,6 +233,7 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
 	}
 
 	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return false;
 }
 

@@ -32,6 +32,7 @@ public:
 	/// @brief Checks if the mesh casts shadows.
 	/// @return True if the mesh casts shadows.
 	virtual bool GetIsShadowCaster() const = 0;
+
 	/// @brief Sets if the mesh casts shadows.
 	/// @param InValue True to set the mesh to casts shadows.
 	virtual void SetIsShadowCaster(bool InValue) = 0;
