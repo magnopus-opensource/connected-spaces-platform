@@ -287,7 +287,7 @@ namespace CSPEngine
                 var component = e.arg1.GetComponent(componentKey);
                 var staticModel = component.As<Multiplayer.StaticModelSpaceComponent>();
 
-                Assert.AreEqual(staticModel.GetModelAssetId(), modelAssetId);
+                Assert.AreEqual(staticModel.GetExternalResourceAssetId(), modelAssetId);
 
                 gotUpdate = true;
             };
@@ -298,7 +298,7 @@ namespace CSPEngine
                 componentKey = component.GetId();
 
                 var staticModel = component.As<Multiplayer.StaticModelSpaceComponent>();
-                staticModel.SetModelAssetId(modelAssetId);
+                staticModel.SetExternalResourceAssetId(modelAssetId);
 
                 LogDebug("Sending entity update...");
 
