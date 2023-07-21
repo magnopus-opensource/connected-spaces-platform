@@ -53,11 +53,11 @@ class CSP_API TicketedEventResult : public csp::services::ResultBase
 	/** @endcond */
 
 public:
-	/// @brief Get the ticketed event from the result
+	/// @brief Get the ticketed event from the result.
 	/// @return The ticketed event.
 	TicketedEvent& GetTicketedEvent();
 
-	/// @brief Get the ticketed event from the result
+	/// @brief Get the ticketed event from the result.
 	/// @return The ticketed event.
 	const TicketedEvent& GetTicketedEvent() const;
 
@@ -69,8 +69,38 @@ private:
 	TicketedEvent Event;
 };
 
+/// @ingroup Event Ticketing System
+/// @brief Result class holding a TicketedEvent.
+class CSP_API TicketedEventCollectionResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Gets the array of ticketed events from the result.
+	/// @return The ticketed event.
+	csp::common::Array<TicketedEvent>& GetTicketedEvents();
+
+	/// @brief Gets the array of ticketed events from the result.
+	/// @return The ticketed event.
+	const csp::common::Array<TicketedEvent>& GetTicketedEvents() const;
+
+private:
+	TicketedEventCollectionResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::Array<TicketedEvent> Events;
+};
+
 
 // @brief Callback providing a ticketed event result.
 typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResultCallback;
+
+// @brief Callback providing a ticketed event collection result.
+typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
 
 } // namespace csp::systems

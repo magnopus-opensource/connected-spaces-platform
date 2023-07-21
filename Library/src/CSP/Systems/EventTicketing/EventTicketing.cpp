@@ -30,7 +30,6 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 	Event.IsTicketingActive = Dto.GetIsTicketingActive();
 }
 
-
 namespace csp::systems
 {
 
@@ -58,5 +57,40 @@ const TicketedEvent& TicketedEventResult::GetTicketedEvent() const
 {
 	return Event;
 }
+
+void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* TicketedEventCollectionResponse  = static_cast<csp::services::DtoArray<chs::SpaceEventDto>*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent());
+
+		// Extract data from the response into our Anchors array
+		std::vector<chs::SpaceEventDto>& DtoArray = TicketedEventCollectionResponse->GetArray();
+		Events									  = csp::common::Array<csp::systems::TicketedEvent>(DtoArray.size());
+
+		for (size_t idx = 0; idx < DtoArray.size(); ++idx)
+		{
+			SpaceEventDtoToTicketedEvent(DtoArray[idx], Events[idx]);
+		}
+	}
+}
+
+csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents()
+{
+	return Events;
+}
+
+const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() const
+{
+	return Events;
+}
+
+
 
 } // namespace csp::systems

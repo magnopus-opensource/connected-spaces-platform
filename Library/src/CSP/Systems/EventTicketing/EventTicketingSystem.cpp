@@ -71,4 +71,26 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesSpaceIdEventsPost(SpaceId, Request, ResponseHandler);
 }
 
+void EventTicketingSystem::GetTicketedEvents(const csp::common::String& SpaceId,
+											 const csp::common::Optional<int>& Skip,
+											 const csp::common::Optional<int>& Limit,
+											 TicketedEventCollectionResultCallback Callback)
+{
+	std::vector<csp::common::String> RequestSpaceIds;
+	RequestSpaceIds.reserve(1);
+	RequestSpaceIds.push_back(SpaceId);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<TicketedEventCollectionResultCallback,
+										   TicketedEventCollectionResult,
+										   void,
+										   csp::services::DtoArray<chs::SpaceEventDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+
+	auto RequestSkip  = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
+	auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
+		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
+}
+
 } // namespace csp::systems
