@@ -7,7 +7,7 @@ from copy import deepcopy
 from io import TextIOWrapper
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 
 from Config import config
 from MetadataTypes import *
@@ -42,7 +42,7 @@ def error_in_file(filename: str, line: int, message: str) -> None:
     sys.exit(1)
 
 
-def warning_in_file(filename: str, line: int, message: str) -> None:
+def warning_in_file(filename: str | None, line: int, message: str) -> None:
     print(f"{COLOUR_WARNING}** Warning in file: {filename} line: {line}  {message}{COLOUR_RESET}", file=sys.stderr)
 
 
@@ -151,6 +151,8 @@ class Parser:
             if function.parent_class.is_template_instance:
                 class_name += f"__{'_'.join([a.name for a in function.parent_class.template_arguments])}"
 
+            assert func_name is not None
+
             if func_name.startswith('operator'):
                 op = func_name[len('operator'):]
                 func_name = self.__OPERATOR_OVERLOAD_TRANSLATIONS[op]
@@ -164,6 +166,8 @@ class Parser:
 
             if function.is_const:
                 func_name += 'C'
+
+            assert function.namespace is not None
 
             unique_name = f"{function.namespace.replace('::', '_')}_{class_name}_{func_name}"
 
@@ -188,19 +192,20 @@ class Parser:
             else:
                 unique_name += '_void'
 
-        for p in function.parameters:
-            t = p.type
-            unique_name += '_' + t.name.replace('<', '__').replace('>', '__')
+        if function.parameters is not None:
+            for p in function.parameters:
+                t = p.type
+                unique_name += '_' + t.name.replace('<', '__').replace('>', '__')
 
-            if t.is_pointer_pointer:
-                unique_name += 'PP'
-            elif t.is_pointer:
-                unique_name += 'P'
-            elif t.is_reference:
-                unique_name += 'R'
-            
-            if t.is_const:
-                unique_name += 'C'
+                if t.is_pointer_pointer:
+                    unique_name += 'PP'
+                elif t.is_pointer:
+                    unique_name += 'P'
+                elif t.is_reference:
+                    unique_name += 'R'
+                
+                if t.is_const:
+                    unique_name += 'C'
         
         return unique_name
 
@@ -236,12 +241,12 @@ class Parser:
                 doc_comments.append(comment)
 
 
-    def __parse_type(self, reader: WordReader, word: str) -> tuple[TypeMetadata, str]:
+    def __parse_type(self, reader: WordReader, word: str) -> tuple[TypeMetadata | None, str]:
         is_const = False
         is_pointer = False
         is_pointer_pointer = False
         is_reference = False
-        function_signature: FunctionMetadata = None
+        function_signature: FunctionMetadata | None = None
         is_template = False
         template_arguments: List[TemplateArgumentMetadata] = []
         is_optional = False
@@ -303,13 +308,15 @@ class Parser:
                     word = reader.next_word()
 
                 param_type, word = self.__parse_type(reader, word)
-                param_name: str = None
+                param_name: str
 
                 if word == ',' or word == ')':
                     param_name = f"arg{i}"
                 else:
                     param_name = word
                     word = reader.next_word()
+                
+                assert param_type is not None
                 
                 parameters.append(ParameterMetadata(
                     name=param_name,
@@ -346,6 +353,8 @@ class Parser:
                     word = reader.next_word()
 
                 argument_type, word = self.__parse_type(reader, word)
+
+                assert argument_type is not None
 
                 template_arguments.append(TemplateArgumentMetadata(
                     type=argument_type
@@ -410,7 +419,7 @@ class Parser:
         self.indent += 1
 
         word = reader.next_word()
-        base: str = None
+        base: str | None = None
 
         if word == ':':
             base = reader.next_word()
@@ -428,7 +437,7 @@ class Parser:
         while word != '}':
             doc_comments: List[str] = []
 
-            if (word == '///'):
+            if word == '///':
                 # Hack to go back to beginning of comment... Required for __read_doc_comments
                 count = 0
                 i = -1
@@ -497,7 +506,7 @@ class Parser:
         )
 
 
-    def __parse_struct(self, filename: str, reader: WordReader) -> StructMetadata:
+    def __parse_struct(self, filename: str, reader: WordReader) -> StructMetadata | None:
         start_line = reader.current_line
 
         word = reader.next_word()
@@ -520,7 +529,7 @@ class Parser:
         log(f"Entering struct '{namespace}::{name}'", self.indent)
 
         word = reader.next_word()
-        base: str = None
+        base: str | None = None
 
         if word == ':':
             base = reader.next_word()
@@ -553,6 +562,9 @@ class Parser:
                     word = reader.next_word()
             else:
                 res = self.__parse_field(filename, reader, word, _struct)
+
+                assert res is not None
+
                 res.unique_getter_name = f"{res.namespace.replace('::', '_')}_{name}__Get_{res.name}"
                 res.unique_setter_name = f"{res.namespace.replace('::', '_')}_{name}__Set_{res.name}"
                 fields.append(res)
@@ -565,7 +577,7 @@ class Parser:
         self.indent += 1
 
         for f in fields:
-            log(f, self.indent)
+            log(str(f), self.indent)
 
         self.indent -=1
 
@@ -578,13 +590,15 @@ class Parser:
         return _struct
     
 
-    def __parse_field(self, filename: str, reader: WordReader, word: str, parent_type: Union[ClassMetadata, StructMetadata]) -> FieldMetadata:
+    def __parse_field(self, filename: str, reader: WordReader, word: str, parent_type: Union[ClassMetadata, StructMetadata]) -> FieldMetadata | None:
         is_static = False
 
         field_type, word = self.__parse_type(reader, word)
 
         if word == ';': # forward declaration
             return None
+        
+        assert field_type is not None
         
         if field_type.is_inline_forward:
             #warning_in_file(get_rel_path(filename), reader.current_line, "Inline forward declarations are supported, but should not be used in Foundation code. Please consider moving forward declarations to the top of the file.")
@@ -638,7 +652,9 @@ class Parser:
         
         return_type, word = self.__parse_type(reader, word)
 
-        if (word == '('):
+        if word == '(':
+            assert return_type is not None
+
             # Constructor/Destructor
             word = return_type.name
             return_type = None
@@ -673,6 +689,8 @@ class Parser:
         if name.startswith('operator'):
             _function.is_operator_overload = True
 
+            assert _function.name is not None
+
             if name == 'operator' and reader.peek_char() == '(':
                 _function.name = 'operator()'
                 reader.next_word()  # '('
@@ -686,6 +704,8 @@ class Parser:
             # TODO: Add support for all operators
             if operator == '[]':
                 _function.is_index_operator = True
+
+                assert return_type is not None
 
                 if not return_type.is_reference:
                     error_in_file(filename, reader.current_line, "Subscript/Index operator overload should return a reference so that the value is modifiable.")
@@ -721,13 +741,15 @@ class Parser:
                 word = reader.next_word()
 
             param_type, word = self.__parse_type(reader, word)
-            param_name: str = None
+            param_name: str
 
             if word == ',' or word == ')':
                 param_name = f"arg{i}"
             else:
                 param_name = word
                 word = reader.next_word()
+            
+            assert param_type is not None
             
             parameters.append(ParameterMetadata(
                 name=param_name,
@@ -795,7 +817,7 @@ class Parser:
         return _function
 
 
-    def __parse_class(self, filename: str, reader: WordReader, nested: bool = False) -> ClassMetadata:
+    def __parse_class(self, filename: str, reader: WordReader, nested: bool = False) -> ClassMetadata | None:
         start_line = reader.current_line
 
         if not nested:
@@ -839,6 +861,9 @@ class Parser:
                     word = reader.next_word()
 
                 inherited_type, word = self.__parse_type(reader, word)
+
+                assert inherited_type is not None
+
                 inherits_from.append(inherited_type)
 
                 log(f"Inherited Type: {inherited_type}", self.indent)
@@ -945,6 +970,8 @@ class Parser:
                 word = reader.next_word()
 
                 if modifier == AccessModifier.PUBLIC:
+                    assert typedef_type is not None
+
                     typedef = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
                         name=typedef_name,
@@ -967,6 +994,8 @@ class Parser:
                 alias_type, word = self.__parse_type(reader, word)
                 
                 if modifier == AccessModifier.PUBLIC:
+                    assert alias_type is not None
+
                     alias = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
                         name=alias_name,
@@ -1124,7 +1153,7 @@ class Parser:
         self.indent += 1
 
         for f in fields:
-            log(f, self.indent)
+            log(str(f), self.indent)
 
         self.indent -=1
 
@@ -1132,7 +1161,7 @@ class Parser:
         self.indent += 1
 
         for m in methods:
-            log(m, self.indent)
+            log(str(m), self.indent)
 
         self.indent -=1
 
@@ -1144,7 +1173,7 @@ class Parser:
         return _class
     
 
-    def __parse_interface(self, filename: str, reader: WordReader, nested: bool = False) -> ClassMetadata:
+    def __parse_interface(self, filename: str, reader: WordReader, nested: bool = False) -> InterfaceMetadata | None:
         word = reader.next_word()
 
         if word != 'class':
@@ -1165,7 +1194,7 @@ class Parser:
             error_in_file(filename, _class.start_line, 'Interfaces must be pure virtual classes.')
         
         if _class.has_base_type:
-            error_in_file(filename, _class.start_line, 'Interfaces must not inherit from any other types.')
+            error_in_file(filename, _class.start_line, 'Interfaces must not inherit from any types except other interfaces.')
         
         destructor_found = False
         
@@ -1181,6 +1210,23 @@ class Parser:
         
         if not destructor_found:
             error_in_file(filename, _class.start_line, 'Interfaces must define a virtual destructor.')
+        
+        interfaces: List[ClassInterfaceMetadata] | None = None
+        has_interfaces: bool = False
+        
+        if _class.inherits_from is not None and len(_class.inherits_from) > 0:
+            interfaces = []
+            has_interfaces = True
+
+            for i in _class.inherits_from:
+                interfaces.append(
+                    ClassInterfaceMetadata(
+                        name = i.name,
+                        type = i
+                    )
+                )
+            
+            interfaces[-1].is_last = True
 
         return InterfaceMetadata(
             header_file=_class.header_file,
@@ -1190,11 +1236,13 @@ class Parser:
             name=_class.name,
             methods=_class.methods,
             is_nested_type=_class.is_nested_type,
-            full_safe_type_name=_class.full_safe_type_name
+            full_safe_type_name=_class.full_safe_type_name,
+            interfaces=interfaces,
+            has_interfaces=has_interfaces
         )
     
 
-    def __find_type_namespace(self, name: str, current_namespace: str, types: Dict[str, any]) -> str:
+    def __find_type_namespace(self, name: str, current_namespace: str, types: Dict[str, Any]) -> str | None:
         while True:
             full_type_name = f"{current_namespace}::{name}"
 
@@ -1214,7 +1262,7 @@ class Parser:
             current_namespace = current_namespace[:pos]
     
 
-    def __find_and_set_type_namespace(self, object_: any, object_type: TypeMetadata, parent_namespace: str, types: Dict[str, any]) -> None:
+    def __find_and_set_type_namespace(self, object_: Any, object_type: TypeMetadata, parent_namespace: str, types: Dict[str, Any]) -> None:
         if object_type.namespace == '':
             object_type.namespace = self.__find_type_namespace(object_type.name, parent_namespace, types)
         
@@ -1225,11 +1273,13 @@ class Parser:
             object_type.namespace = self.__find_type_namespace(object_type.name, parent_namespace, self.templates)
         
         if object_type.is_template:
+            assert object_type.template_arguments is not None
+
             for a in object_type.template_arguments:
                 if a.type.namespace == '':
                     a.type.namespace = self.__find_type_namespace(a.type.name, parent_namespace, types)
         
-        full_type_name: str = None
+        full_type_name: str
 
         if object_type.namespace != None:
             full_type_name = f"{object_type.namespace}::{object_type.name}"
@@ -1243,6 +1293,8 @@ class Parser:
             object_type.is_string = td.type.is_string
 
             if td.type.is_function_signature:
+                assert td.type.function_signature is not None
+
                 object_type.is_function_signature = True
                 object_type.function_signature = deepcopy(td.type.function_signature)
 
@@ -1250,10 +1302,13 @@ class Parser:
                     object_type.function_signature.doc_comments = td.doc_comments
             
         if object_type.is_function_signature:
+            assert object_type.function_signature is not None
+
             object_type.function_signature.name = object_.name
 
-            for p in object_type.function_signature.parameters:
-                self.__find_and_set_type_namespace(p, p.type, parent_namespace, types)
+            if object_type.function_signature.parameters is not None:
+                for p in object_type.function_signature.parameters:
+                    self.__find_and_set_type_namespace(p, p.type, parent_namespace, types)
         
         if full_type_name not in types:
             return
@@ -1264,12 +1319,14 @@ class Parser:
             self.__find_and_set_type_namespace(object_type_type, object_type_type.base, object_type_type.namespace, types)
 
 
-    def __find_and_set_templated_type(self, object_type: TypeMetadata, parent_namespace: str, types: Dict[str, any]) -> None:
+    def __find_and_set_templated_type(self, object_type: TypeMetadata, parent_namespace: str, types: Dict[str, Any]) -> None:
         template_name = f"{object_type.namespace}::{object_type.name}"
         template = self.templates[template_name]
 
         if template.instances == None:
             template.instances = []
+        
+        assert object_type.template_arguments is not None
 
         template_arguments = deepcopy(object_type.template_arguments)
 
@@ -1482,7 +1539,9 @@ class Parser:
                     word = reader.next_word()
                     typedef_type, word = self.__parse_type(reader, word)
                     typedef_name = word
-                    word = reader.next_word()                   
+                    word = reader.next_word()
+
+                    assert typedef_type is not None
 
                     typedef = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
@@ -1500,6 +1559,8 @@ class Parser:
                     reader.next_word()  # '='
                     word = reader.next_word()
                     alias_type, word = self.__parse_type(reader, word)
+
+                    assert alias_type is not None
 
                     alias = TypedefMetadata(
                         namespace='::'.join(self.namespaces),
@@ -1533,6 +1594,9 @@ class Parser:
 
                     if word == 'class':
                         res = self.__parse_class(h, reader)
+
+                        assert res is not None
+
                         self.templates[f"{res.namespace}::{res.name}"] = TemplateMetadata(
                             definition=res,
                             template_parameters=parameters
@@ -1574,12 +1638,17 @@ class Parser:
             if not t.type.is_function_signature:
                 continue
 
-            for p in t.type.function_signature.parameters:
-                if p.type.is_template:
-                    self.__find_and_set_templated_type(p.type, t.namespace, types)
+            assert t.type.function_signature is not None
 
-                    for ta in p.type.template_arguments:
-                        self.__set_type_classification(ta.type)
+            if t.type.function_signature.parameters is not None:
+                for p in t.type.function_signature.parameters:
+                    if p.type.is_template:
+                        self.__find_and_set_templated_type(p.type, t.namespace, types)
+
+                        assert p.type.template_arguments is not None 
+
+                        for ta in p.type.template_arguments:
+                            self.__set_type_classification(ta.type)
 
         # Add template instances for parameters in class functions and class fields
         for c in self.classes.values():
@@ -1587,9 +1656,10 @@ class Parser:
                 if m.return_type != None and m.return_type.is_template:
                     self.__find_and_set_templated_type(m.return_type, c.namespace, types)
                 
-                for p in m.parameters:
-                    if p.type.is_template:
-                        self.__find_and_set_templated_type(p.type, c.namespace, types)
+                if m.parameters is not None:
+                    for p in m.parameters:
+                        if p.type.is_template:
+                            self.__find_and_set_templated_type(p.type, c.namespace, types)
             
             for f in c.fields:
                 if f.type.is_template:
@@ -1606,18 +1676,23 @@ class Parser:
                         m.return_type.is_template_argument = True
                     
                     if m.return_type.is_template:
+                        assert m.return_type.template_arguments is not None
+
                         for ta in m.return_type.template_arguments:
                             if any(ta.type.name == tp.name for tp in t.template_parameters):
                                 ta.type.is_template_argument = True
                 
-                for p in m.parameters:
-                    if any(p.type.name == tp.name for tp in t.template_parameters):
-                        p.type.is_template_argument = True
+                if m.parameters is not None:
+                    for p in m.parameters:
+                        if any(p.type.name == tp.name for tp in t.template_parameters):
+                            p.type.is_template_argument = True
 
-                    if p.type.is_template:
-                        for ta in p.type.template_arguments:
-                            if any(ta.type.name == tp.name for tp in t.template_parameters):
-                                ta.type.is_template_argument = True
+                        if p.type.is_template:
+                            assert p.type.template_arguments is not None
+
+                            for ta in p.type.template_arguments:
+                                if any(ta.type.name == tp.name for tp in t.template_parameters):
+                                    ta.type.is_template_argument = True
 
         # Stage 3 processing (type namespaces)
         for t in self.typedefs.values():
@@ -1628,9 +1703,40 @@ class Parser:
                 self.__find_and_set_type_namespace(f, f.return_type, f.namespace, types)
                 self.__set_type_classification(f.return_type)
             
-            for p in f.parameters:
-                self.__find_and_set_type_namespace(p, p.type, f.namespace, types)
-                self.__set_type_classification(p.type)
+            if f.parameters is not None:
+                for p in f.parameters:
+                    self.__find_and_set_type_namespace(p, p.type, f.namespace, types)
+                    self.__set_type_classification(p.type)
+
+        for i in self.interfaces.values():
+            for m in i.methods:
+                if m.return_type != None:
+                    self.__find_and_set_type_namespace(m, m.return_type, f"{i.namespace}::{i.name}", types)
+                    self.__set_type_classification(m.return_type)
+
+                    if m.return_type.is_template and not m.return_type.template_arguments is None:
+                        for a in m.return_type.template_arguments:
+                            self.__set_safe_type_name(a)
+                
+                if m.parameters is not None:
+                    for p in m.parameters:
+                        self.__find_and_set_type_namespace(p, p.type, f"{i.namespace}::{i.name}", types)
+                        self.__set_type_classification(p.type)
+
+                        if p.type.is_function_signature and not p.type.function_signature is None:
+                            if p.type.function_signature.parameters is not None:
+                                for fp in p.type.function_signature.parameters:
+                                    self.__find_and_set_type_namespace(fp, fp.type, f"{i.namespace}::{i.name}", types)
+                                    self.__set_type_classification(fp.type)
+
+                                    if fp.type.is_template and not fp.type.template_arguments is None:
+                                        for fpp in fp.type.template_arguments:
+                                            self.__set_safe_type_name(fpp)
+            
+            if i.interfaces is not None:
+                for ii in i.interfaces:
+                    self.__find_and_set_type_namespace(ii, ii.type, f"{i.namespace}::{i.name}", types)
+                    self.__set_type_classification(ii.type)
         
         for c in self.classes.values():
             for i in c.inherits_from:
@@ -1672,6 +1778,18 @@ class Parser:
                                 found_implementation = True
                                 break
                         
+                        # Also look for function declaration in interface interfaces
+                        # TODO: Break this logic off into its own function to allow recursion
+                        if interface.interfaces is not None:
+                            for ii in interface.interfaces:
+                                _interface = self.interfaces[f"{ii.type.namespace}::{ii.type.name}"]
+
+                                for im in _interface.methods:
+                                    if im.name == m.name:
+                                        m.is_interface_implementation = True
+                                        found_implementation = True
+                                        break
+                        
                         if found_implementation:
                             break
 
@@ -1685,18 +1803,20 @@ class Parser:
                             self.__set_type_classification(a.type)
                             self.__set_safe_type_name(a)
                 
-                for p in m.parameters:
-                    self.__find_and_set_type_namespace(p, p.type, f"{c.namespace}::{c.name}", types)
-                    self.__set_type_classification(p.type)
+                if m.parameters is not None:
+                    for p in m.parameters:
+                        self.__find_and_set_type_namespace(p, p.type, f"{c.namespace}::{c.name}", types)
+                        self.__set_type_classification(p.type)
 
-                    if p.type.is_function_signature and not p.type.function_signature is None:
-                        for fp in p.type.function_signature.parameters:
-                            self.__find_and_set_type_namespace(fp, fp.type, f"{c.namespace}::{c.name}", types)
-                            self.__set_type_classification(fp.type)
+                        if p.type.is_function_signature and not p.type.function_signature is None:
+                            if p.type.function_signature.parameters is not None:
+                                for fp in p.type.function_signature.parameters:
+                                    self.__find_and_set_type_namespace(fp, fp.type, f"{c.namespace}::{c.name}", types)
+                                    self.__set_type_classification(fp.type)
 
-                            if fp.type.is_template and not fp.type.template_arguments is None:
-                                for fpp in fp.type.template_arguments:
-                                    self.__set_safe_type_name(fpp)
+                                    if fp.type.is_template and not fp.type.template_arguments is None:
+                                        for fpp in fp.type.template_arguments:
+                                            self.__set_safe_type_name(fpp)
 
             for f in c.fields:
                 self.__find_and_set_type_namespace(f, f.type, f"{c.namespace}::{c.name}", types)
@@ -1745,35 +1865,13 @@ class Parser:
                         
                         m.return_type.template_safe_type_name = template.definition.full_safe_type_name
                 
-                for p in m.parameters:
-                    if p.type.is_template_argument:
-                        continue
+                if m.parameters is not None:
+                    for p in m.parameters:
+                        if p.type.is_template_argument:
+                            continue
 
-                    self.__find_and_set_type_namespace(p, p.type, f"{t.definition.namespace}::{t.definition.name}", types)
-                    self.__set_type_classification(p.type)
-        
-        for i in self.interfaces.values():
-            for m in i.methods:
-                if m.return_type != None:
-                    self.__find_and_set_type_namespace(m, m.return_type, f"{i.namespace}::{i.name}", types)
-                    self.__set_type_classification(m.return_type)
-
-                    if m.return_type.is_template and not m.return_type.template_arguments is None:
-                        for a in m.return_type.template_arguments:
-                            self.__set_safe_type_name(a)
-                
-                for p in m.parameters:
-                    self.__find_and_set_type_namespace(p, p.type, f"{i.namespace}::{i.name}", types)
-                    self.__set_type_classification(p.type)
-
-                    if p.type.is_function_signature and not p.type.function_signature is None:
-                        for fp in p.type.function_signature.parameters:
-                            self.__find_and_set_type_namespace(fp, fp.type, f"{i.namespace}::{i.name}", types)
-                            self.__set_type_classification(fp.type)
-
-                            if fp.type.is_template and not fp.type.template_arguments is None:
-                                for fpp in fp.type.template_arguments:
-                                    self.__set_safe_type_name(fpp)
+                        self.__find_and_set_type_namespace(p, p.type, f"{t.definition.namespace}::{t.definition.name}", types)
+                        self.__set_type_classification(p.type)
         
         # Stage 4 processing (further template processing)
         # Add template instances for return types that are templates
@@ -1788,6 +1886,8 @@ class Parser:
                     if m.return_type != None and m.return_type.is_template and not m.return_type.template_arguments is None:
                         return_type = deepcopy(m.return_type)   # Create a copy, as we don't want to actually modify the return type, but instead only add an instance for it
                         index = 0
+
+                        assert return_type.template_arguments is not None
 
                         for a in return_type.template_arguments:
                             tp_type = next((x for x in i.arguments if x.parameter_name == a.type.name), None)
