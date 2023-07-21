@@ -7,6 +7,12 @@
 
     {{> DocComments }}
     public interface {{ name }}
+{{# has_interfaces }}
+        :
+{{# interfaces }}
+        {{# type }}{{> Type }}{{/ type }}{{> Comma }}
+{{/ interfaces }}
+{{/ has_interfaces }}
     {
 {{# methods }}
         {{> Interface/Method }}

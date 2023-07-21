@@ -7,16 +7,21 @@
      */
     public interface IMultiplayerTestClient
     {
-        bool Login(string Login, string Password);
-        void ConnectToSpace(string SpaceId, bool EnableLeaderElection);
-        void CreateAvatar(string avatarName, string avatarId);
-        void DestroyAvatar();
-        void Tick();
-        
-        void Disconnect();
-        void Logout();
-        
-        void Close();
+        public abstract bool Login(string login, string password);
+        public abstract void ConnectToSpace(string spaceId);
+        public abstract void CreateAvatar(string avatarName, string avatarId);
+        public abstract void DestroyAvatar();
+        public abstract void Tick(int frameCount);
+
+        public abstract bool IsTheLeader();
+
+        public abstract void CreateMultiProcessTestScript();
+        public abstract void SimulateLeaderLost();
+
+        public abstract void Disconnect();
+        public abstract void Logout();
+
+        public abstract void Close();
     }
 
 }
