@@ -84,7 +84,7 @@ void
 {{/ type.is_function_signature }}
 {{/ parameters }}
 {{# has_return }}
-    return
+    auto _result =
 {{# return_type.is_pointer_or_reference }}
 {{# return_type.is_primitive }}
 {{# return_type.is_const }}
@@ -199,14 +199,29 @@ void
     ), true }
 {{/ return_type.is_class_or_interface }}
 {{/ return_type.is_pointer_or_reference }}
-{{# return_type.is_string }}
-{{# return_type.is_pointer }}
-    ->c_str()
-{{/ return_type.is_pointer }}
-{{^ return_type.is_pointer }}
-    .c_str()
-{{/ return_type.is_pointer }}
-{{/ return_type.is_string }}
 {{/ has_return }}
     ;
+
+{{! Copy strings }}
+{{# has_return }}
+{{# return_type }}
+{{# is_string }}
+{{# is_pointer }}
+    auto _cstr = _result->c_str();
+{{/ is_pointer }}
+{{^ is_pointer }}
+    auto _cstr = _result.c_str();
+{{/ is_pointer }}
+
+    auto _resultCopy = CSP_NEW char[_result.Length() + 1];
+    std::memcpy(_resultCopy, _cstr, _result.Length());
+    _resultCopy[_result.Length()] = '\0';
+
+    return _resultCopy;
+{{/ is_string }}
+{{^ is_string }}
+    return _result;
+{{/ is_string }}
+{{/ return_type }}
+{{/ has_return }}
 }
