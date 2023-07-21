@@ -22,7 +22,8 @@ namespace csp::systems
 
 enum class EventTicketingVendor
 {
-	Eventbrite = 0
+	Eventbrite = 0,
+	Unknown
 };
 
 /// @ingroup Event Ticketing System
@@ -30,7 +31,7 @@ enum class EventTicketingVendor
 class CSP_API TicketedEvent
 {
 public:
-	TicketedEvent() {};
+	TicketedEvent() : Vendor(EventTicketingVendor::Unknown), IsTicketingActive(false) {};
 
 	csp::common::String Id;
 	csp::common::String SpaceId;
@@ -42,7 +43,7 @@ public:
 
 
 /// @ingroup Event Ticketing System
-/// @brief Data class used to contain information after creating or retrieving an Anchor.
+/// @brief Result class holding a TicketedEvent.
 class CSP_API TicketedEventResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
