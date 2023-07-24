@@ -206,3 +206,405 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_NO_EVENTS_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId  = "TestVendorEventId";
+	csp::common::String TestVendorEventUri = "TestVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetTicketedEvents().Size(), 0);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_ONE_EVENT_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId  = "TestVendorEventId";
+	csp::common::String TestVendorEventUri = "TestVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreateEventResult] = AWAIT_PRE(EventTicketingSystem,
+										 CreateTicketedEvent,
+										 RequestPredicate,
+										 Space.Id,
+										 csp::systems::EventTicketingVendor::Eventbrite,
+										 TestVendorEventId,
+										 TestVendorEventUri,
+										 false);
+	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetTicketedEvents().Size(), 1);
+
+	auto Event = Result.GetTicketedEvents()[0];
+
+	EXPECT_EQ(Event.Id, CreateEventResult.GetTicketedEvent().Id);
+	EXPECT_EQ(Event.SpaceId, Space.Id);
+	EXPECT_EQ(Event.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+	EXPECT_EQ(Event.VendorEventId, TestVendorEventId);
+	EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri);
+	EXPECT_FALSE(Event.IsTicketingActive);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_TWO_EVENTS_SAME_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEventsSameSpaceTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
+	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
+
+	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
+	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId1,
+										  TestVendorEventUri1,
+										  true);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event1 = CreateEventResult1.GetTicketedEvent();
+
+	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId2,
+										  TestVendorEventUri2,
+										  false);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event2 = CreateEventResult2.GetTicketedEvent();
+
+	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto Events = Result.GetTicketedEvents();
+
+	EXPECT_EQ(Result.GetTicketedEvents().Size(), 2);
+
+	bool FoundFirst		 = false;
+	bool FoundSecond	 = false;
+	bool FoundUnexpected = false;
+
+	for (auto i = 0; i < Events.Size(); ++i)
+	{
+		auto Event = Result.GetTicketedEvents()[i];
+
+		EXPECT_EQ(Event.SpaceId, Space.Id);
+		EXPECT_EQ(Event.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+
+		if (Event.Id == Event1.Id)
+		{
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId1);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri1);
+			EXPECT_TRUE(Event.IsTicketingActive);
+			FoundFirst = true;
+		}
+		else if (Event.Id == Event2.Id)
+		{
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId2);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri2);
+			EXPECT_FALSE(Event.IsTicketingActive);
+			FoundSecond = true;
+		}
+		else
+		{
+			FoundUnexpected = true;
+		}
+	}
+
+	EXPECT_TRUE(FoundFirst);
+	EXPECT_TRUE(FoundSecond);
+	EXPECT_FALSE(FoundUnexpected);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_TWO_EVENTS_TWO_SPACES_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEventsTwoSpacesTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
+	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
+
+	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
+	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName1[256];
+	SPRINTF(UniqueSpaceName1, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	char UniqueSpaceName2[256];
+	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space1;
+	CreateSpace(SpaceSystem, UniqueSpaceName1, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space1);
+	csp::systems::Space Space2;
+	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space2);
+
+	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space1.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId1,
+										  TestVendorEventUri1,
+										  true);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event1 = CreateEventResult1.GetTicketedEvent();
+
+	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space2.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId2,
+										  TestVendorEventUri2,
+										  false);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event2 = CreateEventResult2.GetTicketedEvent();
+
+	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space1.Id, Space2.Id}, nullptr, nullptr);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto Events = Result.GetTicketedEvents();
+
+	EXPECT_EQ(Result.GetTicketedEvents().Size(), 2);
+
+	bool FoundFirst		 = false;
+	bool FoundSecond	 = false;
+	bool FoundUnexpected = false;
+
+	for (auto i = 0; i < Events.Size(); ++i)
+	{
+		auto Event = Result.GetTicketedEvents()[i];
+
+		EXPECT_EQ(Event.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+
+		if (Event.Id == Event1.Id)
+		{
+			EXPECT_EQ(Event.SpaceId, Space1.Id);
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId1);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri1);
+			EXPECT_TRUE(Event.IsTicketingActive);
+			FoundFirst = true;
+		}
+		else if (Event.Id == Event2.Id)
+		{
+			EXPECT_EQ(Event.SpaceId, Space2.Id);
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId2);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri2);
+			EXPECT_FALSE(Event.IsTicketingActive);
+			FoundSecond = true;
+		}
+		else
+		{
+			FoundUnexpected = true;
+		}
+	}
+
+	EXPECT_TRUE(FoundFirst);
+	EXPECT_TRUE(FoundSecond);
+	EXPECT_FALSE(FoundUnexpected);
+
+	DeleteSpace(SpaceSystem, Space1.Id);
+	DeleteSpace(SpaceSystem, Space2.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_PAGINATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginationTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
+	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
+
+	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
+	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId1,
+										  TestVendorEventUri1,
+										  true);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event1 = CreateEventResult1.GetTicketedEvent();
+
+	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
+										  CreateTicketedEvent,
+										  RequestPredicate,
+										  Space.Id,
+										  csp::systems::EventTicketingVendor::Eventbrite,
+										  TestVendorEventId2,
+										  TestVendorEventUri2,
+										  false);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event2 = CreateEventResult2.GetTicketedEvent();
+
+	bool FoundFirst		 = false;
+	bool FoundSecond	 = false;
+	bool FoundUnexpected = false;
+
+	auto [GetResult1] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 0, 1);
+
+	EXPECT_EQ(GetResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult1.GetTicketedEvents().Size(), 1);
+
+	auto GetEvent1 = GetResult1.GetTicketedEvents()[0];
+
+	if (GetEvent1.Id == Event1.Id)
+	{
+		FoundFirst = true;
+	}
+	else if (GetEvent1.Id == Event2.Id)
+	{
+		FoundSecond = true;
+	}
+	else
+	{
+		FoundUnexpected = true;
+	}
+
+	auto [GetResult2] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 1, 1);
+
+	EXPECT_EQ(GetResult2.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult2.GetTicketedEvents().Size(), 1);
+
+	auto GetEvent2 = GetResult2.GetTicketedEvents()[0];
+
+	if (GetEvent2.Id == Event1.Id)
+	{
+		FoundFirst = true;
+	}
+	else if (GetEvent2.Id == Event2.Id)
+	{
+		FoundSecond = true;
+	}
+	else
+	{
+		FoundUnexpected = true;
+	}
+
+	EXPECT_TRUE(FoundFirst);
+	EXPECT_TRUE(FoundSecond);
+	EXPECT_FALSE(FoundUnexpected);
+
+	auto [GetResult3] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 2, 1);
+
+	EXPECT_EQ(GetResult3.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult3.GetTicketedEvents().Size(), 0);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
