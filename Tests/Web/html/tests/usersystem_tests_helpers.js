@@ -10,19 +10,19 @@ export var ALT_LOGIN_PASSWORD;
 fetch("/assets/test_account_creds.txt")
   .then((res) => res.text())
   .then((text) => {
-    const accounts = text.split(/ |\n/)
-    if(accounts.length == 4){
-        DEFAULT_LOGIN_EMAIL = accounts[0];
-        DEFAULT_LOGIN_PASSWORD = accounts[1];
-        ALT_LOGIN_EMAIL = accounts[2];
-        ALT_LOGIN_PASSWORD = accounts[3];
+    const Accounts = text.split(/ |\n/)
+    if(Accounts.length == 4){
+        DEFAULT_LOGIN_EMAIL = Accounts[0];
+        DEFAULT_LOGIN_PASSWORD = Accounts[1];
+        ALT_LOGIN_EMAIL = Accounts[2];
+        ALT_LOGIN_PASSWORD = Accounts[3];
 
     }else{
-        throw "test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>";
+        throw "test_account_creds.txt formatted incorrectly. This file must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>";
     }
 
    })
-  .catch((e) => console.error(e));
+  .catch((e) => console.error("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>"));
 
 /**
  * 
