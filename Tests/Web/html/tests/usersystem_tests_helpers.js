@@ -10,13 +10,12 @@ export var ALT_LOGIN_PASSWORD;
 fetch("/assets/test_account_creds.txt")
   .then((res) => res.text())
   .then((text) => {
-    const Accounts = text.split(/ |\n/)
+    const Accounts = text.split(/\s+/)
     if(Accounts.length == 4){
         DEFAULT_LOGIN_EMAIL = Accounts[0];
         DEFAULT_LOGIN_PASSWORD = Accounts[1];
         ALT_LOGIN_EMAIL = Accounts[2];
         ALT_LOGIN_PASSWORD = Accounts[3];
-
     }else{
         throw "test_account_creds.txt formatted incorrectly. This file must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>";
     }
