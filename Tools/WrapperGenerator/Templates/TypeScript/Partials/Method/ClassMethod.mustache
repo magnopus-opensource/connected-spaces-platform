@@ -128,7 +128,12 @@
         "number",
 {{/ is_enum }}
 {{^ is_enum }}
+{{# is_string }}
+        "number",
+{{/ is_string }}
+{{^ is_string }}
         "{{ name }}",
+{{/ is_string }}
 {{/ is_enum }}
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
@@ -276,6 +281,13 @@
 {{/ is_signed }}
 {{/ is_integer }}
 {{/ is_number }}
+
+{{# is_string }}
+    const _resultString = Module.UTF8ToString(_result);
+    free(_result);
+
+    _result = _resultString;
+{{/ is_string }}
 
 {{^ is_void }}
     return _result;

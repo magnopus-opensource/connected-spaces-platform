@@ -84,14 +84,11 @@ export class {{ name }}
         );
 
 {{# type.is_integer }}
-{{# type.is_signed }}
-        return _result;
-{{/ type.is_signed }}
 {{^ type.is_signed }}
         const _unfixedValue = _result;
         {{# type }}{{> UnsignedFix }}{{/ type }}
         
-        return _fixedValue;
+        _result = _fixedValue;
 {{/ type.is_signed }}
 {{/ type.is_integer }}
 

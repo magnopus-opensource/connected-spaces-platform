@@ -2,6 +2,6 @@
     {% if use_epsilon %}
         Assert.IsTrue({{ var_name }}.NearlyEquals({{ expected_value }}));
     {% else %}
-        Assert.AreEqual({{ var_name }}, {{ expected_value }});
+        Assert.AreEqual({{ expected_value }}, {{ var_name }});
     {% endif %}
 {%- endmacro -%}
