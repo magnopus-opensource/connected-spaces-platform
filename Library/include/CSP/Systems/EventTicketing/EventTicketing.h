@@ -81,11 +81,11 @@ class CSP_API TicketedEventCollectionResult : public csp::services::ResultBase
 
 public:
 	/// @brief Gets the array of ticketed events from the result.
-	/// @return The ticketed event.
+	/// @return The array of ticketed events.
 	csp::common::Array<TicketedEvent>& GetTicketedEvents();
 
 	/// @brief Gets the array of ticketed events from the result.
-	/// @return The ticketed event.
+	/// @return The array of ticketed events.
 	const csp::common::Array<TicketedEvent>& GetTicketedEvents() const;
 
 private:

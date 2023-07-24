@@ -71,14 +71,18 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesSpaceIdEventsPost(SpaceId, Request, ResponseHandler);
 }
 
-void EventTicketingSystem::GetTicketedEvents(const csp::common::String& SpaceId,
+void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::common::String>& SpaceIds,
 											 const csp::common::Optional<int>& Skip,
 											 const csp::common::Optional<int>& Limit,
 											 TicketedEventCollectionResultCallback Callback)
 {
 	std::vector<csp::common::String> RequestSpaceIds;
-	RequestSpaceIds.reserve(1);
-	RequestSpaceIds.push_back(SpaceId);
+	RequestSpaceIds.reserve(SpaceIds.Size());
+
+	for (auto i = 0; i < SpaceIds.Size(); ++i)
+	{
+		RequestSpaceIds.push_back(SpaceIds[i]);
+	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI->CreateHandler<TicketedEventCollectionResultCallback,
@@ -86,8 +90,8 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::String& SpaceId,
 										   void,
 										   csp::services::DtoArray<chs::SpaceEventDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	auto RequestSkip  = Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
-	auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
+	const auto RequestSkip	= Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
+	const auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);

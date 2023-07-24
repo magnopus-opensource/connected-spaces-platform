@@ -48,9 +48,11 @@ public:
 											  TicketedEventResultCallback Callback);
 
 	/// @brief Creates a ticketed event for the given space.
-	/// @param SpaceId csp::common::String : ID of the space to create the event for.
+	/// @param SpaceIds csp::common::Array<csp::common::String> : IDs of the spaces to get the events for.
+	/// @param Skip csp::common::Optional<int> : Optional number of results that will be skipped from the result.
+	/// @param Limit csp::common::Optional<int> : Optional maximum number of results to be retrieved.
 	/// @param Callback TicketedEventCollectionResultCallback : Callback providing the TicketedEvents for the space.
-	CSP_ASYNC_RESULT void GetTicketedEvents(const csp::common::String& SpaceId,
+	CSP_ASYNC_RESULT void GetTicketedEvents(const csp::common::Array<csp::common::String>& SpaceIds,
 											const csp::common::Optional<int>& Skip,
 											const csp::common::Optional<int>& Limit,
 											TicketedEventCollectionResultCallback Callback);

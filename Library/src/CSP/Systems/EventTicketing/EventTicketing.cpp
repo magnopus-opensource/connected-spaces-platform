@@ -67,12 +67,10 @@ void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseB
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
-		// Build the Dto from the response Json
 		TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent());
 
-		// Extract data from the response into our Anchors array
-		std::vector<chs::SpaceEventDto>& DtoArray = TicketedEventCollectionResponse->GetArray();
-		Events									  = csp::common::Array<csp::systems::TicketedEvent>(DtoArray.size());
+		const std::vector<chs::SpaceEventDto>& DtoArray = TicketedEventCollectionResponse->GetArray();
+		Events											= csp::common::Array<csp::systems::TicketedEvent>(DtoArray.size());
 
 		for (size_t idx = 0; idx < DtoArray.size(); ++idx)
 		{
@@ -90,7 +88,5 @@ const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicke
 {
 	return Events;
 }
-
-
 
 } // namespace csp::systems
