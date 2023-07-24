@@ -401,4 +401,114 @@ namespace csp {
     private:
         MyReallyCoolClass Class_Field;
     };
+
+
+    /// Parameter types
+
+    // Primitives
+
+    class CSP_API PrimitiveParameterTestClass {
+    public:
+        {% for p in config.primitives %}
+            // Pass {{ p.type }} min value by value
+            void ClassFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.type }} Value);
+
+            // Pass {{ p.type }} max value by value
+            void ClassFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.type }} Value);
+
+            {# TODO: Add support for out and in-out params in class methods #}
+            {# // Get {{ p.type }} min value via out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_min(CSP_OUT {{ p.type }}& OutValue);
+
+            // Get {{ p.type }} max value via out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_max(CSP_OUT {{ p.type }}& OutValue);
+
+            // Get {{ p.type }} min and max values via out parameters
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax(
+                CSP_OUT {{ p.type }}& OutMinValue,
+                CSP_OUT {{ p.type }}& OutMaxValue
+            );
+
+            // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max(
+                CSP_OUT {{ p.type }}& OutValue
+            );
+
+            // Get {{ p.type }} min and max values via out parameters and return {{ p.type }} min value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min(
+                CSP_OUT {{ p.type }}& OutMinValue,
+                CSP_OUT {{ p.type }}& OutMaxValue
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax(CSP_IN_OUT {{ p.type }}& InOutValue);
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and
+            // get min value via another in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+                CSP_IN_OUT {{ p.type }}& InOutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out-parameter, and return {{ p.type }} max value by
+            // value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max(
+                CSP_IN_OUT {{ p.type }}& InOutValue
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out-parameter, pass {{ p.type }} max value and get
+            // min value via another in-out parameter, and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+                CSP_IN_OUT {{ p.type }}& InOutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via
+            // in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax(
+                CSP_OUT {{ p.type }}& OutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+            // parameter, and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+                CSP_OUT {{ p.type }}& OutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            ); #}
+        {% endfor %}
+    };
+
+
+    // String
+
+    class CSP_API StringParameterTestClass {
+    public:
+        // Pass string by value
+        void ClassFunctions_String_PassValue(csp::common::String Value);
+
+        // Pass string by const reference
+        void ClassFunctions_String_PassConstReference(const csp::common::String& Value);
+    };
+
+
+    // Classes
+
+    class CSP_API ClassParameterTestClass {
+    public:
+        // Pass class by value
+        void ClassFunctions_MyClass_PassValue(csp::MyClass Value);
+
+        // Pass class by pointer
+        void ClassFunctions_MyClass_PassPointer(csp::MyClass* Value);
+
+        // Pass class by const pointer
+        void ClassFunctions_MyClass_PassConstPointer(const csp::MyClass* Value);
+
+        // Pass class by reference
+        void ClassFunctions_MyClass_PassReference(csp::MyClass& Value);
+
+        // Pass class by const reference
+        void ClassFunctions_MyClass_PassConstReference(const csp::MyClass& Value);
+    };
 }
