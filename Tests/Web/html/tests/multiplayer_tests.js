@@ -1227,6 +1227,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 0);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.AssetSource);
         assert.areEqual(videoComponent.getIsVisible(), true);
+        assert.areEqual(videoComponent.getIsEnabled(), true);
 
         pos.delete();
     }
@@ -1250,6 +1251,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         videoComponent.setCurrentPlayheadPosition(1);
         videoComponent.setVideoPlayerSourceType(Multiplayer.VideoPlayerSourceType.URLSource);
         videoComponent.setIsVisible(false);
+        videoComponent.setIsEnabled(false);
 
         // Ensure values are set correctly
         const pos = videoComponent.getPosition();
@@ -1268,6 +1270,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 1);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.URLSource);
         assert.areEqual(videoComponent.getIsVisible(), false);
+        assert.areEqual(videoComponent.getIsEnabled(), false);
 
         pos.delete();
     }

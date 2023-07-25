@@ -1728,6 +1728,7 @@ namespace CSPEngine
             Assert.AreEqual(videoComponent.GetCurrentPlayheadPosition(), 0);
             Assert.AreEqual(videoComponent.GetVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.AssetSource);
             Assert.AreEqual(videoComponent.GetIsVisible(), true);
+            Assert.AreEqual(videoComponent.GetIsEnabled(), true);
 
             // Set new values
             const string assetId = "TEST_ASSET_ID";
@@ -1747,6 +1748,7 @@ namespace CSPEngine
             videoComponent.SetCurrentPlayheadPosition(1.0f);
             videoComponent.SetVideoPlayerSourceType(Multiplayer.VideoPlayerSourceType.URLSource);
             videoComponent.SetIsVisible(false);
+            videoComponent.SetIsEnabled(false);
 
             pos.Dispose();
             pos = videoComponent.GetPosition();
@@ -1768,6 +1770,7 @@ namespace CSPEngine
             Assert.AreEqual(videoComponent.GetCurrentPlayheadPosition(), 1.0f);
             Assert.AreEqual(videoComponent.GetVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.URLSource);
             Assert.AreEqual(videoComponent.GetIsVisible(), false);
+            Assert.AreEqual(videoComponent.GetIsEnabled(), false);
 
             pos.Dispose();
         }

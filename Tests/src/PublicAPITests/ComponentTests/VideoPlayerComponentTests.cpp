@@ -114,6 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 	EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
 	EXPECT_EQ(VideoComponent->GetIsVisible(), true);
 	EXPECT_EQ(VideoComponent->GetMeshComponentId(), 0);
+	EXPECT_EQ(VideoComponent->GetIsEnabled(), true);
 
 	auto* ModelComponent = static_cast<VideoPlayerSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
 
@@ -138,6 +139,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 	VideoComponent->SetVideoPlayerSourceType(VideoPlayerSourceType::URLSource);
 	VideoComponent->SetIsVisible(false);
 	VideoComponent->SetMeshComponentId(ModelComponent->GetId());
+	VideoComponent->SetIsEnabled(false);
 
 	// Ensure values are set correctly
 	EXPECT_EQ(VideoComponent->GetPosition(), csp::common::Vector3::One());
@@ -154,6 +156,7 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 	EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
 	EXPECT_EQ(VideoComponent->GetIsVisible(), false);
 	EXPECT_EQ(VideoComponent->GetMeshComponentId(), ModelComponent->GetId());
+	EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
 
 	AWAIT(Connection, Disconnect);
 	delete Connection;
