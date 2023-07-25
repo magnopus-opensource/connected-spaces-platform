@@ -167,10 +167,10 @@ namespace Csp.Tests {
             // Pass class by {{ x }}
             [Test]
             public static void GlobalFunctions_MyClass_Pass{{ x }}() {
-                using var instance = new MyClass({{ config.class_int_value_first }});
+                using var param = new MyClass({{ config.class_int_value_first }});
 
                 try {
-                    Global.GlobalFunctions_MyClass_Pass{{ x }}(instance);
+                    Global.GlobalFunctions_MyClass_Pass{{ x }}(param);
                 }
                 catch (RuntimeWrappedException e) {
                     Assert.Fail(e.Message);
@@ -401,7 +401,7 @@ namespace Csp.Tests {
 
         [Test]
         public static void Check_PrimitiveFieldTestClass_Fields() {
-            var instance = new PrimitiveFieldTestClass {
+            using var instance = new PrimitiveFieldTestClass {
                 {% for p in config.primitives %}
                     Field{{ loop.index0 }} = {{ p.min }}{{ ',' if not loop.last }}
                 {% endfor %}
@@ -417,7 +417,7 @@ namespace Csp.Tests {
 
         [Test]
         public static void Set_PrimitiveFieldTestClass_Fields() {
-            var instance = new PrimitiveFieldTestClass();
+            using var instance = new PrimitiveFieldTestClass();
             Global.Set_PrimitiveFieldTestClass_Fields(instance);
 
             {% for p in config.primitives %}
@@ -434,7 +434,7 @@ namespace Csp.Tests {
         
         [Test]
         public static void Check_StringFieldTestClass_Field() {
-            var instance = new StringFieldTestClass {
+            using var instance = new StringFieldTestClass {
                 Field = "{{ config.class_string_value_first }}"
             };
 
@@ -448,7 +448,7 @@ namespace Csp.Tests {
 
         [Test]
         public static void Set_StringFieldTestClass_Field() {
-            var instance = new StringFieldTestClass();
+            using var instance = new StringFieldTestClass();
             Global.Set_StringFieldTestClass_Field(instance);
 
             Assert.AreEqual("{{ config.class_string_value_second }}", instance.Field);
@@ -459,7 +459,7 @@ namespace Csp.Tests {
 
         [Test]
         public static void Check_ClassFieldTestClass_Field() {
-            var instance = new ClassFieldTestClass();
+            using var instance = new ClassFieldTestClass();
             instance.Field.ACoolInteger = {{ config.class_int_value_first }};
 
             try {
@@ -472,7 +472,7 @@ namespace Csp.Tests {
 
         [Test]
         public static void Set_ClassFieldTestClass_Field() {
-            var instance = new ClassFieldTestClass();
+            using var instance = new ClassFieldTestClass();
             Global.Set_ClassFieldTestClass_Field(instance);
 
             Assert.AreEqual({{ config.class_int_value_second }}, instance.Field.ACoolInteger);
@@ -489,7 +489,7 @@ namespace Csp.Tests {
             {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
                 [Test]
                 public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
-                    var instance = new PrimitiveReturnTestClass();
+                    using var instance = new PrimitiveReturnTestClass();
                     var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
                     {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
@@ -497,7 +497,7 @@ namespace Csp.Tests {
 
                 [Test]
                 public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
-                    var instance = new PrimitiveReturnTestClass();
+                    using var instance = new PrimitiveReturnTestClass();
                     var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
                     {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
@@ -507,7 +507,7 @@ namespace Csp.Tests {
             {% for x in ['Pointer', 'Reference'] %}
                 [Test]
                 public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
-                    var instance = new PrimitiveReturnTestClass();
+                    using var instance = new PrimitiveReturnTestClass();
                     var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
                     {{ assert_are_equal(p.use_epsilon, "result.Value", p.min) }}
@@ -515,7 +515,7 @@ namespace Csp.Tests {
 
                 [Test]
                 public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
-                    var instance = new PrimitiveReturnTestClass();
+                    using var instance = new PrimitiveReturnTestClass();
                     var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
                     {{ assert_are_equal(p.use_epsilon, "result.Value", p.max) }}
@@ -530,7 +530,7 @@ namespace Csp.Tests {
             // Get string by {{ x }}
             [Test]
             public static void ClassFunctions_String_Return{{ x }}() {
-                var instance = new StringReturnTestClass();
+                using var instance = new StringReturnTestClass();
                 var result = instance.ClassFunctions_String_Return{{ x }}();
 
                 Assert.AreEqual("{{ config.string_value }}", result);
@@ -544,11 +544,111 @@ namespace Csp.Tests {
             // Get class by {{ x }}
             [Test]
             public static void ClassFunctions_MyClass_Return{{ x }}() {
-                var instance = new ClassReturnTestClass();
+                using var instance = new ClassReturnTestClass();
                 using var result = instance.ClassFunctions_MyClass_Return{{ x }}();
 
                 Assert.IsTrue(result.PointerIsValid);
                 Assert.AreEqual({{ config.class_int_value_first }}, result.SomeValue);
+            }
+        {% endfor %}
+
+
+        // Parameter types
+
+        // Primitives
+
+        {% for p in config.primitives %}
+            // Pass {{ p.type }} min value by value
+            [Test]
+            public static void ClassFunctions_Primitives_{{ p.type }}_PassValue_min() {
+                using var instance = new PrimitiveParameterTestClass();
+
+                try {
+                    instance.ClassFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+
+            // Pass {{ p.type }} max value by value
+            [Test]
+            public static void ClassFunctions_Primitives_{{ p.type }}_PassValue_max() {
+                using var instance = new PrimitiveParameterTestClass();
+
+                try {
+                    instance.ClassFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+
+            {# TODO: Add support for out and in-out params in class methods #}
+            {# // Get {{ p.type }} min value via out parameter
+            [Test]
+            public static void ClassFunctions_Primitives_{{ p.type }}_PassOut_min() {
+                Global.ClassFunctions_Primitives_{{ p.type }}_PassOut_min(out var result);
+
+                {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+            }
+
+            // Get {{ p.type }} max value via out parameter
+            [Test]
+            public static void ClassFunctions_Primitives_{{ p.type }}_PassOut_max() {
+                Global.ClassFunctions_Primitives_{{ p.type }}_PassOut_max(out var result);
+
+                {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+            }
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter
+            [Test]
+            public static void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax() {
+                var value = {{ p.min }};
+
+                try {
+                    Global.ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax(ref value);
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+
+                {{ assert_are_equal(p.use_epsilon, "value", p.max) }}
+            } #}
+        {% endfor %}
+
+
+        // String
+        {% for x in ['Value', 'ConstReference'] %}
+            // Pass string by {{ x }}
+            [Test]
+            public static void ClassFunctions_String_Pass{{ x }}() {
+                using var instance = new StringParameterTestClass();
+
+                try {
+                    instance.ClassFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
+            }
+        {% endfor %}
+
+
+        // Classes
+        {% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+            // Pass class by {{ x }}
+            [Test]
+            public static void ClassFunctions_MyClass_Pass{{ x }}() {
+                using var instance = new ClassParameterTestClass();
+                using var param = new MyClass({{ config.class_int_value_first }});
+
+                try {
+                    instance.ClassFunctions_MyClass_Pass{{ x }}(param);
+                }
+                catch (RuntimeWrappedException e) {
+                    Assert.Fail(e.Message);
+                }
             }
         {% endfor %}
     }

@@ -131,13 +131,17 @@ override
             WrapperHelper.StringToNativeUTF8({{ name }}){{> Comma }}
 {{/ type.is_string }}
 {{^ type.is_string }}
-{{# type.is_pointer_or_reference }}
+{{# type.is_class_or_interface }}
 {{# type.is_interface }}
             ((NativeClassWrapper){{ name }})._ptr{{> Comma }}
 {{/ type.is_interface }}
 {{^ type.is_interface }}
             {{ name }}._ptr{{> Comma }}
 {{/ type.is_interface }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# type.is_pointer_or_reference }}
+            {{ name }}._ptr{{> Comma }}
 {{/ type.is_pointer_or_reference }}
 {{^ type.is_pointer_or_reference }}
 {{# type.is_function_signature }}
@@ -148,6 +152,7 @@ override
             {{ name }}{{> Comma }}
 {{/ type.is_function_signature }}
 {{/ type.is_pointer_or_reference }}
+{{/ type.is_class_or_interface }}
 {{/ type.is_string }}
 {{/ is_out }}
 {{/ parameters }}
