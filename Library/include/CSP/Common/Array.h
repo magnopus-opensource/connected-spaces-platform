@@ -49,7 +49,7 @@ public:
 	/// @brief Constructs an array with the given number of elements.
 	/// Each element in the array will have it's default constuctor called.
 	/// @param Size const size_t : Number of elements in the array
-	Array(const size_t Size) : ArraySize(0), ObjectArray(nullptr)
+	explicit Array(const size_t Size) : ArraySize(0), ObjectArray(nullptr)
 	{
 		if (Size > 0)
 		{
@@ -112,14 +112,14 @@ public:
 	/// @return T*
 	CSP_NO_EXPORT T* Data()
 	{
-		return ArraySize > 0 ? &ObjectArray[0] : nullptr;
+		return ObjectArray;
 	}
 
 	/// @brief Returns a const pointer to the start of the array.
 	/// @return const T*
 	CSP_NO_EXPORT const T* Data() const
 	{
-		return ArraySize > 0 ? &ObjectArray[0] : nullptr;
+		return ObjectArray;
 	}
 
 	/// @brief Copy assignment.

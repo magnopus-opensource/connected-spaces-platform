@@ -180,7 +180,7 @@ public:
 	/// @brief Assigns a value to the optional.
 	/// @param Other const T& : Reference to assign to optional
 	/// @return Optional<T>&
-	Optional<T>& operator=(const T& Other)
+	Optional<T>& operator=(const T& InValue)
 	{
 		if (Value)
 		{
@@ -188,7 +188,49 @@ public:
 		}
 
 		Value = (T*) csp::memory::DllAlloc(sizeof(T));
-		new (Value) T(Other);
+		new (Value) T(InValue);
+
+		return *this;
+	}
+
+	/// @brief Copy assignment
+	/// @param Other const T& : Reference to assign to optional
+	/// @return Optional<T>&
+	Optional<T>& operator=(const Optional<T>& Other)
+	{
+		if (Value)
+		{
+			ValueDestructor(Value);
+		}
+
+		if (!Other.Value)
+		{
+			return *this;
+		}
+
+		Value = (T*) csp::memory::DllAlloc(sizeof(T));
+		new (Value) T(*Other.Value);
+
+		return *this;
+	}
+
+	/// @brief Move assignment
+	/// @param Other const T& : Reference to assign to optional
+	/// @return Optional<T>&
+	Optional<T>& operator=(Optional<T>&& Other)
+	{
+		if (Value)
+		{
+			ValueDestructor(Value);
+		}
+
+		if (!Other.Value)
+		{
+			return *this;
+		}
+
+		Value		= Other.Value;
+		Other.Value = nullptr;
 
 		return *this;
 	}
