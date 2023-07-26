@@ -22,7 +22,7 @@ namespace chs = csp::services::generated::aggregationservice;
 
 csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName)
 {
-	csp::systems::EventTicketingVendor Vendor = Vendor = csp::systems::EventTicketingVendor::Unknown;
+	csp::systems::EventTicketingVendor Vendor = csp::systems::EventTicketingVendor::Unknown;
 	if (VendorName == "eventbrite")
 	{
 		Vendor = csp::systems::EventTicketingVendor::Eventbrite;
@@ -31,7 +31,6 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
 	{
 		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
 						   "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
-		Vendor = csp::systems::EventTicketingVendor::Unknown;
 	}
 
 	return Vendor;
