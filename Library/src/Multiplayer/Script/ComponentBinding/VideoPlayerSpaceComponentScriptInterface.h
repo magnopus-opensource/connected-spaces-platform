@@ -53,6 +53,8 @@ public:
 	DECLARE_SCRIPT_PROPERTY(int64_t, VideoPlayerSourceType);
 
 	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+
+	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
 };
 
 } // namespace csp::multiplayer
