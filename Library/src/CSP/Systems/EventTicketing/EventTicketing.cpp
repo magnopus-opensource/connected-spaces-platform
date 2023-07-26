@@ -20,14 +20,39 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
+csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName)
+{
+	csp::systems::EventTicketingVendor Vendor = Vendor = csp::systems::EventTicketingVendor::Unknown;
+	if (VendorName == "eventbrite")
+	{
+		Vendor = csp::systems::EventTicketingVendor::Eventbrite;
+	}
+	else
+	{
+		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
+						   "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
+		Vendor = csp::systems::EventTicketingVendor::Unknown;
+	}
+
+	return Vendor;
+}
+
 void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event)
 {
 	Event.Id				= Dto.GetId();
 	Event.SpaceId			= Dto.GetSpaceId();
-	Event.Vendor			= csp::systems::EventTicketingVendor::Eventbrite;
+	Event.Vendor			= VendorNameToEnum(Dto.GetVendorName());
 	Event.VendorEventId		= Dto.GetVendorEventId();
 	Event.VendorEventUri	= Dto.GetVendorEventUri();
 	Event.IsTicketingActive = Dto.GetIsTicketingActive();
+}
+
+void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)
+{
+	VendorInfo.Vendor			 = VendorNameToEnum(Dto.GetVendorName());
+	VendorInfo.ClientId			 = Dto.GetClientId();
+	VendorInfo.AuthorizeEndpoint = Dto.GetAuthorizeEndpoint();
+	VendorInfo.OAuthRedirectUrl	 = Dto.GetOAuthRedirectUrl();
 }
 
 namespace csp::systems
@@ -87,6 +112,21 @@ csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEve
 const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicketedEvents() const
 {
 	return Events;
+}
+
+void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* Dto							   = static_cast<chs::VendorProviderInfo*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Dto->FromJson(Response->GetPayload().GetContent());
+
+		VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
+	}
 }
 
 } // namespace csp::systems
