@@ -62,7 +62,7 @@ public:
 	/// @param UserId csp::common::String : The ID of the user to obtain authentication info for.
 	/// @param Callback TicketedEventVendorInfoResultCallback : Callback providing the oauth2 information.
 	CSP_ASYNC_RESULT void
-		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, csp::common::String UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
+		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
 
 private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

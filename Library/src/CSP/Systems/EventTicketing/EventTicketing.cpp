@@ -49,10 +49,25 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 
 void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)
 {
-	VendorInfo.Vendor			 = VendorNameToEnum(Dto.GetVendorName());
-	VendorInfo.ClientId			 = Dto.GetClientId();
-	VendorInfo.AuthorizeEndpoint = Dto.GetAuthorizeEndpoint();
-	VendorInfo.OAuthRedirectUrl	 = Dto.GetOAuthRedirectUrl();
+	if (Dto.HasVendorName())
+	{
+		VendorInfo.Vendor = VendorNameToEnum(Dto.GetVendorName());
+	}
+
+	if (Dto.HasClientId())
+	{
+		VendorInfo.ClientId = Dto.GetClientId();
+	}
+
+	if (Dto.HasAuthorizeEndpoint())
+	{
+		VendorInfo.AuthorizeEndpoint = Dto.GetAuthorizeEndpoint();
+	}
+
+	if (Dto.HasOAuthRedirectUrl())
+	{
+		VendorInfo.OAuthRedirectUrl = Dto.GetOAuthRedirectUrl();
+	}
 }
 
 namespace csp::systems
