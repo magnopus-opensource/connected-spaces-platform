@@ -99,7 +99,7 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 }
 
 void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
-												  csp::common::String UserId,
+												  const csp::common::String& UserId,
 												  TicketedEventVendorAuthoriseInfoCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
