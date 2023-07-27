@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
+#include <stdexcept>
 #include <utility>
 
 
@@ -153,7 +154,12 @@ public:
 	/// @return T& : Array element
 	T& operator[](const size_t Index)
 	{
-		assert(Index < ArraySize);
+#ifndef CSP_DISABLE_BOUNDS_CHECKING
+		if (Index >= ArraySize)
+		{
+			throw std::out_of_range("Index");
+		}
+#endif
 
 		return ObjectArray[Index];
 	}
@@ -163,7 +169,12 @@ public:
 	/// @return const T& : Array element
 	const T& operator[](const size_t Index) const
 	{
-		assert(Index < ArraySize);
+#ifndef CSP_DISABLE_BOUNDS_CHECKING
+		if (Index >= ArraySize)
+		{
+			throw std::out_of_range("Index");
+		}
+#endif
 
 		return ObjectArray[Index];
 	}

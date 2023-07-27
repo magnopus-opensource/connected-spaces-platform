@@ -23,7 +23,9 @@
 
 	#include <gtest/gtest.h>
 
+
 using namespace csp::common;
+
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayDefaultInitialisationTest)
 {
@@ -41,6 +43,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayDefaultInitialisationTest)
 	}
 }
 
+
 class ArrayTestClass
 {
 public:
@@ -48,6 +51,7 @@ public:
 
 	int SomeField;
 };
+
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 {
@@ -205,6 +209,23 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOfOptionalTest)
 	{
 		FAIL();
 	}
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOutOfBoundsTest)
+{
+	constexpr int ARRAY_SIZE = 5;
+
+	try
+	{
+		Array<Optional<int>> Instance(ARRAY_SIZE);
+		auto& Element = Instance[ARRAY_SIZE];
+	}
+	catch (const std::out_of_range&)
+	{
+		return;
+	}
+
+	FAIL();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
