@@ -123,6 +123,128 @@ namespace CSPEngine
         }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_TEST
+        [Test]
+        public static void UpdateTicketedEventTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+
+            string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
+            string testSpaceDescription = "OLY-UNITTEST-DESC";
+
+            string initialVendorEventId = "InitialVendorEventId";
+            string initialVendorEventUri = "InitialVendorEventUri";
+
+            string updatedVendorEventId = "UpdatedVendorEventId";
+            string updatedVendorEventUri = "UpdatedVendorEventUri";
+
+            // Log in
+            _ = UserSystemTests.LogIn(userSystem);
+
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+
+            using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+
+            using var createdEvent = createResult.GetTicketedEvent();
+
+            Assert.AreEqual(createdEvent.SpaceId, space.Id);
+            Assert.AreEqual(createdEvent.Vendor, Csp.Systems.EventTicketingVendor.Eventbrite);
+            Assert.AreEqual(createdEvent.VendorEventId, initialVendorEventId);
+            Assert.AreEqual(createdEvent.VendorEventUri, initialVendorEventUri);
+            Assert.IsFalse(createdEvent.IsTicketingActive);
+
+            using var updateResult = eventTicketingSystem.UpdateTicketedEvent(space.Id, createdEvent.Id, Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
+
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Success);
+
+            using var updatedEvent = updateResult.GetTicketedEvent();
+
+            Assert.AreEqual(updatedEvent.Id, createdEvent.Id);
+            Assert.AreEqual(updatedEvent.SpaceId, space.Id);
+            Assert.AreEqual(updatedEvent.Vendor, Csp.Systems.EventTicketingVendor.Eventbrite);
+            Assert.AreEqual(updatedEvent.VendorEventId, updatedVendorEventId);
+            Assert.AreEqual(updatedEvent.VendorEventUri, updatedVendorEventUri);
+            Assert.IsTrue(updatedEvent.IsTicketingActive);
+        }
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_BADSPACE_TEST
+        [Test]
+        public static void UpdateTicketedEventBadSpaceTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+
+            string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
+            string testSpaceDescription = "OLY-UNITTEST-DESC";
+
+            string initialVendorEventId = "InitialVendorEventId";
+            string initialVendorEventUri = "InitialVendorEventUri";
+
+            string updatedVendorEventId = "UpdatedVendorEventId";
+            string updatedVendorEventUri = "UpdatedVendorEventUri";
+
+            // Log in
+            _ = UserSystemTests.LogIn(userSystem);
+
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+
+            using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+
+            using var createdEvent = createResult.GetTicketedEvent();
+
+            Assert.AreEqual(createdEvent.SpaceId, space.Id);
+            Assert.AreEqual(createdEvent.Vendor, Csp.Systems.EventTicketingVendor.Eventbrite);
+            Assert.AreEqual(createdEvent.VendorEventId, initialVendorEventId);
+            Assert.AreEqual(createdEvent.VendorEventUri, initialVendorEventUri);
+            Assert.IsFalse(createdEvent.IsTicketingActive);
+
+            using var updateResult = eventTicketingSystem.UpdateTicketedEvent("12a345678b9cdd01ef23456a", createdEvent.Id, Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
+
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Failed);
+            Assert.AreEqual(updateResult.GetHttpResultCode(), 404);
+        }
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_BADEVENTID_TEST
+        [Test]
+        public static void UpdateTicketedEventBadEventIdTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+
+            string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
+            string testSpaceDescription = "OLY-UNITTEST-DESC";
+
+            string initialVendorEventId = "InitialVendorEventId";
+            string initialVendorEventUri = "InitialVendorEventUri";
+
+            string updatedVendorEventId = "UpdatedVendorEventId";
+            string updatedVendorEventUri = "UpdatedVendorEventUri";
+
+            // Log in
+            _ = UserSystemTests.LogIn(userSystem);
+
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+
+            using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+
+            using var createdEvent = createResult.GetTicketedEvent();
+
+            Assert.AreEqual(createdEvent.SpaceId, space.Id);
+            Assert.AreEqual(createdEvent.Vendor, Csp.Systems.EventTicketingVendor.Eventbrite);
+            Assert.AreEqual(createdEvent.VendorEventId, initialVendorEventId);
+            Assert.AreEqual(createdEvent.VendorEventUri, initialVendorEventUri);
+            Assert.IsFalse(createdEvent.IsTicketingActive);
+
+            using var updateResult = eventTicketingSystem.UpdateTicketedEvent(space.Id, "12a345678b9cdd01ef23456a", Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
+
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Failed);
+            Assert.AreEqual(updateResult.GetHttpResultCode(), 404);
+        }
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_NO_EVENTS_TES
         [Test]
         public static void GetTicketedEventsNoEventsTest()
