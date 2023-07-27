@@ -47,6 +47,26 @@ public:
 											  bool IsTicketingActive,
 											  TicketedEventResultCallback Callback);
 
+	/// @brief Updates a ticketed event in the given space.
+	///
+	/// All parameters should be provided even if they are not new values. Empty values will overwrite
+	/// existing values to be empty.
+	///
+	/// @param SpaceId csp::common::String : ID of the space the event belongs to.
+	/// @param EventId csp::common::String : ID of the Event to update.
+	/// @param Vendor csp::systems::EventTicketingVendor : Enum representing the vendor that the event is created with.
+	/// @param VendorEventId csp::common::String : Specifies the event ID in the vendors system.
+	/// @param VendorEventUri csp::common::String : Specifies the URI for the event in the vendors system.
+	/// @param IsTicketingActive bool : Specifies whether ticketing is currently active for this event.
+	/// @param Callback TicketedEventResultCallback : Callback providing the TicketedEvent once created.
+	CSP_ASYNC_RESULT void UpdateTicketedEvent(const csp::common::String& SpaceId,
+											  const csp::common::String& EventId,
+											  EventTicketingVendor Vendor,
+											  const csp::common::String& VendorEventId,
+											  const csp::common::String& VendorEventUri,
+											  bool IsTicketingActive,
+											  TicketedEventResultCallback Callback);
+
 	/// @brief Creates a ticketed event for the given space.
 	/// @param SpaceIds csp::common::Array<csp::common::String> : IDs of the spaces to get the events for.
 	/// @param Skip csp::common::Optional<int> : Optional number of results that will be skipped from the result.
