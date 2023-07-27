@@ -77,6 +77,25 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 	}
 }
 
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTest)
+{
+	constexpr size_t ARRAY_SIZE = SIZE_MAX;
+
+	try
+	{
+		// This should throw an overflow exception because `sizeof(T) * ARRAY_SIZE` is greater than `SIZE_MAX`
+		Array<ArrayTestClass> Instance(ARRAY_SIZE);
+	}
+	catch (...)
+	{
+		return;
+	}
+
+	FAIL();
+}
+
+
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
 {
 	constexpr int ARRAY_SIZE = 5;

@@ -25,6 +25,14 @@
 #include <stdexcept>
 #include <utility>
 
+#ifndef CSP_DISABLE_OVERFLOW_CHECKING
+	#ifdef _MSC_VER
+		#include <intrin.h>
+	#else
+		#include <cstdint>
+	#endif
+#endif
+
 
 namespace csp::common
 {
@@ -214,7 +222,22 @@ private:
 	{
 		if (ObjectArray == nullptr)
 		{
-			ObjectArray = (T*) csp::memory::DllAlloc(sizeof(T) * Size);
+#ifndef CSP_DISABLE_OVERFLOW_CHECKING
+	#ifdef _MSC_VER // MSVC
+			auto HighBits = __umulh(sizeof(T), Size);
+	#else			// GCC or Clang
+			auto MultiplyResult = static_cast<__uint128_t>(sizeof(T)) * static_cast<__uint128_t>(Size);
+			auto HighBits		= static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
+	#endif
+
+			if (HighBits > 0)
+			{
+				throw std::overflow_error("Size");
+			}
+#endif
+
+			auto BufferSize = sizeof(T) * Size;
+			ObjectArray		= (T*) csp::memory::DllAlloc(BufferSize);
 
 			for (size_t i = 0; i < Size; ++i)
 			{
