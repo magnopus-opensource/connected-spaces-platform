@@ -608,3 +608,101 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETVENDORAUTHORISEINFO_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [TicketedEventVendorAuthInfoResult]
+		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
+
+	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
+
+	EXPECT_EQ(VendorAuthInfo.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+	EXPECT_NE(VendorAuthInfo.ClientId, "");
+	EXPECT_NE(VendorAuthInfo.AuthorizeEndpoint, "");
+	EXPECT_NE(VendorAuthInfo.OAuthRedirectUrl, "");
+
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETVENDORAUTHORISEINFO_BADDATA_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadDataTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// 1. Invalid vendor test
+	{
+		auto [TicketedEventVendorAuthInfoResult]
+			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
+
+		// specifying an unknown vendor when attempting to get auth info should return a fail and an empty vendor auth info object
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
+
+		EXPECT_EQ(VendorAuthInfo.Vendor, csp::systems::EventTicketingVendor::Unknown);
+		EXPECT_EQ(VendorAuthInfo.ClientId, "");
+		EXPECT_EQ(VendorAuthInfo.AuthorizeEndpoint, "");
+		EXPECT_EQ(VendorAuthInfo.OAuthRedirectUrl, "");
+	}
+
+	// 2. Invalid user ID
+	{
+		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
+															 GetVendorAuthoriseInfo,
+															 RequestPredicate,
+															 csp::systems::EventTicketingVendor::Eventbrite,
+															 "n0taR3alC1ien7");
+
+		// specifying an unknown user ID when attempting to get auth info should return a fail and an empty vendor auth info object
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
+
+		EXPECT_EQ(VendorAuthInfo.Vendor, csp::systems::EventTicketingVendor::Unknown);
+		EXPECT_EQ(VendorAuthInfo.ClientId, "");
+		EXPECT_EQ(VendorAuthInfo.AuthorizeEndpoint, "");
+		EXPECT_EQ(VendorAuthInfo.OAuthRedirectUrl, "");
+	}
+
+	// 3. Invalid vendor ID and user ID
+	{
+		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
+															 GetVendorAuthoriseInfo,
+															 RequestPredicate,
+															 csp::systems::EventTicketingVendor::Unknown,
+															 "n0taR3alC1ien7");
+
+		// specifying an unknown vendor ID and user ID when attempting to get auth info should return a fail and an empty vendor auth info object
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
+
+		EXPECT_EQ(VendorAuthInfo.Vendor, csp::systems::EventTicketingVendor::Unknown);
+		EXPECT_EQ(VendorAuthInfo.ClientId, "");
+		EXPECT_EQ(VendorAuthInfo.AuthorizeEndpoint, "");
+		EXPECT_EQ(VendorAuthInfo.OAuthRedirectUrl, "");
+	}
+
+	LogOut(UserSystem);
+}
+#endif

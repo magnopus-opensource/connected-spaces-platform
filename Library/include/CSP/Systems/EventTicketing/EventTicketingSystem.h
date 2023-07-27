@@ -57,6 +57,13 @@ public:
 											const csp::common::Optional<int>& Limit,
 											TicketedEventCollectionResultCallback Callback);
 
+	/// @brief  Looks up the basic info required by a client to initiate an oauth2 flow with the specified vendor.
+	/// @param Vendor EventTicketingVendor : The vendor type to retrieve info for.
+	/// @param UserId csp::common::String : The ID of the user to obtain authentication info for.
+	/// @param Callback TicketedEventVendorInfoResultCallback : Callback providing the oauth2 information.
+	CSP_ASYNC_RESULT void
+		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
+
 private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient);

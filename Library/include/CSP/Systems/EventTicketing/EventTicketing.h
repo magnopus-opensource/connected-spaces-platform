@@ -41,6 +41,21 @@ public:
 	bool IsTicketingActive;
 };
 
+/// @ingroup Event Ticketing System
+/// @brief Data representation of a third party vendor for ticketed events
+class CSP_API TicketedEventVendorAuthInfo
+{
+public:
+	TicketedEventVendorAuthInfo() : Vendor(EventTicketingVendor::Unknown)
+	{
+	}
+
+	EventTicketingVendor Vendor;
+	csp::common::String ClientId;
+	csp::common::String AuthorizeEndpoint;
+	csp::common::String OAuthRedirectUrl;
+};
+
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a TicketedEvent.
@@ -70,7 +85,7 @@ private:
 };
 
 /// @ingroup Event Ticketing System
-/// @brief Result class holding a TicketedEvent.
+/// @brief Result class holding a collection (array) of TicketedEvents.
 class CSP_API TicketedEventCollectionResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
@@ -96,11 +111,37 @@ private:
 	csp::common::Array<TicketedEvent> Events;
 };
 
+/// @ingroup Event Ticketing System
+/// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
+class CSP_API TicketedEventVendorAuthInfoResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	TicketedEventVendorAuthInfo GetVendorAuthInfo() const
+	{
+		return VendorInfo;
+	}
+
+private:
+	TicketedEventVendorAuthInfoResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	TicketedEventVendorAuthInfo VendorInfo;
+};
 
 // @brief Callback providing a ticketed event result.
 typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResultCallback;
 
 // @brief Callback providing a ticketed event collection result.
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
+
+// @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
+typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthoriseInfoCallback;
 
 } // namespace csp::systems

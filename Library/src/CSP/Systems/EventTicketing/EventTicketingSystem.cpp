@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
 
@@ -26,7 +27,7 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
 	switch (Vendor)
 	{
 		case csp::systems::EventTicketingVendor::Eventbrite:
-			return "Eventbrite";
+			return "eventbrite";
 		default:
 			FOUNDATION_LOG_WARN_MSG("Unknown ticketed event vendor");
 			return "Unknown";
@@ -95,6 +96,21 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
+}
+
+void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
+												  const csp::common::String& UserId,
+												  TicketedEventVendorAuthoriseInfoCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI
+			  ->CreateHandler<TicketedEventVendorAuthoriseInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
+				  Callback,
+				  nullptr,
+				  csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
+		->apiV1VendorsVendorNameUsersUserIdProviderInfoGet(GetVendorNameString(Vendor), UserId, std::nullopt, ResponseHandler);
 }
 
 } // namespace csp::systems
