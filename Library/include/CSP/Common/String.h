@@ -93,6 +93,11 @@ public:
 	/// @return csp::common::List<csp::common::String>
 	List<String> Split(char Delimiter) const;
 
+	/// @brief Splits current string by given delimiter chars into individual elements.
+	/// @param Delimiters chars for each delimiting character.
+	/// @return csp::common::List<csp::common::String>
+	List<String> Split(const char* Delimiters) const;
+
 	bool operator==(const String& Other) const;
 	bool operator==(const char* Other) const;
 	bool operator!=(const String& Other) const;

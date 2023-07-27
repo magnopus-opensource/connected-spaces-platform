@@ -19,7 +19,7 @@
 #include "Memory/Memory.h"
 
 #include <algorithm>
-
+#include <sstream>
 
 namespace csp::common
 {
@@ -161,6 +161,28 @@ String::String(String const& Other) : ImplPtr(Other.ImplPtr->Clone())
 List<String> String::Split(char Separator) const
 {
 	return ImplPtr->Split(Separator);
+}
+
+List<String> String::Split(const char* Delimiters) const
+{
+	std::stringstream stringStream(ImplPtr->Text);
+	List<String> StringList;
+	std::string InputLine;
+
+	while (std::getline(stringStream, InputLine))
+	{
+		std::size_t Prev = 0, Pos;
+		while ((Pos = InputLine.find_first_of(Delimiters, Prev)) != std::string::npos)
+		{
+			if (Pos > Prev)
+				StringList.Append(InputLine.substr(Prev, Pos - Prev).c_str());
+			Prev = Pos + 1;
+		}
+		if (Prev < InputLine.length())
+			StringList.Append(InputLine.substr(Prev, std::string::npos).c_str());
+	}
+
+	return StringList;
 }
 
 String& String::swap(String& Other)
