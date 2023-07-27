@@ -71,7 +71,7 @@ public:
 	/// @param Size size_t : Number of elements in the buffer
 	CSP_NO_EXPORT Array(const T* Buffer, size_t Size) : ArraySize(0), ObjectArray(nullptr)
 	{
-		if (Size > 0)
+		if (Buffer != nullptr && Size > 0)
 		{
 			AllocArray(Size);
 			memcpy(ObjectArray, Buffer, Size * sizeof(T));

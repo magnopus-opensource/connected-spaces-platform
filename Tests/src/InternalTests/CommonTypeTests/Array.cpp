@@ -77,7 +77,6 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 	}
 }
 
-
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTest)
 {
 	constexpr size_t ARRAY_SIZE = SIZE_MAX;
@@ -94,7 +93,6 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTe
 
 	FAIL();
 }
-
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
 {
@@ -115,6 +113,22 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
 			EXPECT_EQ(Instance[i], Values[i]);
 			EXPECT_NE(&Instance[i], &Values[i]);
 		}
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferNullptrInitialisationTest)
+{
+	try
+	{
+		Array<int> Instance(nullptr, 5);
+
+		EXPECT_TRUE(Instance.IsEmpty());
+		EXPECT_EQ(Instance.Size(), 0);
+		EXPECT_EQ(Instance.Data(), nullptr);
 	}
 	catch (...)
 	{
