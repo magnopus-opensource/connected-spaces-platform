@@ -138,7 +138,7 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
 			}
 		};
 
-		AssetSystem->DeleteAssetCollection(Messages[idx], DeleteCommentCallback);
+		AssetSystem->DeleteAssetCollection(Messages[idx].Id, DeleteCommentCallback);
 	}
 }
 
@@ -530,7 +530,7 @@ void ConversationSystem::DeleteMessage(const csp::common::String& MessageId, csp
 												signalRCallback);
 	};
 	const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-	AssetSystem->DeleteAssetCollection(MessageAssetCollection, NullCallback);
+	AssetSystem->DeleteAssetCollection(MessageAssetCollection.Id, NullCallback);
 }
 
 void ConversationSystem::SetConversationInformation(const csp::common::String& ConversationId,

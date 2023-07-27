@@ -21,7 +21,7 @@ namespace CSPEngine
     {
         static void DeleteAssetCollection(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, bool disposeFoundationResources = true)
         {
-            using var result = assetSystem.DeleteAssetCollection(assetCollection).Result;
+            using var result = assetSystem.DeleteAssetCollection(assetCollection.Id).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);

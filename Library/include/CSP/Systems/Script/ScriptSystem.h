@@ -20,6 +20,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsResult.h"
 
 #include <functional>
@@ -51,6 +52,7 @@ public:
 	~ScriptModuleCollection();
 
 	const csp::common::String& GetId() const;
+
 	/// <summary>
 	/// Returns map of module names to Asset IDs
 	/// </summary>
@@ -58,9 +60,10 @@ public:
 	const csp::common::Map<csp::common::String, csp::common::String>& GetLookupTable() const;
 
 private:
+	csp::common::Map<csp::common::String, csp::common::String>& GetMutableLookupTable() const;
+
 	csp::common::String Id;
 	csp::common::Map<csp::common::String, csp::common::String> LookupTable;
-	csp::common::String LookupTableId;
 };
 
 
@@ -179,12 +182,13 @@ public:
 	CSP_END_IGNORE
 
 	CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
 	CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
 											   const csp::common::String& Name,
 											   const ScriptModuleAssetResultCallback& Callback);
-	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const ScriptModuleCollection& Collection,
+	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& Namespace,
 												  const csp::common::String& Name,
 												  const csp::common::String& ModuleText,
 												  const NullResultCallback& Callback);
@@ -201,11 +205,7 @@ private:
 
 	class ScriptRuntime* TheScriptRuntime;
 
-	// TODO: Change this to use a typedef'd callback signature and change the callback to return a ResultBase-derived class that contains the lookup
-	// table so we can handle failures
-	static void GetLookupTableById(const csp::common::String& CollectionId,
-								   const csp::common::String& Id,
-								   std::function<void(csp::common::Map<csp::common::String, csp::common::String>)> Callback);
+	static void _GetScriptModuleCollectionCallback(ScriptModuleCollectionResultCallback Callback, const AssetCollectionResult& Result);
 };
 
 } // namespace csp::systems

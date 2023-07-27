@@ -1044,7 +1044,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
 			};
 
 			auto AssetSystem = SystemsManager::Get().GetAssetSystem();
-			AssetSystem->DeleteAssetCollection(AssetCollResult.GetAssetCollection(), DeleteAssetCollCallback);
+			AssetSystem->DeleteAssetCollection(AssetCollResult.GetAssetCollection().Id, DeleteAssetCollCallback);
 		}
 		else
 		{
@@ -1338,7 +1338,7 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 									Callback(DeleteAssetCollResult);
 								};
 
-								AssetSystem->DeleteAssetCollection(ThumbnailAssetCollection, DeleteAssetCollCallback);
+								AssetSystem->DeleteAssetCollection(ThumbnailAssetCollection.Id, DeleteAssetCollCallback);
 							}
 							else
 							{

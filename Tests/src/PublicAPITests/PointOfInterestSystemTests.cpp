@@ -152,7 +152,7 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 
 void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection.Id).Await(RequestPredicate);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 }
 

@@ -834,7 +834,7 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 									Callback(DeleteAssetCollResult);
 								};
 
-								AssetSystem->DeleteAssetCollection(PortraitAvatarAssetCollection, DeleteAssetCollCallback);
+								AssetSystem->DeleteAssetCollection(PortraitAvatarAssetCollection.Id, DeleteAssetCollCallback);
 							}
 							else
 							{
