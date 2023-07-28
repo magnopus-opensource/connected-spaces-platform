@@ -53,6 +53,8 @@ public:
 
 	const csp::common::String& GetId() const;
 
+	// TODO: Store and provide a way to get the name of this ScriptModuleCollection (equivalent to module namespace)
+
 	/// <summary>
 	/// Returns map of module names to Asset IDs
 	/// </summary>
@@ -127,6 +129,8 @@ private:
 
 private:
 	ScriptModuleAsset Module;
+
+	void SetResponseBody(const csp::common::String& Value);
 };
 
 
@@ -185,6 +189,9 @@ public:
 	CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
+	CSP_ASYNC_RESULT void UpdateScriptModuleCollectionLookupTable(const ScriptModuleCollection& Collection,
+																  const csp::common::Map<csp::common::String, csp::common::String>& NewLookupTable,
+																  const NullResultCallback& Callback);
 	CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
 											   const csp::common::String& Name,
 											   const ScriptModuleAssetResultCallback& Callback);

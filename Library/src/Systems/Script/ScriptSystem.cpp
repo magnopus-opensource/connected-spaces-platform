@@ -86,52 +86,6 @@ template <> struct qjs::js_traits<String>
 };
 
 
-namespace
-{
-
-typedef Map<String, String> LookupTableMap;
-
-
-LookupTableMap JsonToLookupTable(const String& JsonString)
-{
-	rapidjson::Document Json;
-	Json.Parse(JsonString.c_str(), JsonString.Length());
-
-	LookupTableMap LookupTable;
-
-	for (const auto& Entry : Json.GetObject())
-	{
-		LookupTable[Entry.name.GetString(), Entry.value.GetString()];
-	}
-
-	return LookupTable;
-}
-
-String LookupTableToJson(const LookupTableMap& LookupTable)
-{
-	rapidjson::Document Json(rapidjson::kObjectType);
-	auto Object = Json.GetObject();
-
-	auto* Keys = LookupTable.Keys();
-
-	for (int i = 0; i < Keys->Size(); ++i)
-	{
-		auto& Key = Keys->operator[](i);
-
-		rapidjson::Value Name(Key.c_str(), Json.GetAllocator());
-		rapidjson::Value Value(LookupTable[Key].c_str(), Json.GetAllocator());
-
-		Object.AddMember(Name, Value, Json.GetAllocator());
-	}
-
-	CSP_DELETE(Keys);
-
-	return Json.GetString();
-}
-
-} // namespace
-
-
 namespace csp::systems
 {
 
@@ -309,7 +263,7 @@ const Map<String, String>& ScriptModuleCollection::GetLookupTable() const
 
 Map<String, String>& ScriptModuleCollection::GetMutableLookupTable() const
 {
-	return const_cast<LookupTableMap&>(LookupTable);
+	return const_cast<decltype(LookupTable)&>(LookupTable);
 }
 
 ScriptModuleCollection& ScriptModuleCollectionResult::GetCollection()
@@ -348,10 +302,15 @@ const ScriptModuleAsset& ScriptModuleAssetResult::GetModule() const
 	return Module;
 }
 
+void ScriptModuleAssetResult::SetResponseBody(const csp::common::String& Value)
+{
+	ResponseBody = Value;
+}
+
 
 void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
 {
-	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
+	String AssetCollectionName(ASSET_COLLECTION_NAME_PREFIX);
 	AssetCollectionName.Append(Namespace);
 
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
@@ -360,19 +319,12 @@ void ScriptSystem::CreateScriptModuleCollection(const String& Namespace, const S
 	{
 		const auto& AssetCollection = Result.GetAssetCollection();
 
-		AssetCollectionResultCallback UpdateAssetCollectionCallback = [AssetSystem, Callback](const AssetCollectionResult& Result)
-		{
-			const auto& AssetCollection = Result.GetAssetCollection();
+		ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-			ScriptModuleCollectionResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		auto& Collection = InternalResult.GetCollection();
+		Collection.Id	 = AssetCollection.Id;
 
-			auto& Collection = InternalResult.GetCollection();
-			Collection.Id	 = AssetCollection.Id;
-
-			Callback(InternalResult);
-		};
-
-		AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, {{LOOKUP_TABLE_METADATA_KEY, "{}"}}, UpdateAssetCollectionCallback);
+		Callback(InternalResult);
 	};
 
 	// Create asset collection that represents script module collection
@@ -389,7 +341,6 @@ void ScriptSystem::_GetScriptModuleCollectionCallback(ScriptModuleCollectionResu
 {
 	const auto& AssetCollection = Result.GetAssetCollection();
 	const auto& Metadata		= AssetCollection.GetMetadataImmutable();
-	const auto& LookupTableJson = Metadata[LOOKUP_TABLE_METADATA_KEY];
 
 	// TODO: Handle failures in GetLookupTableById
 	ScriptModuleCollectionResult InternalResult(csp::services::EResultCode::Success, 400);
@@ -397,12 +348,12 @@ void ScriptSystem::_GetScriptModuleCollectionCallback(ScriptModuleCollectionResu
 	// Grab and modify ScriptModuleCollection instance
 	auto& Collection	   = InternalResult.GetCollection();
 	Collection.Id		   = AssetCollection.Id;
-	Collection.LookupTable = JsonToLookupTable(LookupTableJson);
+	Collection.LookupTable = decltype(Collection.LookupTable)(Metadata); // Copy metadata map
 
 	Callback(InternalResult);
 }
 
-void ScriptSystem::GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
+void ScriptSystem::GetScriptModuleCollection(const String& Namespace, const ScriptModuleCollectionResultCallback& Callback)
 {
 	auto AssetCollectionName = String(ASSET_COLLECTION_NAME_PREFIX);
 	AssetCollectionName.Append(Namespace);
@@ -413,7 +364,7 @@ void ScriptSystem::GetScriptModuleCollection(const csp::common::String& Namespac
 	AssetSystem->GetAssetCollectionByName(AssetCollectionName, std::bind(_GetScriptModuleCollectionCallback, Callback, std::placeholders::_1));
 }
 
-void ScriptSystem::GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback)
+void ScriptSystem::GetScriptModuleCollectionById(const String& Id, const ScriptModuleCollectionResultCallback& Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
@@ -429,15 +380,82 @@ void ScriptSystem::DeleteScriptModuleCollection(const ScriptModuleCollection& Co
 	AssetSystem->DeleteAssetCollection(Collection.GetId(), Callback);
 }
 
-void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& Namespace,
-										   const String& Name,
-										   const String& ModuleText,
-										   const NullResultCallback& Callback)
+void ScriptSystem::UpdateScriptModuleCollectionLookupTable(const ScriptModuleCollection& Collection,
+														   const Map<String, String>& NewLookupTable,
+														   const NullResultCallback& Callback)
+{
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	// TODO: Remove this temporary AssetCollection when we switch to passing IDs instead of objects
+	AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id = Collection.Id;
+
+	AssetCollectionResultCallback UpdateLookupTableCallback = [Callback](const AssetCollectionResult& Result)
+	{
+		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+		Callback(InternalResult);
+	};
+
+	AssetSystem->UpdateAssetCollectionMetadata(InternalAssetCollection, NewLookupTable, UpdateLookupTableCallback);
+}
+
+void ScriptSystem::GetScriptModuleAsset(const ScriptModuleCollection& Collection,
+										const csp::common::String& Name,
+										const ScriptModuleAssetResultCallback& Callback)
+{
+	auto* AssetSystem		= SystemsManager::Get().GetAssetSystem();
+	const auto& LookupTable = Collection.GetLookupTable();
+
+	AssetResultCallback GetAssetCallback = [](const AssetResult& Result)
+	{
+
+	};
+
+	if (LookupTable.HasKey(Name))
+	{
+		AssetSystem->GetAssetById(Collection.Id, LookupTable[Name], GetAssetCallback);
+	}
+	else
+	{
+		ScriptModuleCollectionResultCallback GetScriptModuleCollectionCallback
+			= [Name, AssetSystem, GetAssetCallback, Callback](const ScriptModuleCollectionResult& Result)
+		{
+			if (Result.GetResultCode() == csp::services::EResultCode::Success)
+			{
+				const auto& Collection	= Result.GetCollection();
+				const auto& LookupTable = Collection.GetLookupTable();
+
+				if (LookupTable.HasKey(Name))
+				{
+					AssetSystem->GetAssetById(Collection.Id, LookupTable[Name], GetAssetCallback);
+				}
+				else
+				{
+					ScriptModuleAssetResult InternalResult(csp::services::EResultCode::Failed, Result.GetHttpResultCode());
+					InternalResult.ResponseBody = "Module does not exist in namespace!";
+					Callback(InternalResult);
+				}
+			}
+			else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+			{
+				ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+				Callback(InternalResult);
+			}
+		};
+
+		GetScriptModuleCollectionById(Collection.Id, GetScriptModuleCollectionCallback);
+		// Check if module exists in lookup table
+		// Return invalid if not, otherwise get script module asset
+	}
+}
+
+void ScriptSystem::CreateScriptModuleAsset(const String& Namespace, const String& Name, const String& ModuleText, const NullResultCallback& Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
 	ScriptModuleCollectionResultCallback GetScriptModuleCollectionCallback
-		= [AssetSystem, Name, ModuleText, Callback](const ScriptModuleCollectionResult& Result)
+		= [this, AssetSystem, Name, ModuleText, Callback](const ScriptModuleCollectionResult& Result)
 	{
 		// TODO: Create some kind of mutex to prevent other clients from updating the lookup table while we are still using it here
 		auto& Collection  = Result.GetCollection();
@@ -455,7 +473,7 @@ void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& Namespace,
 		InternalAssetCollection.Id = Collection.GetId();
 
 		AssetResultCallback CreateAssetCallback
-			= [AssetSystem, InternalAssetCollection, Collection, Name, ModuleText, LookupTable, Callback](const AssetResult& Result)
+			= [this, AssetSystem, InternalAssetCollection, Collection, Name, ModuleText, LookupTable, Callback](const AssetResult& Result)
 		{
 			const auto& Asset = Result.GetAsset();
 
@@ -464,25 +482,12 @@ void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& Namespace,
 			AssetData.Buffer	   = const_cast<char*>(ModuleText.c_str());
 			AssetData.BufferLength = ModuleText.Length();
 
-			UriResultCallback UploadAssetDataCallback
-				= [Collection, Name, Asset, LookupTable, InternalAssetCollection, AssetSystem, Callback](const UriResult& Result)
+			UriResultCallback UploadAssetDataCallback = [this, Collection, Name, Asset, LookupTable, Callback](const UriResult& Result)
 			{
-				LookupTableMap NewLookupTable(LookupTable);
+				Map<String, String> NewLookupTable(LookupTable);
 				NewLookupTable[Name] = Asset.Id;
 
-				// TODO: Wrap this uploading of lookup table data in a function that directly takes the lookup table object
-				auto Json = LookupTableToJson(NewLookupTable);
-
-				AssetCollectionResultCallback UpdateLookupTableCallback = [Callback](const AssetCollectionResult& Result)
-				{
-					NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-
-					Callback(InternalResult);
-				};
-
-				// TODO: Upload the JSON instead, or replace the usage of JSON in a single metadata field to just storing each module lookup entry in
-				// its own metadata field
-				AssetSystem->UpdateAssetCollectionMetadata(InternalAssetCollection, NewLookupTable, UpdateLookupTableCallback);
+				UpdateScriptModuleCollectionLookupTable(Collection, NewLookupTable, Callback);
 			};
 
 			AssetSystem->UploadAssetData(InternalAssetCollection, Asset, AssetData, UploadAssetDataCallback);

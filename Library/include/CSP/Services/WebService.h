@@ -106,7 +106,7 @@ protected:
 	float RequestProgress  = 0.0f;
 	float ResponseProgress = 0.0f;
 
-	csp::common::String ResponseBody;
+    csp::common::String ResponseBody;
 };
 
 } // namespace csp::services
