@@ -165,12 +165,38 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
 		rapidjson::Document ResponseJson;
 		ResponseJson.Parse(InputText.c_str());
 
-		for (rapidjson::Value::ConstValueIterator Itr = ResponseJson.Begin(); Itr = ResponseJson.End(); ++Itr)
+		// We expect the response to be a JSON object with a set of fields describing key/value pairs of space IDs and bools,
+		// where the bool describes if it is ticketed or not
+		// We currently however only care about whether the _first_ space is ticketed, because our API only allows clients to
+		// reasons about whether a single space is ticketed.
+
+		bool ExpectedResponse										= true;
+		const auto JsonRootObject									= ResponseJson.GetObject();
+		const rapidjson::Value::ConstMemberIterator FirstJSONMember = JsonRootObject.MemberBegin();
+		if (FirstJSONMember != JsonRootObject.MemberEnd())
 		{
-			if (Itr->IsBool())
+			if (FirstJSONMember->value.IsBool())
 			{
-				SpaceIsTicketed = Itr->GetBool();
+				SpaceIsTicketed = FirstJSONMember->value.GetBool();
+				FOUNDATION_LOG_FORMAT(LogLevel::VeryVerbose,
+									  "We found that the space with ID %s has ticketed status: %s",
+									  FirstJSONMember->name.GetString(),
+									  SpaceIsTicketed ? "true" : "false");
 			}
+			else
+			{
+				ExpectedResponse = false;
+			}
+		}
+		else
+		{
+			ExpectedResponse = false;
+		}
+
+		if (ExpectedResponse == false)
+		{
+			FOUNDATION_LOG_MSG(LogLevel::Error,
+							   "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
 		}
 	}
 }
