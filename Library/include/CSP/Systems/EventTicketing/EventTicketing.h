@@ -168,8 +168,8 @@ typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResu
 // @brief Callback providing a ticketed event collection result.
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
 
+// @brief Callback providing a ticket event status for a space, from an endpoint result.
 typedef std::function<void(const SpaceIsTicketedResult& Result)> SpaceIsTicketedResultCallback;
-
 
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
 typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthorizeInfoCallback;
