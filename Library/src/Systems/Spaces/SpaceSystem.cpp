@@ -1524,7 +1524,7 @@ void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceG
 			// If the user is not the owner or a moderator check are the full user list
 			if (!UserCanAccessSpaceDetails)
 			{
-				UserCanAccessSpaceDetails = IdCheck(UserId, RefreshedSpace.ModeratorIds);
+				UserCanAccessSpaceDetails = IdCheck(UserId, RefreshedSpace.UserIds);
 			}
 
 			if (UserCanAccessSpaceDetails)
