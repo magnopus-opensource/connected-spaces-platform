@@ -557,6 +557,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
+	// Test for IsTicketedEvent prior to creating an event, ensure it returns false
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
@@ -573,6 +574,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 										 false);
 	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
 
+	// Test for IsTicketedEvent post creating an event, but with ticketing disabled, ensure it returns false
 	auto [SecondResult] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Success);
