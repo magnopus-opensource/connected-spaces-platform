@@ -32,7 +32,6 @@
 #include <rapidjson/rapidjson.h>
 
 
-
 using namespace csp;
 
 namespace chs = csp::services::generated::userservice;
