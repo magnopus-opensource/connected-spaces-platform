@@ -26,6 +26,13 @@ enum class EventTicketingVendor
 	Unknown
 };
 
+enum class TicketStatus
+{
+	Purchased = 0,
+	Redeemed,
+	Unknown
+};
+
 /// @ingroup Event Ticketing System
 /// @brief Data representation of a ticketed event
 class CSP_API TicketedEvent
@@ -39,6 +46,23 @@ public:
 	csp::common::String VendorEventId;
 	csp::common::String VendorEventUri;
 	bool IsTicketingActive;
+};
+
+/// @ingroup Event Ticketing System
+/// @brief Data representation of a ticket for an event
+class CSP_API EventTicket
+{
+public:
+	EventTicket() : Vendor(EventTicketingVendor::Unknown), Status(TicketStatus::Unknown) {};
+
+	csp::common::String Id;
+	csp::common::String SpaceId;
+	EventTicketingVendor Vendor;
+	csp::common::String VendorEventId;
+	csp::common::String VendorTicketId;
+	csp::systems::TicketStatus Status;
+	csp::common::String UserId;
+	csp::common::String Email;
 };
 
 /// @ingroup Event Ticketing System
@@ -112,6 +136,33 @@ private:
 };
 
 /// @ingroup Event Ticketing System
+/// @brief Result class holding a ticket for an event.
+class CSP_API EventTicketResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Get the ticketed event from the result.
+	/// @return The ticketed event.
+	EventTicket& GetEventTicket();
+
+	/// @brief Get the ticketed event from the result.
+	/// @return The ticketed event.
+	const EventTicket& GetEventTicket() const;
+
+private:
+	EventTicketResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	EventTicket Ticket;
+};
+
+/// @ingroup Event Ticketing System
 /// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
 class CSP_API TicketedEventVendorAuthInfoResult : public csp::services::ResultBase
 {
@@ -140,6 +191,10 @@ typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResu
 
 // @brief Callback providing a ticketed event collection result.
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
+
+// @brief Callback providing a ticketed event result.
+typedef std::function<void(const EventTicketResult& Result)> EventTicketResultCallback;
+
 
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
 typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthoriseInfoCallback;

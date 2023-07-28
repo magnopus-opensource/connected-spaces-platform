@@ -77,6 +77,23 @@ public:
 											const csp::common::Optional<int>& Limit,
 											TicketedEventCollectionResultCallback Callback);
 
+	/// @brief Submits a ticket from a vendor for the given event.
+	///
+	/// @param SpaceId csp::common::String : ID of the space the event belongs to.
+	/// @param Vendor csp::systems::EventTicketingVendor : Enum representing the vendor that the event is created with.
+	/// @param VendorEventId csp::common::String : Specifies the event ID in the vendors system.
+	/// @param VendorTicketId csp::common::String : Specifies the ticket ID in the vendors system.
+	/// @param OnBehalfOfUserId csp::common::Optional<csp::common::String> : Optionally submit the ticket for another user. Requires super user
+	/// permissions.
+	/// @param Callback EventTicketResultCallback : Callback providing the TicketedEvent once created.
+	CSP_ASYNC_RESULT void SubmitEventTicket(const csp::common::String& SpaceId,
+											EventTicketingVendor Vendor,
+											const csp::common::String& VendorEventId,
+											const csp::common::String& VendorTicketId,
+											const csp::common::Optional<csp::common::String>& OnBehalfOfUserId,
+											EventTicketResultCallback Callback);
+
+
 	/// @brief  Looks up the basic info required by a client to initiate an oauth2 flow with the specified vendor.
 	/// @param Vendor EventTicketingVendor : The vendor type to retrieve info for.
 	/// @param UserId csp::common::String : The ID of the user to obtain authentication info for.
