@@ -172,6 +172,6 @@ typedef std::function<void(const SpaceIsTicketedResult& Result)> SpaceIsTicketed
 
 
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
-typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthoriseInfoCallback;
+typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthorizeInfoCallback;
 
 } // namespace csp::systems

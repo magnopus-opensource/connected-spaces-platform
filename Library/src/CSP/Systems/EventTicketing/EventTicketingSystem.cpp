@@ -37,7 +37,6 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
 namespace csp::systems
 {
 
-
 EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
 	EventTicketingAPI = CSP_NEW chs::TicketedSpaceApi(InWebClient);
@@ -72,6 +71,30 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesSpaceIdEventsPost(SpaceId, Request, ResponseHandler);
 }
 
+void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceId,
+											   const csp::common::String& EventId,
+											   EventTicketingVendor Vendor,
+											   const csp::common::String& VendorEventId,
+											   const csp::common::String& VendorEventUri,
+											   bool IsTicketingActive,
+											   TicketedEventResultCallback Callback)
+{
+	auto Request = std::make_shared<chs::SpaceEventDto>();
+
+	Request->SetVendorName(GetVendorNameString(Vendor));
+	Request->SetVendorEventId(VendorEventId);
+	Request->SetVendorEventUri(VendorEventUri);
+	Request->SetIsTicketingActive(IsTicketingActive);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesSpaceIdEventsEventIdPut(SpaceId, EventId, Request, ResponseHandler);
+}
+
 void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::common::String>& SpaceIds,
 											 const csp::common::Optional<int>& Skip,
 											 const csp::common::Optional<int>& Limit,
@@ -98,13 +121,13 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
 }
 
-void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
+void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
-												  TicketedEventVendorAuthoriseInfoCallback Callback)
+												  TicketedEventVendorAuthorizeInfoCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI
-			  ->CreateHandler<TicketedEventVendorAuthoriseInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
+			  ->CreateHandler<TicketedEventVendorAuthorizeInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
 				  Callback,
 				  nullptr,
 				  csp::web::EResponseCodes::ResponseCreated);

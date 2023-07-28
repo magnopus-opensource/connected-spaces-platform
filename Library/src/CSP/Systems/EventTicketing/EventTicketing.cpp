@@ -37,12 +37,48 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
 
 void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event)
 {
-	Event.Id				= Dto.GetId();
-	Event.SpaceId			= Dto.GetSpaceId();
-	Event.Vendor			= VendorNameToEnum(Dto.GetVendorName());
-	Event.VendorEventId		= Dto.GetVendorEventId();
-	Event.VendorEventUri	= Dto.GetVendorEventUri();
-	Event.IsTicketingActive = Dto.GetIsTicketingActive();
+	Event.Id	  = Dto.GetId();
+	Event.SpaceId = Dto.GetSpaceId();
+
+	if (Dto.HasVendorName())
+	{
+		Event.Vendor = VendorNameToEnum(Dto.GetVendorName());
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorName");
+		Event.Vendor = csp::systems::EventTicketingVendor::Unknown;
+	}
+
+	if (Dto.HasVendorEventId())
+	{
+		Event.VendorEventId = Dto.GetVendorEventId();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorEventId");
+		Event.VendorEventId = "";
+	}
+
+	if (Dto.HasVendorEventUri())
+	{
+		Event.VendorEventUri = Dto.GetVendorEventUri();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorEventUri");
+		Event.VendorEventUri = "";
+	}
+
+	if (Dto.HasIsTicketingActive())
+	{
+		Event.IsTicketingActive = Dto.GetIsTicketingActive();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing IsTicketingActive");
+		Event.IsTicketingActive = false;
+	}
 }
 
 void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)

@@ -36,7 +36,7 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_CREATETICKETEDEVENT_ACTIVE_TRUE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_CREATETICKETEDEVENT_ACTIVE_TRUE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveTrueTest)
 {
 	SetRandSeed();
@@ -85,7 +85,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_CREATETICKETEDEVENT_ACTIVE_FALSE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_CREATETICKETEDEVENT_ACTIVE_FALSE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveFalseTest)
 {
 	SetRandSeed();
@@ -134,7 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_CREATETICKETEDEVENT_TWICE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_CREATETICKETEDEVENT_TWICE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTest)
 {
 	SetRandSeed();
@@ -207,7 +207,195 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_NO_EVENTS_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
+	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
+	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
+	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 CreateTicketedEvent,
+									 RequestPredicate,
+									 Space.Id,
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 InitialVendorEventId,
+									 InitialVendorEventUri,
+									 false);
+
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedEvent = CreatedResult.GetTicketedEvent();
+
+	EXPECT_EQ(CreatedEvent.SpaceId, Space.Id);
+	EXPECT_EQ(CreatedEvent.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+	EXPECT_EQ(CreatedEvent.VendorEventId, InitialVendorEventId);
+	EXPECT_EQ(CreatedEvent.VendorEventUri, InitialVendorEventUri);
+	EXPECT_FALSE(CreatedEvent.IsTicketingActive);
+
+	auto [UpdatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 UpdateTicketedEvent,
+									 RequestPredicate,
+									 Space.Id,
+									 CreatedEvent.Id,
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 UpdatedVendorEventId,
+									 UpdatedVendorEventUri,
+									 true);
+
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto UpdatedEvent = UpdatedResult.GetTicketedEvent();
+
+	EXPECT_EQ(UpdatedEvent.Id, CreatedEvent.Id);
+	EXPECT_EQ(UpdatedEvent.SpaceId, Space.Id);
+	EXPECT_EQ(UpdatedEvent.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+	EXPECT_EQ(UpdatedEvent.VendorEventId, UpdatedVendorEventId);
+	EXPECT_EQ(UpdatedEvent.VendorEventUri, UpdatedVendorEventUri);
+	EXPECT_TRUE(UpdatedEvent.IsTicketingActive);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_BADSPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
+	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
+	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
+	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 CreateTicketedEvent,
+									 RequestPredicate,
+									 Space.Id,
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 InitialVendorEventId,
+									 InitialVendorEventUri,
+									 false);
+
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedEvent = CreatedResult.GetTicketedEvent();
+
+	auto [UpdatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 UpdateTicketedEvent,
+									 RequestPredicate,
+									 "12a345678b9cdd01ef23456a",
+									 CreatedEvent.Id,
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 UpdatedVendorEventId,
+									 UpdatedVendorEventUri,
+									 true);
+
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdatedResult.GetHttpResultCode(), 404);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_UPDATETICKETEDEVENT_BADEVENTID_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventIdTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
+	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
+	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
+	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 CreateTicketedEvent,
+									 RequestPredicate,
+									 Space.Id,
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 InitialVendorEventId,
+									 InitialVendorEventUri,
+									 false);
+
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedEvent = CreatedResult.GetTicketedEvent();
+
+	auto [UpdatedResult] = AWAIT_PRE(EventTicketingSystem,
+									 UpdateTicketedEvent,
+									 RequestPredicate,
+									 Space.Id,
+									 "12a345678b9cdd01ef23456a",
+									 csp::systems::EventTicketingVendor::Eventbrite,
+									 UpdatedVendorEventId,
+									 UpdatedVendorEventUri,
+									 true);
+
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdatedResult.GetHttpResultCode(), 404);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_NO_EVENTS_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsTest)
 {
 	SetRandSeed();
@@ -243,7 +431,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_ONE_EVENT_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_ONE_EVENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventTest)
 {
 	SetRandSeed();
@@ -345,7 +533,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 #endif
 
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_TWO_EVENTS_SAME_SPACE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_TWO_EVENTS_SAME_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEventsSameSpaceTest)
 {
 	SetRandSeed();
@@ -443,7 +631,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_TWO_EVENTS_TWO_SPACES_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_TWO_EVENTS_TWO_SPACES_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEventsTwoSpacesTest)
 {
 	SetRandSeed();
@@ -547,7 +735,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETTICKETEDEVENTS_PAGINATION_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_PAGINATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginationTest)
 {
 	SetRandSeed();
@@ -655,7 +843,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETVENDORAUTHORISEINFO_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORISEINFO_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest)
 {
 	SetRandSeed();
@@ -668,7 +856,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest
 	LogIn(UserSystem, UserId);
 
 	auto [TicketedEventVendorAuthInfoResult]
-		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
+		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
 
 	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
 
@@ -683,7 +871,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETVENDORAUTHORISEINFO_BADDATA_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORISEINFO_BADDATA_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadDataTest)
 {
 	SetRandSeed();
@@ -698,7 +886,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 1. Invalid vendor test
 	{
 		auto [TicketedEventVendorAuthInfoResult]
-			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
+			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
 
 		// specifying an unknown vendor when attempting to get auth info should return a fail and an empty vendor auth info object
 		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
@@ -714,7 +902,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 2. Invalid user ID
 	{
 		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
-															 GetVendorAuthoriseInfo,
+															 GetVendorAuthorizeInfo,
 															 RequestPredicate,
 															 csp::systems::EventTicketingVendor::Eventbrite,
 															 "n0taR3alC1ien7");
@@ -733,7 +921,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 3. Invalid vendor ID and user ID
 	{
 		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
-															 GetVendorAuthoriseInfo,
+															 GetVendorAuthorizeInfo,
 															 RequestPredicate,
 															 csp::systems::EventTicketingVendor::Unknown,
 															 "n0taR3alC1ien7");
