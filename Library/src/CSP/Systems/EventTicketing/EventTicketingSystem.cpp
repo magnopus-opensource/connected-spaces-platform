@@ -113,4 +113,19 @@ void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
 		->apiV1VendorsVendorNameUsersUserIdProviderInfoGet(GetVendorNameString(Vendor), UserId, std::nullopt, ResponseHandler);
 }
 
+void EventTicketingSystem::GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback)
+{
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<SpaceIsTicketedResultCallback, SpaceIsTicketedResult, void, csp::services::DtoArray<chs::StringDataPage>>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	std::vector<csp::common::String> RequestSpaceId;
+	RequestSpaceId.push_back(SpaceId);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesTicketedGet(RequestSpaceId, ResponseHandler);
+}
+
 } // namespace csp::systems

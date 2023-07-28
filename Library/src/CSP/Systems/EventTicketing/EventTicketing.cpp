@@ -16,7 +16,6 @@
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 
 #include "Services/AggregationService/Api.h"
-#include "Services/AggregationService/Dto.h"
 
 namespace chs = csp::services::generated::aggregationservice;
 
@@ -140,6 +139,39 @@ void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiRespo
 		Dto->FromJson(Response->GetPayload().GetContent());
 
 		VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
+	}
+}
+
+bool SpaceIsTicketedResult::GetIsTicketedEvent()
+{
+	return SpaceIsTicketed;
+}
+
+const bool SpaceIsTicketedResult::GetIsTicketedEvent() const
+{
+	return SpaceIsTicketed;
+}
+
+void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		std::string InputText = Response->GetPayload().GetContent().c_str();
+
+		rapidjson::Document ResponseJson;
+		ResponseJson.Parse(InputText.c_str());
+
+		for (rapidjson::Value::ConstValueIterator Itr = ResponseJson.Begin(); Itr = ResponseJson.End(); ++Itr)
+		{
+			if (Itr->IsBool())
+			{
+				SpaceIsTicketed = Itr->GetBool();
+			}
+		}
 	}
 }
 

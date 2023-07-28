@@ -64,6 +64,8 @@ public:
 	CSP_ASYNC_RESULT void
 		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
 
+	CSP_ASYNC_RESULT void GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback);
+
 private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient);
