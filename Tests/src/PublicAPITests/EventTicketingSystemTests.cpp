@@ -532,6 +532,58 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETINGSYSTEM_TESTS || RUN_EVENTTICKETINGSYSTEM_GETISSPACETICKETEDFAILURE_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId  = "TestVendorEventId";
+	csp::common::String TestVendorEventUri = "TestVendorEventUri";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_FALSE(Result.GetIsTicketedEvent());
+
+	auto [CreateEventResult] = AWAIT_PRE(EventTicketingSystem,
+										 CreateTicketedEvent,
+										 RequestPredicate,
+										 Space.Id,
+										 csp::systems::EventTicketingVendor::Eventbrite,
+										 TestVendorEventId,
+										 TestVendorEventUri,
+										 false);
+	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [SecondResult] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_FALSE(SecondResult.GetIsTicketedEvent());
+
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETTICKETEDEVENTS_TWO_EVENTS_SAME_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEventsSameSpaceTest)
