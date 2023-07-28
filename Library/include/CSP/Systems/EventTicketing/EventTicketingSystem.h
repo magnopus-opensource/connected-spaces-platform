@@ -64,6 +64,9 @@ public:
 	CSP_ASYNC_RESULT void
 		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
 
+	/// @brief Gets the ticketed status of a space given by ID.
+	/// @param SpaceId const csp::common::String& : The space ID to check the status for.
+	/// @param Callback SpaceIsTicketedResultCallback : Callback providing the result of the query.
 	CSP_ASYNC_RESULT void GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback);
 
 private:

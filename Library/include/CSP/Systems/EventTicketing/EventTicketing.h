@@ -122,8 +122,12 @@ class CSP_API SpaceIsTicketedResult : public csp::services::ResultBase
 	/** @endcond */
 
 public:
+	/// @brief Gets the ticketed status of the space from the result.
+	/// @return A bool describing if the space is ticketed.
 	bool GetIsTicketedEvent();
 
+	/// @brief Gets the ticketed status of the space from the result.
+	/// @return A bool describing if the space is ticketed.
 	const bool GetIsTicketedEvent() const;
 
 private:
