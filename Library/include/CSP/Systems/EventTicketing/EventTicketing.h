@@ -142,6 +142,6 @@ typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResu
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
 
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
-typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthoriseInfoCallback;
+typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthorizeInfoCallback;
 
 } // namespace csp::systems

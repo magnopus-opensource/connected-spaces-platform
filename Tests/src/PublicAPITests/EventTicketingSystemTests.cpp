@@ -622,7 +622,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest
 	LogIn(UserSystem, UserId);
 
 	auto [TicketedEventVendorAuthInfoResult]
-		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
+		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
 
 	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
 
@@ -652,7 +652,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 1. Invalid vendor test
 	{
 		auto [TicketedEventVendorAuthInfoResult]
-			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthoriseInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
+			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
 
 		// specifying an unknown vendor when attempting to get auth info should return a fail and an empty vendor auth info object
 		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
@@ -668,7 +668,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 2. Invalid user ID
 	{
 		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
-															 GetVendorAuthoriseInfo,
+															 GetVendorAuthorizeInfo,
 															 RequestPredicate,
 															 csp::systems::EventTicketingVendor::Eventbrite,
 															 "n0taR3alC1ien7");
@@ -687,7 +687,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadD
 	// 3. Invalid vendor ID and user ID
 	{
 		auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
-															 GetVendorAuthoriseInfo,
+															 GetVendorAuthorizeInfo,
 															 RequestPredicate,
 															 csp::systems::EventTicketingVendor::Unknown,
 															 "n0taR3alC1ien7");

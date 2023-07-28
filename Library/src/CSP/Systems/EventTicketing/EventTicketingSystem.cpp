@@ -98,13 +98,13 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
 }
 
-void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
+void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
-												  TicketedEventVendorAuthoriseInfoCallback Callback)
+												  TicketedEventVendorAuthorizeInfoCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI
-			  ->CreateHandler<TicketedEventVendorAuthoriseInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
+			  ->CreateHandler<TicketedEventVendorAuthorizeInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
 				  Callback,
 				  nullptr,
 				  csp::web::EResponseCodes::ResponseCreated);
