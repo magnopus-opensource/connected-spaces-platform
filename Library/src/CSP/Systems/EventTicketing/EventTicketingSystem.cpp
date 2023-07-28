@@ -149,7 +149,7 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
 																						 ResponseHandler);
 }
 
-void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
+void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
 												  TicketedEventVendorAuthorizeInfoCallback Callback)
 {

@@ -899,8 +899,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORISEINFO_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest)
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORIZEINFO_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest)
 {
 	SetRandSeed();
 
@@ -927,8 +927,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoTest
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORISEINFO_BADDATA_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthoriseInfoBadDataTest)
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_GETVENDORAUTHORIZEINFO_BADDATA_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadDataTest)
 {
 	SetRandSeed();
 
@@ -1055,7 +1055,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Display, "AttendeeUserId: %s", EventAttendeeUserId.c_str());
 
 	auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
-														 GetVendorAuthoriseInfo,
+														 GetVendorAuthorizeInfo,
 														 RequestPredicate,
 														 csp::systems::EventTicketingVendor::Eventbrite,
 														 EventCreatorUserId);
