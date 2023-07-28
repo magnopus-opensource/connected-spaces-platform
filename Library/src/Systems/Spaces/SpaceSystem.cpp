@@ -32,6 +32,7 @@
 #include <rapidjson/rapidjson.h>
 
 
+
 using namespace csp;
 
 namespace chs = csp::services::generated::userservice;
@@ -81,24 +82,91 @@ void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, St
 	}
 }
 
+std::shared_ptr<chs::GroupDto> DefaultGroupInfo()
+{
+	auto DefaultGroupInfo = std::make_shared<chs::GroupDto>();
+
+	DefaultGroupInfo->SetGroupType("Space");
+	DefaultGroupInfo->SetAutoModerator(false);
+	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+	DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
+
+	return DefaultGroupInfo;
+}
+
+bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids)
+{
+	bool IdFound = false;
+
+	for (int i = 0; i < Ids.Size(); ++i)
+	{
+		if (Ids[i] == UserId)
+		{
+			IdFound = true;
+			break;
+		}
+	}
+
+	return IdFound;
+}
+
+Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection)
+{
+	Map<String, String> SpacesMetadata;
+
+	const auto& Metadata = AssetCollection.GetMetadataImmutable();
+
+	auto SpaceId = systems::SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
+
+	// Convert old JSON metadata to key-value metadata
+	if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
+	{
+		FOUNDATION_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
+
+		const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
+		Map<String, String> NewMetadata;
+		::ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
+
+		SpacesMetadata = NewMetadata;
+	}
+	else
+	{
+		SpacesMetadata = Metadata;
+	}
+
+	return SpacesMetadata;
+}
+
+std::vector<std::shared_ptr<chs::GroupInviteDto>> GenerateGroupInvites(const common::Array<systems::InviteUserRoleInfo> InviteUsers)
+{
+	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
+	GroupInvites.reserve(InviteUsers.Size());
+
+	for (auto i = 0; i < InviteUsers.Size(); ++i)
+	{
+		auto InviteUser = InviteUsers[i];
+
+		auto GroupInvite = std::make_shared<chs::GroupInviteDto>();
+		GroupInvite->SetEmail(InviteUser.UserEmail);
+		GroupInvite->SetAsModerator(InviteUser.UserRole == systems::SpaceUserRole::Moderator);
+
+		GroupInvites.push_back(GroupInvite);
+	}
+
+	return GroupInvites;
+}
+
 void CreateSpace(chs::GroupApi* GroupAPI,
 				 const String& Name,
 				 const String& Description,
 				 csp::systems::SpaceAttributes Attributes,
 				 csp::systems::SpaceResultCallback Callback)
 {
-	auto GroupInfo = std::make_shared<chs::GroupDto>();
+	auto GroupInfo = DefaultGroupInfo();
 	GroupInfo->SetName(Name);
 	GroupInfo->SetDescription(Description);
-	GroupInfo->SetGroupType("Space");
-
 	GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
 	GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-
-	GroupInfo->SetAutoModerator(false);
-
-	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-	GroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -142,12 +210,12 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 			FOUNDATION_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
 
-			const String UserID = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+			const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
 			if (!HasFlag(RefreshedSpace.Attributes, SpaceAttributes::RequiresInvite))
 			{
 				AddUserToSpace(SpaceId,
-							   UserID,
+							   UserId,
 							   [=](const SpaceResult& Result)
 							   {
 								   if (Result.GetResultCode() == csp::services::EResultCode::Success)
@@ -174,31 +242,18 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 			else
 			{
 				// First check if the user is the owner
-				bool EnterSuccess = RefreshedSpace.OwnerId == UserID;
+				bool EnterSuccess = RefreshedSpace.OwnerId == UserId;
 
 				// If the user is not the owner check are they a moderator
 				if (!EnterSuccess)
 				{
-					for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-					{
-						if (RefreshedSpace.ModeratorIds[i] == UserID)
-						{
-							EnterSuccess = true;
-							break;
-						}
-					}
+					EnterSuccess = IdCheck(UserId, RefreshedSpace.ModeratorIds);
 				}
 
 				// Finally check all users in the group
 				if (!EnterSuccess)
 				{
-					for (int i = 0; i < RefreshedSpace.UserIds.Size(); ++i)
-					{
-						if (RefreshedSpace.UserIds[i] == UserID)
-						{
-							EnterSuccess = true;
-						}
-					}
+					EnterSuccess = IdCheck(UserId, RefreshedSpace.UserIds);
 				}
 
 				if (EnterSuccess)
@@ -643,19 +698,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 
 void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const Array<InviteUserRoleInfo>& InviteUsers, NullResultCallback Callback)
 {
-	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
-	GroupInvites.reserve(InviteUsers.Size());
-
-	for (auto i = 0; i < InviteUsers.Size(); ++i)
-	{
-		auto InviteUser = InviteUsers[i];
-
-		auto GroupInvite = std::make_shared<chs::GroupInviteDto>();
-		GroupInvite->SetEmail(InviteUser.UserEmail);
-		GroupInvite->SetAsModerator(InviteUser.UserRole == SpaceUserRole::Moderator);
-
-		GroupInvites.push_back(GroupInvite);
-	}
+	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites = GenerateGroupInvites(InviteUsers);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
@@ -844,25 +887,10 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 			for (int i = 0; i < AssetCollections.Size(); ++i)
 			{
 				const auto& AssetCollection = AssetCollections[i];
-				const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 
 				auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
-				// Convert old JSON metadata to key-value metadata
-				if (Metadata.HasKey(SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
-				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
-
-					const auto& Json = Metadata[SpaceSystemHelpers::SPACE_METADATA_KEY];
-					Map<String, String> NewMetadata;
-					::ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
-
-					SpacesMetadata[SpaceId] = NewMetadata;
-				}
-				else
-				{
-					SpacesMetadata[SpaceId] = Metadata;
-				}
+				SpacesMetadata[SpaceId] = LegacyAssetConversion(AssetCollection);
 			}
 
 			InternalResult.SetMetadata(SpacesMetadata);
@@ -883,23 +911,8 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			const auto& AssetCollection = Result.GetAssetCollection();
-			const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 
-			// Convert old JSON metadata to key-value metadata
-			if (Metadata.HasKey(SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
-			{
-				FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
-
-				const auto& Json = Metadata[SpaceSystemHelpers::SPACE_METADATA_KEY];
-				Map<String, String> NewMetadata;
-				::ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
-
-				InternalResult.SetMetadata(NewMetadata);
-			}
-			else
-			{
-				InternalResult.SetMetadata(Metadata);
-			}
+			InternalResult.SetMetadata(LegacyAssetConversion(AssetCollection));
 		}
 
 		Callback(InternalResult);
@@ -1506,27 +1519,13 @@ void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceG
 			// If the user is not the owner check are they a moderator
 			if (!UserCanAccessSpaceDetails)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserId)
-					{
-						UserCanAccessSpaceDetails = true;
-						break;
-					}
-				}
+				UserCanAccessSpaceDetails = IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			// If the user is not the owner or a moderator check are the full user list
 			if (!UserCanAccessSpaceDetails)
 			{
-				for (int i = 0; i < RefreshedSpace.UserIds.Size(); ++i)
-				{
-					if (RefreshedSpace.UserIds[i] == UserId)
-					{
-						UserCanAccessSpaceDetails = true;
-						break;
-					}
-				}
+				UserCanAccessSpaceDetails = IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			if (UserCanAccessSpaceDetails)
@@ -1594,14 +1593,7 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
 			// If the user is not the owner check are they a moderator
 			if (!UserCanModifySpace)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserId)
-					{
-						UserCanModifySpace = true;
-						break;
-					}
-				}
+				UserCanModifySpace = IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			if (UserCanModifySpace)
@@ -1653,22 +1645,15 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 		{
 			const auto RefreshedSpace = GetSpaceResult.GetSpace();
 
-			const auto UserID = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+			const auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
 			// First check if the user is the owner
-			bool UserCanModifySpace = RefreshedSpace.OwnerId == UserID;
+			bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
 
 			// If the user is not the owner check are they a moderator
 			if (!UserCanModifySpace)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserID)
-					{
-						UserCanModifySpace = true;
-						break;
-					}
-				}
+				UserCanModifySpace = IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			if (UserCanModifySpace)
