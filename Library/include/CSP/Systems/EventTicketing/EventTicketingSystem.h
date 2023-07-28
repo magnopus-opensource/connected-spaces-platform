@@ -99,7 +99,12 @@ public:
 	/// @param UserId csp::common::String : The ID of the user to obtain authentication info for.
 	/// @param Callback TicketedEventVendorInfoResultCallback : Callback providing the oauth2 information.
 	CSP_ASYNC_RESULT void
-		GetVendorAuthoriseInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthoriseInfoCallback Callback);
+		GetVendorAuthorizeInfo(EventTicketingVendor Vendor, const csp::common::String& UserId, TicketedEventVendorAuthorizeInfoCallback Callback);
+
+	/// @brief Gets the ticketed status of a space given by ID.
+	/// @param SpaceId const csp::common::String& : The space ID to check the status for.
+	/// @param Callback SpaceIsTicketedResultCallback : Callback providing the result of the query.
+	CSP_ASYNC_RESULT void GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback);
 
 private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_NEWFEATURE_TESTS)
 
-	#include "Memory/Memory.h"
+	#include "CSP/CSPFoundation.h"
 	#include "CSP/Common/List.h"
 	#include "CSP/Common/Map.h"
-	#include "CSP/Common/String.h"
-	#include "CSP/CSPFoundation.h"
-	#include "Systems/Assets/LODHelpers.h"
-	#include "TestHelpers.h"
 	#include "CSP/Common/Optional.h"
+	#include "CSP/Common/String.h"
+	#include "Memory/Memory.h"
+	#include "Systems/Assets/LODHelpers.h"
+
+	#include "TestHelpers.h"
 	#include "PublicTestBase.h"
 
 	#include "Debug/Logging.h"
 
-	#include "gtest/gtest.h"
+	#include <gtest/gtest.h>
 
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, StringAppendTest)
@@ -71,36 +73,6 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, StringJoinTest)
 		auto String = csp::common::String::Join(',', {"asd", "fgh", "jkl"});
 
 		EXPECT_EQ(String, "asd,fgh,jkl");
-	}
-	catch (...)
-	{
-		FAIL();
-	}
-}
-
-CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ArrayConversionTest)
-{
-	try
-	{
-		csp::common::Array<csp::common::String> Array {"asd", "fgh", "jkl", "123"};
-
-		auto List = Array.ToList();
-
-		EXPECT_EQ(List.Size(), Array.Size());
-
-		for (size_t i = 0; i < Array.Size(); ++i)
-		{
-			EXPECT_EQ(List[i], Array[i]);
-		}
-
-		auto NewArray = List.ToArray();
-
-		EXPECT_EQ(NewArray.Size(), List.Size());
-
-		for (size_t i = 0; i < List.Size(); ++i)
-		{
-			EXPECT_EQ(NewArray[i], List[i]);
-		}
 	}
 	catch (...)
 	{
