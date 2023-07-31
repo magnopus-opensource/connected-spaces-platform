@@ -121,19 +121,34 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
 }
 
-void EventTicketingSystem::GetVendorAuthoriseInfo(EventTicketingVendor Vendor,
+void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
-												  TicketedEventVendorAuthoriseInfoCallback Callback)
+												  TicketedEventVendorAuthorizeInfoCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI
-			  ->CreateHandler<TicketedEventVendorAuthoriseInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
+			  ->CreateHandler<TicketedEventVendorAuthorizeInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
 				  Callback,
 				  nullptr,
 				  csp::web::EResponseCodes::ResponseCreated);
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
 		->apiV1VendorsVendorNameUsersUserIdProviderInfoGet(GetVendorNameString(Vendor), UserId, std::nullopt, ResponseHandler);
+}
+
+void EventTicketingSystem::GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback)
+{
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<SpaceIsTicketedResultCallback, SpaceIsTicketedResult, void, csp::services::DtoArray<chs::StringDataPage>>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	std::vector<csp::common::String> RequestSpaceId;
+	RequestSpaceId.push_back(SpaceId);
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)->apiV1SpacesTicketedGet(RequestSpaceId, ResponseHandler);
 }
 
 } // namespace csp::systems

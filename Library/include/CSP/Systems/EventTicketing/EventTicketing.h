@@ -112,6 +112,33 @@ private:
 };
 
 /// @ingroup Event Ticketing System
+/// @brief Result class holding a collection (array) of TicketedEvents.
+class CSP_API SpaceIsTicketedResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Gets the ticketed status of the space from the result.
+	/// @return A bool describing if the space is ticketed.
+	bool GetIsTicketedEvent();
+
+	/// @brief Gets the ticketed status of the space from the result.
+	/// @return A bool describing if the space is ticketed.
+	const bool GetIsTicketedEvent() const;
+
+private:
+	SpaceIsTicketedResult(void*) : SpaceIsTicketed(false) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	bool SpaceIsTicketed;
+};
+
+/// @ingroup Event Ticketing System
 /// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
 class CSP_API TicketedEventVendorAuthInfoResult : public csp::services::ResultBase
 {
@@ -141,7 +168,10 @@ typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResu
 // @brief Callback providing a ticketed event collection result.
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
 
+// @brief Callback providing a ticket event status for a space, from an endpoint result.
+typedef std::function<void(const SpaceIsTicketedResult& Result)> SpaceIsTicketedResultCallback;
+
 // @brief Callback providing the ticketed event vendor information necessary for authenticating with the vendor's platform.
-typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthoriseInfoCallback;
+typedef std::function<void(const TicketedEventVendorAuthInfoResult& Result)> TicketedEventVendorAuthorizeInfoCallback;
 
 } // namespace csp::systems
