@@ -17,10 +17,10 @@
 
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Services/ApiBase/ApiBase.h"
 #include "Systems/Users/UserSystem.internal.h"
 
 #include <chrono>
-
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -319,7 +319,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 
 		const HttpResponse& Response = Request->GetResponse();
 
-		// Atempt Auto-retry if needed
+		// Attempt Auto-retry if needed
 		bool RetryIssued = Request->CheckForAutoRetry();
 
 		if (Request->GetCallback())
@@ -328,6 +328,12 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			{
 				if (!RetryIssued)
 				{
+					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
+					if (ResponseCode >= 400 && ResponseCode < 500)
+					{
+						PrintClientErrorResponseMessages(Response);
+					}
+
 					Request->GetCallback()->OnHttpResponse(Response);
 				}
 
@@ -337,6 +343,12 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			{
 				if (!RetryIssued)
 				{
+					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
+					if (ResponseCode >= 400 && ResponseCode < 500)
+					{
+						PrintClientErrorResponseMessages(Response);
+					}
+
 					// This request is marked to be polled, so add to the queue
 					// to be issued on the next call to WebClient::ProcessResponses()
 					PollRequests.Enqueue({Request});
@@ -368,4 +380,39 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 }
 #endif
 
+void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
+{
+	const uint16_t ResponseCode				   = static_cast<uint16_t>(Response.GetResponseCode());
+	const csp::common::String& ResponsePayload = Response.GetPayload().GetContent();
+	if (ResponsePayload.IsEmpty())
+	{
+		FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) but with no payload/error message.",
+									Response.GetRequest()->GetUri().GetAsString(),
+									ResponseCode);
+	}
+	else
+	{
+		rapidjson::Document ResponseJson;
+		ResponseJson.Parse(ResponsePayload.c_str());
+		if (ResponseJson.HasMember("errors"))
+		{
+			const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
+
+			for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+			{
+				FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+											Response.GetRequest()->GetUri().GetAsString(),
+											ResponseCode,
+											ResponseArray[i].GetString());
+			}
+		}
+		else if (ResponseJson.HasMember("error"))
+		{
+			FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+										Response.GetRequest()->GetUri().GetAsString(),
+										ResponseCode,
+										ResponseJson["error"].GetString());
+		}
+	}
+}
 } // namespace csp::web

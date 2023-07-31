@@ -22,21 +22,20 @@ _"An interoperable communication library for the spatial internet."_
 - [Tenant Keys](#-tenant-keys)
 - [Api Documentation](#-api-documentation)
 - [Contributions](#%EF%B8%8F-contributions)
-- [Work In Progress](#woman_factory_worker-work-in-progress)
 - [License](#%EF%B8%8F-license)
 
 ****
 
 ## Background
-Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
+Interoperability is the foundation of the spatial internet. We need experiences to work across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
 <p align="center">
-    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/bfd58061-613d-4aa6-9adf-35a4d8e53434">
+    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/65fa6a8f-f9a4-45d7-9bd4-731d505c7711">
 </p>
 
-The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+The Connected Spaces Platform provides developers across a range of languages and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
 
-It comes in the form of an open-source client-side library, effectively encoding in binary form the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
+It comes in the form of an open-source client-side library, effectively encoding (in binary form) the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
 ****
 
@@ -69,7 +68,7 @@ If you choose to use the Connected Spaces Platform in conjunction with Magnopus 
 
 For information on how to obtain one, head over here.
 
- - [Obtaining a Tenant Key](https://www.magnopus.com/platform)
+ - [Obtaining a Tenant Key](https://www.magnopus.com/csp/for-developers#tenant-key)
 ****
 
 ## 🖥️ Usage
@@ -102,15 +101,6 @@ You can always find up-to-date documentation on the API here.
 PRs are welcome! If have any ideas you would like to contribute please see our contribution page.
 
  - [Contribution](/CONTRIBUTING.md)
-
-
-****
-
-## :woman_factory_worker: Work In Progress
-
-Our Work In Progress page details future planned work.
-
- - [Work In Progress](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Work-In-Progress)
 
 
 ****

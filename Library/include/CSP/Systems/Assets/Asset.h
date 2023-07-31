@@ -136,7 +136,8 @@ public:
 	virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
 
 	CSP_NO_EXPORT virtual void
-		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const = 0;
+		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
+		= 0;
 
 protected:
 	virtual ~AssetDataSource() = default;
@@ -308,6 +309,8 @@ private:
 	UriResult(const csp::common::String Uri);
 	UriResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	void SetResponseBody(const csp::common::String& Contents);
 
 	csp::common::String Uri;
 	csp::common::String XCodeError;

@@ -4,7 +4,7 @@ import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn,
 import { createSpace, deleteSpace, getSpace, getSpacesByIds, updateSpace } from './spacesystem_tests_helpers.js'
 import { createAsset, createAssetCollection, createBufferAssetDataSource, uploadAssetData } from './assetsystem_tests_helpers.js';
 
-import { freeBuffer, OlympusFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
 import { commonArrayToJSArray } from '../conversion_helpers.js';
 
 
@@ -69,7 +69,7 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
         current = Date.now();
         testTime = (current - start) / 1000;
 
-        OlympusFoundation.tick();
+        CSPFoundation.tick();
     }
 
     assert.isTrue(interrupted);
@@ -189,7 +189,7 @@ test('MultiplayerTests', 'RunScriptTest', async function() {
     scriptComponent.setScriptSource(scriptText);
     entity.getScript().invoke();
 
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     const err = entity.getScript().hasError();
 
@@ -584,7 +584,7 @@ test('MultiplayerTests', 'DeleteMultipleEntitiesTest', async function() {
     entitySystem.destroyEntity(createdObject2);
     entitySystem.destroyEntity(createdObject3);
     
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Cleanup
 var ok = await spaceSystem.exitSpaceAndDisconnect(connection);
@@ -740,7 +740,7 @@ test('MultiplayerTests', 'DeleteScriptTest', async function() {
     entitySystem.processPendingEntityOperations();
 
     // Tick to attempt to call scripts tick event
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Ensure position is still set to 0
     {
@@ -826,7 +826,7 @@ test('MultiplayerTests', 'DeleteAndChangeComponentTest', async function() {
     entitySystem.processPendingEntityOperations();
     createdObject.delete();
     // Ensure entity update doesn't crash
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
     
     // Cleanup
    var ok = await spaceSystem.exitSpaceAndDisconnect(connection);
@@ -891,7 +891,7 @@ test('MultiplayerTests', 'AddSecondScriptTest', async function() {
     createdObject.queueUpdate();
     entitySystem.processPendingEntityOperations();
 
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     // Ensure position is set to 0
     {
@@ -915,7 +915,7 @@ test('MultiplayerTests', 'AddSecondScriptTest', async function() {
     entitySystem.processPendingEntityOperations();
 
     // Ensure re-bound script works
-    OlympusFoundation.tick();
+    CSPFoundation.tick();
 
     createdObject.queueUpdate();
     entitySystem.processPendingEntityOperations();
@@ -1227,6 +1227,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 0);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.AssetSource);
         assert.areEqual(videoComponent.getIsVisible(), true);
+        assert.areEqual(videoComponent.getIsEnabled(), true);
 
         pos.delete();
     }
@@ -1250,6 +1251,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         videoComponent.setCurrentPlayheadPosition(1);
         videoComponent.setVideoPlayerSourceType(Multiplayer.VideoPlayerSourceType.URLSource);
         videoComponent.setIsVisible(false);
+        videoComponent.setIsEnabled(false);
 
         // Ensure values are set correctly
         const pos = videoComponent.getPosition();
@@ -1268,6 +1270,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 1);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.URLSource);
         assert.areEqual(videoComponent.getIsVisible(), false);
+        assert.areEqual(videoComponent.getIsEnabled(), false);
 
         pos.delete();
     }

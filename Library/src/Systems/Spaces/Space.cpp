@@ -427,14 +427,4 @@ void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiRespon
 	}
 }
 
-
-csp::multiplayer::MultiplayerConnection* EnterSpaceResult::GetConnection() const
-{
-	return Connection;
-}
-
-void EnterSpaceResult::SetConnection(csp::multiplayer::MultiplayerConnection* IncommingConnection)
-{
-	Connection = IncommingConnection;
-}
 } // namespace csp::systems

@@ -95,9 +95,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
+
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
+
 	EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
 }
 #endif

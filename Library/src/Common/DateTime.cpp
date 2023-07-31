@@ -34,6 +34,50 @@ namespace
 namespace csp::common
 {
 
+// Portable implementation of timegm - since it is not part of the C++ standard
+// we cannot assume it is reliably implemented across platforms, and is in fact
+// known to have issues with Emscripten, for example.
+// Based on https://stackoverflow.com/questions/530519/stdmktime-and-timezone-info.
+// Note - we rely on the `Time` parameter that is passed adhering to the cpp spec
+// https://en.cppreference.com/w/c/chrono/tm.
+
+time_t CSPTimeGM(struct tm* Time)
+{
+	// note - we use this constant array for calculating days into the year instead of
+	// relying on tm::tm_yday, as we expect calling code to more reliably provide values for `tm::tm_mon`
+	constexpr long long CumulativeDaysInYear[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+
+	const long long Year = 1900LL + Time->tm_year;
+	time_t Result		 = (Year - 1970) * 365 + CumulativeDaysInYear[Time->tm_mon];
+
+	// leap year offsets
+	{
+		Result += (Year - 1968) / 4;
+		Result -= (Year - 1900) / 100;
+		Result += (Year - 1600) / 400;
+
+		if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2)
+		{
+			Result--;
+		}
+	}
+
+	Result += static_cast<time_t>(Time->tm_mday) - 1;
+	Result *= 24;
+	Result += Time->tm_hour;
+	Result *= 60;
+	Result += Time->tm_min;
+	Result *= 60;
+	Result += Time->tm_sec;
+
+	if (Time->tm_isdst == 1)
+	{
+		Result -= 3600;
+	}
+
+	return Result;
+}
+
 DateTime::DateTime(const csp::common::String& DateString)
 {
 	int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
@@ -76,7 +120,7 @@ DateTime::DateTime(const csp::common::String& DateString)
 	}
 
 	// TODO: Use OffsetHours and OffsetMinutes in case CHS decides not to send datetimes in UTC in the future
-	const std::time_t Time = timegm(&TM);
+	const std::time_t Time = CSPTimeGM(&TM);
 	TimePoint			   = std::chrono::system_clock::from_time_t(Time);
 }
 

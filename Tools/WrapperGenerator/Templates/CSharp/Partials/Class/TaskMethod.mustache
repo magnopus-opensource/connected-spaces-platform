@@ -35,6 +35,8 @@ static void {{ delegate.name }}Function(
     _handle.Free();
 }
 
+static readonly {{ delegate.name }} {{ name }}DelegateInstance = {{ delegate.name }}Function;
+
 {{> DocComments }}
 public Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type }}{{> Type }}{{/ type }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }}> {{ name }}({{# parameters }}{{# type }}{{> Type }}{{# is_optional }}?{{/ is_optional }}{{/ type }} {{ name }}{{> Comma }}{{/ parameters }})
 {
@@ -88,7 +90,7 @@ public Task<{{# has_multiple_results }}({{/ has_multiple_results }}{{# results }
 {{/ type.is_pointer_or_reference }}
             ,
 {{/ parameters }}
-        {{ delegate.name }}Function, (IntPtr)handle
+        {{ name }}DelegateInstance, (IntPtr)handle
     );
     
     return tcs.Task;

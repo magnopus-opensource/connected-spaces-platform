@@ -2,11 +2,26 @@ import { assert, pushCleanupFunction } from '../test_framework.js';
 
 import { Services, Systems } from '../olympus_foundation.js';
 
+export var DEFAULT_LOGIN_EMAIL;
+export var ALT_LOGIN_EMAIL;
+export var DEFAULT_LOGIN_PASSWORD;
+export var ALT_LOGIN_PASSWORD;
 
-export const DEFAULT_LOGIN_EMAIL = "olyservice.WASM@magnopus.com";
-export const ALT_LOGIN_EMAIL = "olyservice.WASM+1@magnopus.com";
-export const DEFAULT_LOGIN_PASSWORD = "nQ30ZE78G*DmEiEk";
+fetch("/assets/test_account_creds.txt")
+  .then((res) => res.text())
+  .then((text) => {
+    const Accounts = text.split(/\s+/)
+    if(Accounts.length == 4){
+        DEFAULT_LOGIN_EMAIL = Accounts[0];
+        DEFAULT_LOGIN_PASSWORD = Accounts[1];
+        ALT_LOGIN_EMAIL = Accounts[2];
+        ALT_LOGIN_PASSWORD = Accounts[3];
+    }else{
+        throw "test_account_creds.txt formatted incorrectly. This file must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>";
+    }
 
+   })
+  .catch((e) => console.error("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>"));
 
 /**
  * 

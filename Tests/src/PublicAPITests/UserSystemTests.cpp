@@ -311,8 +311,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInWithTokenTest)
 	EXPECT_EQ(CurrentLoginState.State, csp::systems::ELoginState::LoggedIn);
 
 	// check that we're successfully logged in to CHS by creating a space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
@@ -489,8 +489,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
 
-	const char* TestUserName	= "OLY-TEST-NAME";
-	const char* TestDisplayName = "OLY-TEST-DISPLAY";
+	const char* TestUserName	= "CSP-TEST-NAME";
+	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
 	char UniqueUserName[256];
 	SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueHexString().c_str());
@@ -526,15 +526,18 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Verify that newsletter preference was set
+	// At this point, the user has been created but not verified the account via email.
+	// So, from this point onwards, attempting to set data for the user account should fail.
+	// But we should be able to get some of the user data.
+
+	// Verify that newsletter preference cannot be set
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetNewsletterStatus, CreatedUserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-		EXPECT_TRUE(Result.GetValue());
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 	}
 
-	// Retrieve the lite profile
+	// But that we can retrieve a lite profile
 	{
 		csp::common::Array<csp::common::String> Ids = {CreatedUserId};
 		auto [Result]								= AWAIT_PRE(UserSystem, GetProfilesByUserId, RequestPredicate, Ids);
@@ -547,21 +550,11 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 		EXPECT_EQ(LiteProfile.DisplayName, TestDisplayName);
 	}
 
-	// Retrieve the full profile
-	{
-		auto FullProfile = GetFullProfileByUserId(UserSystem, CreatedUserId);
-
-		EXPECT_EQ(FullProfile.UserId, CreatedUserId);
-		EXPECT_EQ(FullProfile.UserName, UniqueUserName);
-		EXPECT_EQ(FullProfile.DisplayName, TestDisplayName);
-		EXPECT_EQ(FullProfile.Email, UniqueEmail);
-	}
-
-	// Delete the created user
+	// Whilst logged in as one user with normal roles, we cannot deleted another
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 	}
 
 	LogOut(UserSystem);
@@ -576,7 +569,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const char* TestUserName = "OLY-TEST-NAME";
+	const char* TestUserName = "CSP-TEST-NAME";
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueHexString().c_str());
@@ -620,23 +613,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
 		EXPECT_EQ(LiteProfile.UserId, CreatedUserId);
 		EXPECT_FALSE(LiteProfile.DisplayName.IsEmpty());
-	}
-
-	// Retrieve the full profile
-	{
-		auto FullProfile = GetFullProfileByUserId(UserSystem, CreatedUserId);
-
-		EXPECT_EQ(FullProfile.UserId, CreatedUserId);
-		EXPECT_TRUE(FullProfile.UserName.IsEmpty());
-		EXPECT_FALSE(FullProfile.DisplayName.IsEmpty());
-		EXPECT_EQ(FullProfile.Email, UniqueEmail);
-	}
-
-	// Delete the created user
-	{
-		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 	}
 
 	LogOut(UserSystem);

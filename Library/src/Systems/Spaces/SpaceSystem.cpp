@@ -42,63 +42,17 @@ namespace
 
 constexpr const int MAX_SPACES_RESULTS = 100;
 
-void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata)
-{
-	rapidjson::Document Json;
-	Json.Parse(JsonMetadata.c_str());
-
-	if (!Json.IsObject())
-	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
-
-		OutMapMetadata["site"]				 = "Void";
-		OutMapMetadata["multiplayerVersion"] = "3"; // 2 represents double-msg-packed serialiser spaces, 3 represents the change to dictionary packing
-
-		return;
-	}
-
-	for (const auto& Member : Json.GetObject())
-	{
-		if (Member.value.IsString())
-		{
-			OutMapMetadata[Member.name.GetString()] = Member.value.GetString();
-		}
-		else if (Member.value.IsInt())
-		{
-			OutMapMetadata[Member.name.GetString()] = std::to_string(Member.value.GetInt()).c_str();
-		}
-		else if (Member.value.IsNull())
-		{
-			OutMapMetadata[Member.name.GetString()] = "";
-		}
-		else
-		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-								  "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)",
-								  Member.name.GetString(),
-								  Member.value.GetType());
-		}
-	}
-}
-
 void CreateSpace(chs::GroupApi* GroupAPI,
 				 const String& Name,
 				 const String& Description,
 				 csp::systems::SpaceAttributes Attributes,
 				 csp::systems::SpaceResultCallback Callback)
 {
-	auto GroupInfo = std::make_shared<chs::GroupDto>();
+	auto GroupInfo = systems::SpaceSystemHelpers::DefaultGroupInfo();
 	GroupInfo->SetName(Name);
 	GroupInfo->SetDescription(Description);
-	GroupInfo->SetGroupType("Space");
-
 	GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
 	GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-
-	GroupInfo->SetAutoModerator(false);
-
-	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-	GroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -126,27 +80,28 @@ SpaceSystem::~SpaceSystem()
 	CSP_DELETE(GroupAPI);
 }
 
-void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpaceResultCallback Callback)
+void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
 	SpaceResultCallback GetSpaceCallback = [=](const SpaceResult& GetSpaceResult)
 	{
 		if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
+			NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
+
 			Callback(InternalResult);
 		}
 		else if (GetSpaceResult.GetResultCode() == csp::services::EResultCode::Success)
 		{
-			auto RefreshedSpace = GetSpaceResult.GetSpace();
+			const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
 			FOUNDATION_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
 
-			const String UserID = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+			const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
 			if (!HasFlag(RefreshedSpace.Attributes, SpaceAttributes::RequiresInvite))
 			{
 				AddUserToSpace(SpaceId,
-							   UserID,
+							   UserId,
 							   [=](const SpaceResult& Result)
 							   {
 								   if (Result.GetResultCode() == csp::services::EResultCode::Success)
@@ -157,80 +112,36 @@ void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpace
 										   = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
 									   EnterSpaceEvent->AddString("SpaceId", SpaceId);
 									   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
-									   EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-									   if (AutoConnect)
-									   {
-										   auto* Connection = new csp::multiplayer::MultiplayerConnection(SpaceId);
+									   NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-										   SetConnectionCallbacks(Connection);
+									   Callback(InternalResult);
+								   }
+								   else
+								   {
+									   NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
 
-										   Connection->Connect(
-											   [=](bool Ok)
-											   {
-												   if (Ok)
-												   {
-													   Connection->InitialiseConnection(
-														   [=](bool Ok)
-														   {
-															   if (Ok)
-															   {
-																   EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(),
-																								   GetSpaceResult.GetHttpResultCode());
-																   InternalResult.SetConnection(Connection);
-																   Callback(InternalResult);
-															   }
-															   else
-															   {
-																   FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server");
-																   Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(),
-																							 GetSpaceResult.GetHttpResultCode()));
-															   }
-														   });
-												   }
-												   else
-												   {
-													   FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server")
-													   Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-												   }
-											   });
-									   }
-									   else
-									   {
-										   Callback(InternalResult);
-									   }
+									   Callback(InternalResult);
 								   }
 							   });
 			}
 			else
 			{
 				// First check if the user is the owner
-				bool EnterSuccess = RefreshedSpace.OwnerId == UserID;
+				bool EnterSuccess = RefreshedSpace.OwnerId == UserId;
 
 				// If the user is not the owner check are they a moderator
 				if (!EnterSuccess)
 				{
-					for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-					{
-						if (RefreshedSpace.ModeratorIds[i] == UserID)
-						{
-							EnterSuccess = true;
-							break;
-						}
-					}
+					EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
 				}
 
 				// Finally check all users in the group
 				if (!EnterSuccess)
 				{
-					for (int i = 0; i < RefreshedSpace.UserIds.Size(); ++i)
-					{
-						if (RefreshedSpace.UserIds[i] == UserID)
-						{
-							EnterSuccess = true;
-						}
-					}
+					EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.UserIds);
 				}
+
 				if (EnterSuccess)
 				{
 					CurrentSpace = GetSpaceResult.GetSpace();
@@ -239,79 +150,21 @@ void SpaceSystem::EnterSpace(const String& SpaceId, bool AutoConnect, EnterSpace
 					EnterSpaceEvent->AddString("SpaceId", SpaceId);
 					csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 
-					if (AutoConnect)
-					{
-						auto Connection = new csp::multiplayer::MultiplayerConnection(SpaceId);
+					NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 
-						SetConnectionCallbacks(Connection);
+					Callback(InternalResult);
+				}
+				else
+				{
+					NullResult InternalResult(csp::services::EResultCode::Failed, GetSpaceResult.GetHttpResultCode());
 
-						Connection->Connect(
-							[=](bool Ok)
-							{
-								if (Ok)
-								{
-									Connection->InitialiseConnection(
-										[=](bool Ok)
-										{
-											if (Ok)
-											{
-												EnterSpaceResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
-												InternalResult.SetConnection(Connection);
-												Callback(InternalResult);
-											}
-											else
-											{
-												FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server");
-												Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-											}
-										});
-								}
-								else
-								{
-									FOUNDATION_LOG_ERROR_MSG("Failed to Connect to SignalR Server")
-									Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-								}
-							});
-					}
-					else
-					{
-						Callback(EnterSpaceResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode()));
-					}
+					Callback(InternalResult);
 				}
 			}
 		}
 	};
 
 	GetSpace(SpaceId, GetSpaceCallback);
-}
-
-void SpaceSystem::ExitSpaceAndDisconnect(csp::multiplayer::MultiplayerConnection* Connection, BoolCallback Callback)
-{
-	FOUNDATION_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
-
-	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
-	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
-	csp::events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
-
-	if (Connection->GetConnectionState() != csp::multiplayer::ConnectionState::Disconnected
-		&& Connection->GetConnectionState() != csp::multiplayer::ConnectionState::Disconnecting)
-	{
-		Connection->Disconnect(
-			[=](bool Ok)
-			{
-				if (Ok)
-				{
-					CurrentSpace = Space();
-					Callback(true);
-				}
-				else
-				{
-					FOUNDATION_LOG_ERROR_MSG("Failed to Exit Space: Disconnect Failed");
-
-					Callback(false);
-				}
-			});
-	}
 }
 
 void SpaceSystem::ExitSpace()
@@ -332,21 +185,6 @@ bool SpaceSystem::IsInSpace()
 const Space& SpaceSystem::GetCurrentSpace() const
 {
 	return CurrentSpace;
-}
-
-CSP_EVENT void SpaceSystem::SetEntityCreatedCallback(csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback)
-{
-	EntityCreatedCallback = Callback;
-}
-
-CSP_EVENT void SpaceSystem::SetInitialEntitiesRetrievedCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback)
-{
-	InitialEntitiesRetrievedCallback = Callback;
-}
-
-CSP_EVENT void SpaceSystem::SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler Callback)
-{
-	ScriptSystemReadyCallback = Callback;
 }
 
 void SpaceSystem::CreateSpace(const String& Name,
@@ -746,19 +584,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 
 void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const Array<InviteUserRoleInfo>& InviteUsers, NullResultCallback Callback)
 {
-	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
-	GroupInvites.reserve(InviteUsers.Size());
-
-	for (auto i = 0; i < InviteUsers.Size(); ++i)
-	{
-		auto InviteUser = InviteUsers[i];
-
-		auto GroupInvite = std::make_shared<chs::GroupInviteDto>();
-		GroupInvite->SetEmail(InviteUser.UserEmail);
-		GroupInvite->SetAsModerator(InviteUser.UserRole == SpaceUserRole::Moderator);
-
-		GroupInvites.push_back(GroupInvite);
-	}
+	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites = systems::SpaceSystemHelpers::GenerateGroupInvites(InviteUsers);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
@@ -947,25 +773,10 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 			for (int i = 0; i < AssetCollections.Size(); ++i)
 			{
 				const auto& AssetCollection = AssetCollections[i];
-				const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 
 				auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
-				// Convert old JSON metadata to key-value metadata
-				if (Metadata.HasKey(SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
-				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
-
-					const auto& Json = Metadata[SpaceSystemHelpers::SPACE_METADATA_KEY];
-					Map<String, String> NewMetadata;
-					::ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
-
-					SpacesMetadata[SpaceId] = NewMetadata;
-				}
-				else
-				{
-					SpacesMetadata[SpaceId] = Metadata;
-				}
+				SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
 			}
 
 			InternalResult.SetMetadata(SpacesMetadata);
@@ -986,23 +797,8 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			const auto& AssetCollection = Result.GetAssetCollection();
-			const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 
-			// Convert old JSON metadata to key-value metadata
-			if (Metadata.HasKey(SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
-			{
-				FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
-
-				const auto& Json = Metadata[SpaceSystemHelpers::SPACE_METADATA_KEY];
-				Map<String, String> NewMetadata;
-				::ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
-
-				InternalResult.SetMetadata(NewMetadata);
-			}
-			else
-			{
-				InternalResult.SetMetadata(Metadata);
-			}
+			InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
 		}
 
 		Callback(InternalResult);
@@ -1586,22 +1382,6 @@ void SpaceSystem::GetSpaceGeoLocationInternal(const csp::common::String& SpaceId
 	POIInternalSystem->GetSpaceGeoLocation(SpaceId, Callback);
 }
 
-void SpaceSystem::SetConnectionCallbacks(csp::multiplayer::MultiplayerConnection* Connection)
-{
-	if (!EntityCreatedCallback || !InitialEntitiesRetrievedCallback || !ScriptSystemReadyCallback)
-	{
-		FOUNDATION_LOG_WARN_MSG("Space connection callbacks have not been set.");
-		return;
-	}
-
-	if (Connection)
-	{
-		Connection->GetSpaceEntitySystem()->SetEntityCreatedCallback(EntityCreatedCallback);
-		Connection->GetSpaceEntitySystem()->SetInitialEntitiesRetrievedCallback(InitialEntitiesRetrievedCallback);
-		Connection->GetSpaceEntitySystem()->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-	}
-}
-
 void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
 	// First refresh the space to ensure the user has access to the space
@@ -1625,27 +1405,13 @@ void SpaceSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceG
 			// If the user is not the owner check are they a moderator
 			if (!UserCanAccessSpaceDetails)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserId)
-					{
-						UserCanAccessSpaceDetails = true;
-						break;
-					}
-				}
+				UserCanAccessSpaceDetails = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			// If the user is not the owner or a moderator check are the full user list
 			if (!UserCanAccessSpaceDetails)
 			{
-				for (int i = 0; i < RefreshedSpace.UserIds.Size(); ++i)
-				{
-					if (RefreshedSpace.UserIds[i] == UserId)
-					{
-						UserCanAccessSpaceDetails = true;
-						break;
-					}
-				}
+				UserCanAccessSpaceDetails = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.UserIds);
 			}
 
 			if (UserCanAccessSpaceDetails)
@@ -1713,14 +1479,7 @@ void SpaceSystem::UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
 			// If the user is not the owner check are they a moderator
 			if (!UserCanModifySpace)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserId)
-					{
-						UserCanModifySpace = true;
-						break;
-					}
-				}
+				UserCanModifySpace = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			if (UserCanModifySpace)
@@ -1772,22 +1531,15 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 		{
 			const auto RefreshedSpace = GetSpaceResult.GetSpace();
 
-			const auto UserID = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
+			const auto UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
 			// First check if the user is the owner
-			bool UserCanModifySpace = RefreshedSpace.OwnerId == UserID;
+			bool UserCanModifySpace = RefreshedSpace.OwnerId == UserId;
 
 			// If the user is not the owner check are they a moderator
 			if (!UserCanModifySpace)
 			{
-				for (int i = 0; i < RefreshedSpace.ModeratorIds.Size(); ++i)
-				{
-					if (RefreshedSpace.ModeratorIds[i] == UserID)
-					{
-						UserCanModifySpace = true;
-						break;
-					}
-				}
+				UserCanModifySpace = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
 			}
 
 			if (UserCanModifySpace)

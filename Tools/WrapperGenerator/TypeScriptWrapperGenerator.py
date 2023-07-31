@@ -422,7 +422,7 @@ class TypeScriptWrapperGenerator:
             if c.base != None:
                 resorted_classes.append(c)
 
-        rendered_functions = TypeScriptWrapperGenerator_Jinja2().generate(functions, templates)
+        rendered_functions = TypeScriptWrapperGenerator_Jinja2().generate(functions, classes, templates)
         
         with open(f"{self.__OUTPUT_DIRECTORY}olympus.foundation.ts", 'w') as f:
             print(
@@ -430,15 +430,14 @@ class TypeScriptWrapperGenerator:
                     template,
                     {
                         'enums': list(enums.values()),
-                        'rendered_functions': rendered_functions,
+                        'rendered_functions': rendered_functions['global_functions'],
                         'classes': resorted_classes,
                         'templates': list(templates.values()),
                         'interfaces': list(interfaces.values()),
                         'extra_data': config
                     },
                     self.__PARTIALS_DIRECTORY,
-                    warn=True,
-                    keep=False
+                    warn=True
                 ),
                 file=f
             )

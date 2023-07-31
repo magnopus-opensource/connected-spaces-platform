@@ -215,7 +215,7 @@ void SettingsSystem::AddRecentlyVisitedSpace(const csp::common::String& InUserId
 			RecentSpaces.Remove(MAX_RECENT_SPACES);
 		}
 
-		auto RecentSpacesString = csp::common::String::Join(',', RecentSpaces);
+		auto RecentSpacesString = csp::common::String::Join(RecentSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "RecentSpaces", RecentSpacesString, Callback);
 	};
@@ -287,7 +287,7 @@ void SettingsSystem::AddBlockedSpace(const csp::common::String& InUserId, const 
 		auto BlockedSpaces = BlockedSpacesArray.ToList();
 		BlockedSpaces.Insert(0, InSpaceID);
 
-		auto BlockedSpacesString = csp::common::String::Join(',', BlockedSpaces);
+		auto BlockedSpacesString = csp::common::String::Join(BlockedSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "BlockedSpaces", BlockedSpacesString, Callback);
 	};
@@ -334,7 +334,7 @@ void SettingsSystem::RemoveBlockedSpace(const csp::common::String& InUserId, con
 		auto BlockedSpaces = BlockedSpacesArray.ToList();
 		BlockedSpaces.RemoveItem(InSpaceID);
 
-		auto BlockedSpacesString = csp::common::String::Join(',', BlockedSpaces);
+		auto BlockedSpacesString = csp::common::String::Join(BlockedSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "BlockedSpaces", BlockedSpacesString, Callback);
 	};
@@ -461,8 +461,22 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String& UserId, UriRes
 				{
 					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
 					{
-						const UriResult InternalResult(AssetsResult.GetAssets()[0].Uri);
-						Callback(InternalResult);
+						const auto& Assets = AssetsResult.GetAssets();
+
+						if (Assets.Size() > 0)
+						{
+							const UriResult InternalResult(AssetsResult.GetAssets()[0].Uri);
+							Callback(InternalResult);
+						}
+						else
+						{
+							UriResult InternalResult(csp::services::EResultCode::Failed, 200);
+							InternalResult.SetResponseBody(
+								"Invalid avatar portrait AssetCollection. AssetCollection should contain an Asset but does not!");
+							InternalResult.Uri = "";
+
+							Callback(InternalResult);
+						}
 					}
 					else
 					{

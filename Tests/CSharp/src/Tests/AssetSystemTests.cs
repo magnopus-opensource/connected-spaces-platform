@@ -62,7 +62,7 @@ namespace CSPEngine
 
         static void GetAssetCollectionsByCriteria(Systems.AssetSystem assetSystem, Systems.Space space, string parentId, Systems.EAssetCollectionType? type, Common.Array<string>? tags, Common.Array<string>? names, int? ResultsSkipNumber, int? ResultsMaxNumber, out Common.Array<Systems.AssetCollection> assetCollections)
         {
-            using var result = assetSystem.GetAssetCollectionsByCriteria(space.Id, parentId, type, tags, names, ResultsSkipNumber, ResultsMaxNumber).Result;
+            using var result = assetSystem.GetAssetCollectionsByCriteria(space?.Id, parentId, type, tags, names, ResultsSkipNumber, ResultsMaxNumber).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -194,7 +194,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAssetCollectionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -221,7 +221,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAssetCollectionNoSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
 
@@ -244,7 +244,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetCollectionsByIdsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -295,7 +295,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAssetTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -345,7 +345,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAssetNoSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
@@ -390,7 +390,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetsByCollectionIdsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -450,7 +450,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetCollectionsByDifferentCriteriaTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -554,7 +554,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetsByDifferentCriteriaTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -714,7 +714,7 @@ namespace CSPEngine
         [Test]
         public static void ExternalUriAssetTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -773,7 +773,7 @@ namespace CSPEngine
         [Test]
         public static void UploadAssetAsFileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -863,7 +863,7 @@ namespace CSPEngine
         [Test]
         public static void UploadAssetAsFileNoSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
@@ -948,7 +948,7 @@ namespace CSPEngine
         [Test]
         public static void UploadAssetAsBufferTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1018,7 +1018,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateAssetDataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1086,7 +1086,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateAssetAsFileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1158,7 +1158,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateAssetAsBufferTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1243,7 +1243,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateAssetCollectionMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1272,7 +1272,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetDataSizeTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET");
@@ -1335,7 +1335,7 @@ namespace CSPEngine
         [Test]
         public static void thirdPartyPackagedAssetIdentifierTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";

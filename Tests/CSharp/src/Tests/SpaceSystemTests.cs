@@ -1,9 +1,10 @@
 using System.IO;
+using System.Runtime.InteropServices;
+
 using Common = Csp.Common;
 using Services = Csp.Services;
 using Systems = Csp.Systems;
 using Web = Csp.Web;
-using System.Runtime.InteropServices;
 
 using CSharpTests;
 using static CSharpTests.TestHelper;
@@ -87,6 +88,22 @@ namespace CSPEngine
                 PushCleanupFunction(() => DeleteSpace(spaceSystem, space, disposeFoundationResources));
 
             return space;
+        }
+
+        public static void ExitSpace(Systems.SpaceSystem spaceSystem)
+        {
+            spaceSystem.ExitSpace();
+        }
+
+        public static void EnterSpace(Systems.SpaceSystem spaceSystem, string id, bool pushCleanupFunction = true)
+        {
+            using var result = spaceSystem.EnterSpace(id).Result;
+            var resCode = result.GetResultCode();
+
+            Assert.AreEqual(resCode, Services.EResultCode.Success);
+
+            if (pushCleanupFunction)
+                PushCleanupFunction(() => ExitSpace(spaceSystem));
         }
 
         static Systems.Space GetSpace(Systems.SpaceSystem spaceSystem, string spaceId)
@@ -292,7 +309,7 @@ namespace CSPEngine
         [Test]
         public static void CreateSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -311,7 +328,7 @@ namespace CSPEngine
         [Test]
         public static void CreateSpaceWithBulkInviteTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -345,7 +362,7 @@ namespace CSPEngine
         [Test]
         public static void CreateSpaceWithBufferTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -382,7 +399,7 @@ namespace CSPEngine
         [Test]
         public static void CreateSpaceWithBufferWithBulkInviteTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -434,7 +451,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceDescriptionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -467,7 +484,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceTypeTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -500,7 +517,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -545,7 +562,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -566,7 +583,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpacesByIdsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testPublicSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testPrivateSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
@@ -610,7 +627,7 @@ namespace CSPEngine
         [Test]
         public static void GetPublicSpacesAsGuestTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in as default test user to create spaces
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
@@ -655,7 +672,7 @@ namespace CSPEngine
         [Test]
         public static void GetPublicSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testPublicSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -707,7 +724,7 @@ namespace CSPEngine
         [Test]
         public static void GetPrivateSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testPrivateSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -759,7 +776,7 @@ namespace CSPEngine
         [Test]
         public static void GetPaginatedPrivateSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testPrivateSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -800,7 +817,7 @@ namespace CSPEngine
         [Test]
         public static void JoinPublicSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -850,7 +867,7 @@ namespace CSPEngine
         [Test]
         public static void AddSiteInfoTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -867,7 +884,7 @@ namespace CSPEngine
         [Test]
         public static void GetSiteInfoTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -905,13 +922,13 @@ namespace CSPEngine
         [Test]
         public static void UpdateUserRolesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
             // Log in with alt account first to get its ID
-            var altUserId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
+            var altUserId = UserSystemTests.LogIn(userSystem, email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
             UserSystemTests.LogOut(userSystem);
 
             // Log in
@@ -922,7 +939,12 @@ namespace CSPEngine
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, altUserId).Result;
             var resCode = addUserResult.GetResultCode();
+            var httpCode = addUserResult.GetHttpResultCode();
+
+            var responseBody = addUserResult.GetResponseBody();
+
             Assert.AreEqual(resCode, Services.EResultCode.Success);
+
             space = addUserResult.GetSpace();
 
             var updatedSecondTestUserRole = new Systems.UserRoleInfo { UserId = altUserId, UserRole = Systems.SpaceUserRole.Moderator };
@@ -950,7 +972,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateGuestUserRoleTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -991,7 +1013,7 @@ namespace CSPEngine
         [Test]
         public static void SetUserRoleOnInviteTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1020,7 +1042,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1055,7 +1077,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpacesMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1095,7 +1117,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceThumbnailTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             var testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             var testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1137,7 +1159,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceThumbnailWithBufferTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             var testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             var testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1194,7 +1216,7 @@ namespace CSPEngine
         [Test]
         public static void CreateSpaceWithEmptyMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1214,7 +1236,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceWithEmptyMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1235,7 +1257,7 @@ namespace CSPEngine
         [Test]
         public static void GetPendingUserInvitesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1268,7 +1290,7 @@ namespace CSPEngine
         [Test]
         public static void BulkInviteToSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1303,7 +1325,7 @@ namespace CSPEngine
         [Test]
         public static void GetPublicSpaceMetadataTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1317,15 +1339,14 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create public space
-            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, testSpaceMetadata, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, testSpaceMetadata, null, null);
 
             // Log out with default user and in with alt user
             UserSystemTests.LogOut(userSystem);
             var altUserId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
 
             // Enter space
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
+            EnterSpace(spaceSystem, space.Id, false);
             
             // Get metadata for public space
             GetSpaceMetadata(spaceSystem, space, out var retrievedMetadata);
@@ -1334,24 +1355,15 @@ namespace CSPEngine
             Assert.IsTrue(retrievedMetadata.HasKey("site"));
             Assert.AreEqual(retrievedMetadata["site"], "Void");
 
-            
             // Exit and re-enter space to verify its OK to always add self to public space
-            var ok = spaceSystem.ExitSpaceAndDisconnect(enterResult.GetConnection()).Result;
-            Assert.IsTrue(ok);
-            {
-                var enterResult2 = spaceSystem.EnterSpace(space.Id, true).Result;
-                Assert.AreEqual(enterResult2.GetResultCode(), Services.EResultCode.Success);
-                
-                ok = spaceSystem.ExitSpaceAndDisconnect(enterResult.GetConnection()).Result;
-                Assert.IsTrue(ok);
-            }
+            ExitSpace(spaceSystem);
+
+            EnterSpace(spaceSystem, space.Id, false);
+            ExitSpace(spaceSystem);
 
             // Log back in with default user so space can be deleted
             UserSystemTests.LogOut(userSystem);
             _ = UserSystemTests.LogIn(userSystem);
-
-            // Delete space
-            DeleteSpace(spaceSystem, space);
         }
 #endif
 
@@ -1359,7 +1371,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpaceThumbnailTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             var testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             var testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1410,7 +1422,7 @@ namespace CSPEngine
         [Test]
         public static void GetSpaceThumbnailWithGuestUserTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             var testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             var testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1434,6 +1446,7 @@ namespace CSPEngine
             {
                 FilePath = Path.GetFullPath("assets/Fox.glb")
             };
+
             updateSpaceThumbnail.SetMimeType("model/gltf-binary");
 
             {
@@ -1462,7 +1475,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceGuestUserBannedListTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1513,7 +1526,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateSpaceStandardUserBannedListTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1564,33 +1577,34 @@ namespace CSPEngine
         [Test]
         public static void EnterSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
             // Login as an admin user
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
-            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+
             // Enter space
-            {
-                var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-                Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-                var ok = spaceSystem.ExitSpaceAndDisconnect(enterResult.GetConnection()).Result;
-                Assert.IsTrue(ok);
-            }
+            EnterSpace(spaceSystem, space.Id, false);
+            ExitSpace(spaceSystem);
 
             UserSystemTests.LogOut(userSystem);
 
             // Log in as a guest user
-            var altUserId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
+            userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
 
-            var enterResult2 = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult2.GetResultCode(), Services.EResultCode.Failed);
+            {
+                using var result = spaceSystem.EnterSpace(space.Id).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Services.EResultCode.Failed);
+            }
 
             UserSystemTests.LogOut(userSystem);
 
-            _ = userSystem.TestLogIn(pushCleanupFunction: false);
+            _ = userSystem.TestLogIn();
             DeleteSpace(spaceSystem, space);
         }
 #endif
@@ -1600,7 +1614,7 @@ namespace CSPEngine
         public static void GeoLocationTest()
         {
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1714,7 +1728,7 @@ namespace CSPEngine
         [Test]
         public static void GeoLocationValidationTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1837,7 +1851,7 @@ namespace CSPEngine
         public static void GeoLocationWithoutPermissionTest()
         {
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1917,7 +1931,7 @@ namespace CSPEngine
         public static void GeoLocationWithoutPermissionPublicSpaceTest()
         {
 
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
