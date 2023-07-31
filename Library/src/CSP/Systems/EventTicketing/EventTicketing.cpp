@@ -16,7 +16,6 @@
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 
 #include "Services/AggregationService/Api.h"
-#include "Services/AggregationService/Dto.h"
 
 namespace chs = csp::services::generated::aggregationservice;
 
@@ -176,6 +175,65 @@ void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiRespo
 		Dto->FromJson(Response->GetPayload().GetContent());
 
 		VendorInfoDtoToVendorInfo(*Dto, VendorInfo);
+	}
+}
+
+bool SpaceIsTicketedResult::GetIsTicketedEvent()
+{
+	return SpaceIsTicketed;
+}
+
+const bool SpaceIsTicketedResult::GetIsTicketedEvent() const
+{
+	return SpaceIsTicketed;
+}
+
+void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		std::string InputText = Response->GetPayload().GetContent().c_str();
+
+		rapidjson::Document ResponseJson;
+		ResponseJson.Parse(InputText.c_str());
+
+		// We expect the response to be a JSON object with a set of fields describing key/value pairs of space IDs and bools,
+		// where the bool describes if it is ticketed or not
+		// We currently however only care about whether the _first_ space is ticketed, because our API only allows clients to
+		// reasons about whether a single space is ticketed.
+
+		bool ExpectedResponse										= true;
+		const auto JsonRootObject									= ResponseJson.GetObject();
+		const rapidjson::Value::ConstMemberIterator FirstJSONMember = JsonRootObject.MemberBegin();
+		if (FirstJSONMember != JsonRootObject.MemberEnd())
+		{
+			if (FirstJSONMember->value.IsBool())
+			{
+				SpaceIsTicketed = FirstJSONMember->value.GetBool();
+				FOUNDATION_LOG_FORMAT(LogLevel::VeryVerbose,
+									  "We found that the space with ID %s has ticketed status: %s",
+									  FirstJSONMember->name.GetString(),
+									  SpaceIsTicketed ? "true" : "false");
+			}
+			else
+			{
+				ExpectedResponse = false;
+			}
+		}
+		else
+		{
+			ExpectedResponse = false;
+		}
+
+		if (ExpectedResponse == false)
+		{
+			FOUNDATION_LOG_MSG(LogLevel::Error,
+							   "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
+		}
 	}
 }
 
