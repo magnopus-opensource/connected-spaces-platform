@@ -328,9 +328,10 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			{
 				if (!RetryIssued)
 				{
-					if (Response.GetResponseCode() == EResponseCodes::ResponseBadRequest)
+					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
+					if (ResponseCode >= 400 && ResponseCode < 500)
 					{
-						PrintErrorMessages(Response);
+						PrintClientErrorResponseMessages(Response);
 					}
 
 					Request->GetCallback()->OnHttpResponse(Response);
@@ -342,13 +343,14 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			{
 				if (!RetryIssued)
 				{
-					// This request is marked to be polled, so add to the queue
-					// to be issued on the next call to WebClient::ProcessResponses()
-					if (Response.GetResponseCode() == EResponseCodes::ResponseBadRequest)
+					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
+					if (ResponseCode >= 400 && ResponseCode < 500)
 					{
-						PrintErrorMessages(Response);
+						PrintClientErrorResponseMessages(Response);
 					}
 
+					// This request is marked to be polled, so add to the queue
+					// to be issued on the next call to WebClient::ProcessResponses()
 					PollRequests.Enqueue({Request});
 				}
 			}
@@ -378,17 +380,38 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 }
 #endif
 
-void WebClient::PrintErrorMessages(const HttpResponse& Response)
+void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 {
-	rapidjson::Document ResponseJson;
-	ResponseJson.Parse(Response.GetPayload().GetContent().c_str());
-	if (ResponseJson.HasMember("errors"))
+	const uint16_t ResponseCode				   = static_cast<uint16_t>(Response.GetResponseCode());
+	const csp::common::String& ResponsePayload = Response.GetPayload().GetContent();
+	if (ResponsePayload.IsEmpty())
 	{
-		const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
-
-		for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+		FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) but with no payload/error message.",
+									Response.GetRequest()->GetUri().GetAsString(),
+									ResponseCode);
+	}
+	else
+	{
+		rapidjson::Document ResponseJson;
+		ResponseJson.Parse(ResponsePayload.c_str());
+		if (ResponseJson.HasMember("errors"))
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Services response has failed with error: %s", ResponseArray[i].GetString());
+			const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
+
+			for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+			{
+				FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+											Response.GetRequest()->GetUri().GetAsString(),
+											ResponseCode,
+											ResponseArray[i].GetString());
+			}
+		}
+		else if (ResponseJson.HasMember("error"))
+		{
+			FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+										Response.GetRequest()->GetUri().GetAsString(),
+										ResponseCode,
+										ResponseJson["error"].GetString());
 		}
 	}
 }

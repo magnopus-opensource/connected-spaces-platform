@@ -31,6 +31,7 @@ public:
 	/// @brief Checks if the component is visible when in default mode.
 	/// @return True if the component is visible, false otherwise.
 	virtual bool GetIsVisible() const = 0;
+
 	/// @brief Sets if the component is visible when in default mode.
 	/// @param InValue True if the component is visible, false otherwise.
 	virtual void SetIsVisible(bool InValue) = 0;
@@ -38,6 +39,7 @@ public:
 	/// @brief Checks if the component is visible when in AR mode.
 	/// @return True if the component is visible when in AR mode, false otherwise.
 	virtual bool GetIsARVisible() const = 0;
+
 	/// @brief Sets if the component is visible in AR mode.
 	/// @param InValue True if the component is visible in AR mode, false otherwise.
 	virtual void SetIsARVisible(bool InValue) = 0;

@@ -322,39 +322,193 @@ namespace csp {
     public:
         {% for p in config.primitives %}
             // Return {{ p.type }} min value by value
-            {{ p.type }} Functions_Primitives_{{ p.type }}_ReturnValue_min();
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_ReturnValue_min();
 
             // Return {{ p.type }} max value by value
-            {{ p.type }} Functions_Primitives_{{ p.type }}_ReturnValue_max();
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_ReturnValue_max();
 
             // Return {{ p.type }} min value by pointer
-            {{ p.type }}* Functions_Primitives_{{ p.type }}_ReturnPointer_min();
+            {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_min();
 
             // Return {{ p.type }} max value by pointer
-            {{ p.type }}* Functions_Primitives_{{ p.type }}_ReturnPointer_max();
+            {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_max();
 
             // Return {{ p.type }} min value by const pointer
-            const {{ p.type }}* Functions_Primitives_{{ p.type }}_ReturnConstPointer_min();
+            const {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min();
 
             // Return {{ p.type }} max value by const pointer
-            const {{ p.type }}* Functions_Primitives_{{ p.type }}_ReturnConstPointer_max();
+            const {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max();
 
             // Return {{ p.type }} min value by reference
-            {{ p.type }}& Functions_Primitives_{{ p.type }}_ReturnReference_min();
+            {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnReference_min();
 
             // Return {{ p.type }} max value by reference
-            {{ p.type }}& Functions_Primitives_{{ p.type }}_ReturnReference_max();
+            {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnReference_max();
 
             // Return {{ p.type }} min value by const reference
-            const {{ p.type }}& Functions_Primitives_{{ p.type }}_ReturnConstReference_min();
+            const {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_min();
 
             // Return {{ p.type }} max value by const reference
-            const {{ p.type }}& Functions_Primitives_{{ p.type }}_ReturnConstReference_max();
+            const {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_max();
         {% endfor %}
 
     private:
         {% for p in config.primitives %}
             {{ p.type }} Primitive_Field_{{ p.type }};
         {% endfor %}
+    };
+
+
+    // String
+
+    class CSP_API StringReturnTestClass {
+    public:
+        // Return string by value
+        csp::common::String ClassFunctions_String_ReturnValue();
+
+        // Return string by const reference
+        const csp::common::String& ClassFunctions_String_ReturnConstReference();
+
+    private:
+        csp::common::String String_Field;
+    };
+
+
+    // Class
+
+    class CSP_API MyReallyCoolClass {
+    public:
+        int32_t SomeValue;
+    };
+
+    class CSP_API ClassReturnTestClass {
+    public:
+        // Return class by value
+        MyReallyCoolClass ClassFunctions_MyClass_ReturnValue();
+        
+        // Return class by pointer
+        MyReallyCoolClass* ClassFunctions_MyClass_ReturnPointer();
+
+        // Return class by const pointer
+        const MyReallyCoolClass* ClassFunctions_MyClass_ReturnConstPointer();
+
+        // Return class by reference
+        MyReallyCoolClass& ClassFunctions_MyClass_ReturnReference();
+
+        // Return class by const reference
+        const MyReallyCoolClass& ClassFunctions_MyClass_ReturnConstReference();
+    
+    private:
+        MyReallyCoolClass Class_Field;
+    };
+
+
+    /// Parameter types
+
+    // Primitives
+
+    class CSP_API PrimitiveParameterTestClass {
+    public:
+        {% for p in config.primitives %}
+            // Pass {{ p.type }} min value by value
+            void ClassFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.type }} Value);
+
+            // Pass {{ p.type }} max value by value
+            void ClassFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.type }} Value);
+
+            {# TODO: Add support for out and in-out params in class methods #}
+            {# // Get {{ p.type }} min value via out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_min(CSP_OUT {{ p.type }}& OutValue);
+
+            // Get {{ p.type }} max value via out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_max(CSP_OUT {{ p.type }}& OutValue);
+
+            // Get {{ p.type }} min and max values via out parameters
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax(
+                CSP_OUT {{ p.type }}& OutMinValue,
+                CSP_OUT {{ p.type }}& OutMaxValue
+            );
+
+            // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max(
+                CSP_OUT {{ p.type }}& OutValue
+            );
+
+            // Get {{ p.type }} min and max values via out parameters and return {{ p.type }} min value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min(
+                CSP_OUT {{ p.type }}& OutMinValue,
+                CSP_OUT {{ p.type }}& OutMaxValue
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax(CSP_IN_OUT {{ p.type }}& InOutValue);
+
+            // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and
+            // get min value via another in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+                CSP_IN_OUT {{ p.type }}& InOutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out-parameter, and return {{ p.type }} max value by
+            // value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max(
+                CSP_IN_OUT {{ p.type }}& InOutValue
+            );
+
+            // Pass {{ p.type }} min value and get max value via in-out-parameter, pass {{ p.type }} max value and get
+            // min value via another in-out parameter, and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+                CSP_IN_OUT {{ p.type }}& InOutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via
+            // in-out parameter
+            void ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax(
+                CSP_OUT {{ p.type }}& OutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            );
+
+            // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+            // parameter, and return {{ p.type }} max value by value
+            {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+                CSP_OUT {{ p.type }}& OutValue1,
+                CSP_IN_OUT {{ p.type }}& InOutValue2
+            ); #}
+        {% endfor %}
+    };
+
+
+    // String
+
+    class CSP_API StringParameterTestClass {
+    public:
+        // Pass string by value
+        void ClassFunctions_String_PassValue(csp::common::String Value);
+
+        // Pass string by const reference
+        void ClassFunctions_String_PassConstReference(const csp::common::String& Value);
+    };
+
+
+    // Classes
+
+    class CSP_API ClassParameterTestClass {
+    public:
+        // Pass class by value
+        void ClassFunctions_MyClass_PassValue(csp::MyClass Value);
+
+        // Pass class by pointer
+        void ClassFunctions_MyClass_PassPointer(csp::MyClass* Value);
+
+        // Pass class by const pointer
+        void ClassFunctions_MyClass_PassConstPointer(const csp::MyClass* Value);
+
+        // Pass class by reference
+        void ClassFunctions_MyClass_PassReference(csp::MyClass& Value);
+
+        // Pass class by const reference
+        void ClassFunctions_MyClass_PassConstReference(const csp::MyClass& Value);
     };
 }

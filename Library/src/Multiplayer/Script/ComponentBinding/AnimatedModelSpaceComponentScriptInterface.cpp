@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
+
 using namespace csp::systems;
+
 
 namespace csp::multiplayer
 {
@@ -29,8 +32,8 @@ AnimatedModelSpaceComponentScriptInterface::AnimatedModelSpaceComponentScriptInt
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, ModelAssetId);
-DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, AssetCollectionId);
+DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, ExternalResourceAssetId);
+DEFINE_SCRIPT_PROPERTY_STRING(AnimatedModelSpaceComponent, ExternalResourceAssetCollectionId);
 
 DEFINE_SCRIPT_PROPERTY_VEC3(AnimatedModelSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(AnimatedModelSpaceComponent, Position);

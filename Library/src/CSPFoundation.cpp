@@ -401,6 +401,12 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 													   GetClientUserAgentInfo().ClientOS.c_str());
 }
 
+
+void Free(void* Pointer)
+{
+	csp::memory::DllFree(Pointer);
+}
+
 void* ModuleHandle = nullptr;
 
 void* GetFunctionAddress(const csp::common::String& Name)

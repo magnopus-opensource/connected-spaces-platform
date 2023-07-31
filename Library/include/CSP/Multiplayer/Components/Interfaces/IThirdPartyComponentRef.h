@@ -35,6 +35,7 @@ public:
 	/// @brief Returns the third party component reference.
 	/// @return The third party component reference.
 	virtual const csp::common::String& GetThirdPartyComponentRef() const = 0;
+
 	/// @brief Sets the third party component reference.
 	/// @param InValue The third party component reference.
 	virtual void SetThirdPartyComponentRef(const csp::common::String& InValue) = 0;

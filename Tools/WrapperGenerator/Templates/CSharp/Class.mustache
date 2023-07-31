@@ -175,7 +175,12 @@
             IntPtr {{ name }}StateObject{{> Comma }}
 {{/ type.is_function_signature }}
 {{^ type.is_function_signature }}
+{{# type.is_class_or_interface }}
+            IntPtr {{ name }}{{> Comma }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
             {{# type }}{{> Type }}{{/ type }} {{ name }}{{> Comma }}
+{{/ type.is_class_or_interface }}
 {{/ type.is_function_signature }}
 {{/ type.is_string }}
 {{/ type.is_pointer_or_reference }}

@@ -1,6 +1,6 @@
 import { test, assert } from '../test_framework.js';
 import { generateUniqueString } from '../test_helpers.js';
-import { logIn, logInAsGuest, logOut, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, ALT_LOGIN_EMAIL, } from './usersystem_tests_helpers.js';
+import { logIn, logInAsGuest, logOut, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD } from './usersystem_tests_helpers.js';
 import { createSpace, getSpace, getSpacesByIds, updateSpace, createInviteUsers, deleteSpace } from './spacesystem_tests_helpers.js';
 
 import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../connected_spaces_platform.js';
@@ -478,7 +478,7 @@ test('SpaceSystemTests', 'EnterSpaceTest', async function() {
     await logOut(userSystem)
 
     // log in as guest to check we cannot enter
-    await logIn(userSystem,ALT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem,ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     {
         const result = await spaceSystem.enterSpace(space.id, true);
@@ -818,7 +818,7 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -841,7 +841,7 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Test they cannot access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);
@@ -902,7 +902,7 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -925,7 +925,7 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Test they can access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);

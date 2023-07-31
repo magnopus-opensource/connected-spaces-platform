@@ -124,7 +124,8 @@ namespace CSharpTests
         }
 
         public static void GetFoundationSystems(out Systems.UserSystem userSystem, out Systems.SpaceSystem spaceSystem, out Systems.AssetSystem assetSystem, out Systems.PointOfInterestSystem poiSystem,
-                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem, out Systems.MaintenanceSystem maintenanceSystem)
+                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem, out Systems.MaintenanceSystem maintenanceSystem, 
+                                                out Systems.EventTicketingSystem eventTicketingSystem)
         {
             var systemsManager = Systems.SystemsManager.Get();
             userSystem = systemsManager.GetUserSystem();
@@ -135,7 +136,7 @@ namespace CSharpTests
             graphQLSystem = systemsManager.GetGraphQLSystem();
             settingsSystem = systemsManager.GetSettingsSystem();
             maintenanceSystem = systemsManager.GetMaintenanceSystem();
-
+            eventTicketingSystem = systemsManager.GetEventTicketingSystem();
         }
 
         public static Dictionary<string, object> ParseJsonObject(string data)
@@ -289,14 +290,16 @@ namespace CSharpTests
             Csp.CSPFoundation.SetClientUserAgentInfo(userAgentInfo);
         }
 
-        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId)
+        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId, string SessionDirectory, string SessionName, long SessionStart)
         {
             Process multiPlayerTestClient = new Process();
 
             multiPlayerTestClient.StartInfo.FileName = "MultiplayerTestClient.exe";
 
+            string ArgsString = String.Format("{0} {1} {2} {3}", ClientId, SessionDirectory, SessionName, SessionStart);
+
             // Pass the client process a handle to the server.
-            multiPlayerTestClient.StartInfo.Arguments = ClientId;
+            multiPlayerTestClient.StartInfo.Arguments = ArgsString;
             multiPlayerTestClient.StartInfo.UseShellExecute = false;
             multiPlayerTestClient.Start();
 

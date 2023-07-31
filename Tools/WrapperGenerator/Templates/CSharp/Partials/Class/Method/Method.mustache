@@ -101,7 +101,7 @@ override
 {{/ parameters }}
 
 {{# return_type }}
-    return
+    var _result =
 {{# is_pointer_or_reference }}
 {{# is_primitive }}
 {{^ is_const }}
@@ -117,9 +117,6 @@ override
         new {{> Type }}(
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
-{{# is_string }}
-        WrapperHelper.NativeUTF8ToString(
-{{/ is_string }}
 {{/ return_type }}
         {{ unique_name }}(
 {{^ is_static }}
@@ -134,13 +131,17 @@ override
             WrapperHelper.StringToNativeUTF8({{ name }}){{> Comma }}
 {{/ type.is_string }}
 {{^ type.is_string }}
-{{# type.is_pointer_or_reference }}
+{{# type.is_class_or_interface }}
 {{# type.is_interface }}
             ((NativeClassWrapper){{ name }})._ptr{{> Comma }}
 {{/ type.is_interface }}
 {{^ type.is_interface }}
             {{ name }}._ptr{{> Comma }}
 {{/ type.is_interface }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# type.is_pointer_or_reference }}
+            {{ name }}._ptr{{> Comma }}
 {{/ type.is_pointer_or_reference }}
 {{^ type.is_pointer_or_reference }}
 {{# type.is_function_signature }}
@@ -151,6 +152,7 @@ override
             {{ name }}{{> Comma }}
 {{/ type.is_function_signature }}
 {{/ type.is_pointer_or_reference }}
+{{/ type.is_class_or_interface }}
 {{/ type.is_string }}
 {{/ is_out }}
 {{/ parameters }}
@@ -174,8 +176,20 @@ override
         )
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
-{{# is_string }}
-        )
-{{/ is_string }}
 {{/ return_type }};
+
+{{! Return value }}
+{{# return_type }}
+{{# is_string }}
+    {{! Convert native string to C# string }}
+    var _resultString = WrapperHelper.NativeUTF8ToString(_result);
+    {{! Free native string as it is a copy }}
+    Global.Free(_result);
+
+    return _resultString;
+{{/ is_string }}
+{{^ is_string }}
+    return _result;
+{{/ is_string }}
+{{/ return_type }}
 }

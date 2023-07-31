@@ -16,7 +16,7 @@ namespace CSPEngine
         [Test]
         public static void BlockSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out var settingsSystem, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out var settingsSystem, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -70,7 +70,7 @@ namespace CSPEngine
         [Test]
         public static void UnblockSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out var settingsSystem, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out var settingsSystem, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -143,7 +143,7 @@ namespace CSPEngine
         [Test]
         public static void GetAvatarPortraitTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _);
 
             var userId = userSystem.TestLogIn(pushCleanupFunction: false);
 
@@ -171,7 +171,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateAvatarPortraitWithBufferTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out var settingsSystem, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out var settingsSystem, out _, out _);
             var userId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword);
 
             {

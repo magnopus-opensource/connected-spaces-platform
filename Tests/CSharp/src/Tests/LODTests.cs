@@ -36,7 +36,7 @@ namespace CSPEngine
          [Test]
         public static void GetEmptyLODChainTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -63,7 +63,7 @@ namespace CSPEngine
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_REGISTER_ASSETS_TO_LODCHAIN_TEST
         public static void RegisterAssetsToLODChainTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";

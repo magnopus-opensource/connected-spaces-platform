@@ -275,10 +275,10 @@ import * as dummy from '@magnopus-opensource/connected-spaces-platform.dummy';
 {% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
     // Pass class by {{ x }}
     test('globalFunctions_MyClass_Pass{{ x }}', async function() {
-        var instance = dummy.MyClass.create_value({{ config.class_int_value_first }});
+        const param = dummy.MyClass.create_value({{ config.class_int_value_first }});
 
         try {
-            dummy.globalFunctions_MyClass_Pass{{ x }}(instance);
+            dummy.globalFunctions_MyClass_Pass{{ x }}(param);
         }
         catch (e) {
             assert.fail(e.message)
@@ -502,14 +502,14 @@ test('set_ClassFieldTestClass_Field', async function() {
     {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_min();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
             {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
         });
 
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_max();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
             {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
         });
@@ -518,16 +518,257 @@ test('set_ClassFieldTestClass_Field', async function() {
     {% for x in ['Pointer', 'Reference'] %}
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_min();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
 
             {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
         });
 
         test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
             const instance = dummy.PrimitiveReturnTestClass.create();
-            const result = instance.functions_Primitives_{{ p.type }}_Return{{ x }}_max();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
 
             {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
         });
     {% endfor %}
+{% endfor %}
+
+
+// String
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    test('classFunctions_String_Return{{ x }}', async function() {
+        const instance = dummy.StringReturnTestClass.create();
+        const result = instance.classFunctions_String_Return{{ x }}();
+
+        assert.areEqual(result, "{{ config.string_value }}");
+    });
+{% endfor %}
+
+
+// Classes
+
+{# All class return types are returned from the C wrapper by pointer, regardless of the C++ return type #}
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }}
+    test('classFunctions_MyClass_Return{{ x }}', async function() {
+        const instance = dummy.ClassReturnTestClass.create();
+        const result = instance.classFunctions_MyClass_Return{{ x }}();
+
+        assert.isTrue(result.pointerIsValid());
+        assert.areEqual(result.someValue, {{ config.class_int_value_first }});
+
+        result.delete();
+    });
+{% endfor %}
+
+
+/// Parameters
+
+// Primitives
+
+{% for p in config.primitives %}
+    // Pass {{ p.type }} min value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassValue_min', async function() {
+        const instance = dummy.PrimitiveParameterTestClass.create();
+
+        try {
+            instance.classFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+    });
+
+    // Pass {{ p.type }} max value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassValue_max', async function() {
+        const instance = dummy.PrimitiveParameterTestClass.create();
+
+        try {
+            instance.classFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+    });
+
+    {# TODO: Add support for out and in-out params in class methods #}
+    {# // Get {{ p.type }} min value via out parameter
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_min', async function() {
+        const result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    });
+
+    // Get {{ p.type }} max value via out parameter
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_max', async function() {
+        const result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    });
+
+    // Get {{ p.type }} min and max value via out parameters
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_minmax', async function() {
+        const result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_minmax();
+
+        {{ assert_are_equal(p.use_epsilon, "result.minValue", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.maxValue", p.max) }}
+    });
+
+    // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max', async function() {
+        const result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
+    });
+
+    // Get {{ p.type }} min and max value via out parameters and return {{ p.type }} max value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min', async function() {
+        const result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.minValue", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.maxValue", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter
+    test('classFunctions_Primitives_{{ p.type }}_PassInOut_minmax', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and
+    // get min value via another in-out parameter
+    test('classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin', async function() {
+        let result;
+
+        try {
+            result = dummy.classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+                {{ p.min }},
+                {{ p.max }}
+            );
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.min) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, and get {{ p.type }} max value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max', async function() {
+        let result;
+
+        try {
+            result = dummy.classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, pass {{ p.type }} max value and get min
+    // value via another in-out parameter, and get {{ p.type }} min value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min',
+        async function() {
+            let result;
+
+            try {
+                result =
+                    dummy.classFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+                        {{ p.min }},
+                        {{ p.max }}
+                    );
+            }
+            catch (e) {
+                assert.fail(e.message);
+            }
+
+            {{ assert_are_equal(p.use_epsilon, "result.result", p.min) }}
+            {{ assert_are_equal(p.use_epsilon, "result.value1", p.max) }}
+            {{ assert_are_equal(p.use_epsilon, "result.value2", p.min) }}
+        }
+    );
+
+    // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via in-out
+    // parameter
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax', async function() {
+        let result;
+
+        try {
+            result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.max) }}
+    });
+
+    // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+    // parameter, and get {{ p.type }} max value by value
+    test('classFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max', async function() {
+        let result;
+
+        try {
+            result = dummy.classFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+                {{ p.min }}
+            );
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.max) }}
+    }); #}
+{% endfor %}
+
+
+// String
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Pass string by {{ x }}
+    test('classFunctions_String_Pass{{ x }}', async function() {
+        const instance = dummy.StringParameterTestClass.create();
+
+        try {
+            instance.classFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+        }
+        catch (e) {
+            assert.fail(e.message)
+        }
+    });
+{% endfor %}
+
+
+// Classes
+
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Pass class by {{ x }}
+    test('classFunctions_MyClass_Pass{{ x }}', async function() {
+        const instance = dummy.ClassParameterTestClass.create();
+        const param = dummy.MyClass.create_value({{ config.class_int_value_first }});
+
+        try {
+            instance.classFunctions_MyClass_Pass{{ x }}(param);
+        }
+        catch (e) {
+            assert.fail(e.message)
+        }
+    });
 {% endfor %}
