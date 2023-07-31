@@ -19,6 +19,7 @@ imgui.ini
 ARM64/*
 **/node_modules/**
 *.log
+*.npmrc
 
 # Allows Project files for Examples
 !/Examples/**/**.sln
