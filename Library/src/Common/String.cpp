@@ -39,15 +39,22 @@ public:
 
 	explicit Impl(char const* const InText) : Text(nullptr), Length(0)
 	{
+		const char* _InText = InText;
+
 		if (InText == nullptr)
 		{
-			return;
+			_InText = "";
 		}
 
-		const size_t Len = strlen(InText);
+		const size_t Len = strlen(_InText);
 
 		char* NewText = CSP_NEW char[Len + 1];
-		memcpy((void*) NewText, InText, Len * sizeof(char));
+
+		if (Len > 0)
+		{
+			memcpy((void*) NewText, _InText, Len * sizeof(char));
+		}
+
 		NewText[Len] = 0;
 
 		Text   = NewText;
@@ -56,13 +63,21 @@ public:
 
 	Impl(char const* const InText, size_t Len) : Text(nullptr), Length(0)
 	{
+		const char* _InText = InText;
+
 		if (InText == nullptr || Len == 0)
 		{
-			return;
+			_InText = "";
+			Len		= 0;
 		}
 
 		char* NewText = CSP_NEW char[Len + 1];
-		memcpy((void*) NewText, InText, Len * sizeof(char));
+
+		if (Len > 0)
+		{
+			memcpy((void*) NewText, _InText, Len * sizeof(char));
+		}
+
 		NewText[Len] = 0;
 
 		Text   = NewText;
@@ -71,15 +86,15 @@ public:
 
 	explicit Impl(size_t Len) : Text(nullptr), Length(0)
 	{
-		if (Len == 0)
-		{
-			return;
-		}
-
 		char* NewText = CSP_NEW char[Len + 1];
+
 #if DEBUG
-		memset((void*) NewText, 0, sizeof(NewText));
+		if (Len > 0)
+		{
+			memset((void*) NewText, 0, sizeof(NewText));
+		}
 #endif
+
 		NewText[Len] = 0;
 		Text		 = NewText;
 		Length		 = Len;
@@ -232,14 +247,26 @@ bool String::operator==(const String& Other) const
 		return true;
 	}
 
+	if (ImplPtr->Length == 0 || Other.Length() == 0)
+	{
+		return false;
+	}
+
 	return strcmp(Get(), Other.Get()) == 0;
 }
 
 bool String::operator==(const char* Other) const
 {
-	if (ImplPtr->Length == 0 && strlen(Other) == 0)
+	auto OtherLength = strlen(Other);
+
+	if (ImplPtr->Length == 0 && OtherLength == 0)
 	{
 		return true;
+	}
+
+	if (ImplPtr->Length == 0 || OtherLength == 0)
+	{
+		return false;
 	}
 
 	return strcmp(Get(), Other) == 0;

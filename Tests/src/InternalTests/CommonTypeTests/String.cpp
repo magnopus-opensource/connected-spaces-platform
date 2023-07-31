@@ -27,7 +27,7 @@
 using namespace csp::common;
 
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringDefaultInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringDefaultInitialisationTest)
 {
 	try
 	{
@@ -43,7 +43,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringDefaultInitialisationTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferLengthInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthInitialisationTest)
 {
 	try
 	{
@@ -66,7 +66,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferLengthInitialisationT
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferLengthNullptrInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthNullptrInitialisationTest)
 {
 	try
 	{
@@ -74,7 +74,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferLengthNullptrInitiali
 
 		EXPECT_TRUE(Instance.IsEmpty());
 		EXPECT_EQ(Instance.Length(), 0);
-		EXPECT_EQ(Instance.c_str(), nullptr);
+		EXPECT_NE(Instance.c_str(), nullptr);
 	}
 	catch (...)
 	{
@@ -82,7 +82,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferLengthNullptrInitiali
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthInitialisationTest)
 {
 	constexpr size_t Length = 5;
 
@@ -92,6 +92,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthInitialisationTest)
 
 		EXPECT_FALSE(Instance.IsEmpty());
 		EXPECT_EQ(Instance.Length(), Length);
+		EXPECT_NE(Instance.c_str(), nullptr);
 	}
 	catch (...)
 	{
@@ -99,7 +100,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthInitialisationTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthZeroInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthZeroInitialisationTest)
 {
 	try
 	{
@@ -107,7 +108,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthZeroInitialisationTes
 
 		EXPECT_TRUE(Instance.IsEmpty());
 		EXPECT_EQ(Instance.Length(), 0);
-		EXPECT_EQ(Instance.c_str(), nullptr);
+		EXPECT_NE(Instance.c_str(), nullptr);
 	}
 	catch (...)
 	{
@@ -115,7 +116,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLengthZeroInitialisationTes
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferInitialisationTest)
 {
 	try
 	{
@@ -138,7 +139,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferInitialisationTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferNullptrInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNullptrInitialisationTest)
 {
 	try
 	{
@@ -146,7 +147,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferNullptrInitialisation
 
 		EXPECT_TRUE(Instance.IsEmpty());
 		EXPECT_EQ(Instance.Length(), 0);
-		EXPECT_EQ(Instance.c_str(), nullptr);
+		EXPECT_NE(Instance.c_str(), nullptr);
 	}
 	catch (...)
 	{
@@ -154,7 +155,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferNullptrInitialisation
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyInitialisationTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyInitialisationTest)
 {
 	try
 	{
@@ -167,6 +168,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyInitialisationTest)
 		EXPECT_EQ(Instance.Length(), OtherInstance.Length());
 		EXPECT_EQ(Instance, OtherInstance);
 		EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
+		EXPECT_NE(Instance.c_str(), nullptr);
 	}
 	catch (...)
 	{
@@ -174,7 +176,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyInitialisationTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyAssignmentTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyAssignmentTest)
 {
 	try
 	{
@@ -187,6 +189,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyAssignmentTest)
 		// Strings should be equal but not point to the same buffer
 		EXPECT_EQ(Instance.Length(), OtherInstance.Length());
 		EXPECT_EQ(Instance, OtherInstance);
+		EXPECT_NE(Instance.c_str(), nullptr);
 		EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
 	}
 	catch (...)
@@ -195,7 +198,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringCopyAssignmentTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferAssignmentTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferAssignmentTest)
 {
 	try
 	{
@@ -208,6 +211,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferAssignmentTest)
 		// String contents should be equal, but buffer pointer should not
 		EXPECT_EQ(Instance.Length(), strlen(Buffer));
 		EXPECT_EQ(Instance, Buffer);
+		EXPECT_NE(Instance.c_str(), nullptr);
 		EXPECT_NE(Instance.c_str(), &Buffer[0]);
 	}
 	catch (...)
@@ -216,7 +220,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferAssignmentTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringSplitTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSplitTest)
 {
 	try
 	{
@@ -236,7 +240,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringSplitTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringSwapTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSwapTest)
 {
 	try
 	{
@@ -253,7 +257,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringSwapTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringEqualityTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEqualityTest)
 {
 	try
 	{
@@ -268,7 +272,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringEqualityTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringNonEqualityTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringNonEqualityTest)
 {
 	try
 	{
@@ -283,7 +287,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringNonEqualityTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferEqualityTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferEqualityTest)
 {
 	try
 	{
@@ -298,7 +302,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferEqualityTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferNonEqualityTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNonEqualityTest)
 {
 	try
 	{
@@ -313,7 +317,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringBufferNonEqualityTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLessThanTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLessThanTest)
 {
 	try
 	{
@@ -329,7 +333,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringLessThanTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendTest)
 {
 	try
 	{
@@ -347,7 +351,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendEmptyTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendEmptyTest)
 {
 	try
 	{
@@ -365,7 +369,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendEmptyTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendBufferTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferTest)
 {
 	try
 	{
@@ -381,7 +385,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendBufferTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendBufferNullptrTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferNullptrTest)
 {
 	try
 	{
@@ -397,7 +401,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAppendBufferNullptrTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddTest)
 {
 	try
 	{
@@ -416,7 +420,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddEmptyTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddEmptyTest)
 {
 	try
 	{
@@ -437,7 +441,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddEmptyTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddBufferTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferTest)
 {
 	try
 	{
@@ -454,7 +458,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddBufferTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddBufferNullptrTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferNullptrTest)
 {
 	try
 	{
@@ -472,7 +476,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddBufferNullptrTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentTest)
 {
 	try
 	{
@@ -490,7 +494,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentEmptyTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentEmptyTest)
 {
 	try
 	{
@@ -508,7 +512,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentEmptyTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentBufferTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferTest)
 {
 	try
 	{
@@ -524,7 +528,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentBufferTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentBufferNullptrTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferNullptrTest)
 {
 	try
 	{
@@ -540,7 +544,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringAddAssignmentBufferNullptrT
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimTest)
 {
 	try
 	{
@@ -557,7 +561,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimNoWhitespaceTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimNoWhitespaceTest)
 {
 	try
 	{
@@ -575,7 +579,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimNoWhitespaceTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimAllWhitespaceTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimAllWhitespaceTest)
 {
 	try
 	{
@@ -592,7 +596,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringTrimAllWhitespaceTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListTest)
 {
 	try
 	{
@@ -607,7 +611,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListEmptyTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListEmptyTest)
 {
 	try
 	{
@@ -622,7 +626,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListEmptyTest)
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListSomeEmptyEntriesTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListSomeEmptyEntriesTest)
 {
 	try
 	{
@@ -637,7 +641,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListSomeEmptyEntriesTes
 	}
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, StringJoinListAllEmptyEntriesTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTest)
 {
 	try
 	{
