@@ -30,10 +30,8 @@
 // Type utilities needed for implementing typed and type-parameterized
 // tests.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
 
 #include "gtest/internal/gtest-port.h"
 
@@ -104,14 +102,12 @@ template <typename T> std::string GetTypeName()
 #endif // GTEST_HAS_RTTI
 }
 
-#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 // A unique type indicating an empty node
 struct None
 {
 };
 
-	#define GTEST_TEMPLATE_ template <typename T> class
+#define GTEST_TEMPLATE_ template <typename T> class
 
 // The template "selector" struct TemplateSel<Tmpl> is used to
 // represent Tmpl, which must be a class template with one type
@@ -129,7 +125,7 @@ template <GTEST_TEMPLATE_ Tmpl> struct TemplateSel
 	};
 };
 
-	#define GTEST_BIND_(TmplSel, T) TmplSel::template Bind<T>::type
+#define GTEST_BIND_(TmplSel, T) TmplSel::template Bind<T>::type
 
 template <GTEST_TEMPLATE_ Head_, GTEST_TEMPLATE_... Tail_> struct Templates
 {
@@ -183,12 +179,10 @@ public:
 	using type = typename proxy::type;
 };
 
-#endif // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 } // namespace internal
 
 template <typename... Ts> using Types = internal::ProxyTypeList<Ts...>;
 
 } // namespace testing
 
-#endif // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_TYPE_UTIL_H_
