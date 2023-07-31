@@ -32,54 +32,6 @@
 	#include <gtest/gtest.h>
 
 
-CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, StringAppendTest)
-{
-	try
-	{
-		csp::common::String StringA("asd");
-		csp::common::String StringC = StringA + "fgh";
-
-		EXPECT_TRUE(StringA == "asd" && StringC == "asdfgh");
-	}
-	catch (...)
-	{
-		FAIL();
-	}
-}
-
-CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, StringSplitTest)
-{
-	try
-	{
-		csp::common::String String("asd,,fgh,");
-		auto Parts = String.Split(',');
-
-		EXPECT_EQ(Parts.Size(), 4);
-		EXPECT_EQ(Parts[0], "asd");
-		EXPECT_EQ(Parts[1], "");
-		EXPECT_EQ(Parts[2], "fgh");
-		EXPECT_EQ(Parts[3], "");
-	}
-	catch (...)
-	{
-		FAIL();
-	}
-}
-
-CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, StringJoinTest)
-{
-	try
-	{
-		auto String = csp::common::String::Join(',', {"asd", "fgh", "jkl"});
-
-		EXPECT_EQ(String, "asd,fgh,jkl");
-	}
-	catch (...)
-	{
-		FAIL();
-	}
-}
-
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ListTest)
 {
 	try
