@@ -20,9 +20,21 @@
 namespace csp::systems
 {
 
+/// @ingroup Event Ticketing System
+/// @brief Enum representing the third party vendor used for ticketing.
 enum class EventTicketingVendor
 {
 	Eventbrite = 0,
+	Unknown
+};
+
+/// @ingroup Event Ticketing System
+/// @brief Enum representing the status of a ticket where purchased means a ticket has not yet been redeemd
+///        and redeemed means the ticket has been submitted already.
+enum class TicketStatus
+{
+	Purchased = 0,
+	Redeemed,
 	Unknown
 };
 
@@ -33,12 +45,44 @@ class CSP_API TicketedEvent
 public:
 	TicketedEvent() : Vendor(EventTicketingVendor::Unknown), IsTicketingActive(false) {};
 
+	/// @brief CHS ID of the event resource.
 	csp::common::String Id;
+	/// @brief  ID of the space the event belongs to.
 	csp::common::String SpaceId;
+	/// @brief 3rd party vendor mangaging the event.
 	EventTicketingVendor Vendor;
+	/// @brief ID within the 3rd party vendor of the event.
 	csp::common::String VendorEventId;
+	/// @brief URI to load the event in the 3rd party.
 	csp::common::String VendorEventUri;
+	/// @brief Specifies whether ticketing is currently turned on for the space.
 	bool IsTicketingActive;
+};
+
+/// @ingroup Event Ticketing System
+/// @brief Data representation of a ticket for an event
+class CSP_API EventTicket
+{
+public:
+	EventTicket() : Vendor(EventTicketingVendor::Unknown), Status(TicketStatus::Unknown) {};
+
+	/// @brief CHS ID of the ticket resource.
+	csp::common::String Id;
+	/// @brief  ID of the space the ticket belongs to.
+	csp::common::String SpaceId;
+	/// @brief Third party vendor mangaging the ticket.
+	EventTicketingVendor Vendor;
+	/// @brief ID within the third party vendor of the event the ticket is for.
+	csp::common::String VendorEventId;
+	/// @brief ID within the third party vendor of the ticket.
+	csp::common::String VendorTicketId;
+	/// @brief Current status of the ticket.
+	csp::systems::TicketStatus Status;
+	/// @brief ID of the user associated with this ticket.
+	csp::common::String UserId;
+	/// @brief Email address of the user associated with this ticket. The email associated to the 3rd party ticket should match the email of the CHS
+	/// user.
+	csp::common::String Email;
 };
 
 /// @ingroup Event Ticketing System
@@ -50,9 +94,13 @@ public:
 	{
 	}
 
+	/// @brief Third party vendor to get auth info for.
 	EventTicketingVendor Vendor;
+	/// @brief Application client ID with the third party vendor.
 	csp::common::String ClientId;
+	/// @brief URI of third party vendor authorize endpoint.
 	csp::common::String AuthorizeEndpoint;
+	/// @brief CHS URL the third party vendor can provide the OAuth code to.
 	csp::common::String OAuthRedirectUrl;
 };
 
@@ -112,6 +160,33 @@ private:
 };
 
 /// @ingroup Event Ticketing System
+/// @brief Result class holding a ticket for an event.
+class CSP_API EventTicketResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Get the ticketed event from the result.
+	/// @return The ticketed event.
+	EventTicket& GetEventTicket();
+
+	/// @brief Get the ticketed event from the result.
+	/// @return The ticketed event.
+	const EventTicket& GetEventTicket() const;
+
+private:
+	EventTicketResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	EventTicket Ticket;
+};
+
+/// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
 class CSP_API SpaceIsTicketedResult : public csp::services::ResultBase
 {
@@ -167,6 +242,9 @@ typedef std::function<void(const TicketedEventResult& Result)> TicketedEventResu
 
 // @brief Callback providing a ticketed event collection result.
 typedef std::function<void(const TicketedEventCollectionResult& Result)> TicketedEventCollectionResultCallback;
+
+// @brief Callback providing a ticketed event result.
+typedef std::function<void(const EventTicketResult& Result)> EventTicketResultCallback;
 
 // @brief Callback providing a ticket event status for a space, from an endpoint result.
 typedef std::function<void(const SpaceIsTicketedResult& Result)> SpaceIsTicketedResultCallback;

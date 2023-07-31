@@ -35,6 +35,27 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
 	return Vendor;
 }
 
+csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus)
+{
+	csp::systems::TicketStatus Status = csp::systems::TicketStatus::Unknown;
+
+	if (DtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::PURCHASED)
+	{
+		Status = csp::systems::TicketStatus::Purchased;
+	}
+	if (DtoStatus.GetValue() == chs::TicketStatus::eTicketStatus::REDEEMED)
+	{
+		Status = csp::systems::TicketStatus::Redeemed;
+	}
+	else
+	{
+		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error,
+						   "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
+	}
+
+	return Status;
+}
+
 void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::TicketedEvent& Event)
 {
 	Event.Id	  = Dto.GetId();
@@ -80,6 +101,73 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 		Event.IsTicketingActive = false;
 	}
 }
+
+void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::EventTicket& Ticket)
+{
+	Ticket.Id	   = Dto.GetId();
+	Ticket.SpaceId = Dto.GetSpaceId();
+
+	if (Dto.HasVendorName())
+	{
+		Ticket.Vendor = VendorNameToEnum(Dto.GetVendorName());
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorName");
+		Ticket.Vendor = csp::systems::EventTicketingVendor::Unknown;
+	}
+
+	if (Dto.HasVendorEventId())
+	{
+		Ticket.VendorEventId = Dto.GetVendorEventId();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorEventId");
+		Ticket.VendorEventId = "";
+	}
+
+	if (Dto.HasVendorTicketId())
+	{
+		Ticket.VendorTicketId = Dto.GetVendorTicketId();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorTicketId");
+		Ticket.VendorTicketId = "";
+	}
+
+	if (Dto.HasTicketStatus())
+	{
+		Ticket.Status = TicketStatusToEnum(*Dto.GetTicketStatus());
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+		Ticket.UserId = "";
+	}
+
+	if (Dto.HasUserId())
+	{
+		Ticket.UserId = Dto.GetUserId();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+		Ticket.UserId = "";
+	}
+
+	if (Dto.HasEmailLower())
+	{
+		Ticket.Email = Dto.GetEmailLower();
+	}
+	else
+	{
+		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing EmailLower");
+		Ticket.Email = "";
+	}
+}
+
 
 void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems::TicketedEventVendorAuthInfo& VendorInfo)
 {
@@ -162,6 +250,32 @@ const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicke
 {
 	return Events;
 }
+
+void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* Dto							   = static_cast<chs::SpaceTicketDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Dto->FromJson(Response->GetPayload().GetContent());
+
+		SpaceTicketDtoToEventTicket(*Dto, Ticket);
+	}
+}
+
+EventTicket& EventTicketResult::GetEventTicket()
+{
+	return Ticket;
+}
+
+const EventTicket& EventTicketResult::GetEventTicket() const
+{
+	return Ticket;
+}
+
 
 void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

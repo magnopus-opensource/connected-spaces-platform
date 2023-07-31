@@ -121,6 +121,34 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
 }
 
+void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
+											 EventTicketingVendor Vendor,
+											 const csp::common::String& VendorEventId,
+											 const csp::common::String& VendorTicketId,
+											 const csp::common::Optional<csp::common::String>& OnBehalfOfUserId,
+											 EventTicketResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<EventTicketResultCallback, EventTicketResult, void, chs::SpaceTicketDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	std::optional<csp::common::String> RequestOnBehalfOfUserId = std::nullopt;
+	if (OnBehalfOfUserId.HasValue())
+	{
+		RequestOnBehalfOfUserId = *OnBehalfOfUserId;
+	}
+
+	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
+		->apiV1SpacesSpaceIdVendorsVendorNameEventsVendorEventIdTicketsVendorTicketIdPut(SpaceId,
+																						 GetVendorNameString(Vendor),
+																						 VendorEventId,
+																						 VendorTicketId,
+																						 RequestOnBehalfOfUserId,
+																						 ResponseHandler);
+}
+
 void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
 												  TicketedEventVendorAuthorizeInfoCallback Callback)
