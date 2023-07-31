@@ -37,8 +37,13 @@ public:
 		CSP_DELETE_ARRAY(Text);
 	}
 
-	explicit Impl(char const* const InText)
+	explicit Impl(char const* const InText) : Text(nullptr), Length(0)
 	{
+		if (InText == nullptr)
+		{
+			return;
+		}
+
 		const size_t Len = strlen(InText);
 
 		char* NewText = CSP_NEW char[Len + 1];
@@ -49,8 +54,13 @@ public:
 		Length = Len;
 	}
 
-	Impl(char const* const InText, size_t Len)
+	Impl(char const* const InText, size_t Len) : Text(nullptr), Length(0)
 	{
+		if (InText == nullptr || Len == 0)
+		{
+			return;
+		}
+
 		char* NewText = CSP_NEW char[Len + 1];
 		memcpy((void*) NewText, InText, Len * sizeof(char));
 		NewText[Len] = 0;
@@ -59,8 +69,13 @@ public:
 		Length = Len;
 	}
 
-	explicit Impl(size_t Len)
+	explicit Impl(size_t Len) : Text(nullptr), Length(0)
 	{
+		if (Len == 0)
+		{
+			return;
+		}
+
 		char* NewText = CSP_NEW char[Len + 1];
 #if DEBUG
 		memset((void*) NewText, 0, sizeof(NewText));
@@ -77,6 +92,11 @@ public:
 
 	inline void Append(const char* Other, size_t OtherLength)
 	{
+		if (Other == nullptr || OtherLength == 0)
+		{
+			return;
+		}
+
 		auto NewLength = Length + OtherLength;
 		auto NewText   = CSP_NEW char[NewLength + 1];
 		memcpy(NewText, Text, Length);
@@ -95,6 +115,11 @@ public:
 
 	void Append(const char* Other)
 	{
+		if (Other == nullptr)
+		{
+			return;
+		}
+
 		auto OtherLength = strlen(Other);
 		Append(Other, OtherLength);
 	}
@@ -202,11 +227,21 @@ bool String::IsEmpty() const
 
 bool String::operator==(const String& Other) const
 {
+	if (ImplPtr->Length == 0 && Other.Length() == 0)
+	{
+		return true;
+	}
+
 	return strcmp(Get(), Other.Get()) == 0;
 }
 
 bool String::operator==(const char* Other) const
 {
+	if (ImplPtr->Length == 0 && strlen(Other) == 0)
+	{
+		return true;
+	}
+
 	return strcmp(Get(), Other) == 0;
 }
 
@@ -287,18 +322,13 @@ String String::Trim()
 	return String(Text, Length);
 }
 
-String String::Join(const List<String>& Parts)
+String String::Join(const List<String>& Parts, Optional<char> Separator)
 {
-	return Join('\0', Parts);
-}
+	if (Parts.Size() == 0)
+	{
+		return String();
+	}
 
-String String::Join(const std::initializer_list<String>& Parts)
-{
-	return Join('\0', Parts);
-}
-
-String String::Join(char Separator, const List<String>& Parts)
-{
 	size_t Length = 0;
 
 	for (int i = 0; i < Parts.Size(); ++i)
@@ -306,7 +336,12 @@ String String::Join(char Separator, const List<String>& Parts)
 		Length += Parts[i].Length();
 	}
 
-	if (Separator != '\0' && Length != 0)
+	if (Length == 0)
+	{
+		return String();
+	}
+
+	if (Separator.HasValue())
 	{
 		Length += Parts.Size() - 1;
 	}
@@ -317,10 +352,19 @@ String String::Join(char Separator, const List<String>& Parts)
 	for (size_t i = 0; i < Parts.Size(); ++i)
 	{
 		auto PartLength = Parts[i].Length();
+
+		if (PartLength == 0)
+		{
+			continue;
+		}
+
 		memcpy(Buffer + Pos, Parts[i].c_str(), PartLength);
 		Pos += PartLength;
 
-		Buffer[Pos++] = Separator;
+		if (Separator.HasValue())
+		{
+			Buffer[Pos++] = *Separator;
+		}
 	}
 
 	Buffer[Length] = '\0';
@@ -332,8 +376,13 @@ String String::Join(char Separator, const List<String>& Parts)
 	return JoinedString;
 }
 
-String String::Join(char Separator, const std::initializer_list<String>& Parts)
+String String::Join(const std::initializer_list<String>& Parts, Optional<char> Separator)
 {
+	if (Parts.size() == 0)
+	{
+		return String();
+	}
+
 	size_t Length = 0;
 
 	for (int i = 0; i < Parts.size(); ++i)
@@ -341,7 +390,12 @@ String String::Join(char Separator, const std::initializer_list<String>& Parts)
 		Length += (Parts.begin() + i)->Length();
 	}
 
-	if (Separator != '\0')
+	if (Length == 0)
+	{
+		return String();
+	}
+
+	if (Separator.HasValue())
 	{
 		Length += Parts.size() - 1;
 	}
@@ -352,10 +406,19 @@ String String::Join(char Separator, const std::initializer_list<String>& Parts)
 	for (size_t i = 0; i < Parts.size(); ++i)
 	{
 		auto PartLength = (Parts.begin() + i)->Length();
+
+		if (PartLength == 0)
+		{
+			continue;
+		}
+
 		memcpy(Buffer + Pos, (Parts.begin() + i)->c_str(), PartLength);
 		Pos += PartLength;
 
-		Buffer[Pos++] = Separator;
+		if (Separator.HasValue())
+		{
+			Buffer[Pos++] = *Separator;
+		}
 	}
 
 	Buffer[Length] = '\0';
