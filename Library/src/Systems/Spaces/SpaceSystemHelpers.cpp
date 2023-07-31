@@ -15,8 +15,12 @@
  */
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
+#include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/Spaces/UserRoles.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 
+namespace chs = csp::services::generated::userservice;
 
 namespace csp::systems
 {
@@ -81,6 +85,120 @@ String GetAssetFileExtension(const String& MimeType)
 		return ".buffer";
 	}
 }
+
+void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata)
+{
+	rapidjson::Document Json;
+	Json.Parse(JsonMetadata.c_str());
+
+	if (!Json.IsObject())
+	{
+		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+
+		OutMapMetadata["site"]				 = "Void";
+		OutMapMetadata["multiplayerVersion"] = "3"; // 2 represents double-msg-packed serialiser spaces, 3 represents the change to dictionary packing
+
+		return;
+	}
+
+	for (const auto& Member : Json.GetObject())
+	{
+		if (Member.value.IsString())
+		{
+			OutMapMetadata[Member.name.GetString()] = Member.value.GetString();
+		}
+		else if (Member.value.IsInt())
+		{
+			OutMapMetadata[Member.name.GetString()] = std::to_string(Member.value.GetInt()).c_str();
+		}
+		else if (Member.value.IsNull())
+		{
+			OutMapMetadata[Member.name.GetString()] = "";
+		}
+		else
+		{
+			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
+								  "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)",
+								  Member.name.GetString(),
+								  Member.value.GetType());
+		}
+	}
+}
+
+std::shared_ptr<chs::GroupDto> DefaultGroupInfo()
+{
+	auto DefaultGroupInfo = std::make_shared<chs::GroupDto>();
+
+	DefaultGroupInfo->SetGroupType("Space");
+	DefaultGroupInfo->SetAutoModerator(false);
+	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+	DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
+
+	return DefaultGroupInfo;
+}
+
+bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids)
+{
+	bool IdFound = false;
+
+	for (int i = 0; i < Ids.Size(); ++i)
+	{
+		if (Ids[i] == UserId)
+		{
+			IdFound = true;
+			break;
+		}
+	}
+
+	return IdFound;
+}
+
+Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection)
+{
+	Map<String, String> SpacesMetadata;
+
+	const auto& Metadata = AssetCollection.GetMetadataImmutable();
+
+	auto SpaceId = systems::SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
+
+	// Convert old JSON metadata to key-value metadata
+	if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
+	{
+		FOUNDATION_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
+
+		const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
+		Map<String, String> NewMetadata;
+		ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
+
+		SpacesMetadata = NewMetadata;
+	}
+	else
+	{
+		SpacesMetadata = Metadata;
+	}
+
+	return SpacesMetadata;
+}
+
+std::vector<std::shared_ptr<chs::GroupInviteDto>> GenerateGroupInvites(const common::Array<systems::InviteUserRoleInfo> InviteUsers)
+{
+	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
+	GroupInvites.reserve(InviteUsers.Size());
+
+	for (auto i = 0; i < InviteUsers.Size(); ++i)
+	{
+		auto InviteUser = InviteUsers[i];
+
+		auto GroupInvite = std::make_shared<chs::GroupInviteDto>();
+		GroupInvite->SetEmail(InviteUser.UserEmail);
+		GroupInvite->SetAsModerator(InviteUser.UserRole == systems::SpaceUserRole::Moderator);
+
+		GroupInvites.push_back(GroupInvite);
+	}
+
+	return GroupInvites;
+}
+
 
 } // namespace SpaceSystemHelpers
 
