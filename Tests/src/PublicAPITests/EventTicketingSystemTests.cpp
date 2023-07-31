@@ -1013,6 +1013,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
  * the line that runs EventTicketingSystem.SubmitEventTicket. In a browser, ensure that you are logged in as the
  * event creator and copy/paste the auth endpoint and click Allow when it loads. Once this is done, continue with
  * the test.
+ *
+ * When done testing, make sure to delete the event in Eventbrite.
  */
 #if RUN_EVENTTICKETING_SUBMITEVENTTICKET_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
@@ -1024,9 +1026,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId  = "688044659097";
-	csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-testing-4-tickets-688044659097";
-	csp::common::String TestVendorTicketId = "7286842589";
+	csp::common::String TestVendorEventId  = "689249974227";
+	csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-testing-5-tickets-689249974227";
+	csp::common::String TestVendorTicketId = "7307631489";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
@@ -1092,6 +1094,105 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 											   TestVendorEventId,
 											   TestVendorTicketId,
 											   nullptr);
+
+	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto SubmittedEventTicket = SubmitEventTicketResult.GetEventTicket();
+
+	EXPECT_EQ(SubmittedEventTicket.SpaceId, Space.Id);
+	EXPECT_EQ(SubmittedEventTicket.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
+	EXPECT_EQ(SubmittedEventTicket.VendorEventId, TestVendorEventId);
+	EXPECT_EQ(SubmittedEventTicket.VendorTicketId, TestVendorTicketId);
+	EXPECT_EQ(SubmittedEventTicket.Status, csp::systems::TicketStatus::Redeemed);
+	EXPECT_EQ(SubmittedEventTicket.UserId, EventAttendeeUserId);
+	EXPECT_EQ(SubmittedEventTicket.Email, AlternativeLoginEmail);
+
+	// Log out as the attendee
+	LogOut(UserSystem);
+
+	LogIn(UserSystem, EventCreatorUserId);
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+
+/*
+ * This test is disabled by default and works the same as the previous test with one difference in that the ticket
+ * is submitted by the superuser on behalf of the alternative user.
+ */
+#if RUN_EVENTTICKETING_SUBMITEVENTTICKET_ONBEHALFOF_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfOfTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager	   = csp::systems::SystemsManager::Get();
+	auto* UserSystem		   = SystemsManager.GetUserSystem();
+	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
+	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
+
+	csp::common::String TestVendorEventId  = "689257717387";
+	csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-testing-6-tickets-689257717387";
+	csp::common::String TestVendorTicketId = "7307701069";
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	// Log in as attendee just to get their UserId and log out again
+	csp::common::String EventAttendeeUserId;
+	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogOut(UserSystem);
+
+	// Log in as the creator
+	csp::common::String EventCreatorUserId;
+	LogIn(UserSystem, EventCreatorUserId);
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+
+	// Add the attendee to the space
+	auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
+	EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Display, "SpaceId: %s", Space.Id.c_str());
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Display, "CreatorUserId: %s", EventCreatorUserId.c_str());
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Display, "AttendeeUserId: %s", EventAttendeeUserId.c_str());
+
+	auto [TicketedEventVendorAuthInfoResult] = AWAIT_PRE(EventTicketingSystem,
+														 GetVendorAuthorizeInfo,
+														 RequestPredicate,
+														 csp::systems::EventTicketingVendor::Eventbrite,
+														 EventCreatorUserId);
+	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
+	auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
+
+	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Display,
+						  "Login to Eventbrite as the event creator and paste the following URL into your browser: %s",
+						  VendorAuthInfo.AuthorizeEndpoint.c_str());
+
+	auto [TicketedEventResult] = AWAIT_PRE(EventTicketingSystem,
+										   CreateTicketedEvent,
+										   RequestPredicate,
+										   Space.Id,
+										   csp::systems::EventTicketingVendor::Eventbrite,
+										   TestVendorEventId,
+										   TestVendorEventUri,
+										   true);
+
+	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	auto Event = TicketedEventResult.GetTicketedEvent();
+
+	auto [SubmitEventTicketResult] = AWAIT_PRE(EventTicketingSystem,
+											   SubmitEventTicket,
+											   RequestPredicate,
+											   Space.Id,
+											   csp::systems::EventTicketingVendor::Eventbrite,
+											   TestVendorEventId,
+											   TestVendorTicketId,
+											   EventAttendeeUserId);
 
 	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::services::EResultCode::Success);
 

@@ -20,12 +20,17 @@
 namespace csp::systems
 {
 
+/// @ingroup Event Ticketing System
+/// @brief Enum representing the third party vendor used for ticketing.
 enum class EventTicketingVendor
 {
 	Eventbrite = 0,
 	Unknown
 };
 
+/// @ingroup Event Ticketing System
+/// @brief Enum representing the status of a ticket where purchased means a ticket has not yet been redeemd
+///        and redeemed means the ticket has been submitted already.
 enum class TicketStatus
 {
 	Purchased = 0,
@@ -40,11 +45,17 @@ class CSP_API TicketedEvent
 public:
 	TicketedEvent() : Vendor(EventTicketingVendor::Unknown), IsTicketingActive(false) {};
 
+	/// @brief CHS ID of the event resource.
 	csp::common::String Id;
+	/// @brief  ID of the space the event belongs to.
 	csp::common::String SpaceId;
+	/// @brief 3rd party vendor mangaging the event.
 	EventTicketingVendor Vendor;
+	/// @brief ID within the 3rd party vendor of the event.
 	csp::common::String VendorEventId;
+	/// @brief URI to load the event in the 3rd party.
 	csp::common::String VendorEventUri;
+	/// @brief Specifies whether ticketing is currently turned on for the space.
 	bool IsTicketingActive;
 };
 
@@ -55,13 +66,22 @@ class CSP_API EventTicket
 public:
 	EventTicket() : Vendor(EventTicketingVendor::Unknown), Status(TicketStatus::Unknown) {};
 
+	/// @brief CHS ID of the ticket resource.
 	csp::common::String Id;
+	/// @brief  ID of the space the ticket belongs to.
 	csp::common::String SpaceId;
+	/// @brief Third party vendor mangaging the ticket.
 	EventTicketingVendor Vendor;
+	/// @brief ID within the third party vendor of the event the ticket is for.
 	csp::common::String VendorEventId;
+	/// @brief ID within the third party vendor of the ticket.
 	csp::common::String VendorTicketId;
+	/// @brief Current status of the ticket.
 	csp::systems::TicketStatus Status;
+	/// @brief ID of the user associated with this ticket.
 	csp::common::String UserId;
+	/// @brief Email address of the user associated with this ticket. The email associated to the 3rd party ticket should match the email of the CHS
+	/// user.
 	csp::common::String Email;
 };
 
@@ -74,9 +94,13 @@ public:
 	{
 	}
 
+	/// @brief Third party vendor to get auth info for.
 	EventTicketingVendor Vendor;
+	/// @brief Application client ID with the third party vendor.
 	csp::common::String ClientId;
+	/// @brief URI of third party vendor authorize endpoint.
 	csp::common::String AuthorizeEndpoint;
+	/// @brief CHS URL the third party vendor can provide the OAuth code to.
 	csp::common::String OAuthRedirectUrl;
 };
 
@@ -162,7 +186,7 @@ private:
 	EventTicket Ticket;
 };
 
-  /// @ingroup Event Ticketing System
+/// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
 class CSP_API SpaceIsTicketedResult : public csp::services::ResultBase
 {
@@ -188,7 +212,7 @@ private:
 
 	bool SpaceIsTicketed;
 };
-  
+
 /// @ingroup Event Ticketing System
 /// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
 class CSP_API TicketedEventVendorAuthInfoResult : public csp::services::ResultBase

@@ -49,7 +49,7 @@ csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
+		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error,
 						   "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
 	}
 
