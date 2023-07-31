@@ -169,7 +169,7 @@ namespace CSPEngine
         [Test]
         public static void LoginTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = LogIn(userSystem);
@@ -180,7 +180,7 @@ namespace CSPEngine
         [Test]
         public static void ForgotPasswordTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             {
                 using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com",null).Result;
@@ -206,7 +206,7 @@ namespace CSPEngine
         [Test]
         public static void LoginWithTokenTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string loginToken = "";
             var loginTokenAvailable = false;
@@ -289,7 +289,7 @@ namespace CSPEngine
             json = ParseJsonObject(response);
             key = json["oneTimeKey"] as string;
 
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in with OTP
             {
@@ -310,7 +310,7 @@ namespace CSPEngine
         [Test]
         public static void LoginErrorTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in with invalid credentials
             _ = LogIn(userSystem, email: "invalidlogin@rewind.co", password: "", expectedResult: Services.EResultCode.Failed);
@@ -324,7 +324,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -352,7 +352,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameWithSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -380,7 +380,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameWithSymbolsTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -408,7 +408,7 @@ namespace CSPEngine
         [Test]
         public static void CreateUserTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _);
 
             string uniqueUserName = GenerateUniqueString("OLY-TEST-NAME");
             string testDisplayName = "OLY-TEST-DISPLAY";
@@ -484,7 +484,7 @@ namespace CSPEngine
         [Test]
         public static void CreateUserEmptyUsernameDisplaynameTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
 
@@ -549,7 +549,7 @@ namespace CSPEngine
         [Test]
         public static void PingTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             using var result = userSystem.Ping().Result;
 
@@ -562,7 +562,7 @@ namespace CSPEngine
         [Test]
         public static void GetThirdPartySupportedProvidersTest()
 {
-	GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+	GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Check the FDN supported providers
             using var supportedProviders = userSystem.GetSupportedThirdPartyAuthenticationProviders();
@@ -600,7 +600,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForGoogleTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -617,7 +617,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForDiscordTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -634,7 +634,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForAppleTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -654,7 +654,7 @@ namespace CSPEngine
         [Test] 
         public static void GoogleLogInTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
             
@@ -699,7 +699,7 @@ namespace CSPEngine
         [Test] 
         public static void DiscordLogInTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
             
@@ -744,7 +744,7 @@ namespace CSPEngine
         [Test] 
         public static void AppleLogInTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://example-app.com/redirect";
             
@@ -791,7 +791,7 @@ namespace CSPEngine
         [Test]
         public static void GetAgoraUserTokenTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = LogIn(userSystem);
@@ -823,7 +823,7 @@ namespace CSPEngine
         [Test]
         public static void GetGuestProfileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
 
             string id = LogInAsGuest(userSystem);
 

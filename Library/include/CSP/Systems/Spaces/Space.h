@@ -335,34 +335,6 @@ private:
 	csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>> Metadata;
 };
 
-/// @ingroup Space System
-/// @brief Data class used to contain information when attempting to Enter a Space.
-class CSP_API EnterSpaceResult : public csp::services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SpaceSystem;
-
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-	csp::multiplayer::MultiplayerConnection* GetConnection() const;
-
-
-private:
-	EnterSpaceResult(void*) {};
-	EnterSpaceResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	EnterSpaceResult() {};
-
-
-	csp::multiplayer::MultiplayerConnection* Connection;
-	void SetConnection(csp::multiplayer::MultiplayerConnection* IncommingConnection);
-	bool EnterResponse;
-};
-
-
 
 /// @ingroup Space System
 /// @brief Data class used to contain the obfuscated email addresses of the users that have not yet accepted the space invites
@@ -458,8 +430,6 @@ typedef std::function<void(const SpaceMetadataResult& Result)> SpaceMetadataResu
 typedef std::function<void(const SpacesMetadataResult& Result)> SpacesMetadataResultCallback;
 
 typedef std::function<void(const PendingInvitesResult& Result)> PendingInvitesResultCallback;
-
-typedef std::function<void(const EnterSpaceResult& Result)> EnterSpaceResultCallback;
 
 typedef std::function<void(const SpaceGeoLocationResult& Result)> SpaceGeoLocationResultCallback;
 typedef std::function<void(const SpaceGeoLocationCollectionResult& Result)> SpaceGeoLocationCollectionResultCallback;

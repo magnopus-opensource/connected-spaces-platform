@@ -38,6 +38,7 @@ class SettingsSystem;
 class GraphQLSystem;
 class AnalyticsSystem;
 class MaintenanceSystem;
+class EventTicketingSystem;
 
 } // namespace csp::systems
 
@@ -121,6 +122,10 @@ public:
 	/// @return MaintenanceSystem : pointer to the Maintenance system class
 	MaintenanceSystem* GetMaintenanceSystem();
 
+	/// @brief Retrieves the Event Ticketing system.
+	/// @return MaintenanceSystem : pointer to the Event Ticketing system class
+	EventTicketingSystem* GetEventTicketingSystem();
+
 private:
 	SystemsManager();
 
@@ -146,6 +151,7 @@ private:
 	GraphQLSystem* GraphQLSystem;
 	AnalyticsSystem* AnalyticsSystem;
 	MaintenanceSystem* MaintenanceSystem;
+	EventTicketingSystem* EventTicketingSystem;
 };
 
 } // namespace csp::systems

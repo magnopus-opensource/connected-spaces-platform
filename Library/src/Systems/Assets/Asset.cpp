@@ -350,6 +350,11 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 	}
 }
 
+void UriResult::SetResponseBody(const csp::common::String& Contents)
+{
+	ResponseBody = Contents;
+}
+
 
 AssetDataResult::AssetDataResult(void*) : Data(nullptr), DataLength(0)
 {

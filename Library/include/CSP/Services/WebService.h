@@ -100,7 +100,6 @@ protected:
 	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
-private:
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
 

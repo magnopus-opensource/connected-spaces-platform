@@ -17,6 +17,7 @@ namespace CSharpTests
         public static readonly Random Rand = new Random();
 
         static readonly Stack<Action> cleanupFunctions = new Stack<Action>();
+        static Systems.LogSystem LogSystem;
 
         [Conditional("DEBUG")]
         public static void LogDebug(string message)
@@ -70,19 +71,26 @@ namespace CSharpTests
             cleanupFunctions.Push(function);
         }
 
+        static void OnLogEvent(object s, string e)
+        {
+            Log("[ ::EVENT  ]", ConsoleColor.Blue, e);
+        }
+
+        static void OnLogMessage(object s, string e)
+        {
+            Log("[ ::LOG    ]", ConsoleColor.Blue, e);
+        }
+
         public static void StartupTest()
         {
             cleanupFunctions.Clear();
             InitialiseFoundationWithUserAgentInfo(CHSEndpointBaseUri);
 
-            Systems.SystemsManager.Get().GetLogSystem().OnEvent += (object s, string e) =>
-            {
-                Log("[ ::EVENT  ]", ConsoleColor.Blue, e);
-            };
-            Systems.SystemsManager.Get().GetLogSystem().OnLog += (object s, string e) =>
-            {
-                Log("[ ::LOG    ]", ConsoleColor.Blue, e);
-            };
+            LogSystem = Systems.SystemsManager.Get().GetLogSystem();
+            GC.SuppressFinalize(LogSystem);
+            LogSystem.OnEvent += OnLogEvent;
+            LogSystem.OnLog += OnLogMessage;
+
             LogDebug("Foundation initialized");
         }
 
@@ -91,9 +99,11 @@ namespace CSharpTests
             while (cleanupFunctions.Count > 0)
                 cleanupFunctions.Pop()();
 
-            Systems.SystemsManager.Get().GetLogSystem().ClearAllCallbacks();
+            LogSystem.ClearAllCallbacks();
             Csp.CSPFoundation.Shutdown();
             LogDebug("Foundation uninitialized");
+
+            LogSystem = null;
         }
 
         public static string GetUniqueHexString(int length = 16)
@@ -114,7 +124,8 @@ namespace CSharpTests
         }
 
         public static void GetFoundationSystems(out Systems.UserSystem userSystem, out Systems.SpaceSystem spaceSystem, out Systems.AssetSystem assetSystem, out Systems.PointOfInterestSystem poiSystem,
-                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem, out Systems.MaintenanceSystem maintenanceSystem)
+                                                out Systems.AnchorSystem anchorSystem, out Systems.GraphQLSystem graphQLSystem, out Systems.SettingsSystem settingsSystem, out Systems.MaintenanceSystem maintenanceSystem, 
+                                                out Systems.EventTicketingSystem eventTicketingSystem)
         {
             var systemsManager = Systems.SystemsManager.Get();
             userSystem = systemsManager.GetUserSystem();
@@ -125,7 +136,7 @@ namespace CSharpTests
             graphQLSystem = systemsManager.GetGraphQLSystem();
             settingsSystem = systemsManager.GetSettingsSystem();
             maintenanceSystem = systemsManager.GetMaintenanceSystem();
-
+            eventTicketingSystem = systemsManager.GetEventTicketingSystem();
         }
 
         public static Dictionary<string, object> ParseJsonObject(string data)
@@ -279,14 +290,16 @@ namespace CSharpTests
             Csp.CSPFoundation.SetClientUserAgentInfo(userAgentInfo);
         }
 
-        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId)
+        public static IMultiplayerTestClient CreateMultiplayerTestClient(string ClientId, string SessionDirectory, string SessionName, long SessionStart)
         {
             Process multiPlayerTestClient = new Process();
 
             multiPlayerTestClient.StartInfo.FileName = "MultiplayerTestClient.exe";
 
+            string ArgsString = String.Format("{0} {1} {2} {3}", ClientId, SessionDirectory, SessionName, SessionStart);
+
             // Pass the client process a handle to the server.
-            multiPlayerTestClient.StartInfo.Arguments = ClientId;
+            multiPlayerTestClient.StartInfo.Arguments = ArgsString;
             multiPlayerTestClient.StartInfo.UseShellExecute = false;
             multiPlayerTestClient.Start();
 

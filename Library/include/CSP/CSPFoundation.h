@@ -143,6 +143,11 @@ private:
 	static const uint32_t EntitySystemVersion = 3;
 };
 
+
+// Helper function to get function address for templates from wrappers
 CSP_API void* GetFunctionAddress(const csp::common::String& Name);
+
+// Helper function to free allocated memory from wrappers
+CSP_API void Free(void* Pointer);
 
 } // namespace csp

@@ -532,7 +532,6 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 
 	ScriptSystemReadyCallback = std::move(Callback);
 
-
 	if (ElectionManager)
 	{
 		ElectionManager->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);

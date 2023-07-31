@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
+
 using namespace csp::systems;
+
 
 namespace csp::multiplayer
 {
@@ -29,8 +32,8 @@ StaticModelSpaceComponentScriptInterface::StaticModelSpaceComponentScriptInterfa
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING(StaticModelSpaceComponent, ModelAssetId);
-DEFINE_SCRIPT_PROPERTY_STRING(StaticModelSpaceComponent, AssetCollectionId);
+DEFINE_SCRIPT_PROPERTY_STRING(StaticModelSpaceComponent, ExternalResourceAssetId);
+DEFINE_SCRIPT_PROPERTY_STRING(StaticModelSpaceComponent, ExternalResourceAssetCollectionId);
 
 DEFINE_SCRIPT_PROPERTY_VEC3(StaticModelSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(StaticModelSpaceComponent, Position);

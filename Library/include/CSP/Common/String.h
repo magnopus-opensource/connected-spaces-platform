@@ -18,6 +18,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/List.h"
+#include "CSP/Common/Optional.h"
 
 
 CSP_NO_EXPORT
@@ -109,28 +110,28 @@ public:
 	/// @param Other const char* : Cstring to append
 	void Append(const char* Other);
 
-	/// @brief Appends rhs string to lhs string.
-	/// This will resize the buffer of the lhs string.
+	/// @brief Returns a new string created by appending rhs string to lhs string.
 	/// @param Lhs String : String to append to
 	/// @param Rhs const String& : String to append
 	/// @return String
 	friend String operator+(String Lhs, const String& Rhs)
 	{
-		Lhs.Append(Rhs);
+		String Result = Lhs;
+		Result.Append(Rhs);
 
-		return Lhs;
+		return Result;
 	}
 
-	/// @brief Appends rhs cstring to lhs string.
-	/// This will resize the buffer of the lhs string.
+	/// @brief Returns a new string created by appending rhs cstring to lhs string.
 	/// @param Lhs String : String to append to
 	/// @param Rhs const char* : Cstring to append
 	/// @return String
 	friend String operator+(String Lhs, const char* Rhs)
 	{
-		Lhs.Append(Rhs);
+		String Result = Lhs;
+		Result.Append(Rhs);
 
-		return Lhs;
+		return Result;
 	}
 
 	/// @brief Appends given string.
@@ -161,27 +162,17 @@ public:
 	/// @return String : A copy of this string with leading and trailing whitespace removed.
 	String Trim();
 
-	/// @brief Concatenates all elements in the list and returns as a string.
-	/// @param Parts const csp::common::List<String>& : List to concatenate
-	/// @return String
-	static String Join(const List<String>& Parts);
-
-	/// @brief Concatenates all elements in the initializer_list and returns as a string.
-	/// @param Parts const std::initializer_list<String>& : initializer_list to concatenate
-	/// @return String
-	static String Join(const std::initializer_list<String>& Parts);
-
 	/// @brief Concatenates all elements in the list with a separator after each element and returns as a string.
-	/// @param Separator char : Separator to add after each Concatenated element
 	/// @param Parts const csp::common::List<String>& : List to concatenate
+	/// @param Separator csp::common::Optional<char> : An optional separator to add after each concatenated element
 	/// @return String
-	static String Join(char Separator, const List<String>& Parts);
+	static String Join(const List<String>& Parts, Optional<char> Separator = nullptr);
 
 	/// @brief Concatenates all elements in the initializer_list and returns as a string.
-	/// @param Separator char : Separator to add after each Concatenated element
 	/// @param Parts const std::initializer_list<String>& : initializer_list to concatenate
+	/// @param Separator csp::common::Optional<char> : An optional separator to add after each concatenated element
 	/// @return String
-	static String Join(char Separator, const std::initializer_list<String>& Parts);
+	static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
 
 private:
 	/// @brief Returns internal buffer.

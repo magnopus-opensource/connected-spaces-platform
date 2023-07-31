@@ -522,7 +522,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 																									  nullptr,
 																									  csp::web::EResponseCodes::ResponseNoContent);
 
-		static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersForgotPasswordPost(RedirectUrlValue, Request, ResponseHandler);
+		static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersForgotPasswordPost(RedirectUrlValue, true, Request, ResponseHandler);
 	}
 	else
 	{
