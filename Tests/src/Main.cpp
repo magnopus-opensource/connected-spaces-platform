@@ -13,14 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "InternalTests/XMLTestResultWriter.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
 #include "TestHelpers.h"
 
-int main(int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
 
+#ifdef CSP_WASM
+	auto& Listeners = testing::UnitTest::GetInstance()->listeners();
+
+	// Prevent googletest from writing to stdout to ensure the output xml isn't corrupted
+	Listeners.Release(Listeners.default_result_printer());
+
+	// Default xml writer hangs on wasm, so we need to add a custom one that writes to stdout
+	auto* Listener = new TestListener();
+	Listeners.Append(Listener);
+#endif
+
 	LoadTestAccountCredentials();
 
-	return RUN_ALL_TESTS();
+	int res = RUN_ALL_TESTS();
+
+#ifdef CSP_WASM
+	emscripten_force_exit(res);
+#endif
+
+	return res;
 }

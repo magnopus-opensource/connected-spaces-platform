@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-#include "CSP/CSPFoundation.h"
-#include "TestHelpers.h"
+#ifdef RUN_PLATFORM_TESTS
 
-#ifdef CSP_WASM
-	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
-#else
-	#include "Web/POCOWebClient/POCOWebClient.h"
-#endif
+	#include "CSP/CSPFoundation.h"
+	#include "PlatformTestUtils.h"
+	#include "TestHelpers.h"
 
-#include "gtest/gtest.h"
-#include <atomic>
-#include <chrono>
-#include <rapidjson/document.h>
-#include <rapidjson/rapidjson.h>
-#include <thread>
+	#ifdef CSP_WASM
+		#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+	#else
+		#include "Web/POCOWebClient/POCOWebClient.h"
+	#endif
 
+	#include "gtest/gtest.h"
+	#include <atomic>
+	#include <chrono>
+	#include <rapidjson/document.h>
+	#include <rapidjson/rapidjson.h>
+	#include <thread>
 
 
 using namespace csp::web;
-
-
 
 class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
 {
@@ -79,7 +79,7 @@ private:
 	std::thread::id ThreadId;
 };
 
-#ifdef CSP_WASM
+	#ifdef CSP_WASM
 
 class TestWebClient : public EmscriptenWebClient
 {
@@ -89,7 +89,7 @@ public:
 	}
 };
 
-#else
+	#else
 
 class TestWebClient : public POCOWebClient
 {
@@ -99,7 +99,23 @@ public:
 	}
 };
 
-#endif
+	#endif
+
+void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequestVerb Verb, HttpPayload& Payload, IHttpResponseHandler* Receiver)
+{
+	#ifndef CSP_WASM
+	WebClient->SendRequest(Verb, Uri(Url), Payload, Receiver, csp::common::CancellationToken::Dummy());
+	#else
+
+	std::thread TestThread(
+		[&]()
+		{
+			WebClient->SendRequest(Verb, Uri(Url), Payload, Receiver, csp::common::CancellationToken::Dummy());
+		});
+
+	TestThread.join();
+	#endif
+}
 
 void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPayload& Payload, EResponseCodes ExpectedResponse)
 {
@@ -108,7 +124,7 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
 	auto* WebClient = CSP_NEW TestWebClient(Port, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
-	WebClient->SendRequest(Verb, Uri(Url), Payload, &Receiver, csp::common::CancellationToken::Dummy());
+	WebClientSendRequest(WebClient, Url, Verb, Payload, &Receiver);
 
 	//// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
@@ -122,9 +138,9 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
 	}
 }
 
-/* CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 
@@ -135,7 +151,7 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 
@@ -152,7 +168,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 
@@ -171,15 +187,14 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 
 	RunWebClientTest("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
 
 	csp::CSPFoundation::Shutdown();
-}*/
-
+}
 
 class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -226,9 +241,9 @@ public:
 		return WaitFor(
 			[this, WebClient]
 			{
-#ifndef CSP_WASM
+	#ifndef CSP_WASM
 				WebClient->ProcessResponses();
-#endif
+	#endif
 				return IsResponseReceived();
 			},
 			std::chrono::seconds(10));
@@ -256,7 +271,7 @@ private:
 	std::thread::id ThreadId;
 };
 
-#if 0
+	#if 0
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
@@ -302,10 +317,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 
 	csp::CSPFoundation::Shutdown();
 }
-#endif
+	#endif
 
-// Why are we testing CHS here? These should just be WebClient tests
-#if 0
+	// Why are we testing CHS here? These should just be WebClient tests
+	#if 0
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
@@ -441,7 +456,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 
 	csp::CSPFoundation::Shutdown();
 }
-#endif
+	#endif
 
 
 class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
@@ -461,7 +476,17 @@ public:
 
 		if (InResponse.GetResponseCode() == EResponseCodes::ResponseNotFound)
 		{
+	#ifdef CSP_WASM
+			std::thread TestThread(
+				[&]()
+				{
+					RetryIssued = InResponse.GetRequest()->Retry(MaxNumRequestRetries);
+				});
+
+			TestThread.join();
+	#else
 			RetryIssued = InResponse.GetRequest()->Retry(MaxNumRequestRetries);
+	#endif
 		}
 
 		if (!RetryIssued)
@@ -504,10 +529,9 @@ private:
 	std::thread::id ThreadId;
 };
 
-
-/* CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 	RetryResponseReceiver Receiver;
@@ -515,7 +539,7 @@ private:
 	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
-	WebClient->SendRequest(ERequestVerb::Get, Uri("https://reqres.in/api/users/23"), Payload, &Receiver, csp::common::CancellationToken::Dummy());
+	WebClientSendRequest(WebClient, "https://reqres.in/api/users/23", ERequestVerb::Get, Payload, &Receiver);
 
 	// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
@@ -534,7 +558,7 @@ private:
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 	ResponseReceiver Receiver;
@@ -542,7 +566,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
-	WebClient->SendRequest(ERequestVerb::Get, Uri("https://reqres.in/apiiii/users/23"), Payload, &Receiver, csp::common::CancellationToken::Dummy());
+	WebClientSendRequest(WebClient, "https://reqres.in/apiiii/users/23", ERequestVerb::Get, Payload, &Receiver);
 
 	// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
@@ -560,7 +584,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 	Payload.AddContent("{ \"email\": \"test@olympus\" }");
@@ -570,7 +594,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
-	WebClient->SendRequest(ERequestVerb::Post, Uri("https://reqres.in/api/register"), Payload, &Receiver, csp::common::CancellationToken::Dummy());
+	WebClientSendRequest(WebClient, "https://reqres.in/api/register", ERequestVerb::Post, Payload, &Receiver);
 
 	//// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
@@ -588,7 +612,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundation();
 
 	HttpPayload Payload;
 	ResponseReceiver Receiver;
@@ -597,7 +621,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
 		EXPECT_TRUE(WebClient != nullptr);
 
-		WebClient->SendRequest(ERequestVerb::Get, Uri("https://postman-echo.com/get"), Payload, &Receiver, csp::common::CancellationToken::Dummy());
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
 
 		//// Sleep thread until response is received
 		if (Receiver.WaitForResponse())
@@ -613,4 +637,5 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 	}
 
 	csp::CSPFoundation::Shutdown();
-}*/
+}
+#endif

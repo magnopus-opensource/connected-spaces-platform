@@ -61,7 +61,8 @@ if not Tests then
             defines {
                 "CSP_WASM",
                 "USE_STD_MALLOC=1",
-                "SKIP_INTERNAL_TESTS"
+                "SKIP_INTERNAL_TESTS",
+                "RUN_PLATFORM_TESTS"    -- enable platform tests by default on wasm
             }
 
             buildoptions {
@@ -70,6 +71,8 @@ if not Tests then
             }
 
             linkoptions { 
+                "--emrun",
+                --"--embed-file ./test_account_creds.txt",
                 "-pthread",                                                     -- enable threading
                 "-fwasm-exceptions",                                            -- enable native wasm exceptions
                 "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
@@ -85,7 +88,9 @@ if not Tests then
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
                 "-sMAXIMUM_MEMORY=1073741824",                             -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory   
-                "-sPROXY_TO_PTHREAD",         
+                "-sPROXY_TO_PTHREAD",
+                "-sSTACK_SIZE=6000000",
+                "-sEXIT_RUNTIME",
                 "-sEXPORTED_RUNTIME_METHODS=[" ..
                     "'ccall'," ..
                     "'setValue'," ..
@@ -103,7 +108,8 @@ if not Tests then
                     "'instantiateWasm'," ..
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
-                    "'wasmMemory'" ..
+                    "'wasmMemory'," ..
+                    "'arguments'" ..
                 "]"
             }
 

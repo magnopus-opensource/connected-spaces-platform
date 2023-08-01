@@ -1,246 +1,35 @@
-#include "../PublicAPITests/UserSystemTestHelpers.h"
-#include "CSP/CSPFoundation.h"
-#include "CSP/Systems/SystemsManager.h"
-#include "CSP/Systems/Users/UserSystem.h"
-#include "TestHelpers.h"
+/*
+ * Copyright 2023 Magnopus LLC
 
-#ifdef CSP_WASM
-	#include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
-	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-	#include <emscripten/emscripten.h>
-	#include <emscripten/fetch.h>
-	#include <emscripten/threading.h>
-#else
-	#include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
-	#include "Web/POCOWebClient/POCOWebClient.h"
-#endif
+#ifdef RUN_PLATFORM_TESTS
 
-#include "gtest/gtest.h"
-#include <thread>
+	#include "../PublicAPITests/UserSystemTestHelpers.h"
+	#include "CSP/CSPFoundation.h"
+	#include "CSP/Systems/SystemsManager.h"
+	#include "CSP/Systems/Users/UserSystem.h"
+	#include "PlatformTestUtils.h"
+	#include "TestHelpers.h"
+
+	#include "gtest/gtest.h"
 
 using namespace csp::multiplayer;
 
-void PlatformTestsLogin(csp::systems::UserSystem* UserSystem)
-{
-#ifndef CSP_WASM
-	csp::common::String Res;
-	LogIn(UserSystem, Res);
-#else
-
-	bool finished = false;
-
-	std::thread TestThread(
-		[&]()
-		{
-			auto CB = [&](const csp::systems::LoginStateResult& Result)
-			{
-				if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
-				{
-					return;
-				}
-
-				finished = true;
-				EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			};
-
-			UserSystem->Login("", DefaultLoginEmail, DefaultLoginPassword, CB);
-		});
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-	TestThread.join();
-#endif
-}
-
-void PlatformTestsLogout(csp::systems::UserSystem* UserSystem)
-{
-#ifndef CSP_WASM
-	LogOut(UserSystem);
-#else
-
-	bool finished = false;
-
-	std::thread TestThread(
-		[&]()
-		{
-			auto CB = [&](const csp::systems::LogoutResult& Result)
-			{
-				if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
-				{
-					return;
-				}
-
-				finished = true;
-				EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			};
-
-			UserSystem->Logout(CB);
-		});
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-	TestThread.join();
-
-#endif
-}
-
-csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Uri)
-{
-	bool finished = false;
-
-	auto Fn = [&](bool result)
-	{
-		EXPECT_TRUE(result);
-		finished = true;
-	};
-
-#ifdef CSP_WASM
-	auto* WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientEmscripten();
-
-	std::thread TestThread(
-		[&]()
-		{
-			WebSocketClient->Start(Uri.c_str(), Fn);
-		});
-#else
-	auto* WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientPOCO();
-	WebSocketClient->Start(Uri.c_str(), Fn);
-#endif
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-#ifdef CSP_WASM
-	TestThread.join();
-#endif
-
-	return WebSocketClient;
-}
-
-void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient)
-{
-	bool finished = false;
-
-	auto Fn = [&](bool result)
-	{
-		EXPECT_TRUE(result);
-		finished = true;
-	};
-
-#ifdef CSP_WASM
-
-	std::thread TestThread(
-		[&]()
-		{
-			WebSocketClient->Stop(Fn);
-		});
-#else
-
-	WebSocketClient->Stop(Fn);
-#endif
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-#ifdef CSP_WASM
-	TestThread.join();
-#endif
-}
-
-void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const csp::common::String& Data)
-{
-	bool finished = false;
-
-	auto Fn = [&](bool result)
-	{
-		EXPECT_TRUE(result);
-		finished = true;
-	};
-
-#ifdef CSP_WASM
-
-	std::thread TestThread(
-		[&]()
-		{
-			WebSocketClient->Send(Data.c_str(), Fn);
-		});
-#else
-	WebSocketClient->Send(Data.c_str(), Fn);
-#endif
-
-	while (!finished)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-#ifdef CSP_WASM
-	TestThread.join();
-#endif
-}
-
-void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
-{
-	bool finished2 = false;
-
-	auto Fn2 = [&](const std::string& S, bool result)
-	{
-		EXPECT_TRUE(result);
-		finished2 = true;
-	};
-
-#ifdef CSP_WASM
-
-	std::thread TestThread(
-		[&]()
-		{
-			WebSocketClient->Receive(Fn2);
-		});
-#else
-	WebSocketClient->Receive(Fn2);
-#endif
-
-	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-	WebSocketSend(WebSocketClient, "{\"protocol\":\"messagepack\",\"version\":1}\x1e");
-	WebSocketSend(WebSocketClient, "\x2\x6");
-
-	while (!finished2)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
-
-#ifdef CSP_WASM
-	TestThread.join();
-#endif
-}
-
-void InitialiseFoundation2()
-{
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
-}
-
-void InitialiseFoundation()
-{
-#ifndef CSP_WASM
-	InitialiseFoundation2();
-#else
-	emscripten_sync_run_in_main_runtime_thread(EM_FUNC_SIG_V, InitialiseFoundation2);
-#endif
-}
-
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
+	// Initialise
 	InitialiseFoundation();
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -248,8 +37,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 
 	// Log in
 	csp::common::String UserId;
-
-	PlatformTestsLogin(UserSystem);
+	LogIn(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
@@ -258,50 +46,56 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 	WebSocketStop(WebSocket);
 
 	// Logout
-	PlatformTestsLogout(UserSystem);
+	LogOut(UserSystem);
 }
-
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 {
+	// Initialise
 	InitialiseFoundation();
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	// Log in
-	PlatformTestsLogin(UserSystem);
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
 
+	// Send
 	WebSocketSend(WebSocket, "test");
 
 	// Stop
 	WebSocketStop(WebSocket);
 
 	// Logout
-	PlatformTestsLogout(UserSystem);
+	LogOut(UserSystem);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 {
+	// Initialise
 	InitialiseFoundation();
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	// Log in
-	PlatformTestsLogin(UserSystem);
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
 
+	// Receive
 	WebSocketSendReceive(WebSocket);
 
 	// Stop
 	WebSocketStop(WebSocket);
 
 	// Logout
-	PlatformTestsLogout(UserSystem);
+	LogOut(UserSystem);
 }
+#endif
