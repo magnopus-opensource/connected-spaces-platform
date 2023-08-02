@@ -39,7 +39,7 @@ ProductInfo::ProductInfo(const csp::common::String& IdIn,
 						 const ProductImageInfo& ImageIn,
 						 const csp::common::Map<csp::common::String, csp::common::String>& SelectedOptionsIn,
 						 double UnitPriceIn,
-						 const ProductMediaInfo& MediaIn)
+						 const csp::common::Array<ProductMediaInfo>& MediaIn)
 	: Id(IdIn)
 	, Title(TitleIn)
 	, AvailableForSale(AvailableForSaleIn)

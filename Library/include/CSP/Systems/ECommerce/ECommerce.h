@@ -33,7 +33,7 @@ namespace csp::systems
 {
 
 /// @ingroup ECommerce System
-/// @brief Represents media information for a Product
+/// @brief Represents media information for a product such as additional images
 class CSP_API ProductMediaInfo
 {
 public:
@@ -44,29 +44,29 @@ public:
 					 const int64_t WidthIn,
 					 const int64_t HeightIn);
 
-	csp::common::String MediaContentType;
-	csp::common::String Alt;
-	csp::common::String Url;
-	int64_t Width;
-	int64_t Height;
+	csp::common::String MediaContentType; // Type of media content used.
+	csp::common::String Alt;			  // Alternative description of the media.
+	csp::common::String Url;			  // Url of the media.
+	int64_t Width;						  // Width fo the media.
+	int64_t Height;						  // Height of the media.
 };
 
 /// @ingroup ECommerce System
-/// @brief Represents image information for a Product
+/// @brief Represents image information for a product
 class CSP_API ProductImageInfo
 {
 public:
 	ProductImageInfo() = default;
 	ProductImageInfo(const csp::common::String& AltIn, const csp::common::String& UrlIn, const int64_t WidthIn, const int64_t HeightIn);
 
-	csp::common::String Alt;
-	csp::common::String Url;
-	int64_t Width;
-	int64_t Height;
+	csp::common::String Alt; // Alternative description of the image.
+	csp::common::String Url; // Url of the image.
+	int64_t Width;			 // Width fo the image.
+	int64_t Height;			 // Height of the Image.
 };
 
 /// @ingroup ECommerce System
-/// @brief Represents a single Product and the information associated with it.
+/// @brief Represents a single product and the information associated with it.
 class CSP_API ProductInfo
 {
 public:
@@ -76,15 +76,16 @@ public:
 				const ProductImageInfo& ImageIn,
 				const csp::common::Map<csp::common::String, csp::common::String>& SelectedOptionsIn,
 				double UnitPriceIn,
-				const ProductMediaInfo& MediaIn);
+				const csp::common::Array<ProductMediaInfo>& Media);
 
-	csp::common::String Id;
-	csp::common::String Title;
-	bool AvailableForSale;
-	ProductImageInfo Image;
-	csp::common::Map<csp::common::String, csp::common::String> SelectedOptions;
-	double UnitPrice;
-	ProductMediaInfo Media;
+
+	csp::common::String Id;														// Id of the product.
+	csp::common::String Title;													// Title of the product.
+	bool AvailableForSale;														// Flag showing if the Product is available.
+	ProductImageInfo Image;														// The object holding Information about the Product image.
+	csp::common::Map<csp::common::String, csp::common::String> SelectedOptions; // map of product options available for selection.
+	double UnitPrice;															// price of the product.
+	csp::common::Array<ProductMediaInfo> Media;									// This array holds object of additional media for the product
 };
 
 
