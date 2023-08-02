@@ -127,8 +127,8 @@ public:
 	/// @return EventTicketingSystem : pointer to the Event Ticketing system class
 	EventTicketingSystem* GetEventTicketingSystem();
 
-	/// @brief Retrieves the eCommerce system.
-	/// @return ECommerceSystem : pointer to the eCommerce system class
+	/// @brief Retrieves the ECommerce system.
+	/// @return ECommerceSystem : pointer to the ECommerce system class
 	ECommerceSystem* GetECommerceSystem();
 
 private:

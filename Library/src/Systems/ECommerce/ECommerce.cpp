@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Systems/eCommerce/ECommerce.h"
+#include "CSP/Systems/ECommerce/ECommerce.h"
 
 
 namespace csp::systems
 {
 
 ProductImageInfo::ProductImageInfo(const csp::common::String& AltIn, const csp::common::String& UrlIn, const int64_t WidthIn, const int64_t HeightIn)
+	: Alt(AltIn), Url(UrlIn), Width(WidthIn), Height(HeightIn)
 {
-	Alt	   = AltIn;
-	Url	   = UrlIn;
-	Width  = WidthIn;
-	Height = HeightIn;
 }
 
 ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn,
@@ -32,12 +29,8 @@ ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn
 								   const csp::common::String& UrlIn,
 								   const int64_t WidthIn,
 								   const int64_t HeightIn)
+	: MediaContentType(MediaContentTypeIn), Alt(AltIn), Url(UrlIn), Width(WidthIn), Height(HeightIn)
 {
-	MediaContentType = MediaContentTypeIn;
-	Alt				 = AltIn;
-	Url				 = UrlIn;
-	Width			 = WidthIn;
-	Height			 = HeightIn;
 }
 
 ProductInfo::ProductInfo(const csp::common::String& IdIn,
@@ -47,14 +40,14 @@ ProductInfo::ProductInfo(const csp::common::String& IdIn,
 						 const csp::common::Map<csp::common::String, csp::common::String>& SelectedOptionsIn,
 						 double UnitPriceIn,
 						 const ProductMediaInfo& MediaIn)
+	: Id(IdIn)
+	, Title(TitleIn)
+	, AvailableForSale(AvailableForSaleIn)
+	, Image(ImageIn)
+	, SelectedOptions(SelectedOptionsIn)
+	, UnitPrice(UnitPriceIn)
+	, Media(MediaIn)
 {
-	Id				 = IdIn;
-	Title			 = TitleIn;
-	AvailableForSale = AvailableForSaleIn;
-	Image			 = ImageIn;
-	SelectedOptions	 = SelectedOptionsIn;
-	UnitPrice		 = UnitPriceIn;
-	Media			 = MediaIn;
 }
 
 } // namespace csp::systems

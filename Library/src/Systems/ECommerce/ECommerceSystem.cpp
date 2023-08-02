@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Systems/eCommerce/ECommerceSystem.h"
+#include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
 #include "Services/aggregationservice/Api.h"
 

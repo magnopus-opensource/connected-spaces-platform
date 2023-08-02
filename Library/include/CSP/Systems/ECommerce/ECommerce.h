@@ -31,6 +31,8 @@ CSP_END_IGNORE
 
 namespace csp::systems
 {
+
+/// @ingroup ECommerce System
 /// @brief Represents media information for a Product
 class CSP_API ProductMediaInfo
 {
@@ -49,6 +51,7 @@ public:
 	int64_t Height;
 };
 
+/// @ingroup ECommerce System
 /// @brief Represents image information for a Product
 class CSP_API ProductImageInfo
 {
@@ -62,6 +65,7 @@ public:
 	int64_t Height;
 };
 
+/// @ingroup ECommerce System
 /// @brief Represents a single Product and the information associated with it.
 class CSP_API ProductInfo
 {
