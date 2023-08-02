@@ -17,20 +17,9 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/Optional.h"
-#include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
-#include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
-#include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
-#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
-#include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
-#include "CSP/Multiplayer/Components/FogSpaceComponent.h"
-#include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
-#include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
-#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
-#include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
-#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -47,10 +36,8 @@
 #include "signalrclient/signalr_value.h"
 
 #include "gtest/gtest.h"
-#include <CSP/Multiplayer/Components/ConversationSpaceComponent.h>
+#include <CSP/Multiplayer/Components/ImageSpaceComponent.h>
 #include <CSP/Multiplayer/Components/LightSpaceComponent.h>
-#include <CSP/Multiplayer/Components/PortalSpaceComponent.h>
-#include <CSP/Multiplayer/Components/SplineSpaceComponent.h>
 #include <atomic_queue/defs.h>
 #include <chrono>
 #include <filesystem>
@@ -74,7 +61,6 @@ std::atomic_bool IsReadyForUpdate;
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 SpaceEntity* TestUser;
-SpaceEntity* TestObject;
 
 int WaitForTestTimeoutCountMs;
 const int WaitForTestTimeoutLimit	= 20000;
@@ -390,12 +376,35 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
 	InitialiseTestingConnection();
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
+
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -492,11 +501,33 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	InitialiseTestingConnection();
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	EntitySystem	 = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
+
 	OnConnect();
+
 	WaitForTestTimeoutCountMs = 0;
 
 	while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
@@ -526,7 +557,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	EXPECT_TRUE(IsTestComplete);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -565,12 +599,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
 
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
 
@@ -593,8 +645,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 		EXPECT_EQ(CreatedObject->GetScale(), ObjectTransform.Scale);
 
 		auto ModelComponent = dynamic_cast<StaticModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::StaticModel));
-		ModelComponent->SetModelAssetId("SomethingElse");
-		ModelComponent->SetAssetCollectionId("Something");
+		ModelComponent->SetExternalResourceAssetId("SomethingElse");
+		ModelComponent->SetExternalResourceAssetCollectionId("Something");
 
 		bool EntityUpdated = false;
 
@@ -627,7 +679,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 		EXPECT_EQ(CreatedObject->GetScale().Z, 3.0f);
 	}
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -661,10 +716,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String& UserName = "Player 1";
 	const SpaceTransform& UserTransform
@@ -673,11 +748,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
 	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
 	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
 
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
@@ -696,13 +766,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 	EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
 
 	// Verify the values of UserAvatarState and UserAvatarPlayMode
-	AvatarSpaceComponent* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
+	auto* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
+
 	EXPECT_NE(AvatarComponent, nullptr);
 	EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
 	EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
 	EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -737,10 +811,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String& UserName = "Creator 1";
 	const SpaceTransform& UserTransform
@@ -749,11 +843,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 	const csp::common::String& UserAvatarId	  = "MyCoolCreatorAvatar";
 	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Creator;
 	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
 
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
@@ -779,8 +868,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 	EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
 	EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
 
+	AWAIT(Connection, Disconnect);
+	delete Connection;
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -815,10 +906,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String& UserName = "Player 1";
 	const SpaceTransform& UserTransform
@@ -826,11 +937,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 	AvatarState UserAvatarState				= AvatarState::Idle;
 	const csp::common::String& UserAvatarId = "MyCoolAvatar";
 	AvatarPlayMode UserAvatarPlayMode		= AvatarPlayMode::Default;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
 
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
@@ -851,7 +957,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
 	EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::One());
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -893,19 +1002,34 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
 	InitialiseTestingConnection();
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform
 		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
 
 	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
@@ -916,8 +1040,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 	EXPECT_EQ(CreatedObject->GetThirdPartyRef(), "");
 	EXPECT_EQ(CreatedObject->GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
 
+	AWAIT(Connection, Disconnect);
+	delete Connection;
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -951,15 +1077,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -977,7 +1118,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	auto* StaticModelComponent	 = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	auto StaticModelComponentKey = StaticModelComponent->GetId();
-	StaticModelComponent->SetModelAssetId(ModelAssetId);
+	StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
 	Object->QueueUpdate();
 
 	while (PatchPending)
@@ -998,7 +1139,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 	EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
 	auto* RealStaticModelComponent = (StaticModelSpaceComponent*) _StaticModelComponent;
 
-	EXPECT_EQ(RealStaticModelComponent->GetModelAssetId(), ModelAssetId);
+	EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 
 	const csp::common::String ImageAssetId = "AlsoNotARealId";
 
@@ -1024,7 +1165,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	EXPECT_EQ(RealImageComponent->GetImageAssetId(), ImageAssetId);
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1058,15 +1202,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -1084,7 +1243,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
 	auto* StaticModelComponent	 = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	auto StaticModelComponentKey = StaticModelComponent->GetId();
-	StaticModelComponent->SetModelAssetId(ModelAssetId);
+	StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
 	auto* ImageComponent   = (ImageSpaceComponent*) Object->AddComponent(ComponentType::Image);
 	auto ImageComponentKey = ImageComponent->GetId();
 	ImageComponent->SetImageAssetId("TestID");
@@ -1109,7 +1268,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	EXPECT_EQ(_StaticModelComponent->GetComponentType(), ComponentType::StaticModel);
 	auto* RealStaticModelComponent = (StaticModelSpaceComponent*) _StaticModelComponent;
 
-	EXPECT_EQ(RealStaticModelComponent->GetModelAssetId(), ModelAssetId);
+	EXPECT_EQ(RealStaticModelComponent->GetExternalResourceAssetId(), ModelAssetId);
 
 	Object->RemoveComponent(StaticModelComponentKey);
 	Object->RemoveComponent(ImageComponentKey);
@@ -1128,360 +1287,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	EXPECT_FALSE(RealComponents.HasKey(StaticModelComponentKey));
 	EXPECT_FALSE(RealComponents.HasKey(ImageComponentKey));
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// we'll be using this in a few places below as part of the test, so we declare it upfront
-	const std::string ScriptText = R"xx(
-
-         var entities = TheEntitySystem.getEntities();
-		  var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		  globalThis.onClick = (_evtName, params) => {
-		    const { id, cid } = JSON.parse(params);
-		    CSP.Log(`Clicked entityId: ${id} componentId: ${cid}`);
-		  }
-
-		  globalThis.onTick = () => {
-		    CSP.Log('Tick');
-		  }
-
-		  ThisEntity.subscribeToMessage("buttonPressed", "onClick");
-		  ThisEntity.subscribeToMessage("entityTick", "onTick");
-
-			CSP.Log('Printing to the log from a script');
-		  
-    )xx";
-
-	// Let's create a simple script and see if we can invoke it OK
-	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		const csp::common::String ObjectName  = "Object 1";
-		SpaceTransform ObjectTransform		  = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
-
-		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-		Object->GetScript()->Invoke();
-
-		const bool ScriptHasErrors = Object->GetScript()->HasError();
-		EXPECT_FALSE(ScriptHasErrors);
-
-		Object->QueueUpdate();
-
-		EntitySystem->ProcessPendingEntityOperations();
-	}
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_RUN_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, RunScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	std::atomic_bool ScriptSystemReady = false;
-
-	auto EntityCreatedCallback = [](SpaceEntity* Entity)
-	{
-		std::cerr << "EntityCreatedCallback called" << std::endl;
-	};
-
-	auto EntitiesReadyCallback = [](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "EntitiesReadyCallback called" << std::endl;
-	};
-
-	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
-		ScriptSystemReady = true;
-	};
-
-	SpaceSystem->SetEntityCreatedCallback(EntityCreatedCallback);
-	SpaceSystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-	SpaceSystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-	OnConnect();
-
-	// we'll be using this in a few places below as part of the test, so we declare it upfront
-	const std::string ScriptText = R"xx(
-
-        var entities = TheEntitySystem.getEntities();
-		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-		
-		globalThis.onTick = () => {
-            OKO.Log('onTick Called');
-			var model = entities[entityIndex].getAnimatedModelComponents()[0];
-			model.position = [10, 10, 10];
-		}
-
-		ThisEntity.subscribeToMessage("entityTick", "onTick");
-		  
-    )xx";
-
-	auto ScriptSystemIsReady = [&ScriptSystemReady]()
-	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
-		return (ScriptSystemReady == true);
-	};
-
-	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
-
-	// Create an AnimatedModelComponent and have the script update it's position
-	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		const csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		AnimatedModelSpaceComponent* AnimatedModelComponent
-			= static_cast<AnimatedModelSpaceComponent*>(Object->AddComponent(ComponentType::AnimatedModel));
-		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
-
-		Object->QueueUpdate();
-		EntitySystem->ProcessPendingEntityOperations();
-
-		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-		Object->GetScript()->Invoke();
-
-		csp::CSPFoundation::Tick();
-
-		const bool ScriptHasErrors = Object->GetScript()->HasError();
-		EXPECT_FALSE(ScriptHasErrors);
-
-		EXPECT_EQ(AnimatedModelComponent->GetPosition().X, 10.f);
-		EXPECT_EQ(AnimatedModelComponent->GetPosition().Y, 10.f);
-		EXPECT_EQ(AnimatedModelComponent->GetPosition().Z, 10.f);
-	}
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-
-#endif
-
-// Removing until we have a proper fix for https://magnopus.atlassian.net/browse/OB-329
-/*
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MODIFY_EXISTING_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ModifyExistingScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
-	// Connect to the SignalR server
-	auto [Ok] = Awaitable(&MultiplayerConnection::Connect, Connection).Await();
-	if(!Ok) { return; }
-
-	std::tie(Ok) = Awaitable(&MultiplayerConnection::InitialiseConnection, Connection).Await();
-	if(!Ok) { return; }
-
-	// we'll be using this in a few places below as part of the test, so we declare it upfront
-	const std::string ScriptText = R"xx(
-
-		 var entities = TheEntitySystem.getEntities();
-		  var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		  globalThis.onClick = (_evtName, params) => {
-			const { id, cid } = JSON.parse(params);
-			CSP.Log(`Clicked entityId: ${id} componentId: ${cid}`);
-		  }
-
-		  globalThis.onTick = () => {
-			CSP.Log('Tick');
-		  }
-
-		  ThisEntity.subscribeToMessage("buttonPressed", "onClick");
-		  ThisEntity.subscribeToMessage("entityTick", "onTick");
-
-			CSP.Log('Printing to the log from a script');
-
-	)xx";
-
-	// For our first phase of this script test, we simply an object with a script component, and assign it
-	// a valid script, tell CHS about it and then bail out of the connection
-	{
-		const csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object] = Awaitable(&SpaceEntitySystem::CreateObject, EntitySystem, ObjectName, ObjectTransform).Await();
-		ScriptSpaceComponent* ScriptComponent	 = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
-
-		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-		Object->QueueUpdate();
-
-		EntitySystem->ProcessPendingEntityOperations();
-	}
-
-	// Disconnect from the SignalR server
-	std::tie(Ok) = Awaitable(&MultiplayerConnection::Disconnect, Connection).Await();
-	if(!Ok) { return; }
-
-	// Delete MultiplayerConnection
+	AWAIT(Connection, Disconnect);
 	delete Connection;
 
-	//------------------------------------------------------------
-	// For our second phase of the test, we attempt to take an entity that already exists (we created it in phase 1), modify the script source and
-	// re-invoke the script
-
-	// Re-form the connection for the second phase of this test
-	Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	bool EntityHasBeenRecreated = false;
-	// we're gonna wanna wait till the entity is created before we can do our test
-	EntitySystem->SetEntityCreatedCallback(
-	[&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* Object)
-	{
-		EntityHasBeenRecreated = true;
-	});
-
-	// Connect to the SignalR server
-	auto [Ok2] = Awaitable(&MultiplayerConnection::Connect, Connection).Await();
-	if(!Ok2) { return; }
-
-	std::tie(Ok2) = Awaitable(&MultiplayerConnection::InitialiseConnection, Connection).Await();
-	if(!Ok2) { return; }
-
-	// spin till we recreate the entity from phase 1 locally, having received it back from CHS
-	while(EntityHasBeenRecreated == false) {}
-
-	// interesting part of phase 2 begins!
-	{
-		csp::multiplayer::SpaceEntity* Object = EntitySystem->GetEntityByIndex(0);
-		// grab the script component we created in phase 1 (we should make this kind of thing easier)
-		const csp::common::Array<ComponentBase*>& Components = *Object->GetComponents()->Values();
-		ScriptSpaceComponent* ScriptComponent = nullptr;
-		for(size_t i = 0; Components.Size(); i++)
-		{
-			if(Components[i]->GetComponentType() == csp::multiplayer::ComponentType::ScriptData)
-			{
-				ScriptComponent = dynamic_cast<ScriptSpaceComponent*>(Components[i]);
-				break;
-			}
-		}
-
-		// phew! now we have that we can attempt to modify script source again and re-invoke - this is the part that we really want to test
-		// can we successfully modify a pre-existing script, and re-invoke it without script errors?
-		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-		Object->GetScript()->Invoke();
-
-		const bool ScriptHasErrors = Object->GetScript()->HasError();
-		EXPECT_FALSE(ScriptHasErrors);
-	}
-
-	// Disconnect from the SignalR server
-	std::tie(Ok2) = Awaitable(&MultiplayerConnection::Disconnect, Connection).Await();
-	if(!Ok2) { return; }
-
-	// Delete MultiplayerConnection
-	delete Connection;
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1490,7 +1299,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ModifyExistingScriptTest)
 	LogOut(UserSystem);
 }
 #endif
-*/
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_NETWORKEVENT_EMPTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
@@ -1521,10 +1330,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	Connection->ListenNetworkEvent("TestEvent",
 								   [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -1572,7 +1401,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 		WaitForTestTimeoutCountMs += 50;
 	}
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1613,10 +1445,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 
 	InitialiseTestingConnection();
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	Connection->ListenNetworkEvent("MultiTypeEvent",
 								   [](bool ok, csp::common::Array<ReplicatedValue> Data)
@@ -1675,7 +1527,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 		WaitForTestTimeoutCountMs += 50;
 	}
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1687,6 +1542,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 
 #if RUN_MULTIPLAYER_INTERACTIVEMOVEMENT_TEST
 	#include <conio.h>
+	#include <CSP/Multiplayer/Components/LightSpaceComponent.h>
 
 csp::multiplayer::MultiplayerConnection* Connection;
 
@@ -1875,184 +1731,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 }
 #endif
 
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AVATAR_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	csp::common::String UserName = "Player 1";
-	SpaceTransform UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState		  = AvatarState::Idle;
-	csp::common::String UserAvatarId  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-	EXPECT_EQ(Avatar->GetName(), UserName);
-	// TODO: Verify these values
-	/*EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
-	EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);*/
-
-	std::string AvatarScriptText = R"xx(
-
-        import * as CSP from "CSP";
-
-        CSP.Log("Entering AvatarScriptTest Script");
-
-        var avatars = TheEntitySystem.getAvatars();
-
-        for (let i=0; i<avatars.length; ++i)
-        {
-            CSP.Log(JSON.stringify(avatars[i].name));
-            CSP.Log(JSON.stringify(avatars[i].id));
-            CSP.Log(JSON.stringify(avatars[i].position));
-            CSP.Log(JSON.stringify(avatars[i].rotation));
-            CSP.Log(JSON.stringify(avatars[i].scale));
-        }
-
-        avatars[0].position = [3, 2, 5];
-        CSP.Log(JSON.stringify(avatars[0].position));
-
-    )xx";
-
-	Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-	Avatar->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	auto& Components = *Avatar->GetComponents();
-
-	EXPECT_EQ(Components.Size(), 2);
-
-	auto* Component = Components[0];
-
-	EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
-
-	auto* ScriptComponent = Components[1];
-
-	EXPECT_EQ(ScriptComponent->GetComponentType(), ComponentType::ScriptData);
-
-	// Delete MultiplayerConnection
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SCRIPT_LOG_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ScriptLogTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	csp::common::String UserName = "Player 1";
-	SpaceTransform UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState		  = AvatarState::Idle;
-	csp::common::String UserAvatarId  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-	EXPECT_EQ(Avatar->GetName(), UserName);
-
-	std::string AvatarScriptText = R"xx(
-
-        import * as CSP from "CSP";
-
-        CSP.Log("Testing CSP.Log");
-
-    )xx";
-
-	Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-	Avatar->GetScript()->Invoke();
-
-	std::string AvatarOKOScriptText = R"xx(
-
-        import * as OKO from "OKO";
-
-        OKO.Log("Testing OKO.Log");
-
-    )xx";
-
-	Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
-	Avatar->GetScript()->Invoke();
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
 #if RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
@@ -2161,286 +1839,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_USE_PORTAL_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UsePortalTest)
-{
-	SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	csp::systems::Space Space2;
-	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription2, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space2);
-
-	csp::common::String PortalSpaceID;
-
-	const csp::common::String UserName		= "Player 1";
-	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	const AvatarState UserAvatarState		= AvatarState::Idle;
-	const csp::common::String UserAvatarId	= "MyCoolAvatar";
-	const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	{
-
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		// Ensure we're in the first space
-		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
-
-		// Create Avatar
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-		// Create object to represent the portal
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create portal component
-		auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
-		PortalComponent->SetSpaceId(Space2.Id);
-
-		PortalSpaceID = PortalComponent->GetSpaceId();
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	/*
-		User would now interact with the portal
-	*/
-
-	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		// Create Avatar
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-	DeleteSpace(SpaceSystem, Space2.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PORTAL_SCRIPT_INTERFACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalScriptInterfaceTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the portal
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create portal component
-	auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
-
-	auto InitialPosition = csp::common::Vector3 {1.1f, 2.2f, 3.3f};
-	PortalComponent->SetSpaceId("initialTestSpaceId");
-	PortalComponent->SetIsEnabled(false);
-	PortalComponent->SetPosition(InitialPosition);
-	PortalComponent->SetRadius(123.123f);
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	EXPECT_EQ(PortalComponent->GetSpaceId(), "initialTestSpaceId");
-	EXPECT_EQ(PortalComponent->GetIsEnabled(), false);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().X, InitialPosition.X);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Y, InitialPosition.Y);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, InitialPosition.Z);
-	EXPECT_EQ(PortalComponent->GetRadius(), 123.123f);
-
-	// Setup script
-	std::string PortalScriptText = R"xx(
-		var portal = ThisEntity.getPortalComponents()[0];
-		portal.spaceId = "secondTestSpaceId";
-		portal.isEnabled = true;
-		portal.position = [4.4, 5.5, 6.6];
-		portal.radius = 456.456;
-    )xx";
-
-	CreatedObject->GetScript()->SetScriptSource(PortalScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	EXPECT_EQ(PortalComponent->GetSpaceId(), "secondTestSpaceId");
-	EXPECT_EQ(PortalComponent->GetIsEnabled(), true);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().X, 4.4f);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Y, 5.5f);
-	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, 6.6f);
-	EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
-
-	// Cleanup
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete MultiplayerConnection
-	delete Connection;
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PORTAL_THUMBNAIL_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, PortalThumbnailTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	auto FilePath = std::filesystem::absolute("assets/OKO.png");
-
-	csp::systems::FileAssetDataSource Source;
-	Source.FilePath = FilePath.string().c_str();
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, Source, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the portal
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create portal component
-	auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
-
-	// Get Thumbnail
-	bool HasThumbailResult = false;
-
-	csp::systems::UriResultCallback Callback = [&HasThumbailResult](const csp::systems::UriResult& Result)
-	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
-		{
-			HasThumbailResult = true;
-			EXPECT_TRUE(Result.GetUri() != "");
-		}
-	};
-
-	PortalComponent->SetSpaceId(Space.Id);
-	PortalComponent->GetSpaceThumbnail(Callback);
-
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
-
-	while (!HasThumbailResult && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
-	EXPECT_TRUE(HasThumbailResult);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
@@ -2470,15 +1869,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create 3 seperate objects to ensure there is too many updates for the rate limiter to process in one tick
 
@@ -2517,7 +1931,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 	csp::CSPFoundation::Tick();
 
 	// Delete MultiplayerConnection
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2551,10 +1968,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	const csp::common::String& UserName = "Player 1";
 	const SpaceTransform& UserTransform
@@ -2562,11 +1999,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 	AvatarState UserAvatarState				= AvatarState::Idle;
 	const csp::common::String& UserAvatarId = "MyCoolAvatar";
 	AvatarPlayMode UserAvatarPlayMode		= AvatarPlayMode::Default;
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
 
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
@@ -2586,2747 +2018,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 	EXPECT_FALSE(CreatedObject->IsSelected());
 
 	// Delete MultiplayerConnection
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ASSET_PROCESSED_CALLBACK_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessedCallbackTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Setup Asset callback
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	auto AssetDetailBlobChangedCallback
-		= [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
-	{
-		if (AssetDetailBlobChangedCallbackCalled)
-		{
-			return;
-		}
-
-		EXPECT_EQ(Params.ChangeType, EAssetChangeType::Created);
-		EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
-
-		CallbackAssetId						 = Params.AssetId;
-		AssetDetailBlobChangedCallbackCalled = true;
-	};
-
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
-
-	// Create asset collection
-	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-	// Create asset
-	csp::systems::Asset Asset;
-	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-
-	// Upload data
-	auto FilePath = std::filesystem::absolute("assets/test.json");
-	csp::systems::FileAssetDataSource Source;
-	Source.FilePath = FilePath.u8string().c_str();
-
-	Source.SetMimeType("application/json");
-
-	csp::common::String Uri;
-	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
-
-	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
-	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
-	EXPECT_EQ(CallbackAssetId, Asset.Id);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ASSET_PROCESS_GRACEFUL_FAILURE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AssetProcessGracefulFailureCallbackTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Setup Asset callback
-	bool AssetDetailBlobChangedCallbackCalled = false;
-
-	auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
-	{
-		if (AssetDetailBlobChangedCallbackCalled)
-		{
-			return;
-		}
-
-		EXPECT_EQ(Params.ChangeType, EAssetChangeType::Invalid);
-		EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::IMAGE);
-
-		AssetDetailBlobChangedCallbackCalled = true;
-	};
-
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
-
-	ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
-	ReplicatedValue Param2 = "";
-	ReplicatedValue Param3 = "";
-	ReplicatedValue Param4 = "";
-	ReplicatedValue Param5 = "";
-
-	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
-										 {Param1, Param2, Param3, Param4, Param5},
-										 Connection->GetClientId(),
-										 [](bool ok)
-										 {
-											 EXPECT_TRUE(ok);
-										 });
-
-	// Wait for message
-	auto Start	   = std::chrono::steady_clock::now();
-	auto Current   = std::chrono::steady_clock::now();
-	float TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
-	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	const std::string ScriptText = R"xx(
-		
-        var entities = TheEntitySystem.getEntities();
-		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		globalThis.onTick = () => {
-			var entity = entities[entityIndex];
-			entity.position = [10, 10, 10];
-		}
- 
-		ThisEntity.subscribeToMessage("entityTick", "onTick");
-		  
-    )xx";
-
-	// Create object
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create script
-	auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
-	ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-	CreatedObject->GetScript()->Invoke();
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Ensure position is set to 0
-	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
-
-	// Delete script component
-	CreatedObject->RemoveComponent(ScriptComponent->GetId());
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Tick to attempt to call scripts tick event
-	csp::CSPFoundation::Tick();
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Ensure position is still set to 0
-	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_AND_CHANGE_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteAndChangeComponentTest)
-{
-	// Test for: OB-864
-	// Second script deletion test adds a second component to the object with the script
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	const std::string ScriptText = R"xx(
-		
-        var entities = TheEntitySystem.getEntities();
-		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		globalThis.onTick = () => {
-			var entity = entities[entityIndex];
-			entity.position = [10, 10, 10];
-		}
- 
-		ThisEntity.subscribeToMessage("entityTick", "onTick");
-		  
-    )xx";
-
-	// Create object
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create animated model component
-	auto* AnimatedComponent = static_cast<AnimatedModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
-
-	// Create script
-	auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
-	ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-	CreatedObject->GetScript()->Invoke();
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Make a component update
-	AnimatedComponent->SetPosition(csp::common::Vector3::One());
-
-	// Delete script component
-	CreatedObject->RemoveComponent(ScriptComponent->GetId());
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Ensure entity update doesn't crash
-	csp::CSPFoundation::Tick();
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ADD_SECOND_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AddSecondScriptTest)
-{
-	// Test for OB-1407
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	std::atomic_bool ScriptSystemReady = false;
-
-	auto EntityCreatedCallback = [](SpaceEntity* Entity)
-	{
-		std::cerr << "EntityCreatedCallback called" << std::endl;
-	};
-
-	auto EntitiesReadyCallback = [](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "EntitiesReadyCallback called" << std::endl;
-	};
-
-	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
-		ScriptSystemReady = true;
-	};
-
-	SpaceSystem->SetEntityCreatedCallback(EntityCreatedCallback);
-	SpaceSystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-	SpaceSystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-	OnConnect();
-
-	const std::string ScriptText = R"xx(
-		
-        var entities = TheEntitySystem.getEntities();
-		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-
-		globalThis.onTick = () => {
-			var entity = entities[entityIndex];
-			entity.position = [1, 1, 1];
-		}
- 
-		ThisEntity.subscribeToMessage("entityTick", "onTick");
-		  
-    )xx";
-
-	auto ScriptSystemIsReady = [&ScriptSystemReady]()
-	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
-		return (ScriptSystemReady == true);
-	};
-
-	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
-
-	// Create object
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	bool PatchPending = true;
-	CreatedObject->SetPatchSentCallback(
-		[&PatchPending](bool ok)
-		{
-			PatchPending = false;
-		});
-
-	// Create script
-	auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
-	ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-	CreatedObject->GetScript()->Invoke();
-
-	CreatedObject->QueueUpdate();
-
-	while (PatchPending)
-	{
-		EntitySystem->ProcessPendingEntityOperations();
-		std::this_thread::sleep_for(10ms);
-	}
-
-	PatchPending = true;
-
-	// Delete script component
-	CreatedObject->RemoveComponent(ScriptComponent->GetId());
-
-	CreatedObject->QueueUpdate();
-
-	while (PatchPending)
-	{
-		EntitySystem->ProcessPendingEntityOperations();
-		std::this_thread::sleep_for(10ms);
-	}
-
-	PatchPending = true;
-
-	// Ensure position is set to 0
-	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
-
-	// Re-add script component
-	ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
-	ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-	CreatedObject->GetScript()->Invoke();
-
-	CreatedObject->QueueUpdate();
-
-	while (PatchPending)
-	{
-		EntitySystem->ProcessPendingEntityOperations();
-		csp::CSPFoundation::Tick();
-		std::this_thread::sleep_for(10ms);
-	}
-
-	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::One());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONVERSATION_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConversationComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	const csp::common::String UserName		= "Player 1";
-	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	const AvatarState UserAvatarState		= AvatarState::Idle;
-	const csp::common::String UserAvatarId	= "MyCoolAvatar";
-	const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	{
-
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		// Ensure we're in the first space
-		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
-
-		// Create Avatar
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-		// Create object to represent the conversation
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create conversation component
-		auto* ConversationComponent = (ConversationSpaceComponent*) CreatedObject->AddComponent(ComponentType::Conversation);
-
-		EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
-		EXPECT_EQ(ConversationComponent->GetIsActive(), true);
-
-		ConversationComponent->SetIsActive(false);
-		ConversationComponent->SetIsVisible(false);
-
-		EXPECT_EQ(ConversationComponent->GetIsVisible(), false);
-		EXPECT_EQ(ConversationComponent->GetIsActive(), false);
-
-		SpaceTransform DefaultTransform = SpaceTransform();
-
-		EXPECT_EQ(ConversationComponent->GetPosition().X, DefaultTransform.Position.X);
-		EXPECT_EQ(ConversationComponent->GetPosition().Y, DefaultTransform.Position.Y);
-		EXPECT_EQ(ConversationComponent->GetPosition().Z, DefaultTransform.Position.Z);
-
-		csp::common::Vector3 NewPosition(1, 2, 3);
-		ConversationComponent->SetPosition(NewPosition);
-
-		EXPECT_EQ(ConversationComponent->GetPosition().X, NewPosition.X);
-		EXPECT_EQ(ConversationComponent->GetPosition().Y, NewPosition.Y);
-		EXPECT_EQ(ConversationComponent->GetPosition().Z, NewPosition.Z);
-
-		EXPECT_EQ(ConversationComponent->GetRotation().W, DefaultTransform.Rotation.W);
-		EXPECT_EQ(ConversationComponent->GetRotation().X, DefaultTransform.Rotation.X);
-		EXPECT_EQ(ConversationComponent->GetRotation().Y, DefaultTransform.Rotation.Y);
-		EXPECT_EQ(ConversationComponent->GetRotation().Z, DefaultTransform.Rotation.Z);
-
-		csp::common::Vector4 NewRotation(4, 5, 6, 7);
-		ConversationComponent->SetRotation(NewRotation);
-
-		EXPECT_EQ(ConversationComponent->GetRotation().W, NewRotation.W);
-		EXPECT_EQ(ConversationComponent->GetRotation().X, NewRotation.X);
-		EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
-		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
-
-		EXPECT_EQ(ConversationComponent->GetTitle(), "");
-		EXPECT_EQ(ConversationComponent->GetDate(), "");
-		EXPECT_EQ(ConversationComponent->GetNumberOfReplies(), 0);
-
-		ConversationComponent->SetTitle("TestTitle");
-		ConversationComponent->SetDate("02-01-1972");
-		ConversationComponent->SetNumberOfReplies(2);
-
-		EXPECT_EQ(ConversationComponent->GetTitle(), "TestTitle");
-		EXPECT_EQ(ConversationComponent->GetDate(), "02-01-1972");
-		EXPECT_EQ(ConversationComponent->GetNumberOfReplies(), 2);
-
-		csp::common::String ConversationId;
-		csp::common::String MessageId;
-		{
-			auto [Result] = AWAIT(ConversationComponent, CreateConversation, "TestMessage");
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_TRUE(Result.GetValue() != "");
-			ConversationId = Result.GetValue();
-		}
-
-		{
-			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "Test");
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			MessageId = Result.GetMessageInfo().Id;
-			EXPECT_EQ(Result.GetMessageInfo().Edited, false);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent, GetMessageInfo, MessageId);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetMessageInfo().Edited, false);
-		}
-
-		{
-			MessageInfo NewData = MessageInfo();
-			NewData.Message		= "NewTest";
-			auto [Result]		= AWAIT(ConversationComponent, SetMessageInfo, MessageId, NewData);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetMessageInfo().Edited, true);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent, GetConversationInfo);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-			EXPECT_FALSE(Result.GetConversationInfo().Edited);
-			EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultTransform.Position.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultTransform.Position.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultTransform.Position.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultTransform.Rotation.W);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultTransform.Rotation.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultTransform.Rotation.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultTransform.Rotation.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultTransform.Scale.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultTransform.Scale.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultTransform.Scale.Z);
-		}
-
-		{
-			ConversationInfo NewData = ConversationInfo();
-			SpaceTransform CameraTransformValue
-				= SpaceTransform(csp::common::Vector3().One(), csp::common::Vector4().One(), csp::common::Vector3().One());
-			NewData.Resolved	   = true;
-			NewData.CameraPosition = CameraTransformValue;
-			NewData.Message		   = "TestMessage1";
-
-			auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, NewData);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage1");
-			EXPECT_TRUE(Result.GetConversationInfo().Edited);
-			EXPECT_TRUE(Result.GetConversationInfo().Resolved);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, CameraTransformValue.Position.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, CameraTransformValue.Position.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, CameraTransformValue.Position.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, CameraTransformValue.Rotation.W);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, CameraTransformValue.Rotation.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, CameraTransformValue.Rotation.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, CameraTransformValue.Rotation.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, CameraTransformValue.Scale.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, CameraTransformValue.Scale.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, CameraTransformValue.Scale.Z);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage1");
-		}
-
-		auto TestMessage = "test123";
-		Connection->ListenNetworkEvent("ConversationSystem:NewMessage",
-									   [=](bool ok, csp::common::Array<ReplicatedValue> Data)
-									   {
-										   EXPECT_TRUE(ok);
-										   ConversationId == Data[0].GetString();
-										   std::cerr << "Test Event Received " << ok << std::endl;
-									   });
-
-		{
-			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			MessageId = Result.GetMessageInfo().Id;
-		}
-		{
-			auto [Result] = AWAIT(ConversationComponent, GetAllMessages);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetTotalCount(), 2);
-
-			EXPECT_EQ(Result.GetMessages()[0].Id, MessageId);
-		}
-		{
-			auto [Result] = AWAIT(ConversationComponent, GetMessage, MessageId);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetMessageInfo().Id, MessageId);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent, DeleteMessage, MessageId);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent, DeleteConversation);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-		}
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONVERSATION_COMPONENT_MOVE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConversationComponentMoveTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	{
-
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		// Ensure we're in the first space
-		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
-
-		// Create Avatar
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		csp::common::String ObjectName1 = "Object 1";
-		csp::common::String ObjectName2 = "Object 2";
-
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-		auto [CreatedObject1] = AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
-		auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
-
-		// Create conversation component
-		auto* ConversationComponent1 = (ConversationSpaceComponent*) CreatedObject1->AddComponent(ComponentType::Conversation);
-		auto* ConversationComponent2 = (ConversationSpaceComponent*) CreatedObject2->AddComponent(ComponentType::Conversation);
-
-
-		csp::common::String ConversationId;
-		csp::common::String MessageId;
-		{
-			auto [Result] = AWAIT(ConversationComponent1, CreateConversation, "TestMessage");
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_TRUE(Result.GetValue() != "");
-			ConversationId = Result.GetValue();
-		}
-
-		SpaceTransform DefaultTransform = SpaceTransform();
-
-		{
-			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-			EXPECT_FALSE(Result.GetConversationInfo().Edited);
-			EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultTransform.Position.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultTransform.Position.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultTransform.Position.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultTransform.Rotation.W);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultTransform.Rotation.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultTransform.Rotation.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultTransform.Rotation.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultTransform.Scale.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultTransform.Scale.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultTransform.Scale.Z);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
-		}
-
-		{
-			auto Result = ConversationComponent2->MoveConversationFromComponent(*ConversationComponent1);
-			EXPECT_TRUE(Result);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-			EXPECT_FALSE(Result.GetConversationInfo().Edited);
-			EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultTransform.Position.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultTransform.Position.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultTransform.Position.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultTransform.Rotation.W);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultTransform.Rotation.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultTransform.Rotation.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultTransform.Rotation.Z);
-
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultTransform.Scale.X);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultTransform.Scale.Y);
-			EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultTransform.Scale.Z);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, DeleteConversation);
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-		}
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONVERSATION_COMPONENT_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConversationComponentScriptTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		// Create object to represent the conversation
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create conversation component
-		auto* ConversationComponent = (ConversationSpaceComponent*) CreatedObject->AddComponent(ComponentType::Conversation);
-
-		SpaceTransform DefaultTransform = SpaceTransform();
-
-		EXPECT_EQ(ConversationComponent->GetIsVisible(), true);
-		EXPECT_EQ(ConversationComponent->GetIsActive(), true);
-
-		EXPECT_EQ(ConversationComponent->GetPosition().X, DefaultTransform.Position.X);
-		EXPECT_EQ(ConversationComponent->GetPosition().Y, DefaultTransform.Position.Y);
-		EXPECT_EQ(ConversationComponent->GetPosition().Z, DefaultTransform.Position.Z);
-
-		EXPECT_EQ(ConversationComponent->GetRotation().W, DefaultTransform.Rotation.W);
-		EXPECT_EQ(ConversationComponent->GetRotation().X, DefaultTransform.Rotation.X);
-		EXPECT_EQ(ConversationComponent->GetRotation().Y, DefaultTransform.Rotation.Y);
-		EXPECT_EQ(ConversationComponent->GetRotation().Z, DefaultTransform.Rotation.Z);
-
-		CreatedObject->QueueUpdate();
-		EntitySystem->ProcessPendingEntityOperations();
-
-		// Setup script
-		std::string ConversationScriptText = R"xx(
-			var conversation = ThisEntity.getConversationComponents()[0];
-			conversation.isVisible = false;
-			conversation.isActive = false;
-			conversation.position = [1,2,3];
-			conversation.rotation = [4,5,6,7];
-		)xx";
-
-		CreatedObject->GetScript()->SetScriptSource(ConversationScriptText.c_str());
-		CreatedObject->GetScript()->Invoke();
-
-		EntitySystem->ProcessPendingEntityOperations();
-
-		EXPECT_FALSE(ConversationComponent->GetIsVisible());
-		EXPECT_FALSE(ConversationComponent->GetIsActive());
-
-		csp::common::Vector3 NewPosition(1, 2, 3);
-		EXPECT_EQ(ConversationComponent->GetPosition().X, NewPosition.X);
-		EXPECT_EQ(ConversationComponent->GetPosition().Y, NewPosition.Y);
-		EXPECT_EQ(ConversationComponent->GetPosition().Z, NewPosition.Z);
-
-		csp::common::Vector4 NewRotation(4, 5, 6, 7);
-		EXPECT_EQ(ConversationComponent->GetRotation().W, NewRotation.W);
-		EXPECT_EQ(ConversationComponent->GetRotation().X, NewRotation.X);
-		EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
-		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
-	};
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AUDIO_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AudioComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the audio
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create audio component
-	auto* AudioComponent = static_cast<AudioSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Audio));
-
-	// Ensure defaults are set
-	EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Reset);
-	EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Global);
-	EXPECT_EQ(AudioComponent->GetAudioAssetId(), "");
-	EXPECT_EQ(AudioComponent->GetAssetCollectionId(), "");
-	EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 10.f);
-	EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), false);
-	EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 0.f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
-	EXPECT_EQ(AudioComponent->GetIsEnabled(), true);
-
-	// Set new values
-	csp::common::String AssetId			  = "TEST_ASSET_ID";
-	csp::common::String AssetCollectionId = "TEST_COLLECTION_ID";
-
-	AudioComponent->SetPosition(csp::common::Vector3::One());
-	AudioComponent->SetPlaybackState(AudioPlaybackState::Play);
-	AudioComponent->SetAudioType(AudioType::Spatial);
-	AudioComponent->SetAudioAssetId(AssetId);
-	AudioComponent->SetAssetCollectionId(AssetCollectionId);
-	AudioComponent->SetAttenuationRadius(100.f);
-	AudioComponent->SetIsLoopPlayback(true);
-	AudioComponent->SetTimeSincePlay(1.f);
-	AudioComponent->SetVolume(0.5f);
-	AudioComponent->SetIsEnabled(false);
-
-	// Ensure values are set correctly
-	EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Play);
-	EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Spatial);
-	EXPECT_EQ(AudioComponent->GetAudioAssetId(), AssetId);
-	EXPECT_EQ(AudioComponent->GetAssetCollectionId(), AssetCollectionId);
-	EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 100.f);
-	EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), true);
-	EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 1.f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
-	EXPECT_EQ(AudioComponent->GetIsEnabled(), false);
-
-	// Test invalid volume values
-	AudioComponent->SetVolume(1.5f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
-	AudioComponent->SetVolume(-2.5f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.5f);
-
-	// Test boundary volume values
-	AudioComponent->SetVolume(1.f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
-	AudioComponent->SetVolume(0.f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_VIDEO_PLAYER_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, VideoPlayerComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the audio
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create audio component
-	auto* VideoComponent = static_cast<VideoPlayerSpaceComponent*>(CreatedObject->AddComponent(ComponentType::VideoPlayer));
-
-	// Ensure defaults are set
-	EXPECT_EQ(VideoComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(VideoComponent->GetPlaybackState(), VideoPlayerPlaybackState::Reset);
-	EXPECT_EQ(VideoComponent->GetVideoAssetURL(), "");
-	EXPECT_EQ(VideoComponent->GetAssetCollectionId(), "");
-	EXPECT_EQ(VideoComponent->GetAttenuationRadius(), 10.f);
-	EXPECT_EQ(VideoComponent->GetIsLoopPlayback(), false);
-	EXPECT_EQ(VideoComponent->GetTimeSincePlay(), 0.f);
-	EXPECT_EQ(VideoComponent->GetIsStateShared(), false);
-	EXPECT_EQ(VideoComponent->GetIsAutoPlay(), false);
-	EXPECT_EQ(VideoComponent->GetIsAutoResize(), false);
-	EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 0.0f);
-	EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::AssetSource);
-	EXPECT_EQ(VideoComponent->GetIsVisible(), true);
-	EXPECT_EQ(VideoComponent->GetMeshComponentId(), 0);
-
-	auto* ModelComponent = static_cast<VideoPlayerSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Set new values
-	csp::common::String AssetId			  = "TEST_ASSET_ID";
-	csp::common::String AssetCollectionId = "TEST_COLLECTION_ID";
-
-	VideoComponent->SetPosition(csp::common::Vector3::One());
-	VideoComponent->SetPlaybackState(VideoPlayerPlaybackState::Play);
-	VideoComponent->SetVideoAssetURL("http://youtube.com/avideo");
-	VideoComponent->SetAssetCollectionId(AssetId);
-	VideoComponent->SetAttenuationRadius(100.f);
-	VideoComponent->SetIsLoopPlayback(true);
-	VideoComponent->SetTimeSincePlay(1.f);
-	VideoComponent->SetIsStateShared(true);
-	VideoComponent->SetIsAutoPlay(true);
-	VideoComponent->SetIsAutoResize(true);
-	VideoComponent->SetCurrentPlayheadPosition(1.0f);
-	VideoComponent->SetVideoPlayerSourceType(VideoPlayerSourceType::URLSource);
-	VideoComponent->SetIsVisible(false);
-	VideoComponent->SetMeshComponentId(ModelComponent->GetId());
-
-	// Ensure values are set correctly
-	EXPECT_EQ(VideoComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(VideoComponent->GetPlaybackState(), VideoPlayerPlaybackState::Play);
-	EXPECT_EQ(VideoComponent->GetVideoAssetURL(), "http://youtube.com/avideo");
-	EXPECT_EQ(VideoComponent->GetAssetCollectionId(), AssetId);
-	EXPECT_EQ(VideoComponent->GetAttenuationRadius(), 100.f);
-	EXPECT_EQ(VideoComponent->GetIsLoopPlayback(), true);
-	EXPECT_EQ(VideoComponent->GetTimeSincePlay(), 1.f);
-	EXPECT_EQ(VideoComponent->GetIsStateShared(), true);
-	EXPECT_EQ(VideoComponent->GetIsAutoPlay(), true);
-	EXPECT_EQ(VideoComponent->GetIsAutoResize(), true);
-	EXPECT_EQ(VideoComponent->GetCurrentPlayheadPosition(), 1.0f);
-	EXPECT_EQ(VideoComponent->GetVideoPlayerSourceType(), VideoPlayerSourceType::URLSource);
-	EXPECT_EQ(VideoComponent->GetIsVisible(), false);
-	EXPECT_EQ(VideoComponent->GetMeshComponentId(), ModelComponent->GetId());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_COLLISION_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CollisionComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the audio
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create collision component
-	auto* CollisionComponent = static_cast<CollisionSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Collision));
-
-	// Ensure defaults are set
-	EXPECT_EQ(CollisionComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(CollisionComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-	EXPECT_EQ(CollisionComponent->GetScale(), csp::common::Vector3::One());
-	EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-	EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-	EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-	EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-	EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Collision);
-	EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Box);
-	EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "");
-	EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "");
-
-	// Set new values
-
-	CollisionComponent->SetPosition(csp::common::Vector3::One());
-	CollisionComponent->SetScale(csp::common::Vector3(2, 2, 2));
-	CollisionComponent->SetCollisionMode(csp::multiplayer::CollisionMode::Trigger);
-	CollisionComponent->SetCollisionShape(csp::multiplayer::CollisionShape::Mesh);
-	CollisionComponent->SetCollisionAssetId("TestAssetID");
-	CollisionComponent->SetAssetCollectionId("TestAssetCollectionID");
-
-	// Ensure values are set correctly
-	EXPECT_EQ(CollisionComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(CollisionComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMin(), csp::common::Vector3(-0.5, -0.5, -0.5));
-	EXPECT_EQ(CollisionComponent->GetUnscaledBoundingBoxMax(), csp::common::Vector3(0.5, 0.5, 0.5));
-	EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMin(), csp::common::Vector3(-1, -1, -1));
-	EXPECT_EQ(CollisionComponent->GetScaledBoundingBoxMax(), csp::common::Vector3(1, 1, 1));
-	EXPECT_EQ(CollisionComponent->GetCollisionMode(), csp::multiplayer::CollisionMode::Trigger);
-	EXPECT_EQ(CollisionComponent->GetCollisionShape(), csp::multiplayer::CollisionShape::Mesh);
-	EXPECT_EQ(CollisionComponent->GetCollisionAssetId(), "TestAssetID");
-	EXPECT_EQ(CollisionComponent->GetAssetCollectionId(), "TestAssetCollectionID");
-
-	const float DefaultSphereRadius		 = CollisionSpaceComponent::GetDefaultSphereRadius();
-	const float DefaultCapsuleHalfWidth	 = CollisionSpaceComponent::GetDefaultCapsuleHalfWidth();
-	const float DefaultCapsuleHalfHeight = CollisionSpaceComponent::GetDefaultCapsuleHalfHeight();
-
-	EXPECT_EQ(DefaultSphereRadius, 0.5f);
-	EXPECT_EQ(DefaultCapsuleHalfWidth, 0.5f);
-	EXPECT_EQ(DefaultCapsuleHalfHeight, 1.0f);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AUDIO_SCRIPT_INTERFACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AudioScriptInterfaceTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the audio
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create audio component
-	auto* AudioComponent = (AudioSpaceComponent*) CreatedObject->AddComponent(ComponentType::Audio);
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Setup script
-	std::string AudioScriptText = R"xx(
-	
-		const assetId			= "TEST_ASSET_ID";
-		const assetCollectionId = "TEST_COLLECTION_ID";
-
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.position = [1,1,1];
-		audio.playbackState = 2;
-		audio.audioType = 1;
-		audio.audioAssetId = assetId;
-		audio.assetCollectionId = assetCollectionId;
-		audio.attenuationRadius = 100;
-		audio.isLoopPlayback = true;
-		audio.timeSincePlay = 1;
-		audio.volume = 0.75;
-    )xx";
-
-	CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Ensure values are set correctly
-	csp::common::String AssetId			  = "TEST_ASSET_ID";
-	csp::common::String AssetCollectionId = "TEST_COLLECTION_ID";
-
-	EXPECT_EQ(AudioComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(AudioComponent->GetPlaybackState(), AudioPlaybackState::Play);
-	EXPECT_EQ(AudioComponent->GetAudioType(), AudioType::Spatial);
-	EXPECT_EQ(AudioComponent->GetAudioAssetId(), AssetId);
-	EXPECT_EQ(AudioComponent->GetAssetCollectionId(), AssetCollectionId);
-	EXPECT_EQ(AudioComponent->GetAttenuationRadius(), 100.f);
-	EXPECT_EQ(AudioComponent->GetIsLoopPlayback(), true);
-	EXPECT_EQ(AudioComponent->GetTimeSincePlay(), 1.f);
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
-
-	// Test invalid volume values
-	AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 1.75;
-    )xx";
-	CreatedObject->GetScript()->Invoke();
-	EntitySystem->ProcessPendingEntityOperations();
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
-
-	AudioScriptText = R"xx(M
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = -2.75;
-    )xx";
-	CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-	EntitySystem->ProcessPendingEntityOperations();
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
-
-	// Test boundary volume values
-	AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 1.0;
-    )xx";
-	CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-	EntitySystem->ProcessPendingEntityOperations();
-	EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
-
-	AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 0.0;
-    )xx";
-	CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-	EntitySystem->ProcessPendingEntityOperations();
-	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_USE_SPLINE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UseSplineTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	const csp::common::String UserName		= "Player 1";
-	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	const AvatarState UserAvatarState		= AvatarState::Idle;
-	const csp::common::String UserAvatarId	= "MyCoolAvatar";
-	const AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	{
-
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		// Ensure we're in the first space
-		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
-
-		// Create object to represent the spline
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create spline component
-		auto* SplineComponent							  = (SplineSpaceComponent*) CreatedObject->AddComponent(ComponentType::Spline);
-		csp::common::List<csp::common::Vector3> WayPoints = {{0, 0, 0}, {0, 1000, 0}, {0, 2000, 0}, {0, 3000, 0}, {0, 4000, 0}, {0, 5000, 0}};
-
-		{
-			auto Result = SplineComponent->GetWaypoints();
-
-			EXPECT_EQ(Result.Size(), 0);
-		}
-
-		{
-			auto Result = SplineComponent->GetLocationAlongSpline(1);
-			EXPECT_EQ(Result.X, 0);
-			EXPECT_EQ(Result.Y, 0);
-			EXPECT_EQ(Result.Z, 0);
-		}
-
-		{
-			SplineComponent->SetWaypoints(WayPoints);
-
-			auto Result = SplineComponent->GetWaypoints();
-
-			EXPECT_EQ(Result.Size(), WayPoints.Size());
-
-			// expect final waypoint to be the same
-			EXPECT_EQ(Result[0], WayPoints[0]);
-		}
-
-		{
-			// Calculated cubic interpolate spline
-			auto Result = SplineComponent->GetLocationAlongSpline(1);
-
-			// expect final waypoint to be the same
-			EXPECT_EQ(Result, WayPoints[WayPoints.Size() - 1]);
-		}
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SPLINE_SCRIPT_INTERFACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SplineScriptInterfaceTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the spline
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create spline component
-	auto* SplineComponent							  = (SplineSpaceComponent*) CreatedObject->AddComponent(ComponentType::Spline);
-	csp::common::List<csp::common::Vector3> WayPoints = {{0, 0, 0}, {0, 1000, 0}, {0, 2000, 0}, {0, 3000, 0}, {0, 4000, 0}, {0, 5000, 0}};
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Setup script
-	const std::string SplineScriptText = R"xx(
-	
-		var spline = ThisEntity.getSplineComponents()[0];
-		
-		var waypoints = [[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
-		spline.setWaypoints(waypoints);
-		var positionResult = spline.getLocationAlongSpline(1);
-		
-    )xx";
-
-	CreatedObject->GetScript()->SetScriptSource(SplineScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	EXPECT_EQ(SplineComponent->GetWaypoints().Size(), WayPoints.Size());
-
-	// expect final waypoint to be the same
-	EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SCRIPT_DELTA_TIME_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ScriptDeltaTimeTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	const std::string ScriptText = R"xx(
-
-        var entities = TheEntitySystem.getEntities();
-		var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
-		
-		globalThis.onTick = (_evtName, params) => {
-			 const { deltaTimeMS } = JSON.parse(params);
-			 CSP.Log(_evtName);
-			 CSP.Log(deltaTimeMS);
-		}
-
-		ThisEntity.subscribeToMessage("entityTick", "onTick");
-		  
-    )xx";
-
-	{
-		const csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
-
-		Object->QueueUpdate();
-		EntitySystem->ProcessPendingEntityOperations();
-
-		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
-		Object->GetScript()->Invoke();
-
-		csp::CSPFoundation::Tick();
-
-		const bool ScriptHasErrors = Object->GetScript()->HasError();
-		EXPECT_FALSE(ScriptHasErrors);
-	}
-
-	// Delete MultiplayerConnection
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-
-#endif
-
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LIGHT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentFieldsTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	const csp::common::String ModelAssetId = "NotARealId";
-
-	auto* LightSpaceComponentInstance = (LightSpaceComponent*) Object->AddComponent(ComponentType::Light);
-
-	// Process component creation
-	Object->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Check component was created
-	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-
-	// Create asset collection
-	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-	// Create asset
-	csp::systems::Asset Asset;
-	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-	Asset.FileName = "OKO.png";
-	Asset.Name	   = "OKO";
-	Asset.Type	   = csp::systems::EAssetType::IMAGE;
-
-	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
-	FILE* UploadFile		 = fopen(UploadFilePath.string().c_str(), "rb");
-	uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-	auto* UploadFileData	 = new unsigned char[UploadFileSize];
-	fread(UploadFileData, UploadFileSize, 1, UploadFile);
-	fclose(UploadFile);
-
-	csp::systems::BufferAssetDataSource BufferSource;
-	BufferSource.Buffer		  = UploadFileData;
-	BufferSource.BufferLength = UploadFileSize;
-
-	BufferSource.SetMimeType("image/png");
-
-	printf("Uploading asset data...\n");
-
-	// Upload data
-	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-	delete[] UploadFileData;
-
-	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
-	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
-
-	// test values
-	const float InnerConeAngle = 10.0f;
-	const float OuterConeAngle = 20.0f;
-	const float Range		   = 120.0f;
-	const float Intensity	   = 1000.0f;
-
-	LightSpaceComponentInstance->SetLightCookieType(LightCookieType::ImageCookie);
-	LightSpaceComponentInstance->SetLightCookieAssetCollectionId(Asset.AssetCollectionId);
-	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
-	LightSpaceComponentInstance->SetLightType(LightType::Spot);
-	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
-	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
-	LightSpaceComponentInstance->SetRange(Range);
-	LightSpaceComponentInstance->SetIntensity(Intensity);
-
-	auto LightSpaceComponentKey				= LightSpaceComponentInstance->GetId();
-	auto* StoredLightSpaceComponentInstance = (LightSpaceComponent*) Object->GetComponent(LightSpaceComponentKey);
-
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieType(), LightCookieType::ImageCookie);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete asset
-	DeleteAsset(AssetSystem, AssetCollection, Asset);
-
-	// Delete asset collection
-	DeleteAssetCollection(AssetSystem, AssetCollection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CUSTOM_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	{
-
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-		Connection	 = EnterResult.GetConnection();
-		EntitySystem = Connection->GetSpaceEntitySystem();
-
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		// Create object to represent the Custom fields
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create custom component
-		auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
-
-		EXPECT_EQ(CustomComponent->GetCustomPropertyKeys().Size(), 0);
-
-		// Vector Check
-		{
-			CustomComponent->SetCustomProperty("Vector3", ReplicatedValue({10, 10, 10}));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("Vector3").GetVector3(), csp::common::Vector3({10, 10, 10}));
-
-			CustomComponent->SetCustomProperty("Vector4", ReplicatedValue({10, 10, 10, 10}));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("Vector4").GetVector4(), csp::common::Vector4({10, 10, 10, 10}));
-		}
-
-		// String Check
-		{
-			CustomComponent->SetCustomProperty("String", ReplicatedValue("OKO"));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("String").GetString(), "OKO");
-		}
-
-		// Boolean Check
-		{
-			CustomComponent->SetCustomProperty("Boolean", ReplicatedValue(true));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("Boolean").GetBool(), true);
-		}
-
-		// Integer Check
-		{
-			CustomComponent->SetCustomProperty("Integer", ReplicatedValue(int64_t(1)));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("Integer").GetInt(), int64_t(1));
-		}
-
-		// Float Check
-		{
-			CustomComponent->SetCustomProperty("Float", ReplicatedValue(1.00f));
-			EXPECT_EQ(CustomComponent->GetCustomProperty("Float").GetFloat(), 1.00f);
-		}
-
-		// Has Key Check
-		{
-			EXPECT_EQ(CustomComponent->HasCustomProperty("Boolean"), true);
-			EXPECT_EQ(CustomComponent->HasCustomProperty("BooleanFalse"), false);
-		}
-
-		// Key Size
-		{
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
-		}
-
-		// Remove Key
-		{
-			CustomComponent->RemoveCustomProperty("Boolean");
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 5);
-		}
-
-		// List Check
-		{
-			auto Keys = CustomComponent->GetCustomPropertyKeys();
-			EXPECT_EQ(Keys.Size(), 5);
-		}
-
-		AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CUSTOM_COMPONENT_SCRIPT_INTERFACE_SUBSCRIPTION_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CustomComponentScriptInterfaceSubscriptionTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	std::atomic_bool ScriptSystemReady = false;
-
-	auto EntityCreatedCallback = [](SpaceEntity* Entity)
-	{
-		std::cerr << "EntityCreatedCallback called" << std::endl;
-	};
-
-	auto EntitiesReadyCallback = [](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "EntitiesReadyCallback called" << std::endl;
-	};
-
-	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
-	{
-		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
-		ScriptSystemReady = true;
-	};
-
-	SpaceSystem->SetEntityCreatedCallback(EntityCreatedCallback);
-	SpaceSystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
-	SpaceSystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-	OnConnect();
-
-	// Create object to represent the audio
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create audio component
-	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
-
-	CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(0)));
-	CustomComponent->SetCustomProperty("NumberChanged", ReplicatedValue(false));
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Setup script
-	std::string ScriptText = R"xx(
-		var custom = ThisEntity.getCustomComponents()[0];
-		custom.setCustomProperty("testFloat", 1.234);
-		custom.setCustomProperty("testInt", 1234);
-		globalThis.onValueChanged = () => {
-		  custom.setCustomProperty("NumberChanged", true);
-		}  
-		// subscribe to entity events 
-		ThisEntity.subscribeToPropertyChange(custom.id, custom.getCustomPropertySubscriptionKey("Number"), "valueChanged");
-		ThisEntity.subscribeToMessage("valueChanged", "onValueChanged");
-		)xx";
-
-	auto ScriptSystemIsReady = [&ScriptSystemReady]()
-	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
-		return (ScriptSystemReady == true);
-	};
-
-	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
-
-	CreatedObject->GetScript()->SetScriptSource(ScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-	EXPECT_EQ(CustomComponent->GetCustomProperty("testFloat").GetFloat(), 1.234f);
-	EXPECT_EQ(CustomComponent->GetCustomProperty("testInt").GetInt(), 1234);
-	EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 0);
-	EXPECT_FALSE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
-
-	CustomComponent->SetCustomProperty("Number", ReplicatedValue(int64_t(100)));
-
-	EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 100);
-	EXPECT_TRUE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_EXTERNAL_LINK_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ExternalLinkComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	{
-
-		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-		auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
-		// Connect to the SignalR server
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-		// Create custom component
-		auto* ExternalLinkComponent = (ExternalLinkSpaceComponent*) CreatedObject->AddComponent(ComponentType::ExternalLink);
-
-		const csp::common::String ExternalLinkName = "MyExternalLink";
-		ExternalLinkComponent->SetName(ExternalLinkName);
-		EXPECT_EQ(ExternalLinkComponent->GetName(), ExternalLinkName);
-
-		const csp::common::String ExternalLinkUrl = "https://oko.live";
-		ExternalLinkComponent->SetLinkUrl(ExternalLinkUrl);
-		EXPECT_EQ(ExternalLinkComponent->GetLinkUrl(), ExternalLinkUrl);
-
-		const csp::common::Vector3 Position(123.0f, 456.0f, 789.0f);
-		ExternalLinkComponent->SetPosition(Position);
-		EXPECT_EQ(ExternalLinkComponent->GetPosition(), Position);
-
-		const csp::common::Vector4 Rotation(1.0f, 2.0f, 3.0f, 4.0f);
-		ExternalLinkComponent->SetRotation(Rotation);
-		EXPECT_EQ(ExternalLinkComponent->GetRotation(), Rotation);
-
-		const csp::common::Vector3 Scale(123.0f, 456.0f, 789.0f);
-		ExternalLinkComponent->SetScale(Scale);
-		EXPECT_EQ(ExternalLinkComponent->GetScale(), Scale);
-
-		const csp::common::String DisplayText = "A great link";
-		ExternalLinkComponent->SetDisplayText(DisplayText);
-		EXPECT_EQ(ExternalLinkComponent->GetDisplayText(), DisplayText);
-
-		bool IsEnabled = false;
-		ExternalLinkComponent->SetIsEnabled(IsEnabled);
-		EXPECT_EQ(ExternalLinkComponent->GetIsEnabled(), IsEnabled);
-
-		bool IsVisible = false;
-		ExternalLinkComponent->SetIsVisible(IsVisible);
-		EXPECT_EQ(ExternalLinkComponent->GetIsVisible(), IsVisible);
-
-		bool IsARVisible = false;
-		ExternalLinkComponent->SetIsARVisible(IsARVisible);
-		EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
-
-		// Disconnect from the SignalR server
-		std::tie(Ok) = AWAIT(Connection, Disconnect);
-
-		EXPECT_TRUE(Ok);
-
-		// Delete MultiplayerConnection
-		delete Connection;
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ACTIONHANDLER_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ActionHandlerTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	const csp::common::String ModelAssetId = "NotARealId";
-
-	auto* LightSpaceComponentInstance = (LightSpaceComponent*) Object->AddComponent(ComponentType::Light);
-
-	// Process component creation
-	Object->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Check component was created
-	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
-
-	bool ActionCalled = false;
-	LightSpaceComponentInstance->RegisterActionHandler("TestAction",
-													   [&ActionCalled](ComponentBase*, const csp::common::String, const csp::common::String)
-													   {
-														   ActionCalled = true;
-													   });
-
-	LightSpaceComponentInstance->InvokeAction("TestAction", "TestParam");
-
-	ASSERT_TRUE(ActionCalled);
-
-	// Disconnect from the SignalR server
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LIGHT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LightComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Connect to the SignalR server
-	auto [Ok] = AWAIT(Connection, Connect);
-
-	EXPECT_TRUE(Ok);
-
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-	EXPECT_TRUE(Ok);
-
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	const csp::common::String ModelAssetId = "NotARealId";
-
-	auto* LightSpaceComponentInstance = (LightSpaceComponent*) Object->AddComponent(ComponentType::Light);
-
-	// Process component creation
-	Object->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Check component was created
-	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-
-	// Create asset collection
-	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-	// Create asset
-	csp::systems::Asset Asset;
-	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-	Asset.FileName = "OKO.png";
-	Asset.Name	   = "OKO";
-	Asset.Type	   = csp::systems::EAssetType::IMAGE;
-
-	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
-	FILE* UploadFile		 = fopen(UploadFilePath.string().c_str(), "rb");
-	uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-	auto* UploadFileData	 = new unsigned char[UploadFileSize];
-	fread(UploadFileData, UploadFileSize, 1, UploadFile);
-	fclose(UploadFile);
-
-	csp::systems::BufferAssetDataSource BufferSource;
-	BufferSource.Buffer		  = UploadFileData;
-	BufferSource.BufferLength = UploadFileSize;
-
-	BufferSource.SetMimeType("image/png");
-
-	printf("Uploading asset data...\n");
-
-	// Upload data
-	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-	delete[] UploadFileData;
-
-	EXPECT_EQ(LightSpaceComponentInstance->GetLightCookieType(), LightCookieType::NoCookie);
-	EXPECT_EQ(LightSpaceComponentInstance->GetLightType(), LightType::Point);
-	EXPECT_EQ(LightSpaceComponentInstance->GetInnerConeAngle(), 0.0f);
-	EXPECT_EQ(LightSpaceComponentInstance->GetOuterConeAngle(), 0.78539816339f);
-	EXPECT_EQ(LightSpaceComponentInstance->GetRange(), 1000.0f);
-	EXPECT_EQ(LightSpaceComponentInstance->GetIntensity(), 5000.0f);
-
-	// test values
-	const float InnerConeAngle = 10.0f;
-	const float OuterConeAngle = 20.0f;
-	const float Range		   = 120.0f;
-	const float Intensity	   = 1000.0f;
-
-	LightSpaceComponentInstance->SetLightCookieAssetCollectionId(Asset.AssetCollectionId);
-	LightSpaceComponentInstance->SetLightCookieAssetId(Asset.Id);
-	LightSpaceComponentInstance->SetLightCookieType(LightCookieType::ImageCookie);
-	LightSpaceComponentInstance->SetLightType(LightType::Spot);
-	LightSpaceComponentInstance->SetInnerConeAngle(InnerConeAngle);
-	LightSpaceComponentInstance->SetOuterConeAngle(OuterConeAngle);
-	LightSpaceComponentInstance->SetRange(Range);
-	LightSpaceComponentInstance->SetIntensity(Intensity);
-
-	auto LightSpaceComponentKey				= LightSpaceComponentInstance->GetId();
-	auto* StoredLightSpaceComponentInstance = (LightSpaceComponent*) Object->GetComponent(LightSpaceComponentKey);
-
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieType(), LightCookieType::ImageCookie);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetCollectionId(), Asset.AssetCollectionId);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightCookieAssetId(), Asset.Id);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetLightType(), LightType::Spot);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetInnerConeAngle(), InnerConeAngle);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetOuterConeAngle(), OuterConeAngle);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
-	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_IMAGE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ImageComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Connect to the SignalR server
-	auto [Ok] = AWAIT(Connection, Connect);
-
-	EXPECT_TRUE(Ok);
-
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-	EXPECT_TRUE(Ok);
-
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	const csp::common::String ModelAssetId = "NotARealId";
-
-	auto* ImageSpaceComponentInstance = (ImageSpaceComponent*) Object->AddComponent(ComponentType::Image);
-
-	// Process component creation
-	Object->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Check component was created
-	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-
-	// Create asset collection
-	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-	// Create asset
-	csp::systems::Asset Asset;
-	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-	Asset.FileName = "OKO.png";
-	Asset.Name	   = "OKO";
-	Asset.Type	   = csp::systems::EAssetType::IMAGE;
-
-	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
-	FILE* UploadFile		 = fopen(UploadFilePath.string().c_str(), "rb");
-	uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-	auto* UploadFileData	 = new unsigned char[UploadFileSize];
-	fread(UploadFileData, UploadFileSize, 1, UploadFile);
-	fclose(UploadFile);
-
-	csp::systems::BufferAssetDataSource BufferSource;
-	BufferSource.Buffer		  = UploadFileData;
-	BufferSource.BufferLength = UploadFileSize;
-
-	BufferSource.SetMimeType("image/png");
-
-	printf("Uploading asset data...\n");
-
-	// Upload data
-	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-	delete[] UploadFileData;
-
-	EXPECT_EQ(ImageSpaceComponentInstance->GetBillboardMode(), BillboardMode::Off);
-	EXPECT_EQ(ImageSpaceComponentInstance->GetDisplayMode(), DisplayMode::DoubleSided);
-	EXPECT_EQ(ImageSpaceComponentInstance->GetIsARVisible(), true);
-	EXPECT_EQ(ImageSpaceComponentInstance->GetIsEmissive(), false);
-
-
-	ImageSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
-	ImageSpaceComponentInstance->SetImageAssetId(Asset.Id);
-	ImageSpaceComponentInstance->SetBillboardMode(BillboardMode::YawLockedBillboard);
-	ImageSpaceComponentInstance->SetDisplayMode(DisplayMode::SingleSided);
-	ImageSpaceComponentInstance->SetIsARVisible(false);
-	ImageSpaceComponentInstance->SetIsEmissive(true);
-
-	auto ImageSpaceComponentKey		= ImageSpaceComponentInstance->GetId();
-	auto* StoredImageSpaceComponent = (ImageSpaceComponent*) Object->GetComponent(ImageSpaceComponentKey);
-
-	EXPECT_EQ(StoredImageSpaceComponent->GetAssetCollectionId(), Asset.AssetCollectionId);
-	EXPECT_EQ(StoredImageSpaceComponent->GetImageAssetId(), Asset.Id);
-	EXPECT_EQ(StoredImageSpaceComponent->GetBillboardMode(), BillboardMode::YawLockedBillboard);
-	EXPECT_EQ(StoredImageSpaceComponent->GetDisplayMode(), DisplayMode::SingleSided);
-	EXPECT_EQ(StoredImageSpaceComponent->GetIsARVisible(), false);
-	EXPECT_EQ(StoredImageSpaceComponent->GetIsEmissive(), true);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_REFLECTION_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ReflectionComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Connect to the SignalR server
-	auto [Ok] = AWAIT(Connection, Connect);
-
-	EXPECT_TRUE(Ok);
-
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-	EXPECT_TRUE(Ok);
-
-	bool AssetDetailBlobChangedCallbackCalled = false;
-	csp::common::String CallbackAssetId;
-
-	const csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	const csp::common::String ModelAssetId = "NotARealId";
-
-	auto* ReflectionSpaceComponentInstance = (ReflectionSpaceComponent*) Object->AddComponent(ComponentType::Reflection);
-
-	// Process component creation
-	Object->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Check component was created
-	auto& Components = *Object->GetComponents();
-	ASSERT_EQ(Components.Size(), 1);
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-
-	// Create asset collection
-	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
-
-	// Create asset
-	csp::systems::Asset Asset;
-	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
-	Asset.FileName = "OKO.png";
-	Asset.Name	   = "OKO";
-	Asset.Type	   = csp::systems::EAssetType::IMAGE;
-
-	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
-	FILE* UploadFile		 = fopen(UploadFilePath.string().c_str(), "rb");
-	uintmax_t UploadFileSize = std::filesystem::file_size(UploadFilePath);
-	auto* UploadFileData	 = new unsigned char[UploadFileSize];
-	fread(UploadFileData, UploadFileSize, 1, UploadFile);
-	fclose(UploadFile);
-
-	csp::systems::BufferAssetDataSource BufferSource;
-	BufferSource.Buffer		  = UploadFileData;
-	BufferSource.BufferLength = UploadFileSize;
-
-	BufferSource.SetMimeType("image/png");
-
-	printf("Uploading asset data...\n");
-
-	// Upload data
-	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Asset.Uri);
-
-	delete[] UploadFileData;
-
-	EXPECT_EQ(ReflectionSpaceComponentInstance->GetReflectionShape(), ReflectionShape::UnitBox);
-
-	ReflectionSpaceComponentInstance->SetAssetCollectionId(Asset.AssetCollectionId);
-	ReflectionSpaceComponentInstance->SetReflectionAssetId(Asset.Id);
-	ReflectionSpaceComponentInstance->SetReflectionShape(ReflectionShape::UnitSphere);
-
-	auto ReflectionSpaceComponentKey	 = ReflectionSpaceComponentInstance->GetId();
-	auto* StoredReflectionSpaceComponent = (ReflectionSpaceComponent*) Object->GetComponent(ReflectionSpaceComponentKey);
-
-	EXPECT_EQ(StoredReflectionSpaceComponent->GetAssetCollectionId(), Asset.AssetCollectionId);
-	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionAssetId(), Asset.Id);
-	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionShape(), ReflectionShape::UnitSphere);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_IMAGE_SCRIPT_INTERFACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ImageScriptInterfaceTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the image
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create image component
-	auto* ImageComponent = (ImageSpaceComponent*) CreatedObject->AddComponent(ComponentType::Image);
-	// Create script component
-	auto* ScriptComponent = (ScriptSpaceComponent*) CreatedObject->AddComponent(ComponentType::ScriptData);
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	EXPECT_EQ(ImageComponent->GetIsVisible(), true);
-	EXPECT_EQ(ImageComponent->GetIsEmissive(), false);
-	EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSided);
-	EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Off);
-
-	// Setup script
-	const std::string ImageScriptText = R"xx(
-	
-		var image = ThisEntity.getImageComponents()[0];
-		
-		image.isVisible = false;
-		image.isEmissive = true;
-		image.displayMode = 2;
-		image.billboardMode = 1;
-    )xx";
-
-	ScriptComponent->SetScriptSource(ImageScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
-	EXPECT_FALSE(ScriptHasErrors);
-
-	EXPECT_EQ(ImageComponent->GetIsVisible(), false);
-	EXPECT_EQ(ImageComponent->GetIsEmissive(), true);
-	EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSidedReversed);
-	EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Billboard);
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -5346,184 +2041,6 @@ struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
 		Entities.Clear();
 	}
 };
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FOG_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FogComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the fog
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create fog component
-	auto* FogComponent = static_cast<FogSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Fog));
-
-	// Ensure defaults are set
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Linear);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 0.f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 0.f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3({0.8f, 0.9f, 1.0f}));
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.2f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 0.2f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 1.f);
-	EXPECT_FALSE(FogComponent->GetIsVolumetric());
-
-	// Set new values
-	FogComponent->SetFogMode(FogMode::Exponential);
-	FogComponent->SetPosition(csp::common::Vector3::One());
-	FogComponent->SetRotation(csp::common::Vector4(0, 0, 0, 1));
-	FogComponent->SetScale(csp::common::Vector3(2, 2, 2));
-	FogComponent->SetStartDistance(1.1f);
-	FogComponent->SetEndDistance(2.2f);
-	FogComponent->SetColor(csp::common::Vector3::One());
-	FogComponent->SetDensity(3.3f);
-	FogComponent->SetHeightFalloff(4.4f);
-	FogComponent->SetMaxOpacity(5.5f);
-	FogComponent->SetIsVolumetric(true);
-
-	// Ensure values are set correctly
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
-	EXPECT_TRUE(FogComponent->GetIsVolumetric());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FOG_SCRIPT_INTERFACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FogScriptInterfaceTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create object to represent the fog
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Create fog component
-	auto* FogComponent = (FogSpaceComponent*) CreatedObject->AddComponent(ComponentType::Fog);
-
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Setup script
-	const std::string FogScriptText = R"xx(
-		var fog = ThisEntity.getFogComponents()[0];
-		fog.fogMode = 1;
-		fog.position = [1, 1, 1];
-		fog.rotation = [1, 1, 1, 2];
-		fog.scale = [2, 2, 2];
-		fog.startDistance = 1.1;
-		fog.endDistance = 2.2;
-		fog.color = [1, 1, 1];
-		fog.density = 3.3;
-		fog.heightFalloff = 4.4;
-		fog.maxOpacity = 5.5;
-		fog.isVolumetric = true;
-    )xx";
-
-	CreatedObject->GetScript()->SetScriptSource(FogScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
-
-	EntitySystem->ProcessPendingEntityOperations();
-
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(1, 1, 1, 2));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
-	EXPECT_TRUE(FogComponent->GetIsVolumetric());
-
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
 
 // Disabled by default as it can be slow
 #if RUN_MULTIPLAYER_MANYENTITIES_TEST
@@ -5754,15 +2271,30 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	bool AssetDetailBlobChangedCallbackCalled = false;
 	csp::common::String CallbackAssetId;
@@ -5795,72 +2327,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MULTIPLAYER_MULTIPLE_SCRIPT_COMPONENT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultipleScriptComponentTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
-	csp::common::String UserId;
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	// Enter space
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	// Create space object
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
-
-	// Attempt to add 2 script components
-	auto Comp1 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
-	auto Comp2 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
-
-	SpaceEntity->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
-
-	// Only 1 script component should be on the object
-	EXPECT_TRUE(SpaceEntity->GetComponents()->Size(), 1);
-
-	// Disconnect from the SignalR server
-	auto [Ok] = AWAIT(Connection, Disconnect);
-
-	EXPECT_TRUE(Ok);
-
-	SpaceSystem->ExitSpace();
-
-	// Delete MultiplayerConnection
-	delete Connection;
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 {
 	SetRandSeed();
@@ -5885,15 +2352,29 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Enter space
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id, true);
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
-	EntitySystem = Connection->GetSpaceEntitySystem();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 
 	// Create space object
 	csp::common::String ObjectName = "Object 1";

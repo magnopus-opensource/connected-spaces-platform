@@ -1,14 +1,14 @@
 # 🌎 Connected Spaces Platform
 
-[![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
-[![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
+[![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+[![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
 
 
-_"An interoperable communication library for the next generation of the internet."_
+_"An interoperable communication library for the spatial internet."_
 
-⚡️ Current Supported Languages : C++, C#, Web Assembly
+⚡️ Current Supported Languages : C++, C#, WebAssembly
 
-🖥️ Current Supported Platforms : Windows, Android, IOS and MacOS
+🖥️ Current Supported Platforms : Windows, Android, iOS and MacOS
 
 
 ****
@@ -18,93 +18,80 @@ _"An interoperable communication library for the next generation of the internet
 - [Background](#background)
 - [Install](#-install)
 - [Build Instructions](#-build-instructions)
-  - [Web Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Web)
-  - [C++ Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CPP)
-  - [C# Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CSharp)
-  - [Android Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Android)
-  - [MacOS Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-MacOS)
-  - [IOS Build Instructions](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-IOS)
 - [Usage](#%EF%B8%8F-usage)
-    - [Web Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
-    - [Web Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/Web)
-    - [C++ Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
-    - [C++ Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
-    - [Unity C# Initialising CSP Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
-    - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 - [Tenant Keys](#-tenant-keys)
 - [Api Documentation](#-api-documentation)
 - [Contributions](#%EF%B8%8F-contributions)
-- [Work In Progress](#woman_factory_worker-work-in-progress)
 - [License](#%EF%B8%8F-license)
 
 ****
 
 ## Background
-This is the Connected Spaces Platform client API, affording client application developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+Interoperability is the foundation of the spatial internet. We need experiences to work across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
+<p align="center">
+    <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/65fa6a8f-f9a4-45d7-9bd4-731d505c7711">
+</p>
+
+The Connected Spaces Platform provides developers across a range of languages and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
+
+It comes in the form of an open-source client-side library, effectively encoding (in binary form) the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
 ****
 
 ## 📦 Install
-NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=csp-foundation)
+NPM packages are available for Web and Unity and can be found in [Packages](https://github.com/orgs/magnopus-opensource/packages?repo_name=connected-spaces-platform).
 
-- Web Installation:  `npm install @magnopus/com.magnopus.csp.foundation.web`
+- Web Installation:  `npm install @magnopus-opensource/connected-spaces-platform.web`
 
-- Unity Installation: `npm install @magnopus/com.magnopus.csp.foundation.unity.core`
+- Unity Installation: `npm install @magnopus-opensource/connected-spaces-platform.unity.core`
 
-For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/csp-foundation/releases).
+For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
 ****
 
 ## 🔨 Build Instructions
-Build instructions for each language supported are below.
+Build instructions for each supported language are below.
 
-- WebAssembly 
-    - [Building for Web](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Web)
-- C++
-    - [Building for C++](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CPP)
-
-- C#
-    - [Building for C#](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-CSharp)
-
-- Android
-    - [Building for Android](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-Android)
-
-- MacOS
-    - [Building for MacOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-MacOS)
-
-- IOS
-    - [Building for IOS](https://github.com/magnopus-opensource/csp-foundation/wiki/Building-Foundation-for-IOS)
+- [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
+- [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
+- [Building for C#](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CSharp)
+- [Building for Android](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Android)
+- [Building for MacOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-MacOS)
+- [Building for IOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-IOS)
 
 ****
 
 ## 🔑 Tenant Keys
 
-For information on how to obtain a Tenant Key please see our Tenant page:
+If you choose to use the Connected Spaces Platform in conjunction with Magnopus Cloud Services, you'll need a Tenant Key.
 
-[Obtaining a Tenant Key](https://github.com/magnopus-opensource/csp-foundation/wiki) (WIP)
+For information on how to obtain one, head over here.
+
+ - [Obtaining a Tenant Key](https://www.magnopus.com/csp/for-developers#tenant-key)
 ****
+
 ## 🖥️ Usage
-HelloWorld Examples for each language supported are below.
+Examples for each supported language are below.
 
 - WebAssembly 
-    - [Web Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/Web)
-    - [Web Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/Web)
+    - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
+    - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/Web)
 - C++
-    - [C++ Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
-    - [C++ Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
+    - [C++ Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+    - [C++ Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
 
-- C#
-    - [Unity C# Initialising Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
-    - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/csp-foundation/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
+- Unity C#
+    - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+    - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
 ****
 
  ## 📖 Api Documentation
 
- Our Api Documentation Page:
+You can always find up-to-date documentation on the API here.
 
- - [CSP Api Documentation](https://builds.magnoboard.com/foundation-docs/index.html)
+ - [CSP API Documentation](https://builds.magnoboard.com/connected-spaces-platform/index.html)
 
 
 ****
@@ -118,16 +105,7 @@ PRs are welcome! If have any ideas you would like to contribute please see our c
 
 ****
 
-## :woman_factory_worker: Work In Progress
-
-Our Work In Progress page details future planned work:
-
- - [Work In Progress](https://github.com/magnopus-opensource/csp-foundation/wiki/Work-In-Progress)
-
-
-****
-
  ## ©️ License
 
- [Apache-2.0](https://github.com/magnopus-opensource/csp-foundation/blob/main/LICENSE)
+ [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
 

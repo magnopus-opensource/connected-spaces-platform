@@ -21,6 +21,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 
@@ -78,13 +79,14 @@ enum class VideoPlayerPropertyKeys
 	IsVisible,
 	IsARVisible,
 	MeshComponentId,
+	IsEnabled,
 	Num
 };
 
 
 /// @ingroup VideoPlayerSpaceComponent
 /// @brief Data representation of an VideoPlayerSpaceComponent.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent, public IEnableableComponent
 {
 public:
 	/// @brief Constructs the video player component, and associates it with the specified Parent space entity.
@@ -273,6 +275,14 @@ public:
 	bool GetIsARVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
+	/// @}
+
+	/// \addtogroup IEnableableComponent
+	/// @{
+	/// @copydoc IEnableableComponent::GetIsEnabled()
+	bool GetIsEnabled() const override;
+	/// @copydoc IEnableableComponent::SetIsEnabled()
+	void SetIsEnabled(bool InValue) override;
 	/// @}
 };
 

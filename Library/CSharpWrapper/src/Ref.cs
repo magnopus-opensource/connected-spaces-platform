@@ -16,16 +16,11 @@ namespace Csp
             this.Pointer = Pointer;
         }
 
-        public static implicit operator T(Ref<T> value) => value.Get();
+        public static implicit operator T(Ref<T> value) => value.Value;
 
-        public unsafe T Get() =>*(T*)Pointer.ToPointer();
-        
-        public void Set(T value)
-        {
-            unsafe
-            {
-                *(T*)Pointer.ToPointer() = value;
-            }
+        public unsafe T Value {
+            get => *(T*)Pointer.ToPointer();
+            set => *(T*)Pointer.ToPointer() = value;
         }
 
         public bool IsValid() => Pointer != IntPtr.Zero;

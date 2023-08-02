@@ -1,10 +1,10 @@
 
-Connected Spaces Platform Foundation
+Connected Spaces Platform
 =================
 
 Copyright 2023 Magnopus
 
-Connected Spaces Platform Foundation licenses this file to you under the Apache License,
+Connected Spaces Platform licenses this file to you under the Apache License,
 version 2.0 (the "License"); you may not use this file except in compliance
 with the License. You may obtain a copy of the License at:
   http://www.apache.org/licenses/LICENSE-2.0
@@ -52,7 +52,7 @@ licensed under the MIT license and can be obtained at:
 
   * SOURCE:
     * https://github.com/aspnet/SignalR-Client-Cpp
-    * https://github.com/magnopus/olympus-foundation/tree/main/ThirdParty/signalrclient
+    * https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/ThirdParty/signalrclient
   * LICENSE:
     * https://github.com/aspnet/SignalR-Client-Cpp/blob/main/LICENSE.txt
   * HOMEPAGE:

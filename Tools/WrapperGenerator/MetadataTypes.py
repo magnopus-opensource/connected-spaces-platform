@@ -25,7 +25,7 @@ class EnumMetadata:
     namespace: str
     name: str
     full_safe_type_name: str
-    base: str
+    base: str | None
     fields: List[EnumFieldMetadata]
     is_flags: bool
     is_nested_type: bool = False
@@ -55,7 +55,7 @@ class StructMetadata:
     start_line: int
     namespace: str
     name: str
-    base: str
+    base: str | None
     end_line: int = -1
     fields: List[FieldMetadata] = None
     is_nested_type: bool = False
@@ -100,6 +100,7 @@ class TypeMetadata:
     is_enum: bool = False
     is_inline_forward: bool = False
     is_template_argument: bool = False
+    is_primitive: bool = False
 
 
 @dataclass
@@ -119,15 +120,15 @@ class FunctionMetadata:
     """ Describes a function. """
 
 
-    header_file: str
+    header_file: str | None
     start_line: int
     end_line: int
-    namespace: str
-    name: str
-    return_type: TypeMetadata
+    namespace: str | None
+    name: str | None
+    return_type: TypeMetadata | None
     has_return: bool
     has_parameters: bool
-    parameters: List[ParameterMetadata]
+    parameters: List[ParameterMetadata] | None
     parent_class: ClassMetadata = field(repr=False, default=None)
     unique_name: str = None
     is_explicit_converter: bool = False
@@ -200,6 +201,8 @@ class InterfaceMetadata:
     name: str
     methods: List[FunctionMetadata]
     full_safe_type_name: str
+    interfaces: List[ClassInterfaceMetadata] | None = None
+    has_interfaces: bool = False
     is_nested_type: bool = False
     doc_comments: List[str] = None
 

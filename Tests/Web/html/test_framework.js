@@ -1,6 +1,6 @@
 import { C, CONSOLE_RED, CONSOLE_GREEN, CHS_ENDPOINT_BASE_URI } from './test_helpers.js'
 
-import { ClientUserAgent, OlympusFoundation, Services, Systems } from './olympus_foundation.js';
+import { ClientUserAgent, CSPFoundation, Services, Systems } from './olympus_foundation.js';
 
 
 /**
@@ -181,17 +181,17 @@ export async function runTests(includedTests) {
             testResult.setAttribute('timestamp', (new Date()).toISOString());
 
             cleanupFunctions.length = 0;
-            OlympusFoundation.initialise(CHS_ENDPOINT_BASE_URI, "OKO_TESTS");
+            CSPFoundation.initialise(CHS_ENDPOINT_BASE_URI, "OKO_TESTS");
 
             let userAgent = ClientUserAgent.create();
-            userAgent.olympusVersion  = OlympusFoundation.getVersion(),
+            userAgent.cSPVersion  = CSPFoundation.getVersion(),
             userAgent.clientOS		  = "WASMTestsOS",
             userAgent.clientSKU		  = "WASMTest",
-            userAgent.clientVersion	  = OlympusFoundation.getVersion(),
+            userAgent.clientVersion	  = CSPFoundation.getVersion(),
             userAgent.clientEnvironment = "ODev",
             userAgent.cHSEnvironment  = "oDev"
 
-            OlympusFoundation.setClientUserAgentInfo(userAgent);
+            CSPFoundation.setClientUserAgentInfo(userAgent);
 
             const startTime = performance.now();
             let passed = false;
@@ -237,7 +237,7 @@ export async function runTests(includedTests) {
 
             suiteElapsed += elapsed;
 
-            OlympusFoundation.shutdown();
+            CSPFoundation.shutdown();
 
             testResult.setAttribute('time', (elapsed / 1000.0).toFixed(3).toString());
 

@@ -355,7 +355,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	Object->OwnerId		   = 42;
 
 	auto* NewComponent = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
-	NewComponent->SetAssetCollectionId("blah");
+	NewComponent->SetExternalResourceAssetCollectionId("blah");
 	NewComponent->SetIsVisible(true);
 
 	Object->Serialise(Serialiser);
@@ -380,7 +380,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedComponent->GetComponentType(), ComponentType::StaticModel);
 
 	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1);
-	EXPECT_EQ(DeserialisedComponent->GetAssetCollectionId(), "blah");
+	EXPECT_EQ(DeserialisedComponent->GetExternalResourceAssetCollectionId(), "blah");
 	EXPECT_EQ(DeserialisedComponent->GetIsVisible(), true);
 
 	CSP_DELETE(DeserialisedObject);

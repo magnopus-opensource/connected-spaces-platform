@@ -69,7 +69,7 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
         current = Date.now();
         testTime = (current - start) / 1000;
 
-        OlympusFoundation.tick();
+        CSPFoundation.tick();
     }
 
     assert.isTrue(interrupted);
@@ -1235,6 +1235,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 0);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.AssetSource);
         assert.areEqual(videoComponent.getIsVisible(), true);
+        assert.areEqual(videoComponent.getIsEnabled(), true);
 
         pos.delete();
     }
@@ -1258,6 +1259,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         videoComponent.setCurrentPlayheadPosition(1);
         videoComponent.setVideoPlayerSourceType(Multiplayer.VideoPlayerSourceType.URLSource);
         videoComponent.setIsVisible(false);
+        videoComponent.setIsEnabled(false);
 
         // Ensure values are set correctly
         const pos = videoComponent.getPosition();
@@ -1276,6 +1278,7 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
         assert.areEqual(videoComponent.getCurrentPlayheadPosition(), 1);
         assert.areEqual(videoComponent.getVideoPlayerSourceType(), Multiplayer.VideoPlayerSourceType.URLSource);
         assert.areEqual(videoComponent.getIsVisible(), false);
+        assert.areEqual(videoComponent.getIsEnabled(), false);
 
         pos.delete();
     }
@@ -1341,6 +1344,7 @@ test('MultiplayerTests', 'LightComponentTest', async function() {
         
         assert.areEqual(lightComponent.getLightCookieType(), Multiplayer.LightCookieType.NoCookie);
         assert.areEqual(lightComponent.getLightType(), Multiplayer.LightType.Point);
+        assert.areEqual(lightComponent.getLightShadowType(), Multiplayer.LightShadowType.None);
         assert.areEqual(lightComponent.getInnerConeAngle(), 0.0);
         assert.isTrue(approximatelyEqual(lightComponent.getOuterConeAngle(),  0.78539816339, 0.0000001));
         assert.areEqual(lightComponent.getRange(), 1000.0);
@@ -1365,6 +1369,7 @@ test('MultiplayerTests', 'LightComponentTest', async function() {
         lightComponent.setLightCookieAssetCollectionId(assetCollectionId);
         lightComponent.setLightCookieType(Multiplayer.LightCookieType.ImageCookie);
         lightComponent.setLightType(Multiplayer.LightType.Spot);
+        lightComponent.setLightShadowType(Multiplayer.LightType.Realtime);
         lightComponent.setInnerConeAngle(InnerConeAngle);
         lightComponent.setOuterConeAngle(OuterConeAngle);
         lightComponent.setRange(Range);
@@ -1378,6 +1383,7 @@ test('MultiplayerTests', 'LightComponentTest', async function() {
         assert.areEqual(lightComponent.getLightCookieAssetId(), assetId);
         assert.areEqual(lightComponent.getLightCookieType(), Multiplayer.LightCookieType.ImageCookie);
         assert.areEqual(lightComponent.getLightType(), Multiplayer.LightType.Spot);
+        assert.areEqual(lightComponent.getLightShadowType(), Multiplayer.LightType.Realtime);
         assert.areEqual(lightComponent.getInnerConeAngle(), InnerConeAngle);
         assert.areEqual(lightComponent.getOuterConeAngle(), OuterConeAngle);
         assert.areEqual(lightComponent.getRange(), Range);

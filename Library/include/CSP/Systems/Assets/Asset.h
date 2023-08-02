@@ -309,6 +309,8 @@ private:
 	UriResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
+	void SetResponseBody(const csp::common::String& Contents);
+
 	csp::common::String Uri;
 	csp::common::String XCodeError;
 };

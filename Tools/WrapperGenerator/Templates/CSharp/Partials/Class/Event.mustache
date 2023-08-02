@@ -41,6 +41,8 @@ static void {{ delegate.name }}Function(
     );
 }
 
+static readonly {{ delegate.name }} {{ name }}DelegateInstance = {{ delegate.name }}Function;
+
 bool {{ name }}Initialised = false;
 event EventHandler<
 {{# has_multiple_parameters }}
@@ -69,7 +71,7 @@ public event EventHandler<
         if (!{{ name }}Initialised)
         {
             var handle = GCHandle.Alloc(this);
-            {{ unique_method_name }}(_ptr, {{ delegate.name }}Function, (IntPtr)handle);
+            {{ unique_method_name }}(_ptr, {{ name }}DelegateInstance, (IntPtr)handle);
             eventHandles.Add(handle);
             {{ name }}Initialised = true;
         }

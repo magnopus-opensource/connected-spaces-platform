@@ -24,28 +24,28 @@ MonoBehaviour:
     m_Scopes: []
     m_IsDefault: 1
     m_Capabilities: 7
-  - m_Id: scoped:Main
-    m_Name: Main
-    m_Url: https://npm.pkg.github.com/@magnopus
+  - m_Id: scoped:Magnopus Open Source
+    m_Name: Magnopus Open Source
+    m_Url: https://npm.pkg.github.com/@magnopus-opensource
     m_Scopes:
-    - com.magnopus
+    - connected-spaces-platform
     m_IsDefault: 0
     m_Capabilities: 0
-  m_UserSelectedRegistryName: Main
+  m_UserSelectedRegistryName: Magnopus Open Source
   m_UserAddingNewScopedRegistry: 0
   m_RegistryInfoDraft:
     m_ErrorMessage: 
     m_Original:
-      m_Id: scoped:Main
-      m_Name: Main
-      m_Url: https://npm.pkg.github.com/@magnopus
+      m_Id: scoped:Magnopus Open Source
+      m_Name: Magnopus Open Source
+      m_Url: https://npm.pkg.github.com/@magnopus-opensource
       m_Scopes:
-      - com.magnopus
+      - connected-spaces-platform
       m_IsDefault: 0
       m_Capabilities: 0
     m_Modified: 0
-    m_Name: Main
-    m_Url: https://npm.pkg.github.com/@magnopus
+    m_Name: Magnopus Open Source
+    m_Url: https://npm.pkg.github.com/@magnopus-opensource
     m_Scopes:
-    - com.magnopus
+    - connected-spaces-platform
     m_SelectedScopeIndex: 0

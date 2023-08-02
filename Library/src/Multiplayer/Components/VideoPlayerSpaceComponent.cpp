@@ -50,6 +50,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible)]				= true;
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible)]				= true;
 	Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)]			= static_cast<int64_t>(0);
+	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)]				= true;
 
 	SetScriptInterface(CSP_NEW VideoPlayerSpaceComponentScriptInterface(this));
 }
@@ -389,6 +390,25 @@ bool VideoPlayerSpaceComponent::GetIsARVisible() const
 void VideoPlayerSpaceComponent::SetIsARVisible(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible), Value);
+}
+
+/* IEnableableComponent */
+
+bool VideoPlayerSpaceComponent::GetIsEnabled() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	return false;
+}
+
+void VideoPlayerSpaceComponent::SetIsEnabled(bool Value)
+{
+	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled), Value);
 }
 
 } // namespace csp::multiplayer

@@ -18,5 +18,6 @@ OR
 - Start, Tick, Stop Foundation
 - Sign up, Log in, Log out
 - Find, Create, Enter, Exit, Delete Space
-- Create Avatar, send & observe entity updates
+- Create Avatar, send entity updates
+- Process a received entity update
 - Create, Upload, Get, Delete Assets

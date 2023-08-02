@@ -83,11 +83,6 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses().Size(), 1);
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].Description, "Example downtime for a Saturday 2122 at 2am PST");
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].StartDateTimestamp, "2122-04-30T02:00:00+0000");
-	EXPECT_EQ(Result.GetMaintenanceInfoResponses()[0].EndDateTimestamp, "2122-04-30T03:00:00+0000");
 }
 #endif
 
@@ -99,14 +94,42 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 	auto& SystemsManager	= SystemsManager::Get();
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = AWAIT(MaintenanceSystem, IsInsideMaintenanceWindow);
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-	EXPECT_FALSE(Result.GetInsideMaintenanceInfo().IsInsideMaintenanceWindow);
-	EXPECT_EQ(Result.GetInsideMaintenanceInfo().Description, "Example downtime for a Saturday 2122 at 2am PST");
-	EXPECT_EQ(Result.GetInsideMaintenanceInfo().StartDateTimestamp, "2122-04-30T02:00:00+0000");
-	EXPECT_EQ(Result.GetInsideMaintenanceInfo().EndDateTimestamp, "2122-04-30T03:00:00+0000");
+	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
+
+	EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MAINTENANCESYSTEM_TESTS || RUN_MAINTENANCESYSTEM_GET_LATEST_MAINTENANCEWINDOW_TEST
+
+CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInfoTest)
+{
+	auto& SystemsManager	= SystemsManager::Get();
+	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
+
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
+	if (Result.HasAnyMaintenanceWindows())
+	{
+		// if any windows were retrieved, then we should expect these fields to all be filled
+		EXPECT_NE(LatestMaintenanceInfo.Description, "");
+		EXPECT_NE(LatestMaintenanceInfo.StartDateTimestamp, "");
+		EXPECT_NE(LatestMaintenanceInfo.EndDateTimestamp, "");
+	}
+	else
+	{
+		// if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
+		EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
+		EXPECT_EQ(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);
+		EXPECT_EQ(LatestMaintenanceInfo.StartDateTimestamp, Result.GetDefaultMaintenanceInfo().StartDateTimestamp);
+		EXPECT_EQ(LatestMaintenanceInfo.EndDateTimestamp, Result.GetDefaultMaintenanceInfo().EndDateTimestamp);
+	}
 }
 #endif
 

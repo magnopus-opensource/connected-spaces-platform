@@ -365,7 +365,7 @@ void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, 
 		GeoLocation.Location.Longitude = Dto.GetLocation()->GetLongitude();
 	}
 
-	GeoLocation.Orientation = Dto.HasOrientation() ? Dto.GetOrientation() : 0.0;
+	GeoLocation.Orientation = Dto.HasOrientation() ? Dto.GetOrientation() : 0.0f;
 
 	if (Dto.HasGeofence())
 	{
@@ -427,14 +427,4 @@ void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiRespon
 	}
 }
 
-
-csp::multiplayer::MultiplayerConnection* EnterSpaceResult::GetConnection() const
-{
-	return Connection;
-}
-
-void EnterSpaceResult::SetConnection(csp::multiplayer::MultiplayerConnection* IncommingConnection)
-{
-	Connection = IncommingConnection;
-}
 } // namespace csp::systems

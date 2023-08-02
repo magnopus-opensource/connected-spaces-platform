@@ -4,25 +4,27 @@ using Systems = Csp.Systems;
 
 using CSharpTests;
 using static CSharpTests.TestHelper;
-using static CSPEngine.MultiplayerTests;
+
+
+#nullable enable annotations
 
 
 namespace CSPEngine
 {
     static class AnchorSystemTests
     {
-        static Systems.Anchor CreateAnchor(Systems.AnchorSystem anchorSystem, string assetCollectionId, Systems.GeoLocation? location, Common.Map<string,string>? spatialKeyValue,Common.Array<string>? tags, bool pushCleanupFunction = true, bool disposeFoundationResources = true )
+        static Systems.Anchor CreateAnchor(Systems.AnchorSystem anchorSystem, string assetCollectionId, Systems.GeoLocation? location, Common.Map<string, string>? spatialKeyValue, Common.Array<string>? tags, bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
             var anchorLocation = location ?? new Systems.GeoLocation() { Latitude = 90.0, Longitude = 180.0 };
-            
+
             string uniqueThirdPartyAnchorId = GenerateUniqueString("OLY-UNITTEST-ID");
 
             var anchorPosition = new Systems.OlyAnchorPosition() { X = 100.0, Y = 100.0, Z = 100.0 };
             var anchorRotation = new Systems.OlyRotation() { X = 100.0, Y = 100.0, Z = 100.0, W = 100.0 };
-            var anchorSpatialKeyValue = spatialKeyValue ?? new Common.Map<string, string>() {["TestKey1"] = "TestValue1", ["TestKey2"] = "TestValue2" };
-            
+            var anchorSpatialKeyValue = spatialKeyValue ?? new Common.Map<string, string>() { ["TestKey1"] = "TestValue1", ["TestKey2"] = "TestValue2" };
+
             var anchorTags = tags;
-            
+
             if (anchorTags == null)
             {
                 anchorTags = new Common.Array<string>(2);
@@ -31,12 +33,12 @@ namespace CSPEngine
             }
 
             var result = anchorSystem.CreateAnchor(Systems.AnchorProvider.GoogleCloudAnchors,
-                uniqueThirdPartyAnchorId, 
-                assetCollectionId, 
-                anchorLocation, 
-                anchorPosition, 
+                uniqueThirdPartyAnchorId,
+                assetCollectionId,
+                anchorLocation,
+                anchorPosition,
                 anchorRotation,
-                anchorSpatialKeyValue, 
+                anchorSpatialKeyValue,
                 anchorTags)
                 .Result;
             var resCode = result.GetResultCode();
@@ -95,7 +97,6 @@ namespace CSPEngine
             return anchor;
         }
 
-
         static void DeleteSingleAnchor(Systems.AnchorSystem anchorSystem, Systems.Anchor anchor, bool disposeFoundationResources = true)
         {
             DeleteAnchors(anchorSystem, new[] { anchor.Id });
@@ -149,19 +150,19 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
-            
+
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
             var createAssetCollectionResult = assetSystem.CreateAssetCollection(null, null, testAssetCollectionName, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection = createAssetCollectionResult.GetAssetCollection();
 
             // Create anchor
-            var anchor = CreateAnchor(anchorSystem, assetCollection.Id, null,null,null);
-            
+            var anchor = CreateAnchor(anchorSystem, assetCollection.Id, null, null, null);
+
             Assert.AreEqual(anchor.ThirdPartyAnchorProvider, Systems.AnchorProvider.GoogleCloudAnchors);
             Assert.AreEqual(anchor.SpaceId, "");
             Assert.AreEqual(anchor.SpaceEntityId, 0UL);
@@ -173,33 +174,47 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorInSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
-            
+
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
+            SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
+
+            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var objectName = "TestObject";
-            CreateObject(entitySystem, objectName, out var createdObject, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);
 
             var createAssetCollectionResult = assetSystem.CreateAssetCollection(space.Id, null, testAssetCollectionName, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection = createAssetCollectionResult.GetAssetCollection();
-            
+
             // Create anchor
-            var anchor = CreateAnchorInSpace(anchorSystem, space.Id, createdObject.GetId(), assetCollection.Id, null,null,null);
-            
+            var anchor = CreateAnchorInSpace(anchorSystem, space.Id, createdObject.GetId(), assetCollection.Id, null, null, null);
+
             Assert.AreEqual(anchor.ThirdPartyAnchorProvider, Systems.AnchorProvider.GoogleCloudAnchors);
             Assert.AreEqual(anchor.SpaceId, space.Id);
             Assert.AreEqual(anchor.SpaceEntityId, createdObject.GetId());
@@ -211,7 +226,7 @@ namespace CSPEngine
         [Test]
         public static void DeleteMultipleAnchorsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -223,17 +238,31 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
+            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var objectName1 = "TestObject1";
-            CreateObject(entitySystem, objectName1, out var createdObject1, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName1, out var createdObject1, false);
             var objectName2 = "TestObject2";
-            CreateObject(entitySystem, objectName2, out var createdObject2, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName2, out var createdObject2, false);
 
             var createAssetCollectionResult1 = assetSystem.CreateAssetCollection(space.Id, null, testAssetCollectionName1, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection1 = createAssetCollectionResult1.GetAssetCollection();
@@ -273,7 +302,7 @@ namespace CSPEngine
         [Test]
         public static void GetAnchorsInsideCircularAreaTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -286,15 +315,29 @@ namespace CSPEngine
             var spaceIds = new Common.Array<string>(1);
             spaceIds[0] = space.Id;
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
+            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var objectName = "TestObject";
-            CreateObject(entitySystem, objectName, out var createdObject, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);
 
             var createAssetCollectionResult = assetSystem.CreateAssetCollection(space.Id, null, testAssetCollectionName, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection = createAssetCollectionResult.GetAssetCollection();
@@ -321,12 +364,16 @@ namespace CSPEngine
             spacialValues[1] = "TestValue2";
 
             // Get anchors
-            using var result = anchorSystem.GetAnchorsInArea(searchLocationOrigin, searchRadius, spacialKeys, spacialValues, tags, true, spaceIds, null, null).Result;
-            var resCode = result.GetResultCode();
+            Common.Array<Systems.Anchor> anchorCollection;
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            {
+                using var result = anchorSystem.GetAnchorsInArea(searchLocationOrigin, searchRadius, spacialKeys, spacialValues, tags, true, spaceIds, null, null).Result;
+                var resCode = result.GetResultCode();
 
-            using var anchorCollection = result.GetAnchors();
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+
+                anchorCollection = result.GetAnchors();
+            }
 
             // We should have at least the anchor we've just created
             Assert.IsGreaterThan(anchorCollection.Size(), 0);
@@ -338,6 +385,7 @@ namespace CSPEngine
                 if (anchorCollection[idx].Id == anchor.Id)
                 {
                     var returnSpatialKeyValue = anchorCollection[idx].SpatialKeyValue;
+
                     Assert.AreEqual(returnSpatialKeyValue.Size(), spacialValues.Size());
 
                     for (var i = 0UL; i < returnSpatialKeyValue.Size(); i++)
@@ -346,6 +394,7 @@ namespace CSPEngine
                     }
 
                     var returnTags = anchorCollection[idx].Tags;
+
                     Assert.AreEqual(returnTags.Size(), tags.Size());
 
                     for (var i = 0UL; i < returnTags.Size(); i++)
@@ -359,6 +408,8 @@ namespace CSPEngine
                 }
             }
 
+            anchorCollection.Dispose();
+
             Assert.IsTrue(found);
         }
 #endif
@@ -367,7 +418,7 @@ namespace CSPEngine
         [Test]
         public static void GetAnchorsInSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -379,17 +430,31 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
+            SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
+            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var objectName1 = "TestObject1";
-            CreateObject(entitySystem, objectName1, out var createdObject1, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName1, out var createdObject1, false);
             var objectName2 = "TestObject2";
-            CreateObject(entitySystem, objectName2, out var createdObject2, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName2, out var createdObject2, false);
 
             var createAssetCollectionResult1 = assetSystem.CreateAssetCollection(space.Id, null, testAssetCollectionName1, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection1 = createAssetCollectionResult1.GetAssetCollection();
@@ -398,15 +463,20 @@ namespace CSPEngine
 
             var anchor1 = CreateAnchorInSpace(anchorSystem, space.Id, createdObject1.GetId(), assetCollection1.Id, null, null, null);
             var anchor2 = CreateAnchorInSpace(anchorSystem, space.Id, createdObject2.GetId(), assetCollection2.Id, null, null, null);
-                
-            using var result = anchorSystem.GetAnchorsInSpace(space.Id, null, null).Result;
-            var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            // Get anchors
+            Common.Array<Systems.Anchor> anchorCollection;
 
-            using var anchorCollection = result.GetAnchors();
+            {
+                using var result = anchorSystem.GetAnchorsInSpace(space.Id, null, null).Result;
+                var resCode = result.GetResultCode();
 
-            Assert.AreEqual(anchorCollection.Size(), 2UL);
+                Assert.AreEqual(resCode, Services.EResultCode.Success);
+
+                anchorCollection = result.GetAnchors();
+
+                Assert.AreEqual(anchorCollection.Size(), 2UL);
+            }
 
             var anchorsFound = 0;
 
@@ -420,6 +490,8 @@ namespace CSPEngine
                 }
             }
 
+            anchorCollection.Dispose();
+
             Assert.AreEqual(anchorsFound, 2);
         }
 #endif
@@ -428,26 +500,40 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorResolutionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
-            
+
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var enterResult = spaceSystem.EnterSpace(space.Id, true).Result;
-            Assert.AreEqual(enterResult.GetResultCode(), Services.EResultCode.Success);
-            var connection = enterResult.GetConnection();
-            
+            SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
+
+            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
             var entitySystem = connection.GetSpaceEntitySystem();
+
             entitySystem.OnEntityCreated += (s, e) => { };
 
+            // Connect to multiplayer service
+            {
+                var ok = connection.Connect().Result;
+
+                Assert.IsTrue(ok);
+            }
+
+            // Fetch all entities, etc.
+            {
+                var ok = connection.InitialiseConnection().Result;
+
+                Assert.IsTrue(ok);
+            }
+
             var objectName = "TestObject";
-            CreateObject(entitySystem, objectName, out var createdObject, false);
+            MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);
 
             var createAssetCollectionResult = assetSystem.CreateAssetCollection(space.Id, null, testAssetCollectionName, null, Systems.EAssetCollectionType.DEFAULT, null).Result;
             var assetCollection = createAssetCollectionResult.GetAssetCollection();

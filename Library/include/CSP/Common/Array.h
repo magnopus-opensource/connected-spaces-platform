@@ -22,7 +22,16 @@
 #include <cassert>
 #include <cstring>
 #include <initializer_list>
+#include <stdexcept>
 #include <utility>
+
+#ifndef CSP_DISABLE_OVERFLOW_CHECKING
+	#ifdef _MSC_VER
+		#include <intrin.h>
+	#else
+		#include <cstdint>
+	#endif
+#endif
 
 
 namespace csp::common
@@ -49,7 +58,7 @@ public:
 	/// @brief Constructs an array with the given number of elements.
 	/// Each element in the array will have it's default constuctor called.
 	/// @param Size const size_t : Number of elements in the array
-	Array(const size_t Size) : ArraySize(0), ObjectArray(nullptr)
+	explicit Array(const size_t Size) : ArraySize(0), ObjectArray(nullptr)
 	{
 		if (Size > 0)
 		{
@@ -62,7 +71,7 @@ public:
 	/// @param Size size_t : Number of elements in the buffer
 	CSP_NO_EXPORT Array(const T* Buffer, size_t Size) : ArraySize(0), ObjectArray(nullptr)
 	{
-		if (Size > 0)
+		if (Buffer != nullptr && Size > 0)
 		{
 			AllocArray(Size);
 			memcpy(ObjectArray, Buffer, Size * sizeof(T));
@@ -112,14 +121,14 @@ public:
 	/// @return T*
 	CSP_NO_EXPORT T* Data()
 	{
-		return ArraySize > 0 ? &ObjectArray[0] : nullptr;
+		return ObjectArray;
 	}
 
 	/// @brief Returns a const pointer to the start of the array.
 	/// @return const T*
 	CSP_NO_EXPORT const T* Data() const
 	{
-		return ArraySize > 0 ? &ObjectArray[0] : nullptr;
+		return ObjectArray;
 	}
 
 	/// @brief Copy assignment.
@@ -153,7 +162,12 @@ public:
 	/// @return T& : Array element
 	T& operator[](const size_t Index)
 	{
-		assert(Index < ArraySize);
+#ifndef CSP_DISABLE_BOUNDS_CHECKING
+		if (Index >= ArraySize)
+		{
+			throw std::out_of_range("Index");
+		}
+#endif
 
 		return ObjectArray[Index];
 	}
@@ -163,7 +177,12 @@ public:
 	/// @return const T& : Array element
 	const T& operator[](const size_t Index) const
 	{
-		assert(Index < ArraySize);
+#ifndef CSP_DISABLE_BOUNDS_CHECKING
+		if (Index >= ArraySize)
+		{
+			throw std::out_of_range("Index");
+		}
+#endif
 
 		return ObjectArray[Index];
 	}
@@ -203,7 +222,22 @@ private:
 	{
 		if (ObjectArray == nullptr)
 		{
-			ObjectArray = (T*) csp::memory::DllAlloc(sizeof(T) * Size);
+#ifndef CSP_DISABLE_OVERFLOW_CHECKING
+	#ifdef _MSC_VER // MSVC
+			auto HighBits = __umulh(sizeof(T), Size);
+	#else // GCC or Clang
+			auto MultiplyResult = static_cast<__uint128_t>(sizeof(T)) * static_cast<__uint128_t>(Size);
+			auto HighBits		= static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
+	#endif
+
+			if (HighBits > 0)
+			{
+				throw std::overflow_error("Size");
+			}
+#endif
+
+			auto BufferSize = sizeof(T) * Size;
+			ObjectArray		= (T*) csp::memory::DllAlloc(BufferSize);
 
 			for (size_t i = 0; i < Size; ++i)
 			{

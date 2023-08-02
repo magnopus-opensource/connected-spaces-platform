@@ -79,22 +79,45 @@
     );
 {{/ type.is_function_signature }}
 {{/ parameters }}
+
 {{! Allocate memory for return value if function returns NativePointer. }}
 {{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_number }}
     var _ret = Module._malloc(8);
+{{/ return_type.is_number }}
 {{/ return_type.is_pointer_or_reference }}
 {{^ return_type.is_pointer_or_reference }}
 {{# return_type.is_class_or_interface }}
     var _ret = Module._malloc(8);
 {{/ return_type.is_class_or_interface }}
 {{/ return_type.is_pointer_or_reference }}
+
 {{! Call the C function with ccall, which handles marshalling some types for us. }}
-    {{# return_type }}{{^ is_void }}{{^ is_pointer_or_reference }}{{^ is_class_or_interface }}return {{/ is_class_or_interface }}{{/ is_pointer_or_reference }}{{/ is_void }}{{/ return_type }}Module.ccall(
+{{# return_type }}
+{{^ is_void }}
+{{^ is_class_or_interface }}
+{{^ is_pointer_or_reference }}
+    let _result =
+{{/ is_pointer_or_reference }}
+{{# is_pointer_or_reference }}
+{{# is_number }}
+    let _result =
+{{/ is_number }}
+{{/ is_pointer_or_reference }}
+{{/ is_class_or_interface }}
+{{/ is_void }}
+{{/ return_type }}
+    Module.ccall(
         "{{ unique_name }}",
 {{! Output the return type of the ccall call. }}
 {{# return_type }}
 {{# is_pointer_or_reference }}
+{{# is_number }}
+        "number",
+{{/ is_number }}
+{{^ is_number }}
         "void",
+{{/ is_number }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
@@ -105,14 +128,21 @@
         "number",
 {{/ is_enum }}
 {{^ is_enum }}
+{{# is_string }}
+        "number",
+{{/ is_string }}
+{{^ is_string }}
         "{{ name }}",
+{{/ is_string }}
 {{/ is_enum }}
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
 {{/ return_type }}
         [
 {{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_number }}
             "number",
+{{/ return_type.is_number }}
 {{/ return_type.is_pointer_or_reference }}
 {{^ return_type.is_pointer_or_reference }}
 {{# return_type.is_class_or_interface }}
@@ -127,7 +157,9 @@
         ],
         [
 {{# return_type.is_pointer_or_reference }}
+{{^ return_type.is_number }}
             _ret,
+{{/ return_type.is_number }}
 {{/ return_type.is_pointer_or_reference }}
 {{^ return_type.is_pointer_or_reference }}
 {{# return_type.is_class_or_interface }}
@@ -157,8 +189,60 @@
 {{# is_pointer_or_reference }}
 {{# is_void_pointer }}
     var _nPtr = getNativePointer(_ret).pointer;
+    Module._free(_ret);
+
+    return _nPtr;
 {{/ is_void_pointer }}
 {{^ is_void_pointer }}
+{{# is_number }}
+{{# is_const }}
+{{# is_integer }}
+{{^ is_signed }}
+    const _unfixedValue = _result;
+    {{> UnsignedFix }}
+
+    _result = _fixedValue;
+{{/ is_signed }}
+{{/ is_integer }}
+
+    return _result;
+{{/ is_const }}
+{{^ is_const }}
+    _result = new NativeRef(
+        _result,
+        NativeType.
+{{# is_integer }}
+{{# is_large }}
+{{# is_signed }} Int64 {{/ is_signed }}
+{{^ is_signed }} UInt64 {{/ is_signed }}
+{{/ is_large }}
+{{# is_small }}
+{{# is_signed }} Int16 {{/ is_signed }}
+{{^ is_signed }} UInt16 {{/ is_signed }}
+{{/ is_small }}
+{{# is_tiny }}
+{{# is_signed }} Int8 {{/ is_signed }}
+{{^ is_signed }} UInt8 {{/ is_signed }}
+{{/ is_tiny }}
+{{^ is_large }}
+{{^ is_small }}
+{{^ is_tiny }}
+{{# is_signed }} Int32 {{/ is_signed }}
+{{^ is_signed }} UInt32 {{/ is_signed }}
+{{/ is_tiny }}
+{{/ is_small }}
+{{/ is_large }}
+{{/ is_integer }}
+{{^ is_integer }}
+{{# is_large }} Double {{/ is_large }}
+{{^ is_large }} Float {{/ is_large }}
+{{/ is_integer }}
+    );
+
+    return _result;
+{{/ is_const }}
+{{/ is_number }}
+{{^ is_number }}
     var _nPtr = new {{> TypeName }}
         (
             getNativePointer(_ret)
@@ -167,9 +251,11 @@
             {{> Template/ConstructorArguments }}
 {{/ template_arguments }}
         );
-{{/ is_void_pointer }}
     Module._free(_ret);
+
     return _nPtr;
+{{/ is_number }}
+{{/ is_void_pointer }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
@@ -182,6 +268,30 @@
     );
     Module._free(_ret);
     return _nPtr;
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+
+{{# is_number }}
+{{# is_integer }}
+{{^ is_signed }}
+    const _unfixedValue = _result;
+    {{> UnsignedFix }}
+
+    _result = _fixedValue;
+{{/ is_signed }}
+{{/ is_integer }}
+{{/ is_number }}
+
+{{# is_string }}
+    const _resultString = Module.UTF8ToString(_result);
+    free(_result);
+
+    _result = _resultString;
+{{/ is_string }}
+
+{{^ is_void }}
+    return _result;
+{{/ is_void }}
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
 {{/ return_type }}
