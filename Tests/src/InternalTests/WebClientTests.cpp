@@ -458,7 +458,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 }
 	#endif
 
-
 class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
 public:
@@ -611,6 +610,267 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest2)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest3)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest4)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest5)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest6)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest7)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest8)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest9)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
+	ResponseReceiver Receiver;
+
+	{
+		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+		EXPECT_TRUE(WebClient != nullptr);
+
+		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
+
+		//// Sleep thread until response is received
+		if (Receiver.WaitForResponse())
+		{
+			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
+		}
+		else
+		{
+			FAIL() << "Response timeout" << std::endl;
+		}
+	}
+
+	csp::CSPFoundation::Shutdown();
+}
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest10)
 {
 	InitialiseFoundation();
 
