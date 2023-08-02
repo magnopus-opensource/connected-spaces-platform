@@ -50,6 +50,7 @@ template <typename... Args> static String StringFormat(const String& Format, Arg
 	std::unique_ptr<char[], csp::memory::DllDeleter<char>> Buf((char*) csp::memory::DllAlloc(Size));
 
 	std::snprintf(Buf.get(), Size, Format.c_str(), args...);
+
 	return String(Buf.get(), Size - 1); // We don't want the '\0' inside
 };
 
