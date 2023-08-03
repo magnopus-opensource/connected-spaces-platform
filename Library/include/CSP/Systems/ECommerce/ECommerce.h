@@ -17,6 +17,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Services/WebService.h"
+#include "Common/DateTime.h"
 
 namespace csp::services
 {
@@ -38,11 +40,7 @@ class CSP_API ProductMediaInfo
 {
 public:
 	ProductMediaInfo() = default;
-	ProductMediaInfo(const csp::common::String& MediaContentTypeIn,
-					 const csp::common::String& AltIn,
-					 const csp::common::String& UrlIn,
-					 const int64_t WidthIn,
-					 const int64_t HeightIn);
+	ProductMediaInfo(const csp::common::String& MediaContentTypeIn, const csp::common::String& AltIn, const csp::common::String& UrlIn);
 
 	/// @brief Type of media content used.
 	csp::common::String MediaContentType;
@@ -50,28 +48,6 @@ public:
 	csp::common::String Alt;
 	/// @brief Url of the media.
 	csp::common::String Url;
-	/// @brief Width of the media.
-	int64_t Width;
-	/// @brief Height of the media.
-	int64_t Height;
-};
-
-/// @ingroup ECommerce System
-/// @brief Represents image information for a product
-class CSP_API ProductImageInfo
-{
-public:
-	ProductImageInfo() = default;
-	ProductImageInfo(const csp::common::String& AltIn, const csp::common::String& UrlIn, const int64_t WidthIn, const int64_t HeightIn);
-
-	/// @brief Alternative description of the image.
-	csp::common::String Alt;
-	/// @brief Url of the image.
-	csp::common::String Url;
-	/// @brief Width of the image.
-	int64_t Width;
-	/// @brief Height of the Image.
-	int64_t Height;
 };
 
 /// @ingroup ECommerce System
@@ -81,27 +57,55 @@ class CSP_API ProductInfo
 public:
 	ProductInfo(const csp::common::String& IdIn,
 				const csp::common::String& TitleIn,
-				bool AvailableForSaleIn,
-				const ProductImageInfo& ImageIn,
-				const csp::common::Map<csp::common::String, csp::common::String>& SelectedOptionsIn,
-				double UnitPriceIn,
-				const csp::common::Array<ProductMediaInfo>& Media);
+				const csp::common::DateTime CreatedAtIn,
+				const csp::common::Array<common::String>& TagsIn,
+				csp::common::Map<common::String, common::String> VariantsIn,
+				const csp::common::Array<ProductMediaInfo>& MediaIn);
 
 	/// @brief Id of the product.
 	csp::common::String Id;
 	/// @brief Title of the product.
 	csp::common::String Title;
-	/// @brief Flag showing if the Product is available.
-	bool AvailableForSale;
-	/// @brief The object holding Information about the Product image.
-	ProductImageInfo Image;
-	/// @brief map of product options available for selection.
-	csp::common::Map<csp::common::String, csp::common::String> SelectedOptions;
-	/// @brief price of the product.
-	double UnitPrice;
+	/// @brief  Time the product was created.
+	csp::common::DateTime CreatedAt;
+	/// @brief Description of the product.
+	csp::common::String Description;
+	/// @brief map of product variants.
+	csp::common::Map<common::String, common::String> Variants;
+	/// @brief array of product tags.
+	csp::common::Array<common::String> Tags;
 	/// @brief This array holds object of additional media for the product
 	csp::common::Array<ProductMediaInfo> Media;
 };
 
+/// @ingroup ECommerce System
+/// @brief Data class used to contain information when attempting to get Product Info.
+class CSP_API ProductInfoResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	friend class ECommerceSystem;
+
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Retrieves the Product Info being stored.
+	/// @return ProductInfo : reference to the ProductInfo
+	const ProductInfo& GetProductInfo() const;
+
+private:
+	ProductInfoResult() = delete;
+	ProductInfoResult(void*) {};
+
+	void SetProductInfo(const ProductInfo& InSpace);
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	ProductInfo ProductInformation;
+};
+
+typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;
 
 } // namespace csp::systems

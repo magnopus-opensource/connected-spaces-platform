@@ -15,39 +15,71 @@
  */
 #include "CSP/Systems/ECommerce/ECommerce.h"
 
+#include "Services/ApiBase/ApiBase.h"
+#include "Services/aggregationservice/Dto.h"
 
+namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
 
-ProductImageInfo::ProductImageInfo(const csp::common::String& AltIn, const csp::common::String& UrlIn, const int64_t WidthIn, const int64_t HeightIn)
-	: Alt(AltIn), Url(UrlIn), Width(WidthIn), Height(HeightIn)
-{
-}
-
-ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn,
-								   const csp::common::String& AltIn,
-								   const csp::common::String& UrlIn,
-								   const int64_t WidthIn,
-								   const int64_t HeightIn)
-	: MediaContentType(MediaContentTypeIn), Alt(AltIn), Url(UrlIn), Width(WidthIn), Height(HeightIn)
+ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn, const csp::common::String& AltIn, const csp::common::String& UrlIn)
+	: MediaContentType(MediaContentTypeIn), Alt(AltIn), Url(UrlIn)
 {
 }
 
 ProductInfo::ProductInfo(const csp::common::String& IdIn,
 						 const csp::common::String& TitleIn,
-						 bool AvailableForSaleIn,
-						 const ProductImageInfo& ImageIn,
-						 const csp::common::Map<csp::common::String, csp::common::String>& SelectedOptionsIn,
-						 double UnitPriceIn,
+						 const csp::common::DateTime CreatedAtIn,
+						 const csp::common::Array<common::String>& TagsIn,
+						 csp::common::Map<common::String, common::String> VariantsIn,
 						 const csp::common::Array<ProductMediaInfo>& MediaIn)
-	: Id(IdIn)
-	, Title(TitleIn)
-	, AvailableForSale(AvailableForSaleIn)
-	, Image(ImageIn)
-	, SelectedOptions(SelectedOptionsIn)
-	, UnitPrice(UnitPriceIn)
-	, Media(MediaIn)
+	: Id(IdIn), Title(TitleIn), CreatedAt(CreatedAtIn), Tags(TagsIn), Variants(VariantsIn), Media(MediaIn)
 {
+}
+
+void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	chs_aggregation::ShopifyProductDto* ProductInformationResponse = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response						   = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		ProductInformationResponse->FromJson(Response->GetPayload().GetContent());
+
+		ProductInformation.Id		   = ProductInformationResponse->GetId();
+		ProductInformation.Title	   = ProductInformationResponse->GetTitle();
+		ProductInformation.Description = ProductInformationResponse->GetDescription();
+		ProductInformation.CreatedAt   = csp::common::DateTime(ProductInformationResponse->GetCreatedAt());
+
+		auto VariantProductInformation = ProductInformationResponse->GetVariants();
+
+		for (int i = 0; i < VariantProductInformation.size(); ++i)
+		{
+			ProductInformation.Variants[VariantProductInformation[i]->GetId()] = VariantProductInformation[i]->GetTitle();
+		}
+
+		auto TagsProductInformation = ProductInformationResponse->GetTags();
+
+		ProductInformation.Tags = common::Array<common::String>(TagsProductInformation.size());
+
+		for (int i = 0; i < TagsProductInformation.size(); ++i)
+		{
+			ProductInformation.Tags[i] = TagsProductInformation[i];
+		}
+
+		auto MediaProductInformation = ProductInformationResponse->GetMedia();
+
+		ProductInformation.Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
+
+		for (int i = 0; i < MediaProductInformation.size(); ++i)
+		{
+			ProductInformation.Media[i].Alt				 = MediaProductInformation[i]->GetAlt();
+			ProductInformation.Media[i].Url				 = MediaProductInformation[i]->GetUrl();
+			ProductInformation.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
+		}
+	}
 }
 
 } // namespace csp::systems
