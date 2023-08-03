@@ -29,9 +29,9 @@ ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn
 
 ProductInfo::ProductInfo(const csp::common::String& IdIn,
 						 const csp::common::String& TitleIn,
-						 const csp::common::DateTime CreatedAtIn,
+						 const csp::common::String& CreatedAtIn,
 						 const csp::common::Array<common::String>& TagsIn,
-						 csp::common::Map<common::String, common::String> VariantsIn,
+						 const csp::common::Map<csp::common::String, csp::common::String>& VariantsIn,
 						 const csp::common::Array<ProductMediaInfo>& MediaIn)
 	: Id(IdIn), Title(TitleIn), CreatedAt(CreatedAtIn), Tags(TagsIn), Variants(VariantsIn), Media(MediaIn)
 {
@@ -61,7 +61,7 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 		ProductInformation.Id		   = ProductInformationResponse->GetId();
 		ProductInformation.Title	   = ProductInformationResponse->GetTitle();
 		ProductInformation.Description = ProductInformationResponse->GetDescription();
-		ProductInformation.CreatedAt   = csp::common::DateTime(ProductInformationResponse->GetCreatedAt());
+		ProductInformation.CreatedAt   = ProductInformationResponse->GetCreatedAt();
 
 		auto VariantProductInformation = ProductInformationResponse->GetVariants();
 

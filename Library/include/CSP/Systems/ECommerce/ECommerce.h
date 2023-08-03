@@ -56,25 +56,25 @@ class CSP_API ProductInfo
 {
 public:
 	ProductInfo() = default;
-	ProductInfo(const csp::common::String& IdIn,
-				const csp::common::String& TitleIn,
-				const csp::common::DateTime CreatedAtIn,
-				const csp::common::Array<common::String>& TagsIn,
-				csp::common::Map<common::String, common::String> VariantsIn,
-				const csp::common::Array<ProductMediaInfo>& MediaIn);
+	ProductInfo::ProductInfo(const csp::common::String& IdIn,
+							 const csp::common::String& TitleIn,
+							 const csp::common::String& CreatedAtIn,
+							 const csp::common::Array<csp::common::String>& TagsIn,
+							 const csp::common::Map<csp::common::String, csp::common::String>& VariantsIn,
+							 const csp::common::Array<ProductMediaInfo>& MediaIn);
 
 	/// @brief Id of the product.
 	csp::common::String Id;
 	/// @brief Title of the product.
 	csp::common::String Title;
 	/// @brief  Time the product was created.
-	csp::common::DateTime CreatedAt;
+	csp::common::String CreatedAt;
 	/// @brief Description of the product.
 	csp::common::String Description;
 	/// @brief map of product variants.
-	csp::common::Map<common::String, common::String> Variants;
+	csp::common::Map<csp::common::String, csp::common::String> Variants;
 	/// @brief array of product tags.
-	csp::common::Array<common::String> Tags;
+	csp::common::Array<csp::common::String> Tags;
 	/// @brief This array holds object of additional media for the product
 	csp::common::Array<ProductMediaInfo> Media;
 };
