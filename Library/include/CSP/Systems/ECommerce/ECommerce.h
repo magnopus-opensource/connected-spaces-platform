@@ -44,11 +44,16 @@ public:
 					 const int64_t WidthIn,
 					 const int64_t HeightIn);
 
-	csp::common::String MediaContentType; // Type of media content used.
-	csp::common::String Alt;			  // Alternative description of the media.
-	csp::common::String Url;			  // Url of the media.
-	int64_t Width;						  // Width fo the media.
-	int64_t Height;						  // Height of the media.
+	/// @brief Type of media content used.
+	csp::common::String MediaContentType;
+	/// @brief Alternative description of the media.
+	csp::common::String Alt;
+	/// @brief Url of the media.
+	csp::common::String Url;
+	/// @brief Width of the media.
+	int64_t Width;
+	/// @brief Height of the media.
+	int64_t Height;
 };
 
 /// @ingroup ECommerce System
@@ -59,10 +64,14 @@ public:
 	ProductImageInfo() = default;
 	ProductImageInfo(const csp::common::String& AltIn, const csp::common::String& UrlIn, const int64_t WidthIn, const int64_t HeightIn);
 
-	csp::common::String Alt; // Alternative description of the image.
-	csp::common::String Url; // Url of the image.
-	int64_t Width;			 // Width fo the image.
-	int64_t Height;			 // Height of the Image.
+	/// @brief Alternative description of the image.
+	csp::common::String Alt;
+	/// @brief Url of the image.
+	csp::common::String Url;
+	/// @brief Width of the image.
+	int64_t Width;
+	/// @brief Height of the Image.
+	int64_t Height;
 };
 
 /// @ingroup ECommerce System
@@ -78,14 +87,20 @@ public:
 				double UnitPriceIn,
 				const csp::common::Array<ProductMediaInfo>& Media);
 
-
-	csp::common::String Id;														// Id of the product.
-	csp::common::String Title;													// Title of the product.
-	bool AvailableForSale;														// Flag showing if the Product is available.
-	ProductImageInfo Image;														// The object holding Information about the Product image.
-	csp::common::Map<csp::common::String, csp::common::String> SelectedOptions; // map of product options available for selection.
-	double UnitPrice;															// price of the product.
-	csp::common::Array<ProductMediaInfo> Media;									// This array holds object of additional media for the product
+	/// @brief Id of the product.
+	csp::common::String Id;
+	/// @brief Title of the product.
+	csp::common::String Title;
+	/// @brief Flag showing if the Product is available.
+	bool AvailableForSale;
+	/// @brief The object holding Information about the Product image.
+	ProductImageInfo Image;
+	/// @brief map of product options available for selection.
+	csp::common::Map<csp::common::String, csp::common::String> SelectedOptions;
+	/// @brief price of the product.
+	double UnitPrice;
+	/// @brief This array holds object of additional media for the product
+	csp::common::Array<ProductMediaInfo> Media;
 };
 
 
