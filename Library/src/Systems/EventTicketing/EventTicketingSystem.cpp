@@ -141,12 +141,7 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
 	}
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
-		->apiV1SpacesSpaceIdVendorsVendorNameEventsVendorEventIdTicketsVendorTicketIdPut(SpaceId,
-																						 GetVendorNameString(Vendor),
-																						 VendorEventId,
-																						 VendorTicketId,
-																						 RequestOnBehalfOfUserId,
-																						 ResponseHandler);
+		->apiV1SpacesSpaceIdEventsEventIdTicketsTicketIdPut(SpaceId, VendorEventId, VendorTicketId, RequestOnBehalfOfUserId, ResponseHandler);
 }
 
 void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
