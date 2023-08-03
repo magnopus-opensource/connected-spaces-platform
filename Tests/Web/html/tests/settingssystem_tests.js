@@ -5,7 +5,7 @@ import { createSpace } from './spacesystem_tests_helpers.js';
 
 import { freeBuffer, uint8ArrayToBuffer, Systems, Common } from '../olympus_foundation.js';
 import { createBufferAssetDataSource} from './assetsystem_tests_helpers.js'
-import { bufferToUint8Array } from '../node_modules/@magnopus/com.magnopus.olympus.foundation.web/olympus.foundation.js';
+import { bufferToUint8Array } from '../node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js';
 
 
 test('SettingsSystemTests', 'BlockSpaceTest', async function() {
