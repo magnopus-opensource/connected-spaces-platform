@@ -48,6 +48,13 @@ public:
 	CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient);
 	~ECommerceSystem();
 
+	/// @brief Get product information from a shopify store within a space
+	/// @param SpaceId csp::common::String : space id of product
+	/// @param ProductId csp::common::String : Product id of product
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+
+	CSP_ASYNC_RESULT void GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback);
+
 private:
 	csp::services::ApiBase* ShopifyAPI;
 };

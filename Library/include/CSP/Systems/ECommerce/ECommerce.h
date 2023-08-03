@@ -55,6 +55,7 @@ public:
 class CSP_API ProductInfo
 {
 public:
+	ProductInfo() = default;
 	ProductInfo(const csp::common::String& IdIn,
 				const csp::common::String& TitleIn,
 				const csp::common::DateTime CreatedAtIn,
@@ -83,8 +84,6 @@ public:
 class CSP_API ProductInfoResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class ECommerceSystem;
-
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
@@ -95,11 +94,12 @@ public:
 	/// @return ProductInfo : reference to the ProductInfo
 	const ProductInfo& GetProductInfo() const;
 
-private:
-	ProductInfoResult() = delete;
-	ProductInfoResult(void*) {};
+	/// @brief Retrieves the Product Info being stored.
+	/// @return ProductInfo : reference to the ProductInfo
+	ProductInfo& GetProductInfo();
 
-	void SetProductInfo(const ProductInfo& InSpace);
+private:
+	ProductInfoResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

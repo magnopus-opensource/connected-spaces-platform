@@ -37,4 +37,16 @@ ECommerceSystem::~ECommerceSystem()
 {
 	CSP_DELETE(ShopifyAPI);
 }
+
+void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
+{
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::SpaceEventDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsGet(SpaceId, ProductId, ResponseHandler);
+}
 } // namespace csp::systems

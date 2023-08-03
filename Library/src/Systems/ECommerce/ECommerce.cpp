@@ -37,6 +37,16 @@ ProductInfo::ProductInfo(const csp::common::String& IdIn,
 {
 }
 
+const ProductInfo& ProductInfoResult::GetProductInfo() const
+{
+	return ProductInformation;
+}
+
+ProductInfo& ProductInfoResult::GetProductInfo()
+{
+	return ProductInformation;
+}
+
 void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
