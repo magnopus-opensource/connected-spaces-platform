@@ -42,7 +42,7 @@ void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const
 {
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::SpaceEventDto>(
+		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
 			Callback,
 			nullptr,
 			csp::web::EResponseCodes::ResponseCreated);

@@ -36,10 +36,51 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 	if (Dto.HasVariants())
 	{
 		auto VariantProductInformation = Dto.GetVariants();
+		ProductInfo.Variants		   = common::Array<ProductVariantInfo>(VariantProductInformation.size());
 
 		for (int i = 0; i < VariantProductInformation.size(); ++i)
 		{
-			ProductInfo.Variants[VariantProductInformation[i]->GetId()] = VariantProductInformation[i]->GetTitle();
+			ProductInfo.Variants[i].Id				 = VariantProductInformation[i]->GetId();
+			ProductInfo.Variants[i].Title			 = VariantProductInformation[i]->GetTitle();
+			ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
+			if (VariantProductInformation[i]->HasImage())
+			{
+				if (VariantProductInformation[i]->GetImage()->HasMediaContentType())
+				{
+					ProductInfo.Variants[i].Media.MediaContentType = VariantProductInformation[i]->GetImage()->GetMediaContentType();
+				}
+
+				ProductInfo.Variants[i].Media.Alt	 = VariantProductInformation[i]->GetImage()->GetAlt();
+				ProductInfo.Variants[i].Media.Url	 = VariantProductInformation[i]->GetImage()->GetUrl();
+				ProductInfo.Variants[i].Media.Width	 = VariantProductInformation[i]->GetImage()->GetWidth();
+				ProductInfo.Variants[i].Media.Height = VariantProductInformation[i]->GetImage()->GetHeight();
+			}
+
+			if (Dto.GetVariants()[i]->HasSelectedOptions())
+			{
+				auto VariantOptionInformation = Dto.GetVariants()[i]->GetSelectedOptions();
+
+				ProductInfo.Variants[i].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
+
+				for (int n = 0; n < VariantOptionInformation.size(); ++n)
+				{
+					ProductInfo.Variants[i].Options[n].Name	 = VariantOptionInformation[n]->GetOptionName();
+					ProductInfo.Variants[i].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
+				}
+			}
+
+			if (VariantProductInformation[i]->HasUnitPrice())
+			{
+				if (VariantProductInformation[i]->GetUnitPrice()->HasAmount())
+				{
+					ProductInfo.Variants[i].UnitPrice.Amount = VariantProductInformation[i]->GetUnitPrice()->GetAmount();
+				}
+
+				if (VariantProductInformation[i]->GetUnitPrice()->HasCurrencyCode())
+				{
+					ProductInfo.Variants[i].UnitPrice.CurrencyCode = VariantProductInformation[i]->GetUnitPrice()->GetCurrencyCode();
+				}
+			}
 		}
 	}
 
@@ -66,6 +107,8 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			ProductInfo.Media[i].Alt			  = MediaProductInformation[i]->GetAlt();
 			ProductInfo.Media[i].Url			  = MediaProductInformation[i]->GetUrl();
 			ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
+			ProductInfo.Media[i].Width			  = MediaProductInformation[i]->GetWidth();
+			ProductInfo.Media[i].Height			  = MediaProductInformation[i]->GetHeight();
 		}
 	}
 }

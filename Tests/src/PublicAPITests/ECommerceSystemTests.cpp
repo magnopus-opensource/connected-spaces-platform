@@ -68,16 +68,71 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	// To use this test please follow end to end testing steps first:
 	// https://docs.google.com/document/d/1D2fzF88c4NfPp26ciJHf-qelNFY5jqQHmt8lqolOmq0/edit?usp=sharing
 
-	// These variables much be change to products values
-	const char* TestProductDescription = "Gift Card";
-	const char* TestSpaceDescription   = "This is a gift card for the store";
-
+	// This is an example from shopify dev quickstart "Gift Card"
+	const csp::common::String ProductId				= "gid://shopify/Product/8660541047057";
+	const csp::common::String ProductTitle			= "Gift Card";
+	const csp::common::String ProductDescription	= "This is a gift card for the store";
+	const csp::common::String ImageMediaContentType = "IMAGE";
+	const csp::common::String ImageAlt				= "Gift card that shows text: Generated data gift card";
+	const csp::common::String ImageUrl				= "https://cdn.shopify.com/s/files/1/0803/6070/2225/products/gift_card.png?v=1691076851";
+	const int32_t ImageWidth						= 2881;
+	const int32_t ImageHeight						= 2881;
+	const int32_t VariantSize						= 4;
+	const int32_t MediaSize							= 1;
+	const int32_t OptionsSize						= 1;
+	const csp::common::String OptionsName			= "Denominations";
+	csp::common::Array<csp::common::String> VariantTitleAndOptionValue = {"$10", "$25", "$50", "$100"};
+	csp::common::Array<csp::common::String> VariantIds				   = {"gid://shopify/ProductVariant/46314311516433",
+																		  "gid://shopify/ProductVariant/46314311647505",
+																		  "gid://shopify/ProductVariant/46314311745809",
+																		  "gid://shopify/ProductVariant/46314311844113"};
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	auto Details = GetShopifyDetails();
 
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformation, RequestPredicate, Details["SpaceId"], Details["ProductId"]);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+
+	EXPECT_EQ(Result.GetProductInfo().Id, ProductId);
+	EXPECT_EQ(Result.GetProductInfo().Title, ProductTitle);
+	EXPECT_EQ(Result.GetProductInfo().Description, ProductDescription);
+	EXPECT_EQ(Result.GetProductInfo().Tags.Size(), 0);
+
+	EXPECT_EQ(Result.GetProductInfo().Media.Size(), MediaSize);
+
+	for (int i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
+	{
+		EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, ImageMediaContentType);
+		EXPECT_EQ(Result.GetProductInfo().Media[i].Url, ImageUrl);
+		EXPECT_EQ(Result.GetProductInfo().Media[i].Alt, ImageAlt);
+		EXPECT_EQ(Result.GetProductInfo().Media[i].Width, ImageWidth);
+		EXPECT_EQ(Result.GetProductInfo().Media[i].Height, ImageHeight);
+	}
+	EXPECT_EQ(Result.GetProductInfo().Variants.Size(), VariantSize);
+
+	for (int i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
+	{
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, VariantIds[i]);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, VariantTitleAndOptionValue[i]);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].AvailableForSale, true);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.MediaContentType, "");
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Alt, ImageAlt);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Url, ImageUrl);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Width, ImageWidth);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Media.Height, ImageHeight);
+
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), OptionsSize);
+
+		for (int n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
+		{
+			EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, OptionsName);
+			EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
+		}
+
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.Amount, 0);
+		EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.CurrencyCode, "");
+	}
 
 	LogOut(UserSystem);
 }

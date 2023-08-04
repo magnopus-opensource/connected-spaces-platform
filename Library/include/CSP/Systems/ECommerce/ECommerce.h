@@ -32,9 +32,21 @@ CSP_END_IGNORE
 
 namespace csp::systems
 {
+/// @ingroup ECommerce System
+/// @brief Represents Currency information for a product
+class CSP_API CurrencyInfo
+{
+public:
+	CurrencyInfo() = default;
+
+	/// @brief Currency Amount.
+	double Amount;
+	/// @brief Currency type
+	csp::common::String CurrencyCode;
+};
 
 /// @ingroup ECommerce System
-/// @brief Represents media information for a product such as additional images
+/// @brief Represents media information for a product
 class CSP_API ProductMediaInfo
 {
 public:
@@ -46,7 +58,47 @@ public:
 	csp::common::String Alt;
 	/// @brief Url of the media.
 	csp::common::String Url;
+	/// @brief Width of the media.
+	int32_t Width;
+	/// @brief Height of the media.
+	int32_t Height;
 };
+
+/// @ingroup ECommerce System
+/// @brief Represents option for a variant
+class CSP_API VariantOptionInfo
+{
+public:
+	VariantOptionInfo() = default;
+
+	/// @brief Id of the variant.
+	csp::common::String Name;
+	/// @brief Title of variant.
+	csp::common::String Value;
+};
+
+/// @ingroup ECommerce System
+/// @brief Represents variant information for a product
+class CSP_API ProductVariantInfo
+{
+public:
+	ProductVariantInfo() = default;
+	/// @brief Id of the variant.
+	csp::common::String Id;
+	/// @brief Title of the variant.
+	csp::common::String Title;
+	/// @brief Title of variant.
+	csp::common::String Url;
+	/// @brief is variant available for sale.
+	bool AvailableForSale;
+	/// @brief This image for a variant
+	ProductMediaInfo Media;
+	/// @brief Additional options for variant
+	csp::common::Array<VariantOptionInfo> Options;
+	/// @brief Unit price for the variant
+	CurrencyInfo UnitPrice;
+};
+
 
 /// @ingroup ECommerce System
 /// @brief Represents a single product and the information associated with it.
@@ -63,11 +115,11 @@ public:
 	csp::common::String CreatedAt;
 	/// @brief Description of the product.
 	csp::common::String Description;
-	/// @brief map of product variants.
-	csp::common::Map<csp::common::String, csp::common::String> Variants;
+	/// @brief array of product variants.
+	csp::common::Array<ProductVariantInfo> Variants;
 	/// @brief array of product tags.
 	csp::common::Array<csp::common::String> Tags;
-	/// @brief This array holds object of additional media for the product
+	/// @brief This array holds  media for the product
 	csp::common::Array<ProductMediaInfo> Media;
 };
 
