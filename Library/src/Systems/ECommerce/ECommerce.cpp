@@ -22,19 +22,52 @@ namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
 
-ProductMediaInfo::ProductMediaInfo(const csp::common::String& MediaContentTypeIn, const csp::common::String& AltIn, const csp::common::String& UrlIn)
-	: MediaContentType(MediaContentTypeIn), Alt(AltIn), Url(UrlIn)
+void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, csp::systems::ProductInfo& ProductInfo)
 {
-}
+	ProductInfo.Id		  = Dto.GetId();
+	ProductInfo.Title	  = Dto.GetTitle();
+	ProductInfo.CreatedAt = Dto.GetCreatedAt();
 
-ProductInfo::ProductInfo(const csp::common::String& IdIn,
-						 const csp::common::String& TitleIn,
-						 const csp::common::String& CreatedAtIn,
-						 const csp::common::Array<common::String>& TagsIn,
-						 const csp::common::Map<csp::common::String, csp::common::String>& VariantsIn,
-						 const csp::common::Array<ProductMediaInfo>& MediaIn)
-	: Id(IdIn), Title(TitleIn), CreatedAt(CreatedAtIn), Tags(TagsIn), Variants(VariantsIn), Media(MediaIn)
-{
+	if (Dto.HasDescription())
+	{
+		ProductInfo.Description = Dto.GetDescription();
+	}
+
+	if (Dto.HasVariants())
+	{
+		auto VariantProductInformation = Dto.GetVariants();
+
+		for (int i = 0; i < VariantProductInformation.size(); ++i)
+		{
+			ProductInfo.Variants[VariantProductInformation[i]->GetId()] = VariantProductInformation[i]->GetTitle();
+		}
+	}
+
+	if (Dto.HasTags())
+	{
+		auto TagsProductInformation = Dto.GetTags();
+
+		ProductInfo.Tags = common::Array<common::String>(TagsProductInformation.size());
+
+		for (int i = 0; i < TagsProductInformation.size(); ++i)
+		{
+			ProductInfo.Tags[i] = TagsProductInformation[i];
+		}
+	}
+
+	if (Dto.HasMedia())
+	{
+		auto MediaProductInformation = Dto.GetMedia();
+
+		ProductInfo.Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
+
+		for (int i = 0; i < MediaProductInformation.size(); ++i)
+		{
+			ProductInfo.Media[i].Alt			  = MediaProductInformation[i]->GetAlt();
+			ProductInfo.Media[i].Url			  = MediaProductInformation[i]->GetUrl();
+			ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
+		}
+	}
 }
 
 const ProductInfo& ProductInfoResult::GetProductInfo() const
@@ -51,44 +84,13 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	chs_aggregation::ShopifyProductDto* ProductInformationResponse = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response						   = ApiResponse->GetResponse();
+	auto* ProductInformationResponse	   = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
 		ProductInformationResponse->FromJson(Response->GetPayload().GetContent());
-
-		ProductInformation.Id		   = ProductInformationResponse->GetId();
-		ProductInformation.Title	   = ProductInformationResponse->GetTitle();
-		ProductInformation.Description = ProductInformationResponse->GetDescription();
-		ProductInformation.CreatedAt   = ProductInformationResponse->GetCreatedAt();
-
-		auto VariantProductInformation = ProductInformationResponse->GetVariants();
-
-		for (int i = 0; i < VariantProductInformation.size(); ++i)
-		{
-			ProductInformation.Variants[VariantProductInformation[i]->GetId()] = VariantProductInformation[i]->GetTitle();
-		}
-
-		auto TagsProductInformation = ProductInformationResponse->GetTags();
-
-		ProductInformation.Tags = common::Array<common::String>(TagsProductInformation.size());
-
-		for (int i = 0; i < TagsProductInformation.size(); ++i)
-		{
-			ProductInformation.Tags[i] = TagsProductInformation[i];
-		}
-
-		auto MediaProductInformation = ProductInformationResponse->GetMedia();
-
-		ProductInformation.Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
-
-		for (int i = 0; i < MediaProductInformation.size(); ++i)
-		{
-			ProductInformation.Media[i].Alt				 = MediaProductInformation[i]->GetAlt();
-			ProductInformation.Media[i].Url				 = MediaProductInformation[i]->GetUrl();
-			ProductInformation.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
-		}
+		ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation);
 	}
 }
 

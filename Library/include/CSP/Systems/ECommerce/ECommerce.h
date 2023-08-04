@@ -40,7 +40,6 @@ class CSP_API ProductMediaInfo
 {
 public:
 	ProductMediaInfo() = default;
-	ProductMediaInfo(const csp::common::String& MediaContentTypeIn, const csp::common::String& AltIn, const csp::common::String& UrlIn);
 
 	/// @brief Type of media content used.
 	csp::common::String MediaContentType;
@@ -56,12 +55,6 @@ class CSP_API ProductInfo
 {
 public:
 	ProductInfo() = default;
-	ProductInfo::ProductInfo(const csp::common::String& IdIn,
-							 const csp::common::String& TitleIn,
-							 const csp::common::String& CreatedAtIn,
-							 const csp::common::Array<csp::common::String>& TagsIn,
-							 const csp::common::Map<csp::common::String, csp::common::String>& VariantsIn,
-							 const csp::common::Array<ProductMediaInfo>& MediaIn);
 
 	/// @brief Id of the product.
 	csp::common::String Id;

@@ -29,18 +29,24 @@
 
 using namespace csp::systems;
 
+bool RequestPredicate(const csp::services::ResultBase& Result)
+{
+	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+}
+
+
 csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {
-	if (!std::filesystem::exists("ShopifyDetails.txt"))
+	if (!std::filesystem::exists("ShopifyCreds.txt"))
 	{
-		LogFatal("ShopifyDetails.txt not found! This file must exist and must contain the following information:\nSpaceId "
+		LogFatal("ShopifyCreds.txt not found! This file must exist and must contain the following information:\nSpaceId "
 				 "<SpaceId>\nProductId <ProductId>");
 	}
 
 	csp::common::Map<csp::common::String, csp::common::String> OutMap;
 
 	std::ifstream CredsFile;
-	CredsFile.open("ShopifyDetails.txt");
+	CredsFile.open("ShopifyCreds.txt");
 	std::string Key, Value;
 	while (CredsFile >> Key >> Value)
 	{
@@ -70,7 +76,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	LogIn(UserSystem, UserId);
 	auto Details = GetShopifyDetails();
 
-	auto [Result] = AWAIT(ECommerceSystem, GetProductInformation, Details["SpaceId"], Details["ProductId"]);
+	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformation, RequestPredicate, Details["SpaceId"], Details["ProductId"]);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	LogOut(UserSystem);
