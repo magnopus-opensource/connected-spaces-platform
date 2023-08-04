@@ -47,6 +47,6 @@ void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const
 			nullptr,
 			csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsGet(SpaceId, ProductId, ResponseHandler);
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsProductIdGet(SpaceId, ProductId, ResponseHandler);
 }
 } // namespace csp::systems

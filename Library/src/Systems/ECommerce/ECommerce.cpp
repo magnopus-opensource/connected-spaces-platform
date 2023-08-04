@@ -84,8 +84,8 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* ProductInformationResponse	   = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	chs_aggregation::ShopifyProductDto* ProductInformationResponse = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response						   = ApiResponse->GetResponse();
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
