@@ -33,7 +33,7 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 /// @ingroup ECommerce System
-/// @brief Represents Currency information for a product
+/// @brief Represents currency information for a product
 class CSP_API CurrencyInfo
 {
 public:
@@ -71,9 +71,9 @@ class CSP_API VariantOptionInfo
 public:
 	VariantOptionInfo() = default;
 
-	/// @brief Id of the variant.
+	/// @brief Id of the variant option.
 	csp::common::String Name;
-	/// @brief Title of variant.
+	/// @brief Value of variant option.
 	csp::common::String Value;
 };
 
