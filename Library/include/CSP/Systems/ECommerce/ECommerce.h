@@ -87,11 +87,11 @@ public:
 	csp::common::String Id;
 	/// @brief Title of the variant.
 	csp::common::String Title;
-	/// @brief Title of variant.
+	/// @brief Url of variant.
 	csp::common::String Url;
-	/// @brief is variant available for sale.
+	/// @brief Is variant available for sale.
 	bool AvailableForSale;
-	/// @brief This image for a variant
+	/// @brief Media for a variant
 	ProductMediaInfo Media;
 	/// @brief Additional options for variant
 	csp::common::Array<VariantOptionInfo> Options;
@@ -111,15 +111,15 @@ public:
 	csp::common::String Id;
 	/// @brief Title of the product.
 	csp::common::String Title;
-	/// @brief  Time the product was created.
+	/// @brief Time the product was created.
 	csp::common::String CreatedAt;
 	/// @brief Description of the product.
 	csp::common::String Description;
-	/// @brief array of product variants.
+	/// @brief Array of product variants.
 	csp::common::Array<ProductVariantInfo> Variants;
-	/// @brief array of product tags.
+	/// @brief Array of product tags.
 	csp::common::Array<csp::common::String> Tags;
-	/// @brief This array holds  media for the product
+	/// @brief This array holds media for the product
 	csp::common::Array<ProductMediaInfo> Media;
 };
 

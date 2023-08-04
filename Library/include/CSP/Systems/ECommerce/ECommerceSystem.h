@@ -37,7 +37,7 @@ namespace csp::systems
 {
 /// @ingroup ECommerce System
 /// @brief Public facing system that allows interfacing with CSP's concept of a ECommerce platform.
-/// Offers methods for utilising shopify through CSP
+/// Offers methods for utilising Ecommerce through CSP
 class CSP_API CSP_NO_DISPOSE ECommerceSystem : public SystemBase
 {
 	/** @cond DO_NOT_DOCUMENT */
