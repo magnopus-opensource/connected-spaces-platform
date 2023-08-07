@@ -209,7 +209,7 @@ void HttpPayload::SetBoundary(const csp::common::String& InBoundary)
 }
 
 // This checks not only for "application/json" but also covers cases like "application/graphql+json" and "application/problem+json"
-const bool HttpPayload::IsJsonPayload() const
+bool HttpPayload::IsJsonPayload() const
 {
 	const auto& ContentTypeHeader = Headers.find("content-type");
 	if (ContentTypeHeader == Headers.end())

@@ -71,7 +71,7 @@ public:
 
 	void SetBoundary(const csp::common::String& InBoundary);
 
-	const bool IsJsonPayload() const;
+	bool IsJsonPayload() const;
 
 private:
 	HeadersMap Headers;
