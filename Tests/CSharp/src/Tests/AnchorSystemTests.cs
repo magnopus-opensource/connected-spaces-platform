@@ -150,7 +150,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -174,7 +174,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorInSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -226,7 +226,7 @@ namespace CSPEngine
         [Test]
         public static void DeleteMultipleAnchorsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -302,7 +302,7 @@ namespace CSPEngine
         [Test]
         public static void GetAnchorsInsideCircularAreaTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -418,7 +418,7 @@ namespace CSPEngine
         [Test]
         public static void GetAnchorsInSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -500,7 +500,7 @@ namespace CSPEngine
         [Test]
         public static void CreateAnchorResolutionTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
