@@ -137,4 +137,29 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 	}
 }
 
+const CheckoutInfo& CheckoutInfoResult::GetCheckoutInfo() const
+{
+	return CheckoutInformation;
+}
+
+CheckoutInfo& CheckoutInfoResult::GetCheckoutInfo()
+{
+	return CheckoutInformation;
+}
+
+void CheckoutInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	chs_aggregation::ShopifyCheckoutDto* CheckoutInformationResponse = static_cast<chs_aggregation::ShopifyCheckoutDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response							 = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent());
+		CheckoutInformation.StoreUrl	= CheckoutInformationResponse->GetCheckoutUrl();
+		CheckoutInformation.CheckoutUrl = CheckoutInformationResponse->GetCheckoutUrl();
+	}
+}
+
 } // namespace csp::systems

@@ -137,3 +137,30 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+	auto Details = GetShopifyDetails();
+
+	// The additional info inside of this mask need to be added to the ShopifyCred.txt file on a new line as: "Key Value"
+	auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().StoreUrl.c_str()).find(Details["StoreName"]));
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["StoreName"]));
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["CartId"]));
+
+	LogOut(UserSystem);
+}
+#endif
