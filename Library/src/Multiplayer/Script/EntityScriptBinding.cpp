@@ -30,6 +30,7 @@
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
@@ -426,6 +427,12 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(AudioSpaceComponent, IsLoopPlayback, "isLoopPlayback")
 		.PROPERTY_GET_SET(AudioSpaceComponent, TimeSincePlay, "timeSincePlay")
 		.PROPERTY_GET_SET(AudioSpaceComponent, Volume, "volume");
+
+	Module->class_<ECommerceSpaceComponentScriptInterface>("ECommerceSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.PROPERTY_GET_SET(ECommerceSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(ECommerceSpaceComponent, ProductId, "productId");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -466,6 +473,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")

@@ -23,6 +23,7 @@
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
@@ -936,6 +937,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::Fog:
 			Component = CSP_NEW FogSpaceComponent(this);
+			break;
+		case ComponentType::ECommerce:
+			Component = CSP_NEW ECommerceSpaceComponent(this);
 			break;
 		default:
 		{
