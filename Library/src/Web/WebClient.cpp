@@ -390,7 +390,7 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 									Response.GetRequest()->GetUri().GetAsString(),
 									ResponseCode);
 	}
-	else
+	else if (Response.GetPayload().IsJsonPayload())
 	{
 		rapidjson::Document ResponseJson;
 		ResponseJson.Parse(ResponsePayload.c_str());
@@ -413,6 +413,13 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 										ResponseCode,
 										ResponseJson["error"].GetString());
 		}
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with payload/error message: %s",
+									Response.GetRequest()->GetUri().GetAsString(),
+									ResponseCode,
+									ResponsePayload.c_str());
 	}
 }
 } // namespace csp::web

@@ -207,4 +207,18 @@ void HttpPayload::SetBoundary(const csp::common::String& InBoundary)
 	Boundary = InBoundary;
 }
 
+const bool HttpPayload::IsJsonPayload() const
+{
+	const auto ContentTypeHeader = Headers.find("content-type");
+	if (ContentTypeHeader == Headers.end())
+	{
+		return false;
+	}
+	else
+	{
+		csp::common::String ContentType = ContentTypeHeader->second.c_str();
+		return ContentType.Split(';')[0] == "application/json";
+	}
+}
+
 } // namespace csp::web
