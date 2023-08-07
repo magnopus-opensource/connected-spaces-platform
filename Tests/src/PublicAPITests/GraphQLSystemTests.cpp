@@ -94,18 +94,12 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
 	csp::common::String UserId;
-
-	// Log in
 	LogIn(UserSystem, UserId);
 
 	csp::common::String testQuery = "badQuery";
-
-	auto [Result] = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
-
-	// Search Space Name
+	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 
-	// Log Out
 	LogOut(UserSystem);
 }
 #endif
@@ -119,18 +113,12 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
 	csp::common::String UserId;
-
-	// Log in
 	LogIn(UserSystem, UserId);
 
 	csp::common::String testQuery = "badRequest";
-
-	auto [Result] = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);
-
-	// Search Space Name
+	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 
-	// Log Out
 	LogOut(UserSystem);
 }
 #endif
