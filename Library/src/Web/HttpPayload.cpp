@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <regex>
 #include <sstream>
 
 namespace csp::web
@@ -207,17 +208,18 @@ void HttpPayload::SetBoundary(const csp::common::String& InBoundary)
 	Boundary = InBoundary;
 }
 
+// This checks not only for "application/json" but also covers cases like "application/graphql+json" and "application/problem+json"
 const bool HttpPayload::IsJsonPayload() const
 {
-	const auto ContentTypeHeader = Headers.find("content-type");
+	const auto& ContentTypeHeader = Headers.find("content-type");
 	if (ContentTypeHeader == Headers.end())
 	{
 		return false;
 	}
 	else
 	{
-		csp::common::String ContentType = ContentTypeHeader->second.c_str();
-		return ContentType.Split(';')[0] == "application/json";
+		std::regex Regex("^application\\/([a-z]+\\+)?json");
+		return std::regex_search(ContentTypeHeader->second.c_str(), Regex);
 	}
 }
 

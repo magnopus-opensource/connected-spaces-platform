@@ -35,8 +35,6 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 
 } // namespace
 
-
-
 #if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 {
@@ -81,6 +79,56 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 
 	// Delete Space
 	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log Out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_QUERY_BADINPUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto GraphQLSystem	 = SystemsManager.GetGraphQLSystem();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	csp::common::String testQuery = "badQuery";
+
+	auto [Result] = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
+
+	// Search Space Name
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// Log Out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_GRAPHQLSYSTEM_TESTS || RUN_GRAPHQLSYSTEM_REQUEST_BADINPUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto GraphQLSystem	 = SystemsManager.GetGraphQLSystem();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	csp::common::String testQuery = "badRequest";
+
+	auto [Result] = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);
+
+	// Search Space Name
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
 
 	// Log Out
 	LogOut(UserSystem);
