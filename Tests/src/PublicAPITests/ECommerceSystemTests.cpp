@@ -56,17 +56,36 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 	return OutMap;
 }
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PROPERTY_INFORMATION_TEST
+/*These test are currently internal tests because they utilise that is currently only available
+through internal CSP infrastructure.*/
+
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
+	/*Steps needed to be performed before running this test are:
+
+	1. Create a space (Add to shopify Creds)
+	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
+		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+		{
+			"storeName": "string",
+			"isEcommerceActive": true,
+			"privateAccessToken": "string"
+		}
+	3. check sopify has synced with your namespace
+		Endpoint: /api/v1/vendors/shopify/validate
+		{
+			"storeName": "string",
+			"privateAccessToken": "string"
+		}
+	4. either use the default "Gift Card" product or update these test variables with a new product. (Add product Id to shopify Creds)
+	Now you can use this test!*/
 	SetRandSeed();
 
 	auto& SystemsManager  = csp::systems::SystemsManager::Get();
 	auto* UserSystem	  = SystemsManager.GetUserSystem();
 	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
-
-	// To use this test please follow end to end testing steps first:
-	// https://docs.google.com/document/d/1D2fzF88c4NfPp26ciJHf-qelNFY5jqQHmt8lqolOmq0/edit?usp=sharing
 
 	// This is an example from shopify dev quickstart "Gift Card"
 	const csp::common::String ProductId				= "gid://shopify/Product/8660541047057";
@@ -142,6 +161,25 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 {
 	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+
+	1. Create a space (Add to shopify Creds)
+	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
+		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+		{
+			"storeName": "string",
+			"isEcommerceActive": true,
+			"privateAccessToken": "string"
+		}
+	3. check shopify has synced with your namespace
+		Endpoint: /api/v1/vendors/shopify/validate
+		{
+			"storeName": "string",
+			"privateAccessToken": "string"
+		}
+	4. Create a CartId (Add to shopify Creds)
+		Endpoint: /api/v1/spaces/{spaceId}/vendors/shopify/carts
+	Now you can use this test!*/
 
 	auto& SystemsManager  = csp::systems::SystemsManager::Get();
 	auto* UserSystem	  = SystemsManager.GetUserSystem();
