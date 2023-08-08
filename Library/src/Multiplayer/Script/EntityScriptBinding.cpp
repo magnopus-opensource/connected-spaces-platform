@@ -32,6 +32,7 @@
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
@@ -433,6 +434,16 @@ void BindComponents(qjs::Context::Module* Module)
 		.base<ComponentScriptInterface>()
 		.PROPERTY_GET_SET(ECommerceSpaceComponent, Position, "position")
 		.PROPERTY_GET_SET(ECommerceSpaceComponent, ProductId, "productId");
+
+	Module->class_<FiducialMarkerSpaceComponentScriptInterface>("FiducialMarkerSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Name, "name")
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, MarkerAssetId, "markerAssetId")
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Scale, "scale")
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -474,6 +485,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
+			"getFiducialMarkerComponents")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")
