@@ -39,8 +39,8 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {
 	if (!std::filesystem::exists("ShopifyCreds.txt"))
 	{
-		LogFatal("ShopifyCreds.txt not found! This file must exist and must contain the following information:\nSpaceId "
-				 "<SpaceId>\nProductId <ProductId>");
+		LogFatal("ShopifyCreds.txt not found! This file must exist and must contain a minimum of the following information:\nSpaceId "
+				 "<SpaceId>\nProductId <ProductId> but may also need \nProductId <ProductId>\nCartId <CartId>\n");
 	}
 
 	csp::common::Map<csp::common::String, csp::common::String> OutMap;
