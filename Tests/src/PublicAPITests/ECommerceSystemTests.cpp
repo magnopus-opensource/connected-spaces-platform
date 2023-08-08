@@ -153,7 +153,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 	const csp::common::String FalseSpaceId = "abcdefghijk1234567891011";
 	const csp::common::String FalseCartId  = "B1-1234567891011121314151617e8e21er";
 
-	// The additional info inside of this mask need to be added to the ShopifyCred.txt file on a new line as: "Key Value"
+	// The additional info such as "CartId" inside of this test need to be added to the ShopifyCred.txt file on a new line as: <Key> <Value>
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
