@@ -25,6 +25,7 @@
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
@@ -940,6 +941,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::ECommerce:
 			Component = CSP_NEW ECommerceSpaceComponent(this);
+			break;
+		case ComponentType::FiducialMarker:
+			Component = CSP_NEW FiducialMarkerSpaceComponent(this);
 			break;
 		default:
 		{
