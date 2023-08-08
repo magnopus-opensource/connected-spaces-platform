@@ -149,7 +149,9 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	auto Details = GetShopifyDetails();
+	auto Details						   = GetShopifyDetails();
+	const csp::common::String FalseSpaceId = "abcdefghijk1234567891011";
+	const csp::common::String FalseCartId  = "B1-1234567891011121314151617e8e21er";
 
 	// The additional info inside of this mask need to be added to the ShopifyCred.txt file on a new line as: "Key Value"
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
@@ -160,6 +162,18 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["StoreName"]));
 
 	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["CartId"]));
+
+	// False Ids
+	auto [FalseResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, FalseCartId);
+	EXPECT_EQ(FalseResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// False SpaceId
+	auto [FalseSpaceResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, Details["CartId"]);
+	EXPECT_EQ(FalseSpaceResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// False CartId
+	auto [FalseCartResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], FalseCartId);
+	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::services::EResultCode::Failed);
 
 	LogOut(UserSystem);
 }
