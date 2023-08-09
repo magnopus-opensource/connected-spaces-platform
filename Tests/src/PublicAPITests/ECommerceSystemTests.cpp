@@ -73,7 +73,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 			"isEcommerceActive": true,
 			"privateAccessToken": "string"
 		}
-	3. check sopify has synced with your namespace
+	3. check shopify has synced with your namespace
 		Endpoint: /api/v1/vendors/shopify/validate
 		{
 			"storeName": "string",
