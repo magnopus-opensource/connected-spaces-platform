@@ -39,8 +39,8 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {
 	if (!std::filesystem::exists("ShopifyCreds.txt"))
 	{
-		LogFatal("ShopifyCreds.txt not found! This file must exist and must contain the following information:\nSpaceId "
-				 "<SpaceId>\nProductId <ProductId>");
+		LogFatal("ShopifyCreds.txt not found! This file must exist and must contain a minimum of the following information:\nSpaceId "
+				 "<SpaceId>\nProductId <ProductId> but may also need \nProductId <ProductId>\nCartId <CartId>\n");
 	}
 
 	csp::common::Map<csp::common::String, csp::common::String> OutMap;
@@ -56,17 +56,36 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 	return OutMap;
 }
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PROPERTY_INFORMATION_TEST
+/*These test are currently internal tests because they utilise that is currently only available
+through internal CSP infrastructure.*/
+
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
+	/*Steps needed to be performed before running this test are:
+
+	1. Create a space (Add to shopify Creds)
+	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
+		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+		{
+			"storeName": "string",
+			"isEcommerceActive": true,
+			"privateAccessToken": "string"
+		}
+	3. check shopify has synced with your namespace
+		Endpoint: /api/v1/vendors/shopify/validate
+		{
+			"storeName": "string",
+			"privateAccessToken": "string"
+		}
+	4. either use the default "Gift Card" product or update these test variables with a new product. (Add product Id to shopify Creds)
+	Now you can use this test!*/
 	SetRandSeed();
 
 	auto& SystemsManager  = csp::systems::SystemsManager::Get();
 	auto* UserSystem	  = SystemsManager.GetUserSystem();
 	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
-
-	// To use this test please follow end to end testing steps first:
-	// https://docs.google.com/document/d/1D2fzF88c4NfPp26ciJHf-qelNFY5jqQHmt8lqolOmq0/edit?usp=sharing
 
 	// This is an example from shopify dev quickstart "Gift Card"
 	const csp::common::String ProductId				= "gid://shopify/Product/8660541047057";
@@ -133,6 +152,66 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 		EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.Amount, 0);
 		EXPECT_EQ(Result.GetProductInfo().Variants[i].UnitPrice.CurrencyCode, "");
 	}
+
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+
+	1. Create a space (Add to shopify Creds)
+	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
+		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+		{
+			"storeName": "string",
+			"isEcommerceActive": true,
+			"privateAccessToken": "string"
+		}
+	3. check shopify has synced with your namespace
+		Endpoint: /api/v1/vendors/shopify/validate
+		{
+			"storeName": "string",
+			"privateAccessToken": "string"
+		}
+	4. Create a CartId (Add to shopify Creds)
+		Endpoint: /api/v1/spaces/{spaceId}/vendors/shopify/carts
+	Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+	auto Details						   = GetShopifyDetails();
+	const csp::common::String FalseSpaceId = "abcdefghijk1234567891011";
+	const csp::common::String FalseCartId  = "B1-1234567891011121314151617e8e21er";
+
+	// The additional info such as "CartId" inside of this test need to be added to the ShopifyCred.txt file on a new line as: <Key> <Value>
+	auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().StoreUrl.c_str()).find(Details["StoreName"]));
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["StoreName"]));
+
+	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().CheckoutUrl.c_str()).find(Details["CartId"]));
+
+	// False Ids
+	auto [FalseResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, FalseCartId);
+	EXPECT_EQ(FalseResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// False SpaceId
+	auto [FalseSpaceResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, Details["CartId"]);
+	EXPECT_EQ(FalseSpaceResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// False CartId
+	auto [FalseCartResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], FalseCartId);
+	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::services::EResultCode::Failed);
 
 	LogOut(UserSystem);
 }
