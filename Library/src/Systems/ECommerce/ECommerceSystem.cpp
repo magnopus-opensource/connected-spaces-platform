@@ -21,7 +21,6 @@ using namespace csp;
 
 namespace chs = csp::services::generated::aggregationservice;
 
-
 namespace csp::systems
 {
 ECommerceSystem::ECommerceSystem() : SystemBase(), ShopifyAPI(nullptr)
@@ -60,4 +59,25 @@ void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, cons
 
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet(SpaceId, CartId, ResponseHandler);
 }
+
+void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
+																									   nullptr,
+																									   csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsPost(SpaceId, ResponseHandler);
+}
+
+void ECommerceSystem::GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
+																									   nullptr,
+																									   csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
+}
+
 } // namespace csp::systems
