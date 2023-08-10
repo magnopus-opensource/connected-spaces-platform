@@ -90,8 +90,26 @@ public:
 
 		for (size_t i = 0; i < CurrentSize; ++i)
 		{
+			T* ObjectPtr = &ObjectArray[i];
+			new (ObjectPtr) T;
 			ObjectArray[i] = Other.ObjectArray[i];
 		}
+	}
+
+	CSP_NO_EXPORT List(List<T>&& Other) : CurrentSize(0), MaximumSize(0), ObjectArray(nullptr)
+	{
+		if (Other.CurrentSize == 0)
+		{
+			AllocList(LIST_DEFAULT_SIZE);
+
+			return;
+		}
+
+		CurrentSize = Other.CurrentSize;
+		MaximumSize = Other.MaximumSize;
+		ObjectArray = Other.ObjectArray;
+
+		Other.ObjectArray = nullptr;
 	}
 
 	/// @brief Constructs a list from an initializer_list.
@@ -111,6 +129,8 @@ public:
 
 		for (size_t i = 0; i < CurrentSize; ++i)
 		{
+			T* ObjectPtr = &ObjectArray[i];
+			new (ObjectPtr) T;
 			ObjectArray[i] = *(List.begin() + i);
 		}
 	}
@@ -234,6 +254,8 @@ public:
 		std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
 		++CurrentSize;
 
+		T* ObjectPtr = &ObjectArray[0];
+		new (ObjectPtr) T;
 		ObjectArray[Index] = Item;
 	}
 

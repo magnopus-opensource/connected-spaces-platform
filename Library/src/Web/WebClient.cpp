@@ -394,24 +394,35 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 	{
 		rapidjson::Document ResponseJson;
 		ResponseJson.Parse(ResponsePayload.c_str());
-		if (ResponseJson.HasMember("errors"))
-		{
-			const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
 
-			for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+		if (ResponseJson.IsObject())
+		{
+			if (ResponseJson.HasMember("errors"))
+			{
+				const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
+
+				for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+				{
+					FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+												Response.GetRequest()->GetUri().GetAsString(),
+												ResponseCode,
+												ResponseArray[i].GetString());
+				}
+			}
+			else if (ResponseJson.HasMember("error"))
 			{
 				FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
 											Response.GetRequest()->GetUri().GetAsString(),
 											ResponseCode,
-											ResponseArray[i].GetString());
+											ResponseJson["error"].GetString());
 			}
 		}
-		else if (ResponseJson.HasMember("error"))
+		else
 		{
 			FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
 										Response.GetRequest()->GetUri().GetAsString(),
 										ResponseCode,
-										ResponseJson["error"].GetString());
+										ResponsePayload.c_str());
 		}
 	}
 }
