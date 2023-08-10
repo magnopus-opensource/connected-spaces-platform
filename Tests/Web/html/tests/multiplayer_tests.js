@@ -94,17 +94,13 @@ test('MultiplayerTests', 'ManualConnectionTest', async function() {
     const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
     const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
 
-    console.log("about to login")
-
     // Log in
     await logIn(userSystem);
 
-    console.log("logged in")
-
     // Create space
-    //const space = await createSpace(spaceSystem, SpaceName, spaceDescription, Systems.SpaceAttributes.Private);
+    const space = await createSpace(spaceSystem, SpaceName, spaceDescription, Systems.SpaceAttributes.Private);
 
-    const connection = Multiplayer.MultiplayerConnection.create_spaceId("test");
+    const connection = Multiplayer.MultiplayerConnection.create_spaceId(space.id);
     const entitySystem = connection.getSpaceEntitySystem();
 
     entitySystem.setEntityCreatedCallback((e) => {});
@@ -136,8 +132,6 @@ test('MultiplayerTests', 'ManualConnectionTest', async function() {
     // Cleanup
     await connection.disconnect();
     connection.delete();
-
-    console.log("test end")
 });
 
 test('MultiplayerTests', 'RunScriptTest', async function() {
