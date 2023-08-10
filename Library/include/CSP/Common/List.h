@@ -205,7 +205,7 @@ public:
 
 	/// @brief Appends an element to the end of the list.
 	/// @param Item T&&
-	void Append(T&& Item)
+	CSP_NO_EXPORT void Append(T&& Item)
 	{
 		if (CurrentSize == MaximumSize)
 		{
