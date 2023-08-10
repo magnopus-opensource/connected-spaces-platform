@@ -29,6 +29,13 @@ namespace csp::web
 
 class WebClient;
 
+// In some cases ERequestVerb::DELETE can clash with a win32 macro.
+// To solve this, the following steps are taken:
+//
+// - store the current value of the macro
+// - undefine the current definition
+// - declare our enum
+// - redefine the macro
 #pragma push_macro("DELETE")
 #undef DELETE
 enum class ERequestVerb : uint8_t
