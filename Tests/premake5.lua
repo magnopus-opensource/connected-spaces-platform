@@ -71,14 +71,14 @@ if not Tests then
             }
 
             linkoptions { 
-                "--emrun",
-                "--embed-file ./test_account_creds.txt",
+                "--emrun",                                                      -- make tests emrun compatible
+                "--embed-file ./assets/test_account_creds.txt@/",               -- give account credentials to emscripten
                 "-pthread",                                                     -- enable threading
                 "-fwasm-exceptions",                                            -- enable native wasm exceptions
                 "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
                 "-sEXPORTED_FUNCTIONS=[" ..                            
                     "'_malloc'," ..
-                    "'_main'" ..                                            -- force export _malloc function
+                    "'_main'" ..                                                -- force export _malloc function
                 "]",                             
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
@@ -87,9 +87,9 @@ if not Tests then
                 "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
                 "-sINITIAL_MEMORY=33554432",
-                "-sMAXIMUM_MEMORY=1073741824",                             -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory   
+                "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory   
                 "-sPROXY_TO_PTHREAD",
-                "-sSTACK_SIZE=30MB",
+                "-sSTACK_SIZE=5MB",
                 "-sEXIT_RUNTIME",
                 "-sEXPORTED_RUNTIME_METHODS=[" ..
                     "'ccall'," ..

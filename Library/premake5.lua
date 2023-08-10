@@ -259,7 +259,8 @@ if not Project then
                     "'instantiateWasm'," ..
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
-                    "'wasmMemory'" ..
+                    "'wasmMemory'," ..
+                    "'arguments'" ..
                 "]"
             }
 
