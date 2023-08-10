@@ -128,8 +128,9 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 
 	if (CartDto.HasShopifyCartId())
 	{
-		// There is a prefix added to the ID within the CHS system but it is not needed for our purposes.
-		// When we get a cart we only need to provide the last bit of the ID.
+		// Magnopus Services adds a prefix to the Shopify cart ID. We strip that out here to ensure we are only
+		// using the raw Shopify ID. Magnopus Services accepts the ID with or without the prefix so the latter
+		// is chosen to be more generic if used with other cloud service providers.
 		std::regex CartIdPrefixRegex("^gid:\\/\\/shopify\\/Cart\\/");
 		Cart.CartId = std::regex_replace(CartDto.GetShopifyCartId().c_str(), CartIdPrefixRegex, "").c_str();
 	}
