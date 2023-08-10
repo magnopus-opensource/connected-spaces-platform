@@ -228,7 +228,7 @@ private:
 
 
 /// @ingroup ECommerce System
-/// @brief Data class used to contain information when attempting to get Product Info.
+/// @brief Data class used to contain information when attempting to get a Cart.
 class CSP_API CartInfoResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
