@@ -263,7 +263,7 @@ void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
 
 		if (!Request->Cancelled() && Callback)
 		{
-			const HttpResponse& Response = Request->GetResponse();
+			auto& Response = Request->GetMutableResponse();
 			Callback->OnHttpResponse(Response);
 		}
 
@@ -279,7 +279,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 {
 	if (Request)
 	{
-		auto Payload = Request->GetPayload();
+		auto& Payload = Request->GetMutablePayload();
 		Payload.SetBearerToken();
 
 		const std::chrono::milliseconds SendDelay = Request->GetSendDelay();
@@ -317,7 +317,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			Request->SetResponseProgress(100.0f);
 		}
 
-		const HttpResponse& Response = Request->GetResponse();
+		auto& Response = Request->GetMutableResponse();
 
 		// Attempt Auto-retry if needed
 		bool RetryIssued = Request->CheckForAutoRetry();

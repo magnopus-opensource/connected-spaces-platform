@@ -197,7 +197,26 @@ public:
 			ReallocList(Size);
 		}
 
+		// Instantiate element first to allow copy assignment
+		T* ObjectPtr = &ObjectArray[CurrentSize];
+		new (ObjectPtr) T;
 		ObjectArray[CurrentSize++] = Item;
+	}
+
+	/// @brief Appends an element to the end of the list.
+	/// @param Item T&&
+	void Append(T&& Item)
+	{
+		if (CurrentSize == MaximumSize)
+		{
+			auto Size = next_pow2(MaximumSize + 1);
+			ReallocList(Size);
+		}
+
+		// Instantiate element first to allow move assignment
+		T* ObjectPtr = &ObjectArray[CurrentSize];
+		new (ObjectPtr) T;
+		ObjectArray[CurrentSize++] = std::move(Item);
 	}
 
 	/// @brief Appends an element at the given index of the list.

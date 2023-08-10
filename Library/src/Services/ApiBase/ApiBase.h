@@ -51,7 +51,8 @@ public:
 	EResponseCode GetResponseCode() const;
 	DtoBase* GetDto() const;
 
-	void SetResponse(const csp::web::HttpResponse* Response);
+	void SetResponse(csp::web::HttpResponse* Response);
+	csp::web::HttpResponse* GetMutableResponse();
 	const csp::web::HttpResponse* GetResponse() const;
 
 	void SetResponseCode(csp::web::EResponseCodes InResponseCode, csp::web::EResponseCodes InValidResponseCode);
@@ -60,7 +61,7 @@ protected:
 	EResponseCode ResponseCode				  = EResponseCode::ResponseFailed;
 	csp::web::EResponseCodes HttpResponseCode = csp::web::EResponseCodes::ResponseInit;
 	DtoBase* Dto;
-	const csp::web::HttpResponse* Response = nullptr;
+	csp::web::HttpResponse* Response = nullptr;
 
 private:
 	bool IsValidResponseCode(int ResponseCodeA, int ResponseCodeB);
@@ -159,8 +160,8 @@ public:
 	ApiResponseHandlerBase();
 	virtual ~ApiResponseHandlerBase();
 
-	virtual void OnHttpProgress(const csp::web::HttpRequest& Request) override	 = 0;
-	virtual void OnHttpResponse(const csp::web::HttpResponse& Response) override = 0;
+	virtual void OnHttpProgress(csp::web::HttpRequest& Request) override   = 0;
+	virtual void OnHttpResponse(csp::web::HttpResponse& Response) override = 0;
 
 	// Make sure these get deleted with the request
 	bool ShouldDelete() const override
@@ -188,9 +189,9 @@ public:
 	{
 	}
 
-	void OnHttpProgress(const csp::web::HttpRequest& Request) override
+	void OnHttpProgress(csp::web::HttpRequest& Request) override
 	{
-		ApiResp.SetResponse(&Request.GetResponse());
+		ApiResp.SetResponse(&Request.GetMutableResponse());
 
 		ResponseObjectPtr->OnProgress(&ApiResp);
 
@@ -198,7 +199,7 @@ public:
 		Callback(ResponseObject);
 	}
 
-	void OnHttpResponse(const csp::web::HttpResponse& Response) override
+	void OnHttpResponse(csp::web::HttpResponse& Response) override
 	{
 		ApiResp.SetResponse(&Response);
 

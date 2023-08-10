@@ -32,9 +32,14 @@ DtoBase* ApiResponseBase::GetDto() const
 	return Dto;
 }
 
-void ApiResponseBase::SetResponse(const csp::web::HttpResponse* InResponse)
+void ApiResponseBase::SetResponse(csp::web::HttpResponse* InResponse)
 {
 	Response = InResponse;
+}
+
+csp::web::HttpResponse* ApiResponseBase::GetMutableResponse()
+{
+	return Response;
 }
 
 const csp::web::HttpResponse* ApiResponseBase::GetResponse() const
