@@ -136,6 +136,43 @@ public:
 };
 
 /// @ingroup ECommerce System
+/// @brief Represents a line in a cart.
+class CSP_API CartLine
+{
+public:
+	CartLine() : Quantity(0) {};
+
+	/// @brief ID of the line in the cart.
+	csp::common::String CartLineId;
+
+	/// @brief ID of the variant of the product.
+	csp::common::String ProductVariantId;
+
+	/// @brief Quantity of the product in the cart.
+	int Quantity;
+};
+
+/// @ingroup ECommerce System
+/// @brief Represents a cart.
+class CSP_API CartInfo
+{
+public:
+	CartInfo() : TotalQuantity(0) {};
+
+	/// @brief Space that the cart is associated with.
+	csp::common::String SpaceId;
+
+	/// @brief ID of the cart.
+	csp::common::String CartId;
+
+	/// @brief An array of the lines in the cart.
+	csp::common::Array<CartLine> CartLines;
+
+	/// @brief Total quantity of all lines in the cart.
+	int TotalQuantity;
+};
+
+/// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
 class CSP_API ProductInfoResult : public csp::services::ResultBase
 {
@@ -189,8 +226,38 @@ private:
 	CheckoutInfo CheckoutInformation;
 };
 
+
+/// @ingroup ECommerce System
+/// @brief Data class used to contain information when attempting to get a Cart.
+class CSP_API CartInfoResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Retrieves the Cart Info being stored.
+	/// @return ProductInfo : reference to the CartInfo
+	const CartInfo& GetCartInfo() const;
+
+	/// @brief Retrieves the Cart Info being stored.
+	/// @return ProductInfo : reference to the CartInfo
+	CartInfo& GetCartInfo();
+
+private:
+	CartInfoResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	CartInfo Cart;
+};
+
 typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;
+
 typedef std::function<void(const CheckoutInfoResult& Result)> CheckoutInfoResultCallback;
 
+typedef std::function<void(const CartInfoResult& Result)> CartInfoResultCallback;
 
 } // namespace csp::systems
