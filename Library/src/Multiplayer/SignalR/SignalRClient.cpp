@@ -134,11 +134,13 @@ public:
 	SignalRResponseReceiver() : ResponseReceived(false), ThreadId(std::this_thread::get_id())
 	{
 	}
-	void OnHttpResponse(const csp::web::HttpResponse& InResponse) override
+
+	void OnHttpResponse(csp::web::HttpResponse& InResponse) override
 	{
 		Response		 = InResponse;
 		ResponseReceived = true;
 	}
+
 	bool WaitForResponse()
 	{
 		return WaitFor(
@@ -148,10 +150,12 @@ public:
 			},
 			std::chrono::seconds(5));
 	}
+
 	bool IsResponseReceived() const
 	{
 		return ResponseReceived;
 	}
+
 	csp::web::HttpResponse& GetResponse()
 	{
 		return Response;

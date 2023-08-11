@@ -6,6 +6,6 @@
   "author": "Michael Kelley",
   "license": "MIT",
   "dependencies": {
-    "@magnopus/com.magnopus.olympus.foundation.web": "^3.1.315"
+    "@magnopus-opensource/connected-spaces-platform.web": "4.5.1"
   }
 }

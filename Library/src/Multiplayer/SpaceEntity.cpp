@@ -341,7 +341,8 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 	auto ComponentId = GenerateComponentId();
 	auto* Component	 = InstantiateComponent(ComponentId, Type);
-	// if Component != nullptr component has not been Instantiate, so is skipped.
+
+	// If Component is null, component has not been instantiated, so is skipped.
 	if (Component != nullptr)
 	{
 		DirtyComponents[ComponentId] = DirtyComponent {Component, ComponentUpdateType::Add};

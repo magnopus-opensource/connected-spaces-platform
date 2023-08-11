@@ -1,1 +1,1 @@
-export * from './node_modules/@magnopus/com.magnopus.olympus.foundation.web/olympus.foundation.js'
+export * from './node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js'

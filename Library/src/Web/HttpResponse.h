@@ -27,8 +27,8 @@ class HttpResponse;
 
 struct IHttpResponseHandler
 {
-	virtual void OnHttpProgress(const HttpRequest& Request) {};
-	virtual void OnHttpResponse(const HttpResponse& Response) = 0;
+	virtual void OnHttpProgress(HttpRequest& Request) {};
+	virtual void OnHttpResponse(HttpResponse& Response) = 0;
 	virtual bool ShouldDelete() const
 	{
 		return false;

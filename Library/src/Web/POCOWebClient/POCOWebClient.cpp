@@ -301,7 +301,7 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
 	AddCookie(PocoRequest);
 
-	const std::string Body(Request.GetPayload().GetContent());
+	const std::string Body(Request.GetPayload().GetContent().c_str());
 	PocoRequest.setContentLength(Body.length());
 	ClientSession.sendRequest(PocoRequest) << Body;
 
