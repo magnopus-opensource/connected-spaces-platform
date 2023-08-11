@@ -44,7 +44,7 @@ if not Tests then
         defines { "USE_MSGPACK" }
        
         -- If we're running on a build agent, we want to run *all* the tests
-        if CSP.IsRunningOnTeamCityAgent() then
+        if CSP.IsRunningOnTeamCityAgent() and not CSP.IsWebAssemblyGeneration() then
             result = iif(CSP.IsRunningNightlyBuild(), "RUN_NIGHTLY_TESTS", "RUN_ALL_UNIT_TESTS")
             defines { result }
         end
