@@ -63,7 +63,9 @@ enum class ComponentType
 	Spline,
 	Collision,
 	Reflection,
-	Fog
+	Fog,
+	ECommerce,
+	FiducialMarker
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.

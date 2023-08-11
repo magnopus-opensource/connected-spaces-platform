@@ -70,7 +70,7 @@ namespace CSPEngine
         [Test]
         public static void CreatePOITest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -84,7 +84,7 @@ namespace CSPEngine
         [Test]
         public static void CreatePOIWithTagsTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -102,7 +102,7 @@ namespace CSPEngine
         [Test]
         public static void GetPOIInsideCircularAreaTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out var poiSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -147,7 +147,7 @@ namespace CSPEngine
         [Test]
         public static void GetAssetCollectionFromPOITest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out var poiSystem, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out var poiSystem, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
