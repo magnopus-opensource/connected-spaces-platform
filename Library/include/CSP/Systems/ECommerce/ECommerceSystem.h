@@ -73,6 +73,11 @@ public:
 	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
 
+	/// @brief Update cart information from a shopify store within a space
+	/// @param CartInformation CartInfo : Updated Cart Object.
+	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback);
+
 private:
 	csp::services::ApiBase* ShopifyAPI;
 };

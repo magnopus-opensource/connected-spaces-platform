@@ -80,4 +80,72 @@ void ECommerceSystem::GetCart(const common::String& SpaceId, const common::Strin
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
 }
 
+void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
+{
+
+	if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
+	{
+		FOUNDATION_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
+		Callback(CartInfoResult::Invalid());
+		return;
+	}
+
+	auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
+
+	CartUpdateInfo->SetSpaceId(CartInformation.SpaceId);
+	CartUpdateInfo->SetShopifyCartId(CartInformation.CartId);
+
+	if (!CartInformation.CartLines.IsEmpty())
+	{
+		auto CartLinesRemoval	= std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+		auto CartLinesUpdate	= std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+		auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+
+		for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
+		{
+			if (!CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity == 0)
+			{
+				auto CartLineRemoval = std::make_shared<chs::ShopifyCartLineDto>();
+
+				CartLineRemoval->SetQuantity(CartInformation.CartLines[i].Quantity);
+				CartLineRemoval->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
+				CartLineRemoval->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
+
+				CartLinesRemoval.push_back(CartLineRemoval);
+			}
+			else if (CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity != 0)
+			{
+				auto CartLineAdditions = std::make_shared<chs::ShopifyCartLineDto>();
+
+				CartLineAdditions->SetQuantity(CartInformation.CartLines[i].Quantity);
+				CartLineAdditions->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
+				CartLineAdditions->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
+
+				CartLinesAdditions.push_back(CartLineAdditions);
+			}
+			// this will skip any local lines that have a quantity of 0
+			else if (CartInformation.CartLines[i].Quantity != 0)
+			{
+				auto CartLineUpdate = std::make_shared<chs::ShopifyCartLineDto>();
+
+				CartLineUpdate->SetQuantity(CartInformation.CartLines[i].Quantity);
+				CartLineUpdate->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
+				CartLineUpdate->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
+
+				CartLinesUpdate.push_back(CartLineUpdate);
+			}
+
+			CartUpdateInfo->SetAddLineCartChanges(CartLinesAdditions);
+			CartUpdateInfo->SetRemoveLineCartChanges(CartLinesRemoval);
+			CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
+		}
+
+		csp::services::ResponseHandlerPtr ResponseHandler
+			= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
+																										   nullptr,
+																										   csp::web::EResponseCodes::ResponseCreated);
+		static_cast<chs::ShopifyApi*>(ShopifyAPI)
+			->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
+	}
+}
 } // namespace csp::systems
