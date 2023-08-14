@@ -55,6 +55,24 @@ public:
 
 	CSP_ASYNC_RESULT void GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback);
 
+	/// @brief Get checkout information from a shopify store within a space
+	/// @param SpaceId csp::common::String : space id of the cart
+	/// @param CartId csp::common::String : id of Cart being checked out
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+
+	CSP_ASYNC_RESULT void GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback);
+
+	/// @brief Creates a cart for the current user in the given space.
+	/// @param SpaceId csp::common::String : ID of the space to create the cart for.
+	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback);
+
+	/// @brief Creates a cart for the current user in the given space.
+	/// @param SpaceId csp::common::String : ID of the space to create the cart for.
+	/// @param CartId csp::common::String : ID of the cart.
+	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
+
 private:
 	csp::services::ApiBase* ShopifyAPI;
 };

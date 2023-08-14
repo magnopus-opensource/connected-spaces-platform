@@ -64,8 +64,8 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 	csp::common::Map<csp::common::String, csp::common::String> Headers;
 	GetResponseHeaders(Fetch, Headers);
 
-	auto& Response = Request->GetResponse();
-	auto& Payload  = ((csp::web::HttpResponse&) Response).GetMutablePayload();
+	auto& Response = Request->GetMutableResponse();
+	auto& Payload  = Response.GetMutablePayload();
 	auto Keys	   = Headers.Keys();
 
 	for (int i = 0; i < Keys->Size(); ++i)
@@ -79,7 +79,8 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 	CSP_DELETE(Keys);
 
 	Request->GetCallback()->OnHttpResponse(Response);
-	CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
+	// DO NOT DO THIS! This will delete Payload.Content twice
+	// CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
 	CSP_DELETE(Request);
 	emscripten_fetch_close(Fetch);
 }

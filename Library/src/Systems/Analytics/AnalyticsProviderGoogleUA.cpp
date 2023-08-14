@@ -44,7 +44,7 @@ public:
 class ResponseReceiver : public csp::web::IHttpResponseHandler
 {
 public:
-	void OnHttpResponse(const csp::web::HttpResponse& InResponse) override
+	void OnHttpResponse(csp::web::HttpResponse& InResponse) override
 	{
 	}
 

@@ -75,9 +75,19 @@ const csp::web::Uri& HttpRequest::GetUri() const
 	return Uri;
 }
 
+HttpPayload& HttpRequest::GetMutablePayload()
+{
+	return Payload;
+}
+
 const HttpPayload& HttpRequest::GetPayload() const
 {
 	return Payload;
+}
+
+HttpResponse& HttpRequest::GetMutableResponse()
+{
+	return Response;
 }
 
 const HttpResponse& HttpRequest::GetResponse() const

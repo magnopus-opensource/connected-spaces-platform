@@ -90,8 +90,26 @@ public:
 
 		for (size_t i = 0; i < CurrentSize; ++i)
 		{
+			T* ObjectPtr = &ObjectArray[i];
+			new (ObjectPtr) T;
 			ObjectArray[i] = Other.ObjectArray[i];
 		}
+	}
+
+	CSP_NO_EXPORT List(List<T>&& Other) : CurrentSize(0), MaximumSize(0), ObjectArray(nullptr)
+	{
+		if (Other.CurrentSize == 0)
+		{
+			AllocList(LIST_DEFAULT_SIZE);
+
+			return;
+		}
+
+		CurrentSize = Other.CurrentSize;
+		MaximumSize = Other.MaximumSize;
+		ObjectArray = Other.ObjectArray;
+
+		Other.ObjectArray = nullptr;
 	}
 
 	/// @brief Constructs a list from an initializer_list.
@@ -111,6 +129,8 @@ public:
 
 		for (size_t i = 0; i < CurrentSize; ++i)
 		{
+			T* ObjectPtr = &ObjectArray[i];
+			new (ObjectPtr) T;
 			ObjectArray[i] = *(List.begin() + i);
 		}
 	}
@@ -197,7 +217,26 @@ public:
 			ReallocList(Size);
 		}
 
+		// Instantiate element first to allow copy assignment
+		T* ObjectPtr = &ObjectArray[CurrentSize];
+		new (ObjectPtr) T;
 		ObjectArray[CurrentSize++] = Item;
+	}
+
+	/// @brief Appends an element to the end of the list.
+	/// @param Item T&&
+	CSP_NO_EXPORT void Append(T&& Item)
+	{
+		if (CurrentSize == MaximumSize)
+		{
+			auto Size = next_pow2(MaximumSize + 1);
+			ReallocList(Size);
+		}
+
+		// Instantiate element first to allow move assignment
+		T* ObjectPtr = &ObjectArray[CurrentSize];
+		new (ObjectPtr) T;
+		ObjectArray[CurrentSize++] = std::move(Item);
 	}
 
 	/// @brief Appends an element at the given index of the list.
@@ -215,6 +254,8 @@ public:
 		std::memmove(ObjectArray + (Index + 1), ObjectArray + Index, sizeof(T) * After);
 		++CurrentSize;
 
+		T* ObjectPtr = &ObjectArray[0];
+		new (ObjectPtr) T;
 		ObjectArray[Index] = Item;
 	}
 

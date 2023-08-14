@@ -61,10 +61,18 @@ public:
 	/// @param Other String const&
 	String(String const& Other);
 
+	/// @brief Move constructor
+	String(String&& Other);
+
 	/// @brief Copy assignment.
 	/// @param Rhs const String&
 	/// @return String&
 	String& operator=(const String& Rhs);
+
+	/// @brief Move assignment.
+	/// @param Rhs const String&
+	/// @return String&
+	String& operator=(String&& Rhs);
 
 	/// @brief Assigns a cstring to the string.
 	/// @param Text const char* : Pointer to a string buffer to copy data from

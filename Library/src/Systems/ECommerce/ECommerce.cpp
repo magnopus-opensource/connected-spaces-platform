@@ -18,6 +18,8 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/aggregationservice/Dto.h"
 
+#include <regex>
+
 namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
@@ -113,6 +115,85 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 	}
 }
 
+void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::systems::CartInfo& Cart)
+{
+	if (CartDto.HasSpaceId())
+	{
+		Cart.SpaceId = CartDto.GetSpaceId();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
+	}
+
+	if (CartDto.HasShopifyCartId())
+	{
+		// Magnopus Services adds a prefix to the Shopify cart ID. We strip that out here to ensure we are only
+		// using the raw Shopify ID. Magnopus Services accepts the ID with or without the prefix so the latter
+		// is chosen to be more generic if used with other cloud service providers.
+		std::regex CartIdPrefixRegex("^gid:\\/\\/shopify\\/Cart\\/");
+		Cart.CartId = std::regex_replace(CartDto.GetShopifyCartId().c_str(), CartIdPrefixRegex, "").c_str();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
+	}
+
+	if (CartDto.HasLines())
+	{
+		auto DtoLines  = CartDto.GetLines();
+		Cart.CartLines = csp::common::Array<csp::systems::CartLine>(DtoLines.size());
+
+		for (auto i = 0; i < DtoLines.size(); ++i)
+		{
+			auto CartLineDto = *DtoLines[i];
+
+			Cart.CartLines[i] = csp::systems::CartLine();
+
+			if (CartLineDto.HasShopifyCartLineId())
+			{
+				Cart.CartLines[i].CartLineId = CartLineDto.GetShopifyCartLineId();
+			}
+			else
+			{
+				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
+			}
+
+			if (CartLineDto.HasProductVariantId())
+			{
+				Cart.CartLines[i].ProductVariantId = CartLineDto.GetProductVariantId();
+			}
+			else
+			{
+				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
+			}
+
+			if (CartLineDto.HasQuantity())
+			{
+				Cart.CartLines[i].Quantity = CartLineDto.GetQuantity();
+			}
+			else
+			{
+				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
+			}
+		}
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
+	}
+
+	if (CartDto.HasTotalQuantity())
+	{
+		Cart.TotalQuantity = CartDto.GetTotalQuantity();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
+	}
+}
+
+
 const ProductInfo& ProductInfoResult::GetProductInfo() const
 {
 	return ProductInformation;
@@ -134,6 +215,56 @@ void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 	{
 		ProductInformationResponse->FromJson(Response->GetPayload().GetContent());
 		ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation);
+	}
+}
+
+const CheckoutInfo& CheckoutInfoResult::GetCheckoutInfo() const
+{
+	return CheckoutInformation;
+}
+
+CheckoutInfo& CheckoutInfoResult::GetCheckoutInfo()
+{
+	return CheckoutInformation;
+}
+
+void CheckoutInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	chs_aggregation::ShopifyCheckoutDto* CheckoutInformationResponse = static_cast<chs_aggregation::ShopifyCheckoutDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response							 = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent());
+		CheckoutInformation.StoreUrl	= CheckoutInformationResponse->GetCheckoutUrl();
+		CheckoutInformation.CheckoutUrl = CheckoutInformationResponse->GetCheckoutUrl();
+	}
+}
+
+const CartInfo& CartInfoResult::GetCartInfo() const
+{
+	return Cart;
+}
+
+CartInfo& CartInfoResult::GetCartInfo()
+{
+	return Cart;
+}
+
+void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* Dto							   = static_cast<chs_aggregation::ShopifyCartDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Dto->FromJson(Response->GetPayload().GetContent());
+
+		CartDtoToCartInfo(*Dto, Cart);
 	}
 }
 
