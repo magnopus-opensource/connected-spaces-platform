@@ -23,7 +23,9 @@
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
+#include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
@@ -339,7 +341,8 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 	auto ComponentId = GenerateComponentId();
 	auto* Component	 = InstantiateComponent(ComponentId, Type);
-	// if Component != nullptr component has not been Instantiate, so is skipped.
+
+	// If Component is null, component has not been instantiated, so is skipped.
 	if (Component != nullptr)
 	{
 		DirtyComponents[ComponentId] = DirtyComponent {Component, ComponentUpdateType::Add};
@@ -936,6 +939,12 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::Fog:
 			Component = CSP_NEW FogSpaceComponent(this);
+			break;
+		case ComponentType::ECommerce:
+			Component = CSP_NEW ECommerceSpaceComponent(this);
+			break;
+		case ComponentType::FiducialMarker:
+			Component = CSP_NEW FiducialMarkerSpaceComponent(this);
 			break;
 		default:
 		{

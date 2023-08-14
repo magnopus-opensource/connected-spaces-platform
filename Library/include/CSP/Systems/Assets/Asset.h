@@ -332,14 +332,10 @@ public:
 	~AssetDataResult();
 
 	/// @brief Retrieves the data from the result.
-	void* GetData();
-	/// @brief Retrieves the data from the result.
 	const void* GetData() const;
 
 	/// @brief Gets the length of data returned.
-	size_t GetDataLength();
-	/// @brief Gets the length of data returned.
-	const size_t GetDataLength() const;
+	size_t GetDataLength() const;
 
 protected:
 	AssetDataResult() = delete;
@@ -347,9 +343,6 @@ protected:
 
 private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	void* Data;
-	size_t DataLength;
 };
 
 
