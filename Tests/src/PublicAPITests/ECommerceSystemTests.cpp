@@ -324,8 +324,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECART_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -373,15 +373,13 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
 	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
 	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
 
-	auto CartLines			  = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
-	CreatedCart.TotalQuantity = 4;
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
 
 	// Add local cart lines
 	for (int i = 0; i < VariantIds.Size(); ++i)
 	{
 		auto CartLine			  = csp::systems::CartLine();
 		CartLine.Quantity		  = 1;
-		CartLine.CartLineId		  = "";
 		CartLine.ProductVariantId = VariantIds[i];
 
 		CartLines[i] = CartLine;
@@ -389,85 +387,264 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
 
 	CreatedCart.CartLines = CartLines;
 
+	CreatedCart.TotalQuantity = 4;
+
 	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
 	EXPECT_NE(CreatedCart.CartId, "");
 	EXPECT_EQ(CreatedCart.CartLines.Size(), 4);
 	EXPECT_EQ(CreatedCart.TotalQuantity, 4);
 
-	// Update Cart Lines
-	auto [AdditionCartResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(AdditionCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto AdditionalLinesCart = AdditionCartResult.GetCartInfo();
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
 
-	EXPECT_EQ(AdditionalLinesCart.SpaceId, SpaceId);
-	EXPECT_EQ(AdditionalLinesCart.CartId, CreatedCart.CartId);
-	EXPECT_EQ(AdditionalLinesCart.CartLines.Size(), 4);
-	EXPECT_EQ(AdditionalLinesCart.TotalQuantity, 4);
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
 
-	for (int i = 0; i < VariantIds.Size(); ++i)
+	for (int i = 0; i < CartLines.Size(); ++i)
 	{
-		EXPECT_EQ(AdditionalLinesCart.CartLines[i].ProductVariantId, VariantIds[i]);
-		EXPECT_NE(AdditionalLinesCart.CartLines[i].CartLineId, "");
-		EXPECT_EQ(AdditionalLinesCart.TotalQuantity, 4);
-	}
-
-	// Testing Additional Cart Lines
-	for (int i = 0; i < VariantIds.Size(); ++i)
-	{
-		auto CartLine			  = csp::systems::CartLine();
-		CartLine.Quantity		  = 1;
-		CartLine.CartLineId		  = AdditionalLinesCart.CartLines[i].CartLineId;
-		CartLine.ProductVariantId = VariantIds[0];
-
-		CartLines[i] = CartLine;
-	}
-
-	AdditionalLinesCart.CartLines = CartLines;
-
-	auto [UpdatedCartResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, AdditionalLinesCart);
-
-	EXPECT_EQ(UpdatedCartResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	auto UpdatedLinesCart = UpdatedCartResult.GetCartInfo();
-
-	EXPECT_EQ(UpdatedLinesCart.SpaceId, SpaceId);
-	EXPECT_EQ(UpdatedLinesCart.CartId, CreatedCart.CartId);
-	EXPECT_EQ(UpdatedLinesCart.CartLines.Size(), 4);
-	EXPECT_EQ(UpdatedLinesCart.TotalQuantity, 4);
-
-	for (int i = 0; i < VariantIds.Size(); ++i)
-	{
-		EXPECT_EQ(UpdatedLinesCart.CartLines[i].ProductVariantId, VariantIds[0]);
-		EXPECT_NE(UpdatedLinesCart.CartLines[i].CartLineId, "");
-		EXPECT_EQ(UpdatedLinesCart.TotalQuantity, 4);
-	}
-
-	// Testing Removing Cart Lines
-	for (int i = 0; i < VariantIds.Size(); ++i)
-	{
-		auto CartLine			  = csp::systems::CartLine();
-		CartLine.Quantity		  = 0;
-		CartLine.CartLineId		  = UpdatedLinesCart.CartLines[i].CartLineId;
-		CartLine.ProductVariantId = VariantIds[0];
-
-		CartLines[i] = CartLine;
-	}
-
-	UpdatedLinesCart.CartLines = CartLines;
-
-	auto [RemovedLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, UpdatedLinesCart);
-
-	EXPECT_EQ(RemovedLinesResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	auto RemovedLinesCart = RemovedLinesResult.GetCartInfo();
-
-	EXPECT_EQ(RemovedLinesCart.SpaceId, SpaceId);
-	EXPECT_EQ(RemovedLinesCart.CartId, CreatedCart.CartId);
-	EXPECT_EQ(RemovedLinesCart.CartLines.Size(), 0);
-	EXPECT_EQ(RemovedLinesCart.TotalQuantity, 0);
-
-	LogOut(UserSystem);
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
 }
+
+#endif
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Connect your shopify.dev account to your space using the "Private Access Token" and store name
+			Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+			{
+				"storeName": "string",
+				"isEcommerceActive": true,
+				"privateAccessToken": "string"
+			}
+		3. Check Shopify has synced with your namespace
+			Endpoint: /api/v1/vendors/shopify/validate
+			{
+				"storeName": "string",
+				"privateAccessToken": "string"
+			}
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details						= GetShopifyDetails();
+	auto SpaceId						= Details["SpaceId"];
+	const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
+	const csp::common::String VariantId = "gid://shopify/ProductVariant/46314311516433";
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create Cart
+	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedCart = CreateCartResult.GetCartInfo();
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+
+	// Add local cart lines
+	auto CartLine			  = csp::systems::CartLine();
+	CartLine.Quantity		  = 1;
+	CartLine.ProductVariantId = VariantId;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 1;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
+
+	// update cart lines adding 1 extra quantity
+	CartLine				  = csp::systems::CartLine();
+	CartLine.Quantity		  = 1;
+	CartLine.ProductVariantId = VariantId;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 2;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 2);
+
+	// Add Cart Lines
+	auto [UpdateCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(UpdateCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto UpdateCartLinesCart = UpdateCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(UpdateCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(UpdateCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(UpdateCartLinesCart.CartLines[i].Quantity, 2);
+	};
+}
+
+#endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Connect your shopify.dev account to your space using the "Private Access Token" and store name
+			Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+			{
+				"storeName": "string",
+				"isEcommerceActive": true,
+				"privateAccessToken": "string"
+			}
+		3. Check Shopify has synced with your namespace
+			Endpoint: /api/v1/vendors/shopify/validate
+			{
+				"storeName": "string",
+				"privateAccessToken": "string"
+			}
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details						 = GetShopifyDetails();
+	auto SpaceId						 = Details["SpaceId"];
+	const csp::common::String ProductId	 = "gid://shopify/Product/8660541047057";
+	const csp::common::String VariantIds = "gid://shopify/ProductVariant/46314311516433";
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create Cart
+	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedCart = CreateCartResult.GetCartInfo();
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+
+	// Add local cart lines
+	auto CartLine			  = csp::systems::CartLine();
+	CartLine.Quantity		  = 1;
+	CartLine.ProductVariantId = VariantIds;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 1;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
+
+	// Add update cart lines quantity to 0
+	CartLine.Quantity		  = 0;
+	CartLine.ProductVariantId = VariantIds;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 0;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	// Add Cart Lines
+	auto [DeleteCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto DeleteCartLinesCart = DeleteCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(DeleteCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(DeleteCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(DeleteCartLinesCart.CartLines.Size(), 0);
+	EXPECT_EQ(DeleteCartLinesCart.TotalQuantity, 0);
+}
+
 #endif

@@ -108,8 +108,8 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 				auto CartLineRemoval = std::make_shared<chs::ShopifyCartLineDto>();
 
 				CartLineRemoval->SetQuantity(CartInformation.CartLines[i].Quantity);
-				CartLineRemoval->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
 				CartLineRemoval->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
+				CartLineRemoval->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
 
 				CartLinesRemoval.push_back(CartLineRemoval);
 			}
@@ -119,7 +119,6 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
 				CartLineAdditions->SetQuantity(CartInformation.CartLines[i].Quantity);
 				CartLineAdditions->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
-				CartLineAdditions->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
 
 				CartLinesAdditions.push_back(CartLineAdditions);
 			}
@@ -130,22 +129,21 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
 				CartLineUpdate->SetQuantity(CartInformation.CartLines[i].Quantity);
 				CartLineUpdate->SetProductVariantId(CartInformation.CartLines[i].ProductVariantId);
-				CartLineUpdate->SetShopifyCartLineId(CartInformation.CartLines[i].CartLineId);
 
 				CartLinesUpdate.push_back(CartLineUpdate);
 			}
-
-			CartUpdateInfo->SetAddLineCartChanges(CartLinesAdditions);
-			CartUpdateInfo->SetRemoveLineCartChanges(CartLinesRemoval);
-			CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
 		}
 
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
-																										   nullptr,
-																										   csp::web::EResponseCodes::ResponseCreated);
-		static_cast<chs::ShopifyApi*>(ShopifyAPI)
-			->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
+		CartUpdateInfo->SetAddLineCartChanges(CartLinesAdditions);
+		CartUpdateInfo->SetRemoveLineCartChanges(CartLinesRemoval);
+		CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
 	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
+																									   nullptr,
+																									   csp::web::EResponseCodes::ResponseCreated);
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)
+		->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
 }
 } // namespace csp::systems
