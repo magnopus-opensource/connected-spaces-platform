@@ -361,6 +361,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
+	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
 	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
@@ -375,12 +376,15 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
 	auto CartLines			  = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
 	CreatedCart.TotalQuantity = 4;
 
+	// Add local cart lines
 	for (int i = 0; i < VariantIds.Size(); ++i)
 	{
 		auto CartLine			  = csp::systems::CartLine();
 		CartLine.Quantity		  = 1;
 		CartLine.CartLineId		  = "";
 		CartLine.ProductVariantId = VariantIds[i];
+
+		CartLines[i] = CartLine;
 	}
 
 	CreatedCart.CartLines = CartLines;
@@ -390,23 +394,79 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartTest)
 	EXPECT_EQ(CreatedCart.CartLines.Size(), 4);
 	EXPECT_EQ(CreatedCart.TotalQuantity, 4);
 
-	auto [UpdatedCartResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+	// Update Cart Lines
+	auto [AdditionCartResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(UpdatedCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AdditionCartResult.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto Cart = UpdatedCartResult.GetCartInfo();
+	auto AdditionalLinesCart = AdditionCartResult.GetCartInfo();
 
-	EXPECT_EQ(Cart.SpaceId, SpaceId);
-	EXPECT_EQ(Cart.CartId, CreatedCart.CartId);
-	EXPECT_EQ(Cart.CartLines.Size(), 4);
-	EXPECT_EQ(Cart.TotalQuantity, 4);
+	EXPECT_EQ(AdditionalLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AdditionalLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AdditionalLinesCart.CartLines.Size(), 4);
+	EXPECT_EQ(AdditionalLinesCart.TotalQuantity, 4);
 
 	for (int i = 0; i < VariantIds.Size(); ++i)
 	{
-		EXPECT_EQ(Cart.CartLines[i].ProductVariantId, VariantIds[i]);
-		EXPECT_NE(Cart.CartLines[i].CartLineId, "");
-		EXPECT_EQ(Cart.TotalQuantity, 4);
+		EXPECT_EQ(AdditionalLinesCart.CartLines[i].ProductVariantId, VariantIds[i]);
+		EXPECT_NE(AdditionalLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AdditionalLinesCart.TotalQuantity, 4);
 	}
+
+	// Testing Additional Cart Lines
+	for (int i = 0; i < VariantIds.Size(); ++i)
+	{
+		auto CartLine			  = csp::systems::CartLine();
+		CartLine.Quantity		  = 1;
+		CartLine.CartLineId		  = AdditionalLinesCart.CartLines[i].CartLineId;
+		CartLine.ProductVariantId = VariantIds[0];
+
+		CartLines[i] = CartLine;
+	}
+
+	AdditionalLinesCart.CartLines = CartLines;
+
+	auto [UpdatedCartResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, AdditionalLinesCart);
+
+	EXPECT_EQ(UpdatedCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto UpdatedLinesCart = UpdatedCartResult.GetCartInfo();
+
+	EXPECT_EQ(UpdatedLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(UpdatedLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(UpdatedLinesCart.CartLines.Size(), 4);
+	EXPECT_EQ(UpdatedLinesCart.TotalQuantity, 4);
+
+	for (int i = 0; i < VariantIds.Size(); ++i)
+	{
+		EXPECT_EQ(UpdatedLinesCart.CartLines[i].ProductVariantId, VariantIds[0]);
+		EXPECT_NE(UpdatedLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(UpdatedLinesCart.TotalQuantity, 4);
+	}
+
+	// Testing Removing Cart Lines
+	for (int i = 0; i < VariantIds.Size(); ++i)
+	{
+		auto CartLine			  = csp::systems::CartLine();
+		CartLine.Quantity		  = 0;
+		CartLine.CartLineId		  = UpdatedLinesCart.CartLines[i].CartLineId;
+		CartLine.ProductVariantId = VariantIds[0];
+
+		CartLines[i] = CartLine;
+	}
+
+	UpdatedLinesCart.CartLines = CartLines;
+
+	auto [RemovedLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, UpdatedLinesCart);
+
+	EXPECT_EQ(RemovedLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto RemovedLinesCart = RemovedLinesResult.GetCartInfo();
+
+	EXPECT_EQ(RemovedLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(RemovedLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(RemovedLinesCart.CartLines.Size(), 0);
+	EXPECT_EQ(RemovedLinesCart.TotalQuantity, 0);
 
 	LogOut(UserSystem);
 }
