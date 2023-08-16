@@ -26,6 +26,8 @@
 
 using namespace csp::common;
 
+class OptionalExtraTestClass;
+
 class OptionalTestClass
 {
 public:
@@ -52,6 +54,11 @@ public:
 		MoveCount	= Other.MoveCount + 1;
 		Other.Moved = true;
 	}
+
+	OptionalTestClass(OptionalTestClass* Other)
+	{
+		SomeField = Other->SomeField;
+	}
 };
 
 class OptionalExtraTestClass : public OptionalTestClass
@@ -62,7 +69,6 @@ public:
 	int ExtraField;
 };
 
-
 CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalDefaultInitialisationTest)
 {
 	try
@@ -70,6 +76,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalDefaultInitialisationT
 		Optional<OptionalTestClass> OptionalInstance;
 
 		EXPECT_FALSE(OptionalInstance.HasValue());
+		EXPECT_EQ(&(*OptionalInstance), nullptr);
 	}
 	catch (...)
 	{
@@ -84,6 +91,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNullptrInitialisationT
 		Optional<OptionalTestClass> OptionalInstance(nullptr);
 
 		EXPECT_FALSE(OptionalInstance.HasValue());
+		EXPECT_EQ(&(*OptionalInstance), nullptr);
 	}
 	catch (...)
 	{
@@ -125,7 +133,6 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithPointerAndDestruct
 			DestructorRan = true;
 		};
 
-
 		{
 			auto* TestClassInstancePtr = (OptionalTestClass*) csp::memory::DllAlloc(sizeof(OptionalTestClass));
 			new (TestClassInstancePtr) OptionalTestClass(2);
@@ -145,49 +152,41 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithPointerAndDestruct
 	}
 }
 
-/*
- * This constructor is causing me problems. I've tried a few things but every time I seem to get an error
- * with it trying to use `Optional(const U& InValue)` rather than `Optional(const U* InValue)`. Not sure
- * if there is a way that I am missing or if maybe we should remove this constructor? I cannot see it used
- * anywhere.
- */
-// CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithExtendedClassPointerInitialisationTest)
-//{
-//	try
-//	{
-//		std::unique_ptr<OptionalExtraTestClass> TestClassInstance = std::make_unique<OptionalExtraTestClass>(3, 4);
-//		Optional<OptionalTestClass> OptionalInstance(TestClassInstance.get());
-//
-//		EXPECT_TRUE(OptionalInstance.HasValue());
-//		EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstance->SomeField);
-//		EXPECT_EQ(OptionalInstance->SomeField, TestClassInstance->SomeField);
-//	}
-//	catch (...)
-//	{
-//		FAIL();
-//	}
-// }
+CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithExtendedClassPointerInitialisationTest)
+{
+	try
+	{
+		auto* TestClassInstancePtr = (OptionalExtraTestClass*) csp::memory::DllAlloc(sizeof(OptionalExtraTestClass));
+		new (TestClassInstancePtr) OptionalExtraTestClass(3, 4);
+		Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr);
 
-/*
- * Should we expect this to work?
- * It seems like because we have not got an instace in the optional that it does not use the Optional(const Optional<T>& Other)
- * constructor despite the declaration that OptionalTestClass is the T that we are using.
- */
-// CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, CopyOptionalWithNoValueInitialisationTest)
-//{
-//	try
-//	{
-//		Optional<OptionalTestClass> OriginalOptionalInstance();
-//		Optional<OptionalTestClass> CopyOptionalInstance(OriginalOptionalInstance);
-//
-//		EXPECT_FALSE(CopyOptionalInstance.HasValue());
-//		EXPECT_EQ(*CopyOptionalInstance, nullptr);
-//	}
-//	catch (...)
-//	{
-//		FAIL();
-//	}
-//}
+		EXPECT_TRUE(OptionalInstance.HasValue());
+		EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstancePtr->SomeField);
+		EXPECT_EQ(OptionalInstance->SomeField, TestClassInstancePtr->SomeField);
+
+		csp::memory::DllFree(TestClassInstancePtr);
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, CopyOptionalWithNoValueInitialisationTest)
+{
+	try
+	{
+		Optional<OptionalTestClass> OriginalOptionalInstance = Optional<OptionalTestClass>();
+		Optional<OptionalTestClass> CopyOptionalInstance(OriginalOptionalInstance);
+
+		EXPECT_FALSE(CopyOptionalInstance.HasValue());
+		EXPECT_EQ(&(*CopyOptionalInstance), nullptr);
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
 
 CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithExtendedClassReferenceInitialisationTest)
 {
