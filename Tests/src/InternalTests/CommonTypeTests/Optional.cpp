@@ -18,6 +18,7 @@
 
 	#include "CSP/Common/Optional.h"
 
+	#include "CSP/Memory/DllAllocator.h"
 	#include "TestHelpers.h"
 
 	#include <gtest/gtest.h>
@@ -95,11 +96,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithPointerInitialisat
 
 	try
 	{
-		auto TestClassInstancePtr = std::make_unique<OptionalTestClass>(1);
-		Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr.get());
+		auto* TestClassInstancePtr = (OptionalTestClass*) csp::memory::DllAlloc(sizeof(OptionalTestClass));
+		new (TestClassInstancePtr) OptionalTestClass(2);
+
+		Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr);
 
 		EXPECT_TRUE(OptionalInstance.HasValue());
-		EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr.get());
+		EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr);
 		EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstancePtr->SomeField);
 		EXPECT_EQ(OptionalInstance->SomeField, TestClassInstancePtr->SomeField);
 	}
@@ -117,15 +120,19 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalWithPointerAndDestruct
 
 		std::function<void(OptionalTestClass*)> CustomDestructor = [&](OptionalTestClass* Pointer)
 		{
+			Pointer->~OptionalTestClass();
+			csp::memory::DllFree(Pointer);
 			DestructorRan = true;
 		};
 
+
 		{
-			auto TestClassInstancePtr = std::make_unique<OptionalTestClass>(2);
-			Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr.get(), CustomDestructor);
+			auto* TestClassInstancePtr = (OptionalTestClass*) csp::memory::DllAlloc(sizeof(OptionalTestClass));
+			new (TestClassInstancePtr) OptionalTestClass(2);
+			Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr, CustomDestructor);
 
 			EXPECT_TRUE(OptionalInstance.HasValue());
-			EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr.get());
+			EXPECT_EQ(&(*OptionalInstance), TestClassInstancePtr);
 			EXPECT_EQ((*OptionalInstance).SomeField, TestClassInstancePtr->SomeField);
 			EXPECT_EQ(OptionalInstance->SomeField, TestClassInstancePtr->SomeField);
 		}
