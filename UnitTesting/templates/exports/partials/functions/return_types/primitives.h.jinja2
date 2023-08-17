@@ -1,0 +1,31 @@
+{% for p in config.primitives %}
+    // Return {{ p.type }} min value by value
+    CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_min();
+
+    // Return {{ p.type }} max value by value
+    CSP_API {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_max();
+
+    // Return {{ p.type }} min value by pointer
+    CSP_API {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_min();
+
+    // Return {{ p.type }} max value by pointer
+    CSP_API {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_max();
+
+    // Return {{ p.type }} min value by const pointer
+    CSP_API const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min();
+
+    // Return {{ p.type }} max value by const pointer
+    CSP_API const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max();
+
+    // Return {{ p.type }} min value by reference
+    CSP_API {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_min();
+
+    // Return {{ p.type }} max value by reference
+    CSP_API {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_max();
+
+    // Return {{ p.type }} min value by const reference
+    CSP_API const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_min();
+
+    // Return {{ p.type }} max value by const reference
+    CSP_API const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_max();
+{% endfor %}

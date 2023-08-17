@@ -1,0 +1,12 @@
+{# All class return types are returned from the C wrapper by pointer, regardless of the C++ return type #}
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }}
+    test('globalFunctions_MyClass_Return{{ x }}', async function() {
+        const result = dummy.globalFunctions_MyClass_Return{{ x }}();
+
+        assert.isTrue(result.pointerIsValid());
+        assert.areEqual(result.someValue, {{ config.class_int_value_first }});
+
+        result.delete();
+    });
+{% endfor %}
