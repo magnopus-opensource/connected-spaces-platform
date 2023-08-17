@@ -19,7 +19,7 @@ _"An interoperable communication library for the spatial internet."_
 - [Install](#-install)
 - [Build Instructions](#-build-instructions)
 - [Usage](#%EF%B8%8F-usage)
-- [Tenant Keys](#-tenant-keys)
+- [Tenant IDs](#-tenant-ids)
 - [Api Documentation](#-api-documentation)
 - [Contributions](#%EF%B8%8F-contributions)
 - [License](#%EF%B8%8F-license)
