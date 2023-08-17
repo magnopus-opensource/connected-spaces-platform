@@ -1,0 +1,18 @@
+test('check_StringFieldTestClass_Field', async function() {
+    const instance = dummy.StringFieldTestClass.create();
+    instance.field = "{{ config.class_string_value_first }}";
+
+    try {
+        dummy.check_StringFieldTestClass_Field(instance);
+    }
+    catch (e) {
+        assert.fail(e.message);
+    }
+});
+
+test('set_StringFieldTestClass_Field', async function() {
+    const instance = dummy.StringFieldTestClass.create();
+    dummy.set_StringFieldTestClass_Field(instance);
+
+    assert.areEqual(instance.field, "{{ config.class_string_value_second }}");
+});

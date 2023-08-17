@@ -1,0 +1,9 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    test('classFunctions_String_Return{{ x }}', async function() {
+        const instance = dummy.StringReturnTestClass.create();
+        const result = instance.classFunctions_String_Return{{ x }}();
+
+        assert.areEqual(result, "{{ config.string_value }}");
+    });
+{% endfor %}

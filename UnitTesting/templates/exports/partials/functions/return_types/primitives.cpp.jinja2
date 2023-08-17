@@ -1,0 +1,67 @@
+{% for p in config.primitives %}
+    // Return {{ p.type }} min value by value
+    {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_min() {
+        return {{ p.min }};
+    }
+
+    // Return {{ p.type }} max value by value
+    {{ p.type }} GlobalFunctions_Primitives_{{ p.type }}_ReturnValue_max() {
+        return {{ p.max }};
+    }
+
+    // Return {{ p.type }} min value by pointer
+    {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_min() {
+        static {{ p.type }} Value = {{ p.min }};
+
+        return &Value;
+    }
+
+    // Return {{ p.type }} max value by pointer
+    {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnPointer_max() {
+        static {{ p.type }} Value = {{ p.max }};
+
+        return &Value;
+    }
+
+    // Return {{ p.type }} min value by const pointer
+    const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min() {
+        static {{ p.type }} Value = {{ p.min }};
+
+        return &Value;
+    }
+
+    // Return {{ p.type }} max value by const pointer
+    const {{ p.type }}* GlobalFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max() {
+        static {{ p.type }} Value = {{ p.max }};
+
+        return &Value;
+    }
+
+    // Return {{ p.type }} min value by reference
+    {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_min() {
+        static {{ p.type }} Value = {{ p.min }};
+
+        return Value;
+    }
+
+    // Return {{ p.type }} max value by reference
+    {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnReference_max() {
+        static {{ p.type }} Value = {{ p.max }};
+
+        return Value;
+    }
+
+    // Return {{ p.type }} min value by const reference
+    const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_min() {
+        static {{ p.type }} Value = {{ p.min }};
+
+        return Value;
+    }
+
+    // Return {{ p.type }} max value by const reference
+    const {{ p.type }}& GlobalFunctions_Primitives_{{ p.type }}_ReturnConstReference_max() {
+        static {{ p.type }} Value = {{ p.max }};
+
+        return Value;
+    }
+{% endfor %}

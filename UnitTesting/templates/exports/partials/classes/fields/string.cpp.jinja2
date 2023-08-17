@@ -1,0 +1,11 @@
+// Pass class and check string field values
+void Check_StringFieldTestClass_Field(const StringFieldTestClass& Instance) {
+    if (Instance.Field != "{{ config.class_string_value_first }}") {
+        throw std::invalid_argument("Instance");
+    }
+}
+
+// Pass class and set string field values
+void Set_StringFieldTestClass_Field(StringFieldTestClass& Instance) {
+    Instance.Field = "{{ config.class_string_value_second }}";
+}

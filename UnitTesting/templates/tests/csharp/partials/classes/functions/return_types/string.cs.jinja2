@@ -1,0 +1,10 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    [Test]
+    public static void ClassFunctions_String_Return{{ x }}() {
+        using var instance = new StringReturnTestClass();
+        var result = instance.ClassFunctions_String_Return{{ x }}();
+
+        Assert.AreEqual("{{ config.string_value }}", result);
+    }
+{% endfor %}

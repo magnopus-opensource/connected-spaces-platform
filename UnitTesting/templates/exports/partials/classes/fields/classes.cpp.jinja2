@@ -1,0 +1,11 @@
+// Pass class and check class field values
+void Check_ClassFieldTestClass_Field(const ClassFieldTestClass& Instance) {
+    if (Instance.Field.ACoolInteger != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Instance");
+    }
+}
+
+// Pass class and set class field values
+void Set_ClassFieldTestClass_Field(ClassFieldTestClass& Instance) {
+    Instance.Field.ACoolInteger = {{ config.class_int_value_second }};
+}
