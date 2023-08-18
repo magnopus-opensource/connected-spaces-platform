@@ -1,0 +1,38 @@
+{% for p in config.primitives %}
+    {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
+        // Get {{ p.type }} min value by {{ x }}
+        [Test]
+        public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+            var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+        }
+
+        // Get {{ p.type }} max value by {{ x }}
+        [Test]
+        public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+            var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+        }
+    {% endfor %}
+
+    {# Pointers and references to primitive types are returned as Ref<T> instances #}
+    {% for x in ['Pointer', 'Reference'] %}
+        // Get {{ p.type }} min value by {{ x }}
+        [Test]
+        public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+            var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result.Value", p.min) }}
+        }
+
+        // Get {{ p.type }} max value by {{ x }}
+        [Test]
+        public static void GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+            var result = Global.GlobalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result.Value", p.max) }}
+        }
+    {% endfor %}
+{% endfor %}

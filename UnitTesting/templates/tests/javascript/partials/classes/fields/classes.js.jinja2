@@ -1,0 +1,18 @@
+test('check_ClassFieldTestClass_Field', async function() {
+    const instance = dummy.ClassFieldTestClass.create();
+    instance.field.aCoolInteger = {{ config.class_int_value_first }};
+
+    try {
+        dummy.check_ClassFieldTestClass_Field(instance);
+    }
+    catch (e) {
+        assert.fail(e.message);
+    }
+});
+
+test('set_ClassFieldTestClass_Field', async function() {
+    const instance = dummy.ClassFieldTestClass.create();
+    dummy.set_ClassFieldTestClass_Field(instance);
+
+    assert.areEqual(instance.field.aCoolInteger, {{ config.class_int_value_second }});
+});

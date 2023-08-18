@@ -1,0 +1,15 @@
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Pass class by {{ x }}
+    [Test]
+    public static void ClassFunctions_MyClass_Pass{{ x }}() {
+        using var instance = new ClassParameterTestClass();
+        using var param = new MyClass({{ config.class_int_value_first }});
+
+        try {
+            instance.ClassFunctions_MyClass_Pass{{ x }}(param);
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+    }
+{% endfor %}

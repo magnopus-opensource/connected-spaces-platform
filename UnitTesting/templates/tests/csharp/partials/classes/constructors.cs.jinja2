@@ -1,0 +1,185 @@
+static List<ConstructorInfo> GetAllConstructors(this Type type) {
+    var flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance;
+    var ctors = type.GetConstructors(flags).ToList();
+
+    // Remove internal NativePointer constructor
+    ctors.Remove(
+        ctors.Find(
+            c =>
+                c.GetParameters().Length == 1
+                && c.GetParameters()[0].ParameterType.Name == "NativePointer"
+        )
+    );
+
+    return ctors;
+}
+
+[Test]
+public static void Check_DefaultConstructorClass_Constructors() {
+    var ctors = typeof(DefaultConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(1, ctors.Count);
+
+    var ctor = ctors[0];
+
+    Assert.IsFalse(ctor.IsStatic);
+    Assert.IsFalse(ctor.IsVirtual);
+
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(0, @params.Length);
+}
+
+[Test]
+public static void Create_DefaultConstructorClass() {
+    using var instance = new DefaultConstructorClass();
+
+    Assert.IsTrue(instance.PointerIsValid);
+    Assert.AreEqual({{ config.class_int_value_first }}, instance.SomeValue);
+}
+
+[Test]
+public static void Check_ParameterConstructorClass_Constructors() {
+    var ctors = typeof(ParameterConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(1, ctors.Count);
+
+    var ctor = ctors[0];
+
+    Assert.IsFalse(ctor.IsStatic);
+    Assert.IsFalse(ctor.IsVirtual);
+
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(1, @params.Length);
+    Assert.AreEqual(typeof(int), @params[0].ParameterType);
+}
+
+[Test]
+public static void Create_ParameterConstructorClass() {
+    using var instance = new ParameterConstructorClass({{ config.class_int_value_first }});
+
+    Assert.IsTrue(instance.PointerIsValid);
+    Assert.AreEqual({{ config.class_int_value_first }}, instance.SomeValue);
+}
+
+[Test]
+public static void Check_ParametersConstructorClass_Constructors() {
+    var ctors = typeof(ParametersConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(ctors.Count, 1);
+
+    var ctor = ctors[0];
+
+    Assert.IsFalse(ctor.IsStatic);
+    Assert.IsFalse(ctor.IsVirtual);
+
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(2, @params.Length);
+    Assert.AreEqual(typeof(int), @params[0].ParameterType);
+    Assert.AreEqual(typeof(bool), @params[1].ParameterType);
+}
+
+[Test]
+public static void Create_ParametersConstructorClass() {
+    using var instance = new ParametersConstructorClass({{ config.class_int_value_first }}, true);
+
+    Assert.IsTrue(instance.PointerIsValid);
+    Assert.AreEqual({{ config.class_int_value_first }}, instance.SomeValue);
+    Assert.AreEqual(true, instance.AnotherValue);
+}
+
+[Test]
+public static void Check_MultipleConstructorsClass_Constructors() {
+    var ctors = typeof(MultipleConstructorsClass).GetAllConstructors();
+
+    Assert.AreEqual(2, ctors.Count);
+
+    bool found1 = false, found2 = false;
+
+    foreach (var ctor in ctors) {
+        Assert.IsFalse(ctor.IsStatic);
+        Assert.IsFalse(ctor.IsVirtual);
+
+        var @params = ctor.GetParameters();
+
+        if (@params.Length == 0) {
+            found1 = true;
+        }
+        else if (@params.Length == 1) {
+            Assert.AreEqual(typeof(int), @params[0].ParameterType);
+
+            found2 = true;
+        }
+        else {
+            Assert.Fail("Unexpected constructor found!");
+        }
+    }
+
+    Assert.IsTrue(found1 && found2);
+}
+
+[Test]
+public static void Create_MultipleConstructorsClass() {
+    // Default
+    {
+        using var instance = new MultipleConstructorsClass();
+
+        Assert.IsTrue(instance.PointerIsValid);
+        Assert.AreEqual({{ config.class_int_value_first }}, instance.SomeValue);
+    }
+
+    // Single parameter
+    {
+        using var instance = new MultipleConstructorsClass({{ config.class_int_value_second }});
+
+        Assert.IsTrue(instance.PointerIsValid);
+        Assert.AreEqual({{ config.class_int_value_second }}, instance.SomeValue);
+    }
+}
+
+[Test]
+public static void Check_ProtectedConstructorClass_Constructors() {
+    var ctors = typeof(ProtectedConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(1, ctors.Count);
+    
+    var ctor = ctors[0];
+
+    Assert.IsTrue(ctor.IsFamily);
+    
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(0, @params.Length);
+}
+
+[Test]
+public static void Check_PrivateConstructorClass_Constructors() {
+    var ctors = typeof(PrivateConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(1, ctors.Count);
+    
+    var ctor = ctors[0];
+
+    Assert.IsTrue(ctor.IsFamily);
+    
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(0, @params.Length);
+}
+
+[Test]
+public static void Check_DeletedConstructorClass_Constructors() {
+    var ctors = typeof(DeletedConstructorClass).GetAllConstructors();
+
+    Assert.AreEqual(1, ctors.Count);
+    
+    var ctor = ctors[0];
+
+    Assert.IsTrue(ctor.IsFamily);
+    
+    var @params = ctor.GetParameters();
+
+    Assert.AreEqual(0, @params.Length);
+}

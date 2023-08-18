@@ -1,0 +1,32 @@
+// Return class by value
+MyClass GlobalFunctions_MyClass_ReturnValue() {
+    return MyClass({{ config.class_int_value_first }});
+}
+
+// Return class by pointer
+MyClass* GlobalFunctions_MyClass_ReturnPointer() {
+    static MyClass Instance({{ config.class_int_value_first }});
+
+    return &Instance;
+}
+
+// Return class by const pointer
+const MyClass* GlobalFunctions_MyClass_ReturnConstPointer() {
+    static MyClass Instance({{ config.class_int_value_first }});
+
+    return &Instance;
+}
+
+// Return class by reference
+MyClass& GlobalFunctions_MyClass_ReturnReference() {
+    static MyClass Instance({{ config.class_int_value_first }});
+
+    return Instance;
+}
+
+// Return class by const reference
+const MyClass& GlobalFunctions_MyClass_ReturnConstReference() {
+    static MyClass Instance({{ config.class_int_value_first }});
+
+    return Instance;
+}

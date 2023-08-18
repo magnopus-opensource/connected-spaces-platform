@@ -1,0 +1,27 @@
+test('check_PrimitiveFieldTestClass_Fields', async function() {
+    const instance = dummy.PrimitiveFieldTestClass.create();
+
+    {% for p in config.primitives %}
+        instance.field{{ loop.index0 }} = {{ p.min }};
+    {% endfor %}
+
+    try {
+        dummy.check_PrimitiveFieldTestClass_Fields(instance);
+    }
+    catch (e) {
+        assert.fail(e.message);
+    }
+});
+
+test('set_PrimitiveFieldTestClass_Fields', async function() {
+    const instance = dummy.PrimitiveFieldTestClass.create();
+    dummy.set_PrimitiveFieldTestClass_Fields(instance);
+
+    {% for p in config.primitives %}
+        {% set field_name %}
+            instance.field{{ loop.index0 }}
+        {% endset %}
+
+        {{ assert_are_equal(p.use_epsilon, field_name, p.max) }}
+    {% endfor %}
+});

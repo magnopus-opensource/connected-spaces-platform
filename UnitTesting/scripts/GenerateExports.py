@@ -2,6 +2,7 @@
 
 import os
 import shutil
+import subprocess
 
 from Config import config
 
@@ -21,7 +22,7 @@ def main():
 
     # Initialise Jinja environment
     env = Environment(
-        loader=FileSystemLoader('Templates/Exports'),
+        loader=FileSystemLoader('templates/exports'),
         extensions=['jinja2_workarounds.MultiLineInclude']
     )
 
@@ -34,6 +35,9 @@ def main():
 
     with open('src/generated_exports.cpp', 'w') as f:
         f.write(source_template.render(config=config))
+
+    subprocess.run(f"\"clang-format\" -i \"include/generated_exports.h\"", shell=True)
+    subprocess.run(f"\"clang-format\" -i \"src/generated_exports.cpp\"", shell=True)
 
 
 if __name__ == '__main__':

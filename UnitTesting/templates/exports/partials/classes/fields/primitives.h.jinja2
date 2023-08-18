@@ -1,0 +1,12 @@
+class CSP_API PrimitiveFieldTestClass {
+public:
+    {% for p in config.primitives %}
+        {{ p.type }} Field{{ loop.index0 }};
+    {% endfor %}
+};
+
+// Pass class and check primitive field values
+CSP_API void Check_PrimitiveFieldTestClass_Fields(const PrimitiveFieldTestClass& Instance);
+
+// Pass class and set primitive field values
+CSP_API void Set_PrimitiveFieldTestClass_Fields(PrimitiveFieldTestClass& Instance);

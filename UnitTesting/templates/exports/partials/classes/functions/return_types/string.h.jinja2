@@ -1,0 +1,11 @@
+class CSP_API StringReturnTestClass {
+public:
+    // Return string by value
+    csp::common::String ClassFunctions_String_ReturnValue();
+
+    // Return string by const reference
+    const csp::common::String& ClassFunctions_String_ReturnConstReference();
+
+private:
+    csp::common::String String_Field;
+};

@@ -1,0 +1,33 @@
+{% for p in config.primitives %}
+    {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
+        test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
+            const instance = dummy.PrimitiveReturnTestClass.create();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+        });
+
+        test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
+            const instance = dummy.PrimitiveReturnTestClass.create();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+        });
+    {% endfor %}
+
+    {% for x in ['Pointer', 'Reference'] %}
+        test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
+            const instance = dummy.PrimitiveReturnTestClass.create();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
+        });
+
+        test('classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
+            const instance = dummy.PrimitiveReturnTestClass.create();
+            const result = instance.classFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
+        });
+    {% endfor %}
+{% endfor %}
