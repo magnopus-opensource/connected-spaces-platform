@@ -81,4 +81,6 @@ public:
 private:
 	csp::services::ApiBase* ShopifyAPI;
 };
+
+void RemoveUrl(csp::common::String& Url);
 } // namespace csp::systems

@@ -500,7 +500,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 
 	// update cart lines adding 1 extra quantity
 	CartLine				  = csp::systems::CartLine();
-	CartLine.Quantity		  = 1;
+	CartLine.CartLineId		  = AddCartLinesCart.CartLines[0].CartLineId;
+	CartLine.Quantity		  = 2;
 	CartLine.ProductVariantId = VariantId;
 
 	CartLines[0] = CartLine;
@@ -615,26 +616,27 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 	for (int i = 0; i < CartLines.Size(); ++i)
 	{
 		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
-		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
 		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
 	};
 
 	// Add update cart lines quantity to 0
 	CartLine.Quantity		  = 0;
 	CartLine.ProductVariantId = VariantIds;
+	CartLine.CartLineId		  = AddCartLinesCart.CartLines[0].CartLineId;
 
 	CartLines[0] = CartLine;
 
 	CreatedCart.CartLines = CartLines;
 
-	CreatedCart.TotalQuantity = 0;
+	CreatedCart.TotalQuantity = 1;
 
 	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
 	EXPECT_NE(CreatedCart.CartId, "");
 	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
-	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
 
-	// Add Cart Lines
+	// Delete Cart Lines
 	auto [DeleteCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
 	EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
