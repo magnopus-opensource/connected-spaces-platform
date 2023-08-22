@@ -502,7 +502,7 @@ bool UserSystem::EmailCheck(const std::string& Email) const
 
 void UserSystem::ForgotPassword(const csp::common::String& Email,
 								const csp::common::Optional<csp::common::String>& RedirectUrl,
-								const bool UseTokenChangePasswordUrl,
+								bool UseTokenChangePasswordUrl,
 								NullResultCallback Callback)
 {
 	if (EmailCheck(Email.c_str()))
