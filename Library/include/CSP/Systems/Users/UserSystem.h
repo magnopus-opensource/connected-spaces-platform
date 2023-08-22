@@ -180,9 +180,12 @@ public:
 	/// @brief Allow a user to reset their password if forgotten by providing an email address.
 	/// @param Email csp::common::String : account to recover password for
 	/// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
+	/// @Param UseTokenChangePasswordUrl bool : Whether to have the link in the email direct to the Token Change URL
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void
-		ForgotPassword(const csp::common::String& Email, const csp::common::Optional<csp::common::String>& RedirectUrl, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ForgotPassword(const csp::common::String& Email,
+										 const csp::common::Optional<csp::common::String>& RedirectUrl,
+										 const bool UseTokenChangePasswordUrl,
+										 NullResultCallback Callback);
 
 	/// @brief Get a user profile by user ID.
 	/// @param InUserId csp::common::String : the ID of the user to get
