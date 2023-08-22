@@ -744,8 +744,8 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String&
 		Callback(AssetCollResult);
 	};
 
-	auto AssetSystem					   = SystemsManager::Get().GetAssetSystem();
-	auto AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
+	auto AssetSystem														  = SystemsManager::Get().GetAssetSystem();
+	csp::common::Array<csp::common::String> AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
 
 	AssetSystem->GetAssetCollectionsByCriteria(nullptr,
 											   nullptr,
