@@ -128,7 +128,6 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
 				CartLinesAdditions.push_back(CartLineAdditions);
 			}
-			// this will skip any local lines that have a quantity of 0
 			else
 			{
 				auto CartLineUpdate = std::make_shared<chs::ShopifyCartLineDto>();
