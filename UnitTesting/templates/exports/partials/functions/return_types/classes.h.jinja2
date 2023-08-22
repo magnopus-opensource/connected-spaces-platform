@@ -1,0 +1,21 @@
+class CSP_API MyClass {
+public:
+    MyClass(int Value) : SomeValue(Value) {}
+
+    int SomeValue;
+};
+
+// Return class by value
+CSP_API MyClass GlobalFunctions_MyClass_ReturnValue();
+
+// Return class by pointer
+CSP_API MyClass* GlobalFunctions_MyClass_ReturnPointer();
+
+// Return class by const pointer
+CSP_API const MyClass* GlobalFunctions_MyClass_ReturnConstPointer();
+
+// Return class by reference
+CSP_API MyClass& GlobalFunctions_MyClass_ReturnReference();
+
+// Return class by const reference
+CSP_API const MyClass& GlobalFunctions_MyClass_ReturnConstReference();

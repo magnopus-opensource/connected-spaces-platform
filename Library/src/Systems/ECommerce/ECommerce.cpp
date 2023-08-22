@@ -253,6 +253,13 @@ CartInfo& CartInfoResult::GetCartInfo()
 	return Cart;
 }
 
+CartInfoResult CartInfoResult::Invalid()
+{
+	static CartInfoResult InvalidResult(csp::services::EResultCode::Failed, 0);
+
+	return InvalidResult;
+}
+
 void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);

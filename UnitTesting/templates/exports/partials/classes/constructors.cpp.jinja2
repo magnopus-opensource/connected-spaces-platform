@@ -1,0 +1,20 @@
+DefaultConstructorClass::DefaultConstructorClass() : SomeValue({{ config.class_int_value_first }}) {
+
+}
+
+ParameterConstructorClass::ParameterConstructorClass(int SomeParameter) : SomeValue(SomeParameter) {
+    
+}
+
+ParametersConstructorClass::ParametersConstructorClass(int SomeParameter, bool AnotherParameter)
+    : SomeValue(SomeParameter), AnotherValue(AnotherParameter) {
+    
+}
+
+MultipleConstructorsClass::MultipleConstructorsClass() : SomeValue({{ config.class_int_value_first }}) {
+
+}
+
+MultipleConstructorsClass::MultipleConstructorsClass(int SomeParameter) : SomeValue(SomeParameter) {
+
+}

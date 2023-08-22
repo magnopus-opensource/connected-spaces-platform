@@ -1,0 +1,25 @@
+class CSP_API MyReallyCoolClass {
+public:
+    int32_t SomeValue;
+};
+
+class CSP_API ClassReturnTestClass {
+public:
+    // Return class by value
+    MyReallyCoolClass ClassFunctions_MyClass_ReturnValue();
+    
+    // Return class by pointer
+    MyReallyCoolClass* ClassFunctions_MyClass_ReturnPointer();
+
+    // Return class by const pointer
+    const MyReallyCoolClass* ClassFunctions_MyClass_ReturnConstPointer();
+
+    // Return class by reference
+    MyReallyCoolClass& ClassFunctions_MyClass_ReturnReference();
+
+    // Return class by const reference
+    const MyReallyCoolClass& ClassFunctions_MyClass_ReturnConstReference();
+
+private:
+    MyReallyCoolClass Class_Field;
+};

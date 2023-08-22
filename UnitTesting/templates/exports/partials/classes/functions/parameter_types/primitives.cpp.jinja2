@@ -1,0 +1,157 @@
+{% for p in config.primitives %}
+    // Pass {{ p.type }} min value by value
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.type }} Value) {
+        if ({{ are_values_notequal(p.use_epsilon, "Value", p.min) }}) {
+            throw std::invalid_argument("Value");
+        }
+    }
+
+    // Pass {{ p.type }} max value by value
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.type }} Value) {
+        if ({{ are_values_notequal(p.use_epsilon, "Value", p.max) }}) {
+            throw std::invalid_argument("Value");
+        }
+    }
+
+    {# TODO: Add support for out and in-out params in class methods #}
+    {# // Get {{ p.type }} min value via out parameter
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_min(
+        CSP_OUT {{ p.type }}& OutValue
+    ) {
+        OutValue = {{ p.min }};
+    }
+
+    // Get {{ p.type }} max value via out parameter
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_max(
+        CSP_OUT {{ p.type }}& OutValue
+    ) {
+        OutValue = {{ p.max }};
+    }
+
+    // Get {{ p.type }} min and max values via out parameters
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax(
+        CSP_OUT {{ p.type }}& OutMinValue,
+        CSP_OUT {{ p.type }}& OutMaxValue
+    ) {
+        OutMinValue = {{ p.min }};
+        OutMaxValue = {{ p.max }};
+    }
+
+    // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+    {{ p.type }} PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max(
+        CSP_OUT {{ p.type }}& OutValue
+    ) {
+        OutValue = {{ p.min }};
+
+        return {{ p.max }};
+    }
+
+    // Get {{ p.type }} min and max values via out parameters and return {{ p.type }} min value by value
+    {{ p.type }} PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min(
+        CSP_OUT {{ p.type }}& OutMinValue,
+        CSP_OUT {{ p.type }}& OutMaxValue
+    ) {
+        OutMinValue = {{ p.min }};
+        OutMaxValue = {{ p.max }};
+
+        return {{ p.min }};
+    }
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax(
+        CSP_IN_OUT {{ p.type }}& InOutValue
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue", p.min) }}) {
+            throw std::invalid_argument("InOutValue");
+        }
+
+        InOutValue = {{ p.max }};
+    }
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and get
+    // min value via another in-out parameter
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+        CSP_IN_OUT {{ p.type }}& InOutValue1,
+        CSP_IN_OUT {{ p.type }}& InOutValue2
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue1", p.min) }}) {
+            throw std::invalid_argument("InOutValue1");
+        }
+
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue2", p.max) }}) {
+            throw std::invalid_argument("InOutValue2");
+        }
+
+        InOutValue1 = {{ p.max }};
+        InOutValue2 = {{ p.min }};
+    }
+
+    // Pass {{ p.type }} min value and get max value via in-out-parameter, and return {{ p.type }} max value by
+    // value
+    {{ p.type }}
+    PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max(
+        CSP_IN_OUT {{ p.type }}& InOutValue
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue", p.min) }}) {
+            throw std::invalid_argument("InOutValue");
+        }
+
+        InOutValue = {{ p.max }};
+
+        return {{ p.max }};
+    }
+
+    // Pass {{ p.type }} min value and get max value via in-out-parameter, pass {{ p.type }} max value and get min
+    // value via another in-out parameter, and return {{ p.type }} max value by value
+    {{ p.type }}
+    PrimitiveParameterTestClass::
+    ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+        CSP_IN_OUT {{ p.type }}& InOutValue1,
+        CSP_IN_OUT {{ p.type }}& InOutValue2
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue1", p.min) }}) {
+            throw std::invalid_argument("InOutValue1");
+        }
+
+        if ({{ are_values_notequal(p.use_epsilon, "InOutValue2", p.max) }}) {
+            throw std::invalid_argument("InOutValue2");
+        }
+
+        InOutValue1 = {{ p.max }};
+        InOutValue2 = {{ p.min }};
+
+        return {{ p.min }};
+    }
+
+    // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via in-out
+    // parameter
+    void PrimitiveParameterTestClass::ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax(
+        CSP_OUT {{ p.type }}& OutValue,
+        CSP_IN_OUT {{ p.type }}& InOutMinMaxValue
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutMinMaxValue", p.min) }}) {
+            throw std::invalid_argument("InOutMinMaxValue");
+        }
+
+        InOutMinMaxValue = {{ p.max }};
+        OutValue = {{ p.min }};
+    }
+
+    // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+    // parameter, and return {{ p.type }} max value by value
+    {{ p.type }}
+    PrimitiveParameterTestClass::
+    ClassFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+        CSP_OUT {{ p.type }}& OutValue,
+        CSP_IN_OUT {{ p.type }}& InOutMinMaxValue
+    ) {
+        if ({{ are_values_notequal(p.use_epsilon, "InOutMinMaxValue", p.min) }}) {
+            throw std::invalid_argument("InOutMinMaxValue");
+        }
+
+        InOutMinMaxValue = {{ p.max }};
+        OutValue = {{ p.min }};
+
+        return {{ p.max }};
+    } #}
+{% endfor %}
