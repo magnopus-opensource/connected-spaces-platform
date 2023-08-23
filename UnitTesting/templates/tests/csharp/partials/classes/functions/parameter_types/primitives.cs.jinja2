@@ -1,0 +1,59 @@
+{% for p in config.primitives %}
+    // Pass {{ p.type }} min value by value
+    [Test]
+    public static void ClassFunctions_Primitives_{{ p.type }}_PassValue_min() {
+        using var instance = new PrimitiveParameterTestClass();
+
+        try {
+            instance.ClassFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+    }
+
+    // Pass {{ p.type }} max value by value
+    [Test]
+    public static void ClassFunctions_Primitives_{{ p.type }}_PassValue_max() {
+        using var instance = new PrimitiveParameterTestClass();
+
+        try {
+            instance.ClassFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+    }
+
+    {# TODO: Add support for out and in-out params in class methods #}
+    {# // Get {{ p.type }} min value via out parameter
+    [Test]
+    public static void ClassFunctions_Primitives_{{ p.type }}_PassOut_min() {
+        Global.ClassFunctions_Primitives_{{ p.type }}_PassOut_min(out var result);
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    }
+
+    // Get {{ p.type }} max value via out parameter
+    [Test]
+    public static void ClassFunctions_Primitives_{{ p.type }}_PassOut_max() {
+        Global.ClassFunctions_Primitives_{{ p.type }}_PassOut_max(out var result);
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    }
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter
+    [Test]
+    public static void ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax() {
+        var value = {{ p.min }};
+
+        try {
+            Global.ClassFunctions_Primitives_{{ p.type }}_PassInOut_minmax(ref value);
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "value", p.max) }}
+    } #}
+{% endfor %}

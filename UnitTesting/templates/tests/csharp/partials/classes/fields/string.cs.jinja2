@@ -1,0 +1,21 @@
+[Test]
+public static void Check_StringFieldTestClass_Field() {
+    using var instance = new StringFieldTestClass {
+        Field = "{{ config.class_string_value_first }}"
+    };
+
+    try {
+        Global.Check_StringFieldTestClass_Field(instance);
+    }
+    catch (RuntimeWrappedException e) {
+        Assert.Fail(e.Message);
+    }
+}
+
+[Test]
+public static void Set_StringFieldTestClass_Field() {
+    using var instance = new StringFieldTestClass();
+    Global.Set_StringFieldTestClass_Field(instance);
+
+    Assert.AreEqual("{{ config.class_string_value_second }}", instance.Field);
+}

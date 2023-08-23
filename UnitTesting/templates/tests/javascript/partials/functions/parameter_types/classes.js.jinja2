@@ -1,0 +1,13 @@
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Pass class by {{ x }}
+    test('globalFunctions_MyClass_Pass{{ x }}', async function() {
+        const param = dummy.MyClass.create_value({{ config.class_int_value_first }});
+
+        try {
+            dummy.globalFunctions_MyClass_Pass{{ x }}(param);
+        }
+        catch (e) {
+            assert.fail(e.message)
+        }
+    });
+{% endfor %}

@@ -16,6 +16,7 @@
 #include "WebClient.h"
 
 #include "Debug/Logging.h"
+#include "Json.h"
 #include "Memory/Memory.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/Users/UserSystem.internal.h"
@@ -263,7 +264,7 @@ void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
 
 		if (!Request->Cancelled() && Callback)
 		{
-			const HttpResponse& Response = Request->GetResponse();
+			auto& Response = Request->GetMutableResponse();
 			Callback->OnHttpResponse(Response);
 		}
 
@@ -279,7 +280,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 {
 	if (Request)
 	{
-		auto Payload = Request->GetPayload();
+		auto& Payload = Request->GetMutablePayload();
 		Payload.SetBearerToken();
 
 		const std::chrono::milliseconds SendDelay = Request->GetSendDelay();
@@ -317,7 +318,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			Request->SetResponseProgress(100.0f);
 		}
 
-		const HttpResponse& Response = Request->GetResponse();
+		auto& Response = Request->GetMutableResponse();
 
 		// Attempt Auto-retry if needed
 		bool RetryIssued = Request->CheckForAutoRetry();
@@ -329,7 +330,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 				if (!RetryIssued)
 				{
 					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-					if (ResponseCode >= 400 && ResponseCode < 500)
+					if (ResponseCode >= 400)
 					{
 						PrintClientErrorResponseMessages(Response);
 					}
@@ -344,7 +345,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 				if (!RetryIssued)
 				{
 					const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-					if (ResponseCode >= 400 && ResponseCode < 500)
+					if (ResponseCode >= 400)
 					{
 						PrintClientErrorResponseMessages(Response);
 					}
@@ -380,38 +381,106 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 }
 #endif
 
+
+// This makes an attempt to parse out errors from known JSON error response structures but will fallback to
+// logging the full error response if it cannot find the structured errors.
 void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 {
 	const uint16_t ResponseCode				   = static_cast<uint16_t>(Response.GetResponseCode());
 	const csp::common::String& ResponsePayload = Response.GetPayload().GetContent();
+
+	csp::common::String Verb = "";
+	switch (Response.GetRequest()->GetVerb())
+	{
+		case ERequestVerb::Get:
+			Verb = "GET";
+			break;
+		case ERequestVerb::Post:
+			Verb = "POST";
+			break;
+		case ERequestVerb::Put:
+			Verb = "PUT";
+			break;
+		case ERequestVerb::Delete:
+			Verb = "DELETE";
+			break;
+		case ERequestVerb::Head:
+			Verb = "HEAD";
+			break;
+		default:
+			break;
+	}
+
 	if (ResponsePayload.IsEmpty())
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) but with no payload/error message.",
+		FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.",
+									Verb.c_str(),
 									Response.GetRequest()->GetUri().GetAsString(),
 									ResponseCode);
+		return;
 	}
-	else
+
+	csp::common::List<csp::common::String> Errors;
+
+	if (Response.GetPayload().IsJsonPayload())
 	{
 		rapidjson::Document ResponseJson;
 		ResponseJson.Parse(ResponsePayload.c_str());
+
+		// Since is is possible to have responses in various different structures this is extra cautious in
+		// not assuming the structure and always checking before accessing any element. If there is doubt
+		// the full response will be printed later.
 		if (ResponseJson.HasMember("errors"))
 		{
-			const auto ResponseArray = ResponseJson["errors"].GetObject().FindMember("")->value.GetArray();
-
-			for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+			if (ResponseJson["errors"].IsArray())
 			{
-				FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
-											Response.GetRequest()->GetUri().GetAsString(),
-											ResponseCode,
-											ResponseArray[i].GetString());
+				const auto& ResponseArray = ResponseJson["errors"].GetArray();
+
+				for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+				{
+					if (ResponseArray[i].IsObject())
+					{
+						const auto& ResponseError = ResponseArray[i].GetObject();
+						if (ResponseError.HasMember("message") && ResponseError["message"].IsString())
+						{
+							Errors.Append(ResponseError["message"].GetString());
+						}
+						else
+						{
+							Errors.Append(JsonObjectToString(ResponseError));
+						}
+					}
+				}
+			}
+			else
+			{
+				Errors.Append(JsonObjectToString(ResponseJson["errors"]));
 			}
 		}
-		else if (ResponseJson.HasMember("error"))
+		else
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Services request %s has returned a failed response (%i) with error: %s",
+			Errors.Append(JsonObjectToString(ResponseJson["error"]));
+		}
+	}
+
+	// If the response was not JSON or errors were not found as expected, log the full response payload.
+	if (Errors.Size() == 0)
+	{
+		FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
+									Verb.c_str(),
+									Response.GetRequest()->GetUri().GetAsString(),
+									ResponseCode,
+									ResponsePayload.c_str());
+	}
+	else
+	{
+		for (auto i = 0; i < Errors.Size(); ++i)
+		{
+			FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
+										Verb.c_str(),
 										Response.GetRequest()->GetUri().GetAsString(),
 										ResponseCode,
-										ResponseJson["error"].GetString());
+										Errors[i].c_str());
 		}
 	}
 }

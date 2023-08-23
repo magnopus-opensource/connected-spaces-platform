@@ -215,7 +215,7 @@ void SettingsSystem::AddRecentlyVisitedSpace(const csp::common::String& InUserId
 			RecentSpaces.Remove(MAX_RECENT_SPACES);
 		}
 
-		auto RecentSpacesString = csp::common::String::Join(',', RecentSpaces);
+		auto RecentSpacesString = csp::common::String::Join(RecentSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "RecentSpaces", RecentSpacesString, Callback);
 	};
@@ -287,7 +287,7 @@ void SettingsSystem::AddBlockedSpace(const csp::common::String& InUserId, const 
 		auto BlockedSpaces = BlockedSpacesArray.ToList();
 		BlockedSpaces.Insert(0, InSpaceID);
 
-		auto BlockedSpacesString = csp::common::String::Join(',', BlockedSpaces);
+		auto BlockedSpacesString = csp::common::String::Join(BlockedSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "BlockedSpaces", BlockedSpacesString, Callback);
 	};
@@ -334,7 +334,7 @@ void SettingsSystem::RemoveBlockedSpace(const csp::common::String& InUserId, con
 		auto BlockedSpaces = BlockedSpacesArray.ToList();
 		BlockedSpaces.RemoveItem(InSpaceID);
 
-		auto BlockedSpacesString = csp::common::String::Join(',', BlockedSpaces);
+		auto BlockedSpacesString = csp::common::String::Join(BlockedSpaces, ',');
 
 		SetSettingValue(InUserId, "UserSettings", "BlockedSpaces", BlockedSpacesString, Callback);
 	};
@@ -744,8 +744,8 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String&
 		Callback(AssetCollResult);
 	};
 
-	auto AssetSystem					   = SystemsManager::Get().GetAssetSystem();
-	auto AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
+	auto AssetSystem														  = SystemsManager::Get().GetAssetSystem();
+	csp::common::Array<csp::common::String> AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
 
 	AssetSystem->GetAssetCollectionsByCriteria(nullptr,
 											   nullptr,

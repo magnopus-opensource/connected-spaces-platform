@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "signalrclient/signalr_value.h"
+
+
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_SPACE_HELPER_TESTS)
 
 	#include "Services/ApiBase/ApiBase.h"
 	#include "Systems/Spaces/SpaceSystemHelpers.h"
 	#include "TestHelpers.h"
 
+
 using namespace csp::services;
+
 
 CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, SpaceGetSpaceMetadataAssetCollectionNameTest)
 {
@@ -209,6 +214,5 @@ CSP_INTERNAL_TEST(CSPEngine, SpaceHelperTests, ConvertJsonMetadataToMapMetadataO
 
 	EXPECT_EQ(ObjectMetaDataMap[MetaDataSiteKey], MetaSiteData);
 }
-
 
 #endif

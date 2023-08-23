@@ -1,0 +1,15 @@
+class CSP_API MyCoolClass {
+public:
+    int32_t ACoolInteger;
+};
+
+class CSP_API ClassFieldTestClass {
+public:
+    MyCoolClass Field;
+};
+
+// Pass class and check class field values
+CSP_API void Check_ClassFieldTestClass_Field(const ClassFieldTestClass& Instance);
+
+// Pass class and set class field values
+CSP_API void Set_ClassFieldTestClass_Field(ClassFieldTestClass& Instance);

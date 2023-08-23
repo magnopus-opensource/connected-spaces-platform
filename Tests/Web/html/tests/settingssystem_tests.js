@@ -3,9 +3,8 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, Systems } from '../connected_spaces_platform.js';
+import { freeBuffer, Systems, bufferToUint8Array } from '../connected_spaces_platform.js';
 import { createBufferAssetDataSource} from './assetsystem_tests_helpers.js'
-
 
 test('SettingsSystemTests', 'BlockSpaceTest', async function() {
     const systemsManager = Systems.SystemsManager.get();

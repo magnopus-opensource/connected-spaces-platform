@@ -6,6 +6,6 @@
   "author": "Magnopus",
   "license": "Apache-2.0",
   "dependencies": {
-    "@magnopus-opensource/connected-spaces-platform.web": "^4.4.0"
+    "@magnopus-opensource/connected-spaces-platform.web": "4.5.1"
   }
 }

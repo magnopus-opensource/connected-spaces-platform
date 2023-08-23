@@ -181,23 +181,50 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
 	EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EXCHANGEKEY_BADINPUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExchangeKeyBadInputTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ExchangeKey, RequestPredicate, "userId", "key");
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+}
+#endif
+
+
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_FORGOTPASSWORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr);
+	// Tests passing false for UseTokenChangePasswordUrl
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, false);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr);
+	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, false);
 
 	EXPECT_EQ(Result2.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr);
+	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, false);
 
 	EXPECT_EQ(FailResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// Tests passing true for UseTokenChangePasswordUrl
+	auto [Result3] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, true);
+
+	EXPECT_EQ(Result3.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [Result4] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, true);
+
+	EXPECT_EQ(Result4.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [FailResult2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, true);
+
+	EXPECT_EQ(FailResult2.GetResultCode(), csp::services::EResultCode::Failed);
 }
 #endif
 

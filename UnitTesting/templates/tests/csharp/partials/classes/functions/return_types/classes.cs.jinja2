@@ -1,0 +1,11 @@
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }}
+    [Test]
+    public static void ClassFunctions_MyClass_Return{{ x }}() {
+        using var instance = new ClassReturnTestClass();
+        using var result = instance.ClassFunctions_MyClass_Return{{ x }}();
+
+        Assert.IsTrue(result.PointerIsValid);
+        Assert.AreEqual({{ config.class_int_value_first }}, result.SomeValue);
+    }
+{% endfor %}

@@ -1,0 +1,36 @@
+{% for p in config.primitives %}
+    {# The code in these tests is nearly identical, so just loop to avoid code duplication #}
+    {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
+        // Get {{ p.type }} min value by {{ x }}
+        test('globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
+            const result = dummy.globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+        });
+
+        // Get {{ p.type }} max value by {{ x }}
+        test('globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
+            const result = dummy.globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+        });
+    {% endfor %}
+
+    {# Primitive non-const pointers and non-const references are returned as NativeRef instances, so pass #}
+    {# 'result.value' instead of 'result'                                                                 #}
+    {% for x in ['Pointer', 'Reference'] %}
+        // Get {{ p.type }} min value by {{ x }}
+        test('globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min', async function() {
+            const result = dummy.globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
+        });
+
+        // Get {{ p.type }} max value by {{ x }}
+        test('globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max', async function() {
+            const result = dummy.globalFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
+        });
+    {% endfor %}
+{% endfor %}

@@ -17,7 +17,7 @@ namespace CSPEngine
         [Test]
         public static void CreateTicketedEventActiveTrueTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -48,7 +48,7 @@ namespace CSPEngine
         [Test]
         public static void CreateTicketedEventActiveFalseTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -79,7 +79,7 @@ namespace CSPEngine
         [Test]
         public static void CreateTicketedEventTwiceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -127,7 +127,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateTicketedEventTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -173,7 +173,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateTicketedEventBadSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -211,7 +211,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateTicketedEventBadEventIdTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -249,7 +249,7 @@ namespace CSPEngine
         [Test]
         public static void GetTicketedEventsNoEventsTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -273,7 +273,7 @@ namespace CSPEngine
         [Test]
         public static void GetTicketedEventsOneEventTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -316,7 +316,7 @@ namespace CSPEngine
         [Test]
         public static void GetTicketedEventsTwoEventsSameSpaceTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";
@@ -391,7 +391,7 @@ namespace CSPEngine
         [Test]
         public static void GetTicketedEventsTwoEventsTwoSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName1 = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceName2 = GenerateUniqueString("OLY-UNITTEST");
@@ -470,7 +470,7 @@ namespace CSPEngine
         [Test]
         public static void GetTicketedEventsPaginationTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out var anchorSystem, out _, out _, out _, out var eventTicketingSystem, out _);
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST");
             string testSpaceDescription = "OLY-UNITTEST-DESC";

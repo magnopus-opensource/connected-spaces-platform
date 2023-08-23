@@ -71,17 +71,6 @@ public:
 		ValueDestructor = DefaultDestructor<T>;
 	}
 
-	/// @brief Constructs an optional with a given value of a different type.
-	/// @param InValue const U* : Pointer to construct optional with
-	template <typename U> Optional(const U* InValue)
-	{
-		static_assert(std::is_constructible<T, U*>::value, "Inner type not constructible from argument type!");
-		Value = (T*) csp::memory::DllAlloc(sizeof(T));
-		new (Value) T(InValue);
-
-		ValueDestructor = DefaultDestructor<T>;
-	}
-
 	/// @brief Constructs an optional by copying given value of a different type.
 	/// @param InValue const U& : Reference to construct optional with
 	template <typename U> Optional(const U& InValue)

@@ -1,0 +1,8 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    test('globalFunctions_String_Return{{ x }}', async function() {
+        const result = dummy.globalFunctions_String_Return{{ x }}();
+
+        assert.areEqual(result, "{{ config.string_value }}");
+    });
+{% endfor %}

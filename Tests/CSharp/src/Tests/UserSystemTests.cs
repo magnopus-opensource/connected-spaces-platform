@@ -169,7 +169,7 @@ namespace CSPEngine
         [Test]
         public static void LoginTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = LogIn(userSystem);
@@ -180,22 +180,42 @@ namespace CSPEngine
         [Test]
         public static void ForgotPasswordTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
+            // Tests passing false for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com",null).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com",null).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email",null).Result;
+                using var result = userSystem.ForgotPassword("email", null, false).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+            }
+
+            // Tests passing true for UseTokenChangePasswordUrl
+            {
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, true).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            }
+
+            {
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, true).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            }
+
+            {
+                using var result = userSystem.ForgotPassword("email", null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
@@ -206,7 +226,7 @@ namespace CSPEngine
         [Test]
         public static void LoginWithTokenTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string loginToken = "";
             var loginTokenAvailable = false;
@@ -289,7 +309,7 @@ namespace CSPEngine
             json = ParseJsonObject(response);
             key = json["oneTimeKey"] as string;
 
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in with OTP
             {
@@ -310,7 +330,7 @@ namespace CSPEngine
         [Test]
         public static void LoginErrorTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in with invalid credentials
             _ = LogIn(userSystem, email: "invalidlogin@rewind.co", password: "", expectedResult: Services.EResultCode.Failed);
@@ -324,7 +344,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -352,7 +372,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameWithSpacesTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -380,7 +400,7 @@ namespace CSPEngine
         [Test]
         public static void UpdateDisplayNameWithSymbolsTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var userId = LogIn(userSystem);
 
@@ -408,7 +428,7 @@ namespace CSPEngine
         [Test]
         public static void CreateUserTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _, out _);
 
             string uniqueUserName = GenerateUniqueString("OLY-TEST-NAME");
             string testDisplayName = "OLY-TEST-DISPLAY";
@@ -418,7 +438,7 @@ namespace CSPEngine
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null,null).Result;
+                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null, null).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -484,7 +504,7 @@ namespace CSPEngine
         [Test]
         public static void CreateUserEmptyUsernameDisplaynameTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
 
@@ -549,7 +569,7 @@ namespace CSPEngine
         [Test]
         public static void PingTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             using var result = userSystem.Ping().Result;
 
@@ -561,8 +581,8 @@ namespace CSPEngine
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_SUPPORTED_PROVIDERS_TEST
         [Test]
         public static void GetThirdPartySupportedProvidersTest()
-{
-	GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+        {
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Check the FDN supported providers
             using var supportedProviders = userSystem.GetSupportedThirdPartyAuthenticationProviders();
@@ -571,7 +591,7 @@ namespace CSPEngine
             bool foundGoogle = false;
             bool foundDiscord = false;
             bool foundApple = false;
-            
+
             for (uint idx = 0; idx < supportedProviders.Size(); ++idx)
             {
                 if (supportedProviders[idx] == Systems.EThirdPartyAuthenticationProviders.Google)
@@ -600,7 +620,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForGoogleTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -617,7 +637,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForDiscordTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -634,7 +654,7 @@ namespace CSPEngine
         [Test]
         public static void GetAuthoriseURLForAppleTest()
         {
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             var redirectURL = "https://odev.magnoverse.space/oauth";
 
@@ -791,7 +811,7 @@ namespace CSPEngine
         [Test]
         public static void GetAgoraUserTokenTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in
             _ = LogIn(userSystem);
@@ -823,7 +843,7 @@ namespace CSPEngine
         [Test]
         public static void GetGuestProfileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string id = LogInAsGuest(userSystem);
 

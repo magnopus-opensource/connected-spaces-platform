@@ -12,7 +12,7 @@ namespace CSPEngine
         [Test]
         public static void GetMaintenanceInfoTest()
         {
-            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _);
+            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
@@ -24,7 +24,7 @@ namespace CSPEngine
         [Test]
         public static void GetInsideMaintenanceInfoTest()
         {
-            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _);
+            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
@@ -38,7 +38,7 @@ namespace CSPEngine
         [Test]
         public static void GetLatestMaintenanceWindowInfoTest()
         {
-            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _);
+            GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);

@@ -1,0 +1,21 @@
+// Pass class and check primitive field values
+void Check_PrimitiveFieldTestClass_Fields(const PrimitiveFieldTestClass& Instance) {
+    if (
+        {% for p in config.primitives %}
+            {%- set field_name -%}
+                Instance.Field{{ loop.index0 }}
+            {%- endset -%}
+
+            {{ are_values_notequal(p.use_epsilon, field_name, p.min) }} {{ '||' if not loop.last }}
+        {% endfor %}
+    ) {
+        throw std::invalid_argument("Instance");
+    }
+}
+
+// Pass class and set primitive field values
+void Set_PrimitiveFieldTestClass_Fields(PrimitiveFieldTestClass& Instance) {
+    {% for p in config.primitives %}
+        Instance.Field{{ loop.index0 }} = {{ p.max }};
+    {%- endfor %}
+}

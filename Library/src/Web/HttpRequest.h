@@ -61,7 +61,9 @@ public:
 
 	const ERequestVerb GetVerb() const;
 	const csp::web::Uri& GetUri() const;
+	HttpPayload& GetMutablePayload();
 	const HttpPayload& GetPayload() const;
+	HttpResponse& GetMutableResponse();
 	const HttpResponse& GetResponse() const;
 
 	IHttpResponseHandler* GetCallback() const;

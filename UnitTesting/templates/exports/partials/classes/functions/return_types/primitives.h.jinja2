@@ -1,0 +1,39 @@
+class CSP_API PrimitiveReturnTestClass {
+public:
+    {% for p in config.primitives %}
+        // Return {{ p.type }} min value by value
+        {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_ReturnValue_min();
+
+        // Return {{ p.type }} max value by value
+        {{ p.type }} ClassFunctions_Primitives_{{ p.type }}_ReturnValue_max();
+
+        // Return {{ p.type }} min value by pointer
+        {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_min();
+
+        // Return {{ p.type }} max value by pointer
+        {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_max();
+
+        // Return {{ p.type }} min value by const pointer
+        const {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min();
+
+        // Return {{ p.type }} max value by const pointer
+        const {{ p.type }}* ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max();
+
+        // Return {{ p.type }} min value by reference
+        {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnReference_min();
+
+        // Return {{ p.type }} max value by reference
+        {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnReference_max();
+
+        // Return {{ p.type }} min value by const reference
+        const {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_min();
+
+        // Return {{ p.type }} max value by const reference
+        const {{ p.type }}& ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_max();
+    {% endfor %}
+
+private:
+    {% for p in config.primitives %}
+        {{ p.type }} Primitive_Field_{{ p.type }};
+    {% endfor %}
+};

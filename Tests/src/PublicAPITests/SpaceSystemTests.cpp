@@ -1907,7 +1907,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 	}
 
 	{
-		// but it should be able to retrieve it
+		// But it should be able to retrieve it
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
