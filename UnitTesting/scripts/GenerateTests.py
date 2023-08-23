@@ -22,14 +22,14 @@ def main():
 
     # Initialise Jinja environment
     env = Environment(
-        loader=FileSystemLoader('Templates/Tests/CSharp'),
+        loader=FileSystemLoader('templates/tests/csharp'),
         extensions=['jinja2_workarounds.MultiLineInclude']
     )
 
     # Fix config values for C#
     _config = deepcopy(config)
 
-    for p in _config['primitives']:        
+    for p in _config['primitives']:
         match p['min']:
             case 'INT_MIN':
                 p['min'] = 'Int32.MinValue'
@@ -38,7 +38,7 @@ def main():
             case '0ULL':
                 p['min'] = '0UL'
             case _: pass
-        
+
         match p['max']:
             case 'UINT_MAX':
                 p['max'] = 'UInt32.MaxValue'
@@ -49,7 +49,7 @@ def main():
             case 'LLONG_MAX':
                 p['max'] = 'Int64.MaxValue'
             case _: pass
-        
+
         match p['type']:
             case 'float':
                 p['min'] = str(p['min']) + 'f'
@@ -72,7 +72,7 @@ def main():
 
     # Initialise Jinja environment
     env = Environment(
-        loader=FileSystemLoader('Templates/Tests/JavaScript'),
+        loader=FileSystemLoader('templates/tests/javascript'),
         extensions=['jinja2_workarounds.MultiLineInclude']
     )
 
@@ -90,7 +90,7 @@ def main():
             case 'LLONG_MIN':
                 p['min'] = 'dummy.Limits.INT64_MIN'
             case _: pass
-        
+
         match p['max']:
             case 'UINT_MAX':
                 p['max'] = 'dummy.Limits.UINT32_MAX'

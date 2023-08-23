@@ -1,0 +1,34 @@
+// Pass class by value
+void ClassParameterTestClass::ClassFunctions_MyClass_PassValue(csp::MyClass Value) {
+    if (Value.SomeValue != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Value");
+    }
+}
+
+// Pass class by pointer
+void ClassParameterTestClass::ClassFunctions_MyClass_PassPointer(csp::MyClass* Value) {
+    if (Value->SomeValue != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Value");
+    }
+}
+
+// Pass class by const pointer
+void ClassParameterTestClass::ClassFunctions_MyClass_PassConstPointer(const csp::MyClass* Value) {
+    if (Value->SomeValue != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Value");
+    }
+}
+
+// Pass class by reference
+void ClassParameterTestClass::ClassFunctions_MyClass_PassReference(csp::MyClass& Value) {
+    if (Value.SomeValue != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Value");
+    }
+}
+
+// Pass class by const reference
+void ClassParameterTestClass::ClassFunctions_MyClass_PassConstReference(const csp::MyClass& Value) {
+    if (Value.SomeValue != {{ config.class_int_value_first }}) {
+        throw std::invalid_argument("Value");
+    }
+}

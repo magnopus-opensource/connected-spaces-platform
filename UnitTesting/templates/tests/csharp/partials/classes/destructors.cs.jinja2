@@ -1,0 +1,19 @@
+[Test]
+public static void Check_PublicDestructorClass_Destructor() {
+    Assert.IsTrue(typeof(IDisposable).IsAssignableFrom(typeof(PublicDestructorClass)));
+}
+
+[Test]
+public static void Check_ProtectedDestructorClass_Destructor() {
+    Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(ProtectedDestructorClass)));
+}
+
+[Test]
+public static void Check_PrivateDestructorClass_Destructor() {
+    Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(PrivateDestructorClass)));
+}
+
+[Test]
+public static void Check_DeletedDestructorClass_Destructor() {
+    Assert.IsFalse(typeof(IDisposable).IsAssignableFrom(typeof(DeletedDestructorClass)));
+}

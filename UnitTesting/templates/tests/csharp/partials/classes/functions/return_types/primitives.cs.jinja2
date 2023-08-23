@@ -1,0 +1,37 @@
+{% for p in config.primitives %}
+    {% for x in ['Value', 'ConstPointer', 'ConstReference'] %}
+        [Test]
+        public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+            using var instance = new PrimitiveReturnTestClass();
+            var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+        }
+
+        [Test]
+        public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+            using var instance = new PrimitiveReturnTestClass();
+            var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+        }
+    {% endfor %}
+
+    {% for x in ['Pointer', 'Reference'] %}
+        [Test]
+        public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min() {
+            using var instance = new PrimitiveReturnTestClass();
+            var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_min();
+
+            {{ assert_are_equal(p.use_epsilon, "result.Value", p.min) }}
+        }
+
+        [Test]
+        public static void ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max() {
+            using var instance = new PrimitiveReturnTestClass();
+            var result = instance.ClassFunctions_Primitives_{{ p.type }}_Return{{ x }}_max();
+
+            {{ assert_are_equal(p.use_epsilon, "result.Value", p.max) }}
+        }
+    {% endfor %}
+{% endfor %}

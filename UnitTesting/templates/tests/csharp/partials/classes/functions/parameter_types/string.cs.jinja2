@@ -1,0 +1,14 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Pass string by {{ x }}
+    [Test]
+    public static void ClassFunctions_String_Pass{{ x }}() {
+        using var instance = new StringParameterTestClass();
+
+        try {
+            instance.ClassFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+    }
+{% endfor %}

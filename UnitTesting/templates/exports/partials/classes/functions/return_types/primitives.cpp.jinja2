@@ -1,0 +1,69 @@
+{% for p in config.primitives %}
+    // Return {{ p.type }} min value by value
+    {{ p.type }} PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnValue_min() {
+        return {{ p.min }};
+    }
+
+    // Return {{ p.type }} max value by value
+    {{ p.type }} PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnValue_max() {
+        return {{ p.max }};
+    }
+
+    // Return {{ p.type }} min value by pointer
+    {{ p.type }}* PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_min() {
+        Primitive_Field_{{ p.type }} = {{ p.min }};
+
+        return &Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} max value by pointer
+    {{ p.type }}* PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnPointer_max() {
+        Primitive_Field_{{ p.type }} = {{ p.max }};
+
+        return &Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} min value by const pointer
+    const {{ p.type }}* PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_min() {
+        Primitive_Field_{{ p.type }} = {{ p.min }};
+
+        return &Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} max value by const pointer
+    const {{ p.type }}* PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnConstPointer_max() {
+        Primitive_Field_{{ p.type }} = {{ p.max }};
+
+        return &Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} min value by reference
+    {{ p.type }}& PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnReference_min() {
+        Primitive_Field_{{ p.type }} = {{ p.min }};
+
+        return Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} max value by reference
+    {{ p.type }}& PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnReference_max() {
+        Primitive_Field_{{ p.type }} = {{ p.max }};
+
+        return Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} min value by const reference
+    const {{ p.type }}&
+    PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_min() {
+        Primitive_Field_{{ p.type }} = {{ p.min }};
+
+        return Primitive_Field_{{ p.type }};
+    }
+
+    // Return {{ p.type }} max value by const reference
+    const {{ p.type }}&
+    PrimitiveReturnTestClass::ClassFunctions_Primitives_{{ p.type }}_ReturnConstReference_max() {
+        Primitive_Field_{{ p.type }} = {{ p.max }};
+
+        return Primitive_Field_{{ p.type }};
+    }
+{% endfor %}

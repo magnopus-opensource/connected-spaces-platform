@@ -1,0 +1,13 @@
+// Pass string by value
+void GlobalFunctions_String_PassValue(csp::common::String Value) {
+    if (Value != "{{ config.string_value }}") {
+        throw std::invalid_argument("Value");
+    }
+}
+
+// Pass string by const reference
+void GlobalFunctions_String_PassConstReference(const csp::common::String& Value) {
+    if (Value != "{{ config.string_value }}") {
+        throw std::invalid_argument("Value");
+    }
+}

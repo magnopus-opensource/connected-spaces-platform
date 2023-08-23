@@ -1,0 +1,44 @@
+class CSP_API DefaultConstructorClass {
+public:
+    DefaultConstructorClass();
+
+    int SomeValue;
+};
+
+class CSP_API ParameterConstructorClass {
+public:
+    ParameterConstructorClass(int SomeParameter);
+
+    int SomeValue;
+};
+
+class CSP_API ParametersConstructorClass {
+public:
+    ParametersConstructorClass(int SomeParameter, bool AnotherParameter);
+
+    int SomeValue;
+    bool AnotherValue;
+};
+
+class CSP_API MultipleConstructorsClass {
+public:
+    MultipleConstructorsClass();
+    MultipleConstructorsClass(int SomeParameter);
+
+    int SomeValue;
+};
+
+class CSP_API ProtectedConstructorClass {
+protected:
+    ProtectedConstructorClass() {};
+};
+
+class CSP_API PrivateConstructorClass {
+private:
+    PrivateConstructorClass() {};
+};
+
+class CSP_API DeletedConstructorClass {
+public:
+    DeletedConstructorClass() = delete;
+};
