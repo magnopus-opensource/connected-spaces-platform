@@ -2,7 +2,7 @@
 // Copyright (c) 2004-2008, Applied Informatics Software Engineering GmbH.
 // and Contributors.
 //
-// Foundation note: This code originates from Poco, so the BSL license requires this license header be present
+// Connected Spaces Platform note: This code originates from Poco, so the BSL license requires this license header be present
 // SPDX-License-Identifier:	BSL-1.0
 //
 

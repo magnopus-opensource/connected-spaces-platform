@@ -12,6 +12,6 @@ if not defined DevEnvDir (
     call "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" amd64
 )
 
-rem Build Windows Foundation lib
+rem Build Windows Connected Spaces Platform lib
 
 msbuild WrapperGeneratorUnitTesting.sln

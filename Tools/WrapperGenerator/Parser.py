@@ -601,7 +601,7 @@ class Parser:
         assert field_type is not None
         
         if field_type.is_inline_forward:
-            #warning_in_file(get_rel_path(filename), reader.current_line, "Inline forward declarations are supported, but should not be used in Foundation code. Please consider moving forward declarations to the top of the file.")
+            #warning_in_file(get_rel_path(filename), reader.current_line, "Inline forward declarations are supported, but should not be used in Connected Spaces Platform code. Please consider moving forward declarations to the top of the file.")
             pass
 
         name = word

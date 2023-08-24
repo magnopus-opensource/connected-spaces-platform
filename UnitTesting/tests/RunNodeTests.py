@@ -11,12 +11,12 @@ def main():
     current_directory = os.path.dirname(os.path.realpath(__file__))
     project_path = os.path.join(current_directory, 'javascript')
 
-    print('Creating `Foundation for Web` dummy package...')
+    print('Creating `CSP for Web` dummy package...')
 
-    dummy_package_path = os.path.join(project_path, 'node_modules', '@magnopus', 'com.magnopus.olympus.foundation.dummy')
+    dummy_package_path = os.path.join(project_path, 'node_modules', '@magnopus-opensource', 'connected-spaces-platform.dummy')
     dummy_package_bin_path = os.path.join(dummy_package_path, 'Debug')
 
-    # Remove existing Foundation dummy package
+    # Remove existing CSP dummy package
     shutil.rmtree(dummy_package_path, ignore_errors=True)
 
     # Recreate dummy package folder structure
@@ -26,28 +26,28 @@ def main():
     with open(os.path.join(dummy_package_path, 'package.json'), 'w') as f:
         f.write('''
 {
-  "name": "com.magnopus.olympus.foundation.dummy",
-  "displayName": "olympus.foundation.dummy",
+  "name": "connected-spaces-platform.dummy",
+  "displayName": "connected-spaces-platform.dummy",
   "version": "1.3.37",
-  "description": "Exposes dummy code for unit-testing Foundation for Web",
+  "description": "Exposes dummy code for unit-testing Connected Spaces Platform for Web",
   "license": "Apache-2.0",
   "dependencies": {
   },
-  "main": "./olympus.foundation.js",
-  "types": "./olympus.foundation.d.ts",
+  "main": "./connectedspacesplatform.js",
+  "types": "./connectedspacesplatform.d.ts",
   "type": "module"
 }
         ''')    
 
-    # Copy Foundation WASM bin and JS wrapper code into dummy package
-    shutil.copy('../Binaries/wasm/Debug/OlympusFoundation_WASM.js', dummy_package_bin_path)
-    shutil.copy('../Binaries/wasm/Debug/OlympusFoundation_WASM.wasm', dummy_package_bin_path)
-    shutil.copy('../Binaries/wasm/Debug/OlympusFoundation_WASM.worker.js', dummy_package_bin_path)
+    # Copy CSP WASM bin and JS wrapper code into dummy package
+    shutil.copy('../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.js', dummy_package_bin_path)
+    shutil.copy('../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.wasm', dummy_package_bin_path)
+    shutil.copy('../Binaries/wasm/Debug/ConnectedSpacesPlatform_WASM.worker.js', dummy_package_bin_path)
 
-    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/olympus.foundation.js', dummy_package_path)
-    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/olympus.foundation.js.map', dummy_package_path)
-    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/olympus.foundation.d.ts', dummy_package_path)
-    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/olympus.foundation.ts', dummy_package_path)
+    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.js', dummy_package_path)
+    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.js.map', dummy_package_path)
+    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.d.ts', dummy_package_path)
+    shutil.copy('../../Tools/WrapperGenerator/Output/TypeScript/connectedspacesplatform.ts', dummy_package_path)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test_output_path', default=os.path.join(current_directory, 'node_test_results.xml'))

@@ -1,10 +1,10 @@
 {
     "name": "PlayModeTests",
-    "rootNamespace": "Olympus.Foundation.Tests",
+    "rootNamespace": "ConnectedSpacesPlatform.Tests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Olympus.Foundation"
+        "ConnectedSpacesPlatform"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

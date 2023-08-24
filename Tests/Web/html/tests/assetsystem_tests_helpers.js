@@ -1,7 +1,7 @@
 import { assert, pushCleanupFunction } from '../test_framework.js';
 import { commonArrayToJSArray, jsArrayToCommonArray } from '../conversion_helpers.js';
 
-import { uint8ArrayToBuffer, Common, Systems } from '../olympus_foundation.js';
+import { uint8ArrayToBuffer, Common, Systems } from '../connected_spaces_platform.js';
 
 
 /**

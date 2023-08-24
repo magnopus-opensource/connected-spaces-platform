@@ -255,6 +255,8 @@ private:
 class CSP_API CartInfoResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
+	friend class ECommerceSystem;
+
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
@@ -269,8 +271,11 @@ public:
 	/// @return ProductInfo : reference to the CartInfo
 	CartInfo& GetCartInfo();
 
+	CSP_NO_EXPORT static CartInfoResult Invalid();
+
 private:
 	CartInfoResult(void*) {};
+	CartInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

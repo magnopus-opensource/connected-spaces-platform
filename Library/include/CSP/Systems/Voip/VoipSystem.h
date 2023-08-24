@@ -29,7 +29,7 @@ class WebClient;
 namespace csp::systems
 {
 
-/// @brief System class for handling VOIP. Provides Foundation specific overidden functionality.
+/// @brief System class for handling VOIP. Provides Connected Spaces Platform specific overidden functionality.
 class CSP_API CSP_NO_DISPOSE VoipSystem
 {
 	/** @cond DO_NOT_DOCUMENT */
