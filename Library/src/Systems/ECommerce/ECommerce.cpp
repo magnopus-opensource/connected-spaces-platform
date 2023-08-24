@@ -193,6 +193,54 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 }
 
+void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontDto& StoreDto, csp::systems::ShopifyStoreInfo& Store)
+{
+	if (StoreDto.HasId())
+	{
+		Store.StoreId = StoreDto.GetId();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+	}
+
+	if (StoreDto.HasStoreName())
+	{
+		Store.StoreName = StoreDto.GetStoreName();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+	}
+
+	if (StoreDto.HasSpaceOwnerId())
+	{
+		Store.SpaceOwnerId = StoreDto.GetSpaceOwnerId();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+	}
+
+	if (StoreDto.HasSpaceId())
+	{
+		Store.SpaceId = StoreDto.GetSpaceId();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+	}
+
+	if (StoreDto.HasIsEcommerceActive())
+	{
+		Store.IsEcommerceActive = StoreDto.GetIsEcommerceActive();
+	}
+	else
+	{
+		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+	}
+}
+
 
 const ProductInfo& ProductInfoResult::GetProductInfo() const
 {
@@ -265,6 +313,43 @@ void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 		Dto->FromJson(Response->GetPayload().GetContent());
 
 		CartDtoToCartInfo(*Dto, Cart);
+	}
+}
+
+const ShopifyStoreInfo& AddShopifyStoreResult::GetShopifyStoreInfo() const
+{
+	return Store;
+}
+
+ShopifyStoreInfo& AddShopifyStoreResult::GetShopifyStoreInfo()
+{
+	return Store;
+}
+
+void AddShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* Dto							   = static_cast<chs_aggregation::ShopifyStorefrontDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Dto->FromJson(Response->GetPayload().GetContent());
+
+		ShopifyStoreDtoToShopifyStoreInfo(*Dto, Store);
+	}
+}
+
+void ValidateShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		ValidateResult = (bool) Response->GetPayload().GetContent();
 	}
 }
 
