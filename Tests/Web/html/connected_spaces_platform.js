@@ -1,0 +1,1 @@
+export * from './node_modules/@magnopus-opensource/connected-spaces-platform.web/connectedspacesplatform.js'

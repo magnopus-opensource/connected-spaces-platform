@@ -68,7 +68,7 @@ POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, bool
 	PocoContext
 		= Poco::makeAuto<Poco::Net::Context>(Poco::Net::Context::CLIENT_USE, "", Poco::Net::Context::VerificationMode::VERIFY_RELAXED, 9, true);
 
-	// TODO: Get rid of singleton usage entirely. Until then, we can't create multiple instances of Foundation.
+	// TODO: Get rid of singleton usage entirely. Until then, we can't create multiple instances of Connected Spaces Platform.
 	Poco::Net::SSLManager::instance().initializeClient(PrivateKeyHandler, CertHandler, PocoContext);
 
 	Cookies = new std::remove_pointer_t<decltype(Cookies)>();

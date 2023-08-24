@@ -1,10 +1,10 @@
+#include "CSP/CSPFoundation.h"
+#include "CSP/Systems/Spaces/Space.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "CommandLineParser.h"
 #include "Helpers.h"
-#include "Olympus/OlympusFoundation.h"
-#include "Olympus/Systems/Spaces/Space.h"
-#include "Olympus/Systems/Spaces/SpaceSystem.h"
-#include "Olympus/Systems/SystemsManager.h"
-#include "Olympus/Systems/Users/UserSystem.h"
 
 #include <iostream>
 
@@ -12,10 +12,10 @@
 bool Login(const std::string& UserEmail, const std::string& UserPassword)
 {
 	bool RetValue = true;
-	ServiceResponseReceiver<oly_systems::LoginStateResult> ResponseReceiver;
-	oly_systems::LoginStateResultCallback Callback = [&](const oly_systems::LoginStateResult& Result)
+	ServiceResponseReceiver<csp::systems::LoginStateResult> ResponseReceiver;
+	csp::systems::LoginStateResultCallback Callback = [&](const csp::systems::LoginStateResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			std::cout << "Error: Login failed" << std::endl;
 			RetValue = false;
@@ -24,7 +24,7 @@ bool Login(const std::string& UserEmail, const std::string& UserPassword)
 		ResponseReceiver.OnResult(Result);
 	};
 
-	auto& SystemsManager = oly_systems::SystemsManager::Get();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& UserSystem	 = *SystemsManager.GetUserSystem();
 	UserSystem.Login("", UserEmail.c_str(), UserPassword.c_str(), Callback);
 	ResponseReceiver.WaitForResult();
@@ -32,17 +32,17 @@ bool Login(const std::string& UserEmail, const std::string& UserPassword)
 	return RetValue;
 }
 
-void GetSpacesForLoggedInUser(oly_common::Array<oly_systems::Space>& OutSpaces)
+void GetSpacesForLoggedInUser(csp::common::Array<csp::systems::Space>& OutSpaces)
 {
-	oly_common::Array<oly_systems::Space> Spaces;
+	csp::common::Array<csp::systems::Space> Spaces;
 
-	ServiceResponseReceiver<oly_systems::SpacesResult> ResponseReceiver;
-	oly_systems::SpacesResultCallback Callback = [&](const oly_systems::SpacesResult& Result)
+	ServiceResponseReceiver<csp::systems::SpacesResult> ResponseReceiver;
+	csp::systems::SpacesResultCallback Callback = [&](const csp::systems::SpacesResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
-			auto& ResultSpaces = *Result.GetSpaces();
-			OutSpaces		   = oly_common::Array<oly_systems::Space>(ResultSpaces.Size());
+			auto& ResultSpaces = Result.GetSpaces();
+			OutSpaces		   = csp::common::Array<csp::systems::Space>(ResultSpaces.Size());
 
 			for (int idx = 0; idx < ResultSpaces.Size(); ++idx)
 			{
@@ -53,7 +53,7 @@ void GetSpacesForLoggedInUser(oly_common::Array<oly_systems::Space>& OutSpaces)
 		ResponseReceiver.OnResult(Result);
 	};
 
-	auto& SystemsManager = oly_systems::SystemsManager::Get();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& SpaceSystem	 = *SystemsManager.GetSpaceSystem();
 	SpaceSystem.GetSpaces(Callback);
 	ResponseReceiver.WaitForResult();
@@ -61,7 +61,7 @@ void GetSpacesForLoggedInUser(oly_common::Array<oly_systems::Space>& OutSpaces)
 
 void ListSpacesForLoggedInUser()
 {
-	oly_common::Array<oly_systems::Space> UserSpaces;
+	csp::common::Array<csp::systems::Space> UserSpaces;
 	GetSpacesForLoggedInUser(UserSpaces);
 
 	for (int idx = 0; idx < UserSpaces.Size(); ++idx)
@@ -71,16 +71,16 @@ void ListSpacesForLoggedInUser()
 	}
 }
 
-bool GetSpace(const oly_common::String SpaceId, oly_systems::Space& OutSpaceInfo)
+bool GetSpace(const csp::common::String SpaceId, csp::systems::Space& OutSpaceInfo)
 {
 	bool RetValue = false;
 
-	ServiceResponseReceiver<oly_systems::SpaceResult> ResponseReceiver;
-	oly_systems::SpaceResultCallback Callback = [&](const oly_systems::SpaceResult& Result)
+	ServiceResponseReceiver<csp::systems::SpaceResult> ResponseReceiver;
+	csp::systems::SpaceResultCallback Callback = [&](const csp::systems::SpaceResult& Result)
 	{
-		RetValue = (Result.GetResultCode() == oly_services::EResultCode::Success);
+		RetValue = (Result.GetResultCode() == csp::services::EResultCode::Success);
 
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			OutSpaceInfo = Result.GetSpace();
 		}
@@ -88,7 +88,7 @@ bool GetSpace(const oly_common::String SpaceId, oly_systems::Space& OutSpaceInfo
 		ResponseReceiver.OnResult(Result);
 	};
 
-	auto& SystemsManager = oly_systems::SystemsManager::Get();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& SpaceSystem	 = *SystemsManager.GetSpaceSystem();
 	SpaceSystem.GetSpace(SpaceId, Callback);
 	ResponseReceiver.WaitForResult();
@@ -98,7 +98,7 @@ bool GetSpace(const oly_common::String SpaceId, oly_systems::Space& OutSpaceInfo
 
 void MigrateSpace(const CommandLineParser& Parser)
 {
-	auto& SystemsManager = oly_systems::SystemsManager::Get();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& SpaceSystem	 = *SystemsManager.GetSpaceSystem();
 
 	if (Parser.SpaceId.empty())
@@ -107,21 +107,21 @@ void MigrateSpace(const CommandLineParser& Parser)
 		return;
 	}
 
-	oly_systems::Space RetrievedSpace;
+	csp::systems::Space RetrievedSpace;
 	if (!GetSpace(Parser.SpaceId.c_str(), RetrievedSpace))
 	{
 		std::cout << "Error: Space retrieval failed. Migration has not been completed." << std::endl;
 		return;
 	}
 
-	ServiceResponseReceiver<oly_systems::NullResult> MigrationResponseReceiver;
-	oly_systems::NullResultCallback MigrationCallback = [&](const oly_systems::NullResult& MigrationResult)
+	ServiceResponseReceiver<csp::systems::NullResult> MigrationResponseReceiver;
+	csp::systems::NullResultCallback MigrationCallback = [&](const csp::systems::NullResult& MigrationResult)
 	{
-		if (MigrationResult.GetResultCode() == oly_services::EResultCode::Success)
+		if (MigrationResult.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			std::cout << "The Space has been migrated successfully!";
 		}
-		else if (MigrationResult.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (MigrationResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			std::cout << "Error: Space migration failed with error code " << MigrationResult.GetHttpResultCode() << std::endl;
 		}
@@ -147,7 +147,7 @@ int main(int argc, const char* argv[])
 		return 0;
 	}
 
-	oly::OlympusFoundation::Initialise(Parser.EndpointBaseURI.c_str());
+	csp::CSPFoundation::Initialise(Parser.EndpointBaseURI.c_str(), Parser.Tenant.c_str());
 
 	if (!Login(Parser.UserEmailAddress, Parser.UserPassword))
 		return 0;
@@ -161,7 +161,7 @@ int main(int argc, const char* argv[])
 		MigrateSpace(Parser);
 	}
 
-	oly::OlympusFoundation::Shutdown();
+	csp::CSPFoundation::Shutdown();
 
 	return 0;
 }

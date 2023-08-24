@@ -66,8 +66,8 @@ export function ready(args: boolean | CspOptions = false) {
     };
     
     Module["locateFilePaths"] = {
-      "OlympusFoundation_WASM.wasm": args.wasmUrl,
-      "OlympusFoundation_WASM.worker.js": args.workerUrl
+      "ConnectedSpacesPlatform_WASM.wasm": args.wasmUrl,
+      "ConnectedSpacesPlatform_WASM.worker.js": args.workerUrl
     };
 
     Module["mainScriptUrlOrBlob"] = args.wrapperUrl;
@@ -107,9 +107,9 @@ export function ready(args: boolean | CspOptions = false) {
     return new Promise<any>((resolve) => {
       let importPromise = args as boolean
         ? // @ts-ignore
-          import("./Debug/OlympusFoundation_WASM.js")
+          import("./Debug/ConnectedSpacesPlatform_WASM.js")
         : // @ts-ignore
-          import("./Release/OlympusFoundation_WASM.js");
+          import("./Release/ConnectedSpacesPlatform_WASM.js");
   
       importPromise.then((loadedModule: any) => {
         loadedModule.default(Module).then((mod: any) => {

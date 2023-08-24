@@ -1,4 +1,4 @@
-import { ready } from '@magnopus/com.magnopus.olympus.foundation.dummy';
+import { ready } from '@magnopus-opensource/connected-spaces-platform.dummy';
 
 import { runTests } from './test_framework.js';
 

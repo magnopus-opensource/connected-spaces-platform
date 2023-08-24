@@ -3,10 +3,8 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, uint8ArrayToBuffer, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, Systems, bufferToUint8Array } from '../connected_spaces_platform.js';
 import { createBufferAssetDataSource} from './assetsystem_tests_helpers.js'
-import { bufferToUint8Array } from '../node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js';
-
 
 test('SettingsSystemTests', 'BlockSpaceTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
@@ -14,8 +12,8 @@ test('SettingsSystemTests', 'BlockSpaceTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const settingsSystem = systemsManager.getSettingsSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     const userId = await logIn(userSystem);
@@ -66,8 +64,8 @@ test('SettingsSystemTests', 'UnBlockSpaceTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const settingsSystem = systemsManager.getSettingsSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     const userId = await logIn(userSystem);
@@ -146,7 +144,7 @@ test('SettingsSystemTests', 'UpdateAvatarPortraitWithBuffer', async function() {
 
     {
         // Create Avatar Portrait
-        var avatarPortrait = await createBufferAssetDataSource("/assets/dog.png","image/png");
+        var avatarPortrait = await createBufferAssetDataSource("/assets/OKO.png","image/png");
 
         const result = await settingsSystem.updateAvatarPortraitWithBuffer(userID, avatarPortrait);
         freeBuffer(avatarPortrait.buffer);

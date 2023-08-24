@@ -1,4 +1,4 @@
-rem Build Foundation WASM lib
+rem Build Connected Spaces Platform WASM lib
 
 for /f "delims=" %%x in (../Tools/Emscripten/emsdk_version.txt) do (
     set emsdk_version=%%x

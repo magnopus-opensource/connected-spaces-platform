@@ -39,7 +39,7 @@ public:
 };
 
 
-/// @brief Data structure representing rotation as defined by Foundation, in the format (X,Y,Z,W) as a quaternion with double values.
+/// @brief Data structure representing rotation as defined by Connected Spaces Platform, in the format (X,Y,Z,W) as a quaternion with double values.
 class CSP_API OlyRotation
 {
 public:

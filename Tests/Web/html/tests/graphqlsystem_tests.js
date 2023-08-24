@@ -3,7 +3,7 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { Systems } from '../olympus_foundation.js';
+import { Systems } from '../connected_spaces_platform.js';
 
 
 test('GraphQLSystemTests', 'QueryTest', async function() {
@@ -13,8 +13,8 @@ test('GraphQLSystemTests', 'QueryTest', async function() {
     const GraphQLSystem = systemsManager.getGraphQLSystem()
 
     // Generate space name
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
