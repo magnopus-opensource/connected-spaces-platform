@@ -1,6 +1,6 @@
 import { test, assert } from '../test_framework.js';
 import { generateUniqueString } from '../test_helpers.js';
-import { freeBuffer, Systems, Common, Multiplayer } from '../olympus_foundation.js';
+import { freeBuffer, Systems, Common, Multiplayer } from '../connected_spaces_platform.js';
 import { logIn } from './usersystem_tests_helpers.js';
 import { jsArrayToCommonArray } from '../conversion_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js'
@@ -12,7 +12,7 @@ test('AnchorSystemTests', 'CreateAnchorTest', async function() {
     const assetSystem = systemsManager.getAssetSystem();
     const anchorSystem = systemsManager.getAnchorSystem();
 
-    const assetCollectionName = generateUniqueString('OLY-TESTS-WASM-SPACE');
+    const assetCollectionName = generateUniqueString('CSP-TESTS-WASM-SPACE');
 
     await logIn(userSystem);
 
@@ -22,7 +22,7 @@ test('AnchorSystemTests', 'CreateAnchorTest', async function() {
     const anchorPosition = Systems.OlyAnchorPosition.create();
     const anchorRotation = Systems.OlyRotation.create();
 
-    const uniqueThirdPartyAnchorId = generateUniqueString('OLY-UNITTEST-ID');
+    const uniqueThirdPartyAnchorId = generateUniqueString('CSP-UNITTEST-ID');
 
     const anchorResult = await anchorSystem.createAnchor(
         Systems.AnchorProvider.GoogleCloudAnchors, 
@@ -63,9 +63,9 @@ test('AnchorSystemTests', 'CreateAnchorInSpaceTest', async function() {
     const assetSystem = systemsManager.getAssetSystem();
     const anchorSystem = systemsManager.getAnchorSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
-    const assetCollectionName = generateUniqueString('OLY-TESTS-WASM-SPACE');
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
+    const assetCollectionName = generateUniqueString('CSP-TESTS-WASM-SPACE');
 
     await logIn(userSystem);
 
@@ -88,7 +88,7 @@ test('AnchorSystemTests', 'CreateAnchorInSpaceTest', async function() {
     const anchorPosition = Systems.OlyAnchorPosition.create();
     const anchorRotation = Systems.OlyRotation.create();
 
-    const uniqueThirdPartyAnchorId = generateUniqueString('OLY-UNITTEST-ID');
+    const uniqueThirdPartyAnchorId = generateUniqueString('CSP-UNITTEST-ID');
 
     const anchorResult = await anchorSystem.createAnchorInSpace(
         Systems.AnchorProvider.GoogleCloudAnchors, 
@@ -137,10 +137,10 @@ test('AnchorSystemTests', 'GetAnchorsInSpaceTest', async function() {
     const assetSystem = systemsManager.getAssetSystem();
     const anchorSystem = systemsManager.getAnchorSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
-    const assetCollectionName1 = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const assetCollectionName2 = generateUniqueString('OLY-TESTS-WASM-SPACE');
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
+    const assetCollectionName1 = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const assetCollectionName2 = generateUniqueString('CSP-TESTS-WASM-SPACE');
 
     await logIn(userSystem);
 
@@ -166,8 +166,8 @@ test('AnchorSystemTests', 'GetAnchorsInSpaceTest', async function() {
     const anchorPosition = Systems.OlyAnchorPosition.create();
     const anchorRotation = Systems.OlyRotation.create();
 
-    const uniqueThirdPartyAnchorId1 = generateUniqueString('OLY-UNITTEST-ID');
-    const uniqueThirdPartyAnchorId2 = generateUniqueString('OLY-UNITTEST-ID');
+    const uniqueThirdPartyAnchorId1 = generateUniqueString('CSP-UNITTEST-ID');
+    const uniqueThirdPartyAnchorId2 = generateUniqueString('CSP-UNITTEST-ID');
 
     const anchorResult1 = await anchorSystem.createAnchorInSpace(
         Systems.AnchorProvider.GoogleCloudAnchors, 
@@ -257,9 +257,9 @@ test('AnchorSystemTests', 'CreateAnchorResolutionTest', async function() {
     const assetSystem = systemsManager.getAssetSystem();
     const anchorSystem = systemsManager.getAnchorSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
-    const assetCollectionName = generateUniqueString('OLY-TESTS-WASM-SPACE');
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
+    const assetCollectionName = generateUniqueString('CSP-TESTS-WASM-SPACE');
 
     // Log in
     await logIn(userSystem);
@@ -282,7 +282,7 @@ test('AnchorSystemTests', 'CreateAnchorResolutionTest', async function() {
     const assetCollection = await createAssetCollection(assetSystem, space, null, assetCollectionName)
 
     // Create anchor
-    const uniqueThirdPartyAnchorId = generateUniqueString('OLY-UNITTEST-ID');
+    const uniqueThirdPartyAnchorId = generateUniqueString('CSP-UNITTEST-ID');
     var anchorLocation = Systems.GeoLocation.create();
     const anchorPosition = Systems.OlyAnchorPosition.create();
     const anchorRotation = Systems.OlyRotation.create();

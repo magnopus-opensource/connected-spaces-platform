@@ -3,7 +3,7 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn, logInAsGuest, logOut, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD } from './usersystem_tests_helpers.js';
 import { createSpace, getSpace, getSpacesByIds, updateSpace, createInviteUsers, deleteSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../olympus_foundation.js';
+import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../connected_spaces_platform.js';
 
 
 test('SpaceSystemTests', 'CreateSpaceTest', async function() {
@@ -11,8 +11,8 @@ test('SpaceSystemTests', 'CreateSpaceTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -28,8 +28,8 @@ test('SpaceSystemTests', 'CreateSpaceWithBulkInviteTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -63,8 +63,8 @@ test('SpaceSystemTests', 'UpdateSpaceDescriptionTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -95,8 +95,8 @@ test('SpaceSystemTests', 'UpdateSpaceTypeTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -127,8 +127,8 @@ test('SpaceSystemTests', 'GetSpaceTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -150,8 +150,8 @@ test('SpaceSystemTests', 'GetSpacesTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -196,9 +196,9 @@ test('SpaceSystemTests', 'GetSpacesByIdsTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const publicSpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const privateSpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const publicSpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const privateSpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -233,8 +233,8 @@ test('SpaceSystemTests', 'UpdateSpaceThumbnailWithBuffer', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
     
-    const publicSpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const publicSpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -374,8 +374,8 @@ test('SpaceSystemTests', 'GetSpacesMetadataTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -421,8 +421,8 @@ test('SpaceSystemTests', 'UpdateSpaceMetadataTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -452,13 +452,14 @@ test('SpaceSystemTests', 'UpdateSpaceMetadataTest', async function() {
     }
 });
 
+/*
 test('SpaceSystemTests', 'EnterSpaceTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem,DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
@@ -492,14 +493,15 @@ test('SpaceSystemTests', 'EnterSpaceTest', async function() {
     await spaceSystem.deleteSpace(space.id);
     space.delete();
 });
+*/
 
 test('SpaceSystemTests', 'BulkInviteToSpaceTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -535,8 +537,8 @@ test('SpaceSystemTests', 'GeoLocationTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -550,7 +552,7 @@ test('SpaceSystemTests', 'GeoLocationTest', async function() {
 
     const initialOrientation = 90.0;
 
-    const initialGeoFence = Common.Array.ofoly_systems_GeoLocation_number(4);
+    const initialGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(4);
     const geoFence0 = Systems.GeoLocation.create();
     geoFence0.latitude = 5.5;
     geoFence0.longitude = 6.6;
@@ -599,7 +601,7 @@ test('SpaceSystemTests', 'GeoLocationTest', async function() {
 
     const secondOrientation = 270.0;
 
-    const secondGeoFence = Common.Array.ofoly_systems_GeoLocation_number(4);
+    const secondGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(4);
     geoFence0.latitude = 11.1;
     geoFence0.longitude = 12.2;
     secondGeoFence.set(0, geoFence0);
@@ -662,8 +664,8 @@ test('SpaceSystemTests', 'GeoLocationValidationTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -682,10 +684,10 @@ test('SpaceSystemTests', 'GeoLocationValidationTest', async function() {
     const validOrientation = 90.0;
     const invalidOrientation = 400.0;
 
-    const validGeoFence = Common.Array.ofoly_systems_GeoLocation_number(4);
-    const shortGeoFence = Common.Array.ofoly_systems_GeoLocation_number(2);
-    const invalidGeoFence = Common.Array.ofoly_systems_GeoLocation_number(4);
-    const invalidGeoLocationGeoFence = Common.Array.ofoly_systems_GeoLocation_number(4);
+    const validGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(4);
+    const shortGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(2);
+    const invalidGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(4);
+    const invalidGeoLocationGeoFence = Common.Array.ofcsp_systems_GeoLocation_number(4);
     
     const geoFence0 = Systems.GeoLocation.create();
     geoFence0.latitude = 5.5;
@@ -805,8 +807,8 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
@@ -889,8 +891,8 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in as primary user
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);

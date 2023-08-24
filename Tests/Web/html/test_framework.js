@@ -1,6 +1,6 @@
 import { C, CONSOLE_RED, CONSOLE_GREEN, CHS_ENDPOINT_BASE_URI } from './test_helpers.js'
 
-import { ClientUserAgent, CSPFoundation, Services, Systems } from './olympus_foundation.js';
+import { ClientUserAgent, CSPFoundation, Services, Systems } from './connected_spaces_platform.js';
 
 
 /**

@@ -97,7 +97,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>OlympusFoundation_D.lib</AdditionalDependencies>
+      <AdditionalDependencies>ConnectedSpacesPlatform_D.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(ProjectDir)\..\..\Library\Binaries\x64\DebugDLL\ xcopy /Q /E /Y /I $(ProjectDir)\..\..\Library\Binaries\x64\DebugDLL $(TargetDir)</Command>
@@ -131,7 +131,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)\OlympusFoundation_D.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\ConnectedSpacesPlatform_D.lib</AdditionalDependencies>
     </Link>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -156,7 +156,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(OutDir)\OlympusFoundation.lib</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\ConnectedSpacesPlatform.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
       <Command>IF EXIST $(ProjectDir)\..\..\Library\Binaries\x64\ReleaseDLL\ xcopy /Q /E /Y /I $(ProjectDir)\..\..\Library\Binaries\x64\ReleaseDLL $(TargetDir)</Command>
