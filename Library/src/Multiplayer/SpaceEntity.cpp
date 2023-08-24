@@ -562,7 +562,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 				SelectedId = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID).GetInt();
 			}
 
-			// Space entities created with versions of Foundation prior to 3.16 do not have these properties
+			// Space entities created with versions of Connected Spaces Platform prior to 3.16 do not have these properties
 			if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM))
 			{
 				auto Value		   = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM).GetInt();

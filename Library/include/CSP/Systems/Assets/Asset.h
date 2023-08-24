@@ -67,7 +67,7 @@ enum class EAssetPlatform
 	DEFAULT
 };
 
-/// @brief Converts a received DTO type into a Foundation enum EAssetType.
+/// @brief Converts a received DTO type into a Connected Spaces Platform enum EAssetType.
 /// @param DTOAssetDetailType : The string defining the asset type given via the DTO.
 /// @returns the converted EAssetType value.
 EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType);
@@ -136,8 +136,7 @@ public:
 	virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
 
 	CSP_NO_EXPORT virtual void
-		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
-		= 0;
+		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const = 0;
 
 protected:
 	virtual ~AssetDataSource() = default;

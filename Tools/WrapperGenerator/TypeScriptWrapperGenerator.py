@@ -424,7 +424,7 @@ class TypeScriptWrapperGenerator:
 
         rendered_functions = TypeScriptWrapperGenerator_Jinja2().generate(functions, classes, templates)
         
-        with open(f"{self.__OUTPUT_DIRECTORY}olympus.foundation.ts", 'w') as f:
+        with open(f"{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts", 'w') as f:
             print(
                 chevron.render(
                     template,
@@ -443,10 +443,10 @@ class TypeScriptWrapperGenerator:
             )
         
         # Run Prettier on output
-        subprocess.run(f"npx prettier --write \"{self.__OUTPUT_DIRECTORY}olympus.foundation.ts\"", shell=True)
+        subprocess.run(f"npx prettier --write \"{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts\"", shell=True)
 
         # Compile output to Javascript
-        if not Path(f"{self.__OUTPUT_DIRECTORY}/OlympusFoundation_WASM.d.ts").is_file():
-            shutil.copy2(f"{self.__OUTPUT_DIRECTORY}../../OlympusFoundation_WASM.d.ts", self.__OUTPUT_DIRECTORY)
+        if not Path(f"{self.__OUTPUT_DIRECTORY}/ConnectedSpacesPlatform_WASM.d.ts").is_file():
+            shutil.copy2(f"{self.__OUTPUT_DIRECTORY}../../ConnectedSpacesPlatform_WASM.d.ts", self.__OUTPUT_DIRECTORY)
         
-        subprocess.run(f"npx --package typescript tsc \"{self.__OUTPUT_DIRECTORY}olympus.foundation.ts\" -d -m es2020 -t es2020 --sourceMap --removeComments", shell=True)
+        subprocess.run(f"npx --package typescript tsc \"{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts\" -d -m es2020 -t es2020 --sourceMap --removeComments", shell=True)

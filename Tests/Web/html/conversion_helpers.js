@@ -1,4 +1,4 @@
-import { Common } from './olympus_foundation.js'
+import { Common } from './connected_spaces_platform.js'
 
 
 /**

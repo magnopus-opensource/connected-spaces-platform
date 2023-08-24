@@ -27,9 +27,9 @@
 #include <cstdio>
 
 #if defined(DEBUG)
-	#define LIB_NAME "OlympusFoundation_D"
+	#define LIB_NAME "ConnectedSpacesPlatform_D"
 #else
-	#define LIB_NAME "OlympusFoundation"
+	#define LIB_NAME "ConnectedSpacesPlatform"
 #endif
 
 #if defined(CSP_WINDOWS)

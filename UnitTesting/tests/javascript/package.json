@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Magnopus",
-  "license": "Unlicensed",
+  "license": "Apache-2.0",
   "type": "module",
   "devDependencies": {
     "eslint": "^8.36.0"

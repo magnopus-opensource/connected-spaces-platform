@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Olympus/Services/WebService.h"
+#include "CSP/Services/WebService.h"
 
 #include <chrono>
 #include <functional>
@@ -41,14 +41,14 @@ public:
 template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
 {
 public:
-	ServiceResponseReceiver(oly_services::EResultCode InExpectedResult = oly_services::EResultCode::Success)
+	ServiceResponseReceiver(csp::services::EResultCode InExpectedResult = csp::services::EResultCode::Success)
 		: ExpectedResult(InExpectedResult), ResponseReceived(false)
 	{
 	}
 
 	void OnResult(const ResultType& InResult)
 	{
-		if (InResult.GetResultCode() == oly_services::EResultCode::InProgress)
+		if (InResult.GetResultCode() == csp::services::EResultCode::InProgress)
 			return;
 
 		ResponseReceived = true;
@@ -57,7 +57,8 @@ public:
 	bool WaitForResult()
 	{
 		return WaitFor(
-			[this] {
+			[this]
+			{
 				return IsResponseReceived();
 			},
 			std::chrono::seconds(20));
@@ -69,6 +70,6 @@ public:
 	}
 
 private:
-	oly_services::EResultCode ExpectedResult;
+	csp::services::EResultCode ExpectedResult;
 	std::atomic<bool> ResponseReceived;
 };

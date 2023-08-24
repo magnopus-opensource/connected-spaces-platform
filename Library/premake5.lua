@@ -237,7 +237,7 @@ if not Project then
                 "-sEXPORTED_FUNCTIONS=['_malloc','_free']",                     -- force export _malloc and _free function
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
-                "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Foundation
+                "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
                 "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
@@ -275,7 +275,7 @@ if not Project then
             linkoptions {
                 "-gdwarf-5",
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
-                "-sSEPARATE_DWARF_URL=../debug/OlympusFoundation_WASM.wasm.debug.wasm"
+                "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
             }
         filter { "platforms:wasm", "configurations:*Release*" }
             -- We want to reduce the size of Release builds as much as possible
@@ -307,18 +307,18 @@ if not Project then
 
         -- Debug/Release config settings
         filter "configurations:*Debug*"
-            targetname( "OlympusFoundation_D" )
+            targetname( "ConnectedSpacesPlatform_D" )
         filter "configurations:*Release*"
-            targetname( "OlympusFoundation" )
+            targetname( "ConnectedSpacesPlatform" )
         filter "platforms:wasm"
-            targetname( "OlympusFoundation_WASM.js" )
+            targetname( "ConnectedSpacesPlatform_WASM.js" )
             kind "None"
         filter {}
     end
         
     function Project.AddProject()
         if not CSP.IsGeneratingCSharpOnMac() then
-            project "OlympusFoundation"
+            project "ConnectedSpacesPlatform"
             location "Library"
             
             -- Static/shared lib settings

@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "com.magnopus.olympus.foundation.dummy": {
-      "version": "file:com.magnopus.olympus.foundation.dummy",
+    "connected-spaces-platform.dummy": {
+      "version": "file:connected-spaces-platform.dummy",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
