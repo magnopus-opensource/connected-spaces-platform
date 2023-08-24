@@ -551,7 +551,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	}
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	// At this point, the user has been created but not verified the account via email.
 	// So, from this point onwards, attempting to set data for the user account should fail.

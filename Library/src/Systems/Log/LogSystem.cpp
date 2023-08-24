@@ -103,7 +103,7 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
 #endif
 
 
-	// Log to our Foundation file system.
+	// Log to our Connected Spaces Platform file system.
 	LogToFile(InMessage);
 
 	if (Callbacks->LogCallback != nullptr)

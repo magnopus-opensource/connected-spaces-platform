@@ -36,7 +36,7 @@ enum class LogLevel
 	All
 };
 
-/// @brief A Foundation level Logger for debugging or printing to console, also handles logging to a file.
+/// @brief A Connected Spaces Platform level Logger for debugging or printing to console, also handles logging to a file.
 /// Contains a callback system that allows clients to react to specific logs or events.
 class CSP_API CSP_NO_DISPOSE LogSystem
 {
@@ -54,19 +54,19 @@ public:
 	// @todo This doesn't need a parameter, but wrapper gen fails without one
 	typedef std::function<void(void*)> EndMarkerCallbackHandler;
 
-	/// @brief Set a callback for handling a log. Can be used to debug Foundation within a client application.
+	/// @brief Set a callback for handling a log. Can be used to debug Connected Spaces Platform within a client application.
 	/// @param InLogCallback The callback to execute when a log occurs.
 	CSP_EVENT void SetLogCallback(LogCallbackHandler InLogCallback);
 
-	/// @brief Set a callback for handling an event log. Can be used to debug Foundation within a client application.
+	/// @brief Set a callback for handling an event log. Can be used to debug Connected Spaces Platform within a client application.
 	/// @param InEventCallback The callback to execute when an evvent log occurs.
 	CSP_EVENT void SetEventCallback(EventCallbackHandler InEventCallback);
 
-	/// @brief Set a callback for handling a begin marker event. Can be used to debug Foundation within a client application.
+	/// @brief Set a callback for handling a begin marker event. Can be used to debug Connected Spaces Platform within a client application.
 	/// @param InBeginCallback The callback to execute when the marker begins.
 	CSP_EVENT void SetBeginMarkerCallback(BeginMarkerCallbackHandler InBeginCallback);
 
-	/// @brief Set a callback for handling an end marker event. Can be used to debug Foundation within a client application.
+	/// @brief Set a callback for handling an end marker event. Can be used to debug Connected Spaces Platform within a client application.
 	/// @param InEndCallback The callback to execute when the marker ends.
 	CSP_EVENT void SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback);
 

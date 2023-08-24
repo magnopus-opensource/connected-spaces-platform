@@ -28,14 +28,14 @@ if not Tests then
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"
         
-        -- The tests project is configured for the most part like the foundation project itself.
+        -- The tests project is configured for the most part like the Connected Spaces Platform project itself.
         -- This allows us to test both internal functionality as well as the public API.
         Project.DefineProject()
         
         -- Set tests executable name
         targetname( "Tests" )
 
-        -- Tell Foundation we're compiling tests
+        -- Tell Connected Spaces Platform we're compiling tests
         defines { "CSP_TESTS" }
 
         -- Compile support for MessagePack

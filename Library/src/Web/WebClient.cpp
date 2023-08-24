@@ -457,7 +457,7 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 				Errors.Append(JsonObjectToString(ResponseJson["errors"]));
 			}
 		}
-		else
+		else if (ResponseJson.HasMember("error"))
 		{
 			Errors.Append(JsonObjectToString(ResponseJson["error"]));
 		}

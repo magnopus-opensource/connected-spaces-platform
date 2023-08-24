@@ -37,7 +37,8 @@ enum class ReplicatedValueType
 	Vector4,
 };
 
-/// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Foundation replication systems.
+/// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
+/// replication systems.
 class CSP_API ReplicatedValue
 {
 public:
