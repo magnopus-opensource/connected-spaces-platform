@@ -68,7 +68,7 @@ public:
 	CSP_ASYNC_RESULT void CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback);
 
 	/// @brief Gets a cart for the current user in the given space.
-	/// @param SpaceId csp::common::String : ID of the space to create the cart for.
+	/// @param SpaceId csp::common::String : ID of the space the cart belongs to.
 	/// @param CartId csp::common::String : ID of the cart.
 	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
