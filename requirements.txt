@@ -1,6 +1,6 @@
 chevron==0.14.0
 gitdb==4.0.9
-GitPython==3.1.26
+GitPython==3.1.32
 smmap==5.0.0
 PyYAML==5.4.1
 jinja2==3.1.2
