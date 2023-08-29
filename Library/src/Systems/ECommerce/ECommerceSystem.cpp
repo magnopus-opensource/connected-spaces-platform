@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
+#include "ECommerceSystemHelpers.h"
 #include "Services/aggregationservice/Api.h"
 
 using namespace csp;
@@ -78,6 +79,43 @@ void ECommerceSystem::GetCart(const common::String& SpaceId, const common::Strin
 																									   csp::web::EResponseCodes::ResponseCreated);
 
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
+}
+
+void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
+									  const common::String& SpaceId,
+									  const bool IsEcommerceActive,
+									  const common::String& PrivateAccessToken,
+									  AddShopifyStoreResultCallback Callback)
+{
+	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
+	ShopifyStorefrontInfo->SetStoreName(StoreName);
+	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
+	ShopifyStorefrontInfo->SetPrivateAccessToken(PrivateAccessToken);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<AddShopifyStoreResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+}
+
+void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
+										   const common::String& PrivateAccessToken,
+										   ValidateShopifyStoreResultCallback Callback)
+{
+	auto ShopifyStorefrontValidationInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontValidationRequest();
+	ShopifyStorefrontValidationInfo->SetStoreName(StoreName);
+	ShopifyStorefrontValidationInfo->SetPrivateAccessToken(PrivateAccessToken);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<ValidateShopifyStoreResultCallback, ValidateShopifyStoreResult, void, chs::ShopifyStorefrontValidationRequest>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1VendorsShopifyValidatePut(ShopifyStorefrontValidationInfo, ResponseHandler);
 }
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)

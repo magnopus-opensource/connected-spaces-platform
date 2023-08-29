@@ -17,6 +17,8 @@
 #include "CSP/Systems/ECommerce/ECommerce.h"
 #include "CSP/Systems/SystemBase.h"
 
+#include <CSP/Systems/SystemsResult.h>
+
 namespace csp::services
 {
 
@@ -72,6 +74,25 @@ public:
 	/// @param CartId csp::common::String : ID of the cart.
 	/// @param Callback CartInfoResultCallback : Callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
+
+	/// @brief Adds a Shopify store to a space.
+	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
+	/// @param SpaceId csp::common::String : ID of the space to link the store to.
+	/// @param IsEcommerceActive bool : Bool to set the ecommerce system status on creation.
+	/// @param PrivateAccessToken csp::common::String : The access token for the shopify storefront.
+	/// @param Callback AddShopifyStoreResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void AddShopifyStore(const common::String& StoreName,
+										  const common::String& SpaceId,
+										  const bool IsEcommerceActive,
+										  const common::String& PrivateAccessToken,
+										  AddShopifyStoreResultCallback Callback);
+
+	/// @brief Validates a shopify store given a store name and an access token.
+	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
+	/// @param PrivateAccessToken csp::common::String : The access token for the shopify storefront.
+	/// @param Callback ValidateShopifyStoreResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void
+		ValidateShopifyStore(const common::String& StoreName, const common::String& PrivateAccessToken, ValidateShopifyStoreResultCallback Callback);
 
 	/// @brief Update cart information from a shopify store within a space
 	/// @param CartInformation CartInfo : Updated Cart Object.
