@@ -523,6 +523,16 @@ void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Call
 	InitialEntitiesRetrievedCallback = std::move(Callback);
 }
 
+void SpaceEntitySystem::SetScriptSpaceComponentsReadyCallback(CallbackHandler Callback)
+{
+	if (ScriptSpaceComponentsReadyCallback)
+	{
+		FOUNDATION_LOG_WARN_MSG("ScriptSpaceComponentReadyCallback has already been set. Previous callback overwritten.");
+	}
+
+	ScriptSpaceComponentsReadyCallback = std::move(Callback);
+}
+
 void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 {
 	if (ScriptSystemReadyCallback)
@@ -666,6 +676,21 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 		const auto& Results = Result.as_array();
 		const auto& Items	= Results[0].as_array();
 		auto ItemTotalCount = Results[1].as_uinteger();
+
+		auto ScriptSpaceComponentReadyCallback = [this](bool Ok)
+		{
+			ScriptSpaceComponentsReady = true;
+
+			for (int i = 0; i < QueuedScriptComponents.Size(); ++i)
+			{
+				QueuedScriptComponents[i]->GetParent()->GetScript()->Bind();
+				QueuedScriptComponents[i]->GetParent()->GetScript()->Invoke();
+			}
+
+			QueuedScriptComponents.Clear();
+		};
+
+		SetScriptSpaceComponentsReadyCallback(ScriptSpaceComponentReadyCallback);
 
 		for (const auto& EntityMessage : Items)
 		{
@@ -815,6 +840,11 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	{
 		InitialEntitiesRetrievedCallback(true);
 	}
+
+	if (ScriptSpaceComponentsReadyCallback)
+	{
+		ScriptSpaceComponentsReadyCallback(true);
+	}
 }
 
 // @brief Simple script ownership
@@ -963,9 +993,19 @@ ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
 	return nullptr;
 }
 
+void SpaceEntitySystem::QueueScriptSpaceComponent(ComponentBase* ScriptSpaceComponent)
+{
+	QueuedScriptComponents.Append(ScriptSpaceComponent);
+}
+
 const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const
 {
 	return EntityPatchRateLimitEnabled;
+}
+
+const bool SpaceEntitySystem::GetScriptSpaceComponentsReady() const
+{
+	return ScriptSpaceComponentsReady;
 }
 
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)

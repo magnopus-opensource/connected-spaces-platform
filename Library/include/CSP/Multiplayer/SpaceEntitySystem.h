@@ -293,6 +293,18 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
+	/// @brief Retrieve the flag for allowing ScriptSpaceComponent to invoke. If true, all other components have been loaded into the space and
+	/// ScriptSpaceComponents can be invoked.
+	/// @return True if enabled, false otherwise.
+	const bool GetScriptSpaceComponentsReady() const;
+
+	/// @brief Queue ScriptSpaceComponents.
+	///
+	/// Queue ScriptSpaceComponent to be executed after all entities have loaded
+	///
+	/// @param ScriptSpaceComponent The ScriptSpaceComponent being queued.
+	void QueueScriptSpaceComponent(ComponentBase* ScriptSpaceComponent);
+
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -316,6 +328,7 @@ private:
 	EntityCreatedCallback SpaceEntityCreatedCallback;
 	CallbackHandler InitialEntitiesRetrievedCallback;
 	CallbackHandler ScriptSystemReadyCallback;
+	CallbackHandler ScriptSpaceComponentsReadyCallback;
 
 	void BindOnObjectMessage();
 	void BindOnObjectPatch();
@@ -345,6 +358,8 @@ private:
 	void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
 	void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
 
+	void SetScriptSpaceComponentsReadyCallback(CallbackHandler Callback);
+
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;
 	class ClientElectionManager* ElectionManager;
@@ -361,8 +376,10 @@ private:
 
 	std::chrono::system_clock::time_point LastTickTime;
 	std::chrono::milliseconds EntityPatchRate;
+	common::List<ComponentBase*> QueuedScriptComponents;
 
 	bool EntityPatchRateLimitEnabled = true;
+	bool ScriptSpaceComponentsReady	 = false;
 };
 
 } // namespace csp::multiplayer

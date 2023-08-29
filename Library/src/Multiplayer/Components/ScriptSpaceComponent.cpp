@@ -93,8 +93,15 @@ void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedVa
 	{
 		// FOUNDATION_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
-		Parent->GetScript()->Bind();
-		Parent->GetScript()->Invoke();
+		if (Parent->GetSpaceEntitySystem()->GetScriptSpaceComponentsReady())
+		{
+			Parent->GetScript()->Bind();
+			Parent->GetScript()->Invoke();
+		}
+		else
+		{
+			Parent->GetSpaceEntitySystem()->QueueScriptSpaceComponent(this);
+		}
 	}
 }
 
