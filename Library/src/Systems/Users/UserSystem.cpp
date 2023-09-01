@@ -458,7 +458,7 @@ void UserSystem::ConfirmUserEmail(NullResultCallback Callback)
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdConfirmEmailPost(UserId, nullptr, ResponseHandler);
 }
 
-void UserSystem::ResetUserPassword(const csp::common::String Token, const csp::common::String NewPassword, NullResultCallback Callback)
+void UserSystem::ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback)
 {
 	const csp::common::String UserId = CurrentLoginState.UserId;
 
