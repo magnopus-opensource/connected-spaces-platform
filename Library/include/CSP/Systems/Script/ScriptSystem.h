@@ -185,13 +185,26 @@ public:
 	const char* GetImportedModule(int64_t ContextId, size_t Index) const;
 	CSP_END_IGNORE
 
+	/*
+	 * // Use `/api/v1/prototypes/asset-details` to fetch this by constructing full asset name from
+	 * // `namespace` and `moduleName` and using this in the `Names` filter.
+	 * //  ScriptModuleAsset name currently uses ScriptModuleCollection ID, but should instead use its name
+	 * // ie. SCRIPT_MODULE_ASSET_{ namespace }_{ moduleName }
+	 * // eg. SCRIPT_MODULE_ASSET_magnopus_physics
+	 * void GetScriptModuleAsset(string namespace, string moduleName, callback);
+	 *
+	 * // Use `/api/v1/prototypes/asset-details` to fetch this by constructing full asset collection name from
+	 * // `namespace` and using this in the `PrototypeParentNames` filter.
+	 * // ie. SCRIPT_MODULE_COLLECTION_{ moduleName }
+	 * // eg. SCRIPT_MODULE_COLLECTION_magnopus
+	 * void GetScriptModuleAssetsByNamespace(string namespace, callback);
+	 */
+
+	// TODO: Delete these and replace with above
 	CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
 	CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
-	CSP_ASYNC_RESULT void UpdateScriptModuleCollectionLookupTable(const ScriptModuleCollection& Collection,
-																  const csp::common::Map<csp::common::String, csp::common::String>& NewLookupTable,
-																  const NullResultCallback& Callback);
 	CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
 											   const csp::common::String& Name,
 											   const ScriptModuleAssetResultCallback& Callback);
@@ -211,6 +224,10 @@ private:
 	ScriptSystem();
 
 	class ScriptRuntime* TheScriptRuntime;
+
+	void UpdateScriptModuleCollectionLookupTable(const ScriptModuleCollection& Collection,
+												 const csp::common::Map<csp::common::String, csp::common::String>& NewLookupTable,
+												 const NullResultCallback& Callback);
 
 	static void _GetScriptModuleCollectionCallback(ScriptModuleCollectionResultCallback Callback, const AssetCollectionResult& Result);
 };
