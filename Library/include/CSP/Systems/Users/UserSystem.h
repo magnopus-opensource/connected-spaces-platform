@@ -162,7 +162,7 @@ public:
 	CSP_ASYNC_RESULT void ConfirmUserEmail(NullResultCallback Callback);
 
 	/// @brief Reset the users password.
-	/// @param Token csp::common::String : Bearer Token of the user changing their password
+	/// @param Token csp::common::String : Token received through email by user
 	/// @param NewPassword csp::common::String : The new password for the associated account
 	/// @param Callback NullResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback);
