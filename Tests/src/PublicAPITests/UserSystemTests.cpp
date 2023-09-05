@@ -16,6 +16,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
+#include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "SpaceSystemTestHelpers.h"
@@ -948,20 +949,29 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	/*
-	  Setup token params
-	  For this test, it's exeptable to use 0 for the UserId and ChannelId
-	  This is because the endpoint is just using an algorithm to generate the token
-	  So no valid Ids are needed for verification
-	*/
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
 	csp::systems::AgoraUserTokenParams Params;
-	Params.AgoraUserId = "0";
-	Params.ChannelName = "0";
+	Params.AgoraUserId = UserId;
+	Params.ChannelName = Space.Id;
 	Params.Lifespan	   = 10000;
 	Params.ShareAudio  = true;
 	Params.ShareScreen = false;
@@ -972,7 +982,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 	auto [Result] = AWAIT_PRE(UserSystem, GetAgoraUserToken, RequestPredicate, Params);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_NE(Result.GetUserToken(), "");
+	EXPECT_FALSE(Result.GetUserToken().IsEmpty());
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);
