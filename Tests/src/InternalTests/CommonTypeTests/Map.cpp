@@ -22,6 +22,7 @@
 	#include "TestHelpers.h"
 
 	#include <gtest/gtest.h>
+	#include <Memory/DllAllocator.cpp>
 
 using namespace csp::common;
 
@@ -200,8 +201,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysTest)
 	Map<int, String> MyMap;
 	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
-	EXPECT_EQ(MyMap.Keys()->Size(), 3);
-	EXPECT_FALSE(MyMap.Keys()->Data() == nullptr);
+	const auto* MyKeys = MyMap.Keys();
+
+	EXPECT_EQ(MyKeys->Size(), 3);
+	EXPECT_FALSE(MyKeys->Data() == nullptr);
+
+	csp::memory::DllFree(&MyKeys);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
@@ -209,8 +214,12 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
 	Map<int, String> MyMap;
 	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
-	EXPECT_EQ(MyMap.Values()->Size(), 3);
-	EXPECT_FALSE(MyMap.Values()->Data() == nullptr);
+	const auto* MyValues = MyMap.Values();
+
+	EXPECT_EQ(MyValues->Size(), 3);
+	EXPECT_FALSE(MyValues->Data() == nullptr);
+
+	csp::memory::DllFree(&MyValues);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)
