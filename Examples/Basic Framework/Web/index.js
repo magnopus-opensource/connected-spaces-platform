@@ -14,7 +14,7 @@ import {
   Common,
   Services,
   CSPFoundation,
-} from "./node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js";
+} from "./node_modules/@magnopus-opensource/connected-spaces-platform.web/connectedspacesplatform.js";
 
 // Magnopus Services Endpoint to connect to.
 const ENDPOINT = "https://ogs-odev.magnoboard.com";
