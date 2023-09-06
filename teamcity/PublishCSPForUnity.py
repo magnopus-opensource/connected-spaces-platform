@@ -39,7 +39,7 @@ def main():
     arg_parser = argparse.ArgumentParser(description="Build and publish the CSP for Unity NPM package.")
     arg_parser.add_argument(
         "--output-directory",
-        help="Enter the relative path from root/teamcity for the libraries to be copied to.",
+        help="Enter the path relative to the git root for the libraries to be copied to.",
         default=f"{config.default_output_directory}/unity",
     )
     arg_parser.add_argument(
@@ -71,27 +71,27 @@ def main():
     arg_group = arg_parser.add_argument_group("artifacts")
     arg_group.add_argument(
         "--windows-artifact-root",
-        help="Enter the relative path from root/teamcity for Windows artifacts.",
+        help="Enter the path relative to the git root for Windows artifacts.",
         default=config.default_artifact_paths.windows,
     )
     arg_group.add_argument(
         "--macosx-artifact-root",
-        help="Enter the relative path from root/teamcity for macOS artifacts.",
+        help="Enter the path relative to the git root for macOS artifacts.",
         default=config.default_artifact_paths.macosx,
     )
     arg_group.add_argument(
         "--ios-artifact-root",
-        help="Enter the relative path from root/teamcity for iOS artifacts.",
+        help="Enter the path relative to the git root for iOS artifacts.",
         default=config.default_artifact_paths.ios,
     )
     arg_group.add_argument(
         "--android-artifact-root",
-        help="Enter the relative path from root/teamcity for 32-bit Android artifacts.",
+        help="Enter the path relative to the git root for 32-bit Android artifacts.",
         default=config.default_artifact_paths.android,
     )
     arg_group.add_argument(
         "--android64-artifact-root",
-        help="Enter the relative path from root/teamcity for 64-bit Android artifacts.",
+        help="Enter the path relative to the git root for 64-bit Android artifacts.",
         default=config.default_artifact_paths.android64,
     )
     arg_group.add_argument(
@@ -180,6 +180,7 @@ def main():
 
     with open(f"{source_output_directory}/{args.assembly_name}.asmdef.meta", "w") as f:
         f.write(
+            # GUID needs to be const here to prevent references to the C# assembly from being removed when the package is updated
             minimal_meta_template.render(guid="1678634e69642a55e208df4d4d895a52", importer_type="AssemblyDefinition")
         )
 
@@ -212,6 +213,7 @@ def main():
 
     with open(f"{buildproc_directory}/NativePluginBuildProcessor.asmdef.meta", "w") as f:
         f.write(
+            # GUID is const here to preserve references
             minimal_meta_template.render(guid="1678634e69642a55e208df4d4d895a53", importer_type="AssemblyDefinition")
         )
 
