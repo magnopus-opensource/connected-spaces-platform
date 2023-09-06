@@ -458,23 +458,21 @@ void UserSystem::ConfirmUserEmail(NullResultCallback Callback)
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdConfirmEmailPost(UserId, nullptr, ResponseHandler);
 }
 
-void UserSystem::ResetUserPassword(const csp::common::Optional<csp::common::String>& RedirectUrl, NullResultCallback Callback)
+void UserSystem::ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback)
 {
 	const csp::common::String UserId = CurrentLoginState.UserId;
-	std::optional<csp::common::String> RedirectUrlValue;
 
-	if (RedirectUrl.HasValue())
-	{
-		RedirectUrlValue = *RedirectUrl;
-	}
+	auto Request = std::make_shared<chs::TokenResetPasswordRequest>();
+
+	Request->SetToken(Token);
+	Request->SetNewPassword(NewPassword);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																								  nullptr,
 																								  csp::web::EResponseCodes::ResponseNoContent);
 
-	static_cast<chs::ProfileApi*>(ProfileAPI)
-		->apiV1UsersUserIdResetPasswordPost(UserId, RedirectUrlValue, csp::CSPFoundation::GetTenant(), ResponseHandler);
+	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdTokenChangePasswordPost(UserId, Request, ResponseHandler);
 }
 
 void UserSystem::UpdateUserDisplayName(const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback)
