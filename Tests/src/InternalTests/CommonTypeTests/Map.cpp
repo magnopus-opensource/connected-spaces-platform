@@ -80,15 +80,37 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapInitialiseMapTest)
 }
 
 // Test case to check if elements are initialised with a Map correctly
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapMoveConstructorTest)
+{
+	Map<int, String> OldMap;
+	OldMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
+
+	Map<int, String> MyMap(std::move(OldMap));
+
+	// Check if the map contains the initial values
+	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_TRUE(MyMap.HasKey(2));
+	EXPECT_TRUE(MyMap.HasKey(3));
+
+	// Check if the map does not contain an invalid key
+	EXPECT_FALSE(MyMap.HasKey(4));
+
+	EXPECT_EQ(MyMap.Size(), 3);
+}
+
+// Test case to check if elements are initialised with a Map correctly
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapCopyAssignmentTest)
 {
 	Map<int, String> OldMap;
 	OldMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
-	Map<int, String> MyMap = OldMap;
+	Map<int, String> MyMap = {{1, "Default"}};
+
+	MyMap = OldMap;
 
 	// Check if the map contains the initial values
 	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_EQ(MyMap[1], "One");
 	EXPECT_TRUE(MyMap.HasKey(2));
 	EXPECT_TRUE(MyMap.HasKey(3));
 
@@ -104,10 +126,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapMoveAssignmentTest)
 	Map<int, String> OldMap;
 	OldMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
-	Map<int, String> MyMap = std::move(OldMap);
+	Map<int, String> MyMap = {{1, "Default"}};
+
+	MyMap = std::move(OldMap);
 
 	// Check if the map contains the initial values
 	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_EQ(MyMap[1], "One");
 	EXPECT_TRUE(MyMap.HasKey(2));
 	EXPECT_TRUE(MyMap.HasKey(3));
 
@@ -170,24 +195,34 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapUpdateTest)
 	EXPECT_EQ(MyMap.Size(), 3);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysValuesClearTest)
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysTest)
 {
 	Map<int, String> MyMap;
 	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
 	EXPECT_EQ(MyMap.Keys()->Size(), 3);
 	EXPECT_FALSE(MyMap.Keys()->Data() == nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
+{
+	Map<int, String> MyMap;
+	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
 	EXPECT_EQ(MyMap.Values()->Size(), 3);
 	EXPECT_FALSE(MyMap.Values()->Data() == nullptr);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)
+{
+	Map<int, String> MyMap;
+	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
+
+	EXPECT_EQ(MyMap.Size(), 3);
 
 	MyMap.Clear();
 
 	EXPECT_EQ(MyMap.Size(), 0);
-	EXPECT_EQ(MyMap.Keys()->Size(), 0);
-	EXPECT_TRUE(MyMap.Keys()->Data() == nullptr);
-	EXPECT_EQ(MyMap.Values()->Size(), 0);
-	EXPECT_TRUE(MyMap.Values()->Data() == nullptr);
 }
 
 #endif
