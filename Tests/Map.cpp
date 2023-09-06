@@ -25,60 +25,99 @@
 
 using namespace csp::common;
 
-// Test fixture for csp::common::Map testing
-class MapTest
+// Test case to check if default initialisation works correctly
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapDefaultInitialisationTest)
 {
-public:
-	MapTest()
+	try
 	{
-		MyMap[1] = "One";
-		MyMap[2] = "Two";
-		MyMap[3] = "Three";
-	};
+		Map<int, int> Instance;
 
-	Map<int, csp::common::String> MyMap;
-};
+		EXPECT_EQ(Instance.Size(), 0);
+		EXPECT_EQ(Instance.Values(), nullptr);
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
 
-// Test case to check if elements are inserted correctly
-CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapInsertionTest)
+// Test case to check if elements are initialised with a list correctly
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapInitialiseListTest)
 {
-	auto MapTestLocal = MapTest();
+	Map<int, csp::common::String> MyMap;
+	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
 	// Check if the map contains the initial values
-	EXPECT_TRUE(MapTestLocal.MyMap.HasKey(1));
-	EXPECT_TRUE(MapTestLocal.MyMap.HasKey(2));
-	EXPECT_TRUE(MapTestLocal.MyMap.HasKey(3));
+	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_TRUE(MyMap.HasKey(2));
+	EXPECT_TRUE(MyMap.HasKey(3));
 
 	// Check if the map does not contain an invalid key
-	EXPECT_FALSE(MapTestLocal.MyMap.HasKey(4));
+	EXPECT_FALSE(MyMap.HasKey(4));
+}
+
+// Test case to check if elements are initialised with a Map correctly
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapInitialiseMapTest)
+{
+	Map<int, csp::common::String> OldMap;
+	OldMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
+
+	Map<int, String> MyMap(OldMap);
+
+	// Check if the map contains the initial values
+	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_TRUE(MyMap.HasKey(2));
+	EXPECT_TRUE(MyMap.HasKey(3));
+
+	// Check if the map does not contain an invalid key
+	EXPECT_FALSE(MyMap.HasKey(4));
+}
+
+// Test case to check if elements are assigned correctly
+CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapAssignmentTest)
+{
+	Map<int, String> MyMap;
+	MyMap[1] = "One";
+	MyMap[2] = "Two";
+	MyMap[3] = "Three";
+
+	// Check if the map contains the initial values
+	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_TRUE(MyMap.HasKey(2));
+	EXPECT_TRUE(MyMap.HasKey(3));
+
+	// Check if the map does not contain an invalid key
+	EXPECT_FALSE(MyMap.HasKey(4));
 }
 
 // Test case to check if elements are removed correctly
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapDeletionTest)
 {
-	auto MapTestLocal = MapTest();
+	Map<int, String> MyMap;
+	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
 	// Remove an element from the map
-	MapTestLocal.MyMap.Remove(2);
+	MyMap.Remove(2);
 
 	// Check if the removed element is not in the map
-	EXPECT_FALSE(MapTestLocal.MyMap.HasKey(2));
+	EXPECT_FALSE(MyMap.HasKey(2));
 
 	// Check if the other elements are still in the map
-	EXPECT_TRUE(MapTestLocal.MyMap.HasKey(1));
-	EXPECT_TRUE(MapTestLocal.MyMap.HasKey(3));
+	EXPECT_TRUE(MyMap.HasKey(1));
+	EXPECT_TRUE(MyMap.HasKey(3));
 }
 
 // Test case to check if elements are updated correctly
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapUpdateTest)
 {
-	auto MapTestLocal = MapTest();
+	Map<int, String> MyMap;
+	MyMap = {{1, "One"}, {2, "Two"}, {3, "Three"}};
 
 	// Update an element in the map
-	MapTestLocal.MyMap[2] = "NewTwo";
+	MyMap[2] = "NewTwo";
 
 	// Check if the updated element has the correct value
-	EXPECT_EQ(MapTestLocal.MyMap[2], "NewTwo");
+	EXPECT_EQ(MyMap[2], "NewTwo");
 }
 
 #endif
