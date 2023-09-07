@@ -99,3 +99,6 @@ UnitTesting/src/**/*
 UnitTesting/tests/*_test_results.xml
 UnitTesting/tests/csharp/Assets/Tests/generated/**/*
 UnitTesting/tests/javascript/tests.js
+
+# Ignore generated package directories
+package/
