@@ -66,13 +66,6 @@ def fetch_chromedriver(version):
 
 
 if __name__ == '__main__':
-    chrome_version = get_chrome_version()
-
-    # Trim the patch version and download chromedriver
-    chrome_version = chrome_version[:chrome_version.rindex('.')]
-    chromedriver_latest_url = f'https://chromedriver.storage.googleapis.com/LATEST_RELEASE_{chrome_version}'
-    chromedriver_latest_version = requests.get(chromedriver_latest_url).text
-    fetch_chromedriver(chromedriver_latest_version)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--gtest_output')
@@ -85,6 +78,14 @@ if __name__ == '__main__':
     if args.serve_only:
         start_http_server(server)
     else:
+        chrome_version = get_chrome_version()
+
+        # Trim the patch version and download chromedriver
+        chrome_version = chrome_version[:chrome_version.rindex('.')]
+        chromedriver_latest_url = f'https://chromedriver.storage.googleapis.com/LATEST_RELEASE_{chrome_version}'
+        chromedriver_latest_version = requests.get(chromedriver_latest_url).text
+        fetch_chromedriver(chromedriver_latest_version)
+        
         t = threading.Thread(target=start_http_server, args=(server,))
         t.start()
 

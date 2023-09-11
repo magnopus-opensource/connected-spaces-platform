@@ -71,18 +71,26 @@ public:
 	CSP_EVENT void SetEndMarkerCallback(EndMarkerCallbackHandler InEndCallback);
 
 	/// @brief Set the verbosity of logging for a system-wide level.
-	CSP_NO_EXPORT void SetSystemLevel(const csp::systems::LogLevel InSystemLevel);
+	/// @param InSystemLevel The level to set the system logging to.
+	void SetSystemLevel(const csp::systems::LogLevel InSystemLevel);
 
 	/// @brief Retreive the log verbosity level.
-	CSP_NO_EXPORT csp::systems::LogLevel GetSystemLevel();
+	csp::systems::LogLevel GetSystemLevel();
 
 	/// @brief Check if we currently log a specified log verbosity level.
-	CSP_NO_EXPORT bool LoggingEnabled(const csp::systems::LogLevel Level);
+	/// @param Level The level to check.
+	bool LoggingEnabled(const csp::systems::LogLevel Level);
 
 	/// @brief Log a message at a specific verbosity level.
+	/// @param Level The level to log this message at.
+	/// @param InMessage The message to be logged.
 	CSP_NO_EXPORT void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
 	/// @brief Log an event.
+	/// @param InEvent The event to be logged.
 	CSP_NO_EXPORT void LogEvent(const csp::common::String& InEvent);
+
+	/// @brief Logs a test message at the set system verbosity level.
+	void LogTestMessage();
 
 	/// @brief Specify a 'Marker' event which can be used to communicate a certain process occurring, usually for debugging.
 	CSP_NO_EXPORT void BeginMarker(const csp::common::String& InMarker);
