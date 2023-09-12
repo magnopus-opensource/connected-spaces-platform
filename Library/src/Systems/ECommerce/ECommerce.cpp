@@ -123,7 +123,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
 	}
 
 	if (CartDto.HasShopifyCartId())
@@ -136,7 +136,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
 	}
 
 	if (CartDto.HasLines())
@@ -156,7 +156,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
 			}
 
 			if (CartLineDto.HasProductVariantId())
@@ -165,7 +165,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
 			}
 
 			if (CartLineDto.HasQuantity())
@@ -174,13 +174,13 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
 			}
 		}
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
 	}
 
 	if (CartDto.HasTotalQuantity())
@@ -189,7 +189,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
 	}
 }
 
@@ -201,7 +201,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
 	}
 
 	if (StoreDto.HasStoreName())
@@ -210,7 +210,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
 	}
 
 	if (StoreDto.HasSpaceOwnerId())
@@ -219,7 +219,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
 	}
 
 	if (StoreDto.HasSpaceId())
@@ -228,7 +228,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
 	}
 
 	if (StoreDto.HasIsEcommerceActive())
@@ -237,7 +237,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
 	}
 }
 

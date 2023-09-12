@@ -124,10 +124,10 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 
 			if (CurrentTime >= Expiry)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-									  "AccessToken Expired: %s %s",
-									  AuthResponse->GetAccessToken().c_str(),
-									  AuthResponse->GetAccessTokenExpiresAt().c_str());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+							   "AccessToken Expired: %s %s",
+							   AuthResponse->GetAccessToken().c_str(),
+							   AuthResponse->GetAccessTokenExpiresAt().c_str());
 
 				return;
 			}
@@ -143,10 +143,10 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 
 			if (RefreshTime >= Expiry)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-									  "RefreshToken Expired: %s %s",
-									  AuthResponse->GetRefreshToken().c_str(),
-									  AuthResponse->GetRefreshTokenExpiresAt().c_str());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+							   "RefreshToken Expired: %s %s",
+							   AuthResponse->GetRefreshToken().c_str(),
+							   AuthResponse->GetRefreshTokenExpiresAt().c_str());
 
 				return;
 			}
@@ -268,13 +268,13 @@ void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiR
 
 		if (!Result)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult invalid");
+			CSP_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult invalid");
 			return;
 		}
 
 		if (!Result->HasMember("token"))
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
+			CSP_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
 			return;
 		}
 

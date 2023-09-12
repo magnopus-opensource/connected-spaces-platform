@@ -40,7 +40,7 @@ const csp::common::String& CustomSpaceComponent::GetApplicationOrigin() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -184,7 +184,7 @@ void CustomSpaceComponent::RemoveKey(const csp::common::String& Key)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("Key Not Found.");
+		CSP_LOG_ERROR_MSG("Key Not Found.");
 	}
 }
 

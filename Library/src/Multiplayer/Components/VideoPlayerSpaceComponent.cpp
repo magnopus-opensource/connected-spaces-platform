@@ -63,7 +63,7 @@ const csp::common::String& VideoPlayerSpaceComponent::GetName() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -80,7 +80,7 @@ const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -97,7 +97,7 @@ const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetURL() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -114,7 +114,7 @@ const csp::common::String& VideoPlayerSpaceComponent::GetAssetCollectionId() con
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -131,7 +131,7 @@ const csp::common::Vector3& VideoPlayerSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -148,7 +148,7 @@ const csp::common::Vector4& VideoPlayerSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -165,7 +165,7 @@ const csp::common::Vector3& VideoPlayerSpaceComponent::GetScale() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -182,7 +182,7 @@ bool VideoPlayerSpaceComponent::GetIsStateShared() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -199,7 +199,7 @@ bool VideoPlayerSpaceComponent::GetIsAutoPlay() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -216,7 +216,7 @@ bool VideoPlayerSpaceComponent::GetIsLoopPlayback() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -233,7 +233,7 @@ bool VideoPlayerSpaceComponent::GetIsAutoResize() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -250,7 +250,7 @@ VideoPlayerPlaybackState VideoPlayerSpaceComponent::GetPlaybackState() const
 		return static_cast<VideoPlayerPlaybackState>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return VideoPlayerPlaybackState::Reset;
 }
 
@@ -267,7 +267,7 @@ float VideoPlayerSpaceComponent::GetCurrentPlayheadPosition() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -284,7 +284,7 @@ float VideoPlayerSpaceComponent::GetTimeSincePlay() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -301,7 +301,7 @@ float VideoPlayerSpaceComponent::GetAttenuationRadius() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -319,7 +319,7 @@ VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() cons
 		return static_cast<VideoPlayerSourceType>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return VideoPlayerSourceType::AssetSource;
 }
 
@@ -337,7 +337,7 @@ uint16_t VideoPlayerSpaceComponent::GetMeshComponentId() const
 		return static_cast<uint16_t>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0;
 }
 
@@ -366,7 +366,7 @@ bool VideoPlayerSpaceComponent::GetIsVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -383,7 +383,7 @@ bool VideoPlayerSpaceComponent::GetIsARVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -402,7 +402,7 @@ bool VideoPlayerSpaceComponent::GetIsEnabled() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
