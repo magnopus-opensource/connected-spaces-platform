@@ -47,15 +47,32 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
 			if (VariantProductInformation[i]->HasImage())
 			{
-				if (VariantProductInformation[i]->GetImage()->HasMediaContentType())
+				auto VariantProductImage = VariantProductInformation[i]->GetImage();
+
+				if (VariantProductImage->HasMediaContentType())
 				{
-					ProductInfo.Variants[i].Media.MediaContentType = VariantProductInformation[i]->GetImage()->GetMediaContentType();
+					ProductInfo.Variants[i].Media.MediaContentType = VariantProductImage->GetMediaContentType();
 				}
 
-				ProductInfo.Variants[i].Media.Alt	 = VariantProductInformation[i]->GetImage()->GetAlt();
-				ProductInfo.Variants[i].Media.Url	 = VariantProductInformation[i]->GetImage()->GetUrl();
-				ProductInfo.Variants[i].Media.Width	 = VariantProductInformation[i]->GetImage()->GetWidth();
-				ProductInfo.Variants[i].Media.Height = VariantProductInformation[i]->GetImage()->GetHeight();
+				if (VariantProductImage->HasAlt())
+				{
+					ProductInfo.Variants[i].Media.Alt = VariantProductImage->GetAlt();
+				}
+
+				if (VariantProductImage->HasUrl())
+				{
+					ProductInfo.Variants[i].Media.Url = VariantProductImage->GetUrl();
+				}
+
+				if (VariantProductImage->HasWidth())
+				{
+					ProductInfo.Variants[i].Media.Width = VariantProductImage->GetWidth();
+				}
+
+				if (VariantProductImage->HasHeight())
+				{
+					ProductInfo.Variants[i].Media.Height = VariantProductImage->GetHeight();
+				}
 			}
 
 			if (Dto.GetVariants()[i]->HasSelectedOptions())
@@ -106,11 +123,30 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
 		for (int i = 0; i < MediaProductInformation.size(); ++i)
 		{
-			ProductInfo.Media[i].Alt			  = MediaProductInformation[i]->GetAlt();
-			ProductInfo.Media[i].Url			  = MediaProductInformation[i]->GetUrl();
-			ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
-			ProductInfo.Media[i].Width			  = MediaProductInformation[i]->GetWidth();
-			ProductInfo.Media[i].Height			  = MediaProductInformation[i]->GetHeight();
+			if (MediaProductInformation[i]->HasAlt())
+			{
+				ProductInfo.Media[i].Alt = MediaProductInformation[i]->GetAlt();
+			}
+
+			if (MediaProductInformation[i]->HasUrl())
+			{
+				ProductInfo.Media[i].Url = MediaProductInformation[i]->GetUrl();
+			}
+
+			if (MediaProductInformation[i]->HasMediaContentType())
+			{
+				ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
+			}
+
+			if (MediaProductInformation[i]->HasWidth())
+			{
+				ProductInfo.Media[i].Width = MediaProductInformation[i]->GetWidth();
+			}
+
+			if (MediaProductInformation[i]->HasHeight())
+			{
+				ProductInfo.Media[i].Height = MediaProductInformation[i]->GetHeight();
+			}
 		}
 	}
 }
