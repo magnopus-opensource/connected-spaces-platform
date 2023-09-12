@@ -2,26 +2,6 @@ import { test, assert } from '../test_framework.js';
 
 import { Systems } from '../connected_spaces_platform.js';
 
-function logCallback(message) {
-
-}
-
-test('LogSystemTests', 'BasicLogTest', async function() {
-    const systemsManager = Systems.SystemsManager.get();
-    const logSystem = systemsManager.getLogSystem();
-
-    let messageLogged = false;
-
-    logSystem.setLogCallback(function (message) {
-        console.log(message);
-        messageLogged = true;
-    });
-
-    logSystem.logTestMessage();
-
-    assert.isTrue(messageLogged);
-});
-
 test('LogSystemTests', 'LogLevelTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
     const logSystem = systemsManager.getLogSystem();

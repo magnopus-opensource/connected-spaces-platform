@@ -89,9 +89,6 @@ public:
 	/// @param InEvent The event to be logged.
 	CSP_NO_EXPORT void LogEvent(const csp::common::String& InEvent);
 
-	/// @brief Logs a test message at the set system verbosity level.
-	void LogTestMessage();
-
 	/// @brief Specify a 'Marker' event which can be used to communicate a certain process occurring, usually for debugging.
 	CSP_NO_EXPORT void BeginMarker(const csp::common::String& InMarker);
 	/// @brief End a 'Marker' event.

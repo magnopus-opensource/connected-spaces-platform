@@ -150,9 +150,4 @@ void LogSystem::ClearAllCallbacks()
 	Callbacks->Clear();
 }
 
-void LogSystem::LogTestMessage()
-{
-	LogMsg(GetSystemLevel(), "Test log message.");
-}
-
 } // namespace csp::systems
