@@ -81,7 +81,7 @@ String GetAssetFileExtension(const String& MimeType)
 		return ".webp";
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Mimetype File Extension Not Supported");
+		CSP_LOG_MSG(LogLevel::Error, "Mimetype File Extension Not Supported");
 		return ".buffer";
 	}
 }
@@ -93,7 +93,7 @@ void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, St
 
 	if (!Json.IsObject())
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+		CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
 
 		OutMapMetadata["site"]				 = "Void";
 		OutMapMetadata["multiplayerVersion"] = "3"; // 2 represents double-msg-packed serialiser spaces, 3 represents the change to dictionary packing
@@ -117,10 +117,10 @@ void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, St
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-								  "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)",
-								  Member.name.GetString(),
-								  Member.value.GetType());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+						   "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)",
+						   Member.name.GetString(),
+						   Member.value.GetType());
 		}
 	}
 }
@@ -164,7 +164,7 @@ Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetC
 	// Convert old JSON metadata to key-value metadata
 	if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
 	{
-		FOUNDATION_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
+		CSP_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
 
 		const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
 		Map<String, String> NewMetadata;

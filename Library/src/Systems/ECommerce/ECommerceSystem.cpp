@@ -123,7 +123,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
 	if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
 	{
-		FOUNDATION_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
+		CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
 		Callback(CartInfoResult::Invalid());
 		return;
 	}

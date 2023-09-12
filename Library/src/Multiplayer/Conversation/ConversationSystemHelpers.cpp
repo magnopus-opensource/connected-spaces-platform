@@ -72,8 +72,8 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		MsgInfo.UserDisplayName = "";
 	}
 
@@ -83,8 +83,8 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		MsgInfo.Message = "";
 	}
 
@@ -94,8 +94,8 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ")
+		CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ")
 		MsgInfo.Edited = false;
 	}
 
@@ -129,8 +129,8 @@ ConversationInfo
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		ConvoInfo.UserDisplayName = "";
 	}
 
@@ -140,8 +140,8 @@ ConversationInfo
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		ConvoInfo.Message = "";
 	}
 
@@ -151,8 +151,8 @@ ConversationInfo
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ")
+		CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ")
 		ConvoInfo.Edited = false;
 	}
 
@@ -162,8 +162,8 @@ ConversationInfo
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No Resolved MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No Resolved MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		ConvoInfo.Resolved = false;
 	}
 
@@ -173,8 +173,8 @@ ConversationInfo
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("No CameraPosition MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-								"improvements: Default metadata has automatically been created for this space as a result. ");
+		CSP_LOG_WARN_MSG("No CameraPosition MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+						 "improvements: Default metadata has automatically been created for this space as a result. ");
 		ConvoInfo.CameraPosition = SpaceTransform();
 	}
 

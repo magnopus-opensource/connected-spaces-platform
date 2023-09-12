@@ -52,7 +52,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::AUDIO;
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
 		return csp::systems::EAssetType::IMAGE;
 	}
 }
@@ -65,7 +65,7 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 		return EAssetPlatform::DEFAULT;
 	}
 }
@@ -78,7 +78,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 			return "Default";
 	}
 
-	FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+	CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 	return "Default";
 }
 

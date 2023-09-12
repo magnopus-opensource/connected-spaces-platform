@@ -57,7 +57,7 @@ const csp::common::Vector3& CollisionSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector3();
 }
@@ -76,7 +76,7 @@ const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector4();
 }
@@ -95,7 +95,7 @@ const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector3();
 }
@@ -114,7 +114,7 @@ CollisionShape CollisionSpaceComponent::GetCollisionShape() const
 		return static_cast<CollisionShape>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return CollisionShape::Box;
 }
@@ -133,7 +133,7 @@ CollisionMode CollisionSpaceComponent::GetCollisionMode() const
 		return static_cast<CollisionMode>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return CollisionMode::Collision;
 }
@@ -152,7 +152,7 @@ const csp::common::String& CollisionSpaceComponent::GetCollisionAssetId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }
@@ -171,7 +171,7 @@ const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }
@@ -225,7 +225,7 @@ const csp::common::String& CollisionSpaceComponent::GetThirdPartyComponentRef() 
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }

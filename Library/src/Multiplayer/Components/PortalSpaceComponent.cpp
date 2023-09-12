@@ -42,7 +42,7 @@ const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() 
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -66,7 +66,7 @@ const csp::common::Vector3& csp::multiplayer::PortalSpaceComponent::GetPosition(
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -83,7 +83,7 @@ float csp::multiplayer::PortalSpaceComponent::GetRadius() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -100,7 +100,7 @@ bool csp::multiplayer::PortalSpaceComponent::GetIsEnabled() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 

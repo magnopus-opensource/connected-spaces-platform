@@ -53,7 +53,7 @@ bool GetUserRole(const Space& Space, const csp::common::String& UserId, UserRole
 		}
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("UserId is not a member of the Space");
+	CSP_LOG_ERROR_MSG("UserId is not a member of the Space");
 	return false;
 }
 } // namespace UserRolesHelpers

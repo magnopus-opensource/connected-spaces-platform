@@ -39,13 +39,13 @@ const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
 void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 {
-	// FOUNDATION_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
+	// CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
 
 	SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
 	Parent->GetScript()->OnSourceChanged(Value);
@@ -59,7 +59,7 @@ int64_t ScriptSpaceComponent::GetOwnerId() const
 		return RepVal.GetInt();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0;
 }
 
@@ -76,7 +76,7 @@ ScriptScope ScriptSpaceComponent::GetScriptScope() const
 		return static_cast<ScriptScope>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ScriptScope::Local;
 }
 
@@ -91,7 +91,7 @@ void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedVa
 
 	if (Key == static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource))
 	{
-		// FOUNDATION_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
+		// CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
 		Parent->GetScript()->Bind();
 		Parent->GetScript()->Invoke();

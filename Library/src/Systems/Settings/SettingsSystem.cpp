@@ -402,10 +402,10 @@ void SettingsSystem::UpdateAvatarPortrait(const csp::common::String& UserId,
 						{
 							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Log,
-													  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-													  (int) UploadResult.GetResultCode(),
-													  UploadResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Log,
+											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+											   (int) UploadResult.GetResultCode(),
+											   UploadResult.GetHttpResultCode());
 							}
 
 							const NullResult InternalResult(UploadResult);
@@ -525,10 +525,10 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const csp::common::String& U
 						{
 							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Log,
-													  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-													  (int) UploadResult.GetResultCode(),
-													  UploadResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Log,
+											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+											   (int) UploadResult.GetResultCode(),
+											   UploadResult.GetHttpResultCode());
 							}
 
 							const NullResult InternalResult(UploadResult);
@@ -591,10 +591,10 @@ void SettingsSystem::AddAvatarPortrait(const csp::common::String& UserId,
 					{
 						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 						{
-							FOUNDATION_LOG_FORMAT(LogLevel::Error,
-												  "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
-												  (int) UploadResult.GetResultCode(),
-												  UploadResult.GetHttpResultCode());
+							CSP_LOG_FORMAT(LogLevel::Error,
+										   "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
+										   (int) UploadResult.GetResultCode(),
+										   UploadResult.GetHttpResultCode());
 						}
 
 						const NullResult InternalResult(UploadResult);
@@ -605,10 +605,10 @@ void SettingsSystem::AddAvatarPortrait(const csp::common::String& UserId,
 				}
 				else
 				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Error,
-										  "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
-										  (int) CreateAssetResult.GetResultCode(),
-										  CreateAssetResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(LogLevel::Error,
+								   "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
+								   (int) CreateAssetResult.GetResultCode(),
+								   CreateAssetResult.GetHttpResultCode());
 
 					const NullResult InternalResult(CreateAssetResult);
 					Callback(InternalResult);
@@ -620,10 +620,10 @@ void SettingsSystem::AddAvatarPortrait(const csp::common::String& UserId,
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error,
-								  "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Error,
+						   "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 
 			const NullResult InternalResult(AssetCollResult);
 			Callback(InternalResult);
@@ -671,10 +671,10 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const csp::common::String& User
 					{
 						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 						{
-							FOUNDATION_LOG_FORMAT(LogLevel::Error,
-												  "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
-												  (int) UploadResult.GetResultCode(),
-												  UploadResult.GetHttpResultCode());
+							CSP_LOG_FORMAT(LogLevel::Error,
+										   "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
+										   (int) UploadResult.GetResultCode(),
+										   UploadResult.GetHttpResultCode());
 						}
 
 						const NullResult InternalResult(UploadResult);
@@ -690,10 +690,10 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const csp::common::String& User
 				}
 				else
 				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Error,
-										  "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
-										  (int) CreateAssetResult.GetResultCode(),
-										  CreateAssetResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(LogLevel::Error,
+								   "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
+								   (int) CreateAssetResult.GetResultCode(),
+								   CreateAssetResult.GetHttpResultCode());
 
 					const NullResult InternalResult(CreateAssetResult);
 					Callback(InternalResult);
@@ -705,10 +705,10 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const csp::common::String& User
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error,
-								  "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Error,
+						   "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 
 			const NullResult InternalResult(AssetCollResult);
 			Callback(InternalResult);
@@ -735,10 +735,10 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String&
 	{
 		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error,
-								  "The Avatar Portrait asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Error,
+						   "The Avatar Portrait asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 		}
 
 		Callback(AssetCollResult);
@@ -763,10 +763,10 @@ void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortrai
 	{
 		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error,
-								  "The Avatar Portrait asset retrieval has failed. ResCode: %d, HttpResCode: %d",
-								  (int) AssetsResult.GetResultCode(),
-								  AssetsResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Error,
+						   "The Avatar Portrait asset retrieval has failed. ResCode: %d, HttpResCode: %d",
+						   (int) AssetsResult.GetResultCode(),
+						   AssetsResult.GetHttpResultCode());
 		}
 
 		Callback(AssetsResult);
@@ -823,11 +823,10 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 								{
 									if (DeleteAssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
 									{
-										FOUNDATION_LOG_FORMAT(
-											LogLevel::Error,
-											"The Portrait Avatar asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
-											(int) DeleteAssetResult.GetResultCode(),
-											DeleteAssetResult.GetHttpResultCode());
+										CSP_LOG_FORMAT(LogLevel::Error,
+													   "The Portrait Avatar asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
+													   (int) DeleteAssetResult.GetResultCode(),
+													   DeleteAssetResult.GetHttpResultCode());
 									}
 
 									NullResult InternalResult(DeleteAssetCollResult);
@@ -838,10 +837,10 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 							}
 							else
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Error,
-													  "The Portrait Avatar asset deletion was not successful. ResCode: %d, HttpResCode: %d",
-													  (int) DeleteAssetResult.GetResultCode(),
-													  DeleteAssetResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Error,
+											   "The Portrait Avatar asset deletion was not successful. ResCode: %d, HttpResCode: %d",
+											   (int) DeleteAssetResult.GetResultCode(),
+											   DeleteAssetResult.GetHttpResultCode());
 
 								NullResult InternalResult(DeleteAssetResult);
 								Callback(DeleteAssetResult);

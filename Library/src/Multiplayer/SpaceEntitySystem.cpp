@@ -69,7 +69,7 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
 		{
 			if (IdValue.is_uinteger())
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
 				EntityId = IdValue.as_uinteger();
 				break;
 			}
@@ -244,7 +244,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 		}
 		catch (const std::exception& e)
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
 			Callback(nullptr);
 		}
 
@@ -284,7 +284,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", e.what());
 				Callback(nullptr);
 			}
 
@@ -325,7 +325,7 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 		}
 		catch (const std::exception& e)
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
 			Callback(nullptr);
 		}
 
@@ -357,7 +357,7 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
 				Callback(nullptr);
 			}
 
@@ -392,7 +392,7 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 		}
 		catch (const std::exception& e)
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
 			Callback(false);
 		}
 
@@ -507,7 +507,7 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
 	if (SpaceEntityCreatedCallback)
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
+		CSP_LOG_WARN_MSG("SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
 	}
 
 	SpaceEntityCreatedCallback = std::move(Callback);
@@ -517,7 +517,7 @@ void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Call
 {
 	if (InitialEntitiesRetrievedCallback)
 	{
-		FOUNDATION_LOG_WARN_MSG("InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
+		CSP_LOG_WARN_MSG("InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
 	}
 
 	InitialEntitiesRetrievedCallback = std::move(Callback);
@@ -527,7 +527,7 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 {
 	if (ScriptSystemReadyCallback)
 	{
-		FOUNDATION_LOG_WARN_MSG("ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
+		CSP_LOG_WARN_MSG("ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
 	}
 
 	ScriptSystemReadyCallback = std::move(Callback);
@@ -566,7 +566,7 @@ void SpaceEntitySystem::BindOnObjectMessage()
 					   }
 					   else
 					   {
-						   FOUNDATION_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+						   CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
 					   }
 				   });
 }
@@ -677,7 +677,7 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 			}
 			else
 			{
-				FOUNDATION_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+				CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
 			}
 		}
 
@@ -713,7 +713,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 		&& EntityToUpdate->TransientDeletionComponentIds.Size() == 0)
 	{
 		// TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges', etc.
-		// FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
+		// CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
 		return;
 	}
 
@@ -958,7 +958,7 @@ ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
 		}
 	}
 
-	FOUNDATION_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
+	CSP_LOG_ERROR_FORMAT("FindComponentById: Component with id: %s doesn't exist!", std::to_string(Id).c_str());
 
 	return nullptr;
 }
@@ -991,7 +991,7 @@ bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
 {
 	// Run script on a remote leader...
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
 
 	ClientProxy* LeaderProxy = ElectionManager->GetLeader();
 
@@ -1078,9 +1078,7 @@ void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::com
 		}
 		catch (const std::exception& e)
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-								  "Failed to send list of entity update due to a signalr exception! Exception: %s",
-								  e.what());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
 		}
 	};
 
@@ -1211,7 +1209,7 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("Attempted to add a pending entity that we already have!");
+		CSP_LOG_ERROR_MSG("Attempted to add a pending entity that we already have!");
 	}
 }
 
@@ -1341,7 +1339,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 			if (!EntityFound)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", EntityID);
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", EntityID);
 			}
 		}
 	}
@@ -1359,7 +1357,7 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 	}
 	catch (const std::exception& e)
 	{
-		FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
 	}
 }
 } // namespace csp::multiplayer
