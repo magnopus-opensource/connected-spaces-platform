@@ -198,7 +198,7 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
+		CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 		Callback(NullResult::Invalid());
 	}
 }
@@ -223,7 +223,7 @@ void AssetSystem::GetAssetCollectionsByIds(const csp::common::Array<csp::common:
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
 		// Call callback with an invalid result to let the user know an error occurred.
 		Callback(AssetCollectionsResult::Invalid());
@@ -522,7 +522,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 		Callback(AssetsResult::Invalid());
 		return;
 	}
@@ -588,7 +588,7 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
 		// Call callback with an invalid result to let the user know an error occurred.
 		Callback(AssetsResult::Invalid());
@@ -642,10 +642,10 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection,
 	{
 		if (!LocalCallback.GetXErrorCode().IsEmpty())
 		{
-			FOUNDATION_LOG_ERROR_MSG(csp::common::StringFormat("Asset with Id %s has failed to upload with Error Code: %s",
-															   Asset.Id.c_str(),
-															   LocalCallback.GetXErrorCode().c_str())
-										 .c_str());
+			CSP_LOG_ERROR_MSG(csp::common::StringFormat("Asset with Id %s has failed to upload with Error Code: %s",
+														Asset.Id.c_str(),
+														LocalCallback.GetXErrorCode().c_str())
+								  .c_str());
 		}
 
 		Callback(LocalCallback);
@@ -732,7 +732,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 
 			if (ValidateNewLODLevelForChain(Chain, LODLevel) == false)
 			{
-				FOUNDATION_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
+				CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
 				Callback(AssetsResult);
 				return;
 			}

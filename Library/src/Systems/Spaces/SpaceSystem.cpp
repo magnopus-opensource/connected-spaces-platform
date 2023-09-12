@@ -94,7 +94,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 		{
 			const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-			FOUNDATION_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
+			CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
 
 			const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
@@ -169,7 +169,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 void SpaceSystem::ExitSpace()
 {
-	FOUNDATION_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
+	CSP_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
 
 	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
 	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
@@ -195,7 +195,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 							  const Optional<FileAssetDataSource>& Thumbnail,
 							  SpaceResultCallback Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	SpaceResultCallback CreateSpaceCallback = [=](const SpaceResult& CreateSpaceResult)
 	{
@@ -303,7 +303,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 										const BufferAssetDataSource& Thumbnail,
 										SpaceResultCallback Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	SpaceResultCallback CreateSpaceCallback = [=](const SpaceResult& CreateSpaceResult)
 	{
@@ -396,7 +396,7 @@ void SpaceSystem::UpdateSpace(const String& SpaceId,
 							  const Optional<SpaceAttributes>& Attributes,
 							  BasicSpaceResultCallback Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	auto LiteGroupInfo = std::make_shared<chs::GroupLiteDto>();
 
@@ -426,7 +426,7 @@ void SpaceSystem::UpdateSpace(const String& SpaceId,
 
 void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCallback Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	const String InGroupId = SpaceId;
 
@@ -488,9 +488,7 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
 
 	if (InResultsMax.HasValue() && *InResultsMax > MAX_SPACES_RESULTS)
 	{
-		FOUNDATION_LOG_WARN_FORMAT("Provided value `%i` for ResultsMax exceeded max value and was reduced to `%i`.",
-								   *InResultsMax,
-								   MAX_SPACES_RESULTS);
+		CSP_LOG_WARN_FORMAT("Provided value `%i` for ResultsMax exceeded max value and was reduced to `%i`.", *InResultsMax, MAX_SPACES_RESULTS);
 	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -515,7 +513,7 @@ void SpaceSystem::GetSpacesByIds(const Array<String>& RequestedSpaceIDs, SpacesR
 {
 	if (RequestedSpaceIDs.IsEmpty())
 	{
-		FOUNDATION_LOG_ERROR_MSG("No space ids given");
+		CSP_LOG_ERROR_MSG("No space ids given");
 		Callback(SpacesResult::Invalid());
 
 		return;
@@ -549,7 +547,7 @@ void SpaceSystem::GetSpace(const String& SpaceId, SpaceResultCallback Callback)
 {
 	if (SpaceId.IsEmpty())
 	{
-		FOUNDATION_LOG_ERROR_MSG("No space id given");
+		CSP_LOG_ERROR_MSG("No space id given");
 		Callback(SpaceResult(csp::services::EResultCode::Failed, 400));
 
 		return;
@@ -591,7 +589,7 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const Array<InviteUse
 																								nullptr,
 																								csp::web::EResponseCodes::ResponseNoContent);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(SpaceId, std::nullopt, GroupInvites, ResponseHandler);
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(SpaceId, std::nullopt, std::nullopt, GroupInvites, ResponseHandler);
 }
 
 void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesResultCallback Callback)
@@ -832,10 +830,10 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
 						{
 							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Log,
-													  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-													  (int) UploadResult.GetResultCode(),
-													  UploadResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Log,
+											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+											   (int) UploadResult.GetResultCode(),
+											   UploadResult.GetHttpResultCode());
 							}
 
 							const NullResult InternalResult(UploadResult);
@@ -892,10 +890,10 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
 						{
 							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Log,
-													  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-													  (int) UploadResult.GetResultCode(),
-													  UploadResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Log,
+											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+											   (int) UploadResult.GetResultCode(),
+											   UploadResult.GetHttpResultCode());
 							}
 
 							const NullResult InternalResult(UploadResult);
@@ -1086,10 +1084,10 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 					{
 						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 						{
-							FOUNDATION_LOG_FORMAT(LogLevel::Log,
-												  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-												  (int) UploadResult.GetResultCode(),
-												  UploadResult.GetHttpResultCode());
+							CSP_LOG_FORMAT(LogLevel::Log,
+										   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+										   (int) UploadResult.GetResultCode(),
+										   UploadResult.GetHttpResultCode());
 						}
 
 						const NullResult InternalResult(UploadResult);
@@ -1100,10 +1098,10 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 				}
 				else
 				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Log,
-										  "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
-										  (int) CreateAssetResult.GetResultCode(),
-										  CreateAssetResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(LogLevel::Log,
+								   "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
+								   (int) CreateAssetResult.GetResultCode(),
+								   CreateAssetResult.GetHttpResultCode());
 
 					const NullResult InternalResult(CreateAssetResult);
 					Callback(InternalResult);
@@ -1115,10 +1113,10 @@ void SpaceSystem::AddSpaceThumbnail(const csp::common::String& SpaceId, const Fi
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Log,
-								  "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Log,
+						   "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 
 			const NullResult InternalResult(AssetCollResult);
 			Callback(InternalResult);
@@ -1168,10 +1166,10 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId
 					{
 						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
 						{
-							FOUNDATION_LOG_FORMAT(LogLevel::Log,
-												  "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-												  (int) UploadResult.GetResultCode(),
-												  UploadResult.GetHttpResultCode());
+							CSP_LOG_FORMAT(LogLevel::Log,
+										   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
+										   (int) UploadResult.GetResultCode(),
+										   UploadResult.GetHttpResultCode());
 						}
 
 						const NullResult InternalResult(UploadResult);
@@ -1187,10 +1185,10 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId
 				}
 				else
 				{
-					FOUNDATION_LOG_FORMAT(LogLevel::Log,
-										  "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
-										  (int) CreateAssetResult.GetResultCode(),
-										  CreateAssetResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(LogLevel::Log,
+								   "The Space thumbnail asset creation was not successful. ResCode: %d, HttpResCode: %d",
+								   (int) CreateAssetResult.GetResultCode(),
+								   CreateAssetResult.GetHttpResultCode());
 
 					const NullResult InternalResult(CreateAssetResult);
 					Callback(InternalResult);
@@ -1202,10 +1200,10 @@ void SpaceSystem::AddSpaceThumbnailWithBuffer(const csp::common::String& SpaceId
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Log,
-								  "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Log,
+						   "The Space thumbnail asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 
 			const NullResult InternalResult(AssetCollResult);
 			Callback(InternalResult);
@@ -1232,10 +1230,10 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
 	{
 		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Log,
-								  "The Space thumbnail asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
-								  (int) AssetCollResult.GetResultCode(),
-								  AssetCollResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Log,
+						   "The Space thumbnail asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
+						   (int) AssetCollResult.GetResultCode(),
+						   AssetCollResult.GetHttpResultCode());
 		}
 
 		Callback(AssetCollResult);
@@ -1267,10 +1265,10 @@ void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCo
 		}
 		else if (AssetsResult.GetResultCode() == csp::services::EResultCode::Failed)
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Log,
-								  "The Space thumbnail asset retrieval has failed. ResCode: %d, HttpResCode: %d",
-								  (int) AssetsResult.GetResultCode(),
-								  AssetsResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Log,
+						   "The Space thumbnail asset retrieval has failed. ResCode: %d, HttpResCode: %d",
+						   (int) AssetsResult.GetResultCode(),
+						   AssetsResult.GetHttpResultCode());
 		}
 
 		Callback(AssetsResult);
@@ -1327,11 +1325,10 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 								{
 									if (DeleteAssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
 									{
-										FOUNDATION_LOG_FORMAT(
-											LogLevel::Log,
-											"The Space thumbnail asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
-											(int) DeleteAssetResult.GetResultCode(),
-											DeleteAssetResult.GetHttpResultCode());
+										CSP_LOG_FORMAT(LogLevel::Log,
+													   "The Space thumbnail asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
+													   (int) DeleteAssetResult.GetResultCode(),
+													   DeleteAssetResult.GetHttpResultCode());
 									}
 
 									NullResult InternalResult(DeleteAssetCollResult);
@@ -1342,10 +1339,10 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 							}
 							else
 							{
-								FOUNDATION_LOG_FORMAT(LogLevel::Log,
-													  "The Space thumbnail asset deletion was not successful. ResCode: %d, HttpResCode: %d",
-													  (int) DeleteAssetResult.GetResultCode(),
-													  DeleteAssetResult.GetHttpResultCode());
+								CSP_LOG_FORMAT(LogLevel::Log,
+											   "The Space thumbnail asset deletion was not successful. ResCode: %d, HttpResCode: %d",
+											   (int) DeleteAssetResult.GetResultCode(),
+											   DeleteAssetResult.GetHttpResultCode());
 
 								NullResult InternalResult(DeleteAssetResult);
 								Callback(DeleteAssetResult);

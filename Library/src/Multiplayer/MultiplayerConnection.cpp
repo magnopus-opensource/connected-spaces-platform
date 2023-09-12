@@ -120,7 +120,7 @@ void ParseEventParams(const std::vector<signalr::value>& EventValues,
 				}
 				else
 				{
-					FOUNDATION_LOG_ERROR_MSG("Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
+					CSP_LOG_ERROR_MSG("Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
 				}
 			}
 			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_UINT16)
@@ -129,7 +129,7 @@ void ParseEventParams(const std::vector<signalr::value>& EventValues,
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("Unsupported event argument type.");
+				CSP_LOG_ERROR_MSG("Unsupported event argument type.");
 			}
 		}
 	}
@@ -321,7 +321,7 @@ void MultiplayerConnection::InitialiseConnection(CallbackHandler Callback)
 					}
 				}
 
-				FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
+				CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
 			});
 
 		Callback(true);
@@ -352,7 +352,7 @@ void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reas
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "%s, Exception: %s", "Could not Disconnect", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s, Exception: %s", "Could not Disconnect", e.what());
 			}
 		}
 		else
@@ -483,7 +483,7 @@ void MultiplayerConnection::StartEventMessageListening()
 				}
 				else
 				{
-					FOUNDATION_LOG_ERROR_MSG("AssetDetailBlob - AssetChangeType out of range of acceptable enum values.");
+					CSP_LOG_ERROR_MSG("AssetDetailBlob - AssetChangeType out of range of acceptable enum values.");
 				}
 
 				AssetDetailBlobParams Params {AssetChangeType,
@@ -587,7 +587,7 @@ void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, CallbackHand
 	}
 
 	signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
 	Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
 }
 
@@ -616,13 +616,13 @@ void MultiplayerConnection::RequestClientId(CallbackHandler Callback)
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
 			this->ClientId = Result.as_uinteger();
 			Callback(true);
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
 	Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -681,7 +681,7 @@ void MultiplayerConnection::StartListening(CallbackHandler Callback)
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
 	Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -706,7 +706,7 @@ void MultiplayerConnection::StopListening(CallbackHandler Callback)
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
 	Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -734,7 +734,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 {
 	if (!Callback)
 	{
-		FOUNDATION_LOG_ERROR_MSG("No callback was passed when SetAllowSelfMessagingFlag was invoked. This will result in this function earlying out");
+		CSP_LOG_ERROR_MSG("No callback was passed when SetAllowSelfMessagingFlag was invoked. This will result in this function earlying out");
 		return;
 	}
 
@@ -752,7 +752,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Caught exception: '%s'", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Caught exception: '%s'", e.what());
 			}
 
 			// @todo Handle error
@@ -765,7 +765,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 	const std::vector InvokeArguments = {signalr::value(InAllowSelfMessaging)};
 	Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);
 }

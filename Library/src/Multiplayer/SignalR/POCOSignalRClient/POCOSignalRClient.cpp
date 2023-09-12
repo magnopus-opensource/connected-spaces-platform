@@ -52,7 +52,7 @@ CSPWebSocketClientPOCO::~CSPWebSocketClientPOCO()
 
 void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	std::string endpoint = csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str();
 	auto index			 = endpoint.find(':');
@@ -101,7 +101,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 	catch (std::exception& e)
 	{
 		CSP_UNUSED(e);
-		FOUNDATION_LOG_ERROR_FORMAT("Exception %s", e.what());
+		CSP_LOG_ERROR_FORMAT("Exception %s", e.what());
 
 		Callback(false);
 	}
@@ -111,7 +111,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 
 void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	// Stop can be called from multiple threads
 	Mutex.lock();
@@ -143,7 +143,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 		}
 		catch (const std::exception&)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
+			CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
 		}
 
 		CSP_DELETE(PocoWebSocket);
@@ -162,7 +162,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 
 void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	assert(PocoWebSocket && "Web socket not created! Please call Start() before calling Send().");
 
@@ -187,7 +187,7 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 	}
 	catch (const std::exception&)
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("%s", "Error: Failed to send data to socket.");
+		CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to send data to socket.");
 	}
 
 	Callback(Succeeded);
@@ -195,7 +195,7 @@ void CSPWebSocketClientPOCO::Send(const std::string& Message, CallbackHandler Ca
 
 void CSPWebSocketClientPOCO::Receive(ReceiveHandler Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	if (!StopFlag)
 	{
@@ -222,7 +222,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
 	for (;;)
 	{
-		FOUNDATION_PROFILE_SCOPED();
+		CSP_PROFILE_SCOPED();
 
 		if (StopFlag)
 		{
@@ -252,7 +252,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 				auto* NewBuffer	  = CSP_REALLOC(Buffer, CurrentBufferSize * 2);
 				Buffer			  = static_cast<char*>(NewBuffer);
 				CurrentBufferSize = CurrentBufferSize * 2;
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);
 			}
 
 			try
@@ -418,7 +418,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 
 void CSPWebSocketClientPOCO::HandleReceiveError(const std::string& Message)
 {
-	FOUNDATION_LOG_ERROR_MSG(Message.c_str());
+	CSP_LOG_ERROR_MSG(Message.c_str());
 
 	if (ReceiveCallback)
 	{

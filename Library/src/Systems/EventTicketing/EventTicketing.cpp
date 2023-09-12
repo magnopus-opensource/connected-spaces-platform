@@ -28,8 +28,8 @@ csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& V
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
-						   "Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
+		CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+					"Encountered an unknown ticketing vendor string when parsing a response from services. Defaulting to 'Unknown'");
 	}
 
 	return Vendor;
@@ -49,8 +49,8 @@ csp::systems::TicketStatus TicketStatusToEnum(const chs::TicketStatus& DtoStatus
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error,
-						   "Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
+		CSP_LOG_MSG(csp::systems::LogLevel::Error,
+					"Encountered an unknown ticket status when parsing a response from services. Defaulting to 'Unknown'");
 	}
 
 	return Status;
@@ -67,7 +67,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorName");
+		CSP_LOG_WARN_MSG("SpaceEventDto missing VendorName");
 		Event.Vendor = csp::systems::EventTicketingVendor::Unknown;
 	}
 
@@ -77,7 +77,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorEventId");
+		CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventId");
 		Event.VendorEventId = "";
 	}
 
@@ -87,7 +87,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing VendorEventUri");
+		CSP_LOG_WARN_MSG("SpaceEventDto missing VendorEventUri");
 		Event.VendorEventUri = "";
 	}
 
@@ -97,7 +97,7 @@ void SpaceEventDtoToTicketedEvent(const chs::SpaceEventDto& Dto, csp::systems::T
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceEventDto missing IsTicketingActive");
+		CSP_LOG_WARN_MSG("SpaceEventDto missing IsTicketingActive");
 		Event.IsTicketingActive = false;
 	}
 }
@@ -113,7 +113,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorName");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorName");
 		Ticket.Vendor = csp::systems::EventTicketingVendor::Unknown;
 	}
 
@@ -123,7 +123,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorEventId");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorEventId");
 		Ticket.VendorEventId = "";
 	}
 
@@ -133,7 +133,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing VendorTicketId");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing VendorTicketId");
 		Ticket.VendorTicketId = "";
 	}
 
@@ -143,7 +143,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
 		Ticket.UserId = "";
 	}
 
@@ -153,7 +153,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing UserId");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing UserId");
 		Ticket.UserId = "";
 	}
 
@@ -163,7 +163,7 @@ void SpaceTicketDtoToEventTicket(const chs::SpaceTicketDto& Dto, csp::systems::E
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("SpaceTicketDto missing EmailLower");
+		CSP_LOG_WARN_MSG("SpaceTicketDto missing EmailLower");
 		Ticket.Email = "";
 	}
 }
@@ -328,10 +328,10 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
 			if (FirstJSONMember->value.IsBool())
 			{
 				SpaceIsTicketed = FirstJSONMember->value.GetBool();
-				FOUNDATION_LOG_FORMAT(LogLevel::VeryVerbose,
-									  "We found that the space with ID %s has ticketed status: %s",
-									  FirstJSONMember->name.GetString(),
-									  SpaceIsTicketed ? "true" : "false");
+				CSP_LOG_FORMAT(LogLevel::VeryVerbose,
+							   "We found that the space with ID %s has ticketed status: %s",
+							   FirstJSONMember->name.GetString(),
+							   SpaceIsTicketed ? "true" : "false");
 			}
 			else
 			{
@@ -345,8 +345,8 @@ void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 		if (ExpectedResponse == false)
 		{
-			FOUNDATION_LOG_MSG(LogLevel::Error,
-							   "CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
+			CSP_LOG_MSG(LogLevel::Error,
+						"CSP received a response from services in an unexpected format when querying if a space requires a ticket to enter");
 		}
 	}
 }

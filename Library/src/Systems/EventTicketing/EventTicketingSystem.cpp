@@ -29,7 +29,7 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
 		case csp::systems::EventTicketingVendor::Eventbrite:
 			return "eventbrite";
 		default:
-			FOUNDATION_LOG_WARN_MSG("Unknown ticketed event vendor");
+			CSP_LOG_WARN_MSG("Unknown ticketed event vendor");
 			return "Unknown";
 	}
 }

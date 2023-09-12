@@ -24,19 +24,19 @@
 CSP_NO_EXPORT
 
 #if defined(__clang__) || defined(__GNUC__)
-	#define FOUNDATION_FUNC_DEF __PRETTY_FUNCTION__
+	#define CSP_FUNC_DEF __PRETTY_FUNCTION__
 #elif defined(_MSC_VER)
-	#define FOUNDATION_FUNC_DEF __FUNCSIG__
+	#define CSP_FUNC_DEF __FUNCSIG__
 #else
 	#error Compiler not supported
 #endif
 
-#if !defined(FOUNDATION_PROFILING_ENABLED)
+#if !defined(CSP_PROFILING_ENABLED)
 	#if defined(NDEBUG)
 		// Disable profiling in release by default (change this to override)
-		#define FOUNDATION_PROFILING_ENABLED 0
+		#define CSP_PROFILING_ENABLED 0
 	#else
-		#define FOUNDATION_PROFILING_ENABLED 1
+		#define CSP_PROFILING_ENABLED 1
 	#endif
 #endif
 
@@ -73,31 +73,31 @@ template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, cons
 	}
 }
 
-#define FOUNDATION_LOG_MSG(LEVEL, MSG)                                          \
+#define CSP_LOG_MSG(LEVEL, MSG)                                                 \
 	if (csp::CSPFoundation::GetIsInitialised())                                 \
 	{                                                                           \
 		csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(LEVEL, MSG); \
 	}
 
-#define FOUNDATION_LOG_FORMAT(LEVEL, FORMAT_STR, ...) csp::profile::LogMsg(LEVEL, FORMAT_STR, __VA_ARGS__)
+#define CSP_LOG_FORMAT(LEVEL, FORMAT_STR, ...) csp::profile::LogMsg(LEVEL, FORMAT_STR, __VA_ARGS__)
 
-#define FOUNDATION_LOG_ERROR_MSG(MSG)                                                                   \
+#define CSP_LOG_ERROR_MSG(MSG)                                                                          \
 	if (csp::CSPFoundation::GetIsInitialised())                                                         \
 	{                                                                                                   \
 		csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Error, MSG); \
 	}
 
-#define FOUNDATION_LOG_ERROR_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Error, FORMAT_STR, __VA_ARGS__)
+#define CSP_LOG_ERROR_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Error, FORMAT_STR, __VA_ARGS__)
 
-#define FOUNDATION_LOG_WARN_MSG(MSG)                                                                      \
+#define CSP_LOG_WARN_MSG(MSG)                                                                             \
 	if (csp::CSPFoundation::GetIsInitialised())                                                           \
 	{                                                                                                     \
 		csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Warning, MSG); \
 	}
 
-#define FOUNDATION_LOG_WARN_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Warning, FORMAT_STR, __VA_ARGS__)
+#define CSP_LOG_WARN_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Warning, FORMAT_STR, __VA_ARGS__)
 
-#if FOUNDATION_PROFILING_ENABLED
+#if CSP_PROFILING_ENABLED
 
 class ScopedProfiler
 {
@@ -189,11 +189,10 @@ template <typename... Args> void LogEvent(const csp::common::String& FormatStr, 
 	// Example:
 	//		void Function()
 	//		{
-	//			FOUNDATION_PROFILE_SCOPED();
+	//			CSP_PROFILE_SCOPED();
 	//			... code ...
 	//		}
-	#define FOUNDATION_PROFILE_SCOPED() \
-		csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(csp::profile::TrimFunctionTag(FOUNDATION_FUNC_DEF))
+	#define CSP_PROFILE_SCOPED() csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(csp::profile::TrimFunctionTag(CSP_FUNC_DEF))
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Manual Begin/End profiling markers
@@ -203,50 +202,50 @@ template <typename... Args> void LogEvent(const csp::common::String& FormatStr, 
 	//		{
 	//			... code ...
 	//			... code ...
-	//			FOUNDATION_PROFILE_BEGIN("Subsection Tag");
+	//			CSP_PROFILE_BEGIN("Subsection Tag");
 	//			... subsection of code to profile...
-	//			FOUNDATION_PROFILE_END();
+	//			CSP_PROFILE_END();
 	//			... code ...
 	//		}
-	#define FOUNDATION_PROFILE_BEGIN(TAG)                                         \
+	#define CSP_PROFILE_BEGIN(TAG)                                                \
 		if (csp::CSPFoundation::GetIsInitialised())                               \
 		{                                                                         \
 			csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(TAG); \
 		}
 
-	#define FOUNDATION_PROFILE_END()                                         \
+	#define CSP_PROFILE_END()                                                \
 		if (csp::CSPFoundation::GetIsInitialised())                          \
 		{                                                                    \
 			csp::systems::SystemsManager::Get().GetLogSystem()->EndMarker(); \
 		}
 
-	#define FOUNDATION_PROFILE_BEGIN_FORMAT(FORMAT_STR, ...)  csp::profile::BeginMarker(FORMAT_STR, __VA_ARGS__);
-	#define FOUNDATION_PROFILE_SCOPED_FORMAT(FORMAT_STR, ...) csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(FORMAT_STR, __VA_ARGS__)
-	#define FOUNDATION_PROFILE_SCOPED_TAG(TAG)				  csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(TAG)
+	#define CSP_PROFILE_BEGIN_FORMAT(FORMAT_STR, ...)  csp::profile::BeginMarker(FORMAT_STR, __VA_ARGS__);
+	#define CSP_PROFILE_SCOPED_FORMAT(FORMAT_STR, ...) csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(FORMAT_STR, __VA_ARGS__)
+	#define CSP_PROFILE_SCOPED_TAG(TAG)				   csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(TAG)
 
-	#define FOUNDATION_PROFILE_EVENT_TAG(TAG)                                  \
+	#define CSP_PROFILE_EVENT_TAG(TAG)                                         \
 		if (csp::CSPFoundation::GetIsInitialised())                            \
 		{                                                                      \
 			csp::systems::SystemsManager::Get().GetLogSystem()->LogEvent(TAG); \
 		}
 
-	#define FOUNDATION_PROFILE_EVENT_FORMAT(FORMAT_STR, ...) csp::profile::LogEvent(FORMAT_STR, __VA_ARGS__);
+	#define CSP_PROFILE_EVENT_FORMAT(FORMAT_STR, ...) csp::profile::LogEvent(FORMAT_STR, __VA_ARGS__);
 
 #else
 
 // Compile everything out for zero overhead when disabled
 
-	#define FOUNDATION_PROFILE_SCOPED()
+	#define CSP_PROFILE_SCOPED()
 
-	#define FOUNDATION_PROFILE_BEGIN(TAG)
-	#define FOUNDATION_PROFILE_END()
+	#define CSP_PROFILE_BEGIN(TAG)
+	#define CSP_PROFILE_END()
 
-	#define FOUNDATION_PROFILE_BEGIN_FORMAT(FORMAT_STR, ...)
-	#define FOUNDATION_PROFILE_SCOPED_FORMAT(FORMAT_STR, ...)
-	#define FOUNDATION_PROFILE_SCOPED_TAG(TAG)
+	#define CSP_PROFILE_BEGIN_FORMAT(FORMAT_STR, ...)
+	#define CSP_PROFILE_SCOPED_FORMAT(FORMAT_STR, ...)
+	#define CSP_PROFILE_SCOPED_TAG(TAG)
 
-	#define FOUNDATION_PROFILE_EVENT_TAG(TAG)
-	#define FOUNDATION_PROFILE_EVENT_FORMAT(FORMAT_STR, ...)
+	#define CSP_PROFILE_EVENT_TAG(TAG)
+	#define CSP_PROFILE_EVENT_FORMAT(FORMAT_STR, ...)
 
 #endif
 
