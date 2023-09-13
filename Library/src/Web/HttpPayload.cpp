@@ -36,9 +36,8 @@ HttpPayload::HttpPayload()
 
 	if (ResponseContent.find("Unset") != std::string::npos)
 	{
-		FOUNDATION_LOG_MSG(
-			csp::systems::LogLevel::Warning,
-			"ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
+		CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+					"ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
 	}
 
 	// Using custom header as User-Agent is protected on web SKUs

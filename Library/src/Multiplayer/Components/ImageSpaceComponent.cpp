@@ -49,7 +49,7 @@ const csp::common::String& ImageSpaceComponent::GetImageAssetId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -66,7 +66,7 @@ const csp::common::String& ImageSpaceComponent::GetAssetCollectionId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -83,7 +83,7 @@ const csp::common::String& ImageSpaceComponent::GetName() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -100,7 +100,7 @@ const csp::common::Vector3& ImageSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -117,7 +117,7 @@ const csp::common::Vector4& ImageSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -134,7 +134,7 @@ const csp::common::Vector3& ImageSpaceComponent::GetScale() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -151,7 +151,7 @@ bool ImageSpaceComponent::GetIsEmissive() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -170,7 +170,7 @@ bool ImageSpaceComponent::GetIsVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -187,7 +187,7 @@ bool ImageSpaceComponent::GetIsARVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -204,7 +204,7 @@ BillboardMode ImageSpaceComponent::GetBillboardMode() const
 		return static_cast<BillboardMode>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return BillboardMode::Off;
 }
 
@@ -221,7 +221,7 @@ DisplayMode ImageSpaceComponent::GetDisplayMode() const
 		return static_cast<DisplayMode>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return DisplayMode::SingleSided;
 }
 

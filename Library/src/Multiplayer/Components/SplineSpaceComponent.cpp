@@ -51,7 +51,7 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("Waypoints not Set.");
+		CSP_LOG_ERROR_MSG("Waypoints not Set.");
 
 		return {};
 	}
@@ -73,7 +73,7 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
 		return returnList;
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return returnList;
 }
 

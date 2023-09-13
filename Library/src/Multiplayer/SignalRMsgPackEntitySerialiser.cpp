@@ -681,7 +681,7 @@ void SignalRMsgPackEntityDeserialiser::EnterComponent(CSP_OUT uint16_t& OutId, C
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("Unsupported data type of serialised data");
+		CSP_LOG_ERROR_MSG("Unsupported data type of serialised data");
 	}
 }
 

@@ -54,7 +54,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAsset
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }
@@ -74,7 +74,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetExternalResourceAsset
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }
@@ -96,7 +96,7 @@ const csp::common::Vector3& AnimatedModelSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector3();
 }
@@ -116,7 +116,7 @@ const csp::common::Vector4& AnimatedModelSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector4();
 }
@@ -136,7 +136,7 @@ const csp::common::Vector3& AnimatedModelSpaceComponent::GetScale() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultVector3();
 }
@@ -174,7 +174,7 @@ bool AnimatedModelSpaceComponent::GetIsLoopPlayback() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return false;
 }
@@ -194,7 +194,7 @@ bool AnimatedModelSpaceComponent::GetIsPlaying() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return false;
 }
@@ -214,7 +214,7 @@ int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 		return RepVal.GetInt();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return 0;
 }
@@ -236,7 +236,7 @@ bool AnimatedModelSpaceComponent::GetIsVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return false;
 }
@@ -256,7 +256,7 @@ bool AnimatedModelSpaceComponent::GetIsARVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return false;
 }
@@ -278,7 +278,7 @@ const csp::common::String& AnimatedModelSpaceComponent::GetThirdPartyComponentRe
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return ReplicatedValue::GetDefaultString();
 }
@@ -300,7 +300,7 @@ bool AnimatedModelSpaceComponent::GetIsShadowCaster() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 
 	return false;
 }

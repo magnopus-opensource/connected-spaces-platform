@@ -51,7 +51,7 @@ FogMode FogSpaceComponent::GetFogMode() const
 		return static_cast<FogMode>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return FogMode::Linear;
 }
 
@@ -68,7 +68,7 @@ const csp::common::Vector3& FogSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -85,7 +85,7 @@ const csp::common::Vector4& FogSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -102,7 +102,7 @@ const csp::common::Vector3& FogSpaceComponent::GetScale() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -119,7 +119,7 @@ float FogSpaceComponent::GetStartDistance() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -136,7 +136,7 @@ float FogSpaceComponent::GetEndDistance() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -153,7 +153,7 @@ const csp::common::Vector3& FogSpaceComponent::GetColor() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -170,7 +170,7 @@ float FogSpaceComponent::GetDensity() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -187,7 +187,7 @@ float FogSpaceComponent::GetHeightFalloff() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -204,7 +204,7 @@ float FogSpaceComponent::GetMaxOpacity() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -221,7 +221,7 @@ bool FogSpaceComponent::GetIsVolumetric() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -240,7 +240,7 @@ bool FogSpaceComponent::GetIsVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -257,7 +257,7 @@ bool FogSpaceComponent::GetIsARVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -274,7 +274,7 @@ const csp::common::String& FogSpaceComponent::GetThirdPartyComponentRef() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 

@@ -17,7 +17,7 @@ import {
 } from "./node_modules/@magnopus-opensource/connected-spaces-platform.web/connectedspacesplatform.js";
 
 // Magnopus Services Endpoint to connect to.
-const ENDPOINT = "https://ogs-odev.magnoboard.com";
+const ENDPOINT = "https://ogs-ostage.magnoboard.com";
 
 // Tenant defines the application scope.
 const TENANT = "FOUNDATION_HELLO_WORLD";

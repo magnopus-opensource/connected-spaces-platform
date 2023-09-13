@@ -56,11 +56,11 @@ void ScriptContext::Initialise()
 
 		if (Source.IsEmpty())
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Module %s not found\n", Url.c_str());
+			CSP_LOG_ERROR_FORMAT("Module %s not found\n", Url.c_str());
 			return qjs::Context::ModuleData {std::nullopt, std::nullopt, std::nullopt};
 		}
 
-		FOUNDATION_LOG_FORMAT(LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
+		CSP_LOG_FORMAT(LogLevel::Log, "Loaded Module: %s\n", Url.c_str());
 
 		return qjs::Context::ModuleData {Url.c_str(), Source.c_str(), std::nullopt};
 	};
@@ -95,7 +95,7 @@ ScriptModule* ScriptContext::GetModule(const csp::common::String& ModuleName)
 
 void ScriptContext::AddModule(const csp::common::String& ModuleName)
 {
-	FOUNDATION_LOG_FORMAT(LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
+	CSP_LOG_FORMAT(LogLevel::Log, "AddModule: %s\n", ModuleName.c_str());
 
 	ModuleMap::iterator It = Modules.find(ModuleName.c_str());
 
@@ -108,7 +108,7 @@ void ScriptContext::AddModule(const csp::common::String& ModuleName)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Module %s already exists\n", ModuleName.c_str());
+		CSP_LOG_ERROR_FORMAT("Module %s already exists\n", ModuleName.c_str());
 	}
 }
 

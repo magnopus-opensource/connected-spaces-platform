@@ -114,7 +114,7 @@ void POCOWebClient::Send(HttpRequest& Request)
 
 void POCOWebClient::Get(HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
+	CSP_PROFILE_SCOPED_FORMAT("GET %s", Request.GetUri().GetAsStdString().c_str());
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
@@ -176,7 +176,7 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
 
 void POCOWebClient::Post(HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED_FORMAT("POST %s", Request.GetUri().GetAsStdString().c_str());
+	CSP_PROFILE_SCOPED_FORMAT("POST %s", Request.GetUri().GetAsStdString().c_str());
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
@@ -243,7 +243,7 @@ void POCOWebClient::Post(HttpRequest& Request)
 
 void POCOWebClient::Put(HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED_FORMAT("PUT %s", Request.GetUri().GetAsStdString().c_str());
+	CSP_PROFILE_SCOPED_FORMAT("PUT %s", Request.GetUri().GetAsStdString().c_str());
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
@@ -287,7 +287,7 @@ void POCOWebClient::Put(HttpRequest& Request)
 
 void POCOWebClient::Delete(HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED_FORMAT("DELETE %s", Request.GetUri().GetAsStdString().c_str());
+	CSP_PROFILE_SCOPED_FORMAT("DELETE %s", Request.GetUri().GetAsStdString().c_str());
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
@@ -325,7 +325,7 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
 void POCOWebClient::Head(HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED_FORMAT("HEAD %s", Request.GetUri().GetAsStdString().c_str());
+	CSP_PROFILE_SCOPED_FORMAT("HEAD %s", Request.GetUri().GetAsStdString().c_str());
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
@@ -362,7 +362,7 @@ void POCOWebClient::ProcessResponseAsync(Poco::Net::HTTPClientSession& ClientSes
 										 std::istream& ResponseStream,
 										 HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	std::streamsize ContentLength = PocoResponse.getContentLength();
 
@@ -429,7 +429,7 @@ void POCOWebClient::ProcessRequestAsync(Poco::Net::HTTPClientSession& ClientSess
 										std::ostream& RequestStream,
 										HttpRequest& Request)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	size_t ContentLength = Request.GetPayload().GetContent().Length();
 

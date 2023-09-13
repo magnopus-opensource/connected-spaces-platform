@@ -20,7 +20,7 @@
 
 namespace csp::systems
 {
-#define FOUNDATION_ANALYTICS_LOG_EVENT(Event)                                 \
+#define CSP_ANALYTICS_LOG_EVENT(Event)                                        \
 	if (csp::CSPFoundation::GetIsInitialised())                               \
 	{                                                                         \
 		csp::systems::SystemsManager::Get().GetAnalyticsSystem()->Log(Event); \

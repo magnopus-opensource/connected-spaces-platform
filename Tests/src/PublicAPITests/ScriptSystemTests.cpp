@@ -107,7 +107,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
 	auto Fn = [&TestMessage](const char* Str)
 	{
 		TestMessage = Str;
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, Str);
+		CSP_LOG_MSG(csp::systems::LogLevel::Log, Str);
 		std::cout << Str << "\n";
 	};
 

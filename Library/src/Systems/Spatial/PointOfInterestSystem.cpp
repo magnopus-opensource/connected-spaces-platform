@@ -286,9 +286,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 	{
 		if (!Location->IsValid())
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
-										Location->Latitude,
-										Location->Longitude);
+			CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -303,7 +301,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 	{
 		if (*Orientation < 0.0f || *Orientation > 360.0f)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+			CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -315,14 +313,14 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 		const auto Size = GeoFence->Size();
 		if (Size < 4)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+			CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
 
 		if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
 		{
-			FOUNDATION_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
+			CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -335,9 +333,9 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
 			if (!GeoFenceLocation.IsValid())
 			{
-				FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
-											GeoFenceLocation.Latitude,
-											GeoFenceLocation.Longitude);
+				CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
+									 GeoFenceLocation.Latitude,
+									 GeoFenceLocation.Longitude);
 				Callback(SpaceGeoLocationResult::Invalid());
 				return;
 			}
@@ -391,9 +389,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 	{
 		if (!Location->IsValid())
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
-										Location->Latitude,
-										Location->Longitude);
+			CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -408,7 +404,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 	{
 		if (*Orientation < 0.0f || *Orientation > 360.0f)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
+			CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -420,14 +416,14 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 		const auto Size = GeoFence->Size();
 		if (Size < 4)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
+			CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
 
 		if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
 		{
-			FOUNDATION_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
+			CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 			Callback(SpaceGeoLocationResult::Invalid());
 			return;
 		}
@@ -440,9 +436,9 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
 			if (!GeoFenceLocation.IsValid())
 			{
-				FOUNDATION_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
-											GeoFenceLocation.Latitude,
-											GeoFenceLocation.Longitude);
+				CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f",
+									 GeoFenceLocation.Latitude,
+									 GeoFenceLocation.Longitude);
 				Callback(SpaceGeoLocationResult::Invalid());
 				return;
 			}
