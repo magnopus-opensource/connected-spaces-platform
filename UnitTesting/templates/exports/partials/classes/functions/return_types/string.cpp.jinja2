@@ -1,0 +1,11 @@
+// Return string by value
+csp::common::String StringReturnTestClass::ClassFunctions_String_ReturnValue(){
+    return "{{ config.string_value }}";
+}
+
+// Return string by const reference
+const csp::common::String& StringReturnTestClass::ClassFunctions_String_ReturnConstReference() {
+    String_Field = "{{ config.string_value }}";
+
+    return String_Field;
+}

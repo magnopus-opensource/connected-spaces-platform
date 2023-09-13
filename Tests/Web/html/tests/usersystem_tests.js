@@ -4,7 +4,7 @@ import { jsArrayToCommonArray } from '../conversion_helpers.js';
 import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn, logOut } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { Services, Systems } from '../olympus_foundation.js';
+import { Services, Systems } from '../connected_spaces_platform.js';
 
 
 const ThirdPartyAuthenticationDefines = 
@@ -140,8 +140,8 @@ test('UserSystemTests', 'LoginWithTokenTest', async function() {
     currentLoginState.delete();
 
     // Create space to verify that we successfully logged in
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
 });
@@ -226,7 +226,7 @@ test('UserSystemTests', 'UpdateDisplayNameTest', async function() {
 
     // Log in
     const userId = await logIn(userSystem);
-    const newDisplayName = generateUniqueString('OLY-TESTS-WASM-NAME').substring(0, 24);
+    const newDisplayName = generateUniqueString('CSP-TESTS-WASM-NAME').substring(0, 24);
 
     // Update display name
     {

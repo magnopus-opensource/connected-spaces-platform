@@ -96,7 +96,7 @@ WebClient::~WebClient()
 
 	if (WaitCounter == kMaxWaitCounter)
 	{
-		FOUNDATION_LOG_WARN_MSG("Web client timed out waiting for outstanding request on exit\n");
+		CSP_LOG_WARN_MSG("Web client timed out waiting for outstanding request on exit\n");
 	}
 
 	PollRequests.Close();
@@ -264,7 +264,7 @@ void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
 
 		if (!Request->Cancelled() && Callback)
 		{
-			const HttpResponse& Response = Request->GetResponse();
+			auto& Response = Request->GetMutableResponse();
 			Callback->OnHttpResponse(Response);
 		}
 
@@ -280,7 +280,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 {
 	if (Request)
 	{
-		auto Payload = Request->GetPayload();
+		auto& Payload = Request->GetMutablePayload();
 		Payload.SetBearerToken();
 
 		const std::chrono::milliseconds SendDelay = Request->GetSendDelay();
@@ -309,7 +309,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 		}
 		catch (const WebClientException& Ex)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error, Ex.what());
+			CSP_LOG_MSG(csp::systems::LogLevel::Error, Ex.what());
 
 			Request->SetRequestProgress(100.0f);
 			Request->SetResponseCode(EResponseCodes::ResponseServiceUnavailable);
@@ -318,7 +318,7 @@ void WebClient::ProcessRequest(HttpRequest* Request)
 			Request->SetResponseProgress(100.0f);
 		}
 
-		const HttpResponse& Response = Request->GetResponse();
+		auto& Response = Request->GetMutableResponse();
 
 		// Attempt Auto-retry if needed
 		bool RetryIssued = Request->CheckForAutoRetry();
@@ -413,10 +413,10 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 
 	if (ResponsePayload.IsEmpty())
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.",
-									Verb.c_str(),
-									Response.GetRequest()->GetUri().GetAsString(),
-									ResponseCode);
+		CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.",
+							 Verb.c_str(),
+							 Response.GetRequest()->GetUri().GetAsString(),
+							 ResponseCode);
 		return;
 	}
 
@@ -466,21 +466,21 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 	// If the response was not JSON or errors were not found as expected, log the full response payload.
 	if (Errors.Size() == 0)
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
-									Verb.c_str(),
-									Response.GetRequest()->GetUri().GetAsString(),
-									ResponseCode,
-									ResponsePayload.c_str());
+		CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
+							 Verb.c_str(),
+							 Response.GetRequest()->GetUri().GetAsString(),
+							 ResponseCode,
+							 ResponsePayload.c_str());
 	}
 	else
 	{
 		for (auto i = 0; i < Errors.Size(); ++i)
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
-										Verb.c_str(),
-										Response.GetRequest()->GetUri().GetAsString(),
-										ResponseCode,
-										Errors[i].c_str());
+			CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s",
+								 Verb.c_str(),
+								 Response.GetRequest()->GetUri().GetAsString(),
+								 ResponseCode,
+								 Errors[i].c_str());
 		}
 	}
 }

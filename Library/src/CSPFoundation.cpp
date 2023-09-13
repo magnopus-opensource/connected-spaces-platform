@@ -27,9 +27,9 @@
 #include <cstdio>
 
 #if defined(DEBUG)
-	#define LIB_NAME "OlympusFoundation_D"
+	#define LIB_NAME "ConnectedSpacesPlatform_D"
 #else
-	#define LIB_NAME "OlympusFoundation"
+	#define LIB_NAME "ConnectedSpacesPlatform"
 #endif
 
 #if defined(CSP_WINDOWS)
@@ -315,7 +315,7 @@ bool CSPFoundation::Shutdown()
 
 void CSPFoundation::Tick()
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	csp::events::Event* TickEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::FOUNDATION_TICK_EVENT_ID);
 	csp::events::EventSystem::Get().EnqueueEvent(TickEvent);

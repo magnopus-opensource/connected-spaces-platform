@@ -59,10 +59,10 @@ void ConversationSystem::StoreConversationMessage(const csp::common::String& Con
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The Comment asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) AddCommentResult.GetResultCode(),
-								  AddCommentResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The Comment asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) AddCommentResult.GetResultCode(),
+						   AddCommentResult.GetHttpResultCode());
 
 			const MessageResult InternalResult(AddCommentResult.GetResultCode(), AddCommentResult.GetHttpResultCode());
 			Callback(InternalResult);
@@ -123,11 +123,11 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
 			else if (DeleteCommentResult.GetResultCode() == csp::services::EResultCode::Failed)
 			{
 
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-									  "Delete asset collection for message ID %s has failed. ResCode: %d, HttpResCode: %d",
-									  Messages[idx].Id.c_str(),
-									  (int) DeleteCommentResult.GetResultCode(),
-									  DeleteCommentResult.GetHttpResultCode());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+							   "Delete asset collection for message ID %s has failed. ResCode: %d, HttpResCode: %d",
+							   Messages[idx].Id.c_str(),
+							   (int) DeleteCommentResult.GetResultCode(),
+							   DeleteCommentResult.GetHttpResultCode());
 
 				++*DeletionCounter;
 
@@ -188,10 +188,10 @@ void ConversationSystem::CreateConversation(const csp::common::String& Message, 
 				}
 				else
 				{
-					FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-										  "The Comment Container asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-										  (int) AddCommentContainerResult.GetResultCode(),
-										  AddCommentContainerResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+								   "The Comment Container asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+								   (int) AddCommentContainerResult.GetResultCode(),
+								   AddCommentContainerResult.GetHttpResultCode());
 
 					const csp::systems::StringResult InternalResult(AddCommentContainerResult.GetResultCode(),
 																	AddCommentContainerResult.GetHttpResultCode());
@@ -238,7 +238,7 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 		{
 			if (!signalRCallbackResult)
 			{
-				FOUNDATION_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
+				CSP_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
 				const csp::multiplayer::MessageResult InternalResult(csp::services::EResultCode::Failed,
 																	 (uint16_t) csp::services::EResultCode::Failed);
 				Callback(InternalResult);
@@ -273,10 +273,10 @@ void ConversationSystem::GetMessagesFromConversation(const csp::common::String& 
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) GetMessagesResult.GetResultCode(),
-								  GetMessagesResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) GetMessagesResult.GetResultCode(),
+						   GetMessagesResult.GetHttpResultCode());
 
 			const MessageCollectionResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
 			Callback(InternalResult);
@@ -312,10 +312,10 @@ void ConversationSystem::GetMessage(const csp::common::String& MessageId, Messag
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The retrieval of the Message asset collection was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) GetMessageResult.GetResultCode(),
-								  GetMessageResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The retrieval of the Message asset collection was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) GetMessageResult.GetResultCode(),
+						   GetMessageResult.GetHttpResultCode());
 
 			const MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
 			Callback(InternalResult);
@@ -346,7 +346,7 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 				{
 					if (!signalRCallbackResult)
 					{
-						FOUNDATION_LOG_ERROR_MSG("UpdatedMessageInfo: SignalR connection: Error");
+						CSP_LOG_ERROR_MSG("UpdatedMessageInfo: SignalR connection: Error");
 					}
 					MessageResult Result;
 					Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection());
@@ -359,10 +359,10 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 			}
 			else
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-									  "The Update of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-									  (int) GetMessageResult.GetResultCode(),
-									  GetMessageResult.GetHttpResultCode());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+							   "The Update of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
+							   (int) GetMessageResult.GetResultCode(),
+							   GetMessageResult.GetHttpResultCode());
 				const csp::multiplayer::MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
 				Callback(InternalResult);
 			}
@@ -389,10 +389,10 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) GetMessageResult.GetResultCode(),
-								  GetMessageResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) GetMessageResult.GetResultCode(),
+						   GetMessageResult.GetHttpResultCode());
 			const csp::multiplayer::MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
 			Callback(InternalResult);
 		}
@@ -436,10 +436,10 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 			{
 				if (DeleteMessagesResult.GetResultCode() == csp::services::EResultCode::Failed)
 				{
-					FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-										  "Not all Message asset collections were deleted. ResCode: %d, HttpResCode: %d",
-										  (int) DeleteMessagesResult.GetResultCode(),
-										  DeleteMessagesResult.GetHttpResultCode());
+					CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+								   "Not all Message asset collections were deleted. ResCode: %d, HttpResCode: %d",
+								   (int) DeleteMessagesResult.GetResultCode(),
+								   DeleteMessagesResult.GetHttpResultCode());
 				}
 
 				const csp::systems::NullResultCallback DeleteConversationAssetCollectionCallback
@@ -452,10 +452,10 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 
 					if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::services::EResultCode::Failed)
 					{
-						FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-											  "The deletion of the Conversation asset collection was not successful. ResCode: %d, HttpResCode: %d",
-											  (int) DeleteConversationAssetCollectionResult.GetResultCode(),
-											  DeleteConversationAssetCollectionResult.GetHttpResultCode());
+						CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+									   "The deletion of the Conversation asset collection was not successful. ResCode: %d, HttpResCode: %d",
+									   (int) DeleteConversationAssetCollectionResult.GetResultCode(),
+									   DeleteConversationAssetCollectionResult.GetHttpResultCode());
 					}
 
 					Callback(DeleteConversationAssetCollectionResult);
@@ -473,7 +473,7 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 				{
 					if (!signalRCallbackResult)
 					{
-						FOUNDATION_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
+						CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
 					}
 					Callback(NullResultCallbackResult);
 				};
@@ -487,10 +487,10 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) GetMessagesResult.GetResultCode(),
-								  GetMessagesResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) GetMessagesResult.GetResultCode(),
+						   GetMessagesResult.GetHttpResultCode());
 
 			const csp::systems::NullResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
 
@@ -521,7 +521,7 @@ void ConversationSystem::DeleteMessage(const csp::common::String& MessageId, csp
 		{
 			if (!signalRCallbackResult)
 			{
-				FOUNDATION_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
+				CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
 			}
 			Callback(NullCallbackResult);
 		};
@@ -580,7 +580,7 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 								}
 								else
 								{
-									FOUNDATION_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
+									CSP_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
 									const csp::multiplayer::ConversationResult InternalResult(csp::services::EResultCode::Failed,
 																							  (uint16_t) csp::services::EResultCode::Failed);
 									Callback(InternalResult);
@@ -594,10 +594,10 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 						}
 						else
 						{
-							FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-												  "The Update of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
-												  (int) GetConversationResult.GetResultCode(),
-												  GetConversationResult.GetHttpResultCode());
+							CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+										   "The Update of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
+										   (int) GetConversationResult.GetResultCode(),
+										   GetConversationResult.GetHttpResultCode());
 							const csp::multiplayer::ConversationResult InternalResult(GetConversationResult.GetResultCode(),
 																					  GetConversationResult.GetHttpResultCode());
 							Callback(InternalResult);
@@ -624,10 +624,10 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log,
-								  "The retrieval of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
-								  (int) GetConversationResult.GetResultCode(),
-								  GetConversationResult.GetHttpResultCode());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+						   "The retrieval of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
+						   (int) GetConversationResult.GetResultCode(),
+						   GetConversationResult.GetHttpResultCode());
 			const csp::multiplayer::ConversationResult InternalResult(GetConversationResult.GetResultCode(),
 																	  GetConversationResult.GetHttpResultCode());
 			Callback(InternalResult);

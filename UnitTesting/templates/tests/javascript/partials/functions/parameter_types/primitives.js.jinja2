@@ -1,0 +1,171 @@
+{% for p in config.primitives %}
+    // Pass {{ p.type }} min value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassValue_min', async function() {
+        try {
+            dummy.globalFunctions_Primitives_{{ p.type }}_PassValue_min({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+    });
+
+    // Pass {{ p.type }} max value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassValue_max', async function() {
+        try {
+            dummy.globalFunctions_Primitives_{{ p.type }}_PassValue_max({{ p.max }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+    });
+
+    {# Out and in-out parameters are transformed into return parameters for the TypeScript wrapper, as TypeScript    #}
+    {# doesn't support out or ref parameters like C# does. Functions with no return value and a single out or in-out #}
+    {# parameter will return a single value. Functions with multiple out or in-out parameters or an out or in-out    #}
+    {# parameter and a return value will return an anonymous object containing all values. Return values in this     #}
+    {# object will be returned as 'result'. Out or in-out results will be returned as their C parameter name, minus  #}
+    {# the "Out" or "InOut" at the start of the name.                                                                #}
+    // Get {{ p.type }} min value via out parameter
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_min', async function() {
+        const result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    });
+
+    // Get {{ p.type }} max value via out parameter
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_max', async function() {
+        const result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    });
+
+    // Get {{ p.type }} min and max value via out parameters
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_minmax', async function() {
+        const result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_minmax();
+
+        {{ assert_are_equal(p.use_epsilon, "result.minValue", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.maxValue", p.max) }}
+    });
+
+    // Get {{ p.type }} min value via out parameter and return {{ p.type }} max value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max', async function() {
+        const result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_min_ReturnValue_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value", p.min) }}
+    });
+
+    // Get {{ p.type }} min and max value via out parameters and return {{ p.type }} max value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min', async function() {
+        const result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_minmax_ReturnValue_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.minValue", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.maxValue", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter
+    test('globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, and pass {{ p.type }} max value and
+    // get min value via another in-out parameter
+    test('globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin(
+                {{ p.min }},
+                {{ p.max }}
+            );
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.min) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, and get {{ p.type }} max value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_ReturnValue_max({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.result", p.max) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value", p.max) }}
+    });
+
+    // Pass {{ p.type }} min value and get max value via in-out parameter, pass {{ p.type }} max value and get min
+    // value via another in-out parameter, and get {{ p.type }} min value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min',
+        async function() {
+            let result;
+
+            try {
+                result =
+                    dummy.globalFunctions_Primitives_{{ p.type }}_PassInOut_minmax_PassInOut_maxmin_ReturnValue_min(
+                        {{ p.min }},
+                        {{ p.max }}
+                    );
+            }
+            catch (e) {
+                assert.fail(e.message);
+            }
+
+            {{ assert_are_equal(p.use_epsilon, "result.result", p.min) }}
+            {{ assert_are_equal(p.use_epsilon, "result.value1", p.max) }}
+            {{ assert_are_equal(p.use_epsilon, "result.value2", p.min) }}
+        }
+    );
+
+    // Get {{ p.type }} min value via out parameter, and pass {{ p.type }} min value and get max value via in-out
+    // parameter
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax({{ p.min }});
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.max) }}
+    });
+
+    // Get {{ p.type }} min value via out parameter, pass {{ p.type }} min value and get max value via in-out
+    // parameter, and get {{ p.type }} max value by value
+    test('globalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max', async function() {
+        let result;
+
+        try {
+            result = dummy.globalFunctions_Primitives_{{ p.type }}_PassOut_min_PassInOut_minmax_ReturnValue_max(
+                {{ p.min }}
+            );
+        }
+        catch (e) {
+            assert.fail(e.message);
+        }
+
+        {{ assert_are_equal(p.use_epsilon, "result.value1", p.min) }}
+        {{ assert_are_equal(p.use_epsilon, "result.value2", p.max) }}
+    });
+{% endfor %}

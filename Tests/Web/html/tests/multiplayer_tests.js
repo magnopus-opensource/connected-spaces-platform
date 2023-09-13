@@ -4,7 +4,7 @@ import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn,
 import { createSpace, deleteSpace, getSpace, getSpacesByIds, updateSpace } from './spacesystem_tests_helpers.js'
 import { createAsset, createAssetCollection, createBufferAssetDataSource, uploadAssetData } from './assetsystem_tests_helpers.js';
 
-import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../olympus_foundation.js';
+import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../connected_spaces_platform.js';
 import { commonArrayToJSArray } from '../conversion_helpers.js';
 
 
@@ -20,8 +20,8 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -91,8 +91,8 @@ test('MultiplayerTests', 'ManualConnectionTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -143,8 +143,8 @@ test('MultiplayerTests', 'RunScriptTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -220,11 +220,11 @@ test('MultiplayerTests', 'UsePortalTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
-    const spaceName2 = generateUniqueString('OLY-TESTS-WASM-SPACE-2');
-    const spaceDescription2 = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName2 = generateUniqueString('CSP-TESTS-WASM-SPACE-2');
+    const spaceDescription2 = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
     const space2 = await createSpace(spaceSystem, spaceName2, spaceDescription2, Systems.SpaceAttributes.Private, null, null, null, false);
@@ -324,8 +324,8 @@ test('MultiplayerTests', 'ImageScriptInterfaceTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -399,8 +399,8 @@ test('MultiplayerTests', 'PortalScriptInterfaceTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -484,8 +484,8 @@ test('MultiplayerTests', 'PortalThumbnailTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -553,8 +553,8 @@ test('MultiplayerTests', 'DeleteMultipleEntitiesTest', async function() {
     await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -605,10 +605,10 @@ test('MultiplayerTests', 'AssetProcessedCallbackTest', async function() {
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
-    const testAssetCollectionName = generateUniqueString('OLY-TESTS-WASM-ASSETCOLLECTION');
-    const testAssetName = generateUniqueString('OLY-TESTS-WASM-ASSET');
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
+    const testAssetCollectionName = generateUniqueString('CSP-TESTS-WASM-ASSETCOLLECTION');
+    const testAssetName = generateUniqueString('CSP-TESTS-WASM-ASSET');
 
     // Log in
     await logIn(userSystem);
@@ -679,8 +679,8 @@ test('MultiplayerTests', 'DeleteScriptTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -768,8 +768,8 @@ test('MultiplayerTests', 'DeleteAndChangeComponentTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -842,8 +842,8 @@ test('MultiplayerTests', 'AddSecondScriptTest', async function() {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
 
-    const SpaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const SpaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
     await logIn(userSystem);
@@ -952,8 +952,8 @@ test('MultiplayerTests', 'ConversationSpaceTest', async function() {
     
     
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
@@ -1070,8 +1070,8 @@ test('MultiplayerTests', 'AudioComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1186,8 +1186,8 @@ test('MultiplayerTests', 'VideoPlayerComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1293,8 +1293,8 @@ test('MultiplayerTests', 'LightComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1400,8 +1400,8 @@ test('MultiplayerTests', 'ImageComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1498,8 +1498,8 @@ test('MultiplayerTests', 'CollisionComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1657,8 +1657,8 @@ test('MultiplayerTests', 'AudioScriptInterfaceTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1777,8 +1777,8 @@ test('MultiplayerTests', 'SplineComponentTest', async function() {
      await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1847,8 +1847,8 @@ test('MultiplayerTests', 'SplineScriptInterfaceTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -1920,8 +1920,8 @@ test('MultiplayerTests', 'ConversationComponentTest', async function() {
      userProfile.delete();
      
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2184,8 +2184,8 @@ test('MultiplayerTests', 'ConversationComponentMoveTest', async function() {
      userProfile.delete();
      
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2333,8 +2333,8 @@ test('MultiplayerTests', 'ConversationScriptInterfaceTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2422,8 +2422,8 @@ test('MultiplayerTests', 'CustomComponentTest', async function() {
      await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2529,8 +2529,8 @@ test('MultiplayerTests', 'CustomComponentScriptInterfaceSubscriptionTest', async
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2610,8 +2610,8 @@ test('MultiplayerTests', 'NetworkEventTest', async function() {
      await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2672,8 +2672,8 @@ test('MultiplayerTests', 'RegisterActionHandlerTest', async function() {
      await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
      // Create space
      const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2717,8 +2717,8 @@ test('MultiplayerTests', 'FogComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2829,8 +2829,8 @@ test('MultiplayerTests', 'FogScriptInterfaceTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
@@ -2923,8 +2923,8 @@ test('MultiplayerTests', 'InvalidComponentTest', async function() {
     await logIn(userSystem);
 
     // Create space
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);

@@ -1,0 +1,11 @@
+// Return string by value
+csp::common::String GlobalFunctions_String_ReturnValue(){
+    return "{{ config.string_value }}";
+}
+
+// Return string by const reference
+const csp::common::String& GlobalFunctions_String_ReturnConstReference() {
+    static csp::common::String Value = "{{ config.string_value }}";
+
+    return Value;
+}

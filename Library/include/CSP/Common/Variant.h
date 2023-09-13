@@ -39,7 +39,8 @@ enum class VariantType
 	Vector4,
 };
 
-/// @brief Variant is an intermediate class that enables clients to pack data into types that are supported by Foundation replication systems.
+/// @brief Variant is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform replication
+/// systems.
 class CSP_API Variant
 {
 public:

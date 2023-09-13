@@ -1,6 +1,6 @@
 import { assert, pushCleanupFunction } from '../test_framework.js';
 
-import { Services, Systems } from '../olympus_foundation.js';
+import { Services, Systems } from '../connected_spaces_platform.js';
 
 export var DEFAULT_LOGIN_EMAIL;
 export var ALT_LOGIN_EMAIL;

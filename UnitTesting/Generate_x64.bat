@@ -1,11 +1,6 @@
-rem Generate dummy lib exports
+rem Generate dummy lib exports and unit tests
 
-python scripts/GenerateExports.py
-
-
-rem Generate unit tests
-
-python scripts/GenerateTests.py
+python scripts/Generate.py
 
 
 rem Generate projects

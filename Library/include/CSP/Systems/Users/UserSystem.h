@@ -51,7 +51,7 @@ public:
 	const LoginState& GetLoginState() const;
 
 	/// @brief Sets a callback that will get fired when the login token has changed as a result of logging in with credentials or with a token or
-	/// after the Foundation internal system has refreshed the session.
+	/// after the Connected Spaces Platform internal system has refreshed the session.
 	/// In the callback result the token and it's expiration time will be provided.
 	/// The expiration time is in OSI format {Year}-{Month}-{Date}T{Hour}:{Min}:{Sec}
 	/// For C#: register a callback to the OnNewLoginTokenReceived event
@@ -81,12 +81,12 @@ public:
 	CSP_ASYNC_RESULT void LoginAsGuest(LoginStateResultCallback Callback);
 
 	/// @ingroup Third Party Authentication
-	/// @brief As a Foundation user the 3rd party authentication flow consists of two steps, first calling GetThirdPartyProviderAuthoriseURL followed
-	/// by LoginToThirdPartyAuthenticationProvider You can see a Sequence Diagram with all the parties involved including what a Client should be
-	/// calling and when here https://miro.com/app/board/uXjVPflpu98=/.
+	/// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
+	/// GetThirdPartyProviderAuthoriseURL followed by LoginToThirdPartyAuthenticationProvider You can see a Sequence Diagram with all the parties
+	/// involved including what a Client should be calling and when here https://miro.com/app/board/uXjVPflpu98=/.
 
-	/// @brief API to retrieve the Foundation supported 3rd party authentication providers
-	/// @return Array of Foundation supported 3rd party authentication providers
+	/// @brief API to retrieve the Connected Spaces Platform supported 3rd party authentication providers
+	/// @return Array of Connected Spaces Platform supported 3rd party authentication providers
 	[[nodiscard]] csp::common::Array<EThirdPartyAuthenticationProviders> GetSupportedThirdPartyAuthenticationProviders() const;
 
 	/// @brief First step of the 3rd party authentication flow
@@ -95,7 +95,7 @@ public:
 	/// @param AuthProvider EThirdPartyAuthenticationProviders : one of the supported Authentication Providers
 	/// @param RedirectURL csp::common::String : the RedirectURL you want to be used for this authentication flow
 	/// @param Callback StringResultCallback : callback that contains the Authorise URL that the Client should be navigating next before moving to the
-	/// second Foundation Authentication step
+	/// second Connected Spaces Platform Authentication step
 	CSP_ASYNC_RESULT void GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProviders AuthProvider,
 															const csp::common::String& RedirectURL,
 															StringResultCallback Callback);
@@ -162,8 +162,10 @@ public:
 	CSP_ASYNC_RESULT void ConfirmUserEmail(NullResultCallback Callback);
 
 	/// @brief Reset the users password.
+	/// @param Token csp::common::String : Token received through email by user
+	/// @param NewPassword csp::common::String : The new password for the associated account
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::Optional<csp::common::String>& RedirectUrl, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback);
 
 	/// @brief Updates the user display name information.
 	/// @param UserId csp::common::String : id of the user that will be updated
@@ -180,9 +182,12 @@ public:
 	/// @brief Allow a user to reset their password if forgotten by providing an email address.
 	/// @param Email csp::common::String : account to recover password for
 	/// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
+	/// @Param UseTokenChangePasswordUrl bool : if true the link in the email will direct the user to the Token Change URL
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void
-		ForgotPassword(const csp::common::String& Email, const csp::common::Optional<csp::common::String>& RedirectUrl, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ForgotPassword(const csp::common::String& Email,
+										 const csp::common::Optional<csp::common::String>& RedirectUrl,
+										 bool UseTokenChangePasswordUrl,
+										 NullResultCallback Callback);
 
 	/// @brief Get a user profile by user ID.
 	/// @param InUserId csp::common::String : the ID of the user to get

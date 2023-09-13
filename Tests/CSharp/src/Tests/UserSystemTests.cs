@@ -182,20 +182,40 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
+            // Tests passing false for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com",null).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com",null).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email",null).Result;
+                using var result = userSystem.ForgotPassword("email", null, false).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+            }
+
+            // Tests passing true for UseTokenChangePasswordUrl
+            {
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, true).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            }
+
+            {
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, true).Result;
+
+                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            }
+
+            {
+                using var result = userSystem.ForgotPassword("email", null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
@@ -418,7 +438,7 @@ namespace CSPEngine
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null,null).Result;
+                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null, null).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -561,8 +581,8 @@ namespace CSPEngine
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_SUPPORTED_PROVIDERS_TEST
         [Test]
         public static void GetThirdPartySupportedProvidersTest()
-{
-	GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
+        {
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Check the FDN supported providers
             using var supportedProviders = userSystem.GetSupportedThirdPartyAuthenticationProviders();
@@ -571,7 +591,7 @@ namespace CSPEngine
             bool foundGoogle = false;
             bool foundDiscord = false;
             bool foundApple = false;
-            
+
             for (uint idx = 0; idx < supportedProviders.Size(); ++idx)
             {
                 if (supportedProviders[idx] == Systems.EThirdPartyAuthenticationProviders.Google)

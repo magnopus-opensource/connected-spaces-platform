@@ -332,7 +332,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 		if (ScriptComponent)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+			CSP_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
 
 			// Return the existing script component
 			return nullptr;
@@ -341,7 +341,8 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 	auto ComponentId = GenerateComponentId();
 	auto* Component	 = InstantiateComponent(ComponentId, Type);
-	// if Component != nullptr component has not been Instantiate, so is skipped.
+
+	// If Component is null, component has not been instantiated, so is skipped.
 	if (Component != nullptr)
 	{
 		DirtyComponents[ComponentId] = DirtyComponent {Component, ComponentUpdateType::Add};
@@ -361,7 +362,7 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("RemoveComponent: No Component with the specified key found!");
+		CSP_LOG_ERROR_MSG("RemoveComponent: No Component with the specified key found!");
 	}
 }
 
@@ -561,7 +562,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 				SelectedId = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID).GetInt();
 			}
 
-			// Space entities created with versions of Foundation prior to 3.16 do not have these properties
+			// Space entities created with versions of Connected Spaces Platform prior to 3.16 do not have these properties
 			if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM))
 			{
 				auto Value		   = Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM).GetInt();
@@ -947,8 +948,8 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		default:
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
-							   csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
+			CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+						csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
 			return nullptr;
 		}
 	}
@@ -1060,7 +1061,7 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("DestroyComponent: Key Does Not Exist")
+		CSP_LOG_ERROR_MSG("DestroyComponent: Key Does Not Exist")
 	}
 }
 

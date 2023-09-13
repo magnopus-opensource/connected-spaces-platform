@@ -173,6 +173,29 @@ public:
 };
 
 /// @ingroup ECommerce System
+/// @brief Represents a shopify store.
+class CSP_API ShopifyStoreInfo
+{
+public:
+	ShopifyStoreInfo() = default;
+
+	/// @brief ID of the store.
+	csp::common::String StoreId;
+
+	/// @brief Name of the store.
+	csp::common::String StoreName;
+
+	/// @brief ID of the store owner.
+	csp::common::String SpaceOwnerId;
+
+	/// @brief Space that the cart is associated with.
+	csp::common::String SpaceId;
+
+	/// @brief Is Ecommerce active.
+	bool IsEcommerceActive;
+};
+
+/// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
 class CSP_API ProductInfoResult : public csp::services::ResultBase
 {
@@ -232,6 +255,8 @@ private:
 class CSP_API CartInfoResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
+	friend class ECommerceSystem;
+
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
@@ -246,12 +271,53 @@ public:
 	/// @return ProductInfo : reference to the CartInfo
 	CartInfo& GetCartInfo();
 
+	CSP_NO_EXPORT static CartInfoResult Invalid();
+
 private:
 	CartInfoResult(void*) {};
+	CartInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	CartInfo Cart;
+};
+
+class CSP_API AddShopifyStoreResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	const ShopifyStoreInfo& GetShopifyStoreInfo() const;
+
+	ShopifyStoreInfo& GetShopifyStoreInfo();
+
+private:
+	AddShopifyStoreResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	ShopifyStoreInfo Store;
+};
+
+class CSP_API ValidateShopifyStoreResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	bool ValidateResult;
+
+private:
+	ValidateShopifyStoreResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;
@@ -259,5 +325,9 @@ typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCa
 typedef std::function<void(const CheckoutInfoResult& Result)> CheckoutInfoResultCallback;
 
 typedef std::function<void(const CartInfoResult& Result)> CartInfoResultCallback;
+
+typedef std::function<void(const AddShopifyStoreResult& Result)> AddShopifyStoreResultCallback;
+
+typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
 
 } // namespace csp::systems

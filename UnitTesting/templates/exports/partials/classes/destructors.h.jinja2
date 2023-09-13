@@ -1,0 +1,19 @@
+class CSP_API PublicDestructorClass {
+public:
+    ~PublicDestructorClass() {};
+};
+
+class CSP_API ProtectedDestructorClass {
+protected:
+    ~ProtectedDestructorClass() {};
+};
+
+class CSP_API PrivateDestructorClass {
+private:
+    ~PrivateDestructorClass() {};
+};
+
+class CSP_API DeletedDestructorClass {
+public:
+    ~DeletedDestructorClass() = delete;
+};

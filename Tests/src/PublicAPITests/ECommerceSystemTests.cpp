@@ -321,4 +321,376 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 
 	LogOut(UserSystem);
 }
+
+#endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Connect your shopify.dev account to your space using the "Private Access Token" and store name
+			Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+			{
+				"storeName": "string",
+				"isEcommerceActive": true,
+				"privateAccessToken": "string"
+			}
+		3. Check Shopify has synced with your namespace
+			Endpoint: /api/v1/vendors/shopify/validate
+			{
+				"storeName": "string",
+				"privateAccessToken": "string"
+			}
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details									   = GetShopifyDetails();
+	auto SpaceId									   = Details["SpaceId"];
+	const csp::common::String ProductId				   = "gid://shopify/Product/8660541047057";
+	csp::common::Array<csp::common::String> VariantIds = {"gid://shopify/ProductVariant/46314311516433",
+														  "gid://shopify/ProductVariant/46314311647505",
+														  "gid://shopify/ProductVariant/46314311745809",
+														  "gid://shopify/ProductVariant/46314311844113"};
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create Cart
+	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedCart = CreateCartResult.GetCartInfo();
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
+
+	// Add local cart lines
+	for (int i = 0; i < VariantIds.Size(); ++i)
+	{
+		auto CartLine			  = csp::systems::CartLine();
+		CartLine.Quantity		  = 1;
+		CartLine.ProductVariantId = VariantIds[i];
+
+		CartLines[i] = CartLine;
+	}
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 4;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 4);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 4);
+
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
+}
+
+#endif
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Connect your shopify.dev account to your space using the "Private Access Token" and store name
+			Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+			{
+				"storeName": "string",
+				"isEcommerceActive": true,
+				"privateAccessToken": "string"
+			}
+		3. Check Shopify has synced with your namespace
+			Endpoint: /api/v1/vendors/shopify/validate
+			{
+				"storeName": "string",
+				"privateAccessToken": "string"
+			}
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details						= GetShopifyDetails();
+	auto SpaceId						= Details["SpaceId"];
+	const csp::common::String ProductId = "gid://shopify/Product/8660541047057";
+	const csp::common::String VariantId = "gid://shopify/ProductVariant/46314311516433";
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create Cart
+	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedCart = CreateCartResult.GetCartInfo();
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+
+	// Add local cart lines
+	auto CartLine			  = csp::systems::CartLine();
+	CartLine.Quantity		  = 1;
+	CartLine.ProductVariantId = VariantId;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 1;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
+
+	// update cart lines adding 1 extra quantity
+	CartLine				  = csp::systems::CartLine();
+	CartLine.CartLineId		  = AddCartLinesCart.CartLines[0].CartLineId;
+	CartLine.Quantity		  = 2;
+	CartLine.ProductVariantId = VariantId;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 2;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 2);
+
+	// Add Cart Lines
+	auto [UpdateCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(UpdateCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto UpdateCartLinesCart = UpdateCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(UpdateCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(UpdateCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
+		EXPECT_EQ(UpdateCartLinesCart.CartLines[i].Quantity, 2);
+	};
+}
+
+#endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Connect your shopify.dev account to your space using the "Private Access Token" and store name
+			Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+			{
+				"storeName": "string",
+				"isEcommerceActive": true,
+				"privateAccessToken": "string"
+			}
+		3. Check Shopify has synced with your namespace
+			Endpoint: /api/v1/vendors/shopify/validate
+			{
+				"storeName": "string",
+				"privateAccessToken": "string"
+			}
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details						 = GetShopifyDetails();
+	auto SpaceId						 = Details["SpaceId"];
+	const csp::common::String ProductId	 = "gid://shopify/Product/8660541047057";
+	const csp::common::String VariantIds = "gid://shopify/ProductVariant/46314311516433";
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create Cart
+	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto CreatedCart = CreateCartResult.GetCartInfo();
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 0);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 0);
+
+	auto CartLines = csp::common::Array<csp::systems::CartLine>(1);
+
+	// Add local cart lines
+	auto CartLine			  = csp::systems::CartLine();
+	CartLine.Quantity		  = 1;
+	CartLine.ProductVariantId = VariantIds;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 1;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+
+	// Add Cart Lines
+	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(AddCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(AddCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
+	EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
+
+	for (int i = 0; i < CartLines.Size(); ++i)
+	{
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
+		EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
+		EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
+	};
+
+	// Add update cart lines quantity to 0
+	CartLine.Quantity		  = 0;
+	CartLine.ProductVariantId = VariantIds;
+	CartLine.CartLineId		  = AddCartLinesCart.CartLines[0].CartLineId;
+
+	CartLines[0] = CartLine;
+
+	CreatedCart.CartLines = CartLines;
+
+	CreatedCart.TotalQuantity = 1;
+
+	EXPECT_EQ(CreatedCart.SpaceId, SpaceId);
+	EXPECT_NE(CreatedCart.CartId, "");
+	EXPECT_EQ(CreatedCart.CartLines.Size(), 1);
+	EXPECT_EQ(CreatedCart.TotalQuantity, 1);
+
+	// Delete Cart Lines
+	auto [DeleteCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
+
+	EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto DeleteCartLinesCart = DeleteCartLinesResult.GetCartInfo();
+
+	EXPECT_EQ(DeleteCartLinesCart.SpaceId, SpaceId);
+	EXPECT_EQ(DeleteCartLinesCart.CartId, CreatedCart.CartId);
+	EXPECT_EQ(DeleteCartLinesCart.CartLines.Size(), 0);
+	EXPECT_EQ(DeleteCartLinesCart.TotalQuantity, 0);
+}
+
+#endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDSHOPIFYSTORE_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Create a Shopify Store on the Shopify site (Ensure it has at least 1 product)
+		3. Add `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details			= GetShopifyDetails();
+	auto SpaceId			= Details["SpaceId"];
+	auto StoreName			= Details["StoreName"];
+	auto PrivateAccessToken = Details["PrivateAccessToken"];
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
+
+	EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_TRUE(ValidateShopifyStoreResult.ValidateResult);
+
+	auto [AddShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, AddShopifyStore, RequestPredicate, StoreName, SpaceId, false, PrivateAccessToken);
+
+	EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto ShopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
+
+	EXPECT_EQ(ShopifyStore.SpaceId, SpaceId);
+	EXPECT_EQ(ShopifyStore.IsEcommerceActive, false);
+	EXPECT_NE(ShopifyStore.StoreId, "");
+	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
+
+	LogOut(UserSystem);
+}
 #endif

@@ -19,7 +19,7 @@ _"An interoperable communication library for the spatial internet."_
 - [Install](#-install)
 - [Build Instructions](#-build-instructions)
 - [Usage](#%EF%B8%8F-usage)
-- [Tenant Keys](#-tenant-keys)
+- [Tenant IDs](#-tenant-ids)
 - [Api Documentation](#-api-documentation)
 - [Contributions](#%EF%B8%8F-contributions)
 - [License](#%EF%B8%8F-license)
@@ -62,13 +62,13 @@ Build instructions for each supported language are below.
 
 ****
 
-## 🔑 Tenant Keys
+## 🔑 Tenant IDs
 
-If you choose to use the Connected Spaces Platform in conjunction with Magnopus Cloud Services, you'll need a Tenant Key.
+If you choose to use the Connected Spaces Platform in conjunction with Magnopus Cloud Services, you'll need a Tenant ID.
 
 For information on how to obtain one, head over here.
 
- - [Obtaining a Tenant Key](https://www.magnopus.com/csp/for-developers#tenant-key)
+ - [Obtaining a Tenant ID](https://www.magnopus.com/csp/for-developers#tenant-id)
 ****
 
 ## 🖥️ Usage

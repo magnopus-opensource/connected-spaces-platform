@@ -34,7 +34,7 @@ premake.override(_G, "workspace", function(base, ...)
 end)
 
 
-solution( "OlympusFoundation" )
+solution( "ConnectedSpacesPlatform" )
     -- Build configurations
     if CSP.HasCommandLineArgument("DLLOnly") then
         configurations { "DebugDLL", "ReleaseDLL", "DebugDLL-CSharp", "ReleaseDLL-CSharp" }

@@ -1,0 +1,14 @@
+{% for x in ['Value', 'Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Pass class by {{ x }}
+    [Test]
+    public static void GlobalFunctions_MyClass_Pass{{ x }}() {
+        using var param = new MyClass({{ config.class_int_value_first }});
+
+        try {
+            Global.GlobalFunctions_MyClass_Pass{{ x }}(param);
+        }
+        catch (RuntimeWrappedException e) {
+            Assert.Fail(e.Message);
+        }
+    }
+{% endfor %}

@@ -1,0 +1,35 @@
+// Return class by value
+MyReallyCoolClass ClassReturnTestClass::ClassFunctions_MyClass_ReturnValue() {
+    MyReallyCoolClass Instance;
+    Instance.SomeValue = {{ config.class_int_value_first }};
+
+    return Instance;
+}
+
+// Return class by pointer
+MyReallyCoolClass* ClassReturnTestClass::ClassFunctions_MyClass_ReturnPointer() {
+    Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+    return &Class_Field;
+}
+
+// Return class by const pointer
+const MyReallyCoolClass* ClassReturnTestClass::ClassFunctions_MyClass_ReturnConstPointer() {
+    Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+    return &Class_Field;
+}
+
+// Return class by reference
+MyReallyCoolClass& ClassReturnTestClass::ClassFunctions_MyClass_ReturnReference() {
+    Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+    return Class_Field;
+}
+
+// Return class by const reference
+const MyReallyCoolClass& ClassReturnTestClass::ClassFunctions_MyClass_ReturnConstReference() {
+    Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+    return Class_Field;
+}

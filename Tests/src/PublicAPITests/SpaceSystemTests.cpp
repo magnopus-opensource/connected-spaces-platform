@@ -1217,8 +1217,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	::UserRoleInfo UpdatedDefaultUserRole	 = {DefaultUserId, SpaceUserRole::Moderator};
 	::UserRoleInfo UpdatedSecondTestUserRole = {AltUserId, SpaceUserRole::Owner};
 
-	UpdateUserRole(SpaceSystem, Space.Id, UpdatedDefaultUserRole);
-	UpdateUserRole(SpaceSystem, Space.Id, UpdatedSecondTestUserRole); // NOTE: This only works because our default test account has superuser access
+	// User Roles should not be changed after update as a owner cannot be modified
+	// This also means a owner cannot be turned into a moderator
+	auto [DefaultResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedDefaultUserRole);
+
+	// Update first account role should fail
+	EXPECT_EQ(DefaultResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [SecondResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedSecondTestUserRole);
+
+	// Update second account role should fail
+	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Failed);
 
 	// Verify updated user roles
 	Array<::UserRoleInfo> RetrievedUserRoles;
@@ -1230,11 +1239,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	{
 		if (RetrievedUserRoles[idx].UserId == DefaultUserId)
 		{
-			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Moderator);
+			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
 		}
 		else if (RetrievedUserRoles[idx].UserId == AltUserId)
 		{
-			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
+			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::User);
 		}
 		else
 		{
@@ -1244,11 +1253,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	GetSpace(SpaceSystem, Space.Id, Space);
 
-	LogOut(UserSystem);
-
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
-
-	// As the default test user has the "internal-service" global role he can delete the space no matter the space role it holds.
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -1907,7 +1911,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 	}
 
 	{
-		// but it should be able to retrieve it
+		// But it should be able to retrieve it
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);

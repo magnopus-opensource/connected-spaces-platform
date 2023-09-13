@@ -170,7 +170,7 @@ public:
 	/// @return Space : reference to the space
 	const Space& GetSpace() const;
 
-	/// @brief Retrieves the code associated with the space. This is typically only useful for foundation-internal functionality.
+	/// @brief Retrieves the code associated with the space. This is typically only useful for internal Connected Spaces Platform functionality.
 	/// @return csp::common::String : the space code
 	const csp::common::String& GetSpaceCode() const;
 

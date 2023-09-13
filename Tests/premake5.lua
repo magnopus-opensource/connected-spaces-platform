@@ -26,7 +26,7 @@ if not Tests then
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"
         
-        -- The tests project is configured for the most part like the foundation project itself.
+        -- The tests project is configured for the most part like the Connected Spaces Platform project itself.
         -- This allows us to test both internal functionality as well as the public API.
         Project.DefineProject()
         
@@ -37,7 +37,7 @@ if not Tests then
             targetname( "Tests_WASM.js" )
         filter {}
 
-        -- Tell Foundation we're compiling tests
+        -- Tell Connected Spaces Platform we're compiling tests
         defines { "CSP_TESTS" }
 
         -- Compile support for MessagePack
@@ -157,12 +157,9 @@ if not Tests then
                 "{COPY} %{prj.location}\\assets\\ %{cfg.buildtarget.directory}\\assets\\"
             }
         filter {}
-        
-        -- The tests project depend on foundation first finishing in order to be able to guarantee the DLLs exist before we copy them
-        -- NOTE: This will slow builds down as it effectively means we need to build foundation twice in a linear fashion, so we need to address this in a better manner long-term.
-        dependson {"OlympusFoundation"}
-        
-        filter "platforms:x64"
+        -- The tests project depend on ConnectedSpacesPlatform first finishing in order to be able to guarantee the DLLs exist before we copy them
+        -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
+        dependson {"ConnectedSpacesPlatform"}
             
             postbuildcommands {
                 "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}"

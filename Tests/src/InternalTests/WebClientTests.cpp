@@ -43,7 +43,7 @@ public:
 	{
 	}
 
-	void OnHttpResponse(const csp::web::HttpResponse& InResponse) override
+	void OnHttpResponse(csp::web::HttpResponse& InResponse) override
 	{
 		// We expect the callback to have come from a seperate Thread
 		EXPECT_FALSE(std::this_thread::get_id() == ThreadId);
@@ -203,7 +203,7 @@ public:
 	{
 	}
 
-	void OnHttpResponse(const HttpResponse& InResponse) override
+	void OnHttpResponse(HttpResponse& InResponse) override
 	{
 		// Check that callbacks are called from the same thread as we poll from
 		EXPECT_TRUE(ThreadId == std::this_thread::get_id());
@@ -465,7 +465,7 @@ public:
 	{
 	}
 
-	void OnHttpResponse(const HttpResponse& InResponse) override
+	void OnHttpResponse(HttpResponse& InResponse) override
 	{
 		// We expect the callback to have come from a seperate Thread
 		EXPECT_FALSE(std::this_thread::get_id() == ThreadId);

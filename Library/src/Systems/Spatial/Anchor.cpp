@@ -39,7 +39,7 @@ void AnchorDtoToAnchor(const chs::AnchorDto& Dto, csp::systems::Anchor& Anchor)
 		}
 		else
 		{
-			FOUNDATION_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", Name.c_str());
+			CSP_LOG_ERROR_FORMAT("Unknown third party anchor provider: %s", Name.c_str());
 		}
 	}
 

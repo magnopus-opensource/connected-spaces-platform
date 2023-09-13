@@ -67,7 +67,7 @@ enum class EAssetPlatform
 	DEFAULT
 };
 
-/// @brief Converts a received DTO type into a Foundation enum EAssetType.
+/// @brief Converts a received DTO type into a Connected Spaces Platform enum EAssetType.
 /// @param DTOAssetDetailType : The string defining the asset type given via the DTO.
 /// @returns the converted EAssetType value.
 EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType);
@@ -331,14 +331,10 @@ public:
 	~AssetDataResult();
 
 	/// @brief Retrieves the data from the result.
-	void* GetData();
-	/// @brief Retrieves the data from the result.
 	const void* GetData() const;
 
 	/// @brief Gets the length of data returned.
-	size_t GetDataLength();
-	/// @brief Gets the length of data returned.
-	const size_t GetDataLength() const;
+	size_t GetDataLength() const;
 
 protected:
 	AssetDataResult() = delete;
@@ -346,9 +342,6 @@ protected:
 
 private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	void* Data;
-	size_t DataLength;
 };
 
 

@@ -16,25 +16,25 @@ except ImportError:
 from distutils.dir_util import copy_tree
 
 
-class OlympusFoundationPyError(Exception): pass
-class FileHandlingError(OlympusFoundationPyError): pass
+class ConnectedSpacesPlatformPyError(Exception): pass
+class FileHandlingError(ConnectedSpacesPlatformPyError): pass
 
 
 def get_arguments_commandline():
-    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Foundation Release for NPM.')
+    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Release for NPM.')
 
     parser.add_argument('--version',
-                        help="Enter the version of the Build Connected Spaces Platform Foundation, Semantic Versioning Only.", 
+                        help="Enter the version of the Connected Spaces Platform, Semantic Versioning Only.", 
                         default="0.0.0")
     parser.add_argument('--name',
-                        help="Enter the name of the Build Connected Spaces Platform Foundation package.", 
-                        default="@magnopus-opensource/csp-foundation")
+                        help="Enter the name of the Connected Spaces Platform package.", 
+                        default="connected-spaces-platform.unity.core")
     parser.add_argument('--display_name',
-                        help="Enter the display name of the Build Connected Spaces Platform Foundation package.", 
-                        default="Olympus Foundation")
+                        help="Enter the display name of the Connected Spaces Platform package.", 
+                        default="connected-spaces-platform.unity")
     parser.add_argument('--assembly_name',
-                        help="Enter the assembly name of the Connected Spaces Platform Foundation package.",
-                        default="Olympus.Foundation")
+                        help="Enter the assembly name of the Connected Spaces Platform package.",
+                        default="ConnectedSpacesPlatform")
     parser.add_argument('--relative_destination_path',
                         help="Enter the relative path from root/teamcity for the libraries to be copied to.", 
                         default="Library\\Binaries\\package")
@@ -60,14 +60,14 @@ def get_arguments_commandline():
                         help="Enter the version of Unity supported, e.g. 2021.1.", 
                         default="2020.1")
     parser.add_argument('--license',
-                        help="Enter the license required for the Connected Spaces Platform Foundation package.", 
+                        help="Enter the license required for the Connected Spaces Platform package.", 
                         default="Apache-2.0")
     parser.add_argument('--dependencies',
-                        help="Enter the dependencies required for the Connected Spaces Platform Foundation package.", 
+                        help="Enter the dependencies required for the Connected Spaces Platform package.", 
                         default=None)
     parser.add_argument('--description',
-                        help="This package provides the DLL's required to interface with the Connected Spaces Platform project servers.", 
-                        default="Exposes Connected Spaces Platform functionality via the Foundation API")
+                        help="Enter the description for the Connected Spaces Platform package.",
+                        default="This package provides the binaries required to interface with the Connected Spaces Platform API.")
     parser.add_argument('--registry',
                         help="This is the upstream location of the package.", 
                         default="https://npm.pkg.github.io/@magnopus-opensource")
@@ -157,7 +157,7 @@ def copy_packages_in(input_args, output_path):
         windows_items = os.listdir(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_windows_path))
         windows_items = [x for x in windows_items if x.endswith(windows_file_extensions)]
         # Remove compiled C# wrapper DLL
-        windows_items = [x for x in windows_items if not "Olympus.Foundation.dll" in x]
+        windows_items = [x for x in windows_items if not "ConnectedSpacesPlatform.dll" in x]
 
     if(input_args.relative_mac_path):
         input_paths.append(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_mac_path))
@@ -185,7 +185,7 @@ def copy_packages_in(input_args, output_path):
     for binary_folder in input_paths:
         for item in os.listdir(binary_folder):
             if not os.path.isdir(item):
-                if item.endswith(all_file_extensions) and not 'dSYM' in item and not 'Olympus.Foundation.dll' in item:
+                if item.endswith(all_file_extensions) and not 'dSYM' in item and not 'ConnectedSpacesPlatform.dll' in item:
                     shutil.copy2(os.path.join(binary_folder, item), output_path)
 
     if(input_paths):
@@ -210,7 +210,7 @@ def create_package_file(input_args, output_path):
         '  "publishConfig": {\n',
        f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
         '  },\n'
-        '  "repository": "https://github.com/magnopus-opensource/csp-foundation"'
+        '  "repository": "https://github.com/magnopus-opensource/connected-spaces-platform"'
         '}\n'
     ])
     f.close()
