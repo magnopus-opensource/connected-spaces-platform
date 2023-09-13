@@ -56,7 +56,7 @@ csp::common::String ConvertExternalAuthProvidersToString(EThirdPartyAuthenticati
 			return "Apple";
 		default:
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error, "Unsupported Provider Type requested: %d, returning Google", static_cast<uint8_t>(Provider));
+			CSP_LOG_FORMAT(LogLevel::Error, "Unsupported Provider Type requested: %d, returning Google", static_cast<uint8_t>(Provider));
 			return "Google";
 		}
 	}
@@ -226,10 +226,10 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 		}
 		else if (ProviderDetailsRes.GetResultCode() != csp::services::EResultCode::InProgress)
 		{
-			FOUNDATION_LOG_FORMAT(LogLevel::Error,
-								  "The retrieval of third party details was not successful. ResCode: %d, HttpResCode: %d",
-								  static_cast<int>(ProviderDetailsRes.GetResultCode()),
-								  ProviderDetailsRes.GetHttpResultCode());
+			CSP_LOG_FORMAT(LogLevel::Error,
+						   "The retrieval of third party details was not successful. ResCode: %d, HttpResCode: %d",
+						   static_cast<int>(ProviderDetailsRes.GetResultCode()),
+						   ProviderDetailsRes.GetHttpResultCode());
 
 			CurrentLoginState.State = ELoginState::Error;
 
@@ -257,9 +257,9 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 {
 	if (CurrentLoginState.State != ELoginState::LoginThirdPartyProviderDetailsRequested)
 	{
-		FOUNDATION_LOG_FORMAT(LogLevel::Error,
-							  "The LoginState: %d is incorrect for proceeding with the third party authentication login",
-							  CurrentLoginState.State);
+		CSP_LOG_FORMAT(LogLevel::Error,
+					   "The LoginState: %d is incorrect for proceeding with the third party authentication login",
+					   CurrentLoginState.State);
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;
@@ -270,7 +270,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 	// checking that the stored ThirdPartyAuthStateId matches the one passed by the Client as a security safety net suggested by the Auth Providers
 	if (ThirdPartyAuthStateId != ThirdPartyStateId)
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "The state ID is not correct"); // intentionally not to explicit about the error for security reasons
+		CSP_LOG_MSG(LogLevel::Error, "The state ID is not correct"); // intentionally not to explicit about the error for security reasons
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;

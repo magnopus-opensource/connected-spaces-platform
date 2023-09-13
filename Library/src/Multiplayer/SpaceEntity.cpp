@@ -332,7 +332,7 @@ ComponentBase* SpaceEntity::AddComponent(ComponentType Type)
 
 		if (ScriptComponent)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
+			CSP_LOG_MSG(csp::systems::LogLevel::Warning, "AddComponent: Script Component already exists on this entity.");
 
 			// Return the existing script component
 			return nullptr;
@@ -362,7 +362,7 @@ void SpaceEntity::RemoveComponent(uint16_t Key)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("RemoveComponent: No Component with the specified key found!");
+		CSP_LOG_ERROR_MSG("RemoveComponent: No Component with the specified key found!");
 	}
 }
 
@@ -948,8 +948,8 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		default:
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Warning,
-							   csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
+			CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+						csp::common::StringFormat("Unknown Component type of value: %d", static_cast<uint32_t>(Type)));
 			return nullptr;
 		}
 	}
@@ -1061,7 +1061,7 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("DestroyComponent: Key Does Not Exist")
+		CSP_LOG_ERROR_MSG("DestroyComponent: Key Does Not Exist")
 	}
 }
 

@@ -2200,8 +2200,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, BannedTest)
 	Connection->SetDisconnectionCallback(
 		[&Disconnected](auto Reason)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, "Disconnected from space. Reason:");
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, Reason);
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "Disconnected from space. Reason:");
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, Reason);
 
 			Disconnected = true;
 		});

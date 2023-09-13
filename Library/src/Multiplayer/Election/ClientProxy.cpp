@@ -57,11 +57,11 @@ ClientId ClientProxy::GetId() const
 
 void ClientProxy::StartLeaderElection(const ClientMap& Clients)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::StartLeaderElection ClientId=%d State=%d", Id, State);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::StartLeaderElection ClientId=%d State=%d", Id, State);
 
 	if (State != ClientElectionState::Idle)
 	{
-		FOUNDATION_LOG_ERROR_MSG("ClientProxy::StartLeaderElection called when election already in progress");
+		CSP_LOG_ERROR_MSG("ClientProxy::StartLeaderElection called when election already in progress");
 		return;
 	}
 
@@ -72,7 +72,7 @@ void ClientProxy::StartLeaderElection(const ClientMap& Clients)
 
 	if (IsThisClientLeader(Clients))
 	{
-		FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "This Client (%d) is Leader", Id);
+		CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "This Client (%d) is Leader", Id);
 
 		for (auto& Client : Clients)
 		{
@@ -88,7 +88,7 @@ void ClientProxy::StartLeaderElection(const ClientMap& Clients)
 
 		if (ElectionManagerPtr)
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Calling OnElectionComplete Pending=%d", PendingElections.load());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Calling OnElectionComplete Pending=%d", PendingElections.load());
 			ElectionManagerPtr->OnElectionComplete(Id);
 		}
 	}
@@ -143,11 +143,11 @@ void ClientProxy::HandleEvent(int64_t EventType, int64_t ClientId)
 
 void ClientProxy::NotifyLeader(int64_t TargetClientId, int64_t LeaderClientId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
-						  "ClientProxy::NotifyLeader Target=%d Source=%d Leader=%d",
-						  TargetClientId,
-						  Id,
-						  LeaderClientId);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
+				   "ClientProxy::NotifyLeader Target=%d Source=%d Leader=%d",
+				   TargetClientId,
+				   Id,
+				   LeaderClientId);
 	SendEvent(TargetClientId, static_cast<int64_t>(ClientElectionMessageType::ElectionNotifyLeader), LeaderClientId);
 }
 
@@ -204,15 +204,11 @@ void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t C
 	{
 		if (!SignalRCallbackResult)
 		{
-			FOUNDATION_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
+			CSP_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
 		}
 	};
 
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
-						  "SendNetworkEventToClient Target=%d Source=%d Type=%d",
-						  TargetClientId,
-						  ClientId,
-						  EventType);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "SendNetworkEventToClient Target=%d Source=%d Type=%d", TargetClientId, ClientId, EventType);
 
 	Connection->SendNetworkEventToClient(ClientElectionMessage,
 										 {ReplicatedValue(EventType), ReplicatedValue(ClientId), ReplicatedValue(MessageId)},
@@ -229,15 +225,15 @@ void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t Conte
 	{
 		if (!SignalRCallbackResult)
 		{
-			FOUNDATION_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
+			CSP_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
 		}
 	};
 
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
-						  "SendRemoteRunScriptEvent Target=%lld ContextId=%lld Script='%s'",
-						  TargetClientId,
-						  ContextId,
-						  ScriptText.c_str());
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
+				   "SendRemoteRunScriptEvent Target=%lld ContextId=%lld Script='%s'",
+				   TargetClientId,
+				   ContextId,
+				   ScriptText.c_str());
 
 	Connection->SendNetworkEventToClient(RemoteRunScriptMessage,
 										 {ReplicatedValue(ContextId), ReplicatedValue(ScriptText)},
@@ -247,7 +243,7 @@ void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t Conte
 
 void ClientProxy::HandleElectionEvent(int64_t ClientId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionEvent ClientId=%d", ClientId);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionEvent ClientId=%d", ClientId);
 
 	// We only need to send a response if we are being elected by a lower id
 	if (ClientId < Id)
@@ -258,10 +254,10 @@ void ClientProxy::HandleElectionEvent(int64_t ClientId)
 
 void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
-						  "ClientProxy::HandleElectionResponseEvent ClientId=%d Pending=%d",
-						  ClientId,
-						  PendingElections.load());
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose,
+				   "ClientProxy::HandleElectionResponseEvent ClientId=%d Pending=%d",
+				   ClientId,
+				   PendingElections.load());
 
 	if (ClientId > Id)
 	{
@@ -278,7 +274,7 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 		// All done
 		if (ElectionManagerPtr && PendingElections == 0)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionResponseEvent All expected reponses received");
+			CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionResponseEvent All expected reponses received");
 
 			// We should have received a valid leader event by now so check this is as expected
 			if (ElectionManagerPtr)
@@ -287,26 +283,25 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 				{
 					if (ElectionManagerPtr->Leader->GetId() == HighestResponseId)
 					{
-						FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
-										   "ClientProxy::HandleElectionResponseEvent Highest response matches elected leader");
+						CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
+									"ClientProxy::HandleElectionResponseEvent Highest response matches elected leader");
 					}
 					else
 					{
-						FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
-										   "ClientProxy::HandleElectionResponseEvent Highest response Id does not match elected leader");
+						CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
+									"ClientProxy::HandleElectionResponseEvent Highest response Id does not match elected leader");
 					}
 				}
 				else
 				{
-					FOUNDATION_LOG_MSG(csp::systems::LogLevel::VeryVerbose,
-									   "ClientProxy::HandleElectionResponseEvent Expected a valid leader by now!");
+					CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionResponseEvent Expected a valid leader by now!");
 				}
 			}
 		}
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("ClientProxy::HandleElectionResponseEvent - Response from lower Id (%d/%d)", ClientId, Id);
+		CSP_LOG_ERROR_FORMAT("ClientProxy::HandleElectionResponseEvent - Response from lower Id (%d/%d)", ClientId, Id);
 	}
 
 	// @Todo :- Handle response timeout (but this shouldn't happen with SignalR/TCP reliable connection)
@@ -314,7 +309,7 @@ void ClientProxy::HandleElectionResponseEvent(int64_t ClientId)
 
 void ClientProxy::HandleElectionLeaderEvent(int64_t LeaderId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionLeaderEvent LeaderId=%d", LeaderId);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionLeaderEvent LeaderId=%d", LeaderId);
 
 	State = ClientElectionState::Idle;
 
@@ -325,13 +320,13 @@ void ClientProxy::HandleElectionLeaderEvent(int64_t LeaderId)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ClientProxy::HandleElectionLeaderEvent - Null election manager pointer");
+		CSP_LOG_ERROR_MSG("ClientProxy::HandleElectionLeaderEvent - Null election manager pointer");
 	}
 }
 
 void ClientProxy::HandleElectionNotifyLeaderEvent(int64_t ClientId)
 {
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionNotifyLeaderEvent ClientId=%d", ClientId);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientProxy::HandleElectionNotifyLeaderEvent ClientId=%d", ClientId);
 
 	if (ElectionManagerPtr)
 	{
@@ -339,7 +334,7 @@ void ClientProxy::HandleElectionNotifyLeaderEvent(int64_t ClientId)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ClientProxy::HandleElectionLeaderEvent - Null election manager pointer");
+		CSP_LOG_ERROR_MSG("ClientProxy::HandleElectionLeaderEvent - Null election manager pointer");
 	}
 }
 

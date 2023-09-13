@@ -123,7 +123,7 @@ void SignalRConnection::SetDisconnected(const std::function<void(std::exception_
 
 void SignalRConnection::On(const std::string& EventName, const SignalRConnection::MethodInvokedHandler& Handler)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	Connection.on(EventName, Handler);
 }
@@ -132,7 +132,7 @@ void SignalRConnection::Invoke(const std::string& MethodName,
 							   const signalr::value& Arguments,
 							   std::function<void(const signalr::value&, std::exception_ptr)> Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	std::function<void(const signalr::value&, std::exception_ptr)> InvocationCallback
 		= [Callback, this](const signalr::value& Value, std::exception_ptr ExceptionPtr)
@@ -160,7 +160,7 @@ void SignalRConnection::Invoke(const std::string& MethodName,
 
 void SignalRConnection::Send(const std::string& MethodName, const signalr::value& Arguments, std::function<void(std::exception_ptr)> Callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	Connection.send(MethodName, Arguments, Callback);
 }

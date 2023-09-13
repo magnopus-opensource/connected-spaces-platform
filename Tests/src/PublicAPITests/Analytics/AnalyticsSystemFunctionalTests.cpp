@@ -44,7 +44,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 	Event->AddInt("Value", TestMetricValue);
 
 	// Send metric
-	FOUNDATION_ANALYTICS_LOG_EVENT(Event);
+	CSP_ANALYTICS_LOG_EVENT(Event);
 
 	// Call tick to process analytics events
 	csp::CSPFoundation::Tick();

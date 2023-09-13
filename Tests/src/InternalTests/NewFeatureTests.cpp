@@ -198,12 +198,12 @@ class MyCoolClass
 public:
 	MyCoolClass()
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::MyCoolClass() called!");
+		CSP_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::MyCoolClass() called!");
 	}
 
 	~MyCoolClass()
 	{
-		FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::~MyCoolClass() called!");
+		CSP_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::~MyCoolClass() called!");
 	}
 };
 
