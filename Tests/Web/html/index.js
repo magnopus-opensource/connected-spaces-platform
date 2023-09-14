@@ -11,6 +11,7 @@ import './tests/conversationsystem_tests.js';
 import './tests/anchorsystem_tests.js';
 import './tests/mimetypehelper_tests.js';
 import './tests/lod_tests.js';
+import './tests/logsystem_tests.js';
 
 import { runTests } from './test_framework.js'
 
