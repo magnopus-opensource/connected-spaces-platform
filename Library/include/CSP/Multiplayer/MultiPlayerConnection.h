@@ -52,8 +52,8 @@ enum class EAssetChangeType
 {
 	Created,
 	Updated,
-	Deleted,
 	MusubiFailed,
+	Deleted,
 	Invalid,
 	Num
 };
