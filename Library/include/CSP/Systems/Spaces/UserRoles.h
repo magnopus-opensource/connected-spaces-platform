@@ -56,7 +56,7 @@ public:
 };
 
 /// @ingroup Space System
-/// @brief Data representation of User Roles inside a space
+/// @brief Data representation of roles for an invited user inside a space
 class CSP_API InviteUserRoleInfo
 {
 public:
@@ -65,6 +65,18 @@ public:
 
 	csp::common::String UserEmail;
 	SpaceUserRole UserRole;
+};
+
+/// @ingroup Space System
+/// @brief Data representation of roles for a group of invited users and the email link to be included in the invite emails
+class CSP_API InviteUserRoleInfoCollection
+{
+public:
+	InviteUserRoleInfoCollection()											= default;
+	InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
+
+	csp::common::String EmailLinkUrl;
+	csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
 };
 
 
