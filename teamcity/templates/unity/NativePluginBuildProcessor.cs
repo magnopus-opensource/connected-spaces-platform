@@ -10,32 +10,36 @@ using UnityEngine;
 
 public class NativePluginBuildProcessor : IPreprocessBuildWithReport
 {
-   public int callbackOrder => 0;
+    public int callbackOrder => 0;
 
-   public void OnPreprocessBuild(BuildReport report)
-   {
-       Debug.Log($"NativePluginBuildProcessor: Filtering CSP binaries for platform {report.summary.platform}.");
+    public void OnPreprocessBuild(BuildReport report)
+    {
+        Debug.Log($"NativePluginBuildProcessor: Filtering CSP binaries for platform {report.summary.platform}.");
 
-       var importers = PluginImporter.GetImporters(report.summary.platform);
+        var importers = PluginImporter.GetImporters(report.summary.platform);
 
-       foreach (var importer in importers)
-       {
-           if (!importer.isNativePlugin)
-               continue;
+        foreach (var importer in importers)
+        {
+            if (!importer.isNativePlugin)
+                continue;
 
-           if (!importer.assetPath.Contains("ConnectedSpacesPlatform"))
-               continue;
+            if (!importer.assetPath.Contains("ConnectedSpacesPlatform"))
+                continue;
 
-           var ext = Path.GetExtension(importer.assetPath);
+            var ext = Path.GetExtension(importer.assetPath);
 
-           if (report.summary.options.HasFlag(BuildOptions.Development) && !importer.assetPath.EndsWith($"_D{ext}"))
-               importer.SetIncludeInBuildDelegate((_) => false);
-           else if ((!report.summary.options.HasFlag(BuildOptions.Development)) && importer.assetPath.EndsWith($"_D{ext}"))
-               importer.SetIncludeInBuildDelegate((_) => false);
-       }
+            // TODO: Remove this hack that always includes iOS and macOS binaries
+            // This was put in place because we currently only include release binaries due to debug binary sizes
+            if (report.summary.platform == BuildTarget.iOS || report.summary.platform == BuildTarget.StandaloneOSX)
+                importer.SetIncludeInBuildDelegate((_) => true);
+            else if (report.summary.options.HasFlag(BuildOptions.Development) && !importer.assetPath.EndsWith($"_D{ext}"))
+                importer.SetIncludeInBuildDelegate((_) => false);
+            else if ((!report.summary.options.HasFlag(BuildOptions.Development)) && importer.assetPath.EndsWith($"_D{ext}"))
+                importer.SetIncludeInBuildDelegate((_) => false);
+        }
 
-       Debug.Log($"NativePluginBuildProcesser: Done {report.summary.platform}.");
-   }
+        Debug.Log($"NativePluginBuildProcesser: Done {report.summary.platform}.");
+    }
 }
 
 #endif

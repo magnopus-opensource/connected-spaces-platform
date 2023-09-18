@@ -49,6 +49,7 @@ export async function logOut(userSystem) {
  * @returns {Promise<?string>} the userId of the logged in account
  */
 export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
+
     const result = await userSystem.login('', email, password);
     const resCode = result.getResultCode();
 

@@ -31,22 +31,21 @@
 //
 // This header file defines internal utilities needed for implementing
 // death tests.  They are subject to change without notice.
-// GOOGLETEST_CM0001 DO NOT DELETE
 
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
 
 #include "gtest/gtest-matchers.h"
 #include "gtest/internal/gtest-internal.h"
 #include <memory>
 #include <stdio.h>
 
+GTEST_DECLARE_string_(internal_run_death_test);
+
 namespace testing
 {
 namespace internal
 {
-
-GTEST_DECLARE_string_(internal_run_death_test);
 
 // Names of the flags (needed for parsing Google Test flags).
 const char kDeathTestStyleFlag[]	   = "death_test_style";
@@ -261,8 +260,6 @@ inline Matcher<const ::std::string&> MakeDeathTestMatcher(Matcher<const ::std::s
 						gtest_dt->Abort(::testing::internal::DeathTest::TEST_DID_NOT_DIE);                           \
 						break;                                                                                       \
 					}                                                                                                \
-					default:                                                                                         \
-						break;                                                                                       \
 				}                                                                                                    \
 			}                                                                                                        \
 		}                                                                                                            \
@@ -342,4 +339,4 @@ InternalRunDeathTestFlag* ParseInternalRunDeathTestFlag();
 } // namespace internal
 } // namespace testing
 
-#endif // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_DEATH_TEST_INTERNAL_H_

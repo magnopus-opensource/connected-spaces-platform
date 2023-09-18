@@ -32,10 +32,8 @@
 // This header file declares functions and macros used internally by
 // Google Test.  They are subject to change without notice.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
-#ifndef GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
-#define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+#define GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
 
 #include "gtest/internal/gtest-port.h"
 
@@ -547,12 +545,12 @@ inline SetUpTearDownSuiteFuncType GetNotDefaultOrNull(SetUpTearDownSuiteFuncType
 
 template <typename T>
 //  Note that SuiteApiResolver inherits from T because
-//  SetUpTestSuite()/TearDownTestSuite() could be protected. Ths way
+//  SetUpTestSuite()/TearDownTestSuite() could be protected. This way
 //  SuiteApiResolver can access them.
 struct SuiteApiResolver : T
 {
 	// testing::Test is only forward declared at this point. So we make it a
-	// dependend class for the compiler to be OK with it.
+	// dependent class for the compiler to be OK with it.
 	using Test = typename std::conditional<sizeof(T) != 0, ::testing::Test, void>::type;
 
 	static SetUpTearDownSuiteFuncType GetSetUpCaseOrSuite(const char* filename, int line_num)
@@ -625,8 +623,6 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(const char* test_suite_name,
 // and returns false.  None of pstr, *pstr, and prefix can be NULL.
 GTEST_API_ bool SkipPrefix(const char* prefix, const char** pstr);
 
-#if GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 /* class A needs to have dll-interface to be used by clients of class B */)
 
 // State of the definition of a type-parameterized test suite.
@@ -681,10 +677,10 @@ private:
 	RegisteredTestsMap registered_tests_;
 };
 
-	//  Legacy API is deprecated but still available
-	#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+//  Legacy API is deprecated but still available
+#ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 using TypedTestCasePState = TypedTestSuitePState;
-	#endif //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+#endif //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 GTEST_DISABLE_MSC_WARNINGS_POP_() //  4251
 
@@ -871,8 +867,6 @@ public:
 	}
 };
 
-#endif // GTEST_HAS_TYPED_TEST || GTEST_HAS_TYPED_TEST_P
-
 // Returns the current OS stack trace as an std::string.
 //
 // The maximum number of stack frames to be included is specified by
@@ -968,12 +962,12 @@ template <typename T> class HasDebugStringAndShortDebugString
 {
 private:
 	template <typename C>
-	static constexpr auto CheckDebugString(C*) -> typename std::is_same<std::string, decltype(std::declval<const C>().DebugString())>::type;
-	template <typename> static constexpr std::false_type CheckDebugString(...);
+	static auto CheckDebugString(C*) -> typename std::is_same<std::string, decltype(std::declval<const C>().DebugString())>::type;
+	template <typename> static std::false_type CheckDebugString(...);
 
 	template <typename C>
-	static constexpr auto CheckShortDebugString(C*) -> typename std::is_same<std::string, decltype(std::declval<const C>().ShortDebugString())>::type;
-	template <typename> static constexpr std::false_type CheckShortDebugString(...);
+	static auto CheckShortDebugString(C*) -> typename std::is_same<std::string, decltype(std::declval<const C>().ShortDebugString())>::type;
+	template <typename> static std::false_type CheckShortDebugString(...);
 
 	using HasDebugStringType	  = decltype(CheckDebugString<T>(nullptr));
 	using HasShortDebugStringType = decltype(CheckShortDebugString<T>(nullptr));
@@ -1596,7 +1590,7 @@ public:
 
 // Implements Boolean test assertions such as EXPECT_TRUE. expression can be
 // either a boolean expression or an AssertionResult. text is a textual
-// represenation of expression as it was passed into the EXPECT_TRUE.
+// representation of expression as it was passed into the EXPECT_TRUE.
 #define GTEST_TEST_BOOLEAN_(expression, text, actual, expected, fail)                        \
 	GTEST_AMBIGUOUS_ELSE_BLOCKER_                                                            \
 	if (const ::testing::AssertionResult gtest_ar_ = ::testing::AssertionResult(expression)) \
@@ -1653,4 +1647,4 @@ public:
 		new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)>);                                        \
 	void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
-#endif // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_

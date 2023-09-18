@@ -85,6 +85,8 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
 
 test('MultiplayerTests', 'ManualConnectionTest', async function() {
 
+    console.log("test start")
+
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
