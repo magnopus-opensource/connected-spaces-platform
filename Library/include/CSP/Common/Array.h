@@ -225,7 +225,7 @@ private:
 #ifndef CSP_DISABLE_OVERFLOW_CHECKING
 	#ifdef _MSC_VER // MSVC
 			auto HighBits = __umulh(sizeof(T), Size);
-	#else			// GCC or Clang
+	#else // GCC or Clang
 			auto MultiplyResult = static_cast<__uint128_t>(sizeof(T)) * static_cast<__uint128_t>(Size);
 			auto HighBits		= static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
 	#endif

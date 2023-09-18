@@ -229,6 +229,9 @@ def main():
     with open(f"{args.output_directory}/package.json.meta", "w") as f:
         f.write(minimal_meta_template.render(guid=generate_guid(), importer_type="TextScript"))
 
+    # Copy readme
+    shutil.copy(f"{config.default_output_directory}/README.md", args.output_directory)
+
     # Create and publish NPM package
     os.chdir(args.output_directory)
     subprocess.call(

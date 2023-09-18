@@ -73,7 +73,7 @@ enum class LightPropertyKeys
 	LightCookieType,
 	IsARVisible,
 	ThirdPartyComponentRef,
-    LightShadowType,
+	LightShadowType,
 	Num
 };
 
@@ -95,7 +95,7 @@ public:
 	/// @param Value The type of light of this light component.
 	void SetLightType(LightType Value);
 
-    /// @brief Gets the type of light shadow of this light component.
+	/// @brief Gets the type of light shadow of this light component.
 	/// @return The type of light shadow of this light component.
 	LightShadowType GetLightShadowType() const;
 

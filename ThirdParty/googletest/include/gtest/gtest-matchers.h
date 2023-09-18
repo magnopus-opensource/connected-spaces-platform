@@ -32,16 +32,13 @@
 // This file implements just enough of the matcher interface to allow
 // EXPECT_DEATH and friends to accept a matcher argument.
 
-// IWYU pragma: private, include "testing/base/public/gunit.h"
-// IWYU pragma: friend third_party/googletest/googlemock/.*
-// IWYU pragma: friend third_party/googletest/googletest/.*
-
-#ifndef GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
-#define GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
 
 #include "gtest/gtest-printers.h"
 #include "gtest/internal/gtest-internal.h"
 #include "gtest/internal/gtest-port.h"
+#include <atomic>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -62,20 +59,16 @@ namespace testing
 {
 
 // To implement a matcher Foo for type T, define:
-//   1. a class FooMatcherImpl that implements the
-//      MatcherInterface<T> interface, and
+//   1. a class FooMatcherMatcher that implements the matcher interface:
+//     using is_gtest_matcher = void;
+//     bool MatchAndExplain(const T&, std::ostream*);
+//       (MatchResultListener* can also be used instead of std::ostream*)
+//     void DescribeTo(std::ostream*);
+//     void DescribeNegationTo(std::ostream*);
+//
 //   2. a factory function that creates a Matcher<T> object from a
-//      FooMatcherImpl*.
-//
-// The two-level delegation design makes it possible to allow a user
-// to write "v" instead of "Eq(v)" where a Matcher is expected, which
-// is impossible if we pass matchers by pointers.  It also eases
-// ownership management as Matcher objects can now be copied like
-// plain values.
+//      FooMatcherMatcher.
 
-// MatchResultListener is an abstract class.  Its << operator can be
-// used by a matcher to explain why a value matches or doesn't match.
-//
 class MatchResultListener
 {
 public:
@@ -123,7 +116,7 @@ inline MatchResultListener::~MatchResultListener()
 
 // An instance of a subclass of this knows how to describe itself as a
 // matcher.
-class MatcherDescriberInterface
+class GTEST_API_ MatcherDescriberInterface
 {
 public:
 	virtual ~MatcherDescriberInterface()
@@ -196,39 +189,6 @@ public:
 namespace internal
 {
 
-// Converts a MatcherInterface<T> to a MatcherInterface<const T&>.
-template <typename T> class MatcherInterfaceAdapter : public MatcherInterface<const T&>
-{
-public:
-	explicit MatcherInterfaceAdapter(const MatcherInterface<T>* impl) : impl_(impl)
-	{
-	}
-	~MatcherInterfaceAdapter() override
-	{
-		delete impl_;
-	}
-
-	void DescribeTo(::std::ostream* os) const override
-	{
-		impl_->DescribeTo(os);
-	}
-
-	void DescribeNegationTo(::std::ostream* os) const override
-	{
-		impl_->DescribeNegationTo(os);
-	}
-
-	bool MatchAndExplain(const T& x, MatchResultListener* listener) const override
-	{
-		return impl_->MatchAndExplain(x, listener);
-	}
-
-private:
-	const MatcherInterface<T>* const impl_;
-
-	GTEST_DISALLOW_COPY_AND_ASSIGN_(MatcherInterfaceAdapter);
-};
-
 struct AnyEq
 {
 	template <typename A, typename B> bool operator()(const A& a, const B& b) const
@@ -298,17 +258,48 @@ private:
 	GTEST_DISALLOW_COPY_AND_ASSIGN_(StreamMatchResultListener);
 };
 
+struct SharedPayloadBase
+{
+	std::atomic<int> ref {1};
+	void Ref()
+	{
+		ref.fetch_add(1, std::memory_order_relaxed);
+	}
+	bool Unref()
+	{
+		return ref.fetch_sub(1, std::memory_order_acq_rel) == 1;
+	}
+};
+
+template <typename T> struct SharedPayload : SharedPayloadBase
+{
+	explicit SharedPayload(const T& v) : value(v)
+	{
+	}
+	explicit SharedPayload(T&& v) : value(std::move(v))
+	{
+	}
+
+	static void Destroy(SharedPayloadBase* shared)
+	{
+		delete static_cast<SharedPayload*>(shared);
+	}
+
+	T value;
+};
+
 // An internal class for implementing Matcher<T>, which will derive
 // from it.  We put functionalities common to all Matcher<T>
 // specializations here to avoid code duplication.
-template <typename T> class MatcherBase
+template <typename T> class MatcherBase : private MatcherDescriberInterface
 {
 public:
 	// Returns true if and only if the matcher matches x; also explains the
 	// match result to 'listener'.
 	bool MatchAndExplain(const T& x, MatchResultListener* listener) const
 	{
-		return impl_->MatchAndExplain(x, listener);
+		GTEST_CHECK_(vtable_ != nullptr);
+		return vtable_->match_and_explain(*this, x, listener);
 	}
 
 	// Returns true if and only if this matcher matches x.
@@ -319,15 +310,17 @@ public:
 	}
 
 	// Describes this matcher to an ostream.
-	void DescribeTo(::std::ostream* os) const
+	void DescribeTo(::std::ostream* os) const final
 	{
-		impl_->DescribeTo(os);
+		GTEST_CHECK_(vtable_ != nullptr);
+		vtable_->describe(*this, os, false);
 	}
 
 	// Describes the negation of this matcher to an ostream.
-	void DescribeNegationTo(::std::ostream* os) const
+	void DescribeNegationTo(::std::ostream* os) const final
 	{
-		impl_->DescribeNegationTo(os);
+		GTEST_CHECK_(vtable_ != nullptr);
+		vtable_->describe(*this, os, true);
 	}
 
 	// Explains why x matches, or doesn't match, the matcher.
@@ -342,36 +335,208 @@ public:
 	// this matcher object is alive.
 	const MatcherDescriberInterface* GetDescriber() const
 	{
-		return impl_.get();
+		if (vtable_ == nullptr)
+			return nullptr;
+		return vtable_->get_describer(*this);
 	}
 
 protected:
-	MatcherBase()
+	MatcherBase() : vtable_(nullptr)
 	{
 	}
 
 	// Constructs a matcher from its implementation.
-	explicit MatcherBase(const MatcherInterface<const T&>* impl) : impl_(impl)
+	template <typename U> explicit MatcherBase(const MatcherInterface<U>* impl)
 	{
+		Init(impl);
 	}
 
-	template <typename U>
-	explicit MatcherBase(const MatcherInterface<U>* impl, typename std::enable_if<!std::is_same<U, const U&>::value>::type* = nullptr)
-		: impl_(new internal::MatcherInterfaceAdapter<U>(impl))
-	{
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher> MatcherBase(M&& m)
+	{ // NOLINT
+		Init(std::forward<M>(m));
 	}
 
-	MatcherBase(const MatcherBase&) = default;
-	MatcherBase& operator=(const MatcherBase&) = default;
-	MatcherBase(MatcherBase&&)				   = default;
-	MatcherBase& operator=(MatcherBase&&) = default;
-
-	virtual ~MatcherBase()
+	MatcherBase(const MatcherBase& other) : vtable_(other.vtable_), buffer_(other.buffer_)
 	{
+		if (IsShared())
+			buffer_.shared->Ref();
+	}
+
+	MatcherBase& operator=(const MatcherBase& other)
+	{
+		if (this == &other)
+			return *this;
+		Destroy();
+		vtable_ = other.vtable_;
+		buffer_ = other.buffer_;
+		if (IsShared())
+			buffer_.shared->Ref();
+		return *this;
+	}
+
+	MatcherBase(MatcherBase&& other) : vtable_(other.vtable_), buffer_(other.buffer_)
+	{
+		other.vtable_ = nullptr;
+	}
+
+	MatcherBase& operator=(MatcherBase&& other)
+	{
+		if (this == &other)
+			return *this;
+		Destroy();
+		vtable_		  = other.vtable_;
+		buffer_		  = other.buffer_;
+		other.vtable_ = nullptr;
+		return *this;
+	}
+
+	~MatcherBase() override
+	{
+		Destroy();
 	}
 
 private:
-	std::shared_ptr<const MatcherInterface<const T&>> impl_;
+	struct VTable
+	{
+		bool (*match_and_explain)(const MatcherBase&, const T&, MatchResultListener*);
+		void (*describe)(const MatcherBase&, std::ostream*, bool negation);
+		// Returns the captured object if it implements the interface, otherwise
+		// returns the MatcherBase itself.
+		const MatcherDescriberInterface* (*get_describer)(const MatcherBase&);
+		// Called on shared instances when the reference count reaches 0.
+		void (*shared_destroy)(SharedPayloadBase*);
+	};
+
+	bool IsShared() const
+	{
+		return vtable_ != nullptr && vtable_->shared_destroy != nullptr;
+	}
+
+	// If the implementation uses a listener, call that.
+	template <typename P>
+	static auto MatchAndExplainImpl(const MatcherBase& m, const T& value, MatchResultListener* listener)
+		-> decltype(P::Get(m).MatchAndExplain(value, listener->stream()))
+	{
+		return P::Get(m).MatchAndExplain(value, listener->stream());
+	}
+
+	template <typename P>
+	static auto MatchAndExplainImpl(const MatcherBase& m, const T& value, MatchResultListener* listener)
+		-> decltype(P::Get(m).MatchAndExplain(value, listener))
+	{
+		return P::Get(m).MatchAndExplain(value, listener);
+	}
+
+	template <typename P> static void DescribeImpl(const MatcherBase& m, std::ostream* os, bool negation)
+	{
+		if (negation)
+		{
+			P::Get(m).DescribeNegationTo(os);
+		}
+		else
+		{
+			P::Get(m).DescribeTo(os);
+		}
+	}
+
+	template <typename P> static const MatcherDescriberInterface* GetDescriberImpl(const MatcherBase& m)
+	{
+		// If the impl is a MatcherDescriberInterface, then return it.
+		// Otherwise use MatcherBase itself.
+		// This allows us to implement the GetDescriber() function without support
+		// from the impl, but some users really want to get their impl back when
+		// they call GetDescriber().
+		// We use std::get on a tuple as a workaround of not having `if constexpr`.
+		return std::get<(std::is_convertible<decltype(&P::Get(m)), const MatcherDescriberInterface*>::value ? 1 : 0)>(
+			std::make_tuple(&m, &P::Get(m)));
+	}
+
+	template <typename P> const VTable* GetVTable()
+	{
+		static constexpr VTable kVTable = {&MatchAndExplainImpl<P>, &DescribeImpl<P>, &GetDescriberImpl<P>, P::shared_destroy};
+		return &kVTable;
+	}
+
+	union Buffer
+	{
+		// Add some types to give Buffer some common alignment/size use cases.
+		void* ptr;
+		double d;
+		int64_t i;
+		// And add one for the out-of-line cases.
+		SharedPayloadBase* shared;
+	};
+
+	void Destroy()
+	{
+		if (IsShared() && buffer_.shared->Unref())
+		{
+			vtable_->shared_destroy(buffer_.shared);
+		}
+	}
+
+	template <typename M> static constexpr bool IsInlined()
+	{
+		return sizeof(M) <= sizeof(Buffer) && alignof(M) <= alignof(Buffer) && std::is_trivially_copy_constructible<M>::value
+			   && std::is_trivially_destructible<M>::value;
+	}
+
+	template <typename M, bool = MatcherBase::IsInlined<M>()> struct ValuePolicy
+	{
+		static const M& Get(const MatcherBase& m)
+		{
+			// When inlined along with Init, need to be explicit to avoid violating
+			// strict aliasing rules.
+			const M* ptr = static_cast<const M*>(static_cast<const void*>(&m.buffer_));
+			return *ptr;
+		}
+		static void Init(MatcherBase& m, M impl)
+		{
+			::new (static_cast<void*>(&m.buffer_)) M(impl);
+		}
+		static constexpr auto shared_destroy = nullptr;
+	};
+
+	template <typename M> struct ValuePolicy<M, false>
+	{
+		using Shared = SharedPayload<M>;
+		static const M& Get(const MatcherBase& m)
+		{
+			return static_cast<Shared*>(m.buffer_.shared)->value;
+		}
+		template <typename Arg> static void Init(MatcherBase& m, Arg&& arg)
+		{
+			m.buffer_.shared = new Shared(std::forward<Arg>(arg));
+		}
+		static constexpr auto shared_destroy = &Shared::Destroy;
+	};
+
+	template <typename U, bool B> struct ValuePolicy<const MatcherInterface<U>*, B>
+	{
+		using M		 = const MatcherInterface<U>;
+		using Shared = SharedPayload<std::unique_ptr<M>>;
+		static const M& Get(const MatcherBase& m)
+		{
+			return *static_cast<Shared*>(m.buffer_.shared)->value;
+		}
+		static void Init(MatcherBase& m, M* impl)
+		{
+			m.buffer_.shared = new Shared(std::unique_ptr<M>(impl));
+		}
+
+		static constexpr auto shared_destroy = &Shared::Destroy;
+	};
+
+	template <typename M> void Init(M&& m)
+	{
+		using MM	 = typename std::decay<M>::type;
+		using Policy = ValuePolicy<MM>;
+		vtable_		 = GetVTable<Policy>();
+		Policy::Init(*this, std::forward<M>(m));
+	}
+
+	const VTable* vtable_;
+	Buffer buffer_;
 };
 
 } // namespace internal
@@ -401,6 +566,11 @@ public:
 	{
 	}
 
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher>
+	Matcher(M&& m) : internal::MatcherBase<T>(std::forward<M>(m))
+	{
+	} // NOLINT
+
 	// Implicit constructor here allows people to write
 	// EXPECT_CALL(foo, Bar(5)) instead of EXPECT_CALL(foo, Bar(Eq(5))) sometimes
 	Matcher(T value); // NOLINT
@@ -417,6 +587,12 @@ public:
 	}
 
 	explicit Matcher(const MatcherInterface<const std::string&>* impl) : internal::MatcherBase<const std::string&>(impl)
+	{
+	}
+
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher>
+	Matcher(M&& m) // NOLINT
+		: internal::MatcherBase<const std::string&>(std::forward<M>(m))
 	{
 	}
 
@@ -439,6 +615,12 @@ public:
 	{
 	}
 	explicit Matcher(const MatcherInterface<std::string>* impl) : internal::MatcherBase<std::string>(impl)
+	{
+	}
+
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher>
+	Matcher(M&& m) // NOLINT
+		: internal::MatcherBase<std::string>(std::forward<M>(m))
 	{
 	}
 
@@ -465,6 +647,12 @@ public:
 	{
 	}
 
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher>
+	Matcher(M&& m) // NOLINT
+		: internal::MatcherBase<const internal::StringView&>(std::forward<M>(m))
+	{
+	}
+
 	// Allows the user to write str instead of Eq(str) sometimes, where
 	// str is a std::string object.
 	Matcher(const std::string& s); // NOLINT
@@ -487,6 +675,12 @@ public:
 	{
 	}
 	explicit Matcher(const MatcherInterface<internal::StringView>* impl) : internal::MatcherBase<internal::StringView>(impl)
+	{
+	}
+
+	template <typename M, typename = typename std::remove_reference<M>::type::is_gtest_matcher>
+	Matcher(M&& m) // NOLINT
+		: internal::MatcherBase<internal::StringView>(std::forward<M>(m))
 	{
 	}
 
@@ -618,9 +812,22 @@ public:
 	explicit ComparisonBase(const Rhs& rhs) : rhs_(rhs)
 	{
 	}
-	template <typename Lhs> operator Matcher<Lhs>() const
+
+	using is_gtest_matcher = void;
+
+	template <typename Lhs> bool MatchAndExplain(const Lhs& lhs, std::ostream*) const
 	{
-		return Matcher<Lhs>(new Impl<const Lhs&>(rhs_));
+		return Op()(lhs, Unwrap(rhs_));
+	}
+	void DescribeTo(std::ostream* os) const
+	{
+		*os << D::Desc() << " ";
+		UniversalPrint(Unwrap(rhs_), os);
+	}
+	void DescribeNegationTo(std::ostream* os) const
+	{
+		*os << D::NegatedDesc() << " ";
+		UniversalPrint(Unwrap(rhs_), os);
 	}
 
 private:
@@ -633,30 +840,6 @@ private:
 		return v;
 	}
 
-	template <typename Lhs, typename = Rhs> class Impl : public MatcherInterface<Lhs>
-	{
-	public:
-		explicit Impl(const Rhs& rhs) : rhs_(rhs)
-		{
-		}
-		bool MatchAndExplain(Lhs lhs, MatchResultListener* /* listener */) const override
-		{
-			return Op()(lhs, Unwrap(rhs_));
-		}
-		void DescribeTo(::std::ostream* os) const override
-		{
-			*os << D::Desc() << " ";
-			UniversalPrint(Unwrap(rhs_), os);
-		}
-		void DescribeNegationTo(::std::ostream* os) const override
-		{
-			*os << D::NegatedDesc() << " ";
-			UniversalPrint(Unwrap(rhs_), os);
-		}
-
-	private:
-		Rhs rhs_;
-	};
 	Rhs rhs_;
 };
 
@@ -895,4 +1078,4 @@ template <typename Rhs> inline internal::NeMatcher<Rhs> Ne(Rhs x)
 
 GTEST_DISABLE_MSC_WARNINGS_POP_() //  4251 5046
 
-#endif // GTEST_INCLUDE_GTEST_GTEST_MATCHERS_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_GTEST_MATCHERS_H_

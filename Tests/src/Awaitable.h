@@ -19,6 +19,7 @@
 #include <chrono>
 #include <functional>
 #include <stdexcept>
+#include <thread>
 #include <tuple>
 
 using namespace std::chrono_literals;
@@ -300,21 +301,31 @@ public:
 	/// <returns>The arguments passed to the asynchronous callback upon completion.</returns>
 	ResultType Await(std::chrono::duration<int> Timeout, std::function<bool(CallbackArgs...)> Predicate = nullptr)
 	{
-		if (Predicate != nullptr)
-		{
-			Function(
-				[this, Predicate](CallbackArgs... _Args)
+#ifdef CSP_WASM
+		// Spawn thread on wasm to prevent wait loop from blocking the async operation
+		std::thread TestThread(
+			[&]()
+			{
+#endif
+				if (Predicate != nullptr)
 				{
-					if (Predicate(_Args...))
-					{
-						Callback(_Args...);
-					}
-				});
-		}
-		else
-		{
-			Function(Callback);
-		}
+					Function(
+						[this, Predicate](CallbackArgs... _Args)
+						{
+							if (Predicate(_Args...))
+							{
+								Callback(_Args...);
+							}
+						});
+				}
+				else
+				{
+					Function(Callback);
+				}
+
+#ifdef CSP_WASM
+			});
+#endif
 
 		auto StartTime = std::chrono::system_clock::now();
 		auto EndTime   = StartTime + Timeout;
@@ -328,6 +339,10 @@ public:
 
 			std::this_thread::sleep_for(1ms);
 		}
+
+#ifdef CSP_WASM
+		TestThread.join();
+#endif
 
 		return *Result;
 	}
