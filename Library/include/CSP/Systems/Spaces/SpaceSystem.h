@@ -174,8 +174,8 @@ public:
 	/// @param Space Space : space to invite to
 	/// @param Email csp::common::String : email to invite to space
 	/// @param IsModeratorRole csp::common::Optional<bool> : if present and true sets the user's role in the space to "Moderator", pass false or
-	/// @param EmailLinkUrl csp::common::Optional<csp::common::String> : link that will be provided in the invite email
 	/// nullptr to leave role as default
+	/// @param EmailLinkUrl csp::common::Optional<csp::common::String> : link that will be provided in the invite email
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void InviteToSpace(const csp::common::String& SpaceId,
 										const csp::common::String& Email,
