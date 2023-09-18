@@ -10,7 +10,7 @@ if not Tests then
         project "Tests"
         location "Tests"
         
-        kind "ConsoleApp"
+        kind "None"
         
         files {
             "%{prj.location}/src/**.h",
@@ -32,8 +32,10 @@ if not Tests then
         
         -- Set tests executable name
         filter "platforms:x64"
+			kind "ConsoleApp"
             targetname( "Tests" )
         filter "platforms:wasm"
+			kind "ConsoleApp"
             targetname( "Tests_WASM.js" )
         filter {}
 
