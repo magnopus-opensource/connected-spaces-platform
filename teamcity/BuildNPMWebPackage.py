@@ -48,6 +48,9 @@ def get_arguments_commandline():
     parser.add_argument('--release_mode',
                         help="NPM release command, pack and publish are available.",
                         default="pack")
+    parser.add_argument('--scope',
+                        help="Enter the scope of the published package. Appends the registry URL.",
+                        default=None)
                      
     args = parser.parse_args()
 
@@ -122,7 +125,7 @@ def create_package_file(input_args, output_path):
         '  "main": "./connectedspacesplatform.js",\n',
         '  "types": "./connectedspacesplatform.d.ts",\n',
         '  "publishConfig": {\n',
-       f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
+       f'    "registry": "{input_args.registry}/{input_args.scope}"\n',
         '  },\n'
         '  "repository": "https://github.com/magnopus-opensource/connected-spaces-platform"'
         '}\n'
