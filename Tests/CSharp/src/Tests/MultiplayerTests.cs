@@ -325,11 +325,13 @@ namespace CSPEngine
             // Log in
             _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Services.EResultCode.Success, false);
 
-            // Create space
-            var InviteUser1 = new Systems.InviteUserRoleInfo { UserEmail = UserSystemTests.DefaultLoginEmail, UserRole = Systems.SpaceUserRole.User };
-            Systems.InviteUserRoleInfo[] InviteUsers = { InviteUser1 };
+            var InviteUsers = new Systems.InviteUserRoleInfoCollection();
+            InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
+            InviteUsers.InviteUserRoleInfos = new Csp.Common.Array<Systems.InviteUserRoleInfo>(1);
+            InviteUsers.InviteUserRoleInfos[0] = new Systems.InviteUserRoleInfo { UserEmail = UserSystemTests.DefaultLoginEmail, UserRole = Systems.SpaceUserRole.User };
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers.ToFoundationArray(), null, pushCleanupFunction: false);
+            // Create space
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, pushCleanupFunction: false);
 
             var connection = CreateMultiplayerConnection(space.Id, false);
             var entitySystem = connection.GetSpaceEntitySystem();

@@ -35,7 +35,7 @@ namespace CSPEngine
         /// <remarks>Automatically deletes and disposes the created space after each test unless otherwise specified.</remarks>
         public static Systems.Space CreateSpace(Systems.SpaceSystem spaceSystem, string name, string description,
             Systems.SpaceAttributes spaceAttributes, Common.Map<string, string>? spaceMetadata, 
-            Common.Array<Systems.InviteUserRoleInfo>? inviteUsers, Systems.FileAssetDataSource? thumbnail,
+            Systems.InviteUserRoleInfoCollection? inviteUsers, Systems.FileAssetDataSource? thumbnail,
             bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
             var testMetadata = spaceMetadata;
@@ -65,7 +65,7 @@ namespace CSPEngine
         /// <remarks>Automatically deletes and disposes the created space after each test unless otherwise specified.</remarks>
         public static Systems.Space CreateSpaceWithBuffer(Systems.SpaceSystem spaceSystem, string name, string description,
             Systems.SpaceAttributes spaceAttributes, Common.Map<string, string>? spaceMetadata,
-            Common.Array<Systems.InviteUserRoleInfo>? inviteUsers, Systems.BufferAssetDataSource thumbnail,
+            Systems.InviteUserRoleInfoCollection? inviteUsers, Systems.BufferAssetDataSource thumbnail,
             bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
             var testMetadata = spaceMetadata;
@@ -290,7 +290,7 @@ namespace CSPEngine
             return (fileName == uriFileName);
         }
 
-        static Common.Array<Systems.InviteUserRoleInfo> CreateInviteUsers()
+        static Systems.InviteUserRoleInfoCollection CreateInviteUsers()
         {
             // Create normal users
             var InviteUser1 = new Systems.InviteUserRoleInfo { UserEmail = "testnopus.pokemon+1@magnopus.com", UserRole = Systems.SpaceUserRole.User };
@@ -300,8 +300,15 @@ namespace CSPEngine
             var ModInviteUser1 = new Systems.InviteUserRoleInfo { UserEmail = "testnopus.pokemon+mod1@magnopus.com", UserRole = Systems.SpaceUserRole.Moderator };
             var ModInviteUser2 = new Systems.InviteUserRoleInfo { UserEmail = "testnopus.pokemon+mod2@magnopus.com", UserRole = Systems.SpaceUserRole.Moderator };
 
-            Systems.InviteUserRoleInfo[] InviteUsers = { InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2 };
-            return InviteUsers.ToFoundationArray<Systems.InviteUserRoleInfo>();
+            var InviteUsers = new Systems.InviteUserRoleInfoCollection();
+            InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
+            InviteUsers.InviteUserRoleInfos = new Csp.Common.Array<Systems.InviteUserRoleInfo>(4);
+            InviteUsers.InviteUserRoleInfos[0] = InviteUser1;
+            InviteUsers.InviteUserRoleInfos[1] = InviteUser2;
+            InviteUsers.InviteUserRoleInfos[2] = ModInviteUser1;
+            InviteUsers.InviteUserRoleInfos[3] = ModInviteUser2;
+
+            return InviteUsers;
         }
 
 
@@ -1017,6 +1024,7 @@ namespace CSPEngine
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testEmailLinkUrl = "https://dev.magnoverse.space";
 
             // Log in with alt account first to get its ID
             var altUserId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
@@ -1027,7 +1035,7 @@ namespace CSPEngine
 
             using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
 
-            using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true).Result;
+            using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, testEmailLinkUrl).Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 
             GetRoleForSpecificUser(spaceSystem, space, altUserId, out var userRoleInfo);
@@ -1261,12 +1269,13 @@ namespace CSPEngine
 
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testEmailLinkUrl = "https://dev.magnoverse.space";
 
             _ = UserSystemTests.LogIn(userSystem);
 
             var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null).Result;
+            using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null, testEmailLinkUrl).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);

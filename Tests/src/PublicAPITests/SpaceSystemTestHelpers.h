@@ -25,7 +25,7 @@ void CreateSpace(csp::systems::SpaceSystem* SpaceSystem,
 				 const csp::common::String& Description,
 				 csp::systems::SpaceAttributes SpaceAttributes,
 				 const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-				 const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
+				 const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
 				 const csp::common::Optional<csp::systems::FileAssetDataSource>& Thumbnail,
 				 csp::systems::Space& OutSpace);
 void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem,
@@ -33,7 +33,7 @@ void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem,
 						   const csp::common::String& Description,
 						   csp::systems::SpaceAttributes SpaceAttributes,
 						   const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-						   const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
+						   const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
 						   csp::systems::BufferAssetDataSource& Thumbnail,
 						   csp::systems::Space& OutSpace);
 void DeleteSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId);
