@@ -9,9 +9,18 @@ if not Tests then
     function Tests.AddProject()
         project "Tests"
         location "Tests"
-        
-        kind "None"
-        
+		
+		filter "platforms:x64"
+			kind "ConsoleApp"
+		filter "platforms:wasm"
+			kind "ConsoleApp"
+		filter "platforms:Android"
+			kind "None"
+		filter "platforms:ios"
+			kind "None"
+`		filter "platforms:macosx"
+			kind "None"
+			
         files {
             "%{prj.location}/src/**.h",
             "%{prj.location}/src/**.cpp",
@@ -32,10 +41,8 @@ if not Tests then
         
         -- Set tests executable name
         filter "platforms:x64"
-			kind "ConsoleApp"
             targetname( "Tests" )
         filter "platforms:wasm"
-			kind "ConsoleApp"
             targetname( "Tests_WASM.js" )
         filter {}
 
