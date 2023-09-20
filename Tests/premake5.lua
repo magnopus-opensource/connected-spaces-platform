@@ -18,7 +18,7 @@ if not Tests then
 			kind "None"
 		filter "platforms:ios"
 			kind "None"
-`		filter "platforms:macosx"
+		filter "platforms:macosx"
 			kind "None"
 			
         files {
