@@ -9,18 +9,7 @@ if not Tests then
     function Tests.AddProject()
         project "Tests"
         location "Tests"
-		
-		filter "platforms:x64"
-			kind "ConsoleApp"
-		filter "platforms:wasm"
-			kind "ConsoleApp"
-		filter "platforms:Android"
-			kind "None"
-		filter "platforms:ios"
-			kind "None"
-		filter "platforms:macosx"
-			kind "None"
-			
+        
         files {
             "%{prj.location}/src/**.h",
             "%{prj.location}/src/**.cpp",
@@ -42,8 +31,10 @@ if not Tests then
         -- Set tests executable name
         filter "platforms:x64"
             targetname( "Tests" )
+			removeplatforms  { "ios", "macosx", "macosx", "Android", "wasm" }
         filter "platforms:wasm"
             targetname( "Tests_WASM.js" )
+			removeplatforms  { "ios", "macosx", "macosx", "Android", "x64" }
         filter {}
 
         -- Tell Connected Spaces Platform we're compiling tests

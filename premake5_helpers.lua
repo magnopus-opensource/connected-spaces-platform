@@ -22,23 +22,28 @@ if not CSP then
         
         -- Config for platforms
         filter "platforms:x64"
+			kind "ConsoleApp"
             system "Windows"
             systemversion "10.0.17763.0"
             architecture "x86_64"
         filter "platforms:Android"
+			kind "None"
             system "Android"
             architecture("ARM64")
             stl("libc++")
             exceptionhandling ("On")
         filter "platforms:macosx"
+			kind "None"
             system "macosx"
             systemversion "10.15"
             architecture "x86_64"
         filter "platforms:ios"
+			kind "None"
             system "ios"
             systemversion "15.0"
             architecture "x86_64"
 		filter "platforms:wasm"
+			kind "ConsoleApp"
             system "linux"
             architecture "x86"
         filter {}
@@ -149,6 +154,10 @@ if not CSP then
 
     function CSP.IsTargettingMacOS()
         return os.istarget("macosx") or os.istarget("ios")
+    end
+
+    function CSP.IsTargettingAndroid()
+        return os.istarget("android")
     end
 
     function CSP.IsGeneratingVS()
