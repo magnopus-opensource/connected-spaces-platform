@@ -81,10 +81,14 @@ if not Project then
 			"%{wks.location}/modules/tinyspline/src",
         }
 
+        filter { "platforms:not wasm", "platforms:not Android" }
+            externalincludedirs {
+                -- mimalloc is not used in WASM or Android builds 
+                "%{wks.location}/ThirdParty/mimalloc/include"
+            }
         filter "platforms:not wasm"
             externalincludedirs {
-                -- mimalloc and POCO are not used in WASM builds 
-                "%{wks.location}/ThirdParty/mimalloc/include",
+                -- POCO is not used in WASM builds
                 "%{wks.location}/ThirdParty/poco/Foundation/include",
                 "%{wks.location}/ThirdParty/poco/Util/include",
                 "%{wks.location}/ThirdParty/poco/Net/include",
@@ -158,7 +162,10 @@ if not Project then
                 "WS2_32"
             }
         filter "platforms:Android"
-            defines { "CSP_ANDROID" }
+            defines {
+                "CSP_ANDROID",
+                "USE_STD_MALLOC=1"
+            }
             staticruntime("On")
 
             linkoptions { "-lm" } -- For gcc's math lib
@@ -297,12 +304,14 @@ if not Project then
 			"tinyspline"
         }
 
+        filter { "platforms:not wasm", "platforms:not Android" }
+            links {
+                "mimalloc"
+            }
         filter "platforms:not wasm"
             links {
-                "POCONetSSL_OpenSSL",
-                "mimalloc",
+                "POCONetSSL_OpenSSL"
             }
-
         filter {}
 
         -- Debug/Release config settings
@@ -337,10 +346,18 @@ if not Project then
         end
         
         --Add the following projects only for a non WebAssembly project generation
-        if not CSP.IsWebAssemblyGeneration() then
+        if not CSP.IsWebAssemblyGeneration() and not CSP.IsTargettingAndroid() then
             if not CSP.IsGeneratingCSharpOnMac() then
                 MiMalloc.AddProject()
+            end
 
+            if not CSP.IsGeneratingCPPOnMac() then
+                WrapperGenerator.AddProject()
+            end
+        end
+
+        if not CSP.IsWebAssemblyGeneration() then
+            if not CSP.IsGeneratingCSharpOnMac() then
                 group("POCO")
                     POCO.Foundation.AddProject()
                     POCO.Util.AddProject()
@@ -348,10 +365,6 @@ if not Project then
                     POCO.Crypto.AddProject()
                     POCO.NETSSL_OpenSSL.AddProject()
                 group("")
-            end
-
-            if not CSP.IsGeneratingCPPOnMac() then
-                WrapperGenerator.AddProject()
             end
         end
     end

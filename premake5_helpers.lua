@@ -151,6 +151,10 @@ if not CSP then
         return os.istarget("macosx") or os.istarget("ios")
     end
 
+    function CSP.IsTargettingAndroid()
+        return os.istarget("android")
+    end
+
     function CSP.IsGeneratingVS()
         return _ACTION:find("vs20", 1, #"vs20")
     end
