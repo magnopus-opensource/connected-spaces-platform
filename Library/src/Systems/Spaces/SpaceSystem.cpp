@@ -190,7 +190,7 @@ const Space& SpaceSystem::GetCurrentSpace() const
 void SpaceSystem::CreateSpace(const String& Name,
 							  const String& Description,
 							  SpaceAttributes Attributes,
-							  const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+							  const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 							  const Map<String, String>& Metadata,
 							  const Optional<FileAssetDataSource>& Thumbnail,
 							  SpaceResultCallback Callback)
@@ -246,7 +246,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 				return;
 			}
 
-			if (InviteUsers.HasValue() && !InviteUsers->IsEmpty())
+			if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
 			{
 				BulkInviteToSpace(Space.Id, *InviteUsers, BulkInviteCallback);
 			}
@@ -278,7 +278,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 			{
 				AddSpaceThumbnail(Space.Id, *Thumbnail, UploadSpaceThumbnailCallback);
 			}
-			else if (InviteUsers.HasValue() && !InviteUsers->IsEmpty())
+			else if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
 			{
 				BulkInviteToSpace(Space.Id, *InviteUsers, BulkInviteCallback);
 			}
@@ -298,7 +298,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 										const String& Description,
 										SpaceAttributes Attributes,
-										const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+										const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 										const Map<String, String>& Metadata,
 										const BufferAssetDataSource& Thumbnail,
 										SpaceResultCallback Callback)
@@ -353,7 +353,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 				return;
 			}
 
-			if (InviteUsers.HasValue() && !InviteUsers->IsEmpty())
+			if (InviteUsers.HasValue() && !InviteUsers->InviteUserRoleInfos.IsEmpty())
 			{
 				BulkInviteToSpace(Space.Id, *InviteUsers, BulkInviteCallback);
 			}
@@ -562,6 +562,7 @@ void SpaceSystem::GetSpace(const String& SpaceId, SpaceResultCallback Callback)
 void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 								const String& Email,
 								const Optional<bool>& IsModeratorRole,
+								const Optional<String>& EmailLinkUrl,
 								NullResultCallback Callback)
 {
 	auto GroupInviteInfo = std::make_shared<chs::GroupInviteDto>();
@@ -572,24 +573,37 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 		GroupInviteInfo->SetAsModerator(*IsModeratorRole);
 	}
 
+	auto EmailLinkUrlParam = EmailLinkUrl.HasValue() && !EmailLinkUrl->IsEmpty() ? (*EmailLinkUrl) : std::optional<String>(std::nullopt);
+
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																								nullptr,
 																								csp::web::EResponseCodes::ResponseNoContent);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitePost(SpaceId, std::nullopt, GroupInviteInfo, ResponseHandler);
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesPost(SpaceId,
+																			  std::nullopt,
+																			  EmailLinkUrlParam,
+																			  GroupInviteInfo,
+																			  ResponseHandler);
 }
 
-void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const Array<InviteUserRoleInfo>& InviteUsers, NullResultCallback Callback)
+void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback)
 {
-	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites = systems::SpaceSystemHelpers::GenerateGroupInvites(InviteUsers);
+	std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites
+		= systems::SpaceSystemHelpers::GenerateGroupInvites(InviteUsers.InviteUserRoleInfos);
+
+	auto EmailLinkUrlParam = !InviteUsers.EmailLinkUrl.IsEmpty() ? (InviteUsers.EmailLinkUrl) : std::optional<String>(std::nullopt);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																								nullptr,
 																								csp::web::EResponseCodes::ResponseNoContent);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(SpaceId, std::nullopt, std::nullopt, GroupInvites, ResponseHandler);
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(SpaceId,
+																				  std::nullopt,
+																				  EmailLinkUrlParam,
+																				  GroupInvites,
+																				  ResponseHandler);
 }
 
 void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesResultCallback Callback)

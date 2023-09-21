@@ -33,7 +33,7 @@ export async function deleteSpace(spaceSystem, space, deleteFoundationResources 
  * @param {!string} description 
  * @param {!Systems.SpaceAttributes} type 
  * @param {?Common.Map<string, string>} [metadata] 
- * @param {?Common.Array<Systems.InviteUserRoleInfo>} [inviteUsers]
+ * @param {?Systems.InviteUserRoleInfoCollection} [inviteUsers]
  * @param {?Systems.FileAssetDataSource} [thumbnail] 
  * @param {!boolean} [pushCleanup] 
  * @param {!boolean} [deleteFoundationResources] 
@@ -127,30 +127,32 @@ export async function updateSpace(spaceSystem, space, newName = null, newDescrip
 }
 
 export function createInviteUsers() {
-    const inviteUsers = Common.Array.ofcsp_systems_InviteUserRoleInfo_number(4);
+    const inviteUsers = Systems.InviteUserRoleInfoCollection.create();
+    inviteUsers.emailLinkUrl = "https://dev.magnoverse.space";
+    inviteUsers.inviteUserRoleInfos = Common.Array.ofcsp_systems_InviteUserRoleInfo_number(4);
 
     const inviteUser1 = Systems.InviteUserRoleInfo.create();
     inviteUser1.userEmail = "testnopus.pokemon+1@magnopus.com";
     inviteUser1.userRole = Systems.SpaceUserRole.User;
-    inviteUsers.set(0, inviteUser1);
+    inviteUsers.inviteUserRoleInfos.set(0, inviteUser1);
     inviteUser1.delete();
 
     const inviteUser2 = Systems.InviteUserRoleInfo.create();
     inviteUser2.userEmail = "testnopus.pokemon+2@magnopus.com";
     inviteUser2.userRole = Systems.SpaceUserRole.User;
-    inviteUsers.set(1, inviteUser2);
+    inviteUsers.inviteUserRoleInfos.set(1, inviteUser2);
     inviteUser2.delete();
 
     const modUser1 = Systems.InviteUserRoleInfo.create();
     modUser1.userEmail = "testnopus.pokemon+mod1@magnopus.com";
     modUser1.userRole = Systems.SpaceUserRole.Moderator;
-    inviteUsers.set(2, modUser1);
+    inviteUsers.inviteUserRoleInfos.set(2, modUser1);
     modUser1.delete();
 
     const modUser2 = Systems.InviteUserRoleInfo.create();
     modUser2.userEmail = "testnopus.pokemon+mod2@magnopus.com";
     modUser2.userRole = Systems.SpaceUserRole.Moderator;
-    inviteUsers.set(3, modUser2);
+    inviteUsers.inviteUserRoleInfos.set(3, modUser2);
     modUser2.delete();
 
     return inviteUsers;

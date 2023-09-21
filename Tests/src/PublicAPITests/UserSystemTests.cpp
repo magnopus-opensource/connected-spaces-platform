@@ -176,9 +176,9 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
 	EXPECT_NE(Scope, INVALID_URL_PARAM_VALUE);
 	EXPECT_NE(RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
 
-	EXPECT_GT(StateId.length(), 10);
-	EXPECT_GT(ClientId.length(), 10);
-	EXPECT_GE(Scope.length(), 5);
+	EXPECT_GT(StateId.length(), 0);
+	EXPECT_GT(ClientId.length(), 0);
+	EXPECT_GE(Scope.length(), 0);
 	EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 

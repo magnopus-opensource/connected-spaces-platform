@@ -45,7 +45,7 @@ test('SpaceSystemTests', 'CreateSpaceWithBulkInviteTest', async function() {
     assert.succeeded(pendingUserInvitesResult);
 
     const pendingUserInviteEmails = pendingUserInvitesResult.getPendingInvitesEmails();
-    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.size());
+    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.inviteUserRoleInfos.size());
 
     pendingUserInvitesResult.delete();
     inviteUsers.delete();
@@ -520,7 +520,7 @@ test('SpaceSystemTests', 'BulkInviteToSpaceTest', async function() {
     assert.succeeded(pendingUserInvitesResult);
 
     const pendingUserInviteEmails = pendingUserInvitesResult.getPendingInvitesEmails();
-    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.size());
+    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.inviteUserRoleInfos.size());
 
     pendingUserInvitesResult.delete();
     inviteUsers.delete();
