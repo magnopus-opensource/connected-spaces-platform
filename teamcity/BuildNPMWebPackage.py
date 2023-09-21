@@ -86,14 +86,16 @@ def create_output_path(output_path):
 
 def copy_packages_in(input_args, output_path):
     input_paths = []
-
+    print("Copying packages...")
     rel_wasm_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_wasm_path)
     if os.path.isdir(rel_wasm_path):
         input_paths.append(rel_wasm_path)
+        print("Wasm path created")
 
     rel_typescript_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_typescript_path)
     if os.path.isdir(rel_typescript_path):
         input_paths.append(rel_typescript_path)
+        print("typescript path created")
 
     for path in input_paths:
         for file in os.listdir(path):
@@ -105,8 +107,10 @@ def copy_packages_in(input_args, output_path):
                 shutil.copy2(file_path, output_path)
 
     if(input_paths):
+        print("input paths true")
         return True
     else:
+        print("input paths false")
         return False
 
 
