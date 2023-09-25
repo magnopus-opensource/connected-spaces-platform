@@ -117,7 +117,6 @@ if not CSP then
         function CSP.Platforms.AddAndroid()
             if not os.istarget("macosx") and not os.istarget("ios") then -- If on windows
                 platforms { "Android" }
-                androidapilevel(30)
             end
         end
         
