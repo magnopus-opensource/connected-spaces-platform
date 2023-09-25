@@ -122,6 +122,7 @@ if not CSP then
         function CSP.Platforms.AddAndroid()
             if not os.istarget("macosx") and not os.istarget("ios") then -- If on windows
                 platforms { "Android" }
+                androidapilevel(30)
             end
         end
         
@@ -154,10 +155,6 @@ if not CSP then
 
     function CSP.IsTargettingMacOS()
         return os.istarget("macosx") or os.istarget("ios")
-    end
-
-    function CSP.IsTargettingAndroid()
-        return os.istarget("android")
     end
 
     function CSP.IsGeneratingVS()
