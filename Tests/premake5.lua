@@ -9,7 +9,11 @@ if not Tests then
     function Tests.AddProject()
         project "Tests"
         location "Tests"
+
+        kind "ConsoleApp"
         
+        removeplatforms  { "ios", "macosx", "Android" }
+
         files {
             "%{prj.location}/src/**.h",
             "%{prj.location}/src/**.cpp",
@@ -31,10 +35,8 @@ if not Tests then
         -- Set tests executable name
         filter "platforms:x64"
             targetname( "Tests" )
-			removeplatforms  { "ios", "macosx", "macosx", "Android", "wasm" }
         filter "platforms:wasm"
             targetname( "Tests_WASM.js" )
-			removeplatforms  { "ios", "macosx", "macosx", "Android", "x64" }
         filter {}
 
         -- Tell Connected Spaces Platform we're compiling tests
@@ -53,8 +55,6 @@ if not Tests then
         filter "platforms:x64"
             defines { "CSP_WINDOWS" }
             linkoptions { "/ignore:4099"} -- Because we don't have debug symbols for OpenSSL libs
-        filter "platforms:Android"
-            defines { "CSP_ANDROID" }
         filter "platforms:wasm"
             rtti("Off")
 
@@ -151,17 +151,17 @@ if not Tests then
         filter {}
 
         filter "platforms:x64"
-            
             -- All configs need their assets in the right place
             postbuildcommands {
                 "{COPY} %{prj.location}\\assets\\ %{cfg.buildtarget.directory}\\assets\\"
             }
         filter {}
+
         -- The tests project depend on ConnectedSpacesPlatform first finishing in order to be able to guarantee the DLLs exist before we copy them
         -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
         dependson {"ConnectedSpacesPlatform"}
             
-	filter "platforms:x64"
+	    filter "platforms:x64"
             postbuildcommands {
                 "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}"
             }
