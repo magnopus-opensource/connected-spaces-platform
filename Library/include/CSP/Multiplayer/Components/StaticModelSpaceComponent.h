@@ -123,9 +123,9 @@ public:
 	/// \addtogroup IShadowCasterComponent
 	/// @{
 	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
-	bool GetIsShadowCaster() const;
+	bool GetIsShadowCaster() const override;
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-	void SetIsShadowCaster(bool Value);
+	void SetIsShadowCaster(bool Value) override;
 	/// @}
 };
 
