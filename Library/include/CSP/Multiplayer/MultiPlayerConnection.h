@@ -101,10 +101,8 @@ public:
 	friend class csp::systems::SpaceSystem;
 	/** @endcond */
 
-	[[deprecated("Multiplayer construction at the client layer will soon be removed. Please migrate your multiplayer connection related code to "
-				 "instead use the object returned when entering a space.")]] MultiplayerConnection(csp::common::String InSpaceId);
-	[[deprecated("Multiplayer deconstruction at the client layer will soon be removed. Please migrate your multiplayer connection related code to "
-				 "passing the object when exting a space.")]] ~MultiplayerConnection();
+	MultiplayerConnection(csp::common::String InSpaceId);
+	~MultiplayerConnection();
 
 	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
