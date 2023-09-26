@@ -161,7 +161,7 @@ if not Tests then
         -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
         dependson {"ConnectedSpacesPlatform"}
             
-	    filter "platforms:x64"
+		filter "platforms:x64"
             postbuildcommands {
                 "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}"
             }
