@@ -110,13 +110,13 @@ public:
 	/// \addtogroup IVisibleComponent
 	/// @{
 	/// @copydoc IVisibleComponent::GetIsVisible()
-	virtual bool GetIsVisible() const;
+	virtual bool GetIsVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsVisible()
-	virtual void SetIsVisible(bool InValue);
+	virtual void SetIsVisible(bool InValue) override;
 	/// @copydoc IVisibleComponent::GetIsARVisible()
-	virtual bool GetIsARVisible() const;
+	virtual bool GetIsARVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsARVisible()
-	virtual void SetIsARVisible(bool InValue);
+	virtual void SetIsARVisible(bool InValue) override;
 	/// @}
 };
 
