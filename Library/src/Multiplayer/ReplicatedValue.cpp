@@ -212,6 +212,12 @@ int64_t ReplicatedValue::GetInt() const
 	return Value.Int;
 }
 
+int64_t ReplicatedValue::StringArray() const
+{
+	assert(ReplicatedType == ReplicatedValueType::Integer);
+	return Value.Int;
+}
+
 void ReplicatedValue::SetString(const char* InValue)
 {
 	ReplicatedType = ReplicatedValueType::String;
@@ -234,6 +240,18 @@ const csp::common::String& ReplicatedValue::GetDefaultString()
 {
 	static const csp::common::String InvalidString = csp::common::String();
 	return InvalidString;
+}
+
+void ReplicatedValue::SetStringArray(const csp::common::Array<csp::common::String>& InValue)
+{
+	ReplicatedType	  = ReplicatedValueType::StringArray;
+	Value.StringArray = InValue;
+}
+
+const csp::common::Array<csp::common::String>& ReplicatedValue::GetStringArray() const
+{
+	assert(ReplicatedType == ReplicatedValueType::StringArray);
+	return Value.StringArray;
 }
 
 

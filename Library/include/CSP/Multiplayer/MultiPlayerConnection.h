@@ -78,6 +78,16 @@ public:
 	csp::common::String MessageValue;
 };
 
+/// @brief Class used to provide details of a Permission change in a callback.
+class CSP_API AccessControlParams
+{
+public:
+	csp::common::String SpaceId;
+	csp::common::Array<csp::common::String> GroupRoles;
+	csp::common::String ChangeType;
+	csp::common::String UserId;
+};
+
 /// @brief Enum used to specify the current state of the muiltiplayer connection.
 enum class ConnectionState
 {
@@ -126,6 +136,9 @@ public:
 
 	// Callback to receive ConversationSystem Data when a message is sent.
 	typedef std::function<void(const ConversationSystemParams&)> ConversationSystemCallbackHandler;
+
+	// Callback to receive access permission changes Data when a message is sent.
+	typedef std::function<void(const AccessControlParams&)> AccessControlChangedCallbackHandler;
 
 	/// @brief Start the connection and register to start receiving updates from the server.
 	/// @param Callback CallbackHandler : a callback with success status.
@@ -253,6 +266,7 @@ private:
 	NetworkInterruptionCallbackHandler NetworkInterruptionCallback;
 	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 	ConversationSystemCallbackHandler ConversationSystemCallback;
+	AccessControlChangedCallbackHandler AccessControlChangedCallback;
 
 	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
 	std::map<csp::common::String, Callbacks> NetworkEventMap;

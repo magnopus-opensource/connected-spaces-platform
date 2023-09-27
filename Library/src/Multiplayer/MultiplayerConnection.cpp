@@ -503,6 +503,17 @@ void MultiplayerConnection::StartEventMessageListening()
 				ConversationSystemCallback(params);
 			}
 		}
+		else if (EventType == "AccessControlChanged ")
+		{
+			if (AccessControlChangedCallback)
+			{
+				AccessControlParams params {EventData[0].GetString(),
+											EventData[1].GetStringArray(),
+											EventData[2].GetString(),
+											EventData[3].GetString()};
+				AccessControlChangedCallback(params);
+			}
+		}
 		else
 		{
 			for (auto Callback : NetworkEventMap[EventType])

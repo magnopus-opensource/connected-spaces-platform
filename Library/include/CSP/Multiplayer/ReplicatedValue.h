@@ -35,6 +35,7 @@ enum class ReplicatedValueType
 	String,
 	Vector3,
 	Vector4,
+	StringArray
 };
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
@@ -151,6 +152,17 @@ public:
 	/// @return The default string.
 	CSP_NO_EXPORT static const csp::common::String& GetDefaultString();
 
+	/// @brief Set a StringArray value for this replicated value from a csp::common::Array<csp::common::String>, will overwrite and previous value.
+	void SetStringArray(const csp::common::Array<csp::common::String>& InValue);
+
+	/// @brief Get a csp::common::Array<csp::common::String> value from this replicated value, will assert if not a
+	/// csp::common::Array<csp::common::String> type.
+	///
+	/// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
+	///
+	/// @return csp::common::Array<csp::common::String>
+	const csp::common::Array<csp::common::String>& GetStringArray() const;
+
 	/// @brief Set a Vector3 value for this replicated value from a csp::common::Vector3, will overwrite and previous value.
 	void SetVector3(const csp::common::Vector3& InValue);
 
@@ -196,6 +208,7 @@ private:
 		float Float;
 		int64_t Int;
 		csp::common::String String;
+		csp::common::Array<csp::common::String> StringArray;
 		csp::common::Vector3 Vector3;
 		csp::common::Vector4 Vector4;
 	};
