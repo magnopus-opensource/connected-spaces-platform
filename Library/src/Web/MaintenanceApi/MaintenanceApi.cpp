@@ -39,9 +39,20 @@ void MaintenanceApi::Query(csp::common::String CHSEnvironment,
 	// S3 bucket URLS are case Sensitive so the CHS Environment name is set to lower case.
 	std::string CHSEnvironmentLower = std::string(CHSEnvironment.c_str());
 	std::transform(CHSEnvironmentLower.begin(), CHSEnvironmentLower.end(), CHSEnvironmentLower.begin(), ::tolower);
+	csp::web::Uri Uri;
 
-	const csp::web::Uri Uri(
-		csp::common::StringFormat("https://maintenance-windows.magnoboard.com/%s/maintenance-windows.json", CHSEnvironmentLower.c_str()).c_str());
+	if (CHSEnvironmentLower != "oprod")
+	{
+		Uri = csp::web::Uri(
+			csp::common::StringFormat("https://maintenance-windows.magnoboard.com/%s/maintenance-windows.json", CHSEnvironmentLower.c_str()).c_str());
+	}
+	else
+	{
+		Uri = csp::web::Uri(
+			csp::common::StringFormat("https://maintenance-windows.magnolympus.com/%s/maintenance-windows.json", CHSEnvironmentLower.c_str())
+				.c_str());
+	}
+
 	csp::web::HttpPayload Payload;
 	Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
 	WebClient->SendRequest(csp::web::ERequestVerb::GET, Uri, Payload, ResponseHandler, CancellationToken);
