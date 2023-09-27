@@ -96,9 +96,16 @@ public:
 	/// @return float
 	float GetResponseProgress() const;
 
+	/// @brief Get a code representing the failure reason, if relevant.
+	/// @return int
+	int GetFailureReason() const;
+
 protected:
 	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+
+	virtual int ParseErrorCode(const csp::common::String& Value);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
@@ -107,6 +114,7 @@ protected:
 	float ResponseProgress = 0.0f;
 
 	csp::common::String ResponseBody;
+	int FailureReason;
 };
 
 } // namespace csp::services

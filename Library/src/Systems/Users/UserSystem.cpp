@@ -110,6 +110,7 @@ void UserSystem::SetNewLoginTokenReceivedCallback(NewLoginTokenReceivedCallback 
 void UserSystem::Login(const csp::common::String& UserName,
 					   const csp::common::String& Email,
 					   const csp::common::String& Password,
+					   const csp::common::Optional<bool>& UserHasVerifiedAge,
 					   LoginStateResultCallback Callback)
 {
 	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
@@ -122,6 +123,11 @@ void UserSystem::Login(const csp::common::String& UserName,
 		Request->SetEmail(Email);
 		Request->SetPassword(Password);
 		Request->SetTenant(csp::CSPFoundation::GetTenant());
+
+		if (UserHasVerifiedAge.HasValue())
+		{
+			Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
+		}
 
 		LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
 		{
@@ -162,7 +168,7 @@ void UserSystem::LoginWithToken(const csp::common::String& UserId, const csp::co
 	RefreshAuthenticationSession(UserId, LoginToken, csp::CSPFoundation::GetDeviceId(), LoginStateResCallback);
 }
 
-void UserSystem::LoginAsGuest(LoginStateResultCallback Callback)
+void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
 {
 	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
 	{
@@ -171,6 +177,11 @@ void UserSystem::LoginAsGuest(LoginStateResultCallback Callback)
 		auto Request = std::make_shared<chs::LoginRequest>();
 		Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
 		Request->SetTenant(csp::CSPFoundation::GetTenant());
+
+		if (UserHasVerifiedAge.HasValue())
+		{
+			Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
+		}
 
 		csp::services::ResponseHandlerPtr ResponseHandler
 			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
@@ -253,6 +264,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 
 void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
 														 const csp::common::String& ThirdPartyStateId,
+														 const csp::common::Optional<bool>& UserHasVerifiedAge,
 														 LoginStateResultCallback Callback)
 {
 	if (CurrentLoginState.State != ELoginState::LoginThirdPartyProviderDetailsRequested)
@@ -295,6 +307,11 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 	Request->SetToken(ThirdPartyToken);
 	Request->SetTenant(csp::CSPFoundation::GetTenant());
 
+	if (UserHasVerifiedAge.HasValue())
+	{
+		Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
+	}
+
 	CurrentLoginState.State = ELoginState::LoginRequested;
 
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -302,29 +319,6 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 																												 &CurrentLoginState);
 
 	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginSocialPost(Request, ResponseHandler);
-}
-
-void UserSystem::LoginAsGuestWithId(const csp::common::String& DeviceId, LoginStateResultCallback Callback)
-{
-	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
-	{
-		CurrentLoginState.State = ELoginState::LoginRequested;
-
-		auto Request = std::make_shared<chs::LoginRequest>();
-		Request->SetDeviceId(DeviceId);
-		Request->SetTenant(csp::CSPFoundation::GetTenant());
-
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
-
-		static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginPost(Request, ResponseHandler);
-	}
-	else
-	{
-		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
-		Callback(BadResult);
-	}
 }
 
 void UserSystem::ExchangeKey(const csp::common::String& UserId, const csp::common::String& Key, LoginStateResultCallback Callback)
@@ -382,6 +376,7 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
 							const csp::common::String& Email,
 							const csp::common::String& Password,
 							bool ReceiveNewsletter,
+							bool HasVerifiedAge,
 							const csp::common::Optional<csp::common::String>& RedirectUrl,
 							const csp::common::Optional<csp::common::String>& InviteToken,
 							ProfileResultCallback Callback)
@@ -406,6 +401,8 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
 	InitialSettings->SetSettings({{"Newsletter", ReceiveNewsletter ? "true" : "false"}});
 	Request->SetInitialSettings({InitialSettings});
 	Request->SetTenant(csp::CSPFoundation::GetTenant());
+
+	Request->SetVerifiedAgeEighteen(HasVerifiedAge);
 
 	if (RedirectUrl.HasValue())
 	{

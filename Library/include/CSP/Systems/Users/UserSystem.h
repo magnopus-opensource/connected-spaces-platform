@@ -62,10 +62,12 @@ public:
 	/// @param UserName csp::common::String
 	/// @param Email csp::common::String
 	/// @param Password csp::common::String
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void Login(const csp::common::String& UserName,
 								const csp::common::String& Email,
 								const csp::common::String& Password,
+								const csp::common::Optional<bool>& UserHasVerifiedAge,
 								LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services using a login token
@@ -77,8 +79,9 @@ public:
 	CSP_ASYNC_RESULT void LoginWithToken(const csp::common::String& UserId, const csp::common::String& LoginToken, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services as a guest.
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void LoginAsGuest(LoginStateResultCallback Callback);
+	CSP_ASYNC_RESULT void LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
 	/// @ingroup Third Party Authentication
 	/// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
@@ -104,16 +107,12 @@ public:
 	/// Note: The Authentication Provider and the Redirect URL you've passed in the first step will be used now
 	/// @param ThirdPartyToken csp::common::String : The authentication token returned by the Provider
 	/// @param ThirdPartyStateId csp::common::String : The state Id returned by the Provider
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Connected Services Authentication operation
 	CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
 																  const csp::common::String& ThirdPartyStateId,
+																  const csp::common::Optional<bool>& UserHasVerifiedAge,
 																  LoginStateResultCallback Callback);
-
-	/// @brief Log in to Magnopus Connected Services services as a guest.
-	/// @param DeviceId csp::common::String : The device Id to use when logging in
-	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	[[deprecated("This is no longer needed as we now have proper device ID generation! Please use LoginAsGuest() instead.")]] CSP_ASYNC_RESULT void
-		LoginAsGuestWithId(const csp::common::String& DeviceId, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services using the given one-time password/key.
 	/// @param UserId csp::common::String : the user Id
@@ -141,6 +140,7 @@ public:
 									 const csp::common::String& Email,
 									 const csp::common::String& Password,
 									 bool ReceiveNewsletter,
+									 bool HasVerifiedAge,
 									 const csp::common::Optional<csp::common::String>& RedirectUrl,
 									 const csp::common::Optional<csp::common::String>& InviteToken,
 									 ProfileResultCallback Callback);
