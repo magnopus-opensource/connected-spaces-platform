@@ -59,6 +59,13 @@ enum class EResultCode : uint8_t
 };
 
 
+enum class EResultBaseFailureReason
+{
+	Unknown = -1,
+	None	= 0
+};
+
+
 /// @brief Base class for a HTTP request result.
 class CSP_API ResultBase
 {

@@ -132,6 +132,7 @@ public:
 	/// @param Email csp::common::String : email address associated with the new profile
 	/// @param Password csp::common::String : password associated with the new profile
 	/// @param ReceiveNewsletter bool : `true` if the user wants to receive the Magnopus Connected Services newsletter
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
 	/// @param InviteToken csp::common::Optional<csp::common::String> : A token provided to the user that can be used to auto-confirm their account
 	/// @param Callback ProfileResultCallback : callback when asynchronous task finishes
@@ -140,7 +141,7 @@ public:
 									 const csp::common::String& Email,
 									 const csp::common::String& Password,
 									 bool ReceiveNewsletter,
-									 bool HasVerifiedAge,
+									 bool UserHasVerifiedAge,
 									 const csp::common::Optional<csp::common::String>& RedirectUrl,
 									 const csp::common::Optional<csp::common::String>& InviteToken,
 									 ProfileResultCallback Callback);

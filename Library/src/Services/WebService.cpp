@@ -106,7 +106,7 @@ void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResC
 
 int ResultBase::ParseErrorCode(const csp::common::String& Value)
 {
-	return 0;
+	return (int) EResultBaseFailureReason::Unknown;
 }
 
 } // namespace csp::services

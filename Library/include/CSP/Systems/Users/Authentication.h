@@ -97,9 +97,10 @@ public:
 };
 
 
-enum ELoginStateResultFailureReason
+enum class ELoginStateResultFailureReason
 {
-	None,
+	Unknown = -1,
+	None	= 0,
 	AgeNotVerified
 };
 
