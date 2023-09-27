@@ -41,6 +41,7 @@ void MaintenanceApi::Query(csp::common::String CHSEnvironment,
 	std::transform(CHSEnvironmentLower.begin(), CHSEnvironmentLower.end(), CHSEnvironmentLower.begin(), ::tolower);
 	csp::web::Uri Uri;
 
+	// For Magnopus cloud hosted services, maintenance windows come from a different URL in production
 	if (CHSEnvironmentLower != "oprod")
 	{
 		Uri = csp::web::Uri(
