@@ -164,9 +164,13 @@ public:
 
 	/// @brief Reset the users password.
 	/// @param Token csp::common::String : Token received through email by user
+	/// @param UserId csp::common::String : The id of the user resetting their password
 	/// @param NewPassword csp::common::String : The new password for the associated account
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token,
+											const csp::common::String& UserId,
+											const csp::common::String& NewPassword,
+											NullResultCallback Callback);
 
 	/// @brief Updates the user display name information.
 	/// @param UserId csp::common::String : id of the user that will be updated
