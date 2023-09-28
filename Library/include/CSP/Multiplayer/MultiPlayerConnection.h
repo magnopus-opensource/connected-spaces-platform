@@ -193,6 +193,10 @@ public:
 	/// Callback will have to reset the callback passed to the system to avoid "dangling objects" after use.
 	CSP_EVENT void SetConversationSystemCallback(ConversationSystemCallbackHandler Callback);
 
+	/// @brief Sets a callback for an access control changed event.
+	/// @param Callback AccessControlChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
+	CSP_EVENT void SetAccessControlChangedCallback(AccessControlChangedCallbackHandler Callback);
+
 	/// @brief Registers a callback to listen for the named event.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
 	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.

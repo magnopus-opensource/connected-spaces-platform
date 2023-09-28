@@ -433,6 +433,11 @@ CSP_EVENT void MultiplayerConnection::SetConversationSystemCallback(Conversation
 	ConversationSystemCallback = Callback;
 }
 
+CSP_EVENT void MultiplayerConnection::SetAccessControlChangedCallback(AccessControlChangedCallbackHandler Callback)
+{
+	AccessControlChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr)

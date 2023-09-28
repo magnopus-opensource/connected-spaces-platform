@@ -212,12 +212,6 @@ int64_t ReplicatedValue::GetInt() const
 	return Value.Int;
 }
 
-int64_t ReplicatedValue::StringArray() const
-{
-	assert(ReplicatedType == ReplicatedValueType::Integer);
-	return Value.Int;
-}
-
 void ReplicatedValue::SetString(const char* InValue)
 {
 	ReplicatedType = ReplicatedValueType::String;
