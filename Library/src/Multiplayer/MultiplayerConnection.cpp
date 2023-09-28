@@ -508,7 +508,7 @@ void MultiplayerConnection::StartEventMessageListening()
 				ConversationSystemCallback(params);
 			}
 		}
-		else if (EventType == "AccessControlChanged ")
+		else if (EventType == "AccessControlChanged")
 		{
 			if (AccessControlChangedCallback)
 			{
