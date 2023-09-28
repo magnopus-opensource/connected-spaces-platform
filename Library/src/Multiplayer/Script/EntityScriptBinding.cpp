@@ -220,7 +220,7 @@ void EntityScriptLog(qjs::rest<std::string> Args)
 		Str << Arg << " ";
 	}
 
-	CSP_LOG_ERROR_FORMAT("%s", Str.str().c_str());
+	CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "%s", Str.str().c_str());
 }
 
 
