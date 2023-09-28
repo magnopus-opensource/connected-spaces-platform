@@ -110,6 +110,11 @@ ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
 			SetVector4(InValue.GetVector4());
 			break;
 		}
+		case ReplicatedValueType::StringArray:
+		{
+			SetStringArray(InValue.GetStringArray());
+			break;
+		}
 		case ReplicatedValueType::InvalidType:
 		{
 			ReplicatedType = ReplicatedValueType::InvalidType;
@@ -160,6 +165,22 @@ bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 			case ReplicatedValueType::Vector4:
 			{
 				IsEqual = GetVector4() == OtherValue.GetVector4();
+				break;
+			}
+			case ReplicatedValueType::StringArray:
+			{
+				IsEqual = GetStringArray().Size() == OtherValue.GetStringArray().Size();
+				if (IsEqual)
+				{
+					for (int i = 0; i <= GetStringArray().Size(); i++)
+					{
+						if (GetStringArray()[i] != OtherValue.GetStringArray()[i])
+						{
+							IsEqual = false;
+							break;
+						}
+					}
+				}
 				break;
 			}
 			default:
