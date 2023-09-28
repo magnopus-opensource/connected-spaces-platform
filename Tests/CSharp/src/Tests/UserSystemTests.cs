@@ -62,13 +62,10 @@ namespace CSPEngine
         /// <returns>User Id</returns>
         public static string LogIn(Systems.UserSystem userSystem, string email = null, string password = null, Services.EResultCode expectedResult = Services.EResultCode.Success, bool pushCleanupFunction = true)
         {
-            if (email == null)
-                email = DefaultLoginEmail;
+            email ??= DefaultLoginEmail;
+            password ??= DefaultLoginPassword;
 
-            if (password == null)
-                password = DefaultLoginPassword;
-
-            using var result = userSystem.Login("", email, password).Result;
+            using var result = userSystem.Login("", email, password, null).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, expectedResult);
@@ -81,7 +78,7 @@ namespace CSPEngine
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => LogOut(userSystem));
 
-                LogDebug($"Logged in (UserId: { userId })");
+                LogDebug($"Logged in (UserId: {userId})");
             }
 
             return userId;
@@ -90,7 +87,7 @@ namespace CSPEngine
         /// <returns>User Id</returns>
         public static string LogInAsGuest(Systems.UserSystem userSystem, bool pushCleanupFunction = true)
         {
-            using var result = userSystem.LoginAsGuest().Result;
+            using var result = userSystem.LoginAsGuest(null).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -103,7 +100,7 @@ namespace CSPEngine
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => LogOut(userSystem));
 
-                LogDebug($"Logged in as guest (UserId: { userId })");
+                LogDebug($"Logged in as guest (UserId: {userId})");
             }
 
             return userId;
@@ -280,8 +277,8 @@ namespace CSPEngine
             Assert.AreEqual(currentLoginState.State, Systems.ELoginState.LoggedIn);
 
             //check that we're successfully logged in to CHS by creating a space
-            string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
-            string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testSpaceName = GenerateUniqueString("CSP-UNITTEST-SPACE-REWIND");
+            string testSpaceDescription = "CSP-UNITTEST-SPACEDESC-REWIND";
 
             // Create space
             _ = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
@@ -348,7 +345,7 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLY-UNITTEST-DISPLAY-NAME");
+            var newDisplayName = GenerateUniqueString("NAME");
 
             // Update display name
             {
@@ -376,7 +373,7 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLY UNITTEST DISPLAY NAME WITH SPACES");
+            var newDisplayName = GenerateUniqueString("TEST ");
 
             // Update display name
             {
@@ -404,7 +401,7 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLYUNITTEST DISPLAY NAME *&^\\%$@~#!;?.,{}[]()=");
+            var newDisplayName = GenerateUniqueString("()= - ");
 
             // Update display name
             {
@@ -430,16 +427,18 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _, out _);
 
-            string uniqueUserName = GenerateUniqueString("OLY-TEST-NAME");
-            string testDisplayName = "OLY-TEST-DISPLAY";
+            string uniqueUserName = GenerateUniqueString(GenerateUniqueString("CSP-TEST-NAME"));
+            string testDisplayName = "CSP-TEST-DISPLAY";
             string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
 
             string createdUserId;
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null, null).Result;
+                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, true, null, null).Result;
                 var resCode = result.GetResultCode();
+                var failureReason = result.GetFailureReason();
+                var body = result.GetResponseBody();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
 
@@ -457,6 +456,7 @@ namespace CSPEngine
             {
                 using var result = settingsSystem.GetNewsletterStatus(createdUserId).Result;
                 var resCode = result.GetResultCode();
+                var body = result.GetResponseBody();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
                 Assert.IsTrue(result.GetValue());
@@ -512,7 +512,7 @@ namespace CSPEngine
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(null, null, uniqueTestEmail, GeneratedTestAccountPassword, false, null, null).Result;
+                using var result = userSystem.CreateUser(null, null, uniqueTestEmail, GeneratedTestAccountPassword, false, true, null, null).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
@@ -669,8 +669,7 @@ namespace CSPEngine
 
         // As the following two tests require manual actions explained inside, they are currently disabled
         // ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
-#if false
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
+#if RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
         [Test] 
         public static void GoogleLogInTest()
         {
@@ -715,7 +714,8 @@ namespace CSPEngine
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
 #endif
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DISCORD_LOGIN_TEST
+
+#if RUN_USERSYSTEM_DISCORD_LOGIN_TEST
         [Test] 
         public static void DiscordLogInTest()
         {
@@ -760,7 +760,8 @@ namespace CSPEngine
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
 #endif
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_APPLE_LOGIN_TEST
+
+#if RUN_USERSYSTEM_APPLE_LOGIN_TEST
         [Test] 
         public static void AppleLogInTest()
         {
@@ -805,7 +806,6 @@ namespace CSPEngine
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
 #endif
-#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AGORA_USER_TOKEN_TEST
         [Test]
@@ -843,7 +843,7 @@ namespace CSPEngine
         [Test]
         public static void GetGuestProfileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string id = LogInAsGuest(userSystem);
 

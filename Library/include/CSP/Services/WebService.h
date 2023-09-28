@@ -59,6 +59,13 @@ enum class EResultCode : uint8_t
 };
 
 
+enum class EResultBaseFailureReason
+{
+	Unknown = -1,
+	None	= 0
+};
+
+
 /// @brief Base class for a HTTP request result.
 class CSP_API ResultBase
 {
@@ -96,9 +103,16 @@ public:
 	/// @return float
 	float GetResponseProgress() const;
 
+	/// @brief Get a code representing the failure reason, if relevant.
+	/// @return int
+	int GetFailureReason() const;
+
 protected:
 	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+
+	virtual int ParseErrorCode(const csp::common::String& Value);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
@@ -107,6 +121,7 @@ protected:
 	float ResponseProgress = 0.0f;
 
 	csp::common::String ResponseBody;
+	int FailureReason;
 };
 
 } // namespace csp::services

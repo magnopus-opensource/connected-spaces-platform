@@ -82,7 +82,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   const csp::common::String& Password,
 		   csp::services::EResultCode ExpectedResultCode)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, nullptr).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 
@@ -94,7 +94,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, csp::services::EResultCode ExpectedResult)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, nullptr).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
@@ -408,7 +408,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("NAME ") + GetUniqueHexString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST") + GetUniqueHexString().c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -440,7 +440,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("Test ") + GetUniqueHexString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST ") + GetUniqueHexString().c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -472,7 +472,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("Test ()= - ") + GetUniqueHexString(8).c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueHexString(8).c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -521,7 +521,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
 	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueHexString().c_str(), GetUniqueHexString().c_str());
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueHexString().c_str());
@@ -538,13 +538,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 								  UniqueEmail,
 								  GeneratedTestAccountPassword,
 								  true,
+								  true,
 								  nullptr,
 								  nullptr);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-		auto CreatedProfile = Result.GetProfile();
-		CreatedUserId		= CreatedProfile.UserId;
+		const auto& CreatedProfile = Result.GetProfile();
+		CreatedUserId			   = CreatedProfile.UserId;
 
 		EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
 		EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
@@ -578,7 +579,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 		EXPECT_EQ(LiteProfile.DisplayName, TestDisplayName);
 	}
 
-	// Whilst logged in as one user with normal roles, we cannot deleted another
+	// Whilst logged in as one user with normal roles, we cannot delete another
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
@@ -614,6 +615,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 								  UniqueEmail,
 								  GeneratedTestAccountPassword,
 								  false,
+								  true,
 								  nullptr,
 								  nullptr);
 
