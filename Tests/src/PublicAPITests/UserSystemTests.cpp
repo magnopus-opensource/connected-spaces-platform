@@ -1010,3 +1010,22 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if 1 || RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	auto [Result]
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif

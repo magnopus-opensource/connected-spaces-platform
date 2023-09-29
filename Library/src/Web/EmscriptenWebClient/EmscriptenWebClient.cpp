@@ -73,6 +73,22 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 		csp::common::String Key = Keys->operator[](i);
 		csp::common::String Val = Headers[Key];
 
+		// Make Key and Val lower-case
+		std::transform(Key.begin(),
+					   Key.end(),
+					   Key.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
+		std::transform(Val.begin(),
+					   Val.end(),
+					   Val.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
+
 		Payload.AddHeader(Key, Val);
 	}
 
