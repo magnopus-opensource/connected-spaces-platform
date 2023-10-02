@@ -77,6 +77,38 @@ test('UserSystemTests', 'LoginTest', async function() {
     await logIn(userSystem);
 });
 
+test('UserSystemTests', 'LoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in
+    await logIn(userSystem);
+});
+
+test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in with false age verification
+    {
+        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD,false);
+    
+        assert.failed(result);
+
+        result.delete();
+    }
+
+    // Log in with true age verification
+    {
+        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD,true);
+    
+        assert.succeeded(result);
+
+        result.delete();
+    }
+
+});
+
 
 test('UserSystemTests', 'LoginWithTokenTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
