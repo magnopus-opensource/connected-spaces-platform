@@ -1011,7 +1011,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 }
 #endif
 
-#if 1 || RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
