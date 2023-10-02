@@ -2,6 +2,9 @@
 export namespace {{ translated_namespace }} {
 {{/ translated_namespace }}
 
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
 export interface {{ name }}
 {{# has_interfaces }}
     extends
@@ -13,6 +16,9 @@ export interface {{ name }}
 {{# methods }}
 {{^ is_constructor }}
 {{^ is_destructor }}
+{{# doc_comments }}
+    {{& . }}
+{{/ doc_comments }}
     {{> Interface/Method }}
 {{/ is_destructor }}
 {{/ is_constructor }}

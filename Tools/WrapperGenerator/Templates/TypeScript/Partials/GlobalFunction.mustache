@@ -2,6 +2,9 @@
 export namespace {{ translated_namespace }} {
 {{/ translated_namespace }}
 
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
 export function {{ name }}(
 {{# parameters }}
     {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
