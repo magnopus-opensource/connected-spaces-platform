@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// @file AnimatedModelSpaceComponent.h
-/// @brief Definitions and support for animated models.
+/// @file StaticModelSpaceComponent.h
+/// @brief Definitions and support for static models.
 
 #pragma once
 
@@ -26,23 +26,13 @@
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
-#include "CSP/Multiplayer/SpaceTransform.h"
 
 
 namespace csp::multiplayer
 {
 
-/// @brief Enumerates the actions that can be performed on an animated model component.
-enum class AnimatedModelActions
-{
-	Play,
-	Pause,
-	Restart,
-	Num
-};
-
-/// @brief Enumerates the list of properties that can be replicated for an animated model component.
-enum class AnimatedModelPropertyKeys
+/// @brief Enumerates the list of properties that can be replicated for a static model component.
+enum class StaticModelPropertyKeys
 {
 	Name = 0,
 	ExternalResourceAssetId,
@@ -50,11 +40,7 @@ enum class AnimatedModelPropertyKeys
 	Position,
 	Rotation,
 	Scale,
-	IsLoopPlayback,
-	IsPlaying,
 	IsVisible,
-	RESERVED,
-	AnimationIndex,
 	IsARVisible,
 	ThirdPartyComponentRef,
 	IsShadowCaster,
@@ -62,19 +48,19 @@ enum class AnimatedModelPropertyKeys
 };
 
 
-/// @ingroup AnimatedModelSpaceComponent
-/// @brief Data representation of an AnimatedModelSpaceComponent.
-class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
-											public ITransformComponent,
-											public IVisibleComponent,
-											public IExternalResourceComponent,
-											public IThirdPartyComponentRef,
-											public IShadowCasterComponent
+/// @ingroup StaticModelSpaceComponent
+/// @brief Data representation of an StaticModelSpaceComponent.
+class CSP_API StaticModelSpaceComponent : public ComponentBase,
+										  public ITransformComponent,
+										  public IVisibleComponent,
+										  public IExternalResourceComponent,
+										  public IThirdPartyComponentRef,
+										  public IShadowCasterComponent
 {
 public:
-	/// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
+	/// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
-	AnimatedModelSpaceComponent(SpaceEntity* Parent);
+	StaticModelSpaceComponent(SpaceEntity* Parent);
 
 	/* clang-format off */
 	[[deprecated("Due to the introduction of LODs it doesn't make sense to set a specific asset anymore")]]
@@ -85,12 +71,12 @@ public:
 	/* clang-format on */
 
 	/// @brief Gets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's animated asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
 	/// @return The ID of the asset collection associated with this component.
 	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
 	/// @brief Sets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's animated asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
 	/// @param Value The ID of the asset collection associated with this component.
 	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 
@@ -113,30 +99,6 @@ public:
 	/// @copydoc ITransformComonent::SetTransform()
 	void SetTransform(const SpaceTransform& InValue) override;
 	/// @}
-
-	/// @brief Checks if the animation of this animated model is in loop.
-	/// @return True if the animation of this animated model loops (i.e. restarts from the beginning on end), false otherwise.
-	bool GetIsLoopPlayback() const;
-
-	/// @brief Establishes if the animation of this animated model is in loop.
-	/// @param Value True if the animation of this animated model will loop (i.e. restarts from the beginning on end), false otherwise.
-	void SetIsLoopPlayback(bool Value);
-
-	/// @brief Checks if the animation of this animated model is playing.
-	/// @return True if the animation of this animated is playing, false otherwise.
-	bool GetIsPlaying() const;
-
-	/// @brief Establishes if the animation of this animated model is playing.
-	/// @param Value True if the animation of this animated model is playing, false otherwise.
-	void SetIsPlaying(bool Value);
-
-	/// @brief Gets the index of the currently active animation.
-	/// @return The index of the currently active animation.
-	int64_t GetAnimationIndex() const;
-
-	/// @brief Sets the index of the currently active animation.
-	/// @return The index of the currently active animation.
-	void SetAnimationIndex(int64_t Value);
 
 	/// \addtogroup IVisibleComponent
 	/// @{
@@ -161,9 +123,9 @@ public:
 	/// \addtogroup IShadowCasterComponent
 	/// @{
 	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
-	bool GetIsShadowCaster() const;
+	bool GetIsShadowCaster() const override;
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-	void SetIsShadowCaster(bool Value);
+	void SetIsShadowCaster(bool Value) override;
 	/// @}
 };
 

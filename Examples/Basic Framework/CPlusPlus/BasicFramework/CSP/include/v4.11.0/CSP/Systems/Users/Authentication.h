@@ -97,6 +97,14 @@ public:
 };
 
 
+enum class ELoginStateResultFailureReason
+{
+	Unknown = -1,
+	None	= 0,
+	AgeNotVerified
+};
+
+
 /// @brief Result structure for a login state request.
 class CSP_API LoginStateResult : public csp::services::ResultBase
 {
@@ -111,13 +119,15 @@ public:
 	LoginState& GetLoginState();
 	const LoginState& GetLoginState() const;
 
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
+
 private:
 	LoginStateResult();
 	LoginStateResult(LoginState* InStatePtr);
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-private:
 	LoginState* State;
 };
 

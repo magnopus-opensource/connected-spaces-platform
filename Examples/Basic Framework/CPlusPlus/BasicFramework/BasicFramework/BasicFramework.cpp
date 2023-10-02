@@ -29,14 +29,14 @@
 using namespace std;
 using namespace nlohmann;
 
-const csp::common::String Tenant = "FOUNDATION_HELLO_WORLD";
+const csp::common::String Tenant = "CSP_HELLO_WORLD";
 csp::common::String CurrentSpaceId;
 csp::multiplayer::MultiplayerConnection* MultiplayerConnection = nullptr;
 csp::multiplayer::SpaceEntity* Avatar = nullptr;
 csp::systems::AssetCollection AssetCollection;
 csp::systems::Asset Asset;
 
-bool StartupFoundation()
+bool StartupCSPFoundation()
 {
     const csp::common::String EndpointRootURI = "https://ogs-ostage.magnoboard.com";
 	return csp::CSPFoundation::Initialise(EndpointRootURI, Tenant);
@@ -55,7 +55,7 @@ void SetClientUserAgentInfo()
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 }
 
-bool ShutdownFoundation()
+bool ShutdownCSPFoundation()
 {
 	return csp::CSPFoundation::Shutdown();
 }
@@ -73,7 +73,7 @@ void Signup()
 
 	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false,
+	UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false, true,
 				"", "", [&](const csp::systems::ProfileResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
@@ -106,7 +106,7 @@ void Login()
 
 	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->Login("", Email.c_str(), Password.c_str(), [&](const csp::systems::LoginStateResult& Result)
+	UserSystem->Login("", Email.c_str(), Password.c_str(), nullptr, [&](const csp::systems::LoginStateResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
@@ -190,17 +190,20 @@ void CreateSpace()
 
 	cout << "\nCreate Space: please specify a name for the new space" << endl;
 	string SpaceName;
-	cin >> SpaceName;
+	cin.ignore();
+	std::getline(cin, SpaceName);
 
-	csp::common::Map<csp::common::String, csp::common::String> TestMetadata;	
-	csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
+	csp::systems::SystemsManager& SystemsManager = csp::systems::SystemsManager::Get();
+	csp::systems::SpaceSystem* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
-	SpaceSystem->CreateSpace(SpaceName.c_str(), "", csp::systems::SpaceAttributes::IsDiscoverable, nullptr, 
-							TestMetadata, nullptr, [&](const csp::systems::SpaceResult& Result)
+	csp::common::Map<csp::common::String, csp::common::String> TestMetadata = {{"spaceData", "myData"}};
+	
+	SpaceSystem->CreateSpace(SpaceName.c_str(), "", csp::systems::SpaceAttributes::Private, nullptr, TestMetadata, nullptr, [&CallbackPromise](const csp::systems::SpaceResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			string SpaceID = Result.GetSpace().Id.c_str();
+			string SpaceName = Result.GetSpace().Name.c_str();
 			cout << "Created a new space called " + SpaceName + " and ID: " + SpaceID << endl;
 			CallbackPromise.set_value();
 		}
@@ -216,11 +219,6 @@ void CreateSpace()
 
 void SetupConnection()
 {
-	// MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(OLY_TEXT(TCHAR_TO_UTF8(*InSpace.Id)));
-	// SetEntityCreatedCallback()
-	// MultiplayerConnection->Connect()
-	// MultiplayerConnection->InitialiseConnection()
-
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
@@ -274,27 +272,6 @@ void EnterSpace()
 		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: Could not enter space. " + Result.GetResponseBody()<< endl;
-		}
-		CallbackPromise.set_value();
-	});
-
-	CallbackFuture.wait();
-}
-
-void SetSelfMessaging()
-{
-	promise<void> CallbackPromise;
-	future<void> CallbackFuture = CallbackPromise.get_future();
-
-	MultiplayerConnection->SetAllowSelfMessagingFlag(true, [&] (bool IsSuccessful)
-	{
-		if(IsSuccessful)
-		{
-			cout << "\nAllowed this client to receive its own messages through multiplayer"<< endl;
-		}
-		else
-		{
-			cout << "\nError: Could not allow this client to receive every message it sends through multiplayer"<< endl;
 		}
 		CallbackPromise.set_value();
 	});
@@ -373,7 +350,8 @@ void CreateAssetCollection()
 
 	cout << "\nCreate Asset Collection: please enter a unique name" << endl;
 	string AssetCollectionName;
-	cin >> AssetCollectionName;
+	cin.ignore();
+	std::getline(cin, AssetCollectionName);
 
 	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 	AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(),
@@ -402,7 +380,8 @@ void CreateAsset()
 
 	cout << "\nCreate Asset: please enter a unique name" << endl;
 	string AssetName;
-	cin >> AssetName;
+	cin.ignore();
+	std::getline(cin, AssetName);
 
 	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 	AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr,
@@ -518,15 +497,15 @@ void DeleteSpace()
 
 int main()
 {
-	//Initialise Foundation
-	if(StartupFoundation())
+	//Initialise CSP Foundation
+	if(StartupCSPFoundation())
 	{
-		cout << "Welcome to Foundation! \nThis is a simple Hello World example to demonstrate basic Foundation functionality."  << endl;
+		cout << "Welcome to the Connected Spaces Platform (CSP)! \nThis is a simple Hello World example to demonstrate basic CSP functionality."  << endl;
 		SetClientUserAgentInfo();
 	}
 	else
 	{
-		cout << "Error: Foundation could not be initialized."  << endl;
+		cout << "Error: The Connected Spaces Platform (CSP) could not be initialized."  << endl;
 		return 1;
 	}
 
@@ -573,10 +552,6 @@ int main()
 
 	if(MultiplayerConnection != nullptr)
 	{
-		//For this example we want to demonstrate that we are able to
-		//receive multiplayer updates, even the ones we send
-		SetSelfMessaging();
-
 		//Create an Avatar
 		CreateAvatarEntity();
 
@@ -613,14 +588,14 @@ int main()
 	//Logout
 	Logout();
 
-	//Shut down Foundation
-	if(ShutdownFoundation())
+	//Shut down CSP Foundation
+	if(ShutdownCSPFoundation())
 	{
-		cout << "\nFoundation shut down" << endl;
+		cout << "\nCSP Foundation shut down" << endl;
 	}
 	else
 	{
-		cout << "\nError: Foundation could not shut down"  << endl;
+		cout << "\nError: CSP Foundation could not shut down"  << endl;
 		return 1;
 	}
 }
