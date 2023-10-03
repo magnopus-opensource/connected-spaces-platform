@@ -106,7 +106,7 @@ void Login()
 
 	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->Login("", Email.c_str(), Password.c_str(), nullptr, [&](const csp::systems::LoginStateResult& Result)
+	UserSystem->Login("", Email.c_str(), Password.c_str(), true, [&](const csp::systems::LoginStateResult& Result)
 	{
 		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
