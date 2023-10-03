@@ -1049,7 +1049,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  DefaultLoginPassword,
 		  true,
 		  csp::services::EResultCode::Success,
-		  static_cast<int>(csp::services::EResultBaseFailureReason::None));
+		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
 
 	LogOut(UserSystem);
 }
