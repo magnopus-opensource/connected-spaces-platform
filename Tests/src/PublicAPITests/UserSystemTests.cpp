@@ -1019,10 +1019,20 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
 	csp::common::String UserId;
 
-	// Log in
-	auto [Result]
+	// False Log in
+	auto [FailureResult]
 		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(FailureResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(FailureResult.GetFailureReason(), csp::services::EResultBaseFailureReason::None);
+
+	// False Log in
+	auto [SuccessResult]
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
+
+	EXPECT_EQ(SuccessResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(SuccessResult.GetFailureReason(), csp::services::EResultBaseFailureReason::None);
+
+	LogOut(UserSystem);
 }
 #endif
