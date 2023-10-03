@@ -44,18 +44,20 @@ export async function logOut(userSystem) {
  * @param {!Systems.UserSystem} userSystem 
  * @param {!string} [email] 
  * @param {!string} [password] 
- * @param {!Services.EResultCode} [expectedResult] 
- * @param {!boolean} [pushCleanup] 
+ * @param {!boolean} [ageVerified] 
+ * @param {!Services.EResultCode} [expectedResult]
+ * @param {!Systems.ELoginStateResultFailureReason} [expectedFailureResultCode]
+ * @param {!boolean} [pushCleanup]
  * @returns {Promise<?string>} the userId of the logged in account
  */
-export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, ageVerified = true, expectedResult = Services.EResultCode.Success,expectedFailureResultCode = Services.EResultBaseFailureReason.None, pushCleanup = true) {
+export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, ageVerified = true, expectedResult = Services.EResultCode.Success, expectedFailureResultCode = Systems.ELoginStateResultFailureReason, pushCleanup = true) {
 
     const result = await userSystem.login('', email, password, ageVerified);
     const resCode = result.getResultCode();
 
     assert.succeeded(result, expectedResult);
 
-    assert.areEqual(result.getFailureReason(), expectedFailureResultCode);
+    assert.areEqual(result.getFailureReason(), Number(expectedFailureResultCode));
 
     const loginState = result.getLoginState();
     result.delete();

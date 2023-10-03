@@ -90,22 +90,13 @@ test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
     const userSystem = systemsManager.getUserSystem();
 
     // Log in with false age verification
-    {
-        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified);
 
-    }
-
-    
     // Log in with null age verification
-    {
-        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, null, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified);
-
-    }
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, null, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified);
 
     // Log in with true age verification
-    {
-        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None);
-    }
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None);
 });
 
 

@@ -37,7 +37,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   const csp::common::String& Password			 = DefaultLoginPassword,
 		   bool AgeVerified								 = true,
 		   csp::services::EResultCode ExpectedResultCode = csp::services::EResultCode::Success,
-		   int ExpectedResultFailureCode				 = -1);
+		   int ExpectedResultFailureCode				 = 0);
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem,
 				  csp::common::String& OutUserId,
