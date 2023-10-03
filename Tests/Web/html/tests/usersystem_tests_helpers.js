@@ -48,12 +48,14 @@ export async function logOut(userSystem) {
  * @param {!boolean} [pushCleanup] 
  * @returns {Promise<?string>} the userId of the logged in account
  */
-export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, ageVerified = true, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
+export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, ageVerified = true, expectedResult = Services.EResultCode.Success,expectedFailureResultCode = Services.EResultBaseFailureReason.None, pushCleanup = true) {
 
     const result = await userSystem.login('', email, password, ageVerified);
     const resCode = result.getResultCode();
 
     assert.succeeded(result, expectedResult);
+
+    assert.areEqual(result.getFailureReason(), expectedFailureResultCode);
 
     const loginState = result.getLoginState();
     result.delete();
