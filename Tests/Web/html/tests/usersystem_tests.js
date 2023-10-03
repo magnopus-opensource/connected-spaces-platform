@@ -91,13 +91,19 @@ test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
 
     // Log in with false age verification
     {
-        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false,Services.EResultCode.Failed,Services.EResultBaseFailureReason.None);
+        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false, Services.EResultCode.Failed, 1);
+
+    }
+
+    // Log in with null age verification
+    {
+        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, null, Services.EResultCode.Failed, 1);
 
     }
 
     // Log in with true age verification
     {
-        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true,Services.EResultCode.Success,Services.EResultBaseFailureReason.None);
+        await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, -1);
     }
 });
 
