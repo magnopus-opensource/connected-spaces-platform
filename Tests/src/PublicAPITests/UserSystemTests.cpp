@@ -80,11 +80,15 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
 		   const csp::common::String& Email,
 		   const csp::common::String& Password,
-		   csp::services::EResultCode ExpectedResultCode)
+		   bool AgeVerified,
+		   csp::services::EResultCode ExpectedResultCode,
+		   csp::services::EResultBaseFailureReason ExpectedResultFailureCode)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, nullptr).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, AgeVerified).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+
+	EXPECT_EQ(Result.GetFailureReason(), int(ExpectedResultFailureCode));
 
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
@@ -270,7 +274,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 	LogIn(UserSystem, UserId);
 
 	// Attempt to log in again
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, true, csp::services::EResultCode::Failed);
 
 	// Log out
 	LogOut(UserSystem);
@@ -367,7 +371,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 	csp::common::String UserId;
 
 	// Log in with invalid credentials
-	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", true, csp::services::EResultCode::Failed);
 
 	// Log in
 	LogIn(UserSystem, UserId);
@@ -1020,18 +1024,22 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	csp::common::String UserId;
 
 	// False Log in
-	auto [FailureResult]
-		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  false,
+		  csp::services::EResultCode::Failed,
+		  csp::services::EResultBaseFailureReason::Unknown);
 
-	EXPECT_EQ(FailureResult.GetResultCode(), csp::services::EResultCode::Failed);
-	EXPECT_EQ(FailureResult.GetFailureReason(), csp::services::EResultBaseFailureReason::None);
-
-	// False Log in
-	auto [SuccessResult]
-		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
-
-	EXPECT_EQ(SuccessResult.GetResultCode(), csp::services::EResultCode::Failed);
-	EXPECT_EQ(SuccessResult.GetFailureReason(), csp::services::EResultBaseFailureReason::None);
+	// true Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::services::EResultCode::Success,
+		  csp::services::EResultBaseFailureReason::None);
 
 	LogOut(UserSystem);
 }
