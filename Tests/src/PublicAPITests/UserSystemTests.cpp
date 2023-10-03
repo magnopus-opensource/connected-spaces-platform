@@ -1025,10 +1025,22 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
 	// False Log in
 	// 1 stands for Age not verified
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, false, csp::services::EResultCode::Failed, 1);
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  false,
+		  csp::services::EResultCode::Failed,
+		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
 
 	// null Log in
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, nullptr, csp::services::EResultCode::Failed, 1);
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  nullptr,
+		  csp::services::EResultCode::Failed,
+		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
 
 	// true Log in
 	LogIn(UserSystem,
@@ -1037,7 +1049,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  DefaultLoginPassword,
 		  true,
 		  csp::services::EResultCode::Success,
-		  int(csp::services::EResultBaseFailureReason::None));
+		  static_cast<int>(csp::services::EResultBaseFailureReason::None));
 
 	LogOut(UserSystem);
 }
