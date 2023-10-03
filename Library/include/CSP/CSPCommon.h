@@ -16,10 +16,23 @@
 #pragma once
 
 // Enable this define if you are using the CSP library in DLL form
-//#define USING_CSP_DLL
+// #define USING_CSP_DLL
 
-// Enable the define appropriate for the target platform
-//#define CSP_WINDOWS
+#if defined(_WIN32)
+	#define CSP_WINDOWS
+#elif defined(__APPLE__)
+	#include <TargetConditionals.h>
+
+	#if defined(TARGET_OS_MAC)
+		#define CSP_MACOSX
+	#elif defined(TARGET_OS_IPHONE)
+		#define CSP_IOS
+	#endif
+#elif defined(__EMSCRIPTEN__)
+	#define CSP_WASM
+#elif defined(__ANDROID__)
+	#define CSP_ANDROID
+#endif
 
 #if defined CSP_WINDOWS
 	#define CSP_DLLEXPORT __declspec(dllexport)
