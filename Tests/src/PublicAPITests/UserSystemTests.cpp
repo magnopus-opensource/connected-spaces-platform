@@ -82,13 +82,13 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   const csp::common::String& Password,
 		   bool AgeVerified,
 		   csp::services::EResultCode ExpectedResultCode,
-		   csp::services::EResultBaseFailureReason ExpectedResultFailureCode)
+		   int ExpectedResultFailureCode)
 {
 	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, AgeVerified).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 
-	EXPECT_EQ(Result.GetFailureReason(), int(ExpectedResultFailureCode));
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
@@ -1024,13 +1024,11 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	csp::common::String UserId;
 
 	// False Log in
-	LogIn(UserSystem,
-		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
-		  false,
-		  csp::services::EResultCode::Failed,
-		  csp::services::EResultBaseFailureReason::Unknown);
+	// 1 stands for Age not verified
+	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, false, csp::services::EResultCode::Failed, 1);
+
+	// null Log in
+	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, nullptr, csp::services::EResultCode::Failed, 1);
 
 	// true Log in
 	LogIn(UserSystem,
@@ -1039,7 +1037,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  DefaultLoginPassword,
 		  true,
 		  csp::services::EResultCode::Success,
-		  csp::services::EResultBaseFailureReason::None);
+		  int(csp::services::EResultBaseFailureReason::None));
 
 	LogOut(UserSystem);
 }
