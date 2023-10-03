@@ -91,7 +91,7 @@ test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
 
     // Log in with false age verification
     {
-        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD,false);
+        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false);
     
         assert.failed(result);
 
@@ -100,7 +100,7 @@ test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
 
     // Log in with true age verification
     {
-        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD,true);
+        const result = await userSystem.login('', DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true);
     
         assert.succeeded(result);
 
