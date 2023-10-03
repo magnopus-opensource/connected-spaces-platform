@@ -1024,7 +1024,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	csp::common::String UserId;
 
 	// False Log in
-	// 1 stands for Age not verified
 	LogIn(UserSystem,
 		  UserId,
 		  DefaultLoginEmail,
