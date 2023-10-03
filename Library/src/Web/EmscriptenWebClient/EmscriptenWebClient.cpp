@@ -70,26 +70,28 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 
 	for (int i = 0; i < Keys->Size(); ++i)
 	{
-		auto Key	  = Keys->operator[](i);
-		auto Val	  = std::string(Headers[Key].c_str());
-		auto KeyValue = std::string(Key.c_str());
-		// Make Key and Val lower-case
-		std::transform(KeyValue.begin(),
-					   KeyValue.end(),
-					   KeyValue.begin(),
-					   [](unsigned char c)
-					   {
-						   return std::tolower(c);
-					   });
-		std::transform(Val.begin(),
-					   Val.end(),
-					   Val.begin(),
-					   [](unsigned char c)
-					   {
-						   return std::tolower(c);
-					   });
+		csp::common::String Key = Keys->operator[](i);
+		csp::common::String Val = Headers[Key];
 
-		Payload.AddHeader(KeyValue.c_str(), Val.c_str());
+		auto KeyBuffer = new char[Key.Length()];
+		memcpy(KeyBuffer, Key.c_str(), Key.Length());
+		for (auto* Char = KeyBuffer; *Char; Char++)
+		{
+			*Char = tolower(*Char);
+		}
+
+		Key = csp::common::String(KeyBuffer);
+
+		auto ValBuffer = new char[Val.Length()];
+		memcpy(ValBuffer, Val.c_str(), Val.Length());
+		for (auto* Char = ValBuffer; *Char; Char++)
+		{
+			*Char = tolower(*Char);
+		}
+
+		Val = csp::common::String(ValBuffer);
+
+		Payload.AddHeader(Key, Val);
 	}
 
 	CSP_DELETE(Keys);
