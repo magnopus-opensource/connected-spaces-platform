@@ -1024,8 +1024,5 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, false).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
-
-	// Log out
-	LogOut(UserSystem);
 }
 #endif
