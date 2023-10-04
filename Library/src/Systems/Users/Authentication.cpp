@@ -101,7 +101,7 @@ const LoginState& LoginStateResult::GetLoginState() const
 
 int LoginStateResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "User_AgeNotVerified")
+	if (Value == "user_agenotverified")
 		return (int) ELoginStateResultFailureReason::AgeNotVerified;
 
 	return ResultBase::ParseErrorCode(Value);
