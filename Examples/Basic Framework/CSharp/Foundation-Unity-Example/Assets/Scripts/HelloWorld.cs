@@ -20,7 +20,7 @@ public class HelloWorld : MonoBehaviour
     [SerializeField] private AccountUI accountUI;
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string TenantKey = "FOUNDATION_HELLO_WORLD";
+    private const string TenantKey = "CSP_HELLO_WORLD";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
     private readonly string exampleAssetName = "example.png";
@@ -48,7 +48,7 @@ public class HelloWorld : MonoBehaviour
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
             ClientSKU = "csp-cSharp-examples",
-            ClientVersion = "0.0.2",
+            ClientVersion = "0.0.3",
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
@@ -210,7 +210,7 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Creating account with Email {email} ...");
 
         using CspSystems.ProfileResult result =
-            await userSystem.CreateUser(null, null, email, password, false, null, null);
+            await userSystem.CreateUser(null, null, email, password, false, true, null,null);
         CspSystems.Profile profile = result.GetProfile();
 
         Debug.Log($"Created account with Email {profile.Email}. Please check your email to verify your account.");
@@ -226,7 +226,7 @@ public class HelloWorld : MonoBehaviour
     {
         Debug.Log($"Logging in with Email {email} ...");
 
-        using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password);
+        using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password, true);
 
         Debug.Log($"Logged in with Email {email}.");
     }
@@ -334,7 +334,7 @@ public class HelloWorld : MonoBehaviour
     private async Task EnterSpaceAsync(CspSystems.Space space)
     {
         await Task.Delay(100);
-        using CspSystems.EnterSpaceResult enterResult = await spaceSystem.EnterSpace(space.Id, false);
+        using CspSystems.NullResult enterResult = await spaceSystem.EnterSpace(space.Id);
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
         await InitializeConnection(space.Id);
