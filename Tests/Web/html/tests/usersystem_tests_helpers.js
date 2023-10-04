@@ -57,7 +57,7 @@ export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = 
 
     assert.succeeded(result, expectedResult);
 
-    assert.areEqual(result.getFailureReason(), Number(expectedFailureResultCode));
+    assert.areEqual(result.getFailureReason(), expectedFailureResultCode);
 
     const loginState = result.getLoginState();
     result.delete();

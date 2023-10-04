@@ -1033,13 +1033,15 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
 
 	// null Log in
-	LogIn(UserSystem,
-		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
-		  nullptr,
-		  csp::services::EResultCode::Failed,
-		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
+	// does not use login helper function as the login helper function defaults to false.
+	auto [Result]
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, nullptr).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
+
+	LogOut(UserSystem);
 
 	// true Log in
 	LogIn(UserSystem,
