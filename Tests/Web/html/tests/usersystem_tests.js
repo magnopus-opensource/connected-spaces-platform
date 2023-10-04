@@ -77,6 +77,30 @@ test('UserSystemTests', 'LoginTest', async function() {
     await logIn(userSystem);
 });
 
+test('UserSystemTests', 'LoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in
+    await logIn(userSystem);
+});
+
+test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in with false age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified, false);
+
+    // Log in with null age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, null, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
+    await logOut(userSystem)
+
+    // Log in with true age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
+    await logOut(userSystem)
+});
+
 
 test('UserSystemTests', 'LoginWithTokenTest', async function() {
     const systemsManager = Systems.SystemsManager.get();

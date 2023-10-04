@@ -266,7 +266,6 @@ class TemplateInstanceMetadata:
         return self.get_template_argument(parameter, render)
 
 
-
 @dataclass
 class TemplateParameterMetadata:
     """ Describes a template parameter. """

@@ -23,8 +23,8 @@
 #include <assert.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/fetch.h>
+#include <iostream>
 #include <sstream>
-
 
 
 namespace
@@ -70,10 +70,26 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 
 	for (int i = 0; i < Keys->Size(); ++i)
 	{
-		csp::common::String Key = Keys->operator[](i);
-		csp::common::String Val = Headers[Key];
+		auto Key	  = Keys->operator[](i);
+		auto Val	  = std::string(Headers[Key].c_str());
+		auto KeyValue = std::string(Key.c_str());
+		// Make Key and Val lower-case
+		std::transform(KeyValue.begin(),
+					   KeyValue.end(),
+					   KeyValue.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
+		std::transform(Val.begin(),
+					   Val.end(),
+					   Val.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
 
-		Payload.AddHeader(Key, Val);
+		Payload.AddHeader(KeyValue.c_str(), Val.c_str());
 	}
 
 	CSP_DELETE(Keys);
