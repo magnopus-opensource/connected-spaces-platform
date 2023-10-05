@@ -9,7 +9,7 @@ public class HelloWorld : MonoBehaviour
 {
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string TenantKey = "FOUNDATION_HELLO_WORLD";
+    private const string TenantKey = "CSP_HELLO_WORLD";
     // Initialisation of Foundation
     private void Awake()
     {
@@ -19,7 +19,7 @@ public class HelloWorld : MonoBehaviour
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
             ClientSKU = "csp-cSharp-examples",
-            ClientVersion = "0.0.2",
+            ClientVersion = "0.0.3",
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
