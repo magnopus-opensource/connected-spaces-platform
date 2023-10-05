@@ -217,14 +217,22 @@ String& String::swap(String& Other)
 
 String& String::operator=(const String& Rhs)
 {
-	CSP_DELETE(ImplPtr);
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
 	ImplPtr = Rhs.ImplPtr->Clone();
 	return *this;
 }
 
 String& String::operator=(String&& Rhs)
 {
-	CSP_DELETE(ImplPtr);
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
 	ImplPtr		= Rhs.ImplPtr;
 	Rhs.ImplPtr = nullptr;
 	return *this;
@@ -232,7 +240,11 @@ String& String::operator=(String&& Rhs)
 
 String& String::operator=(char const* const Text)
 {
-	CSP_DELETE(ImplPtr);
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
 	ImplPtr = CSP_NEW Impl(Text);
 	return *this;
 }
