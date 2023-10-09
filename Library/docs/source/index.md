@@ -23,9 +23,9 @@ It comes in the form of an open-source client-side library, effectively encoding
 ## 📦 Install
 NPM packages are available for Web and Unity and can be found on npmjs.
 
-- Web: https://www.npmjs.com/package/connected-spaces-platform.web
+- Web: [https://www.npmjs.com/package/connected-spaces-platform.web](https://www.npmjs.com/package/connected-spaces-platform.web)
 
-- Unity: https://www.npmjs.com/package/connected-spaces-platform.unity.core
+- Unity: [https://www.npmjs.com/package/connected-spaces-platform.unity.core](https://www.npmjs.com/package/connected-spaces-platform.unity.core)
   - For detailed installation instructions head over [here](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Using-CSP-For-Unity).
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
