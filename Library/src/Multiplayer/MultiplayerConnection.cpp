@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/MultiplayerKeyConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
@@ -464,33 +465,19 @@ void MultiplayerConnection::StartEventMessageListening()
 		}
 
 		std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
-
-		csp::common::String EventType;
-		uint64_t SenderClientId = 0;
-		csp::common::Array<ReplicatedValue> EventData;
-
-		ParseEventParams(EventValues, EventType, SenderClientId, EventData);
+		const csp::common::String EventType(EventValues[0].as_string().c_str());
 
 		if (EventType == "AssetDetailBlobChanged")
 		{
 			if (AssetDetailBlobChangedCallback)
 			{
-				EAssetChangeType AssetChangeType = EAssetChangeType::Invalid;
-
-				if (EventData[0].GetInt() < static_cast<int64_t>(EAssetChangeType::Num))
-				{
-					AssetChangeType = static_cast<EAssetChangeType>(EventData[0].GetInt());
-				}
-				else
-				{
-					CSP_LOG_ERROR_MSG("AssetDetailBlob - AssetChangeType out of range of acceptable enum values.");
-				}
-
-				AssetDetailBlobParams Params {AssetChangeType,
-											  EventData[1].GetString(),
-											  EventData[2].GetString(),
-											  csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString()),
-											  EventData[4].GetString()};
+				AssetChangedEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+				AssetDetailBlobParams Params {Deserialiser.GetChangeType(),
+											  Deserialiser.GetAssetId(),
+											  Deserialiser.GetVersion(),
+											  Deserialiser.GetAssetType(),
+											  Deserialiser.GetAssetCollectionId()};
 
 				AssetDetailBlobChangedCallback(Params);
 			}
@@ -499,15 +486,21 @@ void MultiplayerConnection::StartEventMessageListening()
 		{
 			if (ConversationSystemCallback)
 			{
-				ConversationSystemParams params {static_cast<ConversationMessageType>(EventData[0].GetInt()), EventData[1].GetString()};
+				ChatEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+
+				ConversationSystemParams params {Deserialiser.GetMessageType(), Deserialiser.GetMessageValue()};
 				ConversationSystemCallback(params);
 			}
 		}
 		else
 		{
+			EventDeserialiser Deserialiser;
+			Deserialiser.Parse(EventValues);
+
 			for (auto Callback : NetworkEventMap[EventType])
 			{
-				Callback(true, EventData);
+				Callback(true, Deserialiser.GetEventData());
 			}
 		}
 	};
