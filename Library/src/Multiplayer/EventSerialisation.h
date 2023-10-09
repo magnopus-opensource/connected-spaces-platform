@@ -116,6 +116,29 @@ class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
 {
 public:
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	csp::common::String GetSpaceId() const
+	{
+		return SpaceId;
+	}
+	const csp::common::Array<csp::common::String>& GetUserRoles() const
+	{
+		return UserRoles;
+	}
+	EPermissionChangeType GetChangeType() const
+	{
+		return ChangeType;
+	}
+	csp::common::String GetUserId() const
+	{
+		return UserId;
+	}
+
+private:
+	csp::common::String SpaceId;
+	csp::common::Array<csp::common::String> UserRoles;
+	EPermissionChangeType ChangeType;
+	csp::common::String UserId;
 };
 
 } // namespace csp::multiplayer

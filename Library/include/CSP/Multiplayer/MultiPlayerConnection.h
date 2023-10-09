@@ -58,6 +58,14 @@ enum class EAssetChangeType
 	Num
 };
 
+/// @brief Enum specifying the type of change that occured to a user's permissions whilst in a space.
+enum class EPermissionChangeType
+{
+	Created,
+	Updated,
+	Removed,
+};
+
 /// @brief Class used to provide details of a changed asset in a callback.
 class CSP_API AssetDetailBlobParams
 {
@@ -76,6 +84,16 @@ class CSP_API ConversationSystemParams
 public:
 	ConversationMessageType MessageType;
 	csp::common::String MessageValue;
+};
+
+/// @brief Class used to provide details of a Permission change in a callback.
+class CSP_API UserPermissionsParams
+{
+public:
+	csp::common::String SpaceId;
+	csp::common::Array<csp::common::String> GroupRoles;
+	EPermissionChangeType ChangeType;
+	csp::common::String UserId;
 };
 
 /// @brief Enum used to specify the current state of the muiltiplayer connection.
@@ -126,6 +144,9 @@ public:
 
 	// Callback to receive ConversationSystem Data when a message is sent.
 	typedef std::function<void(const ConversationSystemParams&)> ConversationSystemCallbackHandler;
+
+	// Callback to receive access permission changes Data when a message is sent.
+	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
 	/// @brief Start the connection and register to start receiving updates from the server.
 	/// @param Callback CallbackHandler : a callback with success status.
@@ -179,6 +200,10 @@ public:
 	/// @param Callback ConversationMessageCallbackHandler: Callback to receive ConversationSystem Data when a message is sent.
 	/// Callback will have to reset the callback passed to the system to avoid "dangling objects" after use.
 	CSP_EVENT void SetConversationSystemCallback(ConversationSystemCallbackHandler Callback);
+
+	/// @brief Sets a callback for an access control changed event.
+	/// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
+	CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
 
 	/// @brief Registers a callback to listen for the named event.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
@@ -253,6 +278,7 @@ private:
 	NetworkInterruptionCallbackHandler NetworkInterruptionCallback;
 	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 	ConversationSystemCallbackHandler ConversationSystemCallback;
+	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
 	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
 	std::map<csp::common::String, Callbacks> NetworkEventMap;

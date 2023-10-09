@@ -161,4 +161,50 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 	 * | **UserId**        | 102          | String       | The userId that was changed                                               |
 	 * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
 	 */
+
+	if (!EventValues[3].is_null())
+	{
+		const uint64_t SPACE_ID								 = 1;
+		const uint64_t GROUP_ROLES_ID						 = 100;
+		const uint64_t CHANGE_TYPE_ID						 = 101;
+		const uint64_t USER_ID								 = 102;
+		const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
+
+		{
+			const std::vector<signalr::value> SpaceIdComponent(Components.at(SPACE_ID).as_array());
+			SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0]).GetString();
+		}
+
+		{
+			// Group Roles - needs specialised handlingas its an array of strings
+			const std::vector<signalr::value> ChangeTypeComponent(Components.at(GROUP_ROLES_ID).as_array());
+			if (ChangeTypeComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
+			{
+				int i	  = 0;
+				UserRoles = csp::common::Array<csp::common::String>(ChangeTypeComponent[1].as_array().size());
+				for (auto& RoleValue : ChangeTypeComponent[1].as_array())
+				{
+					UserRoles[i++] = RoleValue.as_string().c_str();
+				}
+			}
+			else
+			{
+				CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Failed to find the expected array of roles for a user when an event was received.");
+			}
+		}
+
+		{
+			const std::vector<signalr::value> ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
+			const csp::common::String ChangeTypeString(
+				ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0]).GetString());
+			ChangeType = ChangeTypeString == "Created"
+							 ? EPermissionChangeType::Created
+							 : (ChangeTypeString == "Updated" ? EPermissionChangeType::Updated : EPermissionChangeType::Removed);
+		}
+
+		{
+			const std::vector<signalr::value> UserIdComponent(Components.at(USER_ID).as_array());
+			UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
+		}
+	}
 }

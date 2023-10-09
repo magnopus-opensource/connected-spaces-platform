@@ -434,6 +434,11 @@ CSP_EVENT void MultiplayerConnection::SetConversationSystemCallback(Conversation
 	ConversationSystemCallback = Callback;
 }
 
+void MultiplayerConnection::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
+{
+	UserPermissionsChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr)
@@ -493,8 +498,23 @@ void MultiplayerConnection::StartEventMessageListening()
 				ConversationSystemCallback(params);
 			}
 		}
+		else if (EventType == "AccessControlChanged")
+		{
+			if (UserPermissionsChangedCallback)
+			{
+				UserPermissionsChangedEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+
+				UserPermissionsParams params {Deserialiser.GetSpaceId(),
+											  Deserialiser.GetUserRoles(),
+											  Deserialiser.GetChangeType(),
+											  Deserialiser.GetUserId()};
+				UserPermissionsChangedCallback(params);
+			}
+		}
 		else
 		{
+			// for everything else, use the generic deserialiser
 			EventDeserialiser Deserialiser;
 			Deserialiser.Parse(EventValues);
 
