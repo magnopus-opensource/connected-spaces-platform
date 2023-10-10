@@ -18,6 +18,7 @@
 
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Systems/Assets/Asset.h"
+#include "CSP/Systems/Spaces/UserRoles.h"
 
 namespace csp::multiplayer
 {
@@ -39,6 +40,7 @@ enum class EPermissionChangeType
 	Created,
 	Updated,
 	Removed,
+	Invalid,
 };
 
 /// @brief Describes the changes an asset has undergone when the client application is connected to a space.
@@ -79,8 +81,8 @@ public:
 	/// @brief The unique identifier of the space for which a user's permissions have changed.
 	csp::common::String SpaceId;
 
-	/// @brief The new roles that a user has for the given space (either "viewer", "creator", or "owner")
-	csp::common::Array<csp::common::String> UserRoles;
+	/// @brief The roles that a user has for the given space
+	csp::common::Array<csp::systems::SpaceUserRole> UserRoles;
 
 	/// @brief The type of permissions change that has occurred the user.
 	EPermissionChangeType ChangeType;

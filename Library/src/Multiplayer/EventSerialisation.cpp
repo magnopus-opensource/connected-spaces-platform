@@ -192,17 +192,37 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 		}
 
 		{
-			// Group Roles - needs specialised handlingas its an array of strings
+			// Group Roles - needs specialised handling as the payload here contains an array of strings, which is atypical for events
 			const std::vector<signalr::value>& RolesComponent(Components.at(GROUP_ROLES_ID).as_array());
 			if (RolesComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
 			{
 				const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
 
 				int i				  = 0;
-				EventParams.UserRoles = csp::common::Array<csp::common::String>(RolesArrayComponent.size());
+				EventParams.UserRoles = csp::common::Array<csp::systems::SpaceUserRole>(RolesArrayComponent.size());
 				for (auto& RoleValue : RolesArrayComponent)
 				{
-					EventParams.UserRoles[i++] = RoleValue.as_string().c_str();
+					csp::systems::SpaceUserRole NewRole = csp::systems::SpaceUserRole::Invalid;
+					const std::string& RoleValueString	= RoleValue.as_string();
+
+					if (RoleValueString == "viewer")
+					{
+						NewRole = csp::systems::SpaceUserRole::User;
+					}
+					else if (RoleValueString == "creator")
+					{
+						NewRole = csp::systems::SpaceUserRole::Moderator;
+					}
+					else if (RoleValueString == "owner")
+					{
+						NewRole = csp::systems::SpaceUserRole::Owner;
+					}
+					else
+					{
+						CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Detected an unsupported role type. Defaulting to Invalid role.");
+					}
+
+					EventParams.UserRoles[i++] = NewRole;
 				}
 			}
 			else
@@ -215,9 +235,25 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 			const std::vector<signalr::value>& ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
 			const csp::common::String ChangeTypeString(
 				ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0]).GetString());
-			EventParams.ChangeType = ChangeTypeString == "Created"
-										 ? EPermissionChangeType::Created
-										 : (ChangeTypeString == "Updated" ? EPermissionChangeType::Updated : EPermissionChangeType::Removed);
+
+			EventParams.ChangeType = EPermissionChangeType::Invalid;
+
+			if (ChangeTypeString == "Created")
+			{
+				EventParams.ChangeType = EPermissionChangeType::Created;
+			}
+			else if (ChangeTypeString == "Updated")
+			{
+				EventParams.ChangeType = EPermissionChangeType::Updated;
+			}
+			else if (ChangeTypeString == "Removed")
+			{
+				EventParams.ChangeType = EPermissionChangeType::Removed;
+			}
+			else
+			{
+				CSP_LOG_ERROR_MSG("UserPermissionsChangedEvent - Detected an unsupported kind of role change. Defaulting to kind of change.");
+			}
 		}
 
 		{
