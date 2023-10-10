@@ -27,7 +27,7 @@ namespace csp::multiplayer
 {
 
 // Generic deserialiser for multiplayer events. It can be derived from and
-// its constructor behaviour can be overridden if specialised handling is needed for
+// its behaviour can be overridden if specialised handling is needed for
 // certain events.
 class EventDeserialiser
 {
@@ -51,7 +51,7 @@ public:
 	}
 
 	// Returns the event data that has been synthesised from the parsed event
-	// values that were passed in when constructing this object.
+	// values that were parsed.
 	const csp::common::Array<csp::multiplayer::ReplicatedValue>& GetEventData() const
 	{
 		return EventData;
