@@ -40,7 +40,8 @@ enum class SpaceUserRole
 {
 	Owner,
 	Moderator,
-	User
+	User,
+	Invalid
 };
 
 /// @ingroup Space System
