@@ -2439,4 +2439,96 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ROLE_CHANGE_EVENT_TEST || 1
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, MultiplayerRoleChangeEventTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	// Set up multiplayer connection
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
+
+	// Setup permissions changed callback
+	bool PermissionsChanged = false;
+
+	auto PermissionsChangedCallback = [&PermissionsChanged, &Space](const csp::multiplayer::UserPermissionsParams& Params)
+	{
+		if (PermissionsChanged)
+		{
+			return;
+		}
+
+		EXPECT_EQ(Params.ChangeType, csp::multiplayer::EPermissionChangeType::Created);
+		EXPECT_EQ(Params.SpaceId, Space.Id);
+		PermissionsChanged = true;
+	};
+
+	Connection->SetUserPermissionsChangedCallback(PermissionsChangedCallback);
+
+	// Invite a new user to trigger a permissions change callback
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "");
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	// Validate we received the expected callback from the connection
+	while (!PermissionsChanged && TestTime < 20)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	EXPECT_TRUE(PermissionsChanged);
+
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
 } // namespace
