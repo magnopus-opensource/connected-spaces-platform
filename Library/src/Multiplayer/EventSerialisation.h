@@ -71,8 +71,6 @@ protected:
 class AssetChangedEventDeserialiser : public EventDeserialiser
 {
 public:
-	AssetChangedEventDeserialiser();
-
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
 	const AssetDetailBlobParams& GetEventParams() const
@@ -88,8 +86,6 @@ private:
 class ConversationEventDeserialiser : public EventDeserialiser
 {
 public:
-	ConversationEventDeserialiser();
-
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
 	const ConversationSystemParams& GetEventParams() const

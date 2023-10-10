@@ -126,10 +126,6 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
 	return ReplicatedValue;
 }
 
-AssetChangedEventDeserialiser::AssetChangedEventDeserialiser()
-{
-}
-
 void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
 {
 	EventDeserialiser::Parse(EventValues);
@@ -149,10 +145,6 @@ void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
 	EventParams.Version			  = EventData[2].GetString();
 	EventParams.AssetType		  = csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString());
 	EventParams.AssetCollectionId = EventData[4].GetString();
-}
-
-ConversationEventDeserialiser::ConversationEventDeserialiser()
-{
 }
 
 void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
