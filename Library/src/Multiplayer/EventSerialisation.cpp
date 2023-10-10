@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "Multiplayer/EventSerialisation.h"
 
 #include "Debug/Logging.h"
@@ -110,7 +126,7 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
 	return ReplicatedValue;
 }
 
-AssetChangedEventDeserialiser::AssetChangedEventDeserialiser() : ChangeType(EAssetChangeType::Invalid), AssetType(csp::systems::EAssetType::IMAGE)
+AssetChangedEventDeserialiser::AssetChangedEventDeserialiser()
 {
 }
 
@@ -118,33 +134,33 @@ void AssetChangedEventDeserialiser::Parse(const std::vector<signalr::value>& Eve
 {
 	EventDeserialiser::Parse(EventValues);
 
-	EAssetChangeType AssetChangeType = EAssetChangeType::Invalid;
+	EventParams.ChangeType = EAssetChangeType::Invalid;
 
 	if (EventData[0].GetInt() < static_cast<int64_t>(EAssetChangeType::Num))
 	{
-		AssetChangeType = static_cast<EAssetChangeType>(EventData[0].GetInt());
+		EventParams.ChangeType = static_cast<EAssetChangeType>(EventData[0].GetInt());
 	}
 	else
 	{
 		CSP_LOG_ERROR_MSG("AssetDetailChangedEvent - AssetChangeType out of range of acceptable enum values.");
 	}
 
-	AssetId			  = EventData[1].GetString();
-	Version			  = EventData[2].GetString();
-	AssetType		  = csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString());
-	AssetCollectionId = EventData[4].GetString();
+	EventParams.AssetId			  = EventData[1].GetString();
+	EventParams.Version			  = EventData[2].GetString();
+	EventParams.AssetType		  = csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString());
+	EventParams.AssetCollectionId = EventData[4].GetString();
 }
 
-ChatEventDeserialiser::ChatEventDeserialiser() : MessageType(ConversationMessageType::MessageInformation)
+ConversationEventDeserialiser::ConversationEventDeserialiser()
 {
 }
 
-void ChatEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+void ConversationEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
 {
 	EventDeserialiser::Parse(EventValues);
 
-	MessageType	 = static_cast<ConversationMessageType>(EventData[0].GetInt());
-	MessageValue = EventData[1].GetString();
+	EventParams.MessageType	 = static_cast<ConversationMessageType>(EventData[0].GetInt());
+	EventParams.MessageValue = EventData[1].GetString();
 }
 
 void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -156,7 +172,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 	 * | Name              | Component ID | Type         | Notes (units, ranges)                                                     |
 	 * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
 	 * | **SpaceId**       | 1            | String       | Id of the space that has updated permissions                              |
-	 * | **GroupRoles**    | 100          | String Array | Array of user permissions (viewer,creator,owner) that belongs to the user |
+	 * | **UserRoles**    | 100          | String Array | Array of user permissions (viewer,creator,owner) that belongs to the user |
 	 * | **ChangeType**    | 101          | String       | Created, Updated, Removed                                                 |
 	 * | **UserId**        | 102          | String       | The userId that was changed                                               |
 	 * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
@@ -172,7 +188,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 
 		{
 			const std::vector<signalr::value> SpaceIdComponent(Components.at(SPACE_ID).as_array());
-			SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0]).GetString();
+			EventParams.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0]).GetString();
 		}
 
 		{
@@ -180,11 +196,11 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 			const std::vector<signalr::value> ChangeTypeComponent(Components.at(GROUP_ROLES_ID).as_array());
 			if (ChangeTypeComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
 			{
-				int i	  = 0;
-				UserRoles = csp::common::Array<csp::common::String>(ChangeTypeComponent[1].as_array().size());
+				int i				  = 0;
+				EventParams.UserRoles = csp::common::Array<csp::common::String>(ChangeTypeComponent[1].as_array().size());
 				for (auto& RoleValue : ChangeTypeComponent[1].as_array())
 				{
-					UserRoles[i++] = RoleValue.as_string().c_str();
+					EventParams.UserRoles[i++] = RoleValue.as_string().c_str();
 				}
 			}
 			else
@@ -197,14 +213,14 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 			const std::vector<signalr::value> ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
 			const csp::common::String ChangeTypeString(
 				ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0]).GetString());
-			ChangeType = ChangeTypeString == "Created"
-							 ? EPermissionChangeType::Created
-							 : (ChangeTypeString == "Updated" ? EPermissionChangeType::Updated : EPermissionChangeType::Removed);
+			EventParams.ChangeType = ChangeTypeString == "Created"
+										 ? EPermissionChangeType::Created
+										 : (ChangeTypeString == "Updated" ? EPermissionChangeType::Updated : EPermissionChangeType::Removed);
 		}
 
 		{
 			const std::vector<signalr::value> UserIdComponent(Components.at(USER_ID).as_array());
-			UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
+			EventParams.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
 		}
 	}
 }

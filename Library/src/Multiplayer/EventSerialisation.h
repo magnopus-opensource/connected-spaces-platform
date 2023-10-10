@@ -1,10 +1,25 @@
+/*
+ * Copyright 2023 Magnopus LLC
+
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #pragma once
+
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
-#include "CSP/Systems/Assets/Asset.h"
 
 #include <signalrclient/signalr_value.h>
 
@@ -60,55 +75,30 @@ public:
 
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	EAssetChangeType GetChangeType() const
+	const AssetDetailBlobParams& GetEventParams() const
 	{
-		return ChangeType;
-	}
-	csp::common::String GetAssetId() const
-	{
-		return AssetId;
-	}
-	csp::common::String GetVersion() const
-	{
-		return Version;
-	}
-	csp::systems::EAssetType GetAssetType() const
-	{
-		return AssetType;
-	}
-	csp::common::String GetAssetCollectionId() const
-	{
-		return AssetCollectionId;
+		return EventParams;
 	}
 
 private:
-	EAssetChangeType ChangeType;
-	csp::common::String AssetId;
-	csp::common::String Version;
-	csp::systems::EAssetType AssetType;
-	csp::common::String AssetCollectionId;
+	AssetDetailBlobParams EventParams;
 };
 
-// A specialised deserialiser for handling events triggered when a chat message event happens.
-class ChatEventDeserialiser : public EventDeserialiser
+// A specialised deserialiser for handling events triggered when a conversation event happens.
+class ConversationEventDeserialiser : public EventDeserialiser
 {
 public:
-	ChatEventDeserialiser();
+	ConversationEventDeserialiser();
 
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	ConversationMessageType GetMessageType() const
+	const ConversationSystemParams& GetEventParams() const
 	{
-		return MessageType;
-	}
-	csp::common::String GetMessageValue() const
-	{
-		return MessageValue;
+		return EventParams;
 	}
 
 private:
-	ConversationMessageType MessageType;
-	csp::common::String MessageValue;
+	ConversationSystemParams EventParams;
 };
 
 // A specialised deserialiser for handling events triggered when a user in the space's access permissions change.
@@ -117,28 +107,13 @@ class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
 public:
 	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	csp::common::String GetSpaceId() const
+	const UserPermissionsParams& GetEventParams() const
 	{
-		return SpaceId;
-	}
-	const csp::common::Array<csp::common::String>& GetUserRoles() const
-	{
-		return UserRoles;
-	}
-	EPermissionChangeType GetChangeType() const
-	{
-		return ChangeType;
-	}
-	csp::common::String GetUserId() const
-	{
-		return UserId;
+		return EventParams;
 	}
 
 private:
-	csp::common::String SpaceId;
-	csp::common::Array<csp::common::String> UserRoles;
-	EPermissionChangeType ChangeType;
-	csp::common::String UserId;
+	UserPermissionsParams EventParams;
 };
 
 } // namespace csp::multiplayer

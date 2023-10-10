@@ -19,6 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/Asset.h"
 
 #include <atomic>
@@ -31,14 +32,6 @@ namespace csp::systems
 class SpaceSystem;
 }
 
-namespace csp::multiplayer
-{
-class ClientElectionManager;
-class SignalRConnection;
-class IWebSocketClient;
-
-} // namespace csp::multiplayer
-
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
@@ -46,55 +39,9 @@ namespace csp::multiplayer
 class ReplicatedValue;
 class SpaceEntitySystem;
 class ConversationSystem;
-
-/// @brief Enum specifying the type of change that occured to an asset.
-enum class EAssetChangeType
-{
-	Created,
-	Updated,
-	MusubiFailed,
-	Deleted,
-	Invalid,
-	Num
-};
-
-/// @brief Enum specifying the type of change that occured to a user's permissions whilst in a space.
-enum class EPermissionChangeType
-{
-	Created,
-	Updated,
-	Removed,
-};
-
-/// @brief Class used to provide details of a changed asset in a callback.
-class CSP_API AssetDetailBlobParams
-{
-public:
-	EAssetChangeType ChangeType;
-	csp::common::String AssetId;
-	csp::common::String Version;
-	csp::systems::EAssetType AssetType;
-	csp::common::String AssetCollectionId;
-};
-
-
-/// @brief Class used to provide details of a conversation message in a callback.
-class CSP_API ConversationSystemParams
-{
-public:
-	ConversationMessageType MessageType;
-	csp::common::String MessageValue;
-};
-
-/// @brief Class used to provide details of a Permission change in a callback.
-class CSP_API UserPermissionsParams
-{
-public:
-	csp::common::String SpaceId;
-	csp::common::Array<csp::common::String> GroupRoles;
-	EPermissionChangeType ChangeType;
-	csp::common::String UserId;
-};
+class ClientElectionManager;
+class SignalRConnection;
+class IWebSocketClient;
 
 /// @brief Enum used to specify the current state of the muiltiplayer connection.
 enum class ConnectionState

@@ -478,24 +478,16 @@ void MultiplayerConnection::StartEventMessageListening()
 			{
 				AssetChangedEventDeserialiser Deserialiser;
 				Deserialiser.Parse(EventValues);
-				AssetDetailBlobParams Params {Deserialiser.GetChangeType(),
-											  Deserialiser.GetAssetId(),
-											  Deserialiser.GetVersion(),
-											  Deserialiser.GetAssetType(),
-											  Deserialiser.GetAssetCollectionId()};
-
-				AssetDetailBlobChangedCallback(Params);
+				AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
 			}
 		}
 		else if (EventType == "ConversationSystem")
 		{
 			if (ConversationSystemCallback)
 			{
-				ChatEventDeserialiser Deserialiser;
+				ConversationEventDeserialiser Deserialiser;
 				Deserialiser.Parse(EventValues);
-
-				ConversationSystemParams params {Deserialiser.GetMessageType(), Deserialiser.GetMessageValue()};
-				ConversationSystemCallback(params);
+				ConversationSystemCallback(Deserialiser.GetEventParams());
 			}
 		}
 		else if (EventType == "AccessControlChanged")
@@ -504,12 +496,7 @@ void MultiplayerConnection::StartEventMessageListening()
 			{
 				UserPermissionsChangedEventDeserialiser Deserialiser;
 				Deserialiser.Parse(EventValues);
-
-				UserPermissionsParams params {Deserialiser.GetSpaceId(),
-											  Deserialiser.GetUserRoles(),
-											  Deserialiser.GetChangeType(),
-											  Deserialiser.GetUserId()};
-				UserPermissionsChangedCallback(params);
+				UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 			}
 		}
 		else
