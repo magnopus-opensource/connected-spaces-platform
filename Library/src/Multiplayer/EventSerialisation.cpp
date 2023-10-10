@@ -172,7 +172,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 	 * | Name              | Component ID | Type         | Notes (units, ranges)                                                     |
 	 * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
 	 * | **SpaceId**       | 1            | String       | Id of the space that has updated permissions                              |
-	 * | **UserRoles**    | 100          | String Array | Array of user permissions (viewer,creator,owner) that belongs to the user |
+	 * | **UserRoles**     | 100          | String Array | Array of user permissions (viewer,creator,owner) that belongs to the user |
 	 * | **ChangeType**    | 101          | String       | Created, Updated, Removed                                                 |
 	 * | **UserId**        | 102          | String       | The userId that was changed                                               |
 	 * |-------------------|--------------|--------------|---------------------------------------------------------------------------|
@@ -187,18 +187,20 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 		const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
 
 		{
-			const std::vector<signalr::value> SpaceIdComponent(Components.at(SPACE_ID).as_array());
+			const std::vector<signalr::value>& SpaceIdComponent(Components.at(SPACE_ID).as_array());
 			EventParams.SpaceId = ParseSignalRComponent(SpaceIdComponent[0].as_uinteger(), SpaceIdComponent[1].as_array()[0]).GetString();
 		}
 
 		{
 			// Group Roles - needs specialised handlingas its an array of strings
-			const std::vector<signalr::value> ChangeTypeComponent(Components.at(GROUP_ROLES_ID).as_array());
-			if (ChangeTypeComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
+			const std::vector<signalr::value>& RolesComponent(Components.at(GROUP_ROLES_ID).as_array());
+			if (RolesComponent[0].as_uinteger() == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING_ARRAY)
 			{
+				const std::vector<signalr::value>& RolesArrayComponent = RolesComponent[1].as_array()[0].as_array();
+
 				int i				  = 0;
-				EventParams.UserRoles = csp::common::Array<csp::common::String>(ChangeTypeComponent[1].as_array().size());
-				for (auto& RoleValue : ChangeTypeComponent[1].as_array())
+				EventParams.UserRoles = csp::common::Array<csp::common::String>(RolesArrayComponent.size());
+				for (auto& RoleValue : RolesArrayComponent)
 				{
 					EventParams.UserRoles[i++] = RoleValue.as_string().c_str();
 				}
@@ -210,7 +212,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 		}
 
 		{
-			const std::vector<signalr::value> ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
+			const std::vector<signalr::value>& ChangeTypeComponent(Components.at(CHANGE_TYPE_ID).as_array());
 			const csp::common::String ChangeTypeString(
 				ParseSignalRComponent(ChangeTypeComponent[0].as_uinteger(), ChangeTypeComponent[1].as_array()[0]).GetString());
 			EventParams.ChangeType = ChangeTypeString == "Created"
@@ -219,7 +221,7 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 		}
 
 		{
-			const std::vector<signalr::value> UserIdComponent(Components.at(USER_ID).as_array());
+			const std::vector<signalr::value>& UserIdComponent(Components.at(USER_ID).as_array());
 			EventParams.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
 		}
 	}
