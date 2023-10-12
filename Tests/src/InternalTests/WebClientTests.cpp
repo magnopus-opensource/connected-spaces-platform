@@ -117,14 +117,14 @@ void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequ
 	#endif
 }
 
+template <typename TReceiver>
 void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPayload& Payload, EResponseCodes ExpectedResponse)
 {
-	ResponseReceiver Receiver;
+	TReceiver Receiver;
 
-	auto* WebClient = CSP_NEW TestWebClient(Port, ETransferProtocol::HTTP);
-	EXPECT_TRUE(WebClient != nullptr);
+	TestWebClient WebClient(Port, ETransferProtocol::HTTP);
 
-	WebClientSendRequest(WebClient, Url, Verb, Payload, &Receiver);
+	WebClientSendRequest(&WebClient, Url, Verb, Payload, &Receiver);
 
 	//// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
@@ -144,7 +144,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
 	HttpPayload Payload;
 
-	RunWebClientTest("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
+	RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseOK);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -161,7 +161,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 
 	Payload.SetContent(JsonDoc);
 
-	RunWebClientTest("https://reqres.in/api/users/2", ERequestVerb::Put, 80, Payload, EResponseCodes::ResponseOK);
+	RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/2", ERequestVerb::Put, 80, Payload, EResponseCodes::ResponseOK);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -180,7 +180,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 
 	Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json"));
 
-	RunWebClientTest("https://reqres.in/api/login", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseOK);
+	RunWebClientTest<ResponseReceiver>("https://reqres.in/api/login", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseOK);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -191,7 +191,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 
 	HttpPayload Payload;
 
-	RunWebClientTest("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
+	RunWebClientTest<ResponseReceiver>("https://reqres.in/api/users/1", ERequestVerb::Delete, 80, Payload, EResponseCodes::ResponseNoContent);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -533,23 +533,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
 	InitialiseFoundation();
 
 	HttpPayload Payload;
-	RetryResponseReceiver Receiver;
 
-	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
-	EXPECT_TRUE(WebClient != nullptr);
-
-	WebClientSendRequest(WebClient, "https://reqres.in/api/users/23", ERequestVerb::Get, Payload, &Receiver);
-
-	// Sleep thread until response is received
-	if (Receiver.WaitForResponse())
-	{
-		EXPECT_TRUE(Receiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseNotFound)
-			<< "Response was " << (int) Receiver.GetResponse().GetResponseCode();
-	}
-	else
-	{
-		FAIL() << "Response timeout" << std::endl;
-	}
+	RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -560,23 +545,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 	InitialiseFoundation();
 
 	HttpPayload Payload;
-	ResponseReceiver Receiver;
 
-	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
-	EXPECT_TRUE(WebClient != nullptr);
-
-	WebClientSendRequest(WebClient, "https://reqres.in/apiiii/users/23", ERequestVerb::Get, Payload, &Receiver);
-
-	// Sleep thread until response is received
-	if (Receiver.WaitForResponse())
-	{
-		EXPECT_TRUE(Receiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseNotFound)
-			<< "Response was " << (int) Receiver.GetResponse().GetResponseCode();
-	}
-	else
-	{
-		FAIL() << "Response timeout" << std::endl;
-	}
+	RunWebClientTest<ResponseReceiver>("https://reqres.in/apiiii/users/23", ERequestVerb::Get, 80, Payload, EResponseCodes::ResponseNotFound);
 
 	csp::CSPFoundation::Shutdown();
 }
@@ -588,18 +558,32 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 	HttpPayload Payload;
 	Payload.AddContent("{ \"email\": \"test@olympus\" }");
 
+	RunWebClientTest<RetryResponseReceiver>("https://reqres.in/api/register", ERequestVerb::Post, 80, Payload, EResponseCodes::ResponseBadRequest);
+
+	csp::CSPFoundation::Shutdown();
+}
+
+	// Current fails on wasm platform tests due to CORS policy.
+	#ifndef CSP_WASM
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
+{
+	InitialiseFoundation();
+
+	HttpPayload Payload;
 	ResponseReceiver Receiver;
 
 	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
-	WebClientSendRequest(WebClient, "https://reqres.in/api/register", ERequestVerb::Post, Payload, &Receiver);
+	WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
 
 	//// Sleep thread until response is received
 	if (Receiver.WaitForResponse())
 	{
-		EXPECT_TRUE(Receiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseBadRequest)
-			<< "Response was " << (int) Receiver.GetResponse().GetResponseCode();
+		std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
+
+		EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
 	}
 	else
 	{
@@ -609,35 +593,27 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 	csp::CSPFoundation::Shutdown();
 }
 
-	// Current fails on wasm platform tests due to CORS policy.
-	#ifndef CSP_WASM
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
+	#endif
+
+	#include "CSP/Systems/SystemsManager.h"
+	#include "PublicAPITests/UserSystemTestHelpers.h"
+
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 {
 	InitialiseFoundation();
 
+	auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
 	HttpPayload Payload;
-	ResponseReceiver Receiver;
-
-	{
-		auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
-		EXPECT_TRUE(WebClient != nullptr);
-
-		WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
-
-		//// Sleep thread until response is received
-		if (Receiver.WaitForResponse())
-		{
-			std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
-
-			EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
+	RunWebClientTest<RetryResponseReceiver>("https://ogs-odev-internal.magnoboard.com/mag-user/appsettings",
+											ERequestVerb::Get,
+											80,
+											Payload,
+											EResponseCodes::ResponseForbidden);
 
 	csp::CSPFoundation::Shutdown();
 }
-	#endif
+
 #endif
