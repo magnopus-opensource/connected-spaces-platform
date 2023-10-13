@@ -1,6 +1,6 @@
 REM *** Command Line Arguments *** 
 REM DLLOnly - Generates a solution with only DLL-related build configurations
-pip install -r requirements.txt
+pip install -r teamcity/requirements.txt
 
 if "%~1"=="-ci" (goto :NoGitConfig) else goto :GitConfig
 
