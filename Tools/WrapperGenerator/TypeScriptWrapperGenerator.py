@@ -49,6 +49,21 @@ class TypeScriptWrapperGenerator:
 
         setattr(obj, "translated_namespace", ".".join(filter(None, namespaces)))
 
+    def __namespace_underscore(self, obj: Any) -> None:
+        if obj.namespace is None:
+            setattr(obj, "namespace_underscore", None)
+            return
+
+        namespaces = obj.namespace.split("::")
+
+        for i in range(0, min(2, len(namespaces))):
+            if namespaces[i] in self.NAMESPACE_TRANSLATIONS:
+                namespaces[i] = self.NAMESPACE_TRANSLATIONS[namespaces[i]]
+        filtered = filter(None, namespaces)
+        name = "_".join(filtered).lower()
+
+        setattr(obj, "namespace_underscore", name)
+
     def __translate_type(self, type: TypeMetadata) -> None:
         if type is None:
             return
@@ -378,12 +393,14 @@ class TypeScriptWrapperGenerator:
 
         for c in classes.values():
             self.__translate_namespace(c)
-
+            self.__namespace_underscore(c)
+ 
             if c.doc_comments is not None:
                 self.__translate_comments(c.doc_comments)
 
             if c.base is not None:
                 self.__translate_namespace(c.base)
+                self.__namespace_underscore(c.base)
                 setattr(c.base, "is_void_pointer", False)
 
             if c.interfaces is not None:
@@ -562,6 +579,6 @@ class TypeScriptWrapperGenerator:
             shutil.copy2(f"{self.__OUTPUT_DIRECTORY}../../ConnectedSpacesPlatform_WASM.d.ts", self.__OUTPUT_DIRECTORY)
 
         subprocess.run(
-            f'npx --package typescript tsc "{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts" -d -m es2020 -t es2020 --sourceMap',
+            f'npx --package typescript tsc "{self.__OUTPUT_DIRECTORY}connectedspacesplatform.ts" -d -m es2022 -t es2022 --sourceMap',
             shell=True,
         )

@@ -1,3 +1,7 @@
+const registry = new FinalizationRegistry((heldValue: any) => {
+  const {fn, destructorName, ptr} = heldValue;
+  fn(destructorName, ptr);
+});
 class NativeClassWrapper {
     constructor(pointer: NativePointer) {
         this.pointer = pointer.pointer;

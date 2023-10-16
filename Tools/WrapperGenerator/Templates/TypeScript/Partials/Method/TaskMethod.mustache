@@ -11,12 +11,19 @@ async {{ name }}(
 {{/ is_async_result_with_progress }}
 ): Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}> {
     var _resolve;
-
-    var _promise = new Promise<{{# results }}{{# type }}{{> TypeName }}{{/ type }}{{/ results }}>(
-        (_r) => {
-            _resolve = _r
+    {{# results }}
+    {{# type.is_result_base }}
+    var _reject;
+    {{/ type.is_result_base }}
+    var _promise = new Promise<{{# type }}{{> TypeName }}{{/ type }}>(
+        (_r, {{# type.is_result_base }}_rj{{/ type.is_result_base }}) => {
+            _resolve = _r;
+            {{# type.is_result_base }}
+            _reject = _rj;
+            {{/ type.is_result_base }}
         }
     );
+    {{/ results }}
 
     var _callbackPtr: number;
     var _callback = (
@@ -61,24 +68,20 @@ async {{ name }}(
             return;
         }
 {{/ type.is_result_base }}
-{{/ results }}
 
-        _resolve(
-{{# results }}
-{{# type.is_class_or_interface }}
-            _{{ name }}Instance{{> Comma }}
-{{/ type.is_class_or_interface }}
-{{^ type.is_class_or_interface }}
-{{# type.is_string }}
-            Module.UTF8ToString({{name}}){{> Comma }}
-{{/ type.is_string }}
-{{^ type.is_string }}
-            {{# type.is_bool}}!!{{/ type.is_bool }}{{ name }}{{> Comma }}
-{{/ type.is_string }}
-{{/ type.is_class_or_interface }}
-{{/ results }}
-        )
+{{# type.is_result_base }}
+    if ({{> ResultName }}.getResultCode() == Services.EResultCode.Success) {
+        
+{{/ type.is_result_base }}
+        _resolve({{> ResultName }})
+        
+{{# type.is_result_base }}
+    } else {
+        _reject(new Error({{> ResultName }}.getResponseBody()));
+    }
+{{/ type.is_result_base }}
 
+{{/ results }}
         Module.removeFunction(_callbackPtr);
     };
 
