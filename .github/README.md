@@ -106,7 +106,7 @@ You can always find up-to-date documentation on the API here.
 
 PRs are welcome! If have any ideas you would like to contribute please see our contribution page.
 
-- [Contribution](/CONTRIBUTING.md)
+- [Contribution](/.github/CONTRIBUTING.md)
 
 ---
 
