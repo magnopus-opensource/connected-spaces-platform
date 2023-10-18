@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-//#ifdef CSP_WASM
+#include "EmscriptenWebClient.h"
 
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "Debug/Logging.h"
-#include "EmscriptenWebClient.h"
 
 #include <assert.h>
 #include <emscripten/emscripten.h>
@@ -104,9 +103,9 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 
 void OnFetchError(emscripten_fetch_t* Fetch)
 {
-	auto* UserData = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
+	auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
 
-	if (UserData->Retry())
+	if (Request->Retry())
 	{
 		CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
 	}
@@ -120,8 +119,7 @@ void OnFetchProgress(emscripten_fetch_t* Fetch)
 {
 	if (Fetch->totalBytes)
 	{
-		auto UserData = Fetch->userData;
-		auto* Request = reinterpret_cast<csp::web::HttpRequest*>(UserData);
+		auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
 		Request->SetResponseProgress(Fetch->dataOffset * 100.0 / Fetch->totalBytes);
 	}
 }
@@ -296,5 +294,3 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 }
 
 } // namespace csp::web
-
-//#endif // CSP_WASM
