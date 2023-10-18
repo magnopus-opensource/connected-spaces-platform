@@ -83,14 +83,13 @@ export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = 
 
 /**
  * 
- * @param {!Systems.UserSystem} userSystem 
- * @param {!string} [deviceId] 
+ * @param {!Systems.UserSystem} userSystem
  * @param {!Services.EResultCode} [expectedResult] 
  * @param {!boolean} [pushCleanup] 
  * @returns {Promise<?string>} the guest userId of the logged in account
  */
- export async function logInAsGuest(userSystem, deviceId = 'SomeRandomGuestDeviceIdLol', expectedResult = Services.EResultCode.Success, pushCleanup = true) {
-    const result = await userSystem.loginAsGuestWithId(deviceId);
+ export async function logInAsGuest(userSystem, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
+    const result = await userSystem.loginAsGuest(true);
     const resCode = result.getResultCode();
 
     assert.succeeded(result, expectedResult);

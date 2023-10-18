@@ -18,9 +18,9 @@ import { runTests } from './test_framework.js'
 
 async function runAllTests() {
     var options = new CspOptions();
-    options.wrapperUrl = "http://localhost:8080/node_modules/@magnopus-opensource/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.js";
-    options.wasmUrl = "http://localhost:8080/node_modules/@magnopus-opensource/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.wasm";
-    options.workerUrl = "http://localhost:8080/node_modules/@magnopus-opensource/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.worker.js";
+    options.wrapperUrl = "http://localhost:8080/node_modules/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.js";
+    options.wasmUrl = "http://localhost:8080/node_modules/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.wasm";
+    options.workerUrl = "http://localhost:8080/node_modules/connected-spaces-platform.web/Debug/ConnectedSpacesPlatform_WASM.worker.js";
 
     var Module = await ready(options);
     console.log(`Foundation build Id: ${CSPFoundation.getBuildID()}`);

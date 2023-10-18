@@ -237,7 +237,7 @@ test('UserSystemTests', 'LoginErrorTest', async function() {
     const userSystem = systemsManager.getUserSystem();
 
     // Log in with invalid credentials
-    await logIn(userSystem, 'invalidlogin@magnopus.com', 'notarealpassword', Services.EResultCode.Failed);
+    await logIn(userSystem, 'invalidlogin@magnopus.com', 'notarealpassword', true, Services.EResultCode.Failed);
 
     // Log in
     await logIn(userSystem);
@@ -375,7 +375,7 @@ test('UserSystemTests', 'CreateUserTest', async function() {
     
     // Test user creation
     {
-        const result = await userSystem.createUser(newUsername, newDisplayName, newEmail, newPassword, true, null, null);
+        const result = await userSystem.createUser(newUsername, newDisplayName, newEmail, newPassword, true, true, null, null);
         
         assert.succeeded(result);
 
