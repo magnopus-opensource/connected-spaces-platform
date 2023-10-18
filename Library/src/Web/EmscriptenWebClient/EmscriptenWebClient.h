@@ -15,6 +15,10 @@
  */
 #pragma once
 
+#include "CSP/CSPCommon.h"
+
+//#ifdef CSP_WASM
+
 #include "Web/WebClient.h"
 
 
@@ -68,3 +72,5 @@ private:
 };
 
 } // namespace csp::web
+
+//#endif //CSP_WASM
