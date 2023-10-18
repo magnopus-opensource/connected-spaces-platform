@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "EmscriptenWebClient.h"
+//#ifdef CSP_WASM
 
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "Debug/Logging.h"
+#include "EmscriptenWebClient.h"
 
 #include <assert.h>
 #include <emscripten/emscripten.h>
@@ -101,11 +102,26 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 	emscripten_fetch_close(Fetch);
 }
 
+void OnFetchError(emscripten_fetch_t* Fetch)
+{
+	auto* UserData = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
+
+	if (UserData->Retry())
+	{
+		CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
+	}
+	else
+	{
+		OnFetchSuccessOrError(Fetch);
+	}
+}
+
 void OnFetchProgress(emscripten_fetch_t* Fetch)
 {
 	if (Fetch->totalBytes)
 	{
-		auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
+		auto UserData = Fetch->userData;
+		auto* Request = reinterpret_cast<csp::web::HttpRequest*>(UserData);
 		Request->SetResponseProgress(Fetch->dataOffset * 100.0 / Fetch->totalBytes);
 	}
 }
@@ -233,7 +249,7 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	attr.onsuccess	= OnFetchSuccessOrError;
-	attr.onerror	= OnFetchSuccessOrError;
+	attr.onerror	= OnFetchError;
 	attr.onprogress = OnFetchProgress;
 
 	// Don't send headers or content for HEAD requests
@@ -280,3 +296,5 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 }
 
 } // namespace csp::web
+
+//#endif // CSP_WASM
