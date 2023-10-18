@@ -811,14 +811,14 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
     const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Create space as the primary user
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -833,7 +833,7 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
 
     // Switch back to the primary user to actually create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const addGeoResultAsPrimary = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
     assert.succeeded(addGeoResultAsPrimary);
@@ -841,7 +841,7 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Test they cannot access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);
@@ -895,14 +895,14 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
     const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in as primary user
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None,false);
 
     // Create space as the primary user
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Public, null, null, null, false);
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -917,7 +917,7 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
 
     // Switch back to the primary user to actually create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const addGeoResultAsPrimary = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
     assert.succeeded(addGeoResultAsPrimary);
@@ -925,7 +925,7 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Test they can access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);
