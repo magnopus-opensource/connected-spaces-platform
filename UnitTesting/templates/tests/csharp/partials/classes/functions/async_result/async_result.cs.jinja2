@@ -1,0 +1,83 @@
+{% for p in config.primitives %}
+    // Get {{ p.type }} min value via async task
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_min() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    }
+
+    // Get {{ p.type }} max value via async task
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_max() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    }
+
+    // Get {{ p.type }} min value via async task (multi-threaded)
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_min() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    }
+
+    // Get {{ p.type }} max value via async task (multi-threaded)
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_max() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    }
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via async task
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_ReturnStringBy{{ x }}() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_ReturnStringBy{{ x }}();
+
+        Assert.AreEqual("{{ config.string_value }}", result);
+    }
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via async task (multi-threaded)
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_ReturnStringBy{{ x }}_MultiThread() {
+        using var instance = new AsyncResultTestClass();
+        var result = await instance.ClassFunctions_AsyncResult_ReturnStringBy{{ x }}_MultiThread();
+
+        Assert.AreEqual("{{ config.string_value }}", result);
+    }
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }} via async task
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_ReturnClassBy{{ x }}() {
+        using var instance = new AsyncResultTestClass();
+        using var result = await instance.ClassFunctions_AsyncResult_ReturnClassBy{{ x }}();
+
+        Assert.IsTrue(result.PointerIsValid);
+        Assert.AreEqual({{ config.class_int_value_first }}, result.SomeValue);
+    }
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }} via async task (multi-threaded)
+    [Test]
+    public static async Task ClassFunctions_AsyncResult_ReturnClassBy{{ x }}_MultiThread() {
+        using var instance = new AsyncResultTestClass();
+        using var result = await instance.ClassFunctions_AsyncResult_ReturnClassBy{{ x }}_MultiThread();
+
+        Assert.IsTrue(result.PointerIsValid);
+        Assert.AreEqual({{ config.class_int_value_first }}, result.SomeValue);
+    }
+{% endfor %}

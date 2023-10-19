@@ -32,7 +32,7 @@ def find_unity_installation():
     installed_editors = reversed(result.stdout.strip().splitlines())
 
     for e in installed_editors:
-        if "2020.3." in e:
+        if "2020.3." in e or "2021.3" in e:
             version, path = e.split(",")
             version = version.strip()
             path = path.strip()[len("installed at ") :]
