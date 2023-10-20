@@ -61,33 +61,30 @@ export class XMLElement {
         let result = '';
 
         result += ' '.repeat(indent * 4);
-        result += `<${ this.#name }`;
+        result += `<${this.#name}`;
 
         for (let key in this.#attributes) {
             const /** @type {string} */ val = this.#attributes[key];
-            result += ` ${ key }="${ val }"`;
+            result += ` ${key}="${val}"`;
         }
 
         if (this.innerHTML == null && this.#elements.length == 0) {
             result += '/>\n';
-        }
-        else {
+        } else {
             result += '>\n';
 
             if (this.innerHTML != null) {
                 result += ' '.repeat((indent + 1) * 4);
                 result += this.innerHTML + '\n';
-            }
-            else {
+            } else {
                 for (let elem of this.#elements) {
                     result += elem.stringify(indent + 1);
                 }
             }
 
             result += ' '.repeat(indent * 4);
-            result += `</${ this.#name }>\n`;
+            result += `</${this.#name}>\n`;
         }
-
 
         return result;
     }
