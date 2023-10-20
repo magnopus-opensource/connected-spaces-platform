@@ -6,7 +6,8 @@ include "../premake5_helpers.lua"
 --Custom build options
 newoption {
     trigger     = "generate_wasm",
-    description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
+    description =
+        "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
 }
 
 
@@ -89,23 +90,37 @@ project "UnitTestingBinary"
         }
 
         buildoptions {
-            "--no-entry",           -- remove default library entry point
-            "-pthread",             -- enable threading
-            "-fwasm-exceptions"     -- enable native wasm exceptions
+            -- remove default library entry point
+            "--no-entry",
+            -- enable threading
+            "-pthread",
+            -- enable native wasm exceptions
+            "-fwasm-exceptions"
         }
 
-        linkoptions { 
-            "-pthread",                                                     -- enable threading
-            "-fwasm-exceptions",                                            -- enable native wasm exceptions
-            "-sPTHREAD_POOL_SIZE_STRICT=0",                                 -- disable thread pool and spin up threads when we need them
-            "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
-            "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
-            "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
-            "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
-            "-sENVIRONMENT='node,worker'",                                  -- only compile for node and worker (worker is required for multi-threading)
-            "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
+        linkoptions {
+            -- enable threading
+            "-pthread",
+            -- enable native wasm exceptions
+            "-fwasm-exceptions",
+            -- disable thread pool and spin up threads when we need them                                            
+            "-sPTHREAD_POOL_SIZE_STRICT=0",
+            -- export binary as an ES6 module
+            "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",
+            -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
+            "-sFETCH",
+            -- needed for registering callbacks that are passed to Connected Spaces Platform
+            "-sALLOW_TABLE_GROWTH=1",
+            -- enable support for JavaScript's bigint (needed for 64-bit integer support)
+            "-sWASM_BIGINT",
+            -- only compile for node and worker (worker is required for multi-threading)
+            "-sENVIRONMENT='node,worker'",
+            -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
+            "-sALLOW_MEMORY_GROWTH=1",
             "-sINITIAL_MEMORY=33554432",
-            "-sMAXIMUM_MEMORY=1073741824",                                  -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
+            -- set an upper memory allocation bound to prevent Emscripten from trying to allocate too much memory
+            "-sMAXIMUM_MEMORY=1073741824",
+            -- export needed Emscripten functions for wrapper
             "-sEXPORTED_RUNTIME_METHODS=[" ..
                 "'ccall'," ..
                 "'setValue'," ..
@@ -115,10 +130,11 @@ project "UnitTestingBinary"
                 "'UTF8ToString'," ..
                 "'stringToUTF8'," ..
                 "'lengthBytesUTF8'" ..
-            "]",                                                            -- export needed Emscripten functions for wrapper
+            "]",
+            -- ensure _malloc is not trimmed
             "-sEXPORTED_FUNCTIONS=[" ..
                 "'_malloc'" ..
-            "]",                                                            -- ensure _malloc is not trimmed
+            "]",
             "-sINCOMING_MODULE_JS_API=[" ..
                 "'buffer'," ..
                 "'fetchSettings'," ..
