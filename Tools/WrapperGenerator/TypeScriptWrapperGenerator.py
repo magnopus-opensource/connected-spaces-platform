@@ -152,12 +152,12 @@ class TypeScriptWrapperGenerator:
         elif t == "float":
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_float", True)
             setattr(type, "min_value", "Limits.FLOAT_MIN")
             setattr(type, "max_value", "Limits.FLOAT_MAX")
         elif t == "double":
             type.name = "number"
             setattr(type, "is_number", True)
+            setattr(type, "is_large", True)
             setattr(type, "min_value", "Limits.DOUBLE_MIN")
             setattr(type, "max_value", "Limits.DOUBLE_MAX")
         elif t == "String":

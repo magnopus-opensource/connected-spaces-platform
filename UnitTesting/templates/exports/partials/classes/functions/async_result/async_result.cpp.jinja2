@@ -1,0 +1,106 @@
+{% for p in config.primitives %}
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_min(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        Callback({{ p.min }});
+    }
+
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_max(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        Callback({{ p.max }});
+    }
+
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_min(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        std::thread t([Callback]() {
+            Callback({{ p.min }});
+        });
+        t.detach();
+    }
+
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_max(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        std::thread t([Callback]() {
+            Callback({{ p.max }});
+        });
+        t.detach();
+    }
+{% endfor %}
+
+void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnStringByValue(StringValueCallback Callback) {
+    Callback("{{ config.string_value }}");
+}
+
+void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnStringByConstReference(
+    StringConstReferenceCallback Callback
+) {
+    String_Field = "{{ config.string_value }}";
+    Callback(String_Field);
+}
+
+void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnStringByValue_MultiThread(StringValueCallback Callback) {
+    std::thread t([Callback]() {
+        Callback("{{ config.string_value }}");
+    });
+    t.detach();
+}
+
+void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnStringByConstReference_MultiThread(
+    StringConstReferenceCallback Callback
+) {
+    String_Field = "{{ config.string_value }}";
+
+    std::thread t([this, Callback]() {
+        Callback(String_Field);
+    });
+    t.detach();
+}
+
+{% for x in ['Pointer', 'ConstPointer'] %}
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnClassBy{{ x }}(
+        Class{{ x }}Callback Callback
+    ) {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+        Callback(&Class_Field);
+    }
+{% endfor %}
+
+{% for x in ['Reference', 'ConstReference'] %}
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnClassBy{{ x }}(
+        Class{{ x }}Callback Callback
+    ) {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+        Callback(Class_Field);
+    }
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer'] %}
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnClassBy{{ x }}_MultiThread(
+        Class{{ x }}Callback Callback
+    ) {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+        
+        std::thread t([this, Callback]() {
+            Callback(&Class_Field);
+        });
+        t.detach();
+    }
+{% endfor %}
+
+{% for x in ['Reference', 'ConstReference'] %}
+    void AsyncResultTestClass::ClassFunctions_AsyncResult_ReturnClassBy{{ x }}_MultiThread(
+        Class{{ x }}Callback Callback
+    ) {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+        
+        std::thread t([this, Callback]() {
+            Callback(Class_Field);
+        });
+        t.detach();
+    }
+{% endfor %}
