@@ -160,30 +160,6 @@ HttpProgress& HttpRequest::GetProgress()
 	return Progress;
 }
 
-
-/// @brief Retry this request
-///
-/// Issue this request again up to MaxRetries.
-/// Note that we may want to make this more sophisticated in the future
-/// with better retry algorithms, but lets start simple for now
-///
-/// @param MaxRetries Maximum number of times to retry before giving up
-/// @return true if retry succeeded, false if retry limit was reached
-bool HttpRequest::Retry(const uint32_t MaxRetries)
-{
-	if (ResultCodeValidForRetry(this->Response.GetResponseCode()) && RetryCount < MaxRetries)
-	{
-		++RetryCount;
-
-		// Re-issue the request
-		Client->AddRequest(this, std::chrono::milliseconds(DefaultRetriesDelayInMs));
-
-		return true;
-	}
-
-	return false;
-}
-
 bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 {
 	if (Status == csp::web::EResponseCodes::ResponseTooManyRequests					 // 429
@@ -207,6 +183,29 @@ bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 	{
 		return false;
 	}
+}
+
+/// @brief Retry this request
+///
+/// Issue this request again up to MaxRetries.
+/// Note that we may want to make this more sophisticated in the future
+/// with better retry algorithms, but lets start simple for now
+///
+/// @param MaxRetries Maximum number of times to retry before giving up
+/// @return true if retry succeeded, false if retry limit was reached
+bool HttpRequest::Retry(const uint32_t MaxRetries)
+{
+	if (ResultCodeValidForRetry(this->Response.GetResponseCode()) && RetryCount < MaxRetries)
+	{
+		++RetryCount;
+
+		// Re-issue the request
+		Client->AddRequest(this, std::chrono::milliseconds(DefaultRetriesDelayInMs));
+
+		return true;
+	}
+
+	return false;
 }
 
 /// @brief Auto retry if we get a ServiceUnavailable (503) response
