@@ -1,0 +1,55 @@
+{% for p in config.primitives %}
+    typedef std::function<void({{ p.type }})> {{ p.type }}ValueCallback;
+{% endfor %}
+
+typedef std::function<void(csp::common::String)> StringValueCallback;
+typedef std::function<void(const csp::common::String&)> StringConstReferenceCallback;
+
+typedef std::function<void(MyReallyCoolClass)> ClassValueCallback;
+typedef std::function<void(MyReallyCoolClass*)> ClassPointerCallback;
+typedef std::function<void(const MyReallyCoolClass*)> ClassConstPointerCallback;
+typedef std::function<void(MyReallyCoolClass&)> ClassReferenceCallback;
+typedef std::function<void(const MyReallyCoolClass&)> ClassConstReferenceCallback;
+
+class CSP_API AsyncResultTestClass {
+public:
+{% for p in config.primitives %}
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_min({{ p.type }}ValueCallback Callback);
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_max({{ p.type }}ValueCallback Callback);
+
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_min(
+        {{ p.type }}ValueCallback Callback
+    );
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_Return{{ p.type }}ByValue_MultiThread_max(
+        {{ p.type }}ValueCallback Callback
+    );
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnStringBy{{ x }}(String{{ x }}Callback Callback);
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnStringBy{{ x }}_MultiThread(String{{ x }}Callback Callback);
+{% endfor %}
+
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByPointer(ClassPointerCallback Callback);
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByConstPointer(ClassConstPointerCallback Callback);
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByReference(ClassReferenceCallback Callback);
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByConstReference(ClassConstReferenceCallback Callback);
+
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByPointer_MultiThread(ClassPointerCallback Callback);
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByConstPointer_MultiThread(
+        ClassConstPointerCallback Callback
+    );
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByReference_MultiThread(
+        ClassReferenceCallback Callback
+    );
+    CSP_ASYNC_RESULT void ClassFunctions_AsyncResult_ReturnClassByConstReference_MultiThread(
+        ClassConstReferenceCallback Callback
+    );
+
+private:
+    csp::common::String String_Field;
+    MyReallyCoolClass Class_Field;
+};
