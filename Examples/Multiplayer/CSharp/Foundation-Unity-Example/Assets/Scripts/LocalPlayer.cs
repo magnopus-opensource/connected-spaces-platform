@@ -80,7 +80,7 @@ public class LocalPlayer : MonoBehaviour
         {
             distanceTraveled = 0.0f;
 
-            Entity.SetPosition(nextPosition.ToGLTFPositionFromUnity().ToFoundationVector());
+            Entity.SetPosition(nextPosition.ToGLTFPositionFromUnity().ToCSPVector());
 
             Entity.QueueUpdate();
         }

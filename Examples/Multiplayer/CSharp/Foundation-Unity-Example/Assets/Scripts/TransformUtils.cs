@@ -22,7 +22,7 @@ public static class TransformUtils
     /// </summary>
     /// <param name="vec"></param>
     /// <returns></returns>
-    public static CspCommon.Vector3 ToFoundationVector(this Vector3 vec)
+    public static CspCommon.Vector3 ToCSPVector(this Vector3 vec)
     {
         return new CspCommon.Vector3(vec.x, vec.y, vec.z);
     }
