@@ -162,27 +162,10 @@ HttpProgress& HttpRequest::GetProgress()
 
 bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 {
-	if (Status == csp::web::EResponseCodes::ResponseTooManyRequests					 // 429
-		|| Status == csp::web::EResponseCodes::ResponseRequestTimeout				 // 408
-		|| Status == csp::web::EResponseCodes::ResponseInternalServerError			 // 500
-		|| Status == csp::web::EResponseCodes::ResponseNotImplemented				 // 501
-		|| Status == csp::web::EResponseCodes::ResponseBadGateway					 // 502
-		|| Status == csp::web::EResponseCodes::ResponseServiceUnavailable			 // 503
-		|| Status == csp::web::EResponseCodes::ResponseGatewayTimeout				 // 504
-		|| Status == csp::web::EResponseCodes::ResponseVersionNotSupported			 // 505
-		|| Status == csp::web::EResponseCodes::ResponseVariantAlsoNegotiates		 // 506
-		|| Status == csp::web::EResponseCodes::ResponseInsufficientStorage			 // 507
-		|| Status == csp::web::EResponseCodes::ResponseLoopDetected					 // 508
-		|| Status == csp::web::EResponseCodes::ResponseNotExtended					 // 510
-		|| Status == csp::web::EResponseCodes::ResponseNetworkAuthenticationRequired // 511
-	)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return (Status == csp::web::EResponseCodes::ResponseTooManyRequests	  // 429
+			|| Status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
+			|| static_cast<int>(Status) >= 500							  // 500
+	);
 }
 
 /// @brief Retry this request
@@ -195,7 +178,7 @@ bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 /// @return true if retry succeeded, false if retry limit was reached
 bool HttpRequest::Retry(const uint32_t MaxRetries)
 {
-	if (ResultCodeValidForRetry(this->Response.GetResponseCode()) && RetryCount < MaxRetries)
+	if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries)
 	{
 		++RetryCount;
 
