@@ -35,6 +35,7 @@ public class HelloWorld : MonoBehaviour
     private MultiplayerConnection connection;
     private CancellationTokenSource cancellationTokenSource;
     private CspSystems.Space createdSpace;
+    private string userId;
 
     // Initialisation of Csp
 
@@ -228,6 +229,9 @@ public class HelloWorld : MonoBehaviour
 
         using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password, true);
 
+        // Cache user ID for later use.
+        userId = loginResult.GetLoginState().UserId;
+
         Debug.Log($"Logged in with Email {email}.");
     }
 
@@ -419,7 +423,7 @@ public class HelloWorld : MonoBehaviour
     {
         SpaceEntity entity = await entitySystem.CreateAvatar("TestAvatar",
             new SpaceTransform(CspCommon.Vector3.Zero(), CspCommon.Vector4.Identity(),
-                CspCommon.Vector3.One()), AvatarState.Idle, "id", AvatarPlayMode.Default);
+                CspCommon.Vector3.One()), AvatarState.Idle, userId, AvatarPlayMode.Default);
         Debug.Log("Created Avatar.");
         return entity;
     }
