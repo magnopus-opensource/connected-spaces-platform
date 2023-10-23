@@ -19,6 +19,5 @@
     "python.languageServer": "Pylance",
     "editor.rulers": [
         120
-    ],
-    "eslint.nodePath": "./tests/javascript/node_modules"
+    ]
 }
