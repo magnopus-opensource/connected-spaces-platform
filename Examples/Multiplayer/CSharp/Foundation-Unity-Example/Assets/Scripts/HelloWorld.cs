@@ -23,7 +23,7 @@ public class HelloWorld : MonoBehaviour
     private const string TenantKey = "CSP_HELLO_WORLD";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
-    private bool foundationHasStarted;
+    private bool cspHasStarted;
     private bool enteredSpace;
     private CspSystems.UserSystem userSystem;
     private CspSystems.SpaceSystem spaceSystem;
@@ -52,7 +52,7 @@ public class HelloWorld : MonoBehaviour
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
-        Application.quitting += QuitFoundation;
+        Application.quitting += QuitCSPFoundation;
 
         accountUI.OnSignIn += SignInAsync;
         accountUI.OnSignUp += SignUpAsync;
@@ -62,7 +62,7 @@ public class HelloWorld : MonoBehaviour
 
         inSpaceUI.OnExitSpace += ExitSpaceAsync;
 
-        StartFoundation(endPointUri, TenantKey, userAgent);
+        StartCSPFoundation(endPointUri, TenantKey, userAgent);
     }
 
     private void Update()
@@ -86,26 +86,26 @@ public class HelloWorld : MonoBehaviour
     #region Initialisation
 
     /// <summary>
-    /// Starts the underlying Foundation systems, you should also
-    /// call <see cref="StopFoundation"/> during the consuming application's shutdown process.
+    /// Starts the underlying CSP Foundation systems, you should also
+    /// call <see cref="StopCSPFoundation"/> during the consuming application's shutdown process.
     /// </summary>
     /// <param name="backendEndpoint">The endpoint url for the backend services.</param>
     /// <param name="tenant">The assigned Tenant value for this application.</param>
     /// <param name="userAgent">Identifiable information to this application client.</param>
-    private void StartFoundation(string backendEndpoint, string tenant, ClientUserAgent userAgent)
+    private void StartCSPFoundation(string backendEndpoint, string tenant, ClientUserAgent userAgent)
     {
-        Debug.Log("Initializing Foundation ...");
+        Debug.Log("Initializing CSP Foundation ...");
         bool successInit = CSPFoundation.Initialise(backendEndpoint, tenant);
         if (!successInit)
         {
-            Debug.Log("Failed to initialize Olympus Foundation. Error is within Foundation package.");
+            Debug.Log("Failed to initialize CSP Foundation. Error is within CSP package.");
             return;
         }
 
         CSPFoundation.SetClientUserAgentInfo(userAgent);
-        Debug.Log("Initialized Foundation.");
+        Debug.Log("Initialized CSP Foundation.");
 
-        foundationHasStarted = true;
+        cspHasStarted = true;
         InitializeSystems();
     }
 
@@ -159,35 +159,35 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Shuts down the underlying Foundation systems, this should be called by the consuming application
+    /// Shuts down the underlying CSP Foundation systems, this should be called by the consuming application
     /// during application shutdown once all of the dependant systems have been shutdown.
     /// </summary>
-    private void StopFoundation()
+    private void StopCSPFoundation()
     {
-        Debug.Log("Shutting down Csp Foundation ...");
+        Debug.Log("Shutting down CSP Foundation ...");
         bool successShutdown = CSPFoundation.Shutdown();
         if (!successShutdown)
         {
-            Debug.Log("Failed to shut down Foundation. Error is within Foundation package.");
+            Debug.Log("Failed to shut down CSP Foundation. Error is within CSP Foundation package.");
             return;
         }
 
-        Debug.Log("Shutdown Csp Foundation");
-        foundationHasStarted = false;
+        Debug.Log("Shutdown CSP Foundation");
+        cspHasStarted = false;
     }
 
-    private void QuitFoundation()
+    private void QuitCSPFoundation()
     {
-        Application.quitting -= QuitFoundation;
+        Application.quitting -= QuitCSPFoundation;
 
-        if (foundationHasStarted)
+        if (cspHasStarted)
         {
             if (enteredSpace)
             {
                 ExitSpaceAsync();
             }
 
-            StopFoundation();
+            StopCSPFoundation();
         }
     }
 
@@ -220,7 +220,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to create a new account for the user using the given email and password.
+    /// Requests the CSP layer to create a new account for the user using the given email and password.
     /// </summary>
     /// <param name="email"> email of the new account.</param>
     /// <param name="password"> password of the new account.</param>
@@ -237,7 +237,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to Login with email and password.
+    /// Requests the CSP layer to Login with email and password.
     /// </summary>
     /// <param name="email"> Email of the user. </param>
     /// <param name="password"> Password of the user. </param>
@@ -254,8 +254,8 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to make the user logout.
-    /// Not used for this example as shutting down the Foundation layer will automatically log the user out.
+    /// Requests the CSP layer to make the user logout.
+    /// Not used for this example as shutting down the CSP layer will automatically log the user out.
     /// </summary>
     /// <returns> Just the Task object to await.</returns>
     private async Task LogoutAsync()
@@ -285,10 +285,17 @@ public class HelloWorld : MonoBehaviour
 
         // Create a public space so other users can join without invite.
         using CspSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
-            CspSystems.SpaceAttributes.Public, null, ToFoundationMap(metadata), null);
+            CspSystems.SpaceAttributes.Public, null, ToCSPMap(metadata), null);
 
-        createdSpace = spaceResult.GetSpace();
-        Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
+        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        {
+            createdSpace = spaceResult.GetSpace();
+            Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
+        }
+        else
+        {
+            Debug.LogError($"Failed to create space.");
+        }
     }
 
     /// <summary>
@@ -313,12 +320,20 @@ public class HelloWorld : MonoBehaviour
         }
 
         using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpace(targetSpaceId);
-        var space = spaceResult.GetSpace();
-        await EnterSpaceAsync(space);
+
+        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        {
+            var space = spaceResult.GetSpace();
+            await EnterSpaceAsync(space);
+        }
+        else
+        {
+            Debug.LogError($"Failed to get space \"{targetSpaceId}\". Unable to enter.");
+        }
     }
 
     /// <summary>
-    /// Searches available spaces for the user using the Foundation API.
+    /// Searches available spaces for the user using the CSP Foundation API.
     /// </summary>
     /// <returns> Just the Task object to await. </returns>
     private async Task SearchSpacesAsync()
@@ -379,7 +394,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to exit the current space by setting the scope for the user's multiplayer service connection.
+    /// Requests the CSP layer to exit the current space by setting the scope for the user's multiplayer service connection.
     /// </summary>
     private async void ExitSpaceAsync()
     {
@@ -408,7 +423,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to delete the space that was previously created.
+    /// Requests the CSP layer to delete the space that was previously created.
     /// </summary>
     private async void DeleteSpaceAsync()
     {
@@ -579,7 +594,7 @@ public class HelloWorld : MonoBehaviour
         return null;
     }
 
-    private CspCommon.Map<T, U> ToFoundationMap<T, U>(Dictionary<T, U> dict)
+    private CspCommon.Map<T, U> ToCSPMap<T, U>(Dictionary<T, U> dict)
     {
         if (dict != null)
         {
