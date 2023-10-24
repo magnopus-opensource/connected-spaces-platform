@@ -6,40 +6,39 @@ using Csp;
 using Csp.Multiplayer;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CspCommon = Csp.Common;
 using CspSystems = Csp.Systems;
-using CspAsset = Csp.Systems.Asset;
 using UnityEngine;
-using UnityEngine.Windows;
 
 public class HelloWorld : MonoBehaviour
 {
     [SerializeField] private AccountUI accountUI;
+    [SerializeField] private InSpaceUI inSpaceUI;
+    [SerializeField] private LocalPlayer localPlayerPrefab;
+    [SerializeField] private RemotePlayer remotePlayerPrefab;
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
     private const string TenantKey = "CSP_HELLO_WORLD";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
-    private readonly string exampleAssetName = "example.png";
-    private readonly string exampleAssetPath = "Assets/StreamingAssets/";
-    private bool foundationHasStarted;
+    private bool cspHasStarted;
     private bool enteredSpace;
     private CspSystems.UserSystem userSystem;
     private CspSystems.SpaceSystem spaceSystem;
-    private CspSystems.AssetSystem assetSystem;
     private CspSystems.GraphQLSystem graphQLSystem;
     private SpaceEntitySystem entitySystem;
     private MultiplayerConnection connection;
     private CancellationTokenSource cancellationTokenSource;
     private CspSystems.Space createdSpace;
+
     private string userId;
+    private LocalPlayer localPlayer;
+    private List<RemotePlayer> remotePlayers = new List<RemotePlayer>();
+    private List<SpaceEntity> pendingRemoteEntities = new List<SpaceEntity>();
 
-    // Initialisation of Csp
-
-    #region Initialisation
+    #region Unity Callbacks
 
     private void Awake()
     {
@@ -53,39 +52,60 @@ public class HelloWorld : MonoBehaviour
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
-        Application.quitting += QuitFoundation;
+        Application.quitting += QuitCSPFoundation;
 
         accountUI.OnSignIn += SignInAsync;
         accountUI.OnSignUp += SignUpAsync;
         accountUI.OnEnterSpace += EnterSpaceAsync;
         accountUI.OnCreateSpace += CreateSpaceAsync;
-        accountUI.OnExitSpace += ExitSpaceAsync;
         accountUI.OnDeleteSpace += DeleteSpaceAsync;
 
-        StartFoundation(endPointUri, TenantKey, userAgent);
+        inSpaceUI.OnExitSpace += ExitSpaceAsync;
+
+        StartCSPFoundation(endPointUri, TenantKey, userAgent);
     }
 
+    private void Update()
+    {
+        ProcessPendingRemoteEntities();
+    }
+
+    private void OnDestroy()
+    {
+        accountUI.OnSignIn -= SignInAsync;
+        accountUI.OnSignUp -= SignUpAsync;
+        accountUI.OnEnterSpace -= EnterSpaceAsync;
+        accountUI.OnCreateSpace -= CreateSpaceAsync;
+        accountUI.OnDeleteSpace -= DeleteSpaceAsync;
+    }
+
+    #endregion
+
+    // Initialisation of Csp
+
+    #region Initialisation
+
     /// <summary>
-    /// Starts the underlying Foundation systems, you should also
-    /// call <see cref="StopFoundation"/> during the consuming application's shutdown process.
+    /// Starts the underlying CSP Foundation systems, you should also
+    /// call <see cref="StopCSPFoundation"/> during the consuming application's shutdown process.
     /// </summary>
     /// <param name="backendEndpoint">The endpoint url for the backend services.</param>
     /// <param name="tenant">The assigned Tenant value for this application.</param>
     /// <param name="userAgent">Identifiable information to this application client.</param>
-    private void StartFoundation(string backendEndpoint, string tenant, ClientUserAgent userAgent)
+    private void StartCSPFoundation(string backendEndpoint, string tenant, ClientUserAgent userAgent)
     {
-        Debug.Log("Initializing Foundation ...");
+        Debug.Log("Initializing CSP Foundation ...");
         bool successInit = CSPFoundation.Initialise(backendEndpoint, tenant);
         if (!successInit)
         {
-            Debug.Log("Failed to initialize Olympus Foundation. Error is within Foundation package.");
+            Debug.Log("Failed to initialize CSP Foundation. Error is within CSP package.");
             return;
         }
 
         CSPFoundation.SetClientUserAgentInfo(userAgent);
-        Debug.Log("Initialized Foundation.");
+        Debug.Log("Initialized CSP Foundation.");
 
-        foundationHasStarted = true;
+        cspHasStarted = true;
         InitializeSystems();
     }
 
@@ -135,40 +155,39 @@ public class HelloWorld : MonoBehaviour
     {
         userSystem = CspSystems.SystemsManager.Get().GetUserSystem();
         spaceSystem = CspSystems.SystemsManager.Get().GetSpaceSystem();
-        assetSystem = CspSystems.SystemsManager.Get().GetAssetSystem();
         graphQLSystem = CspSystems.SystemsManager.Get().GetGraphQLSystem();
     }
 
     /// <summary>
-    /// Shuts down the underlying Foundation systems, this should be called by the consuming application
+    /// Shuts down the underlying CSP Foundation systems, this should be called by the consuming application
     /// during application shutdown once all of the dependant systems have been shutdown.
     /// </summary>
-    private void StopFoundation()
+    private void StopCSPFoundation()
     {
-        Debug.Log("Shutting down Csp Foundation ...");
+        Debug.Log("Shutting down CSP Foundation ...");
         bool successShutdown = CSPFoundation.Shutdown();
         if (!successShutdown)
         {
-            Debug.Log("Failed to shut down Foundation. Error is within Foundation package.");
+            Debug.Log("Failed to shut down CSP Foundation. Error is within CSP Foundation package.");
             return;
         }
 
-        Debug.Log("Shutdown Csp Foundation");
-        foundationHasStarted = false;
+        Debug.Log("Shutdown CSP Foundation");
+        cspHasStarted = false;
     }
 
-    private void QuitFoundation()
+    private void QuitCSPFoundation()
     {
-        Application.quitting -= QuitFoundation;
+        Application.quitting -= QuitCSPFoundation;
 
-        if (foundationHasStarted)
+        if (cspHasStarted)
         {
             if (enteredSpace)
             {
                 ExitSpaceAsync();
             }
 
-            StopFoundation();
+            StopCSPFoundation();
         }
     }
 
@@ -201,7 +220,7 @@ public class HelloWorld : MonoBehaviour
     }
 
     /// <summary>
-    /// Requests the Foundation layer to create a new account for the user using the given email and password.
+    /// Requests the CSP layer to create a new account for the user using the given email and password.
     /// </summary>
     /// <param name="email"> email of the new account.</param>
     /// <param name="password"> password of the new account.</param>
@@ -211,14 +230,14 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Creating account with Email {email} ...");
 
         using CspSystems.ProfileResult result =
-            await userSystem.CreateUser(null, null, email, password, false, true, null,null);
+            await userSystem.CreateUser(null, null, email, password, false, true, null, null);
         CspSystems.Profile profile = result.GetProfile();
 
         Debug.Log($"Created account with Email {profile.Email}. Please check your email to verify your account.");
     }
 
     /// <summary>
-    /// Requests the Foundation layer to Login with email and password.
+    /// Requests the CSP layer to Login with email and password.
     /// </summary>
     /// <param name="email"> Email of the user. </param>
     /// <param name="password"> Password of the user. </param>
@@ -231,13 +250,12 @@ public class HelloWorld : MonoBehaviour
 
         // Cache user ID for later use.
         userId = loginResult.GetLoginState().UserId;
-
         Debug.Log($"Logged in with Email {email}.");
     }
 
     /// <summary>
-    /// Requests the Foundation layer to make the user logout.
-    /// Not used for this example as shutting down the Foundation layer will automatically log the user out.
+    /// Requests the CSP layer to make the user logout.
+    /// Not used for this example as shutting down the CSP layer will automatically log the user out.
     /// </summary>
     /// <returns> Just the Task object to await.</returns>
     private async Task LogoutAsync()
@@ -264,11 +282,20 @@ public class HelloWorld : MonoBehaviour
         {
             { "site", defaultSpaceSite }
         };
-        using CspSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
-            CspSystems.SpaceAttributes.Private, null, ToFoundationMap(metadata), null);
 
-        createdSpace = spaceResult.GetSpace();
-        Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
+        // Create a public space so other users can join without invite.
+        using CspSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
+            CspSystems.SpaceAttributes.Public, null, ToCSPMap(metadata), null);
+
+        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        {
+            createdSpace = spaceResult.GetSpace();
+            Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
+        }
+        else
+        {
+            Debug.LogError($"Failed to create space.");
+        }
     }
 
     /// <summary>
@@ -293,12 +320,20 @@ public class HelloWorld : MonoBehaviour
         }
 
         using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpace(targetSpaceId);
-        var space = spaceResult.GetSpace();
-        await EnterSpaceAsync(space);
+
+        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        {
+            var space = spaceResult.GetSpace();
+            await EnterSpaceAsync(space);
+        }
+        else
+        {
+            Debug.LogError($"Failed to get space \"{targetSpaceId}\". Unable to enter.");
+        }
     }
 
     /// <summary>
-    /// Searches available spaces for the user using the Foundation API.
+    /// Searches available spaces for the user using the CSP Foundation API.
     /// </summary>
     /// <returns> Just the Task object to await. </returns>
     private async Task SearchSpacesAsync()
@@ -309,7 +344,7 @@ public class HelloWorld : MonoBehaviour
 
         Debug.Log("Got " + unitySpaces.Length + " Spaces");
     }
-    
+
     /// <summary>
     /// Searches available spaces for the user using a GraphQL query.
     /// </summary>
@@ -349,27 +384,24 @@ public class HelloWorld : MonoBehaviour
         entitySystem = connection.GetSpaceEntitySystem();
         entitySystem.OnEntityCreated += OnEntityCreated;
 
-        var entity = await CreateAvatar();
-        MoveAvatar(entity);
-        await CreateAndUploadAssetAsync(space.Id);
-    }
+        var entity = await SpawnLocalAvatar();
 
-    private void EntityUpdate(object sender,
-        (SpaceEntity entity, SpaceEntityUpdateFlags updateFLags, CspCommon.Array<ComponentUpdateInfo> info) e)
-    {
-        CspCommon.Vector3 receivedPosition = e.entity.GetPosition();
-        var unityPosition = new Vector3(receivedPosition.X, receivedPosition.Y, receivedPosition.Z);
+        // Disable account UI.
+        accountUI.gameObject.SetActive(false);
 
-        Debug.Log($"Received Update for Entity {e.entity.GetName()} with position: {unityPosition}");
+        // Enable in-space UI.
+        inSpaceUI.gameObject.SetActive(true);
     }
 
     /// <summary>
-    /// Requests the Foundation layer to exit the current space by setting the scope for the user's multiplayer service connection.
+    /// Requests the CSP layer to exit the current space by setting the scope for the user's multiplayer service connection.
     /// </summary>
     private async void ExitSpaceAsync()
     {
         StopTickLoop();
         entitySystem.OnEntityCreated -= OnEntityCreated;
+
+        await CleanupAvatars();
 
         await connection.Disconnect();
         connection.Dispose();
@@ -382,10 +414,16 @@ public class HelloWorld : MonoBehaviour
         await Task.Delay(100);
 
         enteredSpace = false;
+
+        // Enable account UI.
+        accountUI.gameObject.SetActive(true);
+
+        // Disable in-space UI.
+        inSpaceUI.gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// Requests the Foundation layer to delete the space that was previously created.
+    /// Requests the CSP layer to delete the space that was previously created.
     /// </summary>
     private async void DeleteSpaceAsync()
     {
@@ -404,8 +442,11 @@ public class HelloWorld : MonoBehaviour
     private async Task InitializeConnection(string spaceId)
     {
         connection = new MultiplayerConnection(spaceId);
-        await connection.Connect();
-        await connection.InitialiseConnection();
+        bool connected = await connection.Connect();
+        Debug.Log($"Connected: {connected}");
+
+        bool connectionInitialized = await connection.InitialiseConnection();
+        Debug.Log($"Connection initialized: {connectionInitialized}");
     }
 
     #endregion
@@ -419,104 +460,119 @@ public class HelloWorld : MonoBehaviour
     /// The avatar is used to represent the user in that space.
     /// </summary>
     /// <returns>SpaceEntity representing the avatar.</returns>
-    private async Task<SpaceEntity> CreateAvatar()
+    private async Task<SpaceEntity> SpawnLocalAvatar()
     {
-        SpaceEntity entity = await entitySystem.CreateAvatar("TestAvatar",
+        SpaceEntity entity = await entitySystem.CreateAvatar($"user-{userId}",
             new SpaceTransform(CspCommon.Vector3.Zero(), CspCommon.Vector4.Identity(),
                 CspCommon.Vector3.One()), AvatarState.Idle, userId, AvatarPlayMode.Default);
-        Debug.Log("Created Avatar.");
+
+        localPlayer = Instantiate(localPlayerPrefab, Vector3.zero, Quaternion.identity);
+        localPlayer.Initialize(entity);
+
+        Debug.Log("Created avatar for local player.");
         return entity;
     }
 
-    /// <summary>
-    /// Moves the user's avatar and sends an update.
-    /// </summary>
-    /// <param name="spaceEntity">The Space entity which will be moved.</param>
-    private void MoveAvatar(SpaceEntity spaceEntity)
+    private void OnEntityCreated(object sender, SpaceEntity spaceEntity)
     {
-        var newPos = CspCommon.Vector3.One();
-        var unityVector3 = new Vector3(newPos.X, newPos.Y, newPos.Z);
-        spaceEntity.SetPosition(newPos);
-        spaceEntity.QueueUpdate();
+        SpaceEntityType entityType = spaceEntity.GetEntityType();
+        if (entityType == SpaceEntityType.Avatar)
+        {
+            Debug.Log($"Avatar entity created: {spaceEntity.GetName()}, {spaceEntity.GetId()}");
 
-        Debug.Log($"Set Avatar Position to {unityVector3} and Queued Update.");
+            // Cache the entity for spawning it later. This is because CSP fires EntityCreated on its own thread, 
+            // we can't call GameObject.Instantiate() right away outside of the main thread.
+            lock (pendingRemoteEntities)
+            {
+                pendingRemoteEntities.Add(spaceEntity);
+            }
+        }
     }
 
-    private void OnEntityCreated(object sender, SpaceEntity e)
+    private void ProcessPendingRemoteEntities()
     {
-        e.OnUpdate += EntityUpdate;
+        lock (pendingRemoteEntities)
+        {
+            if (pendingRemoteEntities.Count > 0)
+            {
+                // Create avatar GameObject for all pending entities.
+                foreach (var entity in pendingRemoteEntities)
+                {
+                    SpaceEntityType entityType = entity.GetEntityType();
+                    if (entityType == SpaceEntityType.Avatar)
+                    {
+                        Debug.Log($"Spawn remote avatar: {entity.GetName()}, {entity.GetId()}");
+                        CreateRemoteAvatarGameObject(entity);
+                    }
+                }
+
+                pendingRemoteEntities.Clear();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Creates a remote avatar GameObject representing the given entity in scene. 
+    /// </summary>
+    /// <param name="spaceEntity"></param>
+    private void CreateRemoteAvatarGameObject(SpaceEntity spaceEntity)
+    {
+        // Get entity transform values.
+        Vector3 pos = spaceEntity.GetPosition().ToUnityVector().ToUnityPositionFromGLTF();
+        Quaternion rot = spaceEntity.GetRotation().ToUnityQuaternion().ToUnityRotationFromGLTF();
+        Vector3 scale = spaceEntity.GetScale().ToUnityVector().ToUnityScaleFromGLTF();
+
+        // Create remote 
+        RemotePlayer remotePlayer = Instantiate(remotePlayerPrefab, pos, rot);
+        remotePlayer.transform.localScale = scale;
+        remotePlayer.name = spaceEntity.GetName();
+
+        remotePlayer.Initialize(spaceEntity);
+        remotePlayers.Add(remotePlayer);
+    }
+
+    /// <summary>
+    /// Destroys all remote player objects and despawns local player.
+    /// </summary>
+    /// <returns></returns>
+    private async Task CleanupAvatars()
+    {
+        // Remove remote players from the scene
+        foreach (RemotePlayer rPlayer in remotePlayers)
+        {
+            if (rPlayer != null)
+            {
+                Destroy(rPlayer.gameObject);
+            }
+        }
+        remotePlayers.Clear();
+
+        // Clear pending remote entity list.
+        lock (pendingRemoteEntities)
+        {
+            pendingRemoteEntities.Clear();
+        }
+
+        // Remove local player for remote people
+        if (localPlayer != null)
+        {
+            bool successfulDestroyPlayer = await entitySystem.DestroyEntity(localPlayer.Entity);
+            if (successfulDestroyPlayer)
+            {
+                Debug.Log("Successfully removed the local player from the space!");
+            }
+            else
+            {
+                Debug.LogError("Failed to remove the local player from the space!");
+            }
+
+            // Remove local player from the scene
+            Destroy(localPlayer.gameObject);
+            localPlayer = null;
+        }
     }
 
     #endregion
-
-    // Assets - how to upload, retrieve, delete and search assets in space.
-
-    #region Assets
-
-    /// <summary>
-    /// Demonstrates Creating, uploading, and deleting an asset to the Foundation layer.
-    /// Assets are contained in Asset collections.
-    /// </summary>
-    /// <param name="spaceId">The space in which the asset collection will be uploaded.</param>
-    private async Task CreateAndUploadAssetAsync(string spaceId)
-    {
-        //create an asset collection associated with our space
-        string assetCollectionName = Guid.NewGuid().ToString();
-        using CspSystems.AssetCollectionResult assetCollection = await assetSystem.CreateAssetCollection(spaceId,
-            null, assetCollectionName,
-            null, CspSystems.EAssetCollectionType.DEFAULT, null);
-
-        // get the asset collection from the collection result
-        var collection = assetCollection.GetAssetCollection();
-
-        // create an asset
-        using CspSystems.AssetResult assetResult = await assetSystem.CreateAsset(collection, exampleAssetName,
-            null, null, CspSystems.EAssetType.IMAGE);
-
-        // get the associated detail from the asset result
-        var asset = assetResult.GetAsset();
-
-        // set the asset filename
-        asset.FileName = exampleAssetName;
-
-        //read the file into buffer
-        var bytes = File.ReadAllBytes(exampleAssetPath + exampleAssetName);
-        int size = bytes.Length;
-        var uploadFileDataPtr = Marshal.AllocHGlobal(size);
-        Marshal.Copy(bytes, 0, uploadFileDataPtr, size);
-        var source = new CspSystems.BufferAssetDataSource();
-        source.Buffer = uploadFileDataPtr;
-        source.BufferLength = (ulong)size;
-        // set the mime type
-        source.SetMimeType("image/png");
-
-        // upload the file to the asset collection
-        using CspSystems.UriResult uploadResult = await assetSystem.UploadAssetData(collection, asset, source);
-
-        Debug.Log("Upload completed");
-        // retrieve asset 
-        using CspSystems.AssetCollectionsResult assetCollectionResult =
-            await assetSystem.GetAssetCollectionsByCriteria(spaceId, null,
-                CspSystems.EAssetCollectionType.DEFAULT, null, null, null, null);
-
-        var assets = assetCollectionResult.GetAssetCollections();
-        Debug.Log("Asset collection size:" + assets.Size());
-        //delete asset
-        await assetSystem.DeleteAsset(collection, asset);
-        Debug.Log("Delete completed");
-    }
-
-    #endregion
-
-    private void OnDestroy()
-    {
-        accountUI.OnSignIn -= SignInAsync;
-        accountUI.OnSignUp -= SignUpAsync;
-        accountUI.OnEnterSpace -= EnterSpaceAsync;
-        accountUI.OnCreateSpace -= CreateSpaceAsync;
-        accountUI.OnExitSpace -= ExitSpaceAsync;
-        accountUI.OnDeleteSpace -= DeleteSpaceAsync;
-    }
 
     #region Utils
 
@@ -538,7 +594,7 @@ public class HelloWorld : MonoBehaviour
         return null;
     }
 
-    private CspCommon.Map<T, U> ToFoundationMap<T, U>(Dictionary<T, U> dict)
+    private CspCommon.Map<T, U> ToCSPMap<T, U>(Dictionary<T, U> dict)
     {
         if (dict != null)
         {
