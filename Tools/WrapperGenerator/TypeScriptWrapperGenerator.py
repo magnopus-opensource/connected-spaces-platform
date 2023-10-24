@@ -66,7 +66,7 @@ class TypeScriptWrapperGenerator:
 
         if not hasattr(type, "is_number"):
             setattr(type, "is_number", False)
-            setattr(type, "is_integer", False)
+            setattr(type, "is_float", False)
             setattr(type, "is_large", False)
             setattr(type, "is_small", False)
             setattr(type, "is_tiny", False)
@@ -78,7 +78,6 @@ class TypeScriptWrapperGenerator:
         elif t == "uint64_t" or t == "unsigned long long" or t == "unsigned long long int":
             type.name = "bigint"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_large", True)
             setattr(type, "min_value", "Limits.UINT64_MIN")
             setattr(type, "max_value", "Limits.UINT64_MAX")
@@ -91,7 +90,6 @@ class TypeScriptWrapperGenerator:
         ):
             type.name = "bigint"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_large", True)
             setattr(type, "is_signed", True)
             setattr(type, "min_value", "Limits.INT64_MIN")
@@ -101,7 +99,6 @@ class TypeScriptWrapperGenerator:
         ):
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "min_value", "Limits.UINT32_MIN")
             setattr(type, "max_value", "Limits.UINT32_MAX")
         elif (
@@ -115,21 +112,18 @@ class TypeScriptWrapperGenerator:
         ):
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_signed", True)
             setattr(type, "min_value", "Limits.INT32_MIN")
             setattr(type, "max_value", "Limits.INT32_MAX")
         elif t == "uint16_t" or t == "unsigned short" or t == "unsigned short int":
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_small", True)
             setattr(type, "min_value", "Limits.UINT16_MIN")
             setattr(type, "max_value", "Limits.UINT16_MAX")
         elif t == "int16_t" or t == "signed short" or t == "signed short int" or t == "short" or t == "short int":
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_small", True)
             setattr(type, "is_signed", True)
             setattr(type, "min_value", "Limits.INT16_MIN")
@@ -137,14 +131,12 @@ class TypeScriptWrapperGenerator:
         elif t == "uint8_t" or t == "unsigned char":
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_tiny", True)
             setattr(type, "min_value", "Limits.UINT8_MIN")
             setattr(type, "max_value", "Limits.UINT8_MAX")
         elif t == "int8_t":
             type.name = "number"
             setattr(type, "is_number", True)
-            setattr(type, "is_integer", True)
             setattr(type, "is_tiny", True)
             setattr(type, "is_signed", True)
             setattr(type, "min_value", "Limits.INT8_MIN")
@@ -152,11 +144,13 @@ class TypeScriptWrapperGenerator:
         elif t == "float":
             type.name = "number"
             setattr(type, "is_number", True)
+            setattr(type, "is_float", True)
             setattr(type, "min_value", "Limits.FLOAT_MIN")
             setattr(type, "max_value", "Limits.FLOAT_MAX")
         elif t == "double":
             type.name = "number"
             setattr(type, "is_number", True)
+            setattr(type, "is_float", True)
             setattr(type, "is_large", True)
             setattr(type, "min_value", "Limits.DOUBLE_MIN")
             setattr(type, "max_value", "Limits.DOUBLE_MAX")
