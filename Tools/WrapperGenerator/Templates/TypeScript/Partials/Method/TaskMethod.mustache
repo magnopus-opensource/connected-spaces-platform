@@ -49,7 +49,8 @@ async {{ name }}(
         );
 {{/ type.is_class_or_interface }}
 
-{{# type.is_integer }}
+{{# type.is_number }}
+{{^ type.is_float }}
 {{^ type.is_signed }}
         {
             const _unfixedValue = {{ name }};
@@ -57,7 +58,8 @@ async {{ name }}(
             {{ name }} = _fixedValue;
         }
 {{/ type.is_signed }}
-{{/ type.is_integer }}
+{{/ type.is_float }}
+{{/ type.is_number }}
 
 {{# type.is_result_base }}
         if (_{{ name }}Instance.getResultCode() == Services.EResultCode.InProgress) {
@@ -102,12 +104,14 @@ async {{ name }}(
     var {{ name }}Pointer = 0;
     if ({{ name }} != null) {
         {{ name }}Pointer = Module._malloc(4);
-{{# type.is_integer }}
+{{# type.is_number }}
+{{^ type.is_float }}
         Module.setValue({{ name }}Pointer, {{ name }}, "i32");
-{{/ type.is_integer }}
-{{^ type.is_integer }}
+{{/ type.is_float }}
+{{# type.is_float }}
         Module.setValue({{ name }}Pointer, {{ name }}, "float");
-{{/ type.is_integer }}
+{{/ type.is_float }}
+{{/ type.is_number }}
     }
 
 {{/ type.is_class_or_interface }}
