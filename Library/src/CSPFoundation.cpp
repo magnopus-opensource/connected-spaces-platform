@@ -297,9 +297,11 @@ bool CSPFoundation::Shutdown()
 		return false;
 	}
 
+	IsInitialised = false;
+
 	// Clear unprocessed events before shutting down
 	csp::events::EventSystem::Get().ProcessEvents();
-
+	csp::events::EventSystem::Get().UnRegisterAllListeners();
 	csp::systems::SystemsManager::Destroy();
 
 	CSP_DELETE(Tenant);
@@ -308,13 +310,16 @@ bool CSPFoundation::Shutdown()
 	CSP_DELETE(DeviceId);
 	CSP_DELETE(ClientUserAgentString);
 
-	IsInitialised = false;
-
 	return true;
 }
 
 void CSPFoundation::Tick()
 {
+	if (!IsInitialised)
+	{
+		return;
+	}
+
 	CSP_PROFILE_SCOPED();
 
 	csp::events::Event* TickEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::FOUNDATION_TICK_EVENT_ID);
