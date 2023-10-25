@@ -229,9 +229,12 @@ def main():
     with open(f"{args.output_directory}/package.json.meta", "w") as f:
         f.write(minimal_meta_template.render(guid=generate_guid(), importer_type="TextScript"))
 
-    # Copy readme
+    # Copy readme and create meta file
     if (os.path.exists(f"{config.default_output_directory}/README.md")):
         shutil.copy(f"{config.default_output_directory}/README.md", args.output_directory)
+    
+        with open(f"{args.output_directory}/README.md.meta", "w") as f:
+            f.write(minimal_meta_template.render(guid=generate_guid(), importer_type="Default"))
 
     # Create and publish NPM package
     os.chdir(args.output_directory)
