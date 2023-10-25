@@ -30,11 +30,11 @@
 {{! For each parameter, check if it is a number. If so, do some range checks. }}
 {{# parameters }}
 {{# type.is_number }}
-{{# type.is_integer }}
+{{^ type.is_float }}
 {{^ type.is_large }}
     assert(Number.isInteger({{ name }}));
 {{/ type.is_large }}
-{{/ type.is_integer }}
+{{/ type.is_float }}
     assert({{ name }} >= {{ type.min_value }});
     assert({{ name }} <= {{ type.max_value }});
 {{/ type.is_number }}
@@ -196,14 +196,14 @@
 {{^ is_void_pointer }}
 {{# is_number }}
 {{# is_const }}
-{{# is_integer }}
+{{^ is_float }}
 {{^ is_signed }}
     const _unfixedValue = _result;
     {{> UnsignedFix }}
 
     _result = _fixedValue;
 {{/ is_signed }}
-{{/ is_integer }}
+{{/ is_float }}
 
     return _result;
 {{/ is_const }}
@@ -211,7 +211,7 @@
     _result = new NativeRef(
         _result,
         NativeType.
-{{# is_integer }}
+{{^ is_float }}
 {{# is_large }}
 {{# is_signed }} Int64 {{/ is_signed }}
 {{^ is_signed }} UInt64 {{/ is_signed }}
@@ -232,11 +232,11 @@
 {{/ is_tiny }}
 {{/ is_small }}
 {{/ is_large }}
-{{/ is_integer }}
-{{^ is_integer }}
+{{/ is_float }}
+{{# is_float }}
 {{# is_large }} Double {{/ is_large }}
 {{^ is_large }} Float {{/ is_large }}
-{{/ is_integer }}
+{{/ is_float }}
     );
 
     return _result;
@@ -272,14 +272,14 @@
 {{^ is_class_or_interface }}
 
 {{# is_number }}
-{{# is_integer }}
+{{^ is_float }}
 {{^ is_signed }}
     const _unfixedValue = _result;
     {{> UnsignedFix }}
 
     _result = _fixedValue;
 {{/ is_signed }}
-{{/ is_integer }}
+{{/ is_float }}
 {{/ is_number }}
 
 {{# is_string }}
