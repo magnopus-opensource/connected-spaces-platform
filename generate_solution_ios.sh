@@ -15,9 +15,9 @@ fi
 if [ ! -f /modules/premake/bin/release/premake5 ]
 then
 	if [ $((${XCODE_VERSION//.})) > 142 ]; then
-		echo download binary
+		mkdir -p ./modules/premake/bin/release/
 		cd ./modules/premake/bin/release/
-		wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-macosx.tar.gz
+		curl -O -L https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-macosx.tar.gz
 		tar -xzvf premake-5.0.0-beta2-macosx.tar.gz
 		rm premake-5.0.0-beta2-macosx.tar.gz
 		cd ../../../..
