@@ -447,7 +447,26 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-	Connection	 = EnterResult.GetConnection();
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Ok] = AWAIT(Connection, Connect);
+
+		EXPECT_TRUE(Ok);
+
+		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+		EXPECT_TRUE(Ok);
+	}
 	EntitySystem = Connection->GetSpaceEntitySystem();
 
 	WaitForTestTimeoutCountMs = 0;
@@ -460,7 +479,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 		WaitForTestTimeoutCountMs += 20;
 	}
 
-	AWAIT(SpaceSystem, ExitSpaceAndDisconnect, Connection);
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2178,8 +2200,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, BannedTest)
 	Connection->SetDisconnectionCallback(
 		[&Disconnected](auto Reason)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, "Disconnected from space. Reason:");
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, Reason);
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "Disconnected from space. Reason:");
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, Reason);
 
 			Disconnected = true;
 		});

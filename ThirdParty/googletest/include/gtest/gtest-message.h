@@ -42,10 +42,8 @@
 // to CHANGE WITHOUT NOTICE.  Therefore DO NOT DEPEND ON IT in a user
 // program!
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
-#ifndef GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
-#define GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
 
 #include "gtest/internal/gtest-port.h"
 #include <limits>
@@ -225,4 +223,4 @@ template <typename T> std::string StreamableToString(const T& streamable)
 
 GTEST_DISABLE_MSC_WARNINGS_POP_() //  4251
 
-#endif // GTEST_INCLUDE_GTEST_GTEST_MESSAGE_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_GTEST_MESSAGE_H_

@@ -75,9 +75,19 @@ const csp::web::Uri& HttpRequest::GetUri() const
 	return Uri;
 }
 
+HttpPayload& HttpRequest::GetMutablePayload()
+{
+	return Payload;
+}
+
 const HttpPayload& HttpRequest::GetPayload() const
 {
 	return Payload;
+}
+
+HttpResponse& HttpRequest::GetMutableResponse()
+{
+	return Response;
 }
 
 const HttpResponse& HttpRequest::GetResponse() const
@@ -150,6 +160,13 @@ HttpProgress& HttpRequest::GetProgress()
 	return Progress;
 }
 
+bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
+{
+	return (Status == csp::web::EResponseCodes::ResponseTooManyRequests	  // 429
+			|| Status == csp::web::EResponseCodes::ResponseRequestTimeout // 408
+			|| static_cast<int>(Status) >= 500							  // 500
+	);
+}
 
 /// @brief Retry this request
 ///
@@ -161,7 +178,7 @@ HttpProgress& HttpRequest::GetProgress()
 /// @return true if retry succeeded, false if retry limit was reached
 bool HttpRequest::Retry(const uint32_t MaxRetries)
 {
-	if (RetryCount < MaxRetries)
+	if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries)
 	{
 		++RetryCount;
 

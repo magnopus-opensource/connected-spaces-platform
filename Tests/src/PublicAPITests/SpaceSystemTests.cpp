@@ -65,7 +65,7 @@ void CreateSpace(::SpaceSystem* SpaceSystem,
 				 const String& Description,
 				 SpaceAttributes Attributes,
 				 const Optional<Map<String, String>>& Metadata,
-				 const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+				 const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 				 const Optional<FileAssetDataSource>& Thumbnail,
 				 Space& OutSpace)
 {
@@ -84,7 +84,7 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem,
 						   const String& Description,
 						   SpaceAttributes Attributes,
 						   const Optional<Map<String, String>>& Metadata,
-						   const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+						   const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 						   BufferAssetDataSource& Thumbnail,
 						   Space& OutSpace)
 {
@@ -288,7 +288,7 @@ bool IsUriValid(const std::string& Uri, const std::string& FileName)
 }
 
 
-Array<InviteUserRoleInfo> CreateInviteUsers()
+InviteUserRoleInfoCollection CreateInviteUsers()
 {
 	// Create normal users
 	const auto TestUser1Email = String("testnopus.pokemon+1@magnopus.com");
@@ -314,7 +314,11 @@ Array<InviteUserRoleInfo> CreateInviteUsers()
 	ModInviteUser2.UserEmail = TestModInviteUser2Email;
 	ModInviteUser2.UserRole	 = SpaceUserRole::Moderator;
 
-	return {InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2};
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2};
+	InviteUsers.EmailLinkUrl		= "https://dev.magnoverse.space";
+
+	return InviteUsers;
 }
 
 #if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_TEST
@@ -379,7 +383,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
 	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
-	EXPECT_EQ(PendingInvites.Size(), InviteUsers.Size());
+	EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
 	for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
 	{
@@ -486,7 +490,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
 	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
-	EXPECT_EQ(PendingInvites.Size(), InviteUsers.Size());
+	EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
 	for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
 	{
@@ -1185,12 +1189,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Create test space
 	InviteUserRoleInfo InviteUser;
-	InviteUser.UserEmail								   = AlternativeLoginEmail;
-	InviteUser.UserRole									   = SpaceUserRole::User;
-	csp::common::Array<InviteUserRoleInfo> InviteUserArray = {InviteUser};
+	InviteUser.UserEmail = AlternativeLoginEmail;
+	InviteUser.UserRole	 = SpaceUserRole::User;
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser};
+	InviteUsers.EmailLinkUrl		= "dev.magnoverse.space";
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUserArray, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
 
 	// Log out
 	LogOut(UserSystem);
@@ -1217,8 +1223,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	::UserRoleInfo UpdatedDefaultUserRole	 = {DefaultUserId, SpaceUserRole::Moderator};
 	::UserRoleInfo UpdatedSecondTestUserRole = {AltUserId, SpaceUserRole::Owner};
 
-	UpdateUserRole(SpaceSystem, Space.Id, UpdatedDefaultUserRole);
-	UpdateUserRole(SpaceSystem, Space.Id, UpdatedSecondTestUserRole); // NOTE: This only works because our default test account has superuser access
+	// User Roles should not be changed after update as a owner cannot be modified
+	// This also means a owner cannot be turned into a moderator
+	auto [DefaultResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedDefaultUserRole);
+
+	// Update first account role should fail
+	EXPECT_EQ(DefaultResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [SecondResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedSecondTestUserRole);
+
+	// Update second account role should fail
+	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Failed);
 
 	// Verify updated user roles
 	Array<::UserRoleInfo> RetrievedUserRoles;
@@ -1230,11 +1245,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	{
 		if (RetrievedUserRoles[idx].UserId == DefaultUserId)
 		{
-			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Moderator);
+			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
 		}
 		else if (RetrievedUserRoles[idx].UserId == AltUserId)
 		{
-			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
+			EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::User);
 		}
 		else
 		{
@@ -1244,11 +1259,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	GetSpace(SpaceSystem, Space.Id, Space);
 
-	LogOut(UserSystem);
-
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
-
-	// As the default test user has the "internal-service" global role he can delete the space no matter the space role it holds.
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -1332,10 +1342,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 
 	// create a space with no other user Ids invited
 	::Space Space;
+	// CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true);
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "");
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	::UserRoleInfo UserRoleInfo;
@@ -1659,7 +1670,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
-	const char* TestUserEmail = "testnopus.pokemon@magnopus.com";
+	const char* TestUserEmail	 = "testnopus.pokemon@magnopus.com";
+	const char* TestEmailLinkUrl = "https://dev.magnoverse.space/";
 
 	String UserId;
 	LogIn(UserSystem, UserId);
@@ -1667,7 +1679,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr);
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
@@ -1705,7 +1717,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
-	Array<InviteUserRoleInfo> InviteUsers = CreateInviteUsers();
+	auto InviteUsers = CreateInviteUsers();
 
 	String UserId;
 	LogIn(UserSystem, UserId);
@@ -1907,7 +1919,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 	}
 
 	{
-		// but it should be able to retrieve it
+		// But it should be able to retrieve it
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
@@ -2166,8 +2178,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	InviteUserRoleInfo InviteUser;
 	InviteUser.UserEmail = AlternativeLoginEmail;
 	InviteUser.UserRole	 = SpaceUserRole::User;
-	auto InviteUserArray = {InviteUser};
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUserArray, nullptr, Space);
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser};
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
 
 	::UserRoleInfo NewUserRoleInfo;
 	NewUserRoleInfo.UserId	 = AltUserId;

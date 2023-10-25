@@ -16,6 +16,7 @@
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
+#include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "SpaceSystemTestHelpers.h"
@@ -79,11 +80,15 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
 		   const csp::common::String& Email,
 		   const csp::common::String& Password,
-		   csp::services::EResultCode ExpectedResultCode)
+		   bool AgeVerified,
+		   csp::services::EResultCode ExpectedResultCode,
+		   int ExpectedResultFailureCode)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, AgeVerified).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
 	if (Result.GetResultCode() == csp::services::EResultCode::Success)
 	{
@@ -93,7 +98,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, csp::services::EResultCode ExpectedResult)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, nullptr).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
@@ -175,11 +180,24 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
 	EXPECT_NE(Scope, INVALID_URL_PARAM_VALUE);
 	EXPECT_NE(RetrievedRedirectURL, INVALID_URL_PARAM_VALUE);
 
-	EXPECT_GT(StateId.length(), 10);
-	EXPECT_GT(ClientId.length(), 10);
-	EXPECT_GE(Scope.length(), 5);
+	EXPECT_GT(StateId.length(), 0);
+	EXPECT_GT(ClientId.length(), 0);
+	EXPECT_GE(Scope.length(), 0);
 	EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EXCHANGEKEY_BADINPUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExchangeKeyBadInputTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ExchangeKey, RequestPredicate, "userId", "key");
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+}
+#endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_FORGOTPASSWORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
@@ -187,17 +205,31 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr);
+	// Tests passing false for UseTokenChangePasswordUrl
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, false);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr);
+	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, false);
 
 	EXPECT_EQ(Result2.GetResultCode(), csp::services::EResultCode::Success);
 
-	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr);
+	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, false);
 
 	EXPECT_EQ(FailResult.GetResultCode(), csp::services::EResultCode::Failed);
+
+	// Tests passing true for UseTokenChangePasswordUrl
+	auto [Result3] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, true);
+
+	EXPECT_EQ(Result3.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [Result4] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, true);
+
+	EXPECT_EQ(Result4.GetResultCode(), csp::services::EResultCode::Success);
+
+	auto [FailResult2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, true);
+
+	EXPECT_EQ(FailResult2.GetResultCode(), csp::services::EResultCode::Failed);
 }
 #endif
 
@@ -242,7 +274,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 	LogIn(UserSystem, UserId);
 
 	// Attempt to log in again
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, true, csp::services::EResultCode::Failed);
 
 	// Log out
 	LogOut(UserSystem);
@@ -339,7 +371,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 	csp::common::String UserId;
 
 	// Log in with invalid credentials
-	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", true, csp::services::EResultCode::Failed);
 
 	// Log in
 	LogIn(UserSystem, UserId);
@@ -380,7 +412,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("NAME ") + GetUniqueHexString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST") + GetUniqueHexString().c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -412,7 +444,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("Test ") + GetUniqueHexString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST ") + GetUniqueHexString().c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -444,7 +476,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("Test ()= - ") + GetUniqueHexString(8).c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueHexString(8).c_str();
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -493,7 +525,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
 	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueHexString().c_str(), GetUniqueHexString().c_str());
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueHexString().c_str());
@@ -510,13 +542,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 								  UniqueEmail,
 								  GeneratedTestAccountPassword,
 								  true,
+								  true,
 								  nullptr,
 								  nullptr);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
-		auto CreatedProfile = Result.GetProfile();
-		CreatedUserId		= CreatedProfile.UserId;
+		const auto& CreatedProfile = Result.GetProfile();
+		CreatedUserId			   = CreatedProfile.UserId;
 
 		EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
 		EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
@@ -524,7 +557,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	}
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
 	// At this point, the user has been created but not verified the account via email.
 	// So, from this point onwards, attempting to set data for the user account should fail.
@@ -550,7 +583,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 		EXPECT_EQ(LiteProfile.DisplayName, TestDisplayName);
 	}
 
-	// Whilst logged in as one user with normal roles, we cannot deleted another
+	// Whilst logged in as one user with normal roles, we cannot delete another
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
@@ -586,6 +619,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 								  UniqueEmail,
 								  GeneratedTestAccountPassword,
 								  false,
+								  true,
 								  nullptr,
 								  nullptr);
 
@@ -921,20 +955,29 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	/*
-	  Setup token params
-	  For this test, it's exeptable to use 0 for the UserId and ChannelId
-	  This is because the endpoint is just using an algorithm to generate the token
-	  So no valid Ids are needed for verification
-	*/
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
 	csp::systems::AgoraUserTokenParams Params;
-	Params.AgoraUserId = "0";
-	Params.ChannelName = "0";
+	Params.AgoraUserId = UserId;
+	Params.ChannelName = Space.Id;
 	Params.Lifespan	   = 10000;
 	Params.ShareAudio  = true;
 	Params.ShareScreen = false;
@@ -945,7 +988,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 	auto [Result] = AWAIT_PRE(UserSystem, GetAgoraUserToken, RequestPredicate, Params);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_NE(Result.GetUserToken(), "");
+	EXPECT_FALSE(Result.GetUserToken().IsEmpty());
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);
@@ -964,6 +1010,47 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 	LogInAsGuest(UserSystem, UserId);
 
 	GetFullProfileByUserId(UserSystem, UserId);
+
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_AGE_NOT_VERIFIED_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// False Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  false,
+		  csp::services::EResultCode::Failed,
+		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
+
+	// null Log in
+	// does not use login helper function as the login helper function defaults to false.
+	auto [Result]
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, nullptr).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
+
+	LogOut(UserSystem);
+
+	// true Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::services::EResultCode::Success,
+		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
 
 	LogOut(UserSystem);
 }

@@ -1,0 +1,17 @@
+class CSP_API ClassParameterTestClass {
+public:
+    // Pass class by value
+    void ClassFunctions_MyClass_PassValue(csp::MyClass Value);
+
+    // Pass class by pointer
+    void ClassFunctions_MyClass_PassPointer(csp::MyClass* Value);
+
+    // Pass class by const pointer
+    void ClassFunctions_MyClass_PassConstPointer(const csp::MyClass* Value);
+
+    // Pass class by reference
+    void ClassFunctions_MyClass_PassReference(csp::MyClass& Value);
+
+    // Pass class by const reference
+    void ClassFunctions_MyClass_PassConstReference(const csp::MyClass& Value);
+};

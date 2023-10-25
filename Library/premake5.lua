@@ -1,6 +1,6 @@
 #!lua
 
-include "Tools/VisualStudioNDK21Fix/VisualStudioNDK21Fix.lua"
+include "Tools/PremakeFixes/AndroidFixes.lua"
 
 include "Library/CSharpWrapper/premake5.lua"
 
@@ -57,12 +57,12 @@ if not Project then
         if CSP.IsWebAssemblyGeneration() then 
             excludes { 
                 "**POCOSignalRClient**",
-                "**POCOWebClient**",
+                "**POCOWebClient**"
             }
         else
             excludes { 
                 "**EmscriptenSignalRClient**",
-                "**EmscriptenWebClient**",
+                "**EmscriptenWebClient**"
             }
         end
 
@@ -78,13 +78,14 @@ if not Project then
             "%{wks.location}/ThirdParty/quickjs/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/modules/olympus-foundation-chs/generated",
-			"%{wks.location}/modules/tinyspline/src",
+			"%{wks.location}/modules/tinyspline/src"
         }
 
         filter "platforms:not wasm"
             externalincludedirs {
-                -- mimalloc and POCO are not used in WASM builds 
+                -- mimalloc is not used in WASM builds 
                 "%{wks.location}/ThirdParty/mimalloc/include",
+                -- POCO is not used in WASM builds
                 "%{wks.location}/ThirdParty/poco/Foundation/include",
                 "%{wks.location}/ThirdParty/poco/Util/include",
                 "%{wks.location}/ThirdParty/poco/Net/include",
@@ -158,7 +159,10 @@ if not Project then
                 "WS2_32"
             }
         filter "platforms:Android"
-            defines { "CSP_ANDROID" }
+            defines {
+                "CSP_ANDROID",
+                "USE_STD_MALLOC=1"
+            }
             staticruntime("On")
 
             linkoptions { "-lm" } -- For gcc's math lib
@@ -237,7 +241,7 @@ if not Project then
                 "-sEXPORTED_FUNCTIONS=['_malloc','_free']",                     -- force export _malloc and _free function
                 "-sEXPORT_ES6=1 -sMODULARIZE=1 -sEXPORT_NAME='createModule'",   -- export binary as an ES6 module
                 "-sFETCH",                                                      -- enable Emscripten's Fetch API (needed for making REST calls to CHS)
-                "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Foundation
+                "-sALLOW_TABLE_GROWTH=1",                                       -- needed for registering callbacks that are passed to Connected Spaces Platform
                 "-sWASM_BIGINT",                                                -- enable support for JavaScript's bigint (needed for 64-bit integer support)
                 "-sENVIRONMENT='web,worker'",                                   -- only compile for web and worker (worker is required for multi-threading)
                 "-sALLOW_MEMORY_GROWTH=1",                                      -- we don't know how much memory we'll need, so allow WASM to dynamically allocate more memory
@@ -275,7 +279,7 @@ if not Project then
             linkoptions {
                 "-gdwarf-5",
                 "-gseparate-dwarf", -- preserve debug information (DWARF)
-                "-sSEPARATE_DWARF_URL=../debug/OlympusFoundation_WASM.wasm.debug.wasm"
+                "-sSEPARATE_DWARF_URL=../debug/ConnectedSpacesPlatform_WASM.wasm.debug.wasm"
             }
         filter { "platforms:wasm", "configurations:*Release*" }
             -- We want to reduce the size of Release builds as much as possible
@@ -297,28 +301,30 @@ if not Project then
 			"tinyspline"
         }
 
+        filter { "platforms:not wasm", "platforms:not Android" }
+            links {
+                "mimalloc"
+            }
         filter "platforms:not wasm"
             links {
-                "POCONetSSL_OpenSSL",
-                "mimalloc",
+                "POCONetSSL_OpenSSL"
             }
-
         filter {}
 
         -- Debug/Release config settings
         filter "configurations:*Debug*"
-            targetname( "OlympusFoundation_D" )
+            targetname( "ConnectedSpacesPlatform_D" )
         filter "configurations:*Release*"
-            targetname( "OlympusFoundation" )
+            targetname( "ConnectedSpacesPlatform" )
         filter "platforms:wasm"
-            targetname( "OlympusFoundation_WASM.js" )
+            targetname( "ConnectedSpacesPlatform_WASM.js" )
             kind "None"
         filter {}
     end
         
     function Project.AddProject()
         if not CSP.IsGeneratingCSharpOnMac() then
-            project "OlympusFoundation"
+            project "ConnectedSpacesPlatform"
             location "Library"
             
             -- Static/shared lib settings

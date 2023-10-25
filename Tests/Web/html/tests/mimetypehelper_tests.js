@@ -1,5 +1,5 @@
 import { test, assert } from '../test_framework.js';
-import { CSPFoundation, Common } from '../olympus_foundation.js';
+import { CSPFoundation, Common } from '../connected_spaces_platform.js';
 
 test('MimeTypeHelperTests', 'BasicTest', async function() {
     const helper = Common.MimeTypeHelper.get();

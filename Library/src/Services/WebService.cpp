@@ -20,11 +20,11 @@
 namespace csp::services
 {
 
-ResultBase::ResultBase()
+ResultBase::ResultBase() : FailureReason(0)
 {
 }
 
-ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode)
+ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
 {
 }
 
@@ -56,8 +56,16 @@ void ResultBase::OnResponse(const ApiResponseBase* ApiResponse)
 
 	HttpResponseCode = (uint16_t) ApiResponse->GetResponse()->GetResponseCode();
 
-	const csp::web::HttpResponse* HttpResponse = ApiResponse->GetResponse();
-	ResponseBody							   = HttpResponse->GetPayload().GetContent();
+	const auto* HttpResponse	= ApiResponse->GetResponse();
+	const auto& ResponsePayload = HttpResponse->GetPayload();
+	ResponseBody				= ResponsePayload.GetContent();
+
+	const auto& Headers = ResponsePayload.GetHeaders();
+
+	if (Result == EResultCode::Failed && Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		FailureReason = ParseErrorCode(Headers.at("x-errorcode").c_str());
+	}
 }
 
 const EResultCode ResultBase::GetResultCode() const
@@ -85,10 +93,20 @@ float ResultBase::GetResponseProgress() const
 	return ResponseProgress;
 }
 
+int ResultBase::GetFailureReason() const
+{
+	return FailureReason;
+}
+
 void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode)
 {
 	Result			 = ResCode;
 	HttpResponseCode = HttpResCode;
+}
+
+int ResultBase::ParseErrorCode(const csp::common::String& Value)
+{
+	return (int) EResultBaseFailureReason::Unknown;
 }
 
 } // namespace csp::services

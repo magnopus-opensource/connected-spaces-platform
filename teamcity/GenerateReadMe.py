@@ -34,7 +34,7 @@ def get_commits(input_args, repo):
 
     
 def get_jira_id(commit_message):
-    if re.match("^(\[)+[a-z,A-Z]+[-]+[0-9]+(\])", commit_message):
+    if re.findall(r'\[([^\]]*)\]', commit_message):
         return commit_message.split('[')[1].split(']')[0]
     elif "Jobs:" in commit_message:
         ticket_id = commit_message.split('Jobs:')[1].split('\n')[0]
@@ -95,10 +95,14 @@ def process_commit_title(commit_title, commit_id):
     return commit_title.lower(), breaking_change
 
 
-def process_commit_body(commit_id, commit_title, commit_body_list, breaking_change):
+def process_commit_body(commit_id, commit_title, commit_body_list, breaking_change, squash_desc_list):
     result_body = " <em> "
 
     for commit_line in commit_body_list:
+        if "*" in commit_line and re.search(r'\[([^\]]*)\]', commit_line):
+            commit_line = commit_line[1:]
+            if not commit_line in squash_desc_list:
+                squash_desc_list.append(commit_title)
         if commit_line:
             commit_line = commit_line.replace("  ", " ") #Remove double space
             commit_line = " <br>" + commit_line
@@ -107,13 +111,13 @@ def process_commit_body(commit_id, commit_title, commit_body_list, breaking_chan
     return result_body + " </em> "
 
 
-def process_change_description(change_desc, change_id):
+def process_change_description(change_desc, change_id, squash_desc_list):
     change_split = change_desc.split('\n')
 
     if len(change_split) > 1:
         commit_title, breaking_change = process_commit_title(change_split[0], change_id)
         change_split.pop(0) #Remove first element
-        result_text = commit_title + process_commit_body(change_id, cleanhtml(commit_title), change_split, breaking_change)
+        result_text = commit_title + process_commit_body(change_id, cleanhtml(commit_title), change_split, breaking_change, squash_desc_list)
     else:
         commit_title = ''
         result_text, breaking_change = process_commit_title(change_desc, change_id)
@@ -137,37 +141,37 @@ def create_summary_list(commit_title, commit_id, jira_job_id, feature_commit_lis
         commit_tag = commit_list[0]
         commit_description = commit_list[1]
 
-        if "feat" in commit_tag:
+        if "feat" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 feature_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
                 feature_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        elif "fix" in commit_tag:
+        elif "fix" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 fix_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
                 fix_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        elif "style" in commit_tag:
+        elif "style" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 style_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
                 style_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        elif "test" in commit_tag:
+        elif "test" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 test_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
                 test_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        elif "doc" in commit_tag:
+        elif "doc" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 doc_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
                 doc_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
 
-        elif "refac" in commit_tag:
+        elif "refac" in commit_tag and not "!" in commit_tag:
             if jira_job_id != None:
                 refactor_commit_list.append("[" + jira_job_id + "]" + " - "  + commit_description.capitalize() + " - " + commit_id )
             else:
@@ -184,13 +188,21 @@ def create_summary_list(commit_title, commit_id, jira_job_id, feature_commit_lis
             misc_commit_list.append("No Ticket - " + commit_description.capitalize() + " - " + commit_id )
     # Case to cover situations where the commit has been modified to not comply to our standard format, with the tag. We want to avoid printing merge commits from internal branches, however.
     else:
-        if 'magnopus-opensource/develop' not in raw_commit_title and 'magnopus-opensource/main' not in raw_commit_title and 'magnopus-opensource/staging' not in raw_commit_title:
+        if 'magnopus-opensource/develop' not in raw_commit_title and 'magnopus-opensource/main' not in raw_commit_title and 'magnopus-opensource/staging' not in raw_commit_title and 'merge pull request' not in raw_commit_title:
             misc_commit_list.append("No Ticket - " + raw_commit_title.capitalize() + " - " + commit_id )
 
 
 def create_summaries_text(input_args, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list):
     output_text = "<h1>Built from changelist ID " + input_args.initial_commit + "</h1>\n<h2>Summary Lists</h2>\n"
 
+    if breaking_commit_list:
+        output_text += "<h3><p>&#x1F525; &#x2757; Breaking Changes</p></h3>\n<ul>"
+
+    for commit in breaking_commit_list:
+        output_text += "<li>" + commit + "</li>"
+
+    output_text += "</ul>"
+    
     if feature_commit_list:
         output_text += "<h3><p>&#x1F370; &#x1F64C; New Features</p></h3>\n<ul>"
 
@@ -239,14 +251,6 @@ def create_summaries_text(input_args, feature_commit_list, fix_commit_list, styl
 
         output_text += "</ul>"
 
-    if breaking_commit_list:
-        output_text += "<h3><p>&#x1F525; &#x2757; Breaking Changes</p></h3>\n<ul>"
-
-        for commit in breaking_commit_list:
-            output_text += "<li>" + commit + "</li>"
-
-        output_text += "</ul>"
-
     if misc_commit_list:
         output_text += "<h3><p>&#x1F9E9; Misc Changes</p></h3>\n<ul>"
 
@@ -279,8 +283,9 @@ def main():
     doc_commit_list = []
     breaking_commit_list = []
     misc_commit_list = []
-
+    squash_desc_list = []
     git_repo = init_git()
+    previous_squash_commit = ""
 
     if git_repo:
         if input_args.initial_commit == '':
@@ -313,12 +318,26 @@ def main():
                 message = commit_item.message
 
                 if 'Build' != author.name:
-                    change_desc, commit_title = process_change_description(message, hexsha)
                     
+                    change_desc, commit_title = process_change_description(message, hexsha, squash_desc_list)
                     jira_job_id = get_jira_id(message)
                     
+                    if len(squash_desc_list) > 0:
+                        commit = squash_desc_list[len(squash_desc_list) -1]
+                        if previous_squash_commit != commit and cleanhtml(commit_title).startswith("merge pull request"):
+                            previous_squash_commit = commit
+                            if (cleanhtml(commit_title).startswith("merge pull request")):
+                                print(commit)
+                                squash_jira_job_id = get_jira_id(commit)
+                                if jira_job_id != squash_jira_job_id:
+                                    if squash_jira_job_id:
+                                        squash_jira_job_id = squash_jira_job_id.upper()
+                                    create_summary_list(commit, hexsha, squash_jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list)
+                        squash_desc_list.pop()
                     # Only include merge commits as these are the commits that are the results of a PR. We do further screening inside the create_summary_list method to ensure we only print the merges we want to.
                     if (cleanhtml(commit_title).startswith("merge pull request")):
+                        if jira_job_id:
+                            jira_job_id = jira_job_id.upper()
                         create_summary_list(change_desc, hexsha, jira_job_id, feature_commit_list, fix_commit_list, style_commit_list, refactor_commit_list, test_commit_list, doc_commit_list, breaking_commit_list, misc_commit_list)
                     write_file_line(hexsha, author.name, change_desc, file_out)
 

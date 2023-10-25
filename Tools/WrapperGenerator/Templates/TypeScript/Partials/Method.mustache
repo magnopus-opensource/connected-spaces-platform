@@ -1,4 +1,7 @@
 {{^ is_private }}
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
 {{# is_constructor }}
 {{> Method/Constructor }}
 {{/ is_constructor }}

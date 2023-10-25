@@ -52,7 +52,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::AUDIO;
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
 		return csp::systems::EAssetType::IMAGE;
 	}
 }
@@ -65,7 +65,7 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 		return EAssetPlatform::DEFAULT;
 	}
 }
@@ -78,7 +78,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 			return "Default";
 	}
 
-	FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+	CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 	return "Default";
 }
 
@@ -335,13 +335,12 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto* Response = ApiResponse->GetResponse();
+	const auto& Headers	 = Response->GetPayload().GetHeaders();
 
-	auto Headers = Response->GetPayload().GetHeaders();
-
-	if (!Headers["x-errorcode"].empty())
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
 	{
-		XCodeError = Headers["x-errorcode"].c_str();
+		XCodeError = Headers.at("x-errorcode").c_str();
 	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
@@ -356,71 +355,31 @@ void UriResult::SetResponseBody(const csp::common::String& Contents)
 }
 
 
-AssetDataResult::AssetDataResult(void*) : Data(nullptr), DataLength(0)
+AssetDataResult::AssetDataResult(void*)
 {
 }
 
-AssetDataResult::AssetDataResult(const AssetDataResult& Other) : Data(nullptr), DataLength(Other.DataLength), ResultBase(Other)
+AssetDataResult::AssetDataResult(const AssetDataResult& Other) : ResultBase(Other)
 {
-	if (DataLength > 0)
-	{
-		auto DataPtr = (char*) CSP_ALLOC(sizeof(char) * DataLength + 1);
-		memcpy(DataPtr, Other.Data, DataLength);
-		DataPtr[DataLength] = 0;
-
-		Data = DataPtr;
-	}
 }
 
 AssetDataResult::~AssetDataResult()
 {
-	if (Data)
-	{
-		CSP_FREE(Data);
-	}
-}
-
-void* AssetDataResult::GetData()
-{
-	return Data;
 }
 
 const void* AssetDataResult::GetData() const
 {
-	return Data;
+	return ResponseBody.c_str();
 }
 
-size_t AssetDataResult::GetDataLength()
+size_t AssetDataResult::GetDataLength() const
 {
-	return DataLength;
-}
-
-const size_t AssetDataResult::GetDataLength() const
-{
-	return DataLength;
+	return ResponseBody.Length();
 }
 
 void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
-
-	auto* AssetResponse					   = static_cast<csp::services::AssetFileDto*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
-
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		// Build the Dto from the response Json
-		AssetResponse->FromJson(Response->GetPayload().GetContent());
-
-		const char* PayLoad = Response->GetPayload().GetContent().c_str();
-		DataLength			= Response->GetPayload().GetContent().Length();
-
-		auto DataPtr = (char*) CSP_ALLOC(sizeof(char) * DataLength + 1);
-		memcpy(DataPtr, PayLoad, DataLength);
-		DataPtr[DataLength] = 0;
-
-		Data = DataPtr;
-	}
 }
 
 const csp::common::String& Asset::GetThirdPartyPackagedAssetIdentifier() const

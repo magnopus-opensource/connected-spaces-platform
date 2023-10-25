@@ -1,0 +1,2 @@
+docker build -t platform_tests ./docker
+docker run -w /src -v %cd%:/src --rm platform_tests emrun --verbose --log_stdout "test_results.xml" --browser=chrome --hostname=localhost --kill_exit --browser_args="--no-sandbox --headless --remote-debugging-port=0 --disable-gpu --disable-software-rasterizer" index.html

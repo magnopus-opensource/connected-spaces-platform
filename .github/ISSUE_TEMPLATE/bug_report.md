@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: 'bug'
+labels: bug
 assignees: ''
 
 ---
@@ -27,7 +27,7 @@ A clear and concise description of what you expected to happen.
 
 If applicable, add screenshots to help explain your problem.
 
-**Foundation version (please complete the following information):**
+**CSP version (please complete the following information):**
 
 Refer to the most recent tag in your repo or the version of the precompiled binaries you are using.
 

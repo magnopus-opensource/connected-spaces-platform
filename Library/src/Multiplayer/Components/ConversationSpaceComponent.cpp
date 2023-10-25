@@ -60,7 +60,7 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("This component already has an associated conversation! No new conversation was created as a result.");
+		CSP_LOG_WARN_MSG("This component already has an associated conversation! No new conversation was created as a result.");
 		Callback(StringResult::Invalid());
 	}
 }
@@ -76,7 +76,7 @@ bool ConversationSpaceComponent::MoveConversationFromComponent(ConversationSpace
 	}
 	else
 	{
-		FOUNDATION_LOG_WARN_MSG("This component already has an associated conversation! The conversation was not moved as a result.");
+		CSP_LOG_WARN_MSG("This component already has an associated conversation! The conversation was not moved as a result.");
 		return false;
 	}
 }
@@ -89,7 +89,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to DeleteConversation was empty! No update to the conversation was issued as a result.");
+		CSP_LOG_ERROR_MSG("The conversation ID passed to DeleteConversation was empty! No update to the conversation was issued as a result.");
 		Callback(NullResult::Invalid());
 	}
 }
@@ -119,7 +119,7 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to AddMessage was empty! No update to the conversation was issued as a result.");
+		CSP_LOG_ERROR_MSG("The conversation ID passed to AddMessage was empty! No update to the conversation was issued as a result.");
 		Callback(MessageResult::Invalid());
 	}
 }
@@ -137,7 +137,7 @@ void ConversationSpaceComponent::GetAllMessages(MessageCollectionResultCallback 
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("The conversation ID passed to GetAllMessages was empty! No update to the conversation was issued as a result.");
+		CSP_LOG_ERROR_MSG("The conversation ID passed to GetAllMessages was empty! No update to the conversation was issued as a result.");
 		Callback(MessageCollectionResult::Invalid());
 	}
 }
@@ -155,7 +155,7 @@ bool ConversationSpaceComponent::GetIsVisible() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 void ConversationSpaceComponent::SetIsVisible(const bool Value)
@@ -170,7 +170,7 @@ bool ConversationSpaceComponent::GetIsActive() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -182,7 +182,7 @@ const csp::common::Vector3& ConversationSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -199,7 +199,7 @@ const csp::common::Vector4& ConversationSpaceComponent::GetRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -216,7 +216,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("This component does not have an associated conversation.");
+		CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
 		Callback(ConversationResult::Invalid());
 	}
 }
@@ -229,7 +229,7 @@ void ConversationSpaceComponent::SetConversationInfo(const ConversationInfo& Con
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("This component does not have an associated conversation.");
+		CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
 		Callback(ConversationResult::Invalid());
 	}
 }
@@ -262,7 +262,7 @@ const csp::common::String& ConversationSpaceComponent::GetTitle() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -279,7 +279,7 @@ const csp::common::String& ConversationSpaceComponent::GetDate() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -296,7 +296,7 @@ const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 		return RepVal.GetInt();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0;
 }
 
@@ -318,7 +318,7 @@ const csp::common::String& ConversationSpaceComponent::GetConversationId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 } // namespace csp::multiplayer

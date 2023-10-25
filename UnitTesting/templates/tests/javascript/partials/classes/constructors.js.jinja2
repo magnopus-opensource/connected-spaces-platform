@@ -1,0 +1,101 @@
+function getAllConstructors(prototype) {
+    const props = Object.getOwnPropertyNames(prototype);
+    const ctors = props.filter(x => typeof prototype[x] === 'function' && x.startsWith('create'));
+
+    return ctors;
+}
+
+test('check_DefaultConstructorClass_Constructors', async function() {
+    // Static functions are defined directly on the object. Instance functions are defined on the prototype.
+    const ctorNames = getAllConstructors(dummy.DefaultConstructorClass);
+
+    assert.areEqual(ctorNames.length, 1);
+
+    const ctor = dummy.DefaultConstructorClass[ctorNames[0]];
+
+    // Function.length returns the number of parameters expected
+    assert.areEqual(ctor.length, 0);
+});
+
+test('create_DefaultConstructorClass', async function() {
+    const instance = dummy.DefaultConstructorClass.create();
+
+    assert.isTrue(instance.pointerIsValid());
+    assert.areEqual(instance.someValue, {{ config.class_int_value_first }});
+});
+
+test('check_ParameterConstructorClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.ParameterConstructorClass);
+
+    assert.areEqual(ctorNames.length, 1);
+
+    const ctor = dummy.ParameterConstructorClass[ctorNames[0]];
+
+    assert.areEqual(ctor.length, 1);
+});
+
+test('create_ParameterConstructorClass', async function() {
+    const instance = dummy.ParameterConstructorClass.create_someParameter({{ config.class_int_value_first }});
+
+    assert.isTrue(instance.pointerIsValid());
+    assert.areEqual(instance.someValue, {{ config.class_int_value_first }});
+});
+
+test('check_ParametersConstructorClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.ParametersConstructorClass);
+
+    assert.areEqual(ctorNames.length, 1);
+
+    const ctor = dummy.ParametersConstructorClass[ctorNames[0]];
+
+    assert.areEqual(ctor.length, 2);
+});
+
+test('create_ParametersConstructorClass', async function() {
+    const instance = dummy.ParametersConstructorClass.create_someParameter_anotherParameter(
+        {{ config.class_int_value_first }},
+        true
+    );
+
+    assert.isTrue(instance.pointerIsValid());
+    assert.areEqual(instance.someValue, {{ config.class_int_value_first }});
+});
+
+test('check_MultipleConstructorsClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.MultipleConstructorsClass);
+
+    assert.areEqual(ctorNames.length, 2);
+    assert.isTrue(ctorNames.includes('create') && dummy.MultipleConstructorsClass['create'].length == 0);
+    assert.isTrue(ctorNames.includes('create_someParameter') 
+        && dummy.MultipleConstructorsClass['create_someParameter'].length == 1);
+});
+
+test('create_MultipleConstructorsClass', async function() {
+    let instance = dummy.MultipleConstructorsClass.create();
+
+    assert.isTrue(instance.pointerIsValid());
+    assert.areEqual(instance.someValue, {{ config.class_int_value_first }});
+
+    instance = dummy.MultipleConstructorsClass.create_someParameter({{ config.class_int_value_second }});
+
+    assert.isTrue(instance.pointerIsValid());
+    assert.areEqual(instance.someValue, {{ config.class_int_value_second }});
+});
+
+test('check_ProtectedConstructorClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.ProtectedConstructorClass);
+
+    assert.areEqual(ctorNames.length, 0);
+});
+
+test('check_PrivateConstructorClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.PrivateConstructorClass);
+
+    assert.areEqual(ctorNames.length, 0);
+});
+
+test('check_DeletedConstructorClass_Constructors', async function() {
+    const ctorNames = getAllConstructors(dummy.DeletedConstructorClass);
+
+    assert.areEqual(ctorNames.length, 0);
+});

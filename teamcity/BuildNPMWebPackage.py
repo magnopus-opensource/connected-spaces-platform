@@ -5,22 +5,22 @@ import subprocess
 
 from distutils.dir_util import copy_tree
 
-class OlympusFoundationPyError(Exception): pass
-class FileHandlingError(OlympusFoundationPyError): pass
+class ConnectedSpacesPlatformPyError(Exception): pass
+class FileHandlingError(ConnectedSpacesPlatformPyError): pass
 
 
 def get_arguments_commandline():
-    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Foundation Release for NPM.')
+    parser = argparse.ArgumentParser(description='Build the Connected Spaces Platform Release for NPM.')
 
     parser.add_argument('--version',
-                        help="Enter the version of the Build Connected Spaces Platform Foundation, Semantic Versioning Only.",
+                        help="Enter the version of the Connected Spaces Platform, Semantic Versioning Only.",
                         default="0.0.0")
     parser.add_argument('--name',
-                        help="Enter the name of the Build Connected Spaces Platform Foundation package.",
-                        default="@magnopus-opensource/csp-foundation")
+                        help="Enter the name of the Connected Spaces Platform package.",
+                        default="connected-spaces-platform.web")
     parser.add_argument('--display_name',
-                        help="Enter the display name of the Build Connected Spaces Platform Foundation package.",
-                        default="Connected Spaces Platform Foundation WASM")
+                        help="Enter the display name of the Connected Spaces Platform package.",
+                        default="connected-spaces-platform.web")
     parser.add_argument('--relative_destination_path',
                         help="Enter the relative path from root/teamcity for the libraries to be copied to.",
                         default="Library\\Binaries\\package\\wasm")
@@ -31,14 +31,14 @@ def get_arguments_commandline():
                         help="Enter the relative path from root/teamcity for typescript.",
                         default="Tools\\WrapperGenerator\\Output\\TypeScript")
     parser.add_argument('--license',
-                        help="Enter the license required for the Connected Spaces Platform Foundation package.",
+                        help="Enter the license required for the Connected Spaces Platform package.",
                         default="Apache-2.0")
     parser.add_argument('--dependencies',
-                        help="Enter the dependencies required for the Olympus Foundation package.",
+                        help="Enter the dependencies required for the Connected Spaces Platform package.",
                         default=None)
     parser.add_argument('--description',
-                        help="This package provides the DLL's required to interface with the Olympus project servers.",
-                        default="Exposes Olympus functionality via the Foundation API")
+                        help="Enter the description for the Connected Spaces Platform package.",
+                        default="This package provides the binaries required to interface with the Connected Spaces Platform API.")
     parser.add_argument('--registry',
                         help="This is the upstream location of the package.",
                         default="https://npm.pkg.github.io/@magnopus-opensource")
@@ -48,6 +48,9 @@ def get_arguments_commandline():
     parser.add_argument('--release_mode',
                         help="NPM release command, pack and publish are available.",
                         default="pack")
+    parser.add_argument('--scope',
+                        help="Enter the scope of the published package. Appends the registry URL.",
+                        default=None)
                      
     args = parser.parse_args()
 
@@ -83,14 +86,16 @@ def create_output_path(output_path):
 
 def copy_packages_in(input_args, output_path):
     input_paths = []
-
+    print("Copying packages...")
     rel_wasm_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_wasm_path)
     if os.path.isdir(rel_wasm_path):
         input_paths.append(rel_wasm_path)
+        print("Wasm path created")
 
     rel_typescript_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_typescript_path)
     if os.path.isdir(rel_typescript_path):
         input_paths.append(rel_typescript_path)
+        print("typescript path created")
 
     for path in input_paths:
         for file in os.listdir(path):
@@ -102,8 +107,10 @@ def copy_packages_in(input_args, output_path):
                 shutil.copy2(file_path, output_path)
 
     if(input_paths):
+        print("input paths true")
         return True
     else:
+        print("input paths false")
         return False
 
 
@@ -119,12 +126,12 @@ def create_package_file(input_args, output_path):
        f'  "license": "{input_args.license}",\n',
         '  "dependencies": {\n'
         '  },\n',
-        '  "main": "./olympus.foundation.js",\n',
-        '  "types": "./olympus.foundation.d.ts",\n',
+        '  "main": "./connectedspacesplatform.js",\n',
+        '  "types": "./connectedspacesplatform.d.ts",\n',
         '  "publishConfig": {\n',
-       f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
+       f'    "registry": "{input_args.registry}/{input_args.scope}"\n',
         '  },\n'
-        '  "repository": "https://github.com/magnopus-opensource/csp-foundation"'
+        '  "repository": "https://github.com/magnopus-opensource/connected-spaces-platform"'
         '}\n'
     ])
     f.close()

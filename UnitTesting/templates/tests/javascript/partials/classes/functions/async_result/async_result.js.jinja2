@@ -1,0 +1,40 @@
+{% for p in config.primitives %}
+    // Get {{ p.type }} min value via promise
+    test('classFunctions_AsyncResult_Return{{ p.type }}ByValue_min', async function() {
+        const instance = dummy.AsyncResultTestClass.create();
+        const result = await instance.classFunctions_AsyncResult_Return{{ p.type }}ByValue_min();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+    });
+
+    // Get {{ p.type }} max value via promise
+    test('classFunctions_AsyncResult_Return{{ p.type }}ByValue_max', async function() {
+        const instance = dummy.AsyncResultTestClass.create();
+        const result = await instance.classFunctions_AsyncResult_Return{{ p.type }}ByValue_max();
+
+        {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+    });
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via promise
+    test('classFunctions_AsyncResult_ReturnStringBy{{ x }}', async function() {
+        const instance = dummy.AsyncResultTestClass.create();
+        const result = await instance.classFunctions_AsyncResult_ReturnStringBy{{ x }}();
+
+        assert.areEqual(result, "{{ config.string_value }}");
+    });
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }} via promise
+    test('classFunctions_AsyncResult_ReturnClassBy{{ x }}', async function() {
+        const instance = dummy.AsyncResultTestClass.create();
+        const result = await instance.classFunctions_AsyncResult_ReturnClassBy{{ x }}();
+
+        assert.isTrue(result.pointerIsValid());
+        assert.areEqual(result.someValue, {{ config.class_int_value_first }});
+    });
+{% endfor %}
+
+{# TODO: Add MultiThread tests when we can call callbacks from other threads. #}

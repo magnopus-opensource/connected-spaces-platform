@@ -1,6 +1,6 @@
 import { assert, pushCleanupFunction } from '../test_framework.js';
 
-import { Services, Systems } from '../olympus_foundation.js';
+import { Services, Systems } from '../connected_spaces_platform.js';
 
 export var DEFAULT_LOGIN_EMAIL;
 export var ALT_LOGIN_EMAIL;
@@ -44,15 +44,20 @@ export async function logOut(userSystem) {
  * @param {!Systems.UserSystem} userSystem 
  * @param {!string} [email] 
  * @param {!string} [password] 
- * @param {!Services.EResultCode} [expectedResult] 
- * @param {!boolean} [pushCleanup] 
+ * @param {!boolean} [ageVerified] 
+ * @param {!Services.EResultCode} [expectedResult]
+ * @param {!Systems.ELoginStateResultFailureReason} [expectedFailureResultCode]
+ * @param {!boolean} [pushCleanup]
  * @returns {Promise<?string>} the userId of the logged in account
  */
-export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
-    const result = await userSystem.login('', email, password);
+export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = DEFAULT_LOGIN_PASSWORD, ageVerified = true, expectedResult = Services.EResultCode.Success, expectedFailureResultCode = Systems.ELoginStateResultFailureReason.None, pushCleanup = true) {
+
+    const result = await userSystem.login('', email, password, ageVerified);
     const resCode = result.getResultCode();
 
     assert.succeeded(result, expectedResult);
+
+    assert.areEqual(result.getFailureReason(), expectedFailureResultCode);
 
     const loginState = result.getLoginState();
     result.delete();
@@ -78,14 +83,13 @@ export async function logIn(userSystem, email = DEFAULT_LOGIN_EMAIL, password = 
 
 /**
  * 
- * @param {!Systems.UserSystem} userSystem 
- * @param {!string} [deviceId] 
+ * @param {!Systems.UserSystem} userSystem
  * @param {!Services.EResultCode} [expectedResult] 
  * @param {!boolean} [pushCleanup] 
  * @returns {Promise<?string>} the guest userId of the logged in account
  */
- export async function logInAsGuest(userSystem, deviceId = 'SomeRandomGuestDeviceIdLol', expectedResult = Services.EResultCode.Success, pushCleanup = true) {
-    const result = await userSystem.loginAsGuestWithId(deviceId);
+ export async function logInAsGuest(userSystem, expectedResult = Services.EResultCode.Success, pushCleanup = true) {
+    const result = await userSystem.loginAsGuest(true);
     const resCode = result.getResultCode();
 
     assert.succeeded(result, expectedResult);

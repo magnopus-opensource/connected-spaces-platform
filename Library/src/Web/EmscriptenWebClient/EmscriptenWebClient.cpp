@@ -23,8 +23,8 @@
 #include <assert.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/fetch.h>
+#include <iostream>
 #include <sstream>
-
 
 
 namespace
@@ -64,24 +64,55 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 	csp::common::Map<csp::common::String, csp::common::String> Headers;
 	GetResponseHeaders(Fetch, Headers);
 
-	auto& Response = Request->GetResponse();
-	auto& Payload  = ((csp::web::HttpResponse&) Response).GetMutablePayload();
+	auto& Response = Request->GetMutableResponse();
+	auto& Payload  = Response.GetMutablePayload();
 	auto Keys	   = Headers.Keys();
 
 	for (int i = 0; i < Keys->Size(); ++i)
 	{
-		csp::common::String Key = Keys->operator[](i);
-		csp::common::String Val = Headers[Key];
+		auto Key	  = Keys->operator[](i);
+		auto Val	  = std::string(Headers[Key].c_str());
+		auto KeyValue = std::string(Key.c_str());
+		// Make Key and Val lower-case
+		std::transform(KeyValue.begin(),
+					   KeyValue.end(),
+					   KeyValue.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
+		std::transform(Val.begin(),
+					   Val.end(),
+					   Val.begin(),
+					   [](unsigned char c)
+					   {
+						   return std::tolower(c);
+					   });
 
-		Payload.AddHeader(Key, Val);
+		Payload.AddHeader(KeyValue.c_str(), Val.c_str());
 	}
 
 	CSP_DELETE(Keys);
 
 	Request->GetCallback()->OnHttpResponse(Response);
-	CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
+	// DO NOT DO THIS! This will delete Payload.Content twice
+	// CSP_DELETE_ARRAY(Fetch->__attributes.requestData);
 	CSP_DELETE(Request);
 	emscripten_fetch_close(Fetch);
+}
+
+void OnFetchError(emscripten_fetch_t* Fetch)
+{
+	auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
+
+	if (Request->Retry())
+	{
+		CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
+	}
+	else
+	{
+		OnFetchSuccessOrError(Fetch);
+	}
 }
 
 void OnFetchProgress(emscripten_fetch_t* Fetch)
@@ -216,7 +247,7 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
 
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	attr.onsuccess	= OnFetchSuccessOrError;
-	attr.onerror	= OnFetchSuccessOrError;
+	attr.onerror	= OnFetchError;
 	attr.onprogress = OnFetchProgress;
 
 	// Don't send headers or content for HEAD requests

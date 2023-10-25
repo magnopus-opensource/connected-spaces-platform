@@ -70,6 +70,9 @@ Tools/Emscripten/EmscriptenBuild.log
 *.xcworkspace
 *.xcodeproj
 
+/Tools/SpaceMigrationTool/Logs/**/*
+/Tools/SpaceMigrationTool/x64/**/*
+
 # Make an exception for the SpaceMigrationTool Visual Studio sln and proj
 !Tools/SpaceMigrationTool/SpaceMigrationTool.sln
 !Tools/SpaceMigrationTool/SpaceMigrationTool.vcxproj
@@ -96,3 +99,6 @@ UnitTesting/src/**/*
 UnitTesting/tests/*_test_results.xml
 UnitTesting/tests/csharp/Assets/Tests/generated/**/*
 UnitTesting/tests/javascript/tests.js
+
+# Ignore generated package directories
+package/

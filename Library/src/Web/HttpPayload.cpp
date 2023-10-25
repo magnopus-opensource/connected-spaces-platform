@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <regex>
 #include <sstream>
 
 namespace csp::web
@@ -35,9 +36,8 @@ HttpPayload::HttpPayload()
 
 	if (ResponseContent.find("Unset") != std::string::npos)
 	{
-		FOUNDATION_LOG_MSG(
-			csp::systems::LogLevel::Warning,
-			"ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
+		CSP_LOG_MSG(csp::systems::LogLevel::Warning,
+					"ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
 	}
 
 	// Using custom header as User-Agent is protected on web SKUs
@@ -205,6 +205,21 @@ void HttpPayload::AddFormParam(const char* Name, const std::shared_ptr<csp::web:
 void HttpPayload::SetBoundary(const csp::common::String& InBoundary)
 {
 	Boundary = InBoundary;
+}
+
+// This checks not only for "application/json" but also covers cases like "application/graphql+json" and "application/problem+json"
+bool HttpPayload::IsJsonPayload() const
+{
+	const auto& ContentTypeHeader = Headers.find("content-type");
+	if (ContentTypeHeader == Headers.end())
+	{
+		return false;
+	}
+	else
+	{
+		std::regex Regex("^application\\/([a-z]+\\+)?json");
+		return std::regex_search(ContentTypeHeader->second.c_str(), Regex);
+	}
 }
 
 } // namespace csp::web

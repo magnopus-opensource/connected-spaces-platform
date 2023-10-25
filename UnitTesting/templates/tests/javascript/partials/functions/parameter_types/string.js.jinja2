@@ -1,0 +1,11 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Pass string by {{ x }}
+    test('globalFunctions_String_Pass{{ x }}', async function() {
+        try {
+            dummy.globalFunctions_String_Pass{{ x }}("{{ config.string_value }}");
+        }
+        catch (e) {
+            assert.fail(e.message)
+        }
+    });
+{% endfor %}

@@ -27,7 +27,7 @@
 void LogMessageLevelTest(const csp::systems::LogLevel Level, const csp::common::String& TestMsg, std::atomic_bool& LogConfirmed, bool Expected)
 {
 	LogConfirmed = false;
-	FOUNDATION_LOG_MSG(Level, TestMsg);
+	CSP_LOG_MSG(Level, TestMsg);
 	if (Expected)
 	{
 		EXPECT_TRUE(LogConfirmed);
@@ -45,7 +45,7 @@ void LogFormatLevelTest(const csp::systems::LogLevel Level,
 						bool Expected)
 {
 	LogConfirmed = false;
-	FOUNDATION_LOG_FORMAT(Level, TestMsg, TestValue);
+	CSP_LOG_FORMAT(Level, TestMsg, TestValue);
 	if (Expected)
 	{
 		EXPECT_TRUE(LogConfirmed);
@@ -74,7 +74,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 		});
 
 	// Test the default
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::All, TestMsg);
+	CSP_LOG_MSG(csp::systems::LogLevel::All, TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
@@ -194,7 +194,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 		});
 
 	// Test default
-	FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Log, TestFormatStr, TestValue);
+	CSP_LOG_FORMAT(csp::systems::LogLevel::Log, TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
@@ -311,61 +311,61 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
 		});
 
 	// Test the default
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::NoLogging);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Fatal Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Fatal);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Error Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Error);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Warning Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Warning);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Display Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Display);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Log Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Log);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Verbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Verbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// VeryVerbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// All Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::All);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_MSG(TestMsg);
+	CSP_LOG_ERROR_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	LogSystem.ClearAllCallbacks();
@@ -392,61 +392,61 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
 		});
 
 	// Test the default
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::NoLogging);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Fatal Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Fatal);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Error Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Error);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Warning Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Warning);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Display Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Display);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Log Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Log);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Verbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Verbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// VeryVerbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	// All Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::All);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_MSG(TestMsg);
+	CSP_LOG_WARN_MSG(TestMsg);
 	EXPECT_TRUE(LogConfirmed);
 
 	LogSystem.ClearAllCallbacks();
@@ -476,61 +476,61 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 		});
 
 	// Test default
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::NoLogging);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Fatal Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Fatal);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Error Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Error);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Warning Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Warning);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Display Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Display);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Log Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Log);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Verbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Verbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// VeryVerbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// All Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::All);
 	LogConfirmed = false;
-	FOUNDATION_LOG_WARN_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_WARN_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	LogSystem.ClearAllCallbacks();
@@ -560,61 +560,61 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 		});
 
 	// Test default
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// No Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::NoLogging);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Fatal Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Fatal);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_FALSE(LogConfirmed);
 
 	// Error Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Error);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Warning Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Warning);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Display Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Display);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Log Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Log);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// Verbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::Verbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// VeryVerbose Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	// All Logging Level
 	LogSystem.SetSystemLevel(csp::systems::LogLevel::All);
 	LogConfirmed = false;
-	FOUNDATION_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
+	CSP_LOG_ERROR_FORMAT(TestFormatStr, TestValue);
 	EXPECT_TRUE(LogConfirmed);
 
 	LogSystem.ClearAllCallbacks();
@@ -669,20 +669,20 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
 
 	const int TestValue = 12345;
 
-	FOUNDATION_PROFILE_SCOPED_TAG(TestTag);
+	CSP_PROFILE_SCOPED_TAG(TestTag);
 
-	FOUNDATION_PROFILE_BEGIN(TestTag);
-	FOUNDATION_PROFILE_END();
+	CSP_PROFILE_BEGIN(TestTag);
+	CSP_PROFILE_END();
 
-	FOUNDATION_PROFILE_BEGIN_FORMAT("Marker %d", TestValue);
-	FOUNDATION_PROFILE_END();
+	CSP_PROFILE_BEGIN_FORMAT("Marker %d", TestValue);
+	CSP_PROFILE_END();
 
-	FOUNDATION_PROFILE_SCOPED_FORMAT("Marker %d", TestValue);
+	CSP_PROFILE_SCOPED_FORMAT("Marker %d", TestValue);
 
-	FOUNDATION_PROFILE_EVENT_TAG(TestEvent);
-	FOUNDATION_PROFILE_EVENT_FORMAT("Event %d", TestValue)
+	CSP_PROFILE_EVENT_TAG(TestEvent);
+	CSP_PROFILE_EVENT_FORMAT("Event %d", TestValue)
 
-	#if FOUNDATION_PROFILING_ENABLED
+	#if CSP_PROFILING_ENABLED
 	EXPECT_TRUE(BeginConfirmed);
 	EXPECT_TRUE(EndConfirmed);
 	EXPECT_TRUE(EventConfirmed);
@@ -721,7 +721,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 	csp::common::String UserId;
 
 	// Log in with invalid credentials
-	LogIn(UserSystem, UserId, "invalidlogin@csp.co", "", csp::services::EResultCode::Failed);
+	LogIn(UserSystem, UserId, "invalidlogin@csp.co", "", true, csp::services::EResultCode::Failed);
 
 	auto Start	   = std::chrono::steady_clock::now();
 	auto Current   = std::chrono::steady_clock::now();

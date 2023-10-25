@@ -5,7 +5,7 @@
     "start": "serve . -p 8080"
   },
   "dependencies": {
-    "@magnopus-opensource/connected-spaces-platform.web": "4.4.0"
+    "connected-spaces-platform.web": "4.10.5"
   },
   "devDependencies": {
     "serve": "^14.2.0"

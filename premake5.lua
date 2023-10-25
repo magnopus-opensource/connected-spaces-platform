@@ -34,7 +34,7 @@ premake.override(_G, "workspace", function(base, ...)
 end)
 
 
-solution( "OlympusFoundation" )
+solution( "ConnectedSpacesPlatform" )
     -- Build configurations
     if CSP.HasCommandLineArgument("DLLOnly") then
         configurations { "DebugDLL", "ReleaseDLL", "DebugDLL-CSharp", "ReleaseDLL-CSharp" }
@@ -66,10 +66,11 @@ solution( "OlympusFoundation" )
     -- Visual studio projects
     Project.AddProject()
     
+    if not CSP.IsGeneratingCSharpOnMac() then
+        Tests.AddProject()
+    end
+
     if not CSP.IsWebAssemblyGeneration() then
-        if not CSP.IsGeneratingCSharpOnMac() then
-            Tests.AddProject()
-        end
 
         if not CSP.IsGeneratingCPPOnMac() then
             Tests.CSharp.AddProject()

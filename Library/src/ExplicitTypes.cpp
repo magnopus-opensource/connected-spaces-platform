@@ -33,7 +33,8 @@
 
 /*
  * This file contains explicit template type instantiations so that types will be wrapped in C # or JS
- * without being stripped out, and to ensure that clients use Foundation's allocator for template instances.
+ * without being stripped out, and to ensure that clients use Connected Spaces Platform's allocator for
+ * template instances.
  */
 
 

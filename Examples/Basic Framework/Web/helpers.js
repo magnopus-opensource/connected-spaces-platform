@@ -2,7 +2,7 @@ import {
   Services,
   Systems,
   uint8ArrayToBuffer,
-} from "./node_modules/@magnopus-opensource/connected-spaces-platform.web/olympus.foundation.js";
+} from "./node_modules/connected-spaces-platform.web/connectedspacesplatform.js";
 
 export const testImage =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACsAAAAzCAIAAACBumZhAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAJOgAACToAYJjBRwAAAB5SURBVFhH7dTBCcAgEERR67Ig67Eam7GYDQNexeyaRAL";

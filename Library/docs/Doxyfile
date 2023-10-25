@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "Olympus Foundation"
+PROJECT_NAME           = "Connected Spaces Platform"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -2613,7 +2613,7 @@ GENERATE_LEGEND        = YES
 
 DOT_CLEANUP            = YES
 
-# We omit oly-specific macros used during wrapper generation. This fixes cases 
+# We omit csp-specific macros used during wrapper generation. This fixes cases 
 # where otherwise function signatures' text was not wrapping correctly in the documentation
 PREDEFINED           = "CSP_NO_EXPORT=" \
                        "CSP_ASYNC_RESULT=" \

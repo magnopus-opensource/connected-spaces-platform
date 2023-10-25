@@ -198,6 +198,12 @@ String::String(String const& Other) : ImplPtr(Other.ImplPtr->Clone())
 {
 }
 
+String::String(String&& Other)
+{
+	ImplPtr		  = Other.ImplPtr;
+	Other.ImplPtr = nullptr;
+}
+
 List<String> String::Split(char Separator) const
 {
 	return ImplPtr->Split(Separator);
@@ -211,13 +217,36 @@ String& String::swap(String& Other)
 
 String& String::operator=(const String& Rhs)
 {
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
 	ImplPtr = Rhs.ImplPtr->Clone();
+	return *this;
+}
+
+String& String::operator=(String&& Rhs)
+{
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
+	ImplPtr		= Rhs.ImplPtr;
+	Rhs.ImplPtr = nullptr;
 	return *this;
 }
 
 String& String::operator=(char const* const Text)
 {
-	return *this = String(Text);
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
+
+	ImplPtr = CSP_NEW Impl(Text);
+	return *this;
 }
 
 const char* String::Get() const
@@ -289,7 +318,10 @@ bool String::operator<(const String& Other) const
 
 String::~String()
 {
-	CSP_DELETE(ImplPtr);
+	if (ImplPtr != nullptr)
+	{
+		CSP_DELETE(ImplPtr);
+	}
 }
 
 void String::Append(const String& Other)

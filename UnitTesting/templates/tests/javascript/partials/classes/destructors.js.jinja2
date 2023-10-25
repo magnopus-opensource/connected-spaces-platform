@@ -1,0 +1,15 @@
+test('check_PublicDestructorClass_Destructor', async function() {
+    assert.areEqual(typeof dummy.PublicDestructorClass.prototype['delete'], 'function');
+});
+
+test('check_ProtectedDestructorClass_Destructor', async function() {
+    assert.areEqual(typeof dummy.ProtectedDestructorClass.prototype['delete'], 'undefined');
+});
+
+test('check_PrivateDestructorClass_Destructor', async function() {
+    assert.areEqual(typeof dummy.PrivateDestructorClass.prototype['delete'], 'undefined');
+});
+
+test('check_DeletedDestructorClass_Destructor', async function() {
+    assert.areEqual(typeof dummy.DeletedDestructorClass.prototype['delete'], 'undefined');
+});

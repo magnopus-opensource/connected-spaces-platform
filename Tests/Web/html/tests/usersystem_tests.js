@@ -4,7 +4,7 @@ import { jsArrayToCommonArray } from '../conversion_helpers.js';
 import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn, logOut } from './usersystem_tests_helpers.js';
 import { createSpace } from './spacesystem_tests_helpers.js';
 
-import { Services, Systems } from '../olympus_foundation.js';
+import { Services, Systems } from '../connected_spaces_platform.js';
 
 
 const ThirdPartyAuthenticationDefines = 
@@ -77,6 +77,30 @@ test('UserSystemTests', 'LoginTest', async function() {
     await logIn(userSystem);
 });
 
+test('UserSystemTests', 'LoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in
+    await logIn(userSystem);
+});
+
+test('UserSystemTests', 'FalseAgeVerificationLoginTest', async function() {
+    const systemsManager = Systems.SystemsManager.get();
+    const userSystem = systemsManager.getUserSystem();
+
+    // Log in with false age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, false, Services.EResultCode.Failed, Systems.ELoginStateResultFailureReason.AgeNotVerified, false);
+
+    // Log in with null age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, null, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
+    await logOut(userSystem)
+
+    // Log in with true age verification
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Services.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
+    await logOut(userSystem)
+});
+
 
 test('UserSystemTests', 'LoginWithTokenTest', async function() {
     const systemsManager = Systems.SystemsManager.get();
@@ -140,8 +164,8 @@ test('UserSystemTests', 'LoginWithTokenTest', async function() {
     currentLoginState.delete();
 
     // Create space to verify that we successfully logged in
-    const spaceName = generateUniqueString('OLY-TESTS-WASM-SPACE');
-    const spaceDescription = 'OLY-TESTS-WASM-SPACEDESC';
+    const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
+    const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private);
 });
@@ -213,7 +237,7 @@ test('UserSystemTests', 'LoginErrorTest', async function() {
     const userSystem = systemsManager.getUserSystem();
 
     // Log in with invalid credentials
-    await logIn(userSystem, 'invalidlogin@magnopus.com', 'notarealpassword', Services.EResultCode.Failed);
+    await logIn(userSystem, 'invalidlogin@magnopus.com', 'notarealpassword', true, Services.EResultCode.Failed);
 
     // Log in
     await logIn(userSystem);
@@ -226,7 +250,7 @@ test('UserSystemTests', 'UpdateDisplayNameTest', async function() {
 
     // Log in
     const userId = await logIn(userSystem);
-    const newDisplayName = generateUniqueString('OLY-TESTS-WASM-NAME').substring(0, 24);
+    const newDisplayName = generateUniqueString('CSP-TESTS-WASM-NAME').substring(0, 24);
 
     // Update display name
     {
@@ -351,7 +375,7 @@ test('UserSystemTests', 'CreateUserTest', async function() {
     
     // Test user creation
     {
-        const result = await userSystem.createUser(newUsername, newDisplayName, newEmail, newPassword, true, null, null);
+        const result = await userSystem.createUser(newUsername, newDisplayName, newEmail, newPassword, true, true, null, null);
         
         assert.succeeded(result);
 

@@ -1,0 +1,9 @@
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }}
+    [Test]
+    public static void GlobalFunctions_String_Return{{ x }}() {
+        var result = Global.GlobalFunctions_String_Return{{ x }}();
+
+        Assert.AreEqual("{{ config.string_value }}", result);
+    }
+{% endfor %}
