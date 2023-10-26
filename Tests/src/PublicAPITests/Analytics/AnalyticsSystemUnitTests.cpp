@@ -24,7 +24,7 @@
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_METRIC_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 {
 	csp::systems::AnalyticsSystem System;
 
@@ -58,7 +58,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_MULTIPLE_METRIC_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 {
 	csp::systems::AnalyticsSystem System;
 
@@ -113,7 +113,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_DEREGISTER_PROVIDER_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 {
 	csp::systems::AnalyticsSystem System;
 
@@ -145,7 +145,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_MULTIPLE_THREADS_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 {
 	csp::systems::AnalyticsSystem System;
 
@@ -201,7 +201,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_PARAMS_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAParamsTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAParamsTest)
 {
 	const csp::common::String TestClientId = "TestClientId";
 	const csp::common::String TestProperty = "TestProperty";
@@ -223,7 +223,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAParamsTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_INT_PARAM_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAIntParamTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAIntParamTest)
 {
 	const csp::common::String TestClientId = "TestClientId";
 	const csp::common::String TestProperty = "TestProperty";
@@ -243,7 +243,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAIntParamTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_STRING_PARAM_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAStringParamTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAStringParamTest)
 {
 	const csp::common::String TestClientId = "TestClientId";
 	const csp::common::String TestProperty = "TestProperty";
@@ -263,7 +263,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAStringParamTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_INVALID_PARAM_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAInvalidParamTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UAInvalidParamTest)
 {
 	const csp::common::String TestClientId = "TestClientId";
 	const csp::common::String TestProperty = "TestProperty";
@@ -283,7 +283,7 @@ CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UAInvalidParamTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UA_TOO_MANY_PARAM_TEST
-CSP_INTERNAL_TEST(CSPEngine, AnalyticsSystemUnitTests, UATooManyParamTest)
+CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UATooManyParamTest)
 {
 	const csp::common::String TestClientId = "TestClientId";
 	const csp::common::String TestProperty = "TestProperty";
