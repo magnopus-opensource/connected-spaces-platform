@@ -61,7 +61,7 @@ public:
 
 	void RegisterListener(const EventId& Id, EventListener* InListener);
 	void UnRegisterListener(const EventId& Id, EventListener* InListener);
-
+	void UnRegisterAllListeners();
 	void ProcessEvents();
 
 private:
@@ -116,6 +116,11 @@ void EventSystemImpl::UnRegisterListener(const EventId& Id, EventListener* InLis
 {
 	EventDispatcher& Dispatcher = GetDispatcher(Id);
 	Dispatcher.UnRegisterListener(InListener);
+}
+
+void EventSystemImpl::UnRegisterAllListeners()
+{
+	Dispatchers.clear();
 }
 
 void EventSystemImpl::ProcessEvents()
@@ -175,6 +180,14 @@ void EventSystem::UnRegisterListener(const EventId& Id, EventListener* InListene
 	if (Impl)
 	{
 		Impl->UnRegisterListener(Id, InListener);
+	}
+}
+
+void EventSystem::UnRegisterAllListeners()
+{
+	if (Impl)
+	{
+		Impl->UnRegisterAllListeners();
 	}
 }
 
