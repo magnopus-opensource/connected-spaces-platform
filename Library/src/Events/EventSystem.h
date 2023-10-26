@@ -42,6 +42,8 @@ public:
 	void RegisterListener(const EventId& Id, EventListener* InListener);
 	void UnRegisterListener(const EventId& Id, EventListener* InListener);
 
+	void UnRegisterAllListeners();
+
 	/// @brief Process all queued events and send them to any listeners
 	void ProcessEvents();
 
