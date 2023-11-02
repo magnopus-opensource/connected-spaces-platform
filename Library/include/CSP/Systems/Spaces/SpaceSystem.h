@@ -176,13 +176,13 @@ public:
 	/// @param IsModeratorRole csp::common::Optional<bool> : if present and true sets the user's role in the space to "Moderator", pass false or
 	/// nullptr to leave role as default
 	/// @param EmailLinkUrl csp::common::Optional<csp::common::String> : link that will be provided in the invite email    
-    /// @param DestinationUrl csp::common::Optional<csp::common::String> : destination link that will be provided in the invite email
+    /// @param SignupUrl csp::common::Optional<csp::common::String> : destination link that will be provided in the invite email
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void InviteToSpace(const csp::common::String& SpaceId,
 										const csp::common::String& Email,
 										const csp::common::Optional<bool>& IsModeratorRole,
 										const csp::common::Optional<csp::common::String>& EmailLinkUrl,
-                                        const csp::common::Optional<csp::common::String>& DestinationUrl,
+                                        const csp::common::Optional<csp::common::String>& SignupUrl,
 										NullResultCallback Callback);
 
 	/// @brief Invites all the given emails to a specific space.

@@ -302,7 +302,7 @@ namespace CSPEngine
 
             var InviteUsers = new Systems.InviteUserRoleInfoCollection();
             InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
-            InviteUsers.DestinationUrl = "https://dev.magnoverse.space";
+            InviteUsers.SignupUrl = "https://dev.magnoverse.space";
             InviteUsers.InviteUserRoleInfos = new Csp.Common.Array<Systems.InviteUserRoleInfo>(4);
             InviteUsers.InviteUserRoleInfos[0] = InviteUser1;
             InviteUsers.InviteUserRoleInfos[1] = InviteUser2;
@@ -1026,7 +1026,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
             string testEmailLinkUrl = "https://dev.magnoverse.space";
-            string testDestinationUrl = "https://dev.magnoverse.space";
+            string testSignupUrl = "https://dev.magnoverse.space";
 
             // Log in with alt account first to get its ID
             var altUserId = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
@@ -1037,7 +1037,7 @@ namespace CSPEngine
 
             using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
 
-            using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, testEmailLinkUrl, testDestinationUrl).Result;
+            using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, testEmailLinkUrl, testSignupUrl).Result;
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 
             GetRoleForSpecificUser(spaceSystem, space, altUserId, out var userRoleInfo);
@@ -1272,13 +1272,13 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
             string testEmailLinkUrl = "https://dev.magnoverse.space";
-            string testDestinationUrl = "https://dev.magnoverse.space";
+            string testSignupUrl = "https://dev.magnoverse.space";
 
             _ = UserSystemTests.LogIn(userSystem);
 
             var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null, testEmailLinkUrl, testDestinationUrl).Result;
+            using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null, testEmailLinkUrl, testSignupUrl).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Services.EResultCode.Success);

@@ -77,7 +77,7 @@ public:
 	InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
 
 	csp::common::String EmailLinkUrl;
-	csp::common::String DestinationUrl;
+	csp::common::String SignupUrl;
 	csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
 };
 

@@ -563,7 +563,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 								const String& Email,
 								const Optional<bool>& IsModeratorRole,
 								const Optional<String>& EmailLinkUrl,
-                                const Optional<String>& DestinationUrl,
+                                const Optional<String>& SignupUrl,
 								NullResultCallback Callback)
 {
 	auto GroupInviteInfo = std::make_shared<chs::GroupInviteDto>();
@@ -575,7 +575,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 	}
 
 	auto EmailLinkUrlParam = EmailLinkUrl.HasValue() && !EmailLinkUrl->IsEmpty() ? (*EmailLinkUrl) : std::optional<String>(std::nullopt);
-	auto DestinationUrlParam = DestinationUrl.HasValue() && !DestinationUrl->IsEmpty() ? (*DestinationUrl) : std::optional<String>(std::nullopt);
+	auto SignupUrlParam = SignupUrl.HasValue() && !SignupUrl->IsEmpty() ? (*SignupUrl) : std::optional<String>(std::nullopt);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
@@ -585,7 +585,7 @@ void SpaceSystem::InviteToSpace(const csp::common::String& SpaceId,
 	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesPost(SpaceId,
 																			  std::nullopt,
 																			  EmailLinkUrlParam,
-                                                                              DestinationUrlParam,
+                                                                              SignupUrlParam,
 																			  GroupInviteInfo,
 																			  ResponseHandler);
 }
@@ -596,7 +596,7 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const InviteUserRoleI
 		= systems::SpaceSystemHelpers::GenerateGroupInvites(InviteUsers.InviteUserRoleInfos);
 
 	auto EmailLinkUrlParam = !InviteUsers.EmailLinkUrl.IsEmpty() ? (InviteUsers.EmailLinkUrl) : std::optional<String>(std::nullopt);
-	auto DestinationUrlParam = !InviteUsers.DestinationUrl.IsEmpty() ? (InviteUsers.DestinationUrl) : std::optional<String>(std::nullopt);
+	auto SignupUrlParam = !InviteUsers.SignupUrl.IsEmpty() ? (InviteUsers.SignupUrl) : std::optional<String>(std::nullopt);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
@@ -606,7 +606,7 @@ void SpaceSystem::BulkInviteToSpace(const String& SpaceId, const InviteUserRoleI
 	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesBulkPost(SpaceId,
 																				  std::nullopt,
 																				  EmailLinkUrlParam,
-                                                                                  DestinationUrlParam,
+                                                                                  SignupUrlParam,
 																				  GroupInvites,
 																				  ResponseHandler);
 }
