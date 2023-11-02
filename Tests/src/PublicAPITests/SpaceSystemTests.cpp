@@ -1348,7 +1348,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "");
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	::UserRoleInfo UserRoleInfo;
