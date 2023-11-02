@@ -317,6 +317,8 @@ InviteUserRoleInfoCollection CreateInviteUsers()
 	InviteUserRoleInfoCollection InviteUsers;
 	InviteUsers.InviteUserRoleInfos = {InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2};
 	InviteUsers.EmailLinkUrl		= "https://dev.magnoverse.space";
+	InviteUsers.SignupUrl		= "https://dev.magnoverse.space";
+
 
 	return InviteUsers;
 }
@@ -1346,7 +1348,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "");
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 
 	::UserRoleInfo UserRoleInfo;
@@ -1672,6 +1674,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 
 	const char* TestUserEmail	 = "testnopus.pokemon@magnopus.com";
 	const char* TestEmailLinkUrl = "https://dev.magnoverse.space/";
+	const char* TestSignupUrl = "https://dev.magnoverse.space/";
 
 	String UserId;
 	LogIn(UserSystem, UserId);
@@ -1679,7 +1682,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl);
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 

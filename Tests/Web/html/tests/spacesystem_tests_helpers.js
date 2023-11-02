@@ -129,6 +129,7 @@ export async function updateSpace(spaceSystem, space, newName = null, newDescrip
 export function createInviteUsers() {
     const inviteUsers = Systems.InviteUserRoleInfoCollection.create();
     inviteUsers.emailLinkUrl = "https://dev.magnoverse.space";
+    inviteUsers.signupUrl = "https://dev.magnoverse.space";
     inviteUsers.inviteUserRoleInfos = Common.Array.ofcsp_systems_InviteUserRoleInfo_number(4);
 
     const inviteUser1 = Systems.InviteUserRoleInfo.create();

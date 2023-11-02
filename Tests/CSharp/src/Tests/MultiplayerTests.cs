@@ -327,6 +327,7 @@ namespace CSPEngine
 
             var InviteUsers = new Systems.InviteUserRoleInfoCollection();
             InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
+            InviteUsers.SignupUrl = "https://dev.magnoverse.space";
             InviteUsers.InviteUserRoleInfos = new Csp.Common.Array<Systems.InviteUserRoleInfo>(1);
             InviteUsers.InviteUserRoleInfos[0] = new Systems.InviteUserRoleInfo { UserEmail = UserSystemTests.DefaultLoginEmail, UserRole = Systems.SpaceUserRole.User };
 

@@ -69,7 +69,7 @@ public:
 };
 
 /// @ingroup Space System
-/// @brief Data representation of roles for a group of invited users and the email link to be included in the invite emails
+/// @brief Data representation of roles for a group of invited users, the email link and the destination link to be included in the invite emails
 class CSP_API InviteUserRoleInfoCollection
 {
 public:
@@ -77,6 +77,7 @@ public:
 	InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
 
 	csp::common::String EmailLinkUrl;
+	csp::common::String SignupUrl;
 	csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
 };
 
