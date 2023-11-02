@@ -40,7 +40,7 @@ namespace CSPEngine
 
             // Add the second test user to the space
             {
-                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, "").Result;
+                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, "", true, "").Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
@@ -343,7 +343,7 @@ namespace CSPEngine
 
             // Add the second test user to the space
             {
-                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, "").Result;
+                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, "", true, "").Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
