@@ -22,14 +22,17 @@
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
+#include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Spatial/AnchorSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
+#include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
 #include "Systems/Users/UserSystem.internal.h"
+#include "signalrclient/signalr_value.h"
 
 #ifdef CSP_WASM
 	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
@@ -120,6 +123,11 @@ ECommerceSystem* SystemsManager::GetECommerceSystem()
 	return ECommerceSystem;
 }
 
+QuotaSystem* SystemsManager::GetQuotaSystem()
+{
+	return QuotaSystem;
+}
+
 SystemsManager::SystemsManager()
 	: WebClient(nullptr)
 	, UserSystem(nullptr)
@@ -135,7 +143,8 @@ SystemsManager::SystemsManager()
 	, AnalyticsSystem(nullptr)
 	, MaintenanceSystem(nullptr)
 	, EventTicketingSystem(nullptr)
-	, ECommerceSystem((nullptr))
+	, ECommerceSystem(nullptr)
+	, QuotaSystem(nullptr)
 {
 }
 
@@ -169,6 +178,7 @@ void SystemsManager::CreateSystems()
 	MaintenanceSystem	  = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
 	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
 	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
+	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
 }
 
 void SystemsManager::DestroySystems()
@@ -189,6 +199,7 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(MaintenanceSystem);
 	CSP_DELETE(EventTicketingSystem);
 	CSP_DELETE(ECommerceSystem);
+	CSP_DELETE(QuotaSystem);
 }
 
 void SystemsManager::Instantiate()
