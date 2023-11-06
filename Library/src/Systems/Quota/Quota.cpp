@@ -228,10 +228,14 @@ const csp::common::String& TierNameEnumToString(TierNames Value)
 {
 	switch (Value)
 	{
-		case TierNames::Unlimited:
-			return "Unlimited";
-		case TierNames::Free:
-			return "Free";
+		case TierNames::Basic:
+			return "Basic";
+		case TierNames::Premium:
+			return "Premium";
+		case TierNames::Pro:
+			return "Pro";
+		case TierNames::Enterprise:
+			return "Enterprise";
 	}
 }
 
@@ -262,14 +266,24 @@ const csp::common::String& TierFeatureEnumToString(TierFeatures Value)
 
 const TierNames& StringToTierNameEnum(csp::common::String Value)
 {
-	if (Value == "Unlimited")
+	if (Value == "Basic")
 	{
-		return TierNames::Unlimited;
+		return TierNames::Basic;
 	}
 
-	if (Value == "Free")
+	if (Value == "Premium")
 	{
-		return TierNames::Free;
+		return TierNames::Premium;
+	}
+
+	if (Value == "Pro")
+	{
+		return TierNames::Pro;
+	}
+
+	if (Value == "Enterprise")
+	{
+		return TierNames::Enterprise;
 	}
 
 	CSP_LOG_ERROR_FORMAT("TierName Not Supported %s", Value);

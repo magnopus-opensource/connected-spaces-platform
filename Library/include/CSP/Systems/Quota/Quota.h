@@ -63,8 +63,10 @@ enum class TierFeatures
 
 enum class TierNames
 {
-	Free = 0,
-	Unlimited
+	Basic = 0,
+	Premium,
+	Pro,
+	Enterprise
 };
 
 /// @ingroup Quota System
