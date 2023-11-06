@@ -502,6 +502,8 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 										 std::nullopt,
 										 PrototypeIds,
 										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -581,6 +583,8 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 										 std::nullopt,
 										 PrototypeIds,
 										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -615,6 +619,8 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 										 std::nullopt,
 										 std::nullopt,
 										 Ids,
+										 std::nullopt,
+										 std::nullopt,
 										 std::nullopt,
 										 ResponseHandler);
 }
