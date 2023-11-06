@@ -45,6 +45,9 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 	friend class SystemsManager;
 	/** @endcond */
 
+public:
+	~QuotaSystem();
+
 	/// @brief Get total current users spaces owned and the current users space limit
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTotalSpaceOwnedByUser(FeatureLimitCallback Callback);
@@ -86,9 +89,6 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 	/// @param TierName TierNames : Name of the tier
 	/// @param Callback UserTierCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTierFeaturesQuota(const TierNames& TierName, FeaturesQuotaCallback Callback);
-
-public:
-	~QuotaSystem();
 
 private:
 	QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

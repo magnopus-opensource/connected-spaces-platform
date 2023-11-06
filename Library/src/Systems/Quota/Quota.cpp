@@ -224,7 +224,7 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 		}
 	}
 }
-const csp::common::String& TierNameEnumToString(TierNames Value)
+const csp::common::String TierNameEnumToString(TierNames Value)
 {
 	switch (Value)
 	{
@@ -239,7 +239,7 @@ const csp::common::String& TierNameEnumToString(TierNames Value)
 	}
 }
 
-const csp::common::String& TierFeatureEnumToString(TierFeatures Value)
+const csp::common::String TierFeatureEnumToString(TierFeatures Value)
 {
 	switch (Value)
 	{
@@ -264,7 +264,7 @@ const csp::common::String& TierFeatureEnumToString(TierFeatures Value)
 	}
 }
 
-const TierNames& StringToTierNameEnum(csp::common::String Value)
+const TierNames StringToTierNameEnum(csp::common::String Value)
 {
 	if (Value == "Basic")
 	{
@@ -289,7 +289,7 @@ const TierNames& StringToTierNameEnum(csp::common::String Value)
 	CSP_LOG_ERROR_FORMAT("TierName Not Supported %s", Value);
 }
 
-const TierFeatures& StringToTierFeatureEnum(csp::common::String Value)
+const TierFeatures StringToTierFeatureEnum(csp::common::String Value)
 {
 	if (Value == "Agora")
 	{
