@@ -49,7 +49,7 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTotalSpaceOwnedByUser(FeatureLimitCallback Callback);
 
-	/// @brief Gets total number of user current present inside of a space
+	/// @brief Gets total number of user inside of a space
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
