@@ -52,40 +52,40 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 	/// @brief Gets total number of user current present inside of a space
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	void GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
 
 	/// @brief Get total size of all assets within a space
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	void GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
 
 	/// @brief Get Array of feature progress for a user
-	/// @param FeatureName csp::common::Array<csp::common::String> : Array of feature names that will be retrieved
+	/// @param FeatureNames csp::common::Array<TierFeatures> : Array of feature names that will be retrieved
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	void GetTierFeatureProgressForUser(const csp::common::Array<csp::common::String>& FeatureName, FeaturesLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback);
 
 	/// @brief Get Array of feature progress for a user Space
 	/// @param SpaceId csp::common::String : Id of the Space
-	/// @param FeatureName csp::common::Array<csp::common::String> : Array of feature names that will be retrieved
+	/// @param FeatureNames csp::common::Array<TierFeatures> : Array of feature names that will be retrieved
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	void GetTierFeatureProgressForSpace(const csp::common::String& SpaceId,
-										const csp::common::Array<csp::common::String>& FeatureName,
-										FeaturesLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeatureProgressForSpace(const csp::common::String& SpaceId,
+														 const csp::common::Array<TierFeatures>& FeatureNames,
+														 FeaturesLimitCallback Callback);
 
-	/// @brief Get Current users tier information
+	/// @brief Get current users tier information
 	/// @param Callback UserTierCallback : callback when asynchronous task finishes
-	void GetCurrentUserTier(UserTierCallback Callback);
+	CSP_ASYNC_RESULT void GetCurrentUserTier(UserTierCallback Callback);
 
 	/// @brief Get current feature quota information
-	/// @param TierName csp::common::String : Name of the tier
-	/// @param FeatureName csp::common::String : Name of the feature
+	/// @param TierName TierNames : Name of the tier
+	/// @param FeatureName TierFeatures : Name of the feature
 	/// @param Callback UserTierCallback : callback when asynchronous task finishes
-	void GetTierFeatureQuota(const csp::common::String& TierName, const csp::common::String& FeatureName, FeatureQuotaCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeatureQuota(const TierNames& TierName, const TierFeatures& FeatureName, FeatureQuotaCallback Callback);
 
-	/// @brief Get Current Array of current feature quota information inside a tier
-	/// @param TierName csp::common::String : Name of the tier
+	/// @brief Get current array of current feature quota information inside a tier
+	/// @param TierName TierNames : Name of the tier
 	/// @param Callback UserTierCallback : callback when asynchronous task finishes
-	void GetTierFeaturesQuota(csp::common::String TierName, FeaturesQuotaCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeaturesQuota(const TierNames& TierName, FeaturesQuotaCallback Callback);
 
 public:
 	~QuotaSystem();

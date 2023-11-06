@@ -59,7 +59,7 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 			if (FeatureArray[i].HasFeatureName())
 			{
-				FeaturesLimitInfo[i].FeatureName = FeatureArray[i].GetFeatureName();
+				FeaturesLimitInfo[i].FeatureName = StringToTierFeatureEnum(FeatureArray[i].GetFeatureName());
 			}
 		}
 	}
@@ -94,7 +94,7 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 		if (FeatureProgressResponse->HasFeatureName())
 		{
-			FeatureLimitInfo.FeatureName = FeatureProgressResponse->GetFeatureName();
+			FeatureLimitInfo.FeatureName = StringToTierFeatureEnum(FeatureProgressResponse->GetFeatureName());
 		}
 	}
 }
@@ -128,7 +128,7 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 
 		if (UserTierResponse->HasTierName())
 		{
-			UserTierInfo.TierName = UserTierResponse->GetTierName();
+			UserTierInfo.TierName = StringToTierNameEnum(UserTierResponse->GetTierName());
 		}
 	}
 }
@@ -223,5 +223,105 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 			}
 		}
 	}
+}
+const csp::common::String& TierNameEnumToString(TierNames Value)
+{
+	switch (Value)
+	{
+		case TierNames::Unlimited:
+			return "Unlimited";
+		case TierNames::Free:
+			return "Free";
+	}
+}
+
+const csp::common::String& TierFeatureEnumToString(TierFeatures Value)
+{
+	switch (Value)
+	{
+		case TierFeatures::Agora:
+			return "Agora";
+		case TierFeatures::Shopify:
+			return "Shopify";
+		case TierFeatures::TicketedSpace:
+			return "TicketedSpace";
+		case TierFeatures::AudioVideoUpload:
+			return "AudioVideoUpload";
+		case TierFeatures::ObjectCaptureUpload:
+			return "ObjectCaptureUpload";
+		case TierFeatures::OpenAI:
+			return "OpenAI";
+		case TierFeatures::ScopeConcurrentUsers:
+			return "ScopeConcurrentUsers";
+		case TierFeatures::TotalUploadSizeInKilobytes:
+			return "TotalUploadSizeInKilobytes";
+		case TierFeatures::SpaceOwner:
+			return "SpaceOwner";
+	}
+}
+
+const TierNames& StringToTierNameEnum(csp::common::String Value)
+{
+	if (Value == "Unlimited")
+	{
+		return TierNames::Unlimited;
+	}
+
+	if (Value == "Free")
+	{
+		return TierNames::Free;
+	}
+
+	CSP_LOG_ERROR_FORMAT("TierName Not Supported %s", Value);
+}
+
+const TierFeatures& StringToTierFeatureEnum(csp::common::String Value)
+{
+	if (Value == "Agora")
+	{
+		return TierFeatures::Agora;
+	}
+
+	if (Value == "Shopify")
+	{
+		return TierFeatures::Shopify;
+	}
+
+	if (Value == "TicketedSpace")
+	{
+		return TierFeatures::TicketedSpace;
+	}
+
+	if (Value == "AudioVideoUpload")
+	{
+		return TierFeatures::AudioVideoUpload;
+	}
+
+	if (Value == "ObjectCaptureUpload")
+	{
+		return TierFeatures::ObjectCaptureUpload;
+	}
+
+	if (Value == "OpenAI")
+	{
+		return TierFeatures::OpenAI;
+	}
+
+	if (Value == "ScopeConcurrentUsers")
+	{
+		return TierFeatures::ScopeConcurrentUsers;
+	}
+
+	if (Value == "TotalUploadSizeInKilobytes")
+	{
+		return TierFeatures::TotalUploadSizeInKilobytes;
+	}
+
+	if (Value == "SpaceOwner")
+	{
+		return TierFeatures::SpaceOwner;
+	}
+
+	CSP_LOG_ERROR_FORMAT("TierFeatures Not Supported %s", Value);
 }
 } // namespace csp::systems

@@ -48,6 +48,25 @@ enum class PeriodEnum
 
 };
 
+enum class TierFeatures
+{
+	SpaceOwner = 0,
+	ScopeConcurrentUsers,
+	ObjectCaptureUpload,
+	AudioVideoUpload,
+	TotalUploadSizeInKilobytes,
+	Agora,
+	OpenAI,
+	Shopify,
+	TicketedSpace
+};
+
+enum class TierNames
+{
+	Free = 0,
+	Unlimited
+};
+
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
 class CSP_API FeatureLimitInfo
@@ -55,7 +74,7 @@ class CSP_API FeatureLimitInfo
 public:
 	FeatureLimitInfo() = default;
 
-	csp::common::String FeatureName;
+	TierFeatures FeatureName;
 	int32_t ActivityCount;
 	int32_t Limit;
 };
@@ -69,7 +88,7 @@ public:
 
 	csp::common::String AssignToType;
 	csp::common::String AssignToId;
-	csp::common::String TierName;
+	TierNames TierName;
 };
 
 /// @ingroup Quota System
@@ -200,6 +219,26 @@ private:
 
 	csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
 };
+
+/// @brief Retrieves an array of feature quota results.
+/// @param Value TierNames : enum value to be converted to string
+/// @csp::common::String : const ref of Enum Value as a string
+const csp::common::String& TierNameEnumToString(TierNames Value);
+
+/// @brief Retrieves an array of feature quota results.
+/// @param Value TierFeatures : enum value to be converted to string
+/// @csp::common::String : const ref of Enum Value as a string
+const csp::common::String& TierFeatureEnumToString(TierFeatures Value);
+
+/// @brief Retrieves an array of feature quota results.
+/// @param Value csp::common::String : EnumValue as a string
+/// @TierNames : const ref to String as an enum value
+const TierNames& StringToTierNameEnum(csp::common::String Value);
+
+/// @brief Retrieves an array of feature quota results.
+/// @param Value csp::common::String : EnumValue as a string
+/// @TierFeatures : const ref to String as an enum value
+const TierFeatures& StringToTierFeatureEnum(csp::common::String Value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
