@@ -15,8 +15,8 @@
  */
 #pragma once
 
+#include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
-#include "Quota.h"
 
 
 namespace csp::services
@@ -50,7 +50,7 @@ public:
 
 	/// @brief Get total current users spaces owned and the current users space limit
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetTotalSpaceOwnedByUser(FeatureLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback);
 
 	/// @brief Gets total number of user inside of a space
 	/// @param SpaceId csp::common::String : Id of the Space
