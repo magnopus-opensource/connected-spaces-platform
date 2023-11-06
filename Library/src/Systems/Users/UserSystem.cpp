@@ -581,6 +581,24 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, UserToken
 	static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
 }
 
+void UserSystem::ResendVerificationEmail(const csp::common::String& InEmail,
+										 const csp::common::Optional<csp::common::String>& InRedirectUrl,
+										 NullResultCallback Callback)
+{
+	const csp::common::String& Tenant = CSPFoundation::GetTenant();
+	std::optional<csp::common::String> RedirectUrl;
+
+	if (InRedirectUrl.HasValue())
+	{
+		RedirectUrl = *InRedirectUrl;
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
+
+	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersEmailsEmailConfirmEmailReSendPost(InEmail, Tenant, RedirectUrl, ResponseHandler);
+}
+
 void UserSystem::RefreshAuthenticationSession(const csp::common::String& UserId,
 											  const csp::common::String& RefreshToken,
 											  const csp::common::String& DeviceId,
