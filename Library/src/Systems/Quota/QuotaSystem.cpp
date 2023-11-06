@@ -63,9 +63,7 @@ void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, 
 	std::vector<csp::common::String> FeatureNamesList = {"ScopeConcurrentUsers"};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI
-			  ->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback,
-																																		  nullptr);
+		= QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, chs::QuotaFeatureLimitProgressDto>(Callback, nullptr);
 
 	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId.c_str(), FeatureNamesList, ResponseHandler);
 }
@@ -75,9 +73,7 @@ void QuotaSystem::GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceI
 	std::vector<csp::common::String> FeatureNamesList = {"TotalUploadSizeInKilobytes"};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI
-			  ->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback,
-																																		  nullptr);
+		= QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, chs::QuotaFeatureLimitProgressDto>(Callback, nullptr);
 
 	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId.c_str(), FeatureNamesList, ResponseHandler);
 }

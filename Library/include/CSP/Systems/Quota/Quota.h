@@ -42,9 +42,9 @@ namespace csp::systems
 /// @brief Data representation period of time.
 enum class PeriodEnum
 {
-	TOTAL,
-	CALENDARMONTH,
-	HOURS24
+	Total,
+	CalendarMonth,
+	Hours24
 
 };
 

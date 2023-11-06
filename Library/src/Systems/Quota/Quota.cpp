@@ -74,7 +74,7 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* FeatureProgressResponse		   = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
+	auto* FeatureProgressResponse		   = static_cast<chs::QuotaFeatureLimitProgressDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
@@ -82,21 +82,19 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 		// Build the Dto from the response Json
 		FeatureProgressResponse->FromJson(Response->GetPayload().GetContent());
 
-		// Extract data from response in our Groups array
-		std::vector<chs::QuotaFeatureLimitProgressDto>& FeatureArray = FeatureProgressResponse->GetArray();
-		if (FeatureArray[0].HasLimit())
+		if (FeatureProgressResponse->HasLimit())
 		{
-			FeatureLimitInfo.Limit = FeatureArray[0].GetLimit();
+			FeatureLimitInfo.Limit = FeatureProgressResponse->GetLimit();
 		}
 
-		if (FeatureArray[0].HasActivityCount())
+		if (FeatureProgressResponse->HasActivityCount())
 		{
-			FeatureLimitInfo.ActivityCount = FeatureArray[0].GetActivityCount();
+			FeatureLimitInfo.ActivityCount = FeatureProgressResponse->GetActivityCount();
 		}
 
-		if (FeatureArray[0].HasFeatureName())
+		if (FeatureProgressResponse->HasFeatureName())
 		{
-			FeatureLimitInfo.FeatureName = FeatureArray[0].GetFeatureName();
+			FeatureLimitInfo.FeatureName = FeatureProgressResponse->GetFeatureName();
 		}
 	}
 }
