@@ -103,7 +103,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
-	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, csp::systems::TierFeatures::SpaceOwner);
 }
 #endif
@@ -150,7 +150,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 	for (int i = 0; i < TierFeaturesArray.Size(); i++)
 	{
 		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
-		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, 0);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
 		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
 	}
 }
@@ -193,7 +193,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 	for (int i = 0; i < TierFeaturesArray.Size(); i++)
 	{
 		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
-		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, 0);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
 		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
 	}
 
@@ -223,7 +223,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREsQUOTA_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATURESQUOTA_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -294,7 +294,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
-	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
@@ -317,7 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 1);
-	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 0);
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, -1);
 
 	// Disconnect from the SignalR server
 	auto [Exit] = AWAIT(Connection, Disconnect);

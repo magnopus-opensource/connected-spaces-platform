@@ -71,14 +71,15 @@ enum class TierNames
 
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
+/// Limit Value of -1 means unlimited usage
 class CSP_API FeatureLimitInfo
 {
 public:
-	FeatureLimitInfo() : Limit(0), ActivityCount(0) {};
+	FeatureLimitInfo() : Limit(-1), ActivityCount(0) {};
 
 	TierFeatures FeatureName;
-	int32_t ActivityCount;
-	int32_t Limit;
+	uint32_t ActivityCount;
+	uint32_t Limit;
 };
 
 /// @ingroup Quota System
@@ -95,14 +96,15 @@ public:
 
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
+/// Limit Value of -1 means unlimited usage
 class CSP_API FeatureQuotaInfo
 {
 public:
-	FeatureQuotaInfo() = default;
+	FeatureQuotaInfo() : Limit(-1) {};
 	CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
 	TierFeatures FeatureName;
 	TierNames TierName;
-	int32_t Limit;
+	uint32_t Limit;
 	PeriodEnum Period;
 	bool AllowReductions;
 };
