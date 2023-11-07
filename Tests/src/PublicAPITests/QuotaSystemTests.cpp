@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "SpaceSystemTestHelpers.h"
@@ -23,6 +25,7 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <filesystem>
 using namespace csp::systems;
 
 
@@ -71,7 +74,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOTIERFEATUREENUM_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
 {
 	EXPECT_EQ(StringToTierFeatureEnum("Agora"), csp::systems::TierFeatures::Agora);
@@ -86,7 +89,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierFeatureEnumTestTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTOTALSPACESOWNEDBYUSER_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -102,5 +105,340 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, csp::systems::TierFeatures::SpaceOwner);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETCURRENTUSERTIER_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetUserTierInfo().TierName, TierNames::Basic);
+	EXPECT_EQ(Result.GetUserTierInfo().AssignToId, UserId);
+	EXPECT_EQ(Result.GetUserTierInfo().AssignToType, "user");
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREPROGRESSFORUSER_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+
+	csp::common::Array<TierFeatures> TierFeaturesArray = {TierFeatures::SpaceOwner,
+														  TierFeatures::ObjectCaptureUpload,
+														  TierFeatures::AudioVideoUpload,
+														  TierFeatures::OpenAI,
+														  TierFeatures::TicketedSpace};
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, TierFeaturesArray);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
+
+	for (int i = 0; i < TierFeaturesArray.Size(); i++)
+	{
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, 0);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
+	}
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREPROGRESSFORSPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	csp::common::Array<TierFeatures> TierFeaturesArray = {TierFeatures::SpaceOwner,
+														  TierFeatures::ObjectCaptureUpload,
+														  TierFeatures::AudioVideoUpload,
+														  TierFeatures::OpenAI,
+														  TierFeatures::TicketedSpace};
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForSpace, RequestPredicate, Space.Id, TierFeaturesArray);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
+
+	for (int i = 0; i < TierFeaturesArray.Size(); i++)
+	{
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, 0);
+		EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
+	}
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREQUOTA_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
+	EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
+	EXPECT_EQ(Result.GetFeatureQuotaInfo().Limit, 0);
+	EXPECT_EQ(Result.GetFeatureQuotaInfo().Period, PeriodEnum::Total);
+	EXPECT_EQ(Result.GetFeatureQuotaInfo().AllowReductions, false);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREsQUOTA_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+
+	csp::common::Array<FeatureQuotaInfo> ExpectedInfoArray
+		= {FeatureQuotaInfo(TierFeatures::SpaceOwner, TierNames::Basic, 3, PeriodEnum::Total, true),
+		   FeatureQuotaInfo(TierFeatures::ScopeConcurrentUsers, TierNames::Basic, 5, PeriodEnum::Hours24, true),
+		   FeatureQuotaInfo(TierFeatures::ObjectCaptureUpload, TierNames::Basic, 5, PeriodEnum::CalendarMonth, false),
+		   FeatureQuotaInfo(TierFeatures::AudioVideoUpload, TierNames::Basic, 0, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::Agora, TierNames::Basic, 0, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::OpenAI, TierNames::Basic, 0, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::Shopify, TierNames::Basic, 0, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::TicketedSpace, TierNames::Basic, 0, PeriodEnum::Total, false)};
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), ExpectedInfoArray.Size());
+
+	for (int i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
+	{
+		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, ExpectedInfoArray[i].FeatureName);
+		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].TierName, ExpectedInfoArray[i].TierName);
+		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Limit, ExpectedInfoArray[i].Limit);
+		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Period, ExpectedInfoArray[i].Period);
+		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].AllowReductions, ExpectedInfoArray[i].AllowReductions);
+	}
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETCONCURRENTUSERSINSPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	csp::common::Array<TierFeatures> TierFeaturesArray = {TierFeatures::SpaceOwner,
+														  TierFeatures::ObjectCaptureUpload,
+														  TierFeatures::AudioVideoUpload,
+														  TierFeatures::OpenAI,
+														  TierFeatures::TicketedSpace};
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
+
+	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
+
+	auto [Ok] = AWAIT(Connection, Connect);
+
+	EXPECT_TRUE(Ok);
+
+	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+
+	EXPECT_TRUE(Ok);
+
+	auto [Result1] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(Result1.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 1);
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 0);
+
+	// Disconnect from the SignalR server
+	auto [Exit] = AWAIT(Connection, Disconnect);
+
+	EXPECT_TRUE(Exit);
+
+	SpaceSystem->ExitSpace();
+
+	// Delete MultiplayerConnection
+	delete Connection;
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTOTALSPACESIZEINKILOBYTES_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto UserSystem		 = SystemsManager.GetUserSystem();
+	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
+	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeinKilobytes, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+	auto& InitialAssetId = Asset.Id;
+
+	// Upload data
+	auto FilePath = std::filesystem::absolute("assets/test.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	Source.SetMimeType("application/json");
+
+	printf("Uploading asset data...\n");
+
+	csp::common::String Uri;
+	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
+
+	// Replace data
+	Asset.FileName = "test2.json";
+
+	auto UpdateFilePath		 = std::filesystem::absolute("assets/test2.json");
+	FILE* UpdateFile		 = fopen(UpdateFilePath.string().c_str(), "rb");
+	uintmax_t UpdateFileSize = std::filesystem::file_size(UpdateFilePath);
+	auto* UpdateFileData	 = new unsigned char[UpdateFileSize];
+	fread(UpdateFileData, UpdateFileSize, 1, UpdateFile);
+	fclose(UpdateFile);
+
+	csp::systems::BufferAssetDataSource BufferSource;
+	BufferSource.Buffer		  = UpdateFileData;
+	BufferSource.BufferLength = UpdateFileSize;
+	BufferSource.SetMimeType("application/json");
+
+	printf("Uploading new asset data...\n");
+
+	csp::common::String Uri2;
+	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Uri2);
+
+	EXPECT_NE(Uri, Uri2);
+
+	csp::systems::Asset UpdatedAsset;
+	GetAssetById(AssetSystem, AssetCollection.Id, Asset.Id, UpdatedAsset);
+
+	EXPECT_EQ(InitialAssetId, UpdatedAsset.Id);
+
+	auto [DownloadedResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
+
+	EXPECT_EQ(DownloadedResult.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(DownloadedResult.GetDataLength(), UpdateFileSize);
+
+	auto [UpdatedSizeResult] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeinKilobytes, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(UpdatedSizeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
+	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, UpdateFileSize);
+	EXPECT_GT(UpdatedSizeResult.GetFeatureLimitInfo().Limit, UpdateFileSize);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
 }
 #endif

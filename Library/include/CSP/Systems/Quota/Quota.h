@@ -99,9 +99,9 @@ class CSP_API FeatureQuotaInfo
 {
 public:
 	FeatureQuotaInfo() = default;
-
-	csp::common::String FeatureName;
-	csp::common::String TierName;
+	CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
+	TierFeatures FeatureName;
+	TierNames TierName;
 	int32_t Limit;
 	PeriodEnum Period;
 	bool AllowReductions;

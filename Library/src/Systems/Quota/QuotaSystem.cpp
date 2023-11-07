@@ -25,7 +25,7 @@ namespace chs = csp::services::generated::trackingservice;
 
 namespace csp::systems
 {
-QuotaSystem::QuotaSystem() : SystemBase(), QuotaManagementAPI(nullptr)
+QuotaSystem::QuotaSystem() : SystemBase(), QuotaManagementAPI(nullptr), QuotaTierAssignmentAPI(nullptr), QuotaActivityAPI(nullptr)
 {
 }
 
@@ -43,7 +43,7 @@ QuotaSystem::~QuotaSystem()
 	CSP_DELETE(QuotaActivityAPI);
 }
 
-void QuotaSystem::GetTotalSpaceOwnedByUser(FeatureLimitCallback Callback)
+void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)
 {
 	std::vector<csp::common::String> FeatureNamesList = {TierFeatureEnumToString(TierFeatures::SpaceOwner)};
 
@@ -63,7 +63,9 @@ void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, 
 	std::vector<csp::common::String> FeatureNamesList = {TierFeatureEnumToString(TierFeatures::ScopeConcurrentUsers)};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, chs::QuotaFeatureLimitProgressDto>(Callback, nullptr);
+		= QuotaManagementAPI
+			  ->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback,
+																																		  nullptr);
 
 	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId.c_str(), FeatureNamesList, ResponseHandler);
 }
@@ -73,9 +75,11 @@ void QuotaSystem::GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceI
 	std::vector<csp::common::String> FeatureNamesList = {TierFeatureEnumToString(TierFeatures::TotalUploadSizeInKilobytes)};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, chs::QuotaFeatureLimitProgressDto>(Callback, nullptr);
+		= QuotaManagementAPI
+			  ->CreateHandler<FeatureLimitCallback, FeatureLimitResult, void, csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>>(Callback,
+																																		  nullptr);
 
-	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId.c_str(), FeatureNamesList, ResponseHandler);
+	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId, FeatureNamesList, ResponseHandler);
 }
 
 void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback)
@@ -116,10 +120,7 @@ void QuotaSystem::GetTierFeatureProgressForSpace(const csp::common::String& Spac
 		FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
 	}
 
-	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)
-		->apiV1GroupsGroupIdQuotaProgressGet(csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId,
-											 FeatureNamesList,
-											 ResponseHandler);
+	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId, FeatureNamesList, ResponseHandler);
 }
 
 void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
@@ -134,7 +135,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 void QuotaSystem::GetTierFeatureQuota(const TierNames& TierName, const TierFeatures& FeatureName, FeatureQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaTierAssignmentDto>(Callback, nullptr);
+		= QuotaManagementAPI->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaFeatureTierDto>(Callback, nullptr);
 
 	static_cast<chs::QuotaManagementApi*>(QuotaManagementAPI)
 		->apiV1TiersTierNameFeaturesFeatureNameQuotaGet(TierNameEnumToString(TierName), TierFeatureEnumToString(FeatureName), ResponseHandler);
@@ -143,7 +144,7 @@ void QuotaSystem::GetTierFeatureQuota(const TierNames& TierName, const TierFeatu
 void QuotaSystem::GetTierFeaturesQuota(const TierNames& TierName, FeaturesQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= QuotaManagementAPI->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaTierAssignmentDto>>(
+		= QuotaManagementAPI->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaFeatureTierDto>>(
 			Callback,
 			nullptr);
 
