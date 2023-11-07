@@ -306,6 +306,11 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	EXPECT_TRUE(Ok);
 
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+
 	auto [Result1] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result1.GetResultCode(), csp::services::EResultCode::Success);
