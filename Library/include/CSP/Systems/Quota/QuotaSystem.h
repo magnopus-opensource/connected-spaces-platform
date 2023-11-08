@@ -48,7 +48,7 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 public:
 	~QuotaSystem();
 
-	/// @brief Get total current users spaces owned and the current users space limit
+	/// @brief Get the total number of Spaces own by the current user and their tier Space limit
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback);
 
