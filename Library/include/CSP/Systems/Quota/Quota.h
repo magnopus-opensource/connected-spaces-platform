@@ -133,7 +133,7 @@ private:
 };
 
 /// @ingroup Quota System
-/// @brief Data class used to contain information when receiving an array of feature progress.
+/// @brief Data class used to contain information when receiving an array of feature progresses.
 class CSP_API FeatureLimitResult : public csp::services::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
@@ -260,7 +260,7 @@ typedef std::function<void(const UserTierResult& Result)> UserTierCallback;
 /// @param Result FeatureProgressResult : result class
 typedef std::function<void(const FeatureQuotaResult& Result)> FeatureQuotaCallback;
 
-/// @brief Callback containing Tier Feature Quota Information.
+/// @brief Callback containing Tier Features Quota Information.
 /// @param Result FeatureProgressResult : result class
 typedef std::function<void(const FeaturesQuotaResult& Result)> FeaturesQuotaCallback;
 } // namespace csp::systems

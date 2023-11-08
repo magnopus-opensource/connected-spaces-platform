@@ -70,7 +70,7 @@ void QuotaSystem::GetConcurrentUsersInSpace(const csp::common::String& SpaceId, 
 	static_cast<chs::QuotaActivityApi*>(QuotaManagementAPI)->apiV1GroupsGroupIdQuotaProgressGet(SpaceId.c_str(), FeatureNamesList, ResponseHandler);
 }
 
-void QuotaSystem::GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
+void QuotaSystem::GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback)
 {
 	std::vector<csp::common::String> FeatureNamesList = {TierFeatureEnumToString(TierFeatures::TotalUploadSizeInKilobytes)};
 

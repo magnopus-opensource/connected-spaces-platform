@@ -48,26 +48,26 @@ class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 public:
 	~QuotaSystem();
 
-	/// @brief Get the total number of Spaces own by the current user and their tier Space limit
+	/// @brief Get the total number of Spaces owned by the current user and their tier space limit
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback);
 
-	/// @brief Gets total number of user inside of a space
+	/// @brief Gets total number of user inside of a space and its tier user limit
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetConcurrentUsersInSpace(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
 
-	/// @brief Get total size of all assets within a space
+	/// @brief Get total size of all assets within a space and their tier space size limit
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetTotalSpaceSizeinKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
+	CSP_ASYNC_RESULT void GetTotalSpaceSizeInKilobytes(const csp::common::String& SpaceId, FeatureLimitCallback Callback);
 
-	/// @brief Get Array of feature progress for a user
+	/// @brief Get Array of feature progresses for a user and their tier feature limits
 	/// @param FeatureNames csp::common::Array<TierFeatures> : Array of feature names that will be retrieved
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTierFeatureProgressForUser(const csp::common::Array<TierFeatures>& FeatureNames, FeaturesLimitCallback Callback);
 
-	/// @brief Get Array of feature progress for a user Space
+	/// @brief Get Array of feature progress for a user Space and its tier feature limits
 	/// @param SpaceId csp::common::String : Id of the Space
 	/// @param FeatureNames csp::common::Array<TierFeatures> : Array of feature names that will be retrieved
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes

@@ -370,7 +370,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	char UniqueAssetName[256];
 	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, Space.Id.c_str());
 
-	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeinKilobytes, RequestPredicate, Space.Id);
+	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
@@ -412,7 +412,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 
 	EXPECT_EQ(DownloadedResult.GetDataLength(), UpdateFileSize);
 
-	auto [UpdatedSizeResult] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeinKilobytes, RequestPredicate, Space.Id);
+	auto [UpdatedSizeResult] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(UpdatedSizeResult.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
