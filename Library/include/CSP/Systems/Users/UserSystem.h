@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -212,6 +213,14 @@ public:
 	/// @param Params AgoraUserTokenParams : Params to configure the User token
 	/// @param Callback UserTokenResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, UserTokenResultCallback Callback);
+
+	/// @brief Re-send user verification email
+	/// @param InEmail csp::common::String : User's email address
+	/// @param InRedirectUrl csp::common::Optional<csp::common::String> : URL to redirect user to after they have registered
+	/// @param Callback NullResultCallback : Callback to call when response is received
+	CSP_ASYNC_RESULT void ResendVerificationEmail(const csp::common::String& InEmail,
+												  const csp::common::Optional<csp::common::String>& InRedirectUrl,
+												  NullResultCallback Callback);
 
 
 protected:
