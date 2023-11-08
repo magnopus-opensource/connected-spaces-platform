@@ -112,6 +112,9 @@ async {{ name }}(
         Module.setValue({{ name }}Pointer, {{ name }}, "float");
 {{/ type.is_float }}
 {{/ type.is_number }}
+{{# type.is_bool }}
+        Module.setValue({{ name }}Pointer, {{ name }} ? 1 : 0, "i32");
+{{/ type.is_bool }}
     }
 
 {{/ type.is_class_or_interface }}
