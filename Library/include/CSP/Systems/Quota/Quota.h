@@ -78,8 +78,8 @@ public:
 	FeatureLimitInfo() : Limit(-1), ActivityCount(0) {};
 
 	TierFeatures FeatureName;
-	uint32_t ActivityCount;
-	uint32_t Limit;
+	int32_t ActivityCount;
+	int32_t Limit;
 };
 
 /// @ingroup Quota System
@@ -104,7 +104,7 @@ public:
 	CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
 	TierFeatures FeatureName;
 	TierNames TierName;
-	uint32_t Limit;
+	int32_t Limit;
 	PeriodEnum Period;
 	bool AllowReductions;
 };

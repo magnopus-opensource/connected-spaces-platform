@@ -271,22 +271,22 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 
 const TierNames StringToTierNameEnum(const csp::common::String& Value)
 {
-	if (Value == "Basic")
+	if (Value == "basic")
 	{
 		return TierNames::Basic;
 	}
 
-	if (Value == "Premium")
+	if (Value == "premium")
 	{
 		return TierNames::Premium;
 	}
 
-	if (Value == "Pro")
+	if (Value == "pro")
 	{
 		return TierNames::Pro;
 	}
 
-	if (Value == "Enterprise")
+	if (Value == "enterprise")
 	{
 		return TierNames::Enterprise;
 	}

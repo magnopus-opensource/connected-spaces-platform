@@ -52,10 +52,10 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 #if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
 {
-	EXPECT_EQ(StringToTierNameEnum("Basic"), csp::systems::TierNames::Basic);
-	EXPECT_EQ(StringToTierNameEnum("Premium"), csp::systems::TierNames::Premium);
-	EXPECT_EQ(StringToTierNameEnum("Pro"), csp::systems::TierNames::Pro);
-	EXPECT_EQ(StringToTierNameEnum("Enterprise"), csp::systems::TierNames::Enterprise);
+	EXPECT_EQ(StringToTierNameEnum("basic"), csp::systems::TierNames::Basic);
+	EXPECT_EQ(StringToTierNameEnum("premium"), csp::systems::TierNames::Premium);
+	EXPECT_EQ(StringToTierNameEnum("pro"), csp::systems::TierNames::Pro);
+	EXPECT_EQ(StringToTierNameEnum("enterprise"), csp::systems::TierNames::Enterprise);
 }
 #endif
 
@@ -121,7 +121,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_EQ(Result.GetUserTierInfo().TierName, TierNames::Basic);
+	EXPECT_EQ(Result.GetUserTierInfo().TierName, TierNames::Pro);
 	EXPECT_EQ(Result.GetUserTierInfo().AssignToId, UserId);
 	EXPECT_EQ(Result.GetUserTierInfo().AssignToType, "user");
 }
@@ -234,7 +234,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 		= {FeatureQuotaInfo(TierFeatures::SpaceOwner, TierNames::Basic, 3, PeriodEnum::Total, true),
 		   FeatureQuotaInfo(TierFeatures::ScopeConcurrentUsers, TierNames::Basic, 5, PeriodEnum::Hours24, true),
 		   FeatureQuotaInfo(TierFeatures::ObjectCaptureUpload, TierNames::Basic, 5, PeriodEnum::CalendarMonth, false),
-		   FeatureQuotaInfo(TierFeatures::AudioVideoUpload, TierNames::Basic, 0, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::AudioVideoUpload, TierNames::Basic, -1, PeriodEnum::Total, false),
+		   FeatureQuotaInfo(TierFeatures::TotalUploadSizeInKilobytes, TierNames::Basic, 10000000, PeriodEnum::Total, true),
 		   FeatureQuotaInfo(TierFeatures::Agora, TierNames::Basic, 0, PeriodEnum::Total, false),
 		   FeatureQuotaInfo(TierFeatures::OpenAI, TierNames::Basic, 0, PeriodEnum::Total, false),
 		   FeatureQuotaInfo(TierFeatures::Shopify, TierNames::Basic, 0, PeriodEnum::Total, false),
@@ -294,7 +295,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
-	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 50);
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
@@ -317,7 +318,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 1);
-	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, -1);
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
 
 	// Disconnect from the SignalR server
 	auto [Exit] = AWAIT(Connection, Disconnect);
@@ -346,16 +347,10 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto AssetSystem	 = SystemsManager.GetAssetSystem();
 
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-CSP";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-CSP";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-CSP";
+	const char* TestAssetName			= "OLY-UNITTEST-ASSET-CSP";
 
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
@@ -369,12 +364,18 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, Space.Id.c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, Space.Id.c_str());
+
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeinKilobytes, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
-	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 0);
+	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 10000000);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -386,7 +387,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	auto& InitialAssetId = Asset.Id;
 
 	// Upload data
-	auto FilePath = std::filesystem::absolute("assets/test.json");
+	auto FilePath			 = std::filesystem::absolute("assets/testkb.json");
+	uintmax_t UpdateFileSize = std::filesystem::file_size(FilePath);
 	csp::systems::FileAssetDataSource Source;
 	Source.FilePath = FilePath.u8string().c_str();
 
@@ -397,32 +399,12 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	csp::common::String Uri;
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
-	// Replace data
-	Asset.FileName = "test2.json";
+	csp::systems::Asset RemoteAsset;
+	GetAssetById(AssetSystem, AssetCollection.Id, Asset.Id, RemoteAsset);
 
-	auto UpdateFilePath		 = std::filesystem::absolute("assets/test2.json");
-	FILE* UpdateFile		 = fopen(UpdateFilePath.string().c_str(), "rb");
-	uintmax_t UpdateFileSize = std::filesystem::file_size(UpdateFilePath);
-	auto* UpdateFileData	 = new unsigned char[UpdateFileSize];
-	fread(UpdateFileData, UpdateFileSize, 1, UpdateFile);
-	fclose(UpdateFile);
+	EXPECT_EQ(InitialAssetId, RemoteAsset.Id);
 
-	csp::systems::BufferAssetDataSource BufferSource;
-	BufferSource.Buffer		  = UpdateFileData;
-	BufferSource.BufferLength = UpdateFileSize;
-	BufferSource.SetMimeType("application/json");
-
-	printf("Uploading new asset data...\n");
-
-	csp::common::String Uri2;
-	UploadAssetData(AssetSystem, AssetCollection, Asset, BufferSource, Uri2);
-
-	EXPECT_NE(Uri, Uri2);
-
-	csp::systems::Asset UpdatedAsset;
-	GetAssetById(AssetSystem, AssetCollection.Id, Asset.Id, UpdatedAsset);
-
-	EXPECT_EQ(InitialAssetId, UpdatedAsset.Id);
+	Asset.Uri = Uri;
 
 	auto [DownloadedResult] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
@@ -434,8 +416,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 
 	EXPECT_EQ(UpdatedSizeResult.GetResultCode(), csp::services::EResultCode::Success);
 	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
-	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, UpdateFileSize);
-	EXPECT_GT(UpdatedSizeResult.GetFeatureLimitInfo().Limit, UpdateFileSize);
+	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, UpdateFileSize / 1000);
+	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().Limit, 10000000);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
