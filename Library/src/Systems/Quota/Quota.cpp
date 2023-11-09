@@ -291,7 +291,7 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value)
 		return TierNames::Enterprise;
 	}
 
-	CSP_LOG_ERROR_FORMAT("TierName Not Supported %s", Value);
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierName not recognized: %s", Value.c_str());
 }
 
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
@@ -341,7 +341,7 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 		return TierFeatures::SpaceOwner;
 	}
 
-	CSP_LOG_ERROR_FORMAT("TierFeatures Not Supported %s", Value);
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s", Value.c_str());
 	return TierFeatures::SpaceOwner;
 }
 
