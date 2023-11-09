@@ -31,6 +31,7 @@ public:
 	csp::common::String SpatialDataServiceURI;
 	csp::common::String MultiplayerServiceURI;
 	csp::common::String AggregationServiceURI;
+	csp::common::String TrackingServiceURI;
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.

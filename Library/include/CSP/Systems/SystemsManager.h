@@ -40,6 +40,7 @@ class AnalyticsSystem;
 class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
+class QuotaSystem;
 
 } // namespace csp::systems
 
@@ -131,6 +132,10 @@ public:
 	/// @return ECommerceSystem : pointer to the ECommerce system class
 	ECommerceSystem* GetECommerceSystem();
 
+	/// @brief Retrieves the Quota system.
+	/// @return QuotaSystem : pointer to the Quota system class
+	QuotaSystem* GetQuotaSystem();
+
 private:
 	SystemsManager();
 
@@ -158,6 +163,7 @@ private:
 	MaintenanceSystem* MaintenanceSystem;
 	EventTicketingSystem* EventTicketingSystem;
 	ECommerceSystem* ECommerceSystem;
+	QuotaSystem* QuotaSystem;
 };
 
 } // namespace csp::systems
