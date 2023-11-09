@@ -257,17 +257,18 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string SpatialDataServiceURI = RootURI + "/mag-spatialdata";
 	const std::string MultiplayerServiceURI = RootURI + "/mag-multiplayer/hubs/v1/multiplayer";
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
-
-	Endpoints			  = CSP_NEW EndpointURIs();
-	ClientUserAgentInfo	  = CSP_NEW ClientUserAgent();
-	DeviceId			  = CSP_NEW csp::common::String("");
-	ClientUserAgentString = CSP_NEW csp::common::String("");
+	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
+	Endpoints								= CSP_NEW EndpointURIs();
+	ClientUserAgentInfo						= CSP_NEW ClientUserAgent();
+	DeviceId								= CSP_NEW csp::common::String("");
+	ClientUserAgentString					= CSP_NEW csp::common::String("");
 
 	Endpoints->UserServiceURI		 = CSP_TEXT(UserServiceURI.c_str());
 	Endpoints->PrototypeServiceURI	 = CSP_TEXT(PrototypeServiceURI.c_str());
 	Endpoints->SpatialDataServiceURI = CSP_TEXT(SpatialDataServiceURI.c_str());
 	Endpoints->MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
 	Endpoints->AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
+	Endpoints->TrackingServiceURI	 = CSP_TEXT(TrackingServiceURI.c_str());
 
 	csp::systems::SystemsManager::Instantiate();
 
