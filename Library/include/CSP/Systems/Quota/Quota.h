@@ -75,7 +75,7 @@ enum class TierNames
 class CSP_API FeatureLimitInfo
 {
 public:
-	FeatureLimitInfo() : Limit(-1), ActivityCount(0) {};
+	FeatureLimitInfo() : ActivityCount(0), Limit(-1) {};
 
 	TierFeatures FeatureName;
 	int32_t ActivityCount;
