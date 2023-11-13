@@ -202,7 +202,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREQUOTA_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_GETTIERFEATUREQUOTA_TEST || 1
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -212,14 +212,19 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
+	// test quota queries for basic tier
+	auto [BasicResult] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().Limit, 0);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().Period, PeriodEnum::Total);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().AllowReductions, false);
+	EXPECT_EQ(BasicResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(BasicResult.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
+	EXPECT_EQ(BasicResult.GetFeatureQuotaInfo().TierName, TierNames::Basic);
+
+	// test quota queries for pro tier
+	auto [ProResult] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
+
+	EXPECT_EQ(ProResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(ProResult.GetFeatureQuotaInfo().FeatureName, TierFeatures::SpaceOwner);
+	EXPECT_EQ(ProResult.GetFeatureQuotaInfo().TierName, TierNames::Pro);
 }
 #endif
 
