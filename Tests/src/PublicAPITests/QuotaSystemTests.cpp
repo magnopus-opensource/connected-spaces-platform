@@ -42,10 +42,10 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 #if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 {
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "Basic");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "Premium");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Pro), "Pro");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Enterprise), "Enterprise");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "basic");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "premium");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Pro), "pro");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Enterprise), "enterprise");
 }
 #endif
 
