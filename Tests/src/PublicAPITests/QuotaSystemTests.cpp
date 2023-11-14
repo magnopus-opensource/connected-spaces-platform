@@ -28,7 +28,6 @@
 #include <filesystem>
 using namespace csp::systems;
 
-
 namespace
 {
 
@@ -213,18 +212,22 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 	LogIn(UserSystem, UserId);
 
 	// test quota queries for basic tier
-	auto [BasicResult] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
+	{
+		auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
 
-	EXPECT_EQ(BasicResult.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_EQ(BasicResult.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
-	EXPECT_EQ(BasicResult.GetFeatureQuotaInfo().TierName, TierNames::Basic);
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
+	}
 
 	// test quota queries for pro tier
-	auto [ProResult] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
+	{
+		auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
 
-	EXPECT_EQ(ProResult.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_EQ(ProResult.GetFeatureQuotaInfo().FeatureName, TierFeatures::SpaceOwner);
-	EXPECT_EQ(ProResult.GetFeatureQuotaInfo().TierName, TierNames::Pro);
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::SpaceOwner);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Pro);
+	}
 }
 #endif
 
