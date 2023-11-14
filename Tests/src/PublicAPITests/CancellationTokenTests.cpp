@@ -21,20 +21,46 @@
 
 #include "gtest/gtest.h"
 
+#define RUN_CANCELLATION_TOKEN_TESTS 1
+
 namespace
 {
+
+#if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_CONSTRUCTION_TEST
+CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, ConstructionAndDestructionTest)
+{
+	csp::common::CancellationToken CancellationToken;
+	// No need to assert anything, just ensuring that construction and destruction don't crash
+}
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_CANCEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CancelStateTest)
 {
 	csp::common::CancellationToken CancellationToken;
+	EXPECT_FALSE(CancellationToken.Cancelled());
+
 	CancellationToken.Cancel();
+	EXPECT_TRUE(CancellationToken.Cancelled());
+
+	CancellationToken.Cancel(); // Test that multiple cancellations don't affect the state
 	EXPECT_TRUE(CancellationToken.Cancelled());
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_COPYMOVE_TEST
+CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CopyMoveTest)
+{
+	// Ensure copy and move operations are deleted
+	ASSERT_FALSE(std::is_copy_constructible<csp::common::CancellationToken>::value);
+	ASSERT_FALSE(std::is_move_constructible<csp::common::CancellationToken>::value);
+	ASSERT_FALSE(std::is_copy_assignable<csp::common::CancellationToken>::value);
+	ASSERT_FALSE(std::is_move_assignable<csp::common::CancellationToken>::value);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_ASYNCREF_TEST
-CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CancelAsyncRefTest)
+CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, AsyncRefTest)
 {
 	csp::common::CancellationToken CancellationToken;
 
