@@ -36,7 +36,7 @@ class WebClient;
 
 namespace csp::systems
 {
-/// @ingroup QuotaSystem
+/// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' Quota Server.
 /// Offers methods for receiving Quota Queries.
 class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
