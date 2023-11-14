@@ -132,7 +132,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 		->apiV1UsersUserIdTierAssignmentGet(csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, ResponseHandler);
 }
 
-void QuotaSystem::GetTierFeatureQuota(const TierNames TierName, const TierFeatures FeatureName, FeatureQuotaCallback Callback)
+void QuotaSystem::GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= QuotaManagementAPI->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaFeatureTierDto>(Callback, nullptr);
@@ -141,7 +141,7 @@ void QuotaSystem::GetTierFeatureQuota(const TierNames TierName, const TierFeatur
 		->apiV1TiersTierNameFeaturesFeatureNameQuotaGet(TierNameEnumToString(TierName), TierFeatureEnumToString(FeatureName), ResponseHandler);
 }
 
-void QuotaSystem::GetTierFeaturesQuota(const TierNames TierName, FeaturesQuotaCallback Callback)
+void QuotaSystem::GetTierFeaturesQuota(TierNames TierName, FeaturesQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= QuotaManagementAPI->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaFeatureTierDto>>(
