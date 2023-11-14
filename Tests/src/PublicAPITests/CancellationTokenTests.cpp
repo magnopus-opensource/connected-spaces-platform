@@ -21,8 +21,6 @@
 
 #include "gtest/gtest.h"
 
-#define RUN_CANCELLATION_TOKEN_TESTS 1
-
 namespace
 {
 
