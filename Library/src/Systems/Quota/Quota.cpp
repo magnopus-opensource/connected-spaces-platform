@@ -231,29 +231,16 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 }
 const csp::common::String TierNameEnumToString(const TierNames& Value)
 {
-	csp::common::String TierString;
 	switch (Value)
 	{
 		case TierNames::Basic:
-		{
-			TierString = "basic";
-			break;
-		}
+			return "basic";
 		case TierNames::Premium:
-		{
-			TierString = "premium";
-			break;
-		}
+			return "premium";
 		case TierNames::Pro:
-		{
-			TierString = "pro";
-			break;
-		}
+			return "pro";
 		case TierNames::Enterprise:
-		{
-			TierString = "enterprise";
-			break;
-		}
+			return "enterprise";
 		default:
 		{
 			CSP_LOG_ERROR_FORMAT("Unknown quota tier encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
@@ -262,60 +249,34 @@ const csp::common::String TierNameEnumToString(const TierNames& Value)
 			break;
 		}
 	}
-	return TierString;
+
+	// return a default/invalid value if no matching tier was found
+	return "";
 }
 
 const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 {
-	csp::common::String TierString;
-
 	switch (Value)
 	{
 		case TierFeatures::Agora:
-		{
-			TierString = "Agora";
+			return "Agora";
 			break;
-		}
 		case TierFeatures::Shopify:
-		{
-			TierString = "Shopify";
-			break;
-		}
+			return "Shopify";
 		case TierFeatures::TicketedSpace:
-		{
-			TierString = "TicketedSpace";
-			break;
-		}
+			return "TicketedSpace";
 		case TierFeatures::AudioVideoUpload:
-		{
-			TierString = "AudioVideoUpload";
-			break;
-		}
+			return "AudioVideoUpload";
 		case TierFeatures::ObjectCaptureUpload:
-		{
-			TierString = "ObjectCaptureUpload";
-			break;
-		}
+			return "ObjectCaptureUpload";
 		case TierFeatures::OpenAI:
-		{
-			TierString = "OpenAI";
-			break;
-		}
+			return "OpenAI";
 		case TierFeatures::ScopeConcurrentUsers:
-		{
-			TierString = "ScopeConcurrentUsers";
-			break;
-		}
+			return "ScopeConcurrentUsers";
 		case TierFeatures::TotalUploadSizeInKilobytes:
-		{
-			TierString = "TotalUploadSizeInKilobytes";
-			break;
-		}
+			return "TotalUploadSizeInKilobytes";
 		case TierFeatures::SpaceOwner:
-		{
-			TierString = "SpaceOwner";
-			break;
-		}
+			return "SpaceOwner";
 		default:
 		{
 			CSP_LOG_ERROR_FORMAT("Unknown quota feature encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
@@ -325,83 +286,85 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 		}
 	}
 
-	return TierString;
+	// return a default/invalid value if no matching feature was found
+	return "";
 }
 
 const TierNames StringToTierNameEnum(const csp::common::String& Value)
 {
-	TierNames TierName = TierNames::Basic;
-
 	if (Value == "basic")
 	{
-		TierName = TierNames::Basic;
-	}
-	else if (Value == "premium")
-	{
-		TierName = TierNames::Premium;
-	}
-	else if (Value == "pro")
-	{
-		TierName = TierNames::Pro;
-	}
-	else if (Value == "enterprise")
-	{
-		TierName = TierNames::Enterprise;
-	}
-	else
-	{
-		CSP_LOG_ERROR_FORMAT("QuotaSystem TierName not recognized: %s. Defaulting to basic tier.", Value.c_str());
+		return TierNames::Basic;
 	}
 
-	return TierName;
+	if (Value == "premium")
+	{
+		return TierNames::Premium;
+	}
+
+	if (Value == "pro")
+	{
+		return TierNames::Pro;
+	}
+
+	if (Value == "enterprise")
+	{
+		return TierNames::Enterprise;
+	}
+
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierName not recognized: %s. Defaulting to basic tier.", Value.c_str());
+	return TierNames::Basic;
 }
 
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 {
-	TierFeatures TierFeature = TierFeatures::SpaceOwner;
-
 	if (Value == "Agora")
 	{
-		TierFeature = TierFeatures::Agora;
-	}
-	else if (Value == "Shopify")
-	{
-		TierFeature = TierFeatures::Shopify;
-	}
-	else if (Value == "TicketedSpace")
-	{
-		TierFeature = TierFeatures::TicketedSpace;
-	}
-	else if (Value == "AudioVideoUpload")
-	{
-		TierFeature = TierFeatures::AudioVideoUpload;
-	}
-	else if (Value == "ObjectCaptureUpload")
-	{
-		TierFeature = TierFeatures::ObjectCaptureUpload;
-	}
-	else if (Value == "OpenAI")
-	{
-		TierFeature = TierFeatures::OpenAI;
-	}
-	else if (Value == "ScopeConcurrentUsers")
-	{
-		TierFeature = TierFeatures::ScopeConcurrentUsers;
-	}
-	else if (Value == "TotalUploadSizeInKilobytes")
-	{
-		TierFeature = TierFeatures::TotalUploadSizeInKilobytes;
-	}
-	else if (Value == "SpaceOwner")
-	{
-		TierFeature = TierFeatures::SpaceOwner;
-	}
-	else
-	{
-		CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to SpaceOwner", Value.c_str());
+		return TierFeatures::Agora;
 	}
 
-	return TierFeature;
+	if (Value == "Shopify")
+	{
+		return TierFeatures::Shopify;
+	}
+
+	if (Value == "TicketedSpace")
+	{
+		return TierFeatures::TicketedSpace;
+	}
+
+	if (Value == "AudioVideoUpload")
+	{
+		return TierFeatures::AudioVideoUpload;
+	}
+
+	if (Value == "ObjectCaptureUpload")
+	{
+		return TierFeatures::ObjectCaptureUpload;
+	}
+
+	if (Value == "OpenAI")
+	{
+		return TierFeatures::OpenAI;
+	}
+
+	if (Value == "ScopeConcurrentUsers")
+	{
+		return TierFeatures::ScopeConcurrentUsers;
+	}
+
+	if (Value == "TotalUploadSizeInKilobytes")
+	{
+		return TierFeatures::TotalUploadSizeInKilobytes;
+	}
+
+	if (Value == "SpaceOwner")
+	{
+		return TierFeatures::SpaceOwner;
+	}
+
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to SpaceOwner", Value.c_str());
+	return TierFeatures::SpaceOwner;
 }
 
 } // namespace csp::systems
