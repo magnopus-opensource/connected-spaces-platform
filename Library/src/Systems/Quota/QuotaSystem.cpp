@@ -25,14 +25,14 @@ namespace chs = csp::services::generated::trackingservice;
 
 namespace csp::systems
 {
-QuotaSystem::QuotaSystem() : SystemBase(), QuotaTierAssignmentAPI(nullptr), QuotaManagementAPI(nullptr), QuotaActivityAPI(nullptr)
+QuotaSystem::QuotaSystem() : SystemBase(), QuotaManagementAPI(nullptr), QuotaTierAssignmentAPI(nullptr), QuotaActivityAPI(nullptr)
 {
 }
 
 QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	QuotaTierAssignmentAPI = CSP_NEW chs::QuotaTierAssignmentApi(InWebClient);
 	QuotaManagementAPI	   = CSP_NEW chs::QuotaManagementApi(InWebClient);
+	QuotaTierAssignmentAPI = CSP_NEW chs::QuotaTierAssignmentApi(InWebClient);
 	QuotaActivityAPI	   = CSP_NEW chs::QuotaActivityApi(InWebClient);
 }
 
@@ -132,7 +132,7 @@ void QuotaSystem::GetCurrentUserTier(UserTierCallback Callback)
 		->apiV1UsersUserIdTierAssignmentGet(csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState().UserId, ResponseHandler);
 }
 
-void QuotaSystem::GetTierFeatureQuota(const TierNames& TierName, const TierFeatures& FeatureName, FeatureQuotaCallback Callback)
+void QuotaSystem::GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= QuotaManagementAPI->CreateHandler<FeatureQuotaCallback, FeatureQuotaResult, void, chs::QuotaFeatureTierDto>(Callback, nullptr);
@@ -141,7 +141,7 @@ void QuotaSystem::GetTierFeatureQuota(const TierNames& TierName, const TierFeatu
 		->apiV1TiersTierNameFeaturesFeatureNameQuotaGet(TierNameEnumToString(TierName), TierFeatureEnumToString(FeatureName), ResponseHandler);
 }
 
-void QuotaSystem::GetTierFeaturesQuota(const TierNames& TierName, FeaturesQuotaCallback Callback)
+void QuotaSystem::GetTierFeaturesQuota(TierNames TierName, FeaturesQuotaCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= QuotaManagementAPI->CreateHandler<FeaturesQuotaCallback, FeaturesQuotaResult, void, csp::services::DtoArray<chs::QuotaFeatureTierDto>>(
