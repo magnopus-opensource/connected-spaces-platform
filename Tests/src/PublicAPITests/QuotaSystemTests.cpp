@@ -38,8 +38,8 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_TIERNAMETOSTRING_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumtoStringTest)
 {
 	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "basic");
 	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "premium");
@@ -48,8 +48,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOTIERNAMEENUM_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTest)
 {
 	EXPECT_EQ(StringToTierNameEnum("basic"), csp::systems::TierNames::Basic);
 	EXPECT_EQ(StringToTierNameEnum("premium"), csp::systems::TierNames::Premium);
@@ -58,8 +58,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_TIERFEATUREENUMTOSTRING_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumtoStringTest)
 {
 	EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::Agora), "Agora");
 	EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::AudioVideoUpload), "AudioVideoUpload");
@@ -435,5 +435,29 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOXERRORCATEGORIES_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToXErrorCatergoriesEnumTest)
+{
+	EXPECT_EQ(StringToXErrorCatergoriesEnum(""), csp::systems::XErrorCategories::Unknown);
+	EXPECT_EQ(StringToXErrorCatergoriesEnum("quota_limitreached"), csp::systems::XErrorCategories::QuotaLimitReached);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_XERRORCODETYPEENUM_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToXErrorCodeTypeEnumTest)
+{
+	EXPECT_EQ(StringToXErrorCodeTypeEnum(""), csp::systems::XErrorCodeTypes::Unknown);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("group_spaceownerquota"), csp::systems::XErrorCodeTypes::SpaceOwnerQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("scopes_concurrentusersquota"), csp::systems::XErrorCodeTypes::ConcurrentUsersQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("assetdetail_objectcapturequota"), csp::systems::XErrorCodeTypes::ObjectCaptureQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("assetdetail_audiovideoquota"), csp::systems::XErrorCodeTypes::AudioVideoQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("assetdetail_totaluploadsizeinkilobytes"), csp::systems::XErrorCodeTypes::TotalUploadSizeInKilobytes);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("agoraoperation_groupownerquota"), csp::systems::XErrorCodeTypes::AgoraSpaceOwnerQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("openaioperation_userquota"), csp::systems::XErrorCodeTypes::OpenAIUserQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("shopify_userquota"), csp::systems::XErrorCodeTypes::ShopifyUserQuota);
+	EXPECT_EQ(StringToXErrorCodeTypeEnum("ticketedspaces_userquota"), csp::systems::XErrorCodeTypes::TicketedSpacesUserQuota);
 }
 #endif
