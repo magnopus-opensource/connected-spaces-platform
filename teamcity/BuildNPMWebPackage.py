@@ -116,7 +116,7 @@ def copy_packages_in(input_args, output_path):
         return False
 
 def copy_readme(input_args, output_path):
-    # Copy readme and create meta file
+    # Copy readme
     if (os.path.exists(f"{config.default_output_directory}/README.md")):
         shutil.copy(f"{config.default_output_directory}/README.md", output_path)
 
