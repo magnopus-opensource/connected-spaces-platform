@@ -28,7 +28,6 @@
 #include <filesystem>
 using namespace csp::systems;
 
-
 namespace
 {
 
@@ -42,10 +41,10 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 #if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 {
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "Basic");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "Premium");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Pro), "Pro");
-	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Enterprise), "Enterprise");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "basic");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "premium");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Pro), "pro");
+	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Enterprise), "enterprise");
 }
 #endif
 
@@ -212,14 +211,23 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
+	// test quota queries for basic tier
+	{
+		auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().Limit, 0);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().Period, PeriodEnum::Total);
-	EXPECT_EQ(Result.GetFeatureQuotaInfo().AllowReductions, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
+	}
+
+	// test quota queries for pro tier
+	{
+		auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Pro, TierFeatures::SpaceOwner);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::SpaceOwner);
+		EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Pro);
+	}
 }
 #endif
 

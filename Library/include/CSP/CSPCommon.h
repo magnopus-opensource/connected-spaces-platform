@@ -16,10 +16,29 @@
 #pragma once
 
 // Enable this define if you are using the CSP library in DLL form
-//#define USING_CSP_DLL
+// #define USING_CSP_DLL
 
-// Enable the define appropriate for the target platform
-//#define CSP_WINDOWS
+#if defined(_WIN32) && !defined(CSP_WINDOWS)
+	#define CSP_WINDOWS
+#elif defined(__APPLE__) && !defined(CSP_MACOSX) && !defined(CSP_IOS)
+	#include <TargetConditionals.h>
+
+	#if defined(TARGET_OS_MAC)
+		#define CSP_MACOSX
+	#elif defined(TARGET_OS_IPHONE)
+		#define CSP_IOS
+	#endif
+#elif defined(__EMSCRIPTEN__) && !defined(CSP_WASM)
+	#define CSP_WASM
+#elif defined(__ANDROID__) && !defined(CSP_ANDROID)
+	#define CSP_ANDROID
+#elif defined(__linux__) && !defined(CSP_LINUX)
+    #define CSP_LINUX
+#endif
+
+#if __has_include(<unistd.h>)
+    #define CSP_POSIX
+#endif
 
 #if defined CSP_WINDOWS
 	#define CSP_DLLEXPORT __declspec(dllexport)
@@ -48,7 +67,7 @@
 	#define CSP_C_API
 #elif defined CSP_WASM
 	#define CSP_API
-// The EMSCRIPTEN_KEEPALIVE keyword is the way to export a function from WASM in order to call it from the JS side.
+	// The EMSCRIPTEN_KEEPALIVE keyword is the way to export a function from WASM in order to call it from the JS side.
 	#define CSP_C_API EMSCRIPTEN_KEEPALIVE
 
 	#define PRAGMA_WARNING_PUSH()
@@ -73,6 +92,7 @@
 #define CSP_NO_DISPOSE
 #define CSP_FLAGS
 
+// TODO: Remove the following includes. I don't think we should be default including these everywhere
 #include <stdint.h>
 #include <stdlib.h>
 
