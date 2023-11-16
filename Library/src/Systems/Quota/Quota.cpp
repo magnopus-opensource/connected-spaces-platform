@@ -38,6 +38,17 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 	auto* FeatureProgressResponse		   = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto& Headers					   = Response->GetPayload().GetHeaders();
+
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		XErrorCodeType = StringToXErrorCodeTypeEnum(Headers.at("x-errorcode").c_str());
+
+		if (Headers.count("x-errorcategory") > 0 && !Headers.at("x-errorcategory").empty())
+		{
+			XErrorCategory = StringToXErrorCatergoriesEnum(Headers.at("x-errorcategory").c_str());
+		}
+	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
@@ -79,6 +90,17 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 	auto* FeatureProgressResponse		   = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto& Headers					   = Response->GetPayload().GetHeaders();
+
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		XErrorCodeType = StringToXErrorCodeTypeEnum(Headers.at("x-errorcode").c_str());
+
+		if (Headers.count("x-errorcategory") > 0 && !Headers.at("x-errorcategory").empty())
+		{
+			XErrorCategory = StringToXErrorCatergoriesEnum(Headers.at("x-errorcategory").c_str());
+		}
+	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
@@ -115,6 +137,17 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 
 	auto* UserTierResponse				   = static_cast<chs::QuotaTierAssignmentDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto& Headers					   = Response->GetPayload().GetHeaders();
+
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		XErrorCodeType = StringToXErrorCodeTypeEnum(Headers.at("x-errorcode").c_str());
+
+		if (Headers.count("x-errorcategory") > 0 && !Headers.at("x-errorcategory").empty())
+		{
+			XErrorCategory = StringToXErrorCatergoriesEnum(Headers.at("x-errorcategory").c_str());
+		}
+	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
@@ -149,6 +182,17 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 	auto* FeatureQuotaResponse			   = static_cast<chs::QuotaFeatureTierDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto& Headers					   = Response->GetPayload().GetHeaders();
+
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		XErrorCodeType = StringToXErrorCodeTypeEnum(Headers.at("x-errorcode").c_str());
+
+		if (Headers.count("x-errorcategory") > 0 && !Headers.at("x-errorcategory").empty())
+		{
+			XErrorCategory = StringToXErrorCatergoriesEnum(Headers.at("x-errorcategory").c_str());
+		}
+	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
@@ -193,6 +237,17 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 	auto* FeaturesQuotaResponse			   = static_cast<csp::services::DtoArray<chs::QuotaFeatureTierDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+	const auto& Headers					   = Response->GetPayload().GetHeaders();
+
+	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+	{
+		XErrorCodeType = StringToXErrorCodeTypeEnum(Headers.at("x-errorcode").c_str());
+
+		if (Headers.count("x-errorcategory") > 0 && !Headers.at("x-errorcategory").empty())
+		{
+			XErrorCategory = StringToXErrorCatergoriesEnum(Headers.at("x-errorcategory").c_str());
+		}
+	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
@@ -366,5 +421,68 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to SpaceOwner", Value.c_str());
 	return TierFeatures::SpaceOwner;
 }
+
+XErrorCodeTypes StringToXErrorCodeTypeEnum(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+	{
+		return XErrorCodeTypes::SpaceOwnerQuota;
+	}
+
+	if (Value == "scopes_concurrentusersquota")
+	{
+		return XErrorCodeTypes::ConcurrentUsersQuota;
+	}
+
+	if (Value == "assetdetail_objectcapturequota")
+	{
+		return XErrorCodeTypes::ObjectCaptureQuota;
+	}
+
+	if (Value == "assetdetail_audiovideoquota")
+	{
+		return XErrorCodeTypes::AudioVideoQuota;
+	}
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+	{
+		return XErrorCodeTypes::TotalUploadSizeInKilobytes;
+	}
+
+	if (Value == "agoraoperation_groupownerquota")
+	{
+		return XErrorCodeTypes::AgoraSpaceOwnerQuota;
+	}
+
+	if (Value == "openaioperation_userquota")
+	{
+		return XErrorCodeTypes::OpenAIUserQuota;
+	}
+
+	if (Value == "shopify_userquota")
+	{
+		return XErrorCodeTypes::ShopifyUserQuota;
+	}
+
+	if (Value == "ticketedspaces_userquota")
+	{
+		return XErrorCodeTypes::TicketedSpacesUserQuota;
+	}
+
+	CSP_LOG_ERROR_FORMAT("QuotaSystem XErrorCodeType not recognized: %s. Defaulting to Unknown", Value.c_str());
+	return XErrorCodeTypes::Unknown;
+}
+
+XErrorCategories StringToXErrorCatergoriesEnum(const csp::common::String& Value)
+{
+	if (Value == "quota_limitreached")
+	{
+		return XErrorCategories::QuotaLimitReached;
+	}
+
+	CSP_LOG_ERROR_FORMAT("QuotaSystem XErrorCategories not recognized: %s. Defaulting to Unknown", Value.c_str());
+	return XErrorCategories::Unknown;
+}
+
 
 } // namespace csp::systems

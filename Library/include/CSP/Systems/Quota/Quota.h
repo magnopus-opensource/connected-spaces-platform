@@ -69,6 +69,26 @@ enum class TierNames
 	Enterprise
 };
 
+enum class XErrorCodeTypes
+{
+	Unknown = 0,
+	SpaceOwnerQuota,
+	ConcurrentUsersQuota,
+	ObjectCaptureQuota,
+	AudioVideoQuota,
+	TotalUploadSizeInKilobytes,
+	AgoraSpaceOwnerQuota,
+	OpenAIUserQuota,
+	ShopifyUserQuota,
+	TicketedSpacesUserQuota
+};
+
+enum class XErrorCategories
+{
+	Unknown = 0,
+	QuotaLimitReached
+};
+
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
 /// Limit Value of -1 means unlimited usage
@@ -130,6 +150,8 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<FeatureLimitInfo> FeaturesLimitInfo;
+	XErrorCodeTypes XErrorCodeType;
+	XErrorCategories XErrorCategory;
 };
 
 /// @ingroup Quota System
@@ -153,6 +175,8 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	FeatureLimitInfo FeatureLimitInfo;
+	XErrorCodeTypes XErrorCodeType;
+	XErrorCategories XErrorCategory;
 };
 
 /// @ingroup Quota System
@@ -176,6 +200,8 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	UserTierInfo UserTierInfo;
+	XErrorCodeTypes XErrorCodeType;
+	XErrorCategories XErrorCategory;
 };
 
 /// @ingroup Quota System
@@ -199,6 +225,8 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	FeatureQuotaInfo FeatureQuotaInfo;
+	XErrorCodeTypes XErrorCodeType;
+	XErrorCategories XErrorCategory;
 };
 
 /// @ingroup Quota System
@@ -222,6 +250,8 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
+	XErrorCodeTypes XErrorCodeType;
+	XErrorCategories XErrorCategory;
 };
 
 /// @brief Retrieves an array of feature quota results.
@@ -243,6 +273,16 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value);
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierFeatures : Const string as an enum value
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
+
+/// @brief Converts XErrorCode string into enum value type.
+/// @param Value csp::common::String : EnumValue as a string
+/// @TierNames : Const string as an enum value
+XErrorCodeTypes StringToXErrorCodeTypeEnum(const csp::common::String& Value);
+
+/// @brief Converts XErrorCategory string into enum value type.
+/// @param Value csp::common::String : EnumValue as a string
+/// @TierNames : Const string as an enum value
+XErrorCategories StringToXErrorCatergoriesEnum(const csp::common::String& Value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
