@@ -119,9 +119,6 @@ def copy_readme(input_args, output_path):
     # Copy readme and create meta file
     if (os.path.exists(f"{config.default_output_directory}/README.md")):
         shutil.copy(f"{config.default_output_directory}/README.md", output_path)
-    
-        with open(f"{output_path}/README.md.meta", "w") as f:
-            f.write(minimal_meta_template.render(guid=generate_guid(), importer_type="Default"))
 
 def create_package_file(input_args, output_path):
     print("Creating package file...")
