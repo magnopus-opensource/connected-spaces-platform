@@ -451,7 +451,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 #if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOEQUOTERESULTFAILUREREASONINTVALUE_TEST
 CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToEQuotaResultFailureReasonIntValueTest)
 {
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue(""), 0);
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue(""), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("group_spaceownerquota"), static_cast<int>(EQuotaResultFailureReason::SpaceOwnerQuota));
 	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("scopes_concurrentusersquota"),
 			  static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersQuota));
