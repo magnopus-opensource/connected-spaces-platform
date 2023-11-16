@@ -69,6 +69,21 @@ enum class TierNames
 	Enterprise
 };
 
+enum class EQuotaResultFailureReason
+{
+	Unknown = -1,
+	None	= 0,
+	SpaceOwnerQuota,
+	ConcurrentUsersQuota,
+	ObjectCaptureQuota,
+	AudioVideoQuota,
+	TotalUploadSizeInKilobytes,
+	AgoraOwnerQuota,
+	OpenAIUserQuota,
+	ShopifyUserQuota,
+	TicketedSpacesUserQuota
+};
+
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
 /// Limit Value of -1 means unlimited usage
@@ -124,6 +139,9 @@ public:
 	/// @return csp::common::Array<FeatureProgress> : const array of feature progress class
 	const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
+
 private:
 	FeaturesLimitResult(void*) {};
 
@@ -146,6 +164,9 @@ public:
 	/// @brief Retrieves the feature progress result.
 	/// @returnFeatureProgress : const ref to feature progress class
 	const FeatureLimitInfo& GetFeatureLimitInfo() const;
+
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeatureLimitResult(void*) {};
@@ -170,6 +191,9 @@ public:
 	/// @returnFeatureProgress : const ref to user tier information class
 	const UserTierInfo& GetUserTierInfo() const;
 
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
+
 private:
 	UserTierResult(void*) {};
 
@@ -193,6 +217,9 @@ public:
 	/// @returnFeatureProgress : const ref to feature quota class
 	const FeatureQuotaInfo& GetFeatureQuotaInfo() const;
 
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
+
 private:
 	FeatureQuotaResult(void*) {};
 
@@ -215,6 +242,9 @@ public:
 	/// @brief Retrieves an array of feature quota results.
 	/// @returnFeatureProgress : const ref to feature quota class
 	const csp::common::Array<FeatureQuotaInfo>& GetFeaturesQuotaInfo() const;
+
+protected:
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeaturesQuotaResult(void*) {};

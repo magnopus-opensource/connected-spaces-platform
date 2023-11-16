@@ -38,8 +38,8 @@ bool RequestPredicate(const csp::services::ResultBase& Result)
 
 } // namespace
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_TIERNAMEENUMTOSTRING_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumToStringTest)
 {
 	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Basic), "basic");
 	EXPECT_EQ(TierNameEnumToString(csp::systems::TierNames::Premium), "premium");
@@ -48,8 +48,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierNameEnumTesttoStringTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOTIERNAMEENUM_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTest)
 {
 	EXPECT_EQ(StringToTierNameEnum("basic"), csp::systems::TierNames::Basic);
 	EXPECT_EQ(StringToTierNameEnum("premium"), csp::systems::TierNames::Premium);
@@ -58,8 +58,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToTierNameEnumTestTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_QUERY_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumTesttoStringTest)
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_TIERFEATUREENUMTOSTRING_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, TierFeatureEnumToStringTest)
 {
 	EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::Agora), "Agora");
 	EXPECT_EQ(TierFeatureEnumToString(csp::systems::TierFeatures::AudioVideoUpload), "AudioVideoUpload");
@@ -101,6 +101,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, -1);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, csp::systems::TierFeatures::SpaceOwner);
@@ -120,6 +121,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetUserTierInfo().TierName, TierNames::Pro);
 	EXPECT_EQ(Result.GetUserTierInfo().AssignToId, UserId);
 	EXPECT_EQ(Result.GetUserTierInfo().AssignToType, "user");
@@ -144,6 +146,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, TierFeaturesArray);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
 	for (int i = 0; i < TierFeaturesArray.Size(); i++)
@@ -187,6 +190,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForSpace, RequestPredicate, Space.Id, TierFeaturesArray);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
 	for (int i = 0; i < TierFeaturesArray.Size(); i++)
@@ -216,6 +220,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 		auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureQuota, RequestPredicate, TierNames::Basic, TierFeatures::OpenAI);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 		EXPECT_EQ(Result.GetFeatureQuotaInfo().FeatureName, TierFeatures::OpenAI);
 		EXPECT_EQ(Result.GetFeatureQuotaInfo().TierName, TierNames::Basic);
 	}
@@ -255,6 +260,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), ExpectedInfoArray.Size());
 
 	for (int i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
@@ -300,6 +306,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
@@ -323,6 +330,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	auto [Result1] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 1);
@@ -381,6 +389,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 10000000);
@@ -423,6 +432,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	auto [UpdatedSizeResult] = AWAIT_PRE(QuotaSystem, GetTotalSpaceSizeInKilobytes, RequestPredicate, Space.Id);
 
 	EXPECT_EQ(UpdatedSizeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(EQuotaResultFailureReason::None));
 	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().FeatureName, TierFeatures::TotalUploadSizeInKilobytes);
 	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().ActivityCount, UpdateFileSize / 1000);
 	EXPECT_EQ(UpdatedSizeResult.GetFeatureLimitInfo().Limit, 10000000);

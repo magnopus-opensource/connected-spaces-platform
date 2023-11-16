@@ -68,6 +68,38 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 	}
 }
 
+int FeaturesLimitResult::ParseErrorCode(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+
+	if (Value == "scopes_concurrentusersquota")
+		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+
+	if (Value == "assetdetail_objectcapturequota")
+		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
+
+	if (Value == "assetdetail_audiovideoquota")
+		return (int) EQuotaResultFailureReason::AudioVideoQuota;
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
+
+	if (Value == "agoraoperation_groupownerquota")
+		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
+
+	if (Value == "openaioperation_userquota")
+		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
+
+	if (Value == "shopify_userquota")
+		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
+
+	if (Value == "ticketedspaces_userquota")
+		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
+
+	return ResultBase::ParseErrorCode(Value);
+}
+
 const FeatureLimitInfo& FeatureLimitResult::GetFeatureLimitInfo() const
 {
 	return FeatureLimitInfo;
@@ -104,6 +136,38 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 	}
 }
 
+int FeatureLimitResult::ParseErrorCode(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+
+	if (Value == "scopes_concurrentusersquota")
+		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+
+	if (Value == "assetdetail_objectcapturequota")
+		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
+
+	if (Value == "assetdetail_audiovideoquota")
+		return (int) EQuotaResultFailureReason::AudioVideoQuota;
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
+
+	if (Value == "agoraoperation_groupownerquota")
+		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
+
+	if (Value == "openaioperation_userquota")
+		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
+
+	if (Value == "shopify_userquota")
+		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
+
+	if (Value == "ticketedspaces_userquota")
+		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
+
+	return ResultBase::ParseErrorCode(Value);
+}
+
 const UserTierInfo& UserTierResult::GetUserTierInfo() const
 {
 	return UserTierInfo;
@@ -136,6 +200,38 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 			UserTierInfo.TierName = StringToTierNameEnum(UserTierResponse->GetTierName());
 		}
 	}
+}
+
+int UserTierResult::ParseErrorCode(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+
+	if (Value == "scopes_concurrentusersquota")
+		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+
+	if (Value == "assetdetail_objectcapturequota")
+		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
+
+	if (Value == "assetdetail_audiovideoquota")
+		return (int) EQuotaResultFailureReason::AudioVideoQuota;
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
+
+	if (Value == "agoraoperation_groupownerquota")
+		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
+
+	if (Value == "openaioperation_userquota")
+		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
+
+	if (Value == "shopify_userquota")
+		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
+
+	if (Value == "ticketedspaces_userquota")
+		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
+
+	return ResultBase::ParseErrorCode(Value);
 }
 
 const FeatureQuotaInfo& FeatureQuotaResult::GetFeatureQuotaInfo() const
@@ -180,6 +276,38 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 			FeatureQuotaInfo.AllowReductions = FeatureQuotaResponse->GetAllowReductions();
 		}
 	}
+}
+
+int FeatureQuotaResult::ParseErrorCode(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+
+	if (Value == "scopes_concurrentusersquota")
+		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+
+	if (Value == "assetdetail_objectcapturequota")
+		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
+
+	if (Value == "assetdetail_audiovideoquota")
+		return (int) EQuotaResultFailureReason::AudioVideoQuota;
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
+
+	if (Value == "agoraoperation_groupownerquota")
+		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
+
+	if (Value == "openaioperation_userquota")
+		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
+
+	if (Value == "shopify_userquota")
+		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
+
+	if (Value == "ticketedspaces_userquota")
+		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
+
+	return ResultBase::ParseErrorCode(Value);
 }
 
 const csp::common::Array<FeatureQuotaInfo>& FeaturesQuotaResult::GetFeaturesQuotaInfo() const
@@ -229,6 +357,39 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 		}
 	}
 }
+
+int FeaturesQuotaResult::ParseErrorCode(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+
+	if (Value == "scopes_concurrentusersquota")
+		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+
+	if (Value == "assetdetail_objectcapturequota")
+		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
+
+	if (Value == "assetdetail_audiovideoquota")
+		return (int) EQuotaResultFailureReason::AudioVideoQuota;
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
+
+	if (Value == "agoraoperation_groupownerquota")
+		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
+
+	if (Value == "openaioperation_userquota")
+		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
+
+	if (Value == "shopify_userquota")
+		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
+
+	if (Value == "ticketedspaces_userquota")
+		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
+
+	return ResultBase::ParseErrorCode(Value);
+}
+
 const csp::common::String TierNameEnumToString(const TierNames& Value)
 {
 	switch (Value)
