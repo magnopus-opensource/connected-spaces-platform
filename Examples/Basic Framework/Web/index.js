@@ -104,7 +104,7 @@ const runAllExamples = () => {
       const spaceResult = await spaceSystem.createSpace(
         "Test Space",
         "",
-        Systems.SpaceType.Private,
+        Systems.SpaceAttributes.Private,
         null,
         Common.Map.ofStringAndString(),
         null
