@@ -447,3 +447,24 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	DeleteSpace(SpaceSystem, Space.Id);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOEQUOTERESULTFAILUREREASONINTVALUE_TEST
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToEQuotaResultFailureReasonIntValueTest)
+{
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue(""), 0);
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("group_spaceownerquota"), static_cast<int>(EQuotaResultFailureReason::SpaceOwnerQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("scopes_concurrentusersquota"),
+			  static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_objectcapturequota"),
+			  static_cast<int>(EQuotaResultFailureReason::ObjectCaptureQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_audiovideoquota"), static_cast<int>(EQuotaResultFailureReason::AudioVideoQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_totaluploadsizeinkilobytes"),
+			  static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytes));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("agoraoperation_groupownerquota"),
+			  static_cast<int>(EQuotaResultFailureReason::AgoraOwnerQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("openaioperation_userquota"), static_cast<int>(EQuotaResultFailureReason::OpenAIUserQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("shopify_userquota"), static_cast<int>(EQuotaResultFailureReason::ShopifyUserQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("ticketedspaces_userquota"),
+			  static_cast<int>(EQuotaResultFailureReason::TicketedSpacesUserQuota));
+}
+#endif

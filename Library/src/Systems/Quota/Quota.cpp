@@ -70,34 +70,14 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 int FeaturesLimitResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "group_spaceownerquota")
-		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
 
-	if (Value == "scopes_concurrentusersquota")
-		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+	if (ReturnValue == 0)
+	{
+		return ResultBase::ParseErrorCode(Value);
+	}
 
-	if (Value == "assetdetail_objectcapturequota")
-		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
-
-	if (Value == "assetdetail_audiovideoquota")
-		return (int) EQuotaResultFailureReason::AudioVideoQuota;
-
-	if (Value == "assetdetail_totaluploadsizeinkilobytes")
-		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
-
-	if (Value == "agoraoperation_groupownerquota")
-		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
-
-	if (Value == "openaioperation_userquota")
-		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
-
-	if (Value == "shopify_userquota")
-		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
-
-	if (Value == "ticketedspaces_userquota")
-		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
-
-	return ResultBase::ParseErrorCode(Value);
+	return ReturnValue;
 }
 
 const FeatureLimitInfo& FeatureLimitResult::GetFeatureLimitInfo() const
@@ -138,34 +118,14 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 int FeatureLimitResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "group_spaceownerquota")
-		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
 
-	if (Value == "scopes_concurrentusersquota")
-		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+	if (ReturnValue == 0)
+	{
+		return ResultBase::ParseErrorCode(Value);
+	}
 
-	if (Value == "assetdetail_objectcapturequota")
-		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
-
-	if (Value == "assetdetail_audiovideoquota")
-		return (int) EQuotaResultFailureReason::AudioVideoQuota;
-
-	if (Value == "assetdetail_totaluploadsizeinkilobytes")
-		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
-
-	if (Value == "agoraoperation_groupownerquota")
-		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
-
-	if (Value == "openaioperation_userquota")
-		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
-
-	if (Value == "shopify_userquota")
-		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
-
-	if (Value == "ticketedspaces_userquota")
-		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
-
-	return ResultBase::ParseErrorCode(Value);
+	return ReturnValue;
 }
 
 const UserTierInfo& UserTierResult::GetUserTierInfo() const
@@ -204,34 +164,14 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 
 int UserTierResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "group_spaceownerquota")
-		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
 
-	if (Value == "scopes_concurrentusersquota")
-		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+	if (ReturnValue == 0)
+	{
+		return ResultBase::ParseErrorCode(Value);
+	}
 
-	if (Value == "assetdetail_objectcapturequota")
-		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
-
-	if (Value == "assetdetail_audiovideoquota")
-		return (int) EQuotaResultFailureReason::AudioVideoQuota;
-
-	if (Value == "assetdetail_totaluploadsizeinkilobytes")
-		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
-
-	if (Value == "agoraoperation_groupownerquota")
-		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
-
-	if (Value == "openaioperation_userquota")
-		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
-
-	if (Value == "shopify_userquota")
-		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
-
-	if (Value == "ticketedspaces_userquota")
-		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
-
-	return ResultBase::ParseErrorCode(Value);
+	return ReturnValue;
 }
 
 const FeatureQuotaInfo& FeatureQuotaResult::GetFeatureQuotaInfo() const
@@ -280,34 +220,14 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 int FeatureQuotaResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "group_spaceownerquota")
-		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
 
-	if (Value == "scopes_concurrentusersquota")
-		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+	if (ReturnValue == 0)
+	{
+		return ResultBase::ParseErrorCode(Value);
+	}
 
-	if (Value == "assetdetail_objectcapturequota")
-		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
-
-	if (Value == "assetdetail_audiovideoquota")
-		return (int) EQuotaResultFailureReason::AudioVideoQuota;
-
-	if (Value == "assetdetail_totaluploadsizeinkilobytes")
-		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
-
-	if (Value == "agoraoperation_groupownerquota")
-		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
-
-	if (Value == "openaioperation_userquota")
-		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
-
-	if (Value == "shopify_userquota")
-		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
-
-	if (Value == "ticketedspaces_userquota")
-		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
-
-	return ResultBase::ParseErrorCode(Value);
+	return ReturnValue;
 }
 
 const csp::common::Array<FeatureQuotaInfo>& FeaturesQuotaResult::GetFeaturesQuotaInfo() const
@@ -360,34 +280,14 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 int FeaturesQuotaResult::ParseErrorCode(const csp::common::String& Value)
 {
-	if (Value == "group_spaceownerquota")
-		return (int) EQuotaResultFailureReason::SpaceOwnerQuota;
+	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
 
-	if (Value == "scopes_concurrentusersquota")
-		return (int) EQuotaResultFailureReason::ConcurrentUsersQuota;
+	if (ReturnValue == 0)
+	{
+		return ResultBase::ParseErrorCode(Value);
+	}
 
-	if (Value == "assetdetail_objectcapturequota")
-		return (int) EQuotaResultFailureReason::ObjectCaptureQuota;
-
-	if (Value == "assetdetail_audiovideoquota")
-		return (int) EQuotaResultFailureReason::AudioVideoQuota;
-
-	if (Value == "assetdetail_totaluploadsizeinkilobytes")
-		return (int) EQuotaResultFailureReason::TotalUploadSizeInKilobytes;
-
-	if (Value == "agoraoperation_groupownerquota")
-		return (int) EQuotaResultFailureReason::AgoraOwnerQuota;
-
-	if (Value == "openaioperation_userquota")
-		return (int) EQuotaResultFailureReason::OpenAIUserQuota;
-
-	if (Value == "shopify_userquota")
-		return (int) EQuotaResultFailureReason::ShopifyUserQuota;
-
-	if (Value == "ticketedspaces_userquota")
-		return (int) EQuotaResultFailureReason::TicketedSpacesUserQuota;
-
-	return ResultBase::ParseErrorCode(Value);
+	return ReturnValue;
 }
 
 const csp::common::String TierNameEnumToString(const TierNames& Value)
@@ -526,6 +426,56 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 
 	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to SpaceOwner", Value.c_str());
 	return TierFeatures::SpaceOwner;
+}
+
+const int32_t StringToEQuotaResultFailureReasonIntValue(const csp::common::String& Value)
+{
+	if (Value == "group_spaceownerquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::SpaceOwnerQuota);
+	}
+
+	if (Value == "scopes_concurrentusersquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersQuota);
+	}
+
+	if (Value == "assetdetail_objectcapturequota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::ObjectCaptureQuota);
+	}
+
+	if (Value == "assetdetail_audiovideoquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::AudioVideoQuota);
+	}
+
+	if (Value == "assetdetail_totaluploadsizeinkilobytes")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytes);
+	}
+
+	if (Value == "agoraoperation_groupownerquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::AgoraOwnerQuota);
+	}
+
+	if (Value == "openaioperation_userquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::OpenAIUserQuota);
+	}
+
+	if (Value == "shopify_userquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::ShopifyUserQuota);
+	}
+
+	if (Value == "ticketedspaces_userquota")
+	{
+		return static_cast<int>(EQuotaResultFailureReason::TicketedSpacesUserQuota);
+	}
+
+	return 0;
 }
 
 } // namespace csp::systems

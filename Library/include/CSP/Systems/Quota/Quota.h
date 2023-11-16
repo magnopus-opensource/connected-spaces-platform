@@ -140,7 +140,7 @@ public:
 	const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
 protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
+	virtual int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeaturesLimitResult(void*) {};
@@ -166,7 +166,7 @@ public:
 	const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
 protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
+	virtual int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeatureLimitResult(void*) {};
@@ -192,7 +192,7 @@ public:
 	const UserTierInfo& GetUserTierInfo() const;
 
 protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
+	virtual int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	UserTierResult(void*) {};
@@ -218,7 +218,7 @@ public:
 	const FeatureQuotaInfo& GetFeatureQuotaInfo() const;
 
 protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
+	virtual int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeatureQuotaResult(void*) {};
@@ -244,7 +244,7 @@ public:
 	const csp::common::Array<FeatureQuotaInfo>& GetFeaturesQuotaInfo() const;
 
 protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
+	virtual int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeaturesQuotaResult(void*) {};
@@ -273,6 +273,11 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value);
 /// @param Value csp::common::String : EnumValue as a string
 /// @TierFeatures : Const string as an enum value
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
+
+/// @brief Returns a integer value of an EQuotaResultFailureReason.
+/// @param Value csp::common::String : EnumValue as a string
+/// @int32_t : Const int32_t as an enum value
+const int32_t StringToEQuotaResultFailureReasonIntValue(const csp::common::String& Value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
