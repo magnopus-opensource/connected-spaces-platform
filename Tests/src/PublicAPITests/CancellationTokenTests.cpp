@@ -37,10 +37,10 @@ CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CancelStateTest)
 	csp::common::CancellationToken CancellationToken;
 	EXPECT_FALSE(CancellationToken.Cancelled());
 
-	EXPECT_NO_THROW(CancellationToken.Cancel());
+	CancellationToken.Cancel();
 	EXPECT_TRUE(CancellationToken.Cancelled());
 
-	CancellationToken.Cancel(); // Test that multiple cancellations don't affect the state
+	EXPECT_NO_THROW(CancellationToken.Cancel()); // Test that multiple cancellations don't affect the state
 	EXPECT_TRUE(CancellationToken.Cancelled());
 }
 #endif
