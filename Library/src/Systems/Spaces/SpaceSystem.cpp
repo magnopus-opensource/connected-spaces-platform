@@ -454,7 +454,7 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 					// As a short-term workaround to keep our functional test time manageable, we are restoring the previous approach.
 					// As soon as we've resolved the service-side issue, we'll be restoring the new implementation, and this workaround can be
 					// removed.
-					static const bool SPACE_DELETION_WORKAROUND = true;
+					const bool SPACE_DELETION_WORKAROUND = CSPFoundation::GetTenant() == "OKO_TESTS";
 					if (SPACE_DELETION_WORKAROUND)
 					{
 						static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdDelete(InGroupId, ResponseHandler);
