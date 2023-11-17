@@ -1,6 +1,7 @@
 #!/bin/bash
 # *** Command Line Arguments *** 
 # DLLOnly - Generates a solution with only DLL-related build configurations
+python3 -m pip install -r teamcity/requirements.txt
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 XCODE_VERSION=$(softwareupdate --history | awk '/Command Line Tools for Xcode/ {print $6}' | tail -1)

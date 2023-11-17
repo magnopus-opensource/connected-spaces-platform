@@ -36,7 +36,7 @@ class WebClient;
 
 namespace csp::systems
 {
-/// @ingroup GraphQL System
+/// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' Quota Server.
 /// Offers methods for receiving Quota Queries.
 class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
@@ -83,12 +83,12 @@ public:
 	/// @param TierName TierNames : Name of the tier
 	/// @param FeatureName TierFeatures : Name of the feature
 	/// @param Callback FeatureQuotaCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetTierFeatureQuota(const TierNames& TierName, const TierFeatures& FeatureName, FeatureQuotaCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeatureQuota(TierNames TierName, TierFeatures FeatureName, FeatureQuotaCallback Callback);
 
 	/// @brief Get current array of current feature quota information inside a tier
 	/// @param TierName TierNames : Name of the tier
 	/// @param Callback FeaturesQuotaCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetTierFeaturesQuota(const TierNames& TierName, FeaturesQuotaCallback Callback);
+	CSP_ASYNC_RESULT void GetTierFeaturesQuota(TierNames TierName, FeaturesQuotaCallback Callback);
 
 private:
 	QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

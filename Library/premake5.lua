@@ -185,7 +185,8 @@ if not Project then
             }
         filter "platforms:macosx"
             defines { 
-                "CSP_MACOSX", 				
+                "CSP_MACOSX",
+                "USE_STD_MALLOC=1",
                 "JS_STRICT_NAN_BOXING"
             }
 
@@ -301,7 +302,7 @@ if not Project then
 			"tinyspline"
         }
 
-        filter { "platforms:not wasm", "platforms:not Android" }
+        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx" }
             links {
                 "mimalloc"
             }
