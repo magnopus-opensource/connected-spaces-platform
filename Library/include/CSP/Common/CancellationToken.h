@@ -55,7 +55,7 @@ public:
 
 	/// @brief Check if a request has been cancelled.
 	/// @return bool
-	bool Cancelled();
+	bool Cancelled() const;
 
 	/// @brief Constructs a blank token.
 	/// @return CancellationToken&
