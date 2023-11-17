@@ -1,6 +1,8 @@
 #!/bin/bash
 # *** Command Line Arguments *** 
 # DLLOnly - Generates a solution with only DLL-related build configurations
+python3 -m pip install -r teamcity/requirements.txt
+
 git config core.hooksPath .githooks
 git config commit.template .githooks/commit-template.txt
 

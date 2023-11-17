@@ -24,5 +24,7 @@ function MiMalloc.AddProject()
 
     filter "platforms:Android"
         flags { "ExcludeFromBuild" }
+    filter "platforms:macosx"
+        flags { "ExcludeFromBuild" }
     filter {}
 end

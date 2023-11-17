@@ -38,7 +38,7 @@ public:
 		IsCancelled = true;
 	}
 
-	bool Cancelled()
+	bool Cancelled() const
 	{
 		return IsCancelled;
 	}
@@ -62,7 +62,7 @@ void CancellationToken::Cancel()
 	ImplPtr->Cancel();
 }
 
-bool CancellationToken::Cancelled()
+bool CancellationToken::Cancelled() const
 {
 	return ImplPtr->Cancelled();
 }
