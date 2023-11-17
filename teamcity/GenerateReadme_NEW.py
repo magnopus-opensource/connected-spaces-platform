@@ -78,6 +78,7 @@ def main():
             if match is None:
                 print("Invalid commit title format. Skipping...", file=sys.stderr)
                 continue
+            
             jira_id = match.group("jira_id")
             tag = "misc"
             title = match.group("title")
