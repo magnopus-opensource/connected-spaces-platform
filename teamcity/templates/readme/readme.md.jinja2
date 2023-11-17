@@ -29,5 +29,5 @@
 | Change ID | Author | Description |
 | --------- | ------ | ----------- |
 {%- for commit in commits %}
-| {{ commit.hexsha | truncate(7, true, '') }} | {{ commit.author }} | {{ commit.message | trim | replace('\r', '') | replace('\n\n', '<br>') | replace('\n', '<br>')}}|
+| {{ commit.hexsha | truncate(7, true, '') }} | {{ commit.author }} | {{ commit.message | trim | replace('\r', '') | replace('\n\n', '<br>') | replace('\n', '<br>') | replace('*', '&bull;')}}|
 {%- endfor %}
