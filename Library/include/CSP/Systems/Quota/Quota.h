@@ -140,7 +140,7 @@ public:
 	const csp::common::Array<FeatureLimitInfo>& GetFeaturesLimitInfo() const;
 
 protected:
-	virtual int ParseErrorCode(const csp::common::String& Value) override;
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeaturesLimitResult(void*) {};
@@ -166,7 +166,7 @@ public:
 	const FeatureLimitInfo& GetFeatureLimitInfo() const;
 
 protected:
-	virtual int ParseErrorCode(const csp::common::String& Value) override;
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeatureLimitResult(void*) {};
@@ -192,7 +192,7 @@ public:
 	const UserTierInfo& GetUserTierInfo() const;
 
 protected:
-	virtual int ParseErrorCode(const csp::common::String& Value) override;
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	UserTierResult(void*) {};
@@ -218,7 +218,7 @@ public:
 	const FeatureQuotaInfo& GetFeatureQuotaInfo() const;
 
 protected:
-	virtual int ParseErrorCode(const csp::common::String& Value) override;
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeatureQuotaResult(void*) {};
@@ -244,7 +244,7 @@ public:
 	const csp::common::Array<FeatureQuotaInfo>& GetFeaturesQuotaInfo() const;
 
 protected:
-	virtual int ParseErrorCode(const csp::common::String& Value) override;
+	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	FeaturesQuotaResult(void*) {};
