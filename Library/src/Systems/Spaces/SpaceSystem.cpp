@@ -449,7 +449,20 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 							nullptr,
 							csp::web::EResponseCodes::ResponseNoContent);
 
-					static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(InGroupId, ResponseHandler);
+					// A service-side issue with our new approach to handling space deletion has been found
+					// which has drastically increased the time of our functional tests.
+					// As a short-term workaround to keep our functional test time manageable, we are restoring the previous approach.
+					// As soon as we've resolved the service-side issue, we'll be restoring the new implementation, and this workaround can be
+					// removed.
+					static const bool SPACE_DELETION_WORKAROUND = true;
+					if (SPACE_DELETION_WORKAROUND)
+					{
+						static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdDelete(InGroupId, ResponseHandler);
+					}
+					else
+					{
+						static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(InGroupId, ResponseHandler);
+					}
 				}
 				else
 				{
