@@ -115,6 +115,9 @@ async {{ name }}(
 {{# type.is_bool }}
         Module.setValue({{ name }}Pointer, {{ name }} ? 1 : 0, "i32");
 {{/ type.is_bool }}
+{{# type.is_enum }}
+        Module.setValue({{ name }}Pointer, {{ name }}, "i32");
+{{/ type.is_enum }}
     }
 
 {{/ type.is_class_or_interface }}
