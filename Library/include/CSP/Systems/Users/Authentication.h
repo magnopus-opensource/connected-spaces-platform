@@ -101,7 +101,8 @@ enum class ELoginStateResultFailureReason
 {
 	Unknown = -1,
 	None	= 0,
-	AgeNotVerified
+	AgeNotVerified,
+	EmailNotConfirmed
 };
 
 
