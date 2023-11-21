@@ -417,27 +417,27 @@ const int32_t StringToEQuotaResultFailureReason(const csp::common::String& Value
 
 	if (Value == "assetdetail_totaluploadsizeinkilobytes")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytesLimitExceeded);
+		return static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeLimitExceeded);
 	}
 
 	if (Value == "agoraoperation_groupownerquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::AgoraLimitExceeded);
+		return static_cast<int>(EQuotaResultFailureReason::AgoraDisabled);
 	}
 
 	if (Value == "openaioperation_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::OpenAILimitExceeded);
+		return static_cast<int>(EQuotaResultFailureReason::OpenAIDisabled);
 	}
 
 	if (Value == "shopify_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::ShopifyLimitExceeded);
+		return static_cast<int>(EQuotaResultFailureReason::ShopifyDisabled);
 	}
 
 	if (Value == "ticketedspaces_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::TicketedSpaceLimitExceeded);
+		return static_cast<int>(EQuotaResultFailureReason::TicketedSpaceDisabled);
 	}
 
 	return static_cast<int>(EQuotaResultFailureReason::Unknown);

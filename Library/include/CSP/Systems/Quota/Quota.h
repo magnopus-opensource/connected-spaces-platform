@@ -77,11 +77,11 @@ enum class EQuotaResultFailureReason
 	ConcurrentUsersLimitExceeded,
 	ObjectCaptureUploadLimitExceeded,
 	AudioVideoUploadLimitExceeded,
-	TotalUploadSizeInKilobytesLimitExceeded,
-	AgoraLimitExceeded,
-	OpenAILimitExceeded,
-	ShopifyLimitExceeded,
-	TicketedSpaceLimitExceeded
+	TotalUploadSizeLimitExceeded,
+	AgoraDisabled,
+	OpenAIDisabled,
+	ShopifyDisabled,
+	TicketedSpaceDisabled
 };
 
 /// @ingroup Quota System
