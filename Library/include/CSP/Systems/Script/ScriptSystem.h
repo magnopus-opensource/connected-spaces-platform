@@ -95,6 +95,13 @@ private:
 
 class CSP_API ScriptModuleAsset
 {
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
 public:
 	ScriptModuleAsset();
 	~ScriptModuleAsset();
@@ -134,8 +141,53 @@ private:
 };
 
 
+class CSP_API ScriptModuleAssetNames
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	ScriptModuleAssetNames();
+	~ScriptModuleAssetNames();
+
+	const csp::common::Array<csp::common::String>& GetScriptModuleAssetNames() const;
+
+private:
+	csp::common::Array<csp::common::String>& ModuleAssetNames;
+};
+
+
+class CSP_API ScriptModuleAssetNamesResult : public csp::services::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	friend class ScriptSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	ScriptModuleAssetNames& GetModuleAssetNames();
+	const ScriptModuleAssetNames& GetModuleAssetNames() const;
+
+private:
+	ScriptModuleAssetNamesResult(void*) {};
+	ScriptModuleAssetNamesResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+
+private:
+	ScriptModuleAssetNames ModuleAssets;
+
+	void SetResponseBody(const csp::common::String& Value);
+};
+
+
 typedef std::function<void(ScriptModuleCollectionResult& Result)> ScriptModuleCollectionResultCallback;
 typedef std::function<void(ScriptModuleAssetResult& Result)> ScriptModuleAssetResultCallback;
+typedef std::function<void(ScriptModuleAssetNamesResult& Result)> ScriptModuleAssetNamesResultCallback;
 
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
@@ -199,25 +251,29 @@ public:
 	 * // eg. SCRIPT_MODULE_COLLECTION_magnopus
 	 * void GetScriptModuleAssetsByNamespace(string namespace, callback);
 	 */
+	CSP_ASYNC_RESULT void GetScriptModuleAsset(const csp::common::String& ModuleNamespace,
+											   const csp::common::String& ModuleName,
+											   const ScriptModuleAssetResultCallback& Callback);
+	CSP_ASYNC_RESULT void GetScriptModuleAssetNames(const csp::common::String& ModuleNamespace, const ScriptModuleAssetNamesResultCallback& Callback);
 
 	// TODO: Delete these and replace with above
-	CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
-	CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
-	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
-	CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
-	CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
-											   const csp::common::String& Name,
-											   const ScriptModuleAssetResultCallback& Callback);
-	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& Namespace,
-												  const csp::common::String& Name,
-												  const csp::common::String& ModuleText,
-												  const NullResultCallback& Callback);
-	CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const ScriptModuleCollection& Collection,
-												  const ScriptModuleAsset& Module,
-												  const csp::common::String& NewModuleText,
-												  const NullResultCallback& Callback);
-	CSP_ASYNC_RESULT void
-		DeleteScriptModuleAsset(const ScriptModuleCollection& Collection, const ScriptModuleAsset& Module, const NullResultCallback& Callback);
+	// CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	// CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
+	// CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	// CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
+	// CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
+	//										   const csp::common::String& Name,
+	//										   const ScriptModuleAssetResultCallback& Callback);
+	// CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& Namespace,
+	//											  const csp::common::String& Name,
+	//											  const csp::common::String& ModuleText,
+	//											  const NullResultCallback& Callback);
+	// CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const ScriptModuleCollection& Collection,
+	//											  const ScriptModuleAsset& Module,
+	//											  const csp::common::String& NewModuleText,
+	//											  const NullResultCallback& Callback);
+	// CSP_ASYNC_RESULT void
+	//	DeleteScriptModuleAsset(const ScriptModuleCollection& Collection, const ScriptModuleAsset& Module, const NullResultCallback& Callback);
 	// Will also need a means of getting the names/Ids of all modules associated with a namespace.
 
 private:
