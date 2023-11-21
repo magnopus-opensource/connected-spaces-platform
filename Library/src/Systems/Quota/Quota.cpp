@@ -262,34 +262,24 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 	{
 		case TierFeatures::Agora:
 			return "Agora";
-			break;
 		case TierFeatures::Shopify:
 			return "Shopify";
-			break;
 		case TierFeatures::TicketedSpace:
 			return "TicketedSpace";
-			break;
 		case TierFeatures::AudioVideoUpload:
 			return "AudioVideoUpload";
-			break;
 		case TierFeatures::ObjectCaptureUpload:
 			return "ObjectCaptureUpload";
-			break;
 		case TierFeatures::OpenAI:
 			return "OpenAI";
-			break;
 		case TierFeatures::ScopeConcurrentUsers:
 			return "ScopeConcurrentUsers";
-			break;
 		case TierFeatures::TotalUploadSizeInKilobytes:
 			return "TotalUploadSizeInKilobytes";
-			break;
 		case TierFeatures::SpaceOwner:
 			return "SpaceOwner";
-			break;
 		case TierFeatures::Invalid:
 			return "Invalid";
-			break;
 		default:
 		{
 			CSP_LOG_ERROR_FORMAT("Unknown quota feature encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
