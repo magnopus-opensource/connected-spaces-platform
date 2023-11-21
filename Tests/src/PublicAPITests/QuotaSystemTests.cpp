@@ -449,22 +449,21 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_QUOTASYSTEM_TESTS || RUN_QUOTASYSTEM_STRINGTOEQUOTERESULTFAILUREREASONINTVALUE_TEST
-CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToEQuotaResultFailureReasonIntValueTest)
+CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, StringToEQuotaResultFailureReasonTest)
 {
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue(""), static_cast<int>(EQuotaResultFailureReason::None));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("group_spaceownerquota"), static_cast<int>(EQuotaResultFailureReason::SpaceOwnerQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("scopes_concurrentusersquota"),
-			  static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_objectcapturequota"),
-			  static_cast<int>(EQuotaResultFailureReason::ObjectCaptureQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_audiovideoquota"), static_cast<int>(EQuotaResultFailureReason::AudioVideoQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("assetdetail_totaluploadsizeinkilobytes"),
-			  static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytes));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("agoraoperation_groupownerquota"),
-			  static_cast<int>(EQuotaResultFailureReason::AgoraOwnerQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("openaioperation_userquota"), static_cast<int>(EQuotaResultFailureReason::OpenAIUserQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("shopify_userquota"), static_cast<int>(EQuotaResultFailureReason::ShopifyUserQuota));
-	EXPECT_EQ(StringToEQuotaResultFailureReasonIntValue("ticketedspaces_userquota"),
-			  static_cast<int>(EQuotaResultFailureReason::TicketedSpacesUserQuota));
+	EXPECT_EQ(StringToEQuotaResultFailureReason(""), static_cast<int>(EQuotaResultFailureReason::Unknown));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("group_spaceownerquota"), static_cast<int>(EQuotaResultFailureReason::SpaceLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("scopes_concurrentusersquota"),
+			  static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("assetdetail_objectcapturequota"),
+			  static_cast<int>(EQuotaResultFailureReason::ObjectCaptureUploadLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("assetdetail_audiovideoquota"),
+			  static_cast<int>(EQuotaResultFailureReason::AudioVideoUploadLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("assetdetail_totaluploadsizeinkilobytes"),
+			  static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytesLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("agoraoperation_groupownerquota"), static_cast<int>(EQuotaResultFailureReason::AgoraLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("openaioperation_userquota"), static_cast<int>(EQuotaResultFailureReason::OpenAILimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("shopify_userquota"), static_cast<int>(EQuotaResultFailureReason::ShopifyLimitExceeded));
+	EXPECT_EQ(StringToEQuotaResultFailureReason("ticketedspaces_userquota"), static_cast<int>(EQuotaResultFailureReason::TicketedSpaceLimitExceeded));
 }
 #endif

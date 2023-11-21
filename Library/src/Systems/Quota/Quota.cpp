@@ -70,14 +70,7 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 int FeaturesLimitResult::ParseErrorCode(const csp::common::String& Value)
 {
-	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
-
-	if (ReturnValue == 0)
-	{
-		return ResultBase::ParseErrorCode(Value);
-	}
-
-	return ReturnValue;
+	return StringToEQuotaResultFailureReason(Value);
 }
 
 const FeatureLimitInfo& FeatureLimitResult::GetFeatureLimitInfo() const
@@ -118,14 +111,7 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 int FeatureLimitResult::ParseErrorCode(const csp::common::String& Value)
 {
-	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
-
-	if (ReturnValue == 0)
-	{
-		return ResultBase::ParseErrorCode(Value);
-	}
-
-	return ReturnValue;
+	return StringToEQuotaResultFailureReason(Value);
 }
 
 const UserTierInfo& UserTierResult::GetUserTierInfo() const
@@ -164,14 +150,7 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
 
 int UserTierResult::ParseErrorCode(const csp::common::String& Value)
 {
-	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
-
-	if (ReturnValue == 0)
-	{
-		return ResultBase::ParseErrorCode(Value);
-	}
-
-	return ReturnValue;
+	return StringToEQuotaResultFailureReason(Value);
 }
 
 const FeatureQuotaInfo& FeatureQuotaResult::GetFeatureQuotaInfo() const
@@ -220,14 +199,7 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 
 int FeatureQuotaResult::ParseErrorCode(const csp::common::String& Value)
 {
-	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
-
-	if (ReturnValue == 0)
-	{
-		return ResultBase::ParseErrorCode(Value);
-	}
-
-	return ReturnValue;
+	return StringToEQuotaResultFailureReason(Value);
 }
 
 const csp::common::Array<FeatureQuotaInfo>& FeaturesQuotaResult::GetFeaturesQuotaInfo() const
@@ -280,14 +252,7 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 
 int FeaturesQuotaResult::ParseErrorCode(const csp::common::String& Value)
 {
-	const int32_t ReturnValue = StringToEQuotaResultFailureReasonIntValue(Value);
-
-	if (ReturnValue == 0)
-	{
-		return ResultBase::ParseErrorCode(Value);
-	}
-
-	return ReturnValue;
+	return StringToEQuotaResultFailureReason(Value);
 }
 
 const csp::common::String TierNameEnumToString(const TierNames& Value)
@@ -428,54 +393,54 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 	return TierFeatures::SpaceOwner;
 }
 
-const int32_t StringToEQuotaResultFailureReasonIntValue(const csp::common::String& Value)
+const int32_t StringToEQuotaResultFailureReason(const csp::common::String& Value)
 {
 	if (Value == "group_spaceownerquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::SpaceOwnerQuota);
+		return static_cast<int>(EQuotaResultFailureReason::SpaceLimitExceeded);
 	}
 
 	if (Value == "scopes_concurrentusersquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersQuota);
+		return static_cast<int>(EQuotaResultFailureReason::ConcurrentUsersLimitExceeded);
 	}
 
 	if (Value == "assetdetail_objectcapturequota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::ObjectCaptureQuota);
+		return static_cast<int>(EQuotaResultFailureReason::ObjectCaptureUploadLimitExceeded);
 	}
 
 	if (Value == "assetdetail_audiovideoquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::AudioVideoQuota);
+		return static_cast<int>(EQuotaResultFailureReason::AudioVideoUploadLimitExceeded);
 	}
 
 	if (Value == "assetdetail_totaluploadsizeinkilobytes")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytes);
+		return static_cast<int>(EQuotaResultFailureReason::TotalUploadSizeInKilobytesLimitExceeded);
 	}
 
 	if (Value == "agoraoperation_groupownerquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::AgoraOwnerQuota);
+		return static_cast<int>(EQuotaResultFailureReason::AgoraLimitExceeded);
 	}
 
 	if (Value == "openaioperation_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::OpenAIUserQuota);
+		return static_cast<int>(EQuotaResultFailureReason::OpenAILimitExceeded);
 	}
 
 	if (Value == "shopify_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::ShopifyUserQuota);
+		return static_cast<int>(EQuotaResultFailureReason::ShopifyLimitExceeded);
 	}
 
 	if (Value == "ticketedspaces_userquota")
 	{
-		return static_cast<int>(EQuotaResultFailureReason::TicketedSpacesUserQuota);
+		return static_cast<int>(EQuotaResultFailureReason::TicketedSpaceLimitExceeded);
 	}
 
-	return 0;
+	return static_cast<int>(EQuotaResultFailureReason::Unknown);
 }
 
 } // namespace csp::systems

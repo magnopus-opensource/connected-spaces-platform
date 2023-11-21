@@ -73,15 +73,15 @@ enum class EQuotaResultFailureReason
 {
 	Unknown = -1,
 	None	= 0,
-	SpaceOwnerQuota,
-	ConcurrentUsersQuota,
-	ObjectCaptureQuota,
-	AudioVideoQuota,
-	TotalUploadSizeInKilobytes,
-	AgoraOwnerQuota,
-	OpenAIUserQuota,
-	ShopifyUserQuota,
-	TicketedSpacesUserQuota
+	SpaceLimitExceeded,
+	ConcurrentUsersLimitExceeded,
+	ObjectCaptureUploadLimitExceeded,
+	AudioVideoUploadLimitExceeded,
+	TotalUploadSizeInKilobytesLimitExceeded,
+	AgoraLimitExceeded,
+	OpenAILimitExceeded,
+	ShopifyLimitExceeded,
+	TicketedSpaceLimitExceeded
 };
 
 /// @ingroup Quota System
@@ -277,7 +277,7 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value);
 /// @brief Returns a integer value of an EQuotaResultFailureReason.
 /// @param Value csp::common::String : EnumValue as a string
 /// @int32_t : Const int32_t as an enum value
-const int32_t StringToEQuotaResultFailureReasonIntValue(const csp::common::String& Value);
+const int32_t StringToEQuotaResultFailureReason(const csp::common::String& Value);
 
 /// @brief Callback containing array of feature progress.
 /// @param Result FeatureProgressResult : result class
