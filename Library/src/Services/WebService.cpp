@@ -20,11 +20,12 @@
 namespace csp::services
 {
 
-ResultBase::ResultBase() : FailureReason(0)
+ResultBase::ResultBase() : FailureReason(EResultBaseFailureReason::None)
 {
 }
 
-ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
+ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode)
+	: Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(EResultBaseFailureReason::None)
 {
 }
 
@@ -93,7 +94,7 @@ float ResultBase::GetResponseProgress() const
 	return ResponseProgress;
 }
 
-int ResultBase::GetFailureReason() const
+EResultBaseFailureReason ResultBase::GetFailureReason() const
 {
 	return FailureReason;
 }
@@ -104,9 +105,16 @@ void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResC
 	HttpResponseCode = HttpResCode;
 }
 
-int ResultBase::ParseErrorCode(const csp::common::String& Value)
+EResultBaseFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
 {
-	return (int) EResultBaseFailureReason::Unknown;
+	if (XErrorCodeToFailureReason.HasKey(Value))
+	{
+		return XErrorCodeToFailureReason[Value];
+	}
+	else
+	{
+		return EResultBaseFailureReason::Unknown;
+	}
 }
 
 } // namespace csp::services
