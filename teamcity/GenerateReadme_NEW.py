@@ -74,13 +74,20 @@ def main():
         match = re.match(r'\[(?P<jira_id>[a-zA-Z]+\-[0-9]+)\] (?P<tag>[a-zA-Z]+)(?P<breaking_change>[\!]*)\: (?P<title>.*)', full_title)
 
         if match is None:
-            print("Invalid commit title format. Skipping...", file=sys.stderr)
-            continue
-
-        jira_id = match.group("jira_id")
-        tag = match.group("tag")
-        title = match.group("title")
-        is_breaking_change = len(match.group("breaking_change")) > 0
+            match = re.match(r'(?P<jira_id>[a-zA-Z]+\-[0-9]+) (?P<title>.*)', full_title)
+            if match is None:
+                print("Invalid commit title format. Skipping...", file=sys.stderr)
+                continue
+            
+            jira_id = match.group("jira_id")
+            tag = "misc"
+            title = match.group("title")
+            is_breaking_change = False
+        else:
+            jira_id = match.group("jira_id")
+            tag = match.group("tag")
+            title = match.group("title")
+            is_breaking_change = len(match.group("breaking_change")) > 0
 
         if jira_id.startswith("NT-"):
             jira_id = "No Ticket"
