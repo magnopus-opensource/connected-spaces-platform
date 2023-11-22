@@ -157,6 +157,7 @@ protected:
 	csp::common::String ResponseBody;
 	EResultBaseFailureReason FailureReason;
 
+private:
 	csp::common::Map<csp::common::String, EResultBaseFailureReason> XErrorCodeToFailureReason = {
 		{"Join_OnBehalfNotAllowed", EResultBaseFailureReason::AddUserToSpaceDenied},
 		{"Join_GuestNotAllowed", EResultBaseFailureReason::UserSpaceAccessDenied},
