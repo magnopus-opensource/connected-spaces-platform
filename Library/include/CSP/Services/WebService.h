@@ -146,7 +146,7 @@ protected:
 
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
-	virtual EResultBaseFailureReason ParseErrorCode(const csp::common::String& Value);
+	EResultBaseFailureReason ParseErrorCode(const csp::common::String& Value);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
