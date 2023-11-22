@@ -111,10 +111,11 @@ EResultBaseFailureReason ResultBase::ParseErrorCode(const csp::common::String& V
 	{
 		return XErrorCodeToFailureReason[Value];
 	}
-	else
-	{
-		return EResultBaseFailureReason::Unknown;
-	}
+
+	CSP_LOG_ERROR_FORMAT(
+		"Unknown XErrorCode string encountered whilst converting the string to EResultBaseFailureReason enum value. Value passed in was %s.",
+		Value.c_str());
+	return EResultBaseFailureReason::Unknown;
 }
 
 } // namespace csp::services
