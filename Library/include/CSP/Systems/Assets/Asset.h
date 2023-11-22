@@ -312,7 +312,6 @@ private:
 	void SetResponseBody(const csp::common::String& Contents);
 
 	csp::common::String Uri;
-	csp::common::String XCodeError;
 };
 
 

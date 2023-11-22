@@ -309,16 +309,6 @@ const csp::common::String& UriResult::GetUri() const
 	return Uri;
 }
 
-csp::common::String& UriResult::GetXErrorCode()
-{
-	return XCodeError;
-}
-
-const csp::common::String& UriResult::GetXErrorCode() const
-{
-	return XCodeError;
-}
-
 UriResult UriResult::Invalid()
 {
 	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
@@ -337,11 +327,6 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 	const auto* Response = ApiResponse->GetResponse();
 	const auto& Headers	 = Response->GetPayload().GetHeaders();
-
-	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
-	{
-		XCodeError = Headers.at("x-errorcode").c_str();
-	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
