@@ -17,15 +17,54 @@
 
 #include "Services/ApiBase/ApiBase.h"
 
+namespace
+{
+std::map<csp::common::String, csp::services::ERequestFailureReason> XErrorCodeToFailureReason = {
+	{"Join_OnBehalfNotAllowed", csp::services::ERequestFailureReason::AddUserToSpaceDenied},
+	{"Join_GuestNotAllowed", csp::services::ERequestFailureReason::UserSpaceAccessDenied},
+	{"Join_UserBanned", csp::services::ERequestFailureReason::UserSpaceBannedAccessDenied},
+	{"Join_GroupFull", csp::services::ERequestFailureReason::UserSpaceFullAccessDenied},
+	{"Join_GroupInviteExpired", csp::services::ERequestFailureReason::UserSpaceInviteExpired},
+	{"Group_DuplicateName", csp::services::ERequestFailureReason::SpacePublicNameDuplicate},
+	{"Group_SpaceOwnerQuota", csp::services::ERequestFailureReason::UserMaxSpaceLimitReached},
+	{"User_AccountLocked", csp::services::ERequestFailureReason::UserAccountLocked},
+	{"User_EmptyPassword", csp::services::ERequestFailureReason::UserMissingPassword},
+	{"User_EmailNotConfirmed", csp::services::ERequestFailureReason::UserUnverifiedEmail},
+	{"User_BannedFromGroup", csp::services::ERequestFailureReason::UserBannedFromSpace},
+	{"User_EmailDomainNotAllowed", csp::services::ERequestFailureReason::UserInvalidEmailDomain},
+	{"User_SocialLoginInvalid", csp::services::ERequestFailureReason::UserInvalidThirdPartyAuth},
+	{"User_AgeNotVerified", csp::services::ERequestFailureReason::UserAgeNotVerified},
+	{"User_GuestLoginDisallowed", csp::services::ERequestFailureReason::UserGuestLoginDisallowed},
+	{"Prototype_ReservedKeysNotAllowed", csp::services::ERequestFailureReason::PrototypeReservedKeysNotAllowed},
+	{"AssetDetail_InvalidFileContents", csp::services::ERequestFailureReason::AssetInvalidFileContents},
+	{"AssetDetail_InvalidFileType", csp::services::ERequestFailureReason::AssetInvalidFileType},
+	{"AssetDetail_AudioVideoQuota", csp::services::ERequestFailureReason::AssetAudioVideoLimitReached},
+	{"AssetDetail_ObjectCaptureQuota", csp::services::ERequestFailureReason::AssetObjectCaptureLimitReached},
+	{"AssetDetail_TotalUploadSizeInKilobytes", csp::services::ERequestFailureReason::AssetTotalUploadSizeLimitReached},
+	{"ApplyTicket_UnknownTicketNumber", csp::services::ERequestFailureReason::TicketUnknownNumber},
+	{"ApplyTicket_EmailDoesntMatch", csp::services::ERequestFailureReason::TicketEmailMismatch},
+	{"VendorOAuthExchange_FailureToExchangeCode", csp::services::ERequestFailureReason::TicketVendorOAuthFailure},
+	{"ApplyTicket_InvalidAuthToken", csp::services::ERequestFailureReason::TicketOAuthTokenInvalid},
+	{"ApplyTicket_AlreadyApplied", csp::services::ERequestFailureReason::TicketAlreadyApplied},
+	{"Shopify_VendorConnectionBroken", csp::services::ERequestFailureReason::ShopifyConnectionBroken},
+	{"Shopify_InvalidStoreName", csp::services::ERequestFailureReason::ShopifyInvalidStoreName},
+	{"AgoraOperation_GroupOwnerQuota", csp::services::ERequestFailureReason::UserAgoraLimitReached},
+	{"OpenAIOperation_UserQuota", csp::services::ERequestFailureReason::UserOpenAILimitReached},
+	{"TicketedSpaces_UserQuota", csp::services::ERequestFailureReason::UserTicketedSpacesLimitReached},
+	{"Shopify_UserQuota", csp::services::ERequestFailureReason::UserShopifyLimitReached},
+	{"Scopes_ConcurrentUsersQuota", csp::services::ERequestFailureReason::UserSpaceConcurrentUsersLimitReached},
+};
+}
+
 namespace csp::services
 {
 
-ResultBase::ResultBase() : FailureReason(EResultBaseFailureReason::None)
+ResultBase::ResultBase() : FailureReason(ERequestFailureReason::None)
 {
 }
 
 ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode)
-	: Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(EResultBaseFailureReason::None)
+	: Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(ERequestFailureReason::None)
 {
 }
 
@@ -94,7 +133,7 @@ float ResultBase::GetResponseProgress() const
 	return ResponseProgress;
 }
 
-EResultBaseFailureReason ResultBase::GetFailureReason() const
+ERequestFailureReason ResultBase::GetFailureReason() const
 {
 	return FailureReason;
 }
@@ -105,17 +144,17 @@ void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResC
 	HttpResponseCode = HttpResCode;
 }
 
-EResultBaseFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
+ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
 {
-	if (XErrorCodeToFailureReason.HasKey(Value))
+	if (XErrorCodeToFailureReason.find(Value) != XErrorCodeToFailureReason.end())
 	{
 		return XErrorCodeToFailureReason[Value];
 	}
 
 	CSP_LOG_ERROR_FORMAT(
-		"Unknown XErrorCode string encountered whilst converting the string to EResultBaseFailureReason enum value. Value passed in was %s.",
+		"Unknown XErrorCode string encountered whilst converting the string to ERequestFailureReason enum value. Value passed in was %s.",
 		Value.c_str());
-	return EResultBaseFailureReason::Unknown;
+	return ERequestFailureReason::Unknown;
 }
 
 } // namespace csp::services

@@ -16,7 +16,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
 #include <cstdint>
@@ -60,7 +59,7 @@ enum class EResultCode : uint8_t
 };
 
 
-enum class EResultBaseFailureReason
+enum class ERequestFailureReason
 {
 	Unknown = -1,
 	None	= 0,
@@ -139,14 +138,14 @@ public:
 
 	/// @brief Get a code representing the failure reason, if relevant.
 	/// @return int
-	EResultBaseFailureReason GetFailureReason() const;
+	ERequestFailureReason GetFailureReason() const;
 
 protected:
 	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
-	EResultBaseFailureReason ParseErrorCode(const csp::common::String& Value);
+	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
@@ -155,44 +154,7 @@ protected:
 	float ResponseProgress = 0.0f;
 
 	csp::common::String ResponseBody;
-	EResultBaseFailureReason FailureReason;
-
-private:
-	csp::common::Map<csp::common::String, EResultBaseFailureReason> XErrorCodeToFailureReason = {
-		{"Join_OnBehalfNotAllowed", EResultBaseFailureReason::AddUserToSpaceDenied},
-		{"Join_GuestNotAllowed", EResultBaseFailureReason::UserSpaceAccessDenied},
-		{"Join_UserBanned", EResultBaseFailureReason::UserSpaceBannedAccessDenied},
-		{"Join_GroupFull", EResultBaseFailureReason::UserSpaceFullAccessDenied},
-		{"Join_GroupInviteExpired", EResultBaseFailureReason::UserSpaceInviteExpired},
-		{"Group_DuplicateName", EResultBaseFailureReason::SpacePublicNameDuplicate},
-		{"Group_SpaceOwnerQuota", EResultBaseFailureReason::UserMaxSpaceLimitReached},
-		{"User_AccountLocked", EResultBaseFailureReason::UserAccountLocked},
-		{"User_EmptyPassword", EResultBaseFailureReason::UserMissingPassword},
-		{"User_EmailNotConfirmed", EResultBaseFailureReason::UserUnverifiedEmail},
-		{"User_BannedFromGroup", EResultBaseFailureReason::UserBannedFromSpace},
-		{"User_EmailDomainNotAllowed", EResultBaseFailureReason::UserInvalidEmailDomain},
-		{"User_SocialLoginInvalid", EResultBaseFailureReason::UserInvalidThirdPartyAuth},
-		{"User_AgeNotVerified", EResultBaseFailureReason::UserAgeNotVerified},
-		{"User_GuestLoginDisallowed", EResultBaseFailureReason::UserGuestLoginDisallowed},
-		{"Prototype_ReservedKeysNotAllowed", EResultBaseFailureReason::PrototypeReservedKeysNotAllowed},
-		{"AssetDetail_InvalidFileContents", EResultBaseFailureReason::AssetInvalidFileContents},
-		{"AssetDetail_InvalidFileType", EResultBaseFailureReason::AssetInvalidFileType},
-		{"AssetDetail_AudioVideoQuota", EResultBaseFailureReason::AssetAudioVideoLimitReached},
-		{"AssetDetail_ObjectCaptureQuota", EResultBaseFailureReason::AssetObjectCaptureLimitReached},
-		{"AssetDetail_TotalUploadSizeInKilobytes", EResultBaseFailureReason::AssetTotalUploadSizeLimitReached},
-		{"ApplyTicket_UnknownTicketNumber", EResultBaseFailureReason::TicketUnknownNumber},
-		{"ApplyTicket_EmailDoesntMatch", EResultBaseFailureReason::TicketEmailMismatch},
-		{"VendorOAuthExchange_FailureToExchangeCode", EResultBaseFailureReason::TicketVendorOAuthFailure},
-		{"ApplyTicket_InvalidAuthToken", EResultBaseFailureReason::TicketOAuthTokenInvalid},
-		{"ApplyTicket_AlreadyApplied", EResultBaseFailureReason::TicketAlreadyApplied},
-		{"Shopify_VendorConnectionBroken", EResultBaseFailureReason::ShopifyConnectionBroken},
-		{"Shopify_InvalidStoreName", EResultBaseFailureReason::ShopifyInvalidStoreName},
-		{"AgoraOperation_GroupOwnerQuota", EResultBaseFailureReason::UserAgoraLimitReached},
-		{"OpenAIOperation_UserQuota", EResultBaseFailureReason::UserOpenAILimitReached},
-		{"TicketedSpaces_UserQuota", EResultBaseFailureReason::UserTicketedSpacesLimitReached},
-		{"Shopify_UserQuota", EResultBaseFailureReason::UserShopifyLimitReached},
-		{"Scopes_ConcurrentUsersQuota", EResultBaseFailureReason::UserSpaceConcurrentUsersLimitReached},
-	};
+	ERequestFailureReason FailureReason;
 };
 
 } // namespace csp::services
