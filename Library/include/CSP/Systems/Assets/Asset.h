@@ -292,14 +292,6 @@ public:
 	/// @return csp::common::String : uri of the uploaded asset.
 	const csp::common::String& GetUri() const;
 
-	/// @brief Retrieves the Error Code if the asset upload is unsuccessful.
-	/// @return csp::common::String : Error code of the failed asset upload.
-	csp::common::String& GetXErrorCode();
-
-	/// @brief Retrieves the Error Code if the asset upload is unsuccessful.
-	/// @return csp::common::String : Error code of the failed asset upload.
-	const csp::common::String& GetXErrorCode() const;
-
 protected:
 	UriResult() = delete;
 	UriResult(void*) {};
