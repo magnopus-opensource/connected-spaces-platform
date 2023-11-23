@@ -145,8 +145,6 @@ protected:
 
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
-	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
-
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
 
@@ -155,6 +153,9 @@ protected:
 
 	csp::common::String ResponseBody;
 	ERequestFailureReason FailureReason;
+
+private:
+	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
 };
 
 } // namespace csp::services
