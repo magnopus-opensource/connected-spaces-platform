@@ -44,19 +44,19 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
 	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](const MaintenanceInfoResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			Callback(Result);
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			Callback(MaintenanceInfoResult::Invalid());
 		}
 	};
 
-	csp::services::ResponseHandlerPtr MaintenanceResponseHandler
-		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
-																													  nullptr);
+	csp::systems::ResponseHandlerPtr MaintenanceResponseHandler
+		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::systems::NullDto>(GetMaintenanceInfoCallback,
+																													 nullptr);
 	static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(csp::CSPFoundation::GetClientUserAgentInfo().CHSEnvironment, MaintenanceResponseHandler);
 }
 

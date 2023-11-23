@@ -19,7 +19,7 @@
 #include "Services/SpatialDataService/Dto.h"
 
 
-namespace chs = csp::services::generated::spatialdataservice;
+namespace chs = csp::systems::generated::spatialdataservice;
 
 
 namespace
@@ -101,14 +101,14 @@ const PointOfInterest& POIResult::GetPointOfInterest() const
 	return POI;
 }
 
-void POIResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void POIResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* POIResponse					   = static_cast<chs::PointOfInterestDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		POIResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -126,14 +126,14 @@ const csp::common::Array<csp::systems::PointOfInterest>& POICollectionResult::Ge
 	return POIs;
 }
 
-void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void POICollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* POICollectionResponse			   = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
+	auto* POICollectionResponse			   = static_cast<csp::systems::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		POICollectionResponse->FromJson(Response->GetPayload().GetContent());

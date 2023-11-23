@@ -19,7 +19,7 @@
 
 	#include "TestHelpers.h"
 
-using namespace csp::services;
+using namespace csp::systems;
 
 CSP_INTERNAL_TEST(CSPEngine, ServicesTests, IsValidResponseCodeTest)
 {

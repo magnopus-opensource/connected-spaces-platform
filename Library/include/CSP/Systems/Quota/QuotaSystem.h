@@ -19,14 +19,6 @@
 #include "CSP/Systems/SystemBase.h"
 
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
-
 namespace csp::web
 {
 
@@ -36,6 +28,10 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
+
 /// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' Quota Server.
 /// Offers methods for receiving Quota Queries.
@@ -94,8 +90,8 @@ private:
 	QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* QuotaTierAssignmentAPI;
-	csp::services::ApiBase* QuotaManagementAPI;
-	csp::services::ApiBase* QuotaActivityAPI;
+	csp::systems::ApiBase* QuotaTierAssignmentAPI;
+	csp::systems::ApiBase* QuotaManagementAPI;
+	csp::systems::ApiBase* QuotaActivityAPI;
 };
 } // namespace csp::systems

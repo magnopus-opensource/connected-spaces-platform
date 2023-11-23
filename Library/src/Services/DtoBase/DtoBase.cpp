@@ -17,7 +17,7 @@
 
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 utility::string_t DtoBase::ToJson() const
@@ -42,4 +42,4 @@ utility::string_t NullDto::ToJson() const
 	return Empty;
 }
 
-} // namespace csp::services
+} // namespace csp::systems

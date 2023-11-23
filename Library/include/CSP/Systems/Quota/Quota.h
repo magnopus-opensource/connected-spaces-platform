@@ -23,7 +23,7 @@
 #include "CSP/Web/HTTPResponseCodes.h"
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
@@ -32,12 +32,7 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
 
-
-
-namespace csp::systems
-{
 /// @ingroup Quota System
 /// @brief Data representation period of time.
 enum class PeriodEnum
@@ -113,11 +108,11 @@ public:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progress.
-class CSP_API FeaturesLimitResult : public csp::services::ResultBase
+class CSP_API FeaturesLimitResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -129,18 +124,18 @@ public:
 private:
 	FeaturesLimitResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<FeatureLimitInfo> FeaturesLimitInfo;
 };
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progresses.
-class CSP_API FeatureLimitResult : public csp::services::ResultBase
+class CSP_API FeatureLimitResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -152,18 +147,18 @@ public:
 private:
 	FeatureLimitResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	FeatureLimitInfo FeatureLimitInfo;
 };
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving user tier information.
-class CSP_API UserTierResult : public csp::services::ResultBase
+class CSP_API UserTierResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -175,18 +170,18 @@ public:
 private:
 	UserTierResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	UserTierInfo UserTierInfo;
 };
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving feature quota information.
-class CSP_API FeatureQuotaResult : public csp::services::ResultBase
+class CSP_API FeatureQuotaResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -198,18 +193,18 @@ public:
 private:
 	FeatureQuotaResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	FeatureQuotaInfo FeatureQuotaInfo;
 };
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature quota information.
-class CSP_API FeaturesQuotaResult : public csp::services::ResultBase
+class CSP_API FeaturesQuotaResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -221,7 +216,7 @@ public:
 private:
 	FeaturesQuotaResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<FeatureQuotaInfo> FeaturesQuotaInfo;
 };

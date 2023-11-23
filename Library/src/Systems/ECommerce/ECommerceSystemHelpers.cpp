@@ -19,7 +19,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 
-namespace chs = csp::services::generated::aggregationservice;
+namespace chs = csp::systems::generated::aggregationservice;
 
 namespace csp::systems
 {

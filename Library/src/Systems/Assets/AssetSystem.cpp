@@ -23,7 +23,7 @@
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
 
-namespace chs = csp::services::generated::prototypeservice;
+namespace chs = csp::systems::generated::prototypeservice;
 
 constexpr int DEFAULT_SKIP_NUMBER		= 0;
 constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
@@ -174,7 +174,7 @@ void AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common:
 
 	const auto PrototypeInfo = CreatePrototypeDto(SpaceId, ParentAssetCollectionId, AssetCollectionName, Metadata, Type, Tags);
 
-	const csp::services::ResponseHandlerPtr ResponseHandler
+	const csp::systems::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(
 			Callback,
 			nullptr,
@@ -189,10 +189,10 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 
 	if (!PrototypeId.IsEmpty())
 	{
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																										nullptr,
-																										csp::web::EResponseCodes::ResponseNoContent);
+		csp::systems::ResponseHandlerPtr ResponseHandler
+			= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																									   nullptr,
+																									   csp::web::EResponseCodes::ResponseNoContent);
 
 		static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
 	}
@@ -205,7 +205,7 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 
 void AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollectionId, AssetCollectionResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdGet(AssetCollectionId, ResponseHandler);
@@ -213,7 +213,7 @@ void AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollect
 
 void AssetSystem::GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesNameNameGet(AssetCollectionName, ResponseHandler);
@@ -239,8 +239,8 @@ void AssetSystem::GetAssetCollectionsByIds(const csp::common::Array<csp::common:
 		Ids.push_back(AssetCollectionIds[i]);
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::systems::DtoArray<chs::PrototypeDto>>(
 			Callback,
 			nullptr);
 
@@ -340,8 +340,8 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 		AssetsType->push_back({ConvertAssetCollectionTypeToString(*AssetCollectionType)});
 	};
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::systems::DtoArray<chs::PrototypeDto>>(
 			Callback,
 			nullptr);
 
@@ -381,7 +381,7 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
 
 	auto PrototypeInfo = CreatePrototypeDto(SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, nullptr);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
@@ -430,7 +430,7 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,
 	Platform.push_back(DefaultPlatform);
 	AssetInfo->SetSupportedPlatforms(Platform);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(Callback,
 																									 nullptr,
 																									 csp::web::EResponseCodes::ResponseCreated);
@@ -467,7 +467,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 														  static_cast<int>(Asset.GetThirdPartyPlatformType())));
 
 	AssetInfo->SetAssetType(ConvertAssetTypeToString(Asset.Type));
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(Callback,
 																									 nullptr,
 																									 csp::web::EResponseCodes::ResponseCreated);
@@ -477,10 +477,10 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 
 void AssetSystem::DeleteAsset(const AssetCollection& AssetCollection, const Asset& Asset, NullResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																									  nullptr,
-																									  csp::web::EResponseCodes::ResponseNoContent);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																									 nullptr,
+																									 csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
 		->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdDelete(AssetCollection.Id, Asset.Id, ResponseHandler);
@@ -490,8 +490,8 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 {
 	std::vector<csp::common::String> PrototypeIds = {AssetCollection.Id};
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::systems::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
 		->apiV1PrototypesAssetDetailsGet(std::nullopt,
@@ -509,7 +509,7 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 
 void AssetSystem::GetAssetById(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, AssetResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= AssetDetailAPI->CreateHandler<AssetResultCallback, AssetResult, void, chs::AssetDetailDto>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
@@ -571,8 +571,8 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 		}
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::systems::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
 		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,
@@ -607,8 +607,8 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 		Ids.push_back(AssetCollectionIds[i]);
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, csp::systems::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	// Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
@@ -657,10 +657,10 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection,
 		Callback(LocalCallback);
 	};
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<UriResultCallback, UriResult, void, csp::services::NullDto>(InternalCallback,
-																									nullptr,
-																									csp::web::EResponseCodes::ResponseOK);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<UriResultCallback, UriResult, void, csp::systems::NullDto>(InternalCallback,
+																								   nullptr,
+																								   csp::web::EResponseCodes::ResponseOK);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
 		->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdBlobPost(AssetCollection.Id,
@@ -678,8 +678,8 @@ void AssetSystem::DownloadAssetData(const Asset& Asset, AssetDataResultCallback 
 
 void AssetSystem::DownloadAssetDataEx(const Asset& Asset, csp::common::CancellationToken& CancellationToken, AssetDataResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<AssetDataResultCallback, AssetDataResult, void, csp::services::AssetFileDto>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<AssetDataResultCallback, AssetDataResult, void, csp::systems::AssetFileDto>(Callback, nullptr);
 
 	FileManager->GetFile(Asset.Uri, ResponseHandler, CancellationToken);
 }
@@ -690,7 +690,7 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 	{
 		UInt64Result InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			auto& Headers		= Result.GetValue();
 			auto& ContentLength = Headers["content-length"];
@@ -701,8 +701,8 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 		Callback(InternalResult);
 	};
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AssetDetailAPI->CreateHandler<HTTPHeadersResultCallback, HTTPHeadersResult, void, csp::services::NullDto>(InternalCallback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= AssetDetailAPI->CreateHandler<HTTPHeadersResultCallback, HTTPHeadersResult, void, csp::systems::NullDto>(InternalCallback, nullptr);
 
 	FileManager->GetResponseHeaders(Asset.Uri, ResponseHandler);
 }
@@ -713,7 +713,7 @@ CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetColle
 	{
 		LODChainResult LODResult(AssetsResult);
 
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			LODChain Chain = CreateLODChainFromAssets(AssetsResult.GetAssets(), AssetCollection.Id);
 			LODResult.SetLODChain(std::move(Chain));
@@ -731,7 +731,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	// GetAssetsByCriteria
 	auto GetAssetsCallback = [this, AssetCollection, Asset, LODLevel, Callback](const AssetsResult& AssetsResult)
 	{
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();
 			LODChain Chain										  = CreateLODChainFromAssets(Assets, AssetCollection.Id);

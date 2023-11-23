@@ -20,7 +20,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 
-namespace chs = csp::services::generated::userservice;
+namespace chs = csp::systems::generated::userservice;
 
 namespace csp::systems
 {

@@ -17,14 +17,24 @@
 
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::services
+namespace
+{
+// static and anonymous namespace means that static libs won't build it
+// static std map key being value string and value being enum.
+// define enum in header with all the values
+
+std::map<std::string, csp::systems::EResultBaseFailureReason> m
+	= {{"1", csp::systems::EResultBaseFailureReason::None}, {"2", csp::systems::EResultBaseFailureReason::Unknown}};
+} // namespace
+
+namespace csp::systems
 {
 
 ResultBase::ResultBase() : FailureReason(0)
 {
 }
 
-ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
+ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
 {
 }
 
@@ -98,7 +108,7 @@ int ResultBase::GetFailureReason() const
 	return FailureReason;
 }
 
-void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode)
+void ResultBase::SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 {
 	Result			 = ResCode;
 	HttpResponseCode = HttpResCode;
@@ -109,4 +119,4 @@ int ResultBase::ParseErrorCode(const csp::common::String& Value)
 	return (int) EResultBaseFailureReason::Unknown;
 }
 
-} // namespace csp::services
+} // namespace csp::systems

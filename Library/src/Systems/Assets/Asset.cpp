@@ -24,7 +24,7 @@
 #include "Services/PrototypeService/Dto.h"
 
 
-namespace chs = csp::services::generated::prototypeservice;
+namespace chs = csp::systems::generated::prototypeservice;
 
 
 namespace csp::systems
@@ -241,14 +241,14 @@ const Asset& AssetResult::GetAsset() const
 	return Asset;
 }
 
-void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* AssetDetailResponse			   = static_cast<chs::AssetDetailDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
@@ -260,7 +260,7 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 AssetsResult AssetsResult::Invalid()
 {
-	static AssetsResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static AssetsResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
@@ -275,14 +275,14 @@ const csp::common::Array<Asset>& AssetsResult::GetAssets() const
 	return Assets;
 }
 
-void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetsResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* AssetsResponse				   = static_cast<csp::services::DtoArray<chs::AssetDetailDto>*>(ApiResponse->GetDto());
+	auto* AssetsResponse				   = static_cast<csp::systems::DtoArray<chs::AssetDetailDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		AssetsResponse->FromJson(Response->GetPayload().GetContent());
@@ -321,17 +321,17 @@ const csp::common::String& UriResult::GetXErrorCode() const
 
 UriResult UriResult::Invalid()
 {
-	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static UriResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
 
-void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void UriResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
@@ -343,7 +343,7 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 		XCodeError = Headers.at("x-errorcode").c_str();
 	}
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Uri = Response->GetPayload().GetContent();
 	}
@@ -377,7 +377,7 @@ size_t AssetDataResult::GetDataLength() const
 	return ResponseBody.Length();
 }
 
-void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetDataResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 }

@@ -21,13 +21,6 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
 
 namespace csp::web
 {
@@ -39,6 +32,9 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
 
 /// @ingroup Settings System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' settings service.
@@ -147,7 +143,7 @@ private:
 						 const csp::common::String& InKey,
 						 StringResultCallback Callback) const;
 
-	csp::services::ApiBase* SettingsAPI;
+	csp::systems::ApiBase* SettingsAPI;
 
 	void AddAvatarPortrait(const csp::common::String& UserId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
 	void AddAvatarPortraitWithBuffer(const csp::common::String& UserId,

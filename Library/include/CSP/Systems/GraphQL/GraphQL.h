@@ -23,21 +23,16 @@
 #include "CSP/Services/WebService.h"
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
 
-} // namespace csp::services
-
-
-namespace csp::systems
-{
 
 /// @ingroup GraphQL System
 /// @brief Data class used to contain information when a Response is received from GraphQL
 
-class CSP_API GraphQLResult : public csp::services::ResultBase
+class CSP_API GraphQLResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -53,7 +48,7 @@ public:
 	[[nodiscard]] const csp::common::String& GetResponse();
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 	csp::common::String GraphQLResponse;
 };
 // callback signatures

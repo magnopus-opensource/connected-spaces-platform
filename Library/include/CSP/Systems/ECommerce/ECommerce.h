@@ -19,19 +19,14 @@
 #include "CSP/Common/String.h"
 #include "CSP/Services/WebService.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
 
-
-
-namespace csp::systems
-{
 /// @ingroup ECommerce System
 /// @brief Represents currency information for a product
 class CSP_API CurrencyInfo
@@ -197,11 +192,11 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
-class CSP_API ProductInfoResult : public csp::services::ResultBase
+class CSP_API ProductInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -217,18 +212,18 @@ public:
 private:
 	ProductInfoResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	ProductInfo ProductInformation;
 };
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Checkout Info.
-class CSP_API CheckoutInfoResult : public csp::services::ResultBase
+class CSP_API CheckoutInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -244,7 +239,7 @@ public:
 private:
 	CheckoutInfoResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	CheckoutInfo CheckoutInformation;
 };
@@ -252,13 +247,13 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get a Cart.
-class CSP_API CartInfoResult : public csp::services::ResultBase
+class CSP_API CartInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ECommerceSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -275,18 +270,18 @@ public:
 
 private:
 	CartInfoResult(void*) {};
-	CartInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	CartInfo Cart;
 };
 
-class CSP_API AddShopifyStoreResult : public csp::services::ResultBase
+class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -298,16 +293,16 @@ public:
 private:
 	AddShopifyStoreResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	ShopifyStoreInfo Store;
 };
 
-class CSP_API ValidateShopifyStoreResult : public csp::services::ResultBase
+class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -317,7 +312,7 @@ public:
 private:
 	ValidateShopifyStoreResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 };
 
 typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;

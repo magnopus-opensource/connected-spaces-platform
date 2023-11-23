@@ -26,7 +26,7 @@ namespace csp::multiplayer
 class ConversationSystem;
 }
 
-namespace csp::services
+namespace csp::systems
 {
 
 // TODO: Add support for template friends in wrapper generator and remove usage of these ignore macros
@@ -34,13 +34,9 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
 
-
-namespace csp::systems
-{
 /// @brief A result handler that is used to notify a user of an error.
-class CSP_API NullResult : public csp::services::ResultBase
+class CSP_API NullResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -48,7 +44,7 @@ class CSP_API NullResult : public csp::services::ResultBase
 	friend class UserSystem;
 	friend class csp::multiplayer::ConversationSystem;
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 public:
@@ -57,15 +53,15 @@ public:
 	CSP_NO_EXPORT static NullResult Invalid();
 
 protected:
-	NullResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT NullResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 	NullResult() = default;
 	NullResult(void*) {};
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
-class CSP_API BooleanResult : public csp::services::ResultBase
+class CSP_API BooleanResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -73,7 +69,7 @@ class CSP_API BooleanResult : public csp::services::ResultBase
 	friend class SpaceSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -84,7 +80,7 @@ public:
 private:
 	BooleanResult() = default;
 	BooleanResult(void*) {};
-	BooleanResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	BooleanResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(bool InValue);
 
@@ -92,7 +88,7 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
-class CSP_API StringResult : public csp::services::ResultBase
+class CSP_API StringResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -100,7 +96,7 @@ class CSP_API StringResult : public csp::services::ResultBase
 	friend class csp::multiplayer::ConversationSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -115,7 +111,7 @@ public:
 private:
 	StringResult() = default;
 	StringResult(void*) {};
-	StringResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::String& InValue);
 
@@ -123,14 +119,14 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
-class CSP_API StringArrayResult : public csp::services::ResultBase
+class CSP_API StringArrayResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
 
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -141,7 +137,7 @@ public:
 private:
 	StringArrayResult() = default;
 	StringArrayResult(void*) {};
-	StringArrayResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	StringArrayResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::Array<csp::common::String>& InValue);
 
@@ -149,14 +145,14 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
-class CSP_API UInt64Result : public csp::services::ResultBase
+class CSP_API UInt64Result : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
 
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -167,7 +163,7 @@ public:
 private:
 	UInt64Result() = default;
 	UInt64Result(void*) {};
-	UInt64Result(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UInt64Result(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(uint64_t InValue);
 
@@ -176,21 +172,21 @@ private:
 
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
 /// passing a Map of Strings representing the HTTP Responses.
-class CSP_API HTTPHeadersResult : public csp::services::ResultBase
+class CSP_API HTTPHeadersResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
 
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
 public:
 	/// @brief Event function used to act upon a HTTP response.
 	/// @param ApiResponse : An ApiResponseBase instance used for translating response calls.
-	CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	CSP_NO_EXPORT void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	/// @brief A getter which returns the map of strings representing HTTP responses passed via the result.
 	[[nodiscard]] const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
@@ -198,7 +194,7 @@ public:
 private:
 	HTTPHeadersResult() = default;
 	HTTPHeadersResult(void*) {};
-	HTTPHeadersResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	HTTPHeadersResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	csp::common::Map<csp::common::String, csp::common::String> Value;
 };

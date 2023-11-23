@@ -133,7 +133,7 @@ void WebClient::RefreshIfExpired()
 
 		csp::systems::LoginStateResultCallback LoginStateResCallback = [this](csp::systems::LoginStateResult& LoginStateRes)
 		{
-			if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 #ifdef CSP_WASM
 				WasmRequestsMutex.lock();
@@ -154,7 +154,7 @@ void WebClient::RefreshIfExpired()
 				RefreshStarted = false;
 				UserSystem->NotifyRefreshTokenHasChanged();
 			}
-			else if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Failed)
+			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
 				assert(false && "User authentication token refresh failed!");
 			}

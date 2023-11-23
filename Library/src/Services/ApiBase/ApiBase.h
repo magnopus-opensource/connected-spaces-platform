@@ -28,7 +28,7 @@
 #include <vector>
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 enum class EResponseCode : uint8_t
@@ -269,4 +269,4 @@ template <class DtoType> ApiResponse<DtoType>::~ApiResponse()
 	CSP_DELETE(Dto);
 }
 
-} // namespace csp::services
+} // namespace csp::systems

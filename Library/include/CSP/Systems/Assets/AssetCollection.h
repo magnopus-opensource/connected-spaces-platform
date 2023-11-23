@@ -25,7 +25,7 @@
 
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
@@ -34,12 +34,6 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-
-
-namespace csp::systems
-{
 
 enum class EAssetCollectionType
 {
@@ -98,11 +92,11 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset collection.
-class CSP_API AssetCollectionResult : public csp::services::ResultBase
+class CSP_API AssetCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -118,7 +112,7 @@ public:
 private:
 	AssetCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	AssetCollection AssetCollection;
 };
@@ -127,13 +121,13 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of asset collections.
-class CSP_API AssetCollectionsResult : public csp::services::ResultBase
+class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -158,9 +152,9 @@ public:
 
 private:
 	AssetCollectionsResult(void*) {};
-	AssetCollectionsResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	void FillResultTotalCount(const csp::common::String& JsonContent);
 

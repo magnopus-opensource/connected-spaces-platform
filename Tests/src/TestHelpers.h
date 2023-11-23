@@ -105,14 +105,14 @@ public:
 template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
 {
 public:
-	ServiceResponseReceiver(csp::services::EResultCode InExpectedResult = csp::services::EResultCode::Success)
+	ServiceResponseReceiver(csp::systems::EResultCode InExpectedResult = csp::systems::EResultCode::Success)
 		: ExpectedResult(InExpectedResult), ResponseReceived(false)
 	{
 	}
 
 	void OnResult(const ResultType& InResult)
 	{
-		if (InResult.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (InResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 			return;
 
 		EXPECT_TRUE(InResult.GetResultCode() == ExpectedResult);
@@ -135,7 +135,7 @@ public:
 	}
 
 private:
-	csp::services::EResultCode ExpectedResult;
+	csp::systems::EResultCode ExpectedResult;
 	std::atomic<bool> ResponseReceived;
 };
 

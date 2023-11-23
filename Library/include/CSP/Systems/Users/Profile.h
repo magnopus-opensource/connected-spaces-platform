@@ -21,19 +21,13 @@
 
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-
-
-namespace csp::systems
-{
 
 /// @brief A basic class abstraction for a user profile, including User Id and name, a display name, avatar information
 /// and the users latest platform used.
@@ -67,11 +61,11 @@ public:
 
 
 /// @brief Result structure for a Profile request
-class CSP_API ProfileResult : public csp::services::ResultBase
+class CSP_API ProfileResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -82,18 +76,18 @@ public:
 private:
 	ProfileResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	Profile Profile;
 };
 
 
 /// @brief Result structure for a BasicProfile request
-class CSP_API BasicProfilesResult : public csp::services::ResultBase
+class CSP_API BasicProfilesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -104,7 +98,7 @@ public:
 private:
 	BasicProfilesResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<BasicProfile> Profiles;
 };

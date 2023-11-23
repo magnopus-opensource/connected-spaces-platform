@@ -25,13 +25,6 @@
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services
-{
-
-class ApiBase;
-
-} // namespace csp::services
-
 
 namespace csp::web
 {
@@ -43,6 +36,8 @@ class RemoteFileManager;
 
 namespace csp::systems
 {
+
+class ApiBase;
 
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
@@ -236,8 +231,8 @@ private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* PrototypeAPI;
-	csp::services::ApiBase* AssetDetailAPI;
+	csp::systems::ApiBase* PrototypeAPI;
+	csp::systems::ApiBase* AssetDetailAPI;
 
 	csp::web::RemoteFileManager* FileManager;
 };

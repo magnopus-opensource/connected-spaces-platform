@@ -24,8 +24,8 @@
 #include "Services/UserService/Api.h"
 
 
-namespace chs			  = csp::services::generated::userservice;
-namespace chs_aggregation = csp::services::generated::aggregationservice;
+namespace chs			  = csp::systems::generated::userservice;
+namespace chs_aggregation = csp::systems::generated::aggregationservice;
 
 
 namespace
@@ -133,13 +133,13 @@ void UserSystem::Login(const csp::common::String& UserName,
 		{
 			Callback(LoginStateRes);
 
-			if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				NotifyRefreshTokenHasChanged();
 			}
 		};
 
-		csp::services::ResponseHandlerPtr ResponseHandler
+		csp::systems::ResponseHandlerPtr ResponseHandler
 			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(LoginStateResCallback,
 																													 &CurrentLoginState);
 
@@ -148,7 +148,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -159,7 +159,7 @@ void UserSystem::LoginWithToken(const csp::common::String& UserId, const csp::co
 	{
 		Callback(LoginStateRes);
 
-		if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			NotifyRefreshTokenHasChanged();
 		}
@@ -183,7 +183,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
 			Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
 		}
 
-		csp::services::ResponseHandlerPtr ResponseHandler
+		csp::systems::ResponseHandlerPtr ResponseHandler
 			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
 
 		static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginPost(Request, ResponseHandler);
@@ -191,7 +191,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -214,7 +214,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 	// Get provider_base_url and client_id
 	ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback = [=](const ProviderDetailsResult& ProviderDetailsRes)
 	{
-		if (ProviderDetailsRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto AuthoriseUrl				   = ProviderDetailsRes.GetDetails().AuthoriseURL;
 			const auto ProviderClientId			   = ProviderDetailsRes.GetDetails().ProviderClientId;
@@ -235,7 +235,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 			SuccessResult.SetValue(AuthoriseURL);
 			Callback(SuccessResult);
 		}
-		else if (ProviderDetailsRes.GetResultCode() != csp::services::EResultCode::InProgress)
+		else if (ProviderDetailsRes.GetResultCode() != csp::systems::EResultCode::InProgress)
 		{
 			CSP_LOG_FORMAT(LogLevel::Error,
 						   "The retrieval of third party details was not successful. ResCode: %d, HttpResCode: %d",
@@ -250,7 +250,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 		}
 	};
 
-	const csp::services::ResponseHandlerPtr ResponseHandler
+	const csp::systems::ResponseHandlerPtr ResponseHandler
 		= AuthenticationAPI->CreateHandler<ProviderDetailsResultCallback, ProviderDetailsResult, void, chs::SocialProviderInfo>(
 			ThirdPartyAuthenticationDetailsCallback,
 			nullptr,
@@ -275,7 +275,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;
-		ErrorResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseForbidden);
+		ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseForbidden);
 		Callback(ErrorResult);
 	}
 
@@ -286,7 +286,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;
-		ErrorResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(ErrorResult);
 	}
 
@@ -294,7 +294,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 	{
 		Callback(LoginStateRes);
 
-		if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			NotifyRefreshTokenHasChanged();
 		}
@@ -314,7 +314,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 
 	CurrentLoginState.State = ELoginState::LoginRequested;
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(LoginStateResCallback,
 																												 &CurrentLoginState);
 
@@ -332,7 +332,7 @@ void UserSystem::ExchangeKey(const csp::common::String& UserId, const csp::commo
 		Request->SetUserId(UserId);
 		Request->SetKey(Key);
 
-		csp::services::ResponseHandlerPtr ResponseHandler
+		csp::systems::ResponseHandlerPtr ResponseHandler
 			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
 
 		static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersKeyexchangePost(Request, ResponseHandler);
@@ -340,7 +340,7 @@ void UserSystem::ExchangeKey(const csp::common::String& UserId, const csp::commo
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -355,8 +355,8 @@ void UserSystem::Logout(LogoutResultCallback Callback)
 		Request->SetUserId(CurrentLoginState.UserId);
 		Request->SetDeviceId(CurrentLoginState.DeviceId);
 
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= AuthenticationAPI->CreateHandler<LogoutResultCallback, LogoutResult, LoginState, csp::services::NullDto>(
+		csp::systems::ResponseHandlerPtr ResponseHandler
+			= AuthenticationAPI->CreateHandler<LogoutResultCallback, LogoutResult, LoginState, csp::systems::NullDto>(
 				Callback,
 				&CurrentLoginState,
 				csp::web::EResponseCodes::ResponseNoContent);
@@ -366,7 +366,7 @@ void UserSystem::Logout(LogoutResultCallback Callback)
 	else
 	{
 		csp::systems::LogoutResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -413,7 +413,7 @@ void UserSystem::CreateUser(const csp::common::Optional<csp::common::String>& Us
 	{
 		Request->SetInviteToken(*InviteToken);
 	}
-	const csp::services::ResponseHandlerPtr ResponseHandler
+	const csp::systems::ResponseHandlerPtr ResponseHandler
 		= ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs::ProfileDto>(Callback,
 																								 nullptr,
 																								 csp::web::EResponseCodes::ResponseCreated);
@@ -437,7 +437,7 @@ void UserSystem::UpgradeGuestAccount(const csp::common::String& UserName,
 	Request->SetPassword(Password);
 	Request->SetGuestDeviceId(csp::CSPFoundation::GetDeviceId());
 
-	const csp::services::ResponseHandlerPtr ResponseHandler
+	const csp::systems::ResponseHandlerPtr ResponseHandler
 		= ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs::ProfileDto>(Callback, nullptr);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdUpgradeGuestPost(UserId, Request, ResponseHandler);
@@ -447,10 +447,10 @@ void UserSystem::ConfirmUserEmail(NullResultCallback Callback)
 {
 	const csp::common::String UserId = CurrentLoginState.UserId;
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																								  nullptr,
-																								  csp::web::EResponseCodes::ResponseNoContent);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																								 nullptr,
+																								 csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdConfirmEmailPost(UserId, nullptr, ResponseHandler);
 }
@@ -466,28 +466,28 @@ void UserSystem::ResetUserPassword(const csp::common::String& Token,
 	Request->SetToken(Token);
 	Request->SetNewPassword(NewPassword);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																								  nullptr,
-																								  csp::web::EResponseCodes::ResponseNoContent);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																								 nullptr,
+																								 csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdTokenChangePasswordPost(UserId, Request, ResponseHandler);
 }
 
 void UserSystem::UpdateUserDisplayName(const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback)
 {
-	const csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
+	const csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback, nullptr);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdDisplayNamePut(UserId, NewUserDisplayName, ResponseHandler);
 }
 
 void UserSystem::DeleteUser(const csp::common::String& UserId, NullResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																								  nullptr,
-																								  csp::web::EResponseCodes::ResponseNoContent);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																								 nullptr,
+																								 csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdDelete(UserId, ResponseHandler);
 }
@@ -515,17 +515,17 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 			RedirectUrlValue = *RedirectUrl;
 		}
 
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
-																									  nullptr,
-																									  csp::web::EResponseCodes::ResponseNoContent);
+		csp::systems::ResponseHandlerPtr ResponseHandler
+			= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback,
+																									 nullptr,
+																									 csp::web::EResponseCodes::ResponseNoContent);
 
 		static_cast<chs::ProfileApi*>(ProfileAPI)
 			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, Request, ResponseHandler);
 	}
 	else
 	{
-		Callback(csp::systems::NullResult(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest)));
+		Callback(csp::systems::NullResult(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest)));
 	}
 }
 
@@ -533,7 +533,7 @@ void UserSystem::GetProfileByUserId(const csp::common::String& InUserId, Profile
 {
 	const csp::common::String UserId = InUserId;
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, void, chs::ProfileDto>(Callback, nullptr);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersUserIdGet(UserId, ResponseHandler);
@@ -543,17 +543,17 @@ void UserSystem::GetProfilesByUserId(const csp::common::Array<csp::common::Strin
 {
 	const std::vector<csp::common::String> UserIds(InUserIds.Data(), InUserIds.Data() + InUserIds.Size());
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<BasicProfilesResultCallback, BasicProfilesResult, void, csp::services::DtoArray<chs::ProfileLiteDto> >(Callback,
-																																		   nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<BasicProfilesResultCallback, BasicProfilesResult, void, csp::systems::DtoArray<chs::ProfileLiteDto> >(Callback,
+																																		  nullptr);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersLiteGet(UserIds, ResponseHandler);
 }
 
 void UserSystem::Ping(PingResponseReceivedCallback Callback)
 {
-	csp::services::ResponseHandlerPtr PingResponseHandler
-		= PingAPI->CreateHandler<PingResponseReceivedCallback, PingResponseReceived, void, csp::services::NullDto>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr PingResponseHandler
+		= PingAPI->CreateHandler<PingResponseReceivedCallback, PingResponseReceived, void, csp::systems::NullDto>(Callback, nullptr);
 	static_cast<chs::PingApi*>(PingAPI)->pingGet(PingResponseHandler);
 }
 
@@ -575,7 +575,7 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, UserToken
 
 	TokenInfo->SetParameters(Parameters);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ExternalServiceProxyApi->CreateHandler<UserTokenResultCallback, AgoraUserTokenResult, void, chs_aggregation::ServiceResponse>(Callback,
 																																		nullptr);
 	static_cast<chs_aggregation::ExternalServiceProxyApi*>(ExternalServiceProxyApi)->serviceProxyPost(TokenInfo, ResponseHandler);
@@ -593,8 +593,8 @@ void UserSystem::ResendVerificationEmail(const csp::common::String& InEmail,
 		RedirectUrl = *InRedirectUrl;
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<NullResultCallback, NullResult, void, csp::systems::NullDto>(Callback, nullptr);
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersEmailsEmailConfirmEmailReSendPost(InEmail, Tenant, RedirectUrl, ResponseHandler);
 }
@@ -609,7 +609,7 @@ void UserSystem::RefreshAuthenticationSession(const csp::common::String& UserId,
 	Request->SetUserId(UserId);
 	Request->SetRefreshToken(RefreshToken);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
 
 	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);

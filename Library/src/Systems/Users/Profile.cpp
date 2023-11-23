@@ -21,7 +21,7 @@
 
 
 
-namespace chs = csp::services::generated::userservice;
+namespace chs = csp::systems::generated::userservice;
 
 
 
@@ -134,14 +134,14 @@ Profile::Profile() : IsEmailConfirmed(false)
 
 
 
-void ProfileResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ProfileResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto ProfileResponse				   = static_cast<chs::ProfileDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		ProfileResponse->FromJson(Response->GetPayload().GetContent());
@@ -162,14 +162,14 @@ const Profile& ProfileResult::GetProfile() const
 
 
 
-void BasicProfilesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicProfilesResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* ProfileDataResponse			   = static_cast<csp::services::DtoArray<chs::ProfileLiteDto>*>(ApiResponse->GetDto());
+	auto* ProfileDataResponse			   = static_cast<csp::systems::DtoArray<chs::ProfileLiteDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		ProfileDataResponse->FromJson(Response->GetPayload().GetContent());

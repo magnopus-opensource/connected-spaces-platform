@@ -23,19 +23,13 @@
 #include "CSP/Systems/SystemsResult.h"
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-
-
-namespace csp::systems
-{
 
 /// @ingroup Space System
 /// @brief Data representation of a Site associated with a Space.
@@ -58,11 +52,11 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to retrieve Site information.
-class CSP_API SiteResult : public csp::services::ResultBase
+class CSP_API SiteResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -75,18 +69,18 @@ public:
 private:
 	SiteResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	Site Site;
 };
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of Site information.
-class CSP_API SitesCollectionResult : public csp::services::ResultBase
+class CSP_API SitesCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -102,7 +96,7 @@ public:
 private:
 	SitesCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<Site> Sites;
 };

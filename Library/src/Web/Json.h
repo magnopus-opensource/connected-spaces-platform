@@ -28,11 +28,11 @@
 #include <string>
 #include <vector>
 
-namespace csp::services
+namespace csp::systems
 {
 class DtoBase;
 class EnumBase;
-} // namespace csp::services
+} // namespace csp::systems
 
 namespace csp::web
 {
@@ -67,14 +67,14 @@ template <typename U> rapidjson::Value TypeToJsonValue(const std::vector<U>& Val
 
 template <typename U, typename V> rapidjson::Value TypeToJsonValue(const std::map<U, V>& Value, RapidJsonAlloc& Allocator);
 
-template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>* = nullptr>
+template <class T, typename std::enable_if_t<std::is_base_of_v<csp::systems::DtoBase, T>>* = nullptr>
 rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
 
-template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
+template <class T, typename std::enable_if_t<std::is_base_of_v<csp::systems::EnumBase, T>>* = nullptr>
 rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
 
 template <class T,
-		  typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
+		  typename std::enable_if_t<!std::is_base_of_v<csp::systems::DtoBase, T> && !std::is_base_of_v<csp::systems::EnumBase, T>>* = nullptr>
 rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator);
 
 template <> rapidjson::Value TypeToJsonValue(const bool& Value, RapidJsonAlloc& Allocator);
@@ -103,14 +103,14 @@ template <typename U> inline void JsonValueToType(const rapidjson::Value& Value,
 
 template <typename U, typename V> inline void JsonValueToType(const rapidjson::Value& Value, std::map<U, V>& Type);
 
-template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>* = nullptr>
+template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::systems::DtoBase, T>>* = nullptr>
 inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
 
-template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
+template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::systems::EnumBase, T>>* = nullptr>
 inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
 
 template <class T,
-		  typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>* = nullptr>
+		  typename std::enable_if_t<!std::is_base_of_v<csp::systems::DtoBase, T> && !std::is_base_of_v<csp::systems::EnumBase, T>>* = nullptr>
 inline void JsonValueToType(const rapidjson::Value& Value, T& Type);
 
 template <> inline void JsonValueToType(const rapidjson::Value& Value, bool& Type);
@@ -132,7 +132,7 @@ template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::comm
 template <> inline void JsonValueToType(const rapidjson::Value& Value, rapidjson::Document& Type);
 
 // Catch-all template for notifying the user if no specialisation exists for serialising the specified type
-template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
+template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::systems::DtoBase, T> && !std::is_base_of_v<csp::systems::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON serialisation! You should probably add support for it :)")]] inline rapidjson::Value
 	TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator)
 {
@@ -140,7 +140,7 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
 }
 
 // Serialisation function for types that derive from DtoBase
-template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>*>
+template <class T, typename std::enable_if_t<std::is_base_of_v<csp::systems::DtoBase, T>>*>
 inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator)
 {
 	csp::common::String Json = Value.ToJson();
@@ -151,7 +151,7 @@ inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocato
 }
 
 // Serialisation function for types that derive from EnumDtoBase
-template <class T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>*>
+template <class T, typename std::enable_if_t<std::is_base_of_v<csp::systems::EnumBase, T>>*>
 inline rapidjson::Value TypeToJsonValue(const T& Value, RapidJsonAlloc& Allocator)
 {
 	csp::common::String Json = Value.ToJson();
@@ -279,14 +279,14 @@ template <class T> inline csp::common::String TypeToJsonString(const std::vector
 }
 
 // Deserialisation function for types that derive from EnumBase
-template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::EnumBase, T>>*>
+template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::systems::EnumBase, T>>*>
 inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
 {
 	Type.FromJson(CSP_TEXT(Value.GetString()));
 }
 
 // Catch-all template for notifying the user if no specialisation exists for deserialising to the specified type
-template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::DtoBase, T> && !std::is_base_of_v<csp::services::EnumBase, T>>*>
+template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::systems::DtoBase, T> && !std::is_base_of_v<csp::systems::EnumBase, T>>*>
 [[deprecated("Unsupported type for JSON deserialisation! You should probably add support for it :)")]] inline void
 	JsonValueToType(const rapidjson::Value& Value, T& Type)
 {
@@ -294,7 +294,7 @@ template <class T, typename std::enable_if_t<!std::is_base_of_v<csp::services::D
 }
 
 // Deserialisation function for types that derive from DtoBase
-template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::services::DtoBase, T>>*>
+template <typename T, typename std::enable_if_t<std::is_base_of_v<csp::systems::DtoBase, T>>*>
 inline void JsonValueToType(const rapidjson::Value& Value, T& Type)
 {
 	Type.FromJson(Value.IsString() ? CSP_TEXT(Value.GetString()) : JsonObjectToString(Value));

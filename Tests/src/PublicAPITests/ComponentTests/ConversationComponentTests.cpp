@@ -38,9 +38,9 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -83,7 +83,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		// Set up multiplayer connection
 		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -168,7 +168,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent, CreateConversation, "TestMessage");
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_TRUE(Result.GetValue() != "");
 
 			ConversationId = Result.GetValue();
@@ -177,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, "Test");
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 			MessageId = Result.GetMessageInfo().Id;
 
@@ -187,7 +187,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent, GetMessageInfo, MessageId);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetMessageInfo().Edited, false);
 		}
 
@@ -196,14 +196,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 			NewData.Message = "NewTest";
 			auto [Result]	= AWAIT(ConversationComponent, SetMessageInfo, MessageId, NewData);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetMessageInfo().Edited, true);
 		}
 
 		{
 			auto [Result] = AWAIT(ConversationComponent, GetConversationInfo);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
 			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
 			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
@@ -233,7 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 			auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, NewData);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
 			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
 			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage1");
@@ -268,7 +268,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 			MessageId = Result.GetMessageInfo().Id;
 		}
@@ -276,7 +276,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent, GetAllMessages);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetTotalCount(), 2);
 
 			EXPECT_EQ(Result.GetMessages()[0].Id, MessageId);
@@ -285,20 +285,20 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent, GetMessage, MessageId);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetMessageInfo().Id, MessageId);
 		}
 
 		{
 			auto [Result] = AWAIT(ConversationComponent, DeleteMessage, MessageId);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
 		{
 			auto [Result] = AWAIT(ConversationComponent, DeleteConversation);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
 		AWAIT(Connection, Disconnect);
@@ -345,7 +345,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		// Set up multiplayer connection
 		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -384,7 +384,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent1, CreateConversation, "TestMessage");
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_TRUE(Result.GetValue() != "");
 
 			ConversationId = Result.GetValue();
@@ -395,7 +395,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
 			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
 			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
@@ -419,7 +419,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 		}
 
 		{
@@ -431,13 +431,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 		}
 
 		{
 			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
 			EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
 			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
@@ -461,7 +461,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 		{
 			auto [Result] = AWAIT(ConversationComponent2, DeleteConversation);
 
-			EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
 		AWAIT(Connection, Disconnect);
@@ -504,7 +504,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		// Set up multiplayer connection
 		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);

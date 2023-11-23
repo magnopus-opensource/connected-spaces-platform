@@ -19,12 +19,12 @@
 #include "Services/ApiBase/ApiBase.h"
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 
-} // namespace csp::services
+} // namespace csp::systems
 
 
 namespace csp::web
@@ -38,14 +38,14 @@ class WebClient;
 namespace csp::systems::graphqlservice
 {
 
-class GraphQLApi : public csp::services::ApiBase
+class GraphQLApi : public csp::systems::ApiBase
 {
 public:
 	GraphQLApi(csp::web::WebClient* InWebClient);
 	~GraphQLApi();
 
 	void Query(csp::common::String QueryText,
-			   csp::services::ApiResponseHandlerBase* ResponseHandler,
+			   csp::systems::ApiResponseHandlerBase* ResponseHandler,
 			   csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
 } // namespace csp::systems::graphqlservice

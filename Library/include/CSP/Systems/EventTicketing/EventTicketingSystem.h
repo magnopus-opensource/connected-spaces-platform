@@ -110,7 +110,7 @@ private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* EventTicketingAPI;
+	csp::systems::ApiBase* EventTicketingAPI;
 };
 
 } // namespace csp::systems

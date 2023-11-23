@@ -42,14 +42,14 @@ namespace
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
-bool RequestPredicateWithProgress(const csp::services::ResultBase& Result)
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-	if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 	{
 		PrintProgress(Result.GetRequestProgress());
 
@@ -79,7 +79,7 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::CreateAssetCollection, AssetSystem, SpaceId, ParentId, Name, nullptr, type, Tags)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAssetCollection = Result.GetAssetCollection();
 }
@@ -88,7 +88,7 @@ void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems:
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void GetAssetCollections(csp::systems::AssetSystem* AssetSystem,
@@ -106,7 +106,7 @@ void GetAssetCollections(csp::systems::AssetSystem* AssetSystem,
 							  nullptr)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& AssetCollections = Result.GetAssetCollections();
 	OutAssetCollections			 = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
@@ -123,7 +123,7 @@ void GetAssetCollectionByName(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionByName, AssetSystem, AssetCollectionName).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAssetCollection = Result.GetAssetCollection();
 }
@@ -137,7 +137,7 @@ void GetAssetCollectionsByIds(csp::systems::AssetSystem* AssetSystem,
 
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionsByIds, AssetSystem, Ids).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& AssetCollections = Result.GetAssetCollections();
 	OutAssetCollections			 = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
@@ -164,7 +164,7 @@ void CreateAsset(csp::systems::AssetSystem* AssetSystem,
 							  csp::systems::EAssetType::MODEL)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAsset = Result.GetAsset();
 }
@@ -177,7 +177,7 @@ void UploadAssetData(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutUri = Result.GetUri();
 }
@@ -190,7 +190,7 @@ void UploadAssetData(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutUri = Result.GetUri();
 }
@@ -202,7 +202,7 @@ void GetAssetById(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollectionId, AssetId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAsset = Result.GetAsset();
 }
@@ -211,14 +211,14 @@ void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetColl
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAsset, AssetSystem, AssetCollection, Asset).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset)
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Asset).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void GetAssetsInCollection(csp::systems::AssetSystem* AssetSystem,
@@ -227,7 +227,7 @@ void GetAssetsInCollection(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetsInCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& Assets = Result.GetAssets();
 	OutAssets		   = csp::common::Array<csp::systems::Asset>(Assets.Size());
@@ -246,7 +246,7 @@ void GetAssetsByCollectionIds(csp::systems::AssetSystem* AssetSystem,
 
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetsByCollectionIds, AssetSystem, Ids).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& Assets = Result.GetAssets();
 	OutAssets		   = csp::common::Array<csp::systems::Asset>(Assets.Size());
@@ -284,7 +284,7 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 		EXPECT_EQ(Tags[i], AssetCollection.Tags[i]);
 	}
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 
 	OutMetaData = ResultAssetCollection.GetMetadataImmutable();
@@ -643,7 +643,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Assets[0]).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Get assets
 	GetAssetsInCollection(AssetSystem, AssetCollection, Assets);
@@ -814,7 +814,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 		// search by space
 		auto [Result]
 			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 4);
 	}
 	{
@@ -829,7 +829,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 								  nullptr,
 								  nullptr,
 								  nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection3.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection3.Name);
@@ -838,7 +838,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 		// search by Tag
 		auto [Result]
 			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, nullptr, nullptr, nullptr, Tag, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection2.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection2.Name);
@@ -858,7 +858,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 									   AssetNames,
 									   nullptr,
 									   nullptr);
-		EXPECT_EQ(EmptyResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EmptyResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssetCollections().Size(), 0);
 
 		// next, search names and space thumbnail type
@@ -872,7 +872,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 								  AssetNames,
 								  nullptr,
 								  nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 2);
 
 		bool FoundFirstAssetCollection = false, FoundSecondAssetCollection = false;
@@ -898,7 +898,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	{
 		// Test Pagination,
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, 1, 1);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 	}
 
@@ -960,7 +960,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 		// search by asset id
 		csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, AssetIds, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
@@ -969,7 +969,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 		// search by asset name
 		csp::common::Array<csp::common::String> AssetNames = {FirstAsset.Name};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
@@ -980,13 +980,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
 		csp::common::Array<csp::systems::EAssetType> AssetTypes = {csp::systems::EAssetType::VIDEO};
 		auto [EmptyResult] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
-		EXPECT_EQ(EmptyResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EmptyResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssets().Size(), 0);
 
 		// next to Model append Video too
 		AssetTypes	  = {csp::systems::EAssetType::VIDEO, csp::systems::EAssetType::MODEL};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 2);
 
 		bool FoundFirstAsset = false, FoundSecondAsset = false;
@@ -1078,13 +1078,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	//	csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
 	//	csp::common::Array<csp::common::String> AssetCollIds;
 	//	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollIds, AssetIds, nullptr, nullptr);
-	//	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	//	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	//}
 	{
 		// search by both asset collection Ids at the same time
 		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 2);
 		const auto& RetrievedAssets = Result.GetAssets();
 
@@ -1110,7 +1110,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
 		csp::common::Array<csp::common::String> AssetIds			 = {SecondAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, AssetIds, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, SecondAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, SecondAsset.Name);
@@ -1179,7 +1179,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Upload data
 	auto [UploadNoMimeResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadNoMimeResult.GetUri();
 
@@ -1198,7 +1198,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Upload data with MimeType
 	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_EQ(UploadResult.GetXErrorCode(), "");
 
@@ -1215,7 +1215,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1295,7 +1295,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	// Upload data
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	EXPECT_EQ(Result.GetXErrorCode(), "assetdetail_invalidfilecontents");
 
@@ -1354,7 +1354,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Upload data
 	auto [UploadNoMimeResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadNoMimeResult.GetUri();
 
@@ -1373,7 +1373,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Upload data with MimeType
 	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadResult.GetUri();
 
@@ -1388,7 +1388,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1483,7 +1483,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1804,7 +1804,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	{
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetDataSize, RequestPredicate, UpdatedAsset);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetValue(), AssetData.Length());
 	}
 
@@ -1936,7 +1936,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -2053,7 +2053,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -2161,7 +2161,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 		EXPECT_EQ(Result.GetHttpResultCode(), 403);
 	}
 

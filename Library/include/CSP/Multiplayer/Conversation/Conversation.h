@@ -23,14 +23,14 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
+} // namespace csp::systems
 
 
 namespace csp::multiplayer
@@ -85,14 +85,14 @@ enum class ConversationMessageType
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when a message is being retrieved
-class CSP_API MessageResult : public csp::services::ResultBase
+class CSP_API MessageResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
 	friend class ConversationSpaceComponent;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -112,7 +112,7 @@ public:
 private:
 	explicit MessageResult(void*) {};
 	MessageResult() = default;
-	MessageResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
 
@@ -121,13 +121,13 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a collection of messages
-class CSP_API MessageCollectionResult : public csp::services::ResultBase
+class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -155,7 +155,7 @@ public:
 private:
 	explicit MessageCollectionResult(void*) {};
 	explicit MessageCollectionResult(uint64_t ResultTotalCount) : ResultTotalCount(ResultTotalCount) {};
-	MessageCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
 
@@ -165,13 +165,13 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a conversation.
-class CSP_API ConversationResult : public csp::services::ResultBase
+class CSP_API ConversationResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -191,7 +191,7 @@ public:
 private:
 	explicit ConversationResult(void*) {};
 	ConversationResult() = default;
-	ConversationResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
 

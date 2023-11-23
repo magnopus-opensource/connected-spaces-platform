@@ -31,9 +31,9 @@ public:
 	~RemoteFileManager();
 
 	void GetFile(const csp::common::String& FileUrl,
-				 csp::services::ResponseHandlerPtr ResponseHandler,
+				 csp::systems::ResponseHandlerPtr ResponseHandler,
 				 csp::common::CancellationToken& CancellationToken);
-	void GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler);
+	void GetResponseHeaders(const csp::common::String& Url, csp::systems::ResponseHandlerPtr ResponseHandler);
 
 private:
 	csp::web::WebClient* WebClient;

@@ -33,7 +33,7 @@ GraphQLApi::~GraphQLApi()
 }
 
 void GraphQLApi::Query(csp::common::String QueryText,
-					   csp::services::ApiResponseHandlerBase* ResponseHandler,
+					   csp::systems::ApiResponseHandlerBase* ResponseHandler,
 					   csp::common::CancellationToken& CancellationToken) const
 {
 	csp::web::Uri Uri(*RootUri + "/graphql");

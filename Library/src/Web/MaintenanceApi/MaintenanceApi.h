@@ -19,12 +19,12 @@
 #include "Services/ApiBase/ApiBase.h"
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 
-} // namespace csp::services
+} // namespace csp::systems
 
 
 namespace csp::web
@@ -37,14 +37,14 @@ class WebClient;
 
 namespace csp::systems::maintenanceservice
 {
-class MaintenanceApi : public csp::services::ApiBase
+class MaintenanceApi : public csp::systems::ApiBase
 {
 public:
 	MaintenanceApi(csp::web::WebClient* InWebClient);
 	~MaintenanceApi();
 
 	void Query(csp::common::String CHSEnvironment,
-			   csp::services::ApiResponseHandlerBase* ResponseHandler,
+			   csp::systems::ApiResponseHandlerBase* ResponseHandler,
 			   csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
 } // namespace csp::systems::maintenanceservice

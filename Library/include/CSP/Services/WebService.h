@@ -21,18 +21,15 @@
 #include <cstdint>
 #include <functional>
 
-namespace csp::services
+namespace csp::systems
 {
 class ApiBase;
 class ApiResponseBase;
-} // namespace csp::services
+} // namespace csp::systems
 
-namespace csp::services
+namespace csp::systems
 {
 
-
-/// @namespace csp::services
-/// This namespace wraps abstraction layers around Magnopus Services
 
 /// @brief Abstract base class for all CHS web services.
 class CSP_API WebService
@@ -108,9 +105,9 @@ public:
 	int GetFailureReason() const;
 
 protected:
-	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
-	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+	void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
 	virtual int ParseErrorCode(const csp::common::String& Value);
 
@@ -124,4 +121,4 @@ protected:
 	int FailureReason;
 };
 
-} // namespace csp::services
+} // namespace csp::systems

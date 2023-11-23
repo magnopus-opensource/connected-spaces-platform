@@ -45,7 +45,7 @@ public:
 };
 
 /// @brief Result structure for a third party auth provider details request
-class CSP_API ProviderDetailsResult : public csp::services::ResultBase
+class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -61,7 +61,7 @@ public:
 	[[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	ThirdPartyProviderDetails ProviderDetails;
 };

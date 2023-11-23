@@ -22,7 +22,7 @@
 #include <charconv>
 
 
-namespace chs = csp::services::generated::prototypeservice;
+namespace chs = csp::systems::generated::prototypeservice;
 
 
 namespace
@@ -176,14 +176,14 @@ const AssetCollection& AssetCollectionResult::GetAssetCollection() const
 	return AssetCollection;
 }
 
-void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* PrototypeResponse				   = static_cast<chs::PrototypeDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		PrototypeResponse->FromJson(Response->GetPayload().GetContent());
@@ -196,7 +196,7 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 AssetCollectionsResult AssetCollectionsResult::Invalid()
 {
-	static AssetCollectionsResult result(csp::services::EResultCode::Failed, 0);
+	static AssetCollectionsResult result(csp::systems::EResultCode::Failed, 0);
 
 	return result;
 }
@@ -216,14 +216,14 @@ uint64_t AssetCollectionsResult::GetTotalCount() const
 	return ResultTotalCount;
 }
 
-void AssetCollectionsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AssetCollectionsResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* ProfileDataResponse			   = static_cast<csp::services::DtoArray<chs::PrototypeDto>*>(ApiResponse->GetDto());
+	auto* ProfileDataResponse			   = static_cast<csp::systems::DtoArray<chs::PrototypeDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		ProfileDataResponse->FromJson(Response->GetPayload().GetContent());

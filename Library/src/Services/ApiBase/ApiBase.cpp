@@ -15,7 +15,7 @@
  */
 #include "ApiBase.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 ApiResponseBase::ApiResponseBase(DtoBase* InDto) : Dto(InDto)
@@ -82,4 +82,4 @@ ApiResponseHandlerBase::~ApiResponseHandlerBase()
 {
 }
 
-} // namespace csp::services
+} // namespace csp::systems

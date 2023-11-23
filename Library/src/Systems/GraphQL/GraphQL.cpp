@@ -26,11 +26,11 @@ const csp::common::String& GraphQLResult::GetResponse()
 {
 	return GraphQLResponse;
 }
-void GraphQLResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void GraphQLResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		GraphQLResponse = ApiResponse->GetResponse()->GetPayload().GetContent();
 	}

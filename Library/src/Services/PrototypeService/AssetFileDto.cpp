@@ -15,7 +15,7 @@
  */
 #include "Services/PrototypeService/AssetFileDto.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 AssetFileDto::AssetFileDto()
@@ -30,4 +30,4 @@ void AssetFileDto::FromJson(const csp::common::String& Json)
 {
 }
 
-} // namespace csp::services
+} // namespace csp::systems

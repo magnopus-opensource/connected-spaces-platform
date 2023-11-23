@@ -18,7 +18,7 @@
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
 
-namespace chs = csp::services::generated::spatialdataservice;
+namespace chs = csp::systems::generated::spatialdataservice;
 
 
 namespace
@@ -145,14 +145,14 @@ const Anchor& AnchorResult::GetAnchor() const
 	return Anchor;
 }
 
-void AnchorResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* AnchorResponse				   = static_cast<chs::AnchorDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		AnchorResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -170,14 +170,14 @@ const csp::common::Array<Anchor>& AnchorCollectionResult::GetAnchors() const
 	return Anchors;
 }
 
-void AnchorCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* AnchorCollectionResponse		   = static_cast<csp::services::DtoArray<chs::AnchorDto>*>(ApiResponse->GetDto());
+	auto* AnchorCollectionResponse		   = static_cast<csp::systems::DtoArray<chs::AnchorDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		AnchorCollectionResponse->FromJson(Response->GetPayload().GetContent());
@@ -203,14 +203,14 @@ const AnchorResolution& AnchorResolutionResult::GetAnchorResolution() const
 	return AnchorResolution;
 }
 
-void AnchorResolutionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResolutionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* AnchorResolutionResponse		   = static_cast<chs::AnchorResolutionDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		AnchorResolutionResponse->FromJson(Response->GetPayload().GetContent());
 		AnchorResolutionDtoToAnchorResolution(*AnchorResolutionResponse, AnchorResolution);
@@ -228,14 +228,14 @@ const csp::common::Array<AnchorResolution>& AnchorResolutionCollectionResult::Ge
 	return AnchorResolutions;
 }
 
-void AnchorResolutionCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AnchorResolutionCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* AnchorResolutionCollectionResponse = static_cast<csp::services::DtoArray<chs::AnchorResolutionDto>*>(ApiResponse->GetDto());
+	auto* AnchorResolutionCollectionResponse = static_cast<csp::systems::DtoArray<chs::AnchorResolutionDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response	 = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		AnchorResolutionCollectionResponse->FromJson(Response->GetPayload().GetContent());

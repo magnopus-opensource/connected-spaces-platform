@@ -32,7 +32,7 @@ MaintenanceApi::~MaintenanceApi()
 }
 
 void MaintenanceApi::Query(csp::common::String CHSEnvironment,
-						   csp::services::ApiResponseHandlerBase* ResponseHandler,
+						   csp::systems::ApiResponseHandlerBase* ResponseHandler,
 						   csp::common::CancellationToken& CancellationToken) const
 {
 

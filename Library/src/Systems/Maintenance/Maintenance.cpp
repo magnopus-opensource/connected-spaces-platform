@@ -36,15 +36,15 @@ bool MaintenanceInfo::IsInsideWindow() const
 
 MaintenanceInfoResult MaintenanceInfoResult::Invalid()
 {
-	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static MaintenanceInfoResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 	return result;
 }
 
-void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void MaintenanceInfoResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		rapidjson::Document JsonDoc;
 

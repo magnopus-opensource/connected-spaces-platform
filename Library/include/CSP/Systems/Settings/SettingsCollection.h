@@ -25,7 +25,7 @@
 #include <functional>
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
@@ -34,12 +34,6 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-
-
-namespace csp::systems
-{
 
 /// @ingroup Settings System
 /// @brief Data representation of a Settings collection which maps to a UserService::Settings.
@@ -57,11 +51,11 @@ public:
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
-class CSP_API SettingsCollectionResult : public csp::services::ResultBase
+class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -73,7 +67,7 @@ public:
 private:
 	SettingsCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	SettingsCollection SettingsCollection;
 };

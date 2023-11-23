@@ -28,8 +28,8 @@
 
 using namespace csp;
 
-namespace chs_users	  = csp::services::generated::userservice;
-namespace chs_spatial = csp::services::generated::spatialdataservice;
+namespace chs_users	  = csp::systems::generated::userservice;
+namespace chs_spatial = csp::systems::generated::spatialdataservice;
 
 
 namespace
@@ -135,14 +135,14 @@ void SpaceResult::SetSpace(const csp::systems::Space& InSpace)
 	Space = InSpace;
 }
 
-void SpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* GroupResponse					   = static_cast<chs_users::GroupDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		GroupResponse->FromJson(Response->GetPayload().GetContent());
@@ -167,19 +167,19 @@ const Array<Space>& SpacesResult::GetSpaces() const
 
 SpacesResult SpacesResult::Invalid()
 {
-	static SpacesResult result(csp::services::EResultCode::Failed, 0);
+	static SpacesResult result(csp::systems::EResultCode::Failed, 0);
 
 	return result;
 }
 
-void SpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpacesResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* GroupsResponse				   = static_cast<csp::services::DtoArray<chs_users::GroupDto>*>(ApiResponse->GetDto());
+	auto* GroupsResponse				   = static_cast<csp::systems::DtoArray<chs_users::GroupDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		GroupsResponse->FromJson(Response->GetPayload().GetContent());
@@ -205,14 +205,14 @@ const BasicSpace& BasicSpaceResult::GetSpace() const
 	return Space;
 }
 
-void BasicSpaceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicSpaceResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* LiteGroupResponse				   = static_cast<chs_users::GroupLiteDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		LiteGroupResponse->FromJson(Response->GetPayload().GetContent());
@@ -236,14 +236,14 @@ uint64_t BasicSpacesResult::GetTotalCount() const
 	return ResultTotalCount;
 }
 
-void BasicSpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void BasicSpacesResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* GroupsResponse				   = static_cast<csp::services::DtoArray<chs_users::GroupLiteDto>*>(ApiResponse->GetDto());
+	auto* GroupsResponse				   = static_cast<csp::systems::DtoArray<chs_users::GroupLiteDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		GroupsResponse->FromJson(Response->GetPayload().GetContent());
@@ -305,14 +305,14 @@ const Array<String>& PendingInvitesResult::GetPendingInvitesEmails() const
 	return PendingInvitesEmailAddresses;
 }
 
-void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void PendingInvitesResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* PendingInvitesResponse		   = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
+	auto* PendingInvitesResponse		   = static_cast<csp::systems::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		PendingInvitesResponse->FromJson(Response->GetPayload().GetContent());
@@ -350,7 +350,7 @@ const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const
 
 SpaceGeoLocationResult SpaceGeoLocationResult::Invalid()
 {
-	static SpaceGeoLocationResult InvalidResult(csp::services::EResultCode::Failed, 0);
+	static SpaceGeoLocationResult InvalidResult(csp::systems::EResultCode::Failed, 0);
 
 	return InvalidResult;
 }
@@ -383,14 +383,14 @@ void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, 
 	}
 }
 
-void SpaceGeoLocationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceGeoLocationResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* GeoLocationPOIResponse		   = static_cast<chs_spatial::PointOfInterestDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		GeoLocationPOIResponse->FromJson(Response->GetPayload().GetContent());
@@ -402,14 +402,14 @@ void SpaceGeoLocationResult::OnResponse(const csp::services::ApiResponseBase* Ap
 	}
 }
 
-void SpaceGeoLocationCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceGeoLocationCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* GeoLocationPOIsResponse		   = static_cast<csp::services::DtoArray<chs_spatial::PointOfInterestDto>*>(ApiResponse->GetDto());
+	auto* GeoLocationPOIsResponse		   = static_cast<csp::systems::DtoArray<chs_spatial::PointOfInterestDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		GeoLocationPOIsResponse->FromJson(Response->GetPayload().GetContent());

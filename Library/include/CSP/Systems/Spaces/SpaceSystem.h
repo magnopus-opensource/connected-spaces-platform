@@ -26,13 +26,6 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
 
 namespace csp::web
 {
@@ -44,6 +37,9 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
 
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Group.
@@ -342,8 +338,8 @@ private:
 
 	void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
-	csp::services::ApiBase* GroupAPI;
-	csp::services::ApiBase* SpaceAPI;
+	csp::systems::ApiBase* GroupAPI;
+	csp::systems::ApiBase* SpaceAPI;
 	Space CurrentSpace;
 };
 

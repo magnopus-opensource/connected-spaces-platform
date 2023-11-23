@@ -20,7 +20,7 @@
 #include "Services/AggregationService/Dto.h"
 
 
-namespace chs = csp::services::generated::aggregationservice;
+namespace chs = csp::systems::generated::aggregationservice;
 
 csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor& Vendor)
 {
@@ -62,7 +62,7 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 	Request->SetVendorEventUri(VendorEventUri);
 	Request->SetIsTicketingActive(IsTicketingActive);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
 			Callback,
 			nullptr,
@@ -86,7 +86,7 @@ void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceI
 	Request->SetVendorEventUri(VendorEventUri);
 	Request->SetIsTicketingActive(IsTicketingActive);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
 			Callback,
 			nullptr,
@@ -108,11 +108,12 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 		RequestSpaceIds.push_back(SpaceIds[i]);
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= EventTicketingAPI->CreateHandler<TicketedEventCollectionResultCallback,
-										   TicketedEventCollectionResult,
-										   void,
-										   csp::services::DtoArray<chs::SpaceEventDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI
+			  ->CreateHandler<TicketedEventCollectionResultCallback, TicketedEventCollectionResult, void, csp::systems::DtoArray<chs::SpaceEventDto>>(
+				  Callback,
+				  nullptr,
+				  csp::web::EResponseCodes::ResponseCreated);
 
 	const auto RequestSkip	= Skip.HasValue() ? *Skip : std::optional<int>(std::nullopt);
 	const auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
@@ -128,7 +129,7 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
 											 const csp::common::Optional<csp::common::String>& OnBehalfOfUserId,
 											 EventTicketResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI->CreateHandler<EventTicketResultCallback, EventTicketResult, void, chs::SpaceTicketDto>(
 			Callback,
 			nullptr,
@@ -153,7 +154,7 @@ void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 												  const csp::common::String& UserId,
 												  TicketedEventVendorAuthorizeInfoCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI
 			  ->CreateHandler<TicketedEventVendorAuthorizeInfoCallback, TicketedEventVendorAuthInfoResult, void, chs::VendorProviderInfo>(
 				  Callback,
@@ -167,8 +168,8 @@ void EventTicketingSystem::GetVendorAuthorizeInfo(EventTicketingVendor Vendor,
 void EventTicketingSystem::GetIsSpaceTicketed(const csp::common::String& SpaceId, SpaceIsTicketedResultCallback Callback)
 {
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= EventTicketingAPI->CreateHandler<SpaceIsTicketedResultCallback, SpaceIsTicketedResult, void, csp::services::DtoArray<chs::StringDataPage>>(
+	csp::systems::ResponseHandlerPtr ResponseHandler
+		= EventTicketingAPI->CreateHandler<SpaceIsTicketedResultCallback, SpaceIsTicketedResult, void, csp::systems::DtoArray<chs::StringDataPage>>(
 			Callback,
 			nullptr,
 			csp::web::EResponseCodes::ResponseCreated);

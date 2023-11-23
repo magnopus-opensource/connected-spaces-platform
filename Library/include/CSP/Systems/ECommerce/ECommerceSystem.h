@@ -19,13 +19,6 @@
 
 #include <CSP/Systems/SystemsResult.h>
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
 
 namespace csp::web
 {
@@ -37,6 +30,9 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
 /// @ingroup ECommerce System
 /// @brief Public facing system that allows interfacing with CSP's concept of a ECommerce platform.
 /// Offers methods for utilising Ecommerce through CSP
@@ -100,7 +96,7 @@ public:
 	CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback);
 
 private:
-	csp::services::ApiBase* ShopifyAPI;
+	csp::systems::ApiBase* ShopifyAPI;
 };
 
 void RemoveUrl(csp::common::String& Url);

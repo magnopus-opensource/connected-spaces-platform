@@ -20,14 +20,6 @@
 #include "CSP/Systems/SystemsResult.h"
 
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
-
 namespace csp::web
 {
 
@@ -38,6 +30,9 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
 
 /// @ingroup GraphQL System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' GraphQL Server.
@@ -68,7 +63,7 @@ private:
 	GraphQLSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* GraphQLAPI;
+	csp::systems::ApiBase* GraphQLAPI;
 };
 
 } // namespace csp::systems

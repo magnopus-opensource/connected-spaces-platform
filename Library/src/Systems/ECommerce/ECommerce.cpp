@@ -20,7 +20,7 @@
 
 #include <regex>
 
-namespace chs_aggregation = csp::services::generated::aggregationservice;
+namespace chs_aggregation = csp::systems::generated::aggregationservice;
 namespace csp::systems
 {
 
@@ -288,14 +288,14 @@ ProductInfo& ProductInfoResult::GetProductInfo()
 	return ProductInformation;
 }
 
-void ProductInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ProductInfoResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	chs_aggregation::ShopifyProductDto* ProductInformationResponse = static_cast<chs_aggregation::ShopifyProductDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response						   = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		ProductInformationResponse->FromJson(Response->GetPayload().GetContent());
 		ProductInfoDtoToProductInfo(*ProductInformationResponse, ProductInformation);
@@ -312,14 +312,14 @@ CheckoutInfo& CheckoutInfoResult::GetCheckoutInfo()
 	return CheckoutInformation;
 }
 
-void CheckoutInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void CheckoutInfoResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	chs_aggregation::ShopifyCheckoutDto* CheckoutInformationResponse = static_cast<chs_aggregation::ShopifyCheckoutDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response							 = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent());
 		CheckoutInformation.StoreUrl	= CheckoutInformationResponse->GetCheckoutUrl();
@@ -339,19 +339,19 @@ CartInfo& CartInfoResult::GetCartInfo()
 
 CartInfoResult CartInfoResult::Invalid()
 {
-	static CartInfoResult InvalidResult(csp::services::EResultCode::Failed, 0);
+	static CartInfoResult InvalidResult(csp::systems::EResultCode::Failed, 0);
 
 	return InvalidResult;
 }
 
-void CartInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void CartInfoResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* Dto							   = static_cast<chs_aggregation::ShopifyCartDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Dto->FromJson(Response->GetPayload().GetContent());
 
@@ -369,14 +369,14 @@ ShopifyStoreInfo& AddShopifyStoreResult::GetShopifyStoreInfo()
 	return Store;
 }
 
-void AddShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AddShopifyStoreResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* Dto							   = static_cast<chs_aggregation::ShopifyStorefrontDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Dto->FromJson(Response->GetPayload().GetContent());
 
@@ -384,13 +384,13 @@ void AddShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* Api
 	}
 }
 
-void ValidateShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ValidateShopifyStoreResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		ValidateResult = (bool) Response->GetPayload().GetContent();
 	}

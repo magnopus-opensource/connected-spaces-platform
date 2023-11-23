@@ -19,7 +19,7 @@
 #include "Services/UserService/Dto.h"
 
 
-namespace chs = csp::services::generated::userservice;
+namespace chs = csp::systems::generated::userservice;
 
 
 namespace
@@ -59,14 +59,14 @@ const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() cons
 	return SettingsCollection;
 }
 
-void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SettingsCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* SettingsResponse				   = static_cast<chs::SettingsDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		if (Response->GetPayload().GetContent().Length() > 0)
 		{

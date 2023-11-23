@@ -17,7 +17,7 @@
 
 #include "Services/AggregationService/Api.h"
 
-namespace chs = csp::services::generated::aggregationservice;
+namespace chs = csp::systems::generated::aggregationservice;
 
 csp::systems::EventTicketingVendor VendorNameToEnum(const csp::common::String& VendorName)
 {
@@ -195,14 +195,14 @@ void VendorInfoDtoToVendorInfo(const chs::VendorProviderInfo& Dto, csp::systems:
 namespace csp::systems
 {
 
-void TicketedEventResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* Dto							   = static_cast<chs::SpaceEventDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Dto->FromJson(Response->GetPayload().GetContent());
 
@@ -220,14 +220,14 @@ const TicketedEvent& TicketedEventResult::GetTicketedEvent() const
 	return Event;
 }
 
-void TicketedEventCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventCollectionResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* TicketedEventCollectionResponse  = static_cast<csp::services::DtoArray<chs::SpaceEventDto>*>(ApiResponse->GetDto());
+	auto* TicketedEventCollectionResponse  = static_cast<csp::systems::DtoArray<chs::SpaceEventDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		TicketedEventCollectionResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -251,14 +251,14 @@ const csp::common::Array<TicketedEvent>& TicketedEventCollectionResult::GetTicke
 	return Events;
 }
 
-void EventTicketResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void EventTicketResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* Dto							   = static_cast<chs::SpaceTicketDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Dto->FromJson(Response->GetPayload().GetContent());
 
@@ -277,14 +277,14 @@ const EventTicket& EventTicketResult::GetEventTicket() const
 }
 
 
-void TicketedEventVendorAuthInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void TicketedEventVendorAuthInfoResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* Dto							   = static_cast<chs::VendorProviderInfo*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		Dto->FromJson(Response->GetPayload().GetContent());
 
@@ -302,13 +302,13 @@ const bool SpaceIsTicketedResult::GetIsTicketedEvent() const
 	return SpaceIsTicketed;
 }
 
-void SpaceIsTicketedResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SpaceIsTicketedResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		std::string InputText = Response->GetPayload().GetContent().c_str();
 

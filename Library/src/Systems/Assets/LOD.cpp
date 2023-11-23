@@ -32,7 +32,7 @@ void LODChainResult::SetLODChain(LODChain&& InChain)
 	Chain = std::move(InChain);
 }
 
-void LODChainResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void LODChainResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 }

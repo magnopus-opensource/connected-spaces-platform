@@ -21,13 +21,6 @@
 #include "CSP/Systems/SystemsResult.h"
 
 
-namespace csp::services
-{
-
-class ApiBase;
-
-}
-
 
 namespace csp::web
 {
@@ -39,6 +32,9 @@ class WebClient;
 
 namespace csp::systems
 {
+
+class ApiBase;
+
 
 /// @ingroup Maintenance System
 /// @brief Public facing system that allows interfacing with the Maintenance Window Server.
@@ -61,7 +57,7 @@ private:
 	MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* MaintenanceAPI;
+	csp::systems::ApiBase* MaintenanceAPI;
 };
 
 } // namespace csp::systems

@@ -48,7 +48,7 @@ SystemsManager* SystemsManager::Instance = nullptr;
 
 SystemsManager& SystemsManager::Get()
 {
-	assert(SystemsManager::Instance && "Please call csp::CSPFoundation::Initialize() before calling csp::services::GetSystemsManager().");
+	assert(SystemsManager::Instance && "Please call csp::CSPFoundation::Initialize() before calling csp::systems::GetSystemsManager().");
 
 	return *SystemsManager::Instance;
 }

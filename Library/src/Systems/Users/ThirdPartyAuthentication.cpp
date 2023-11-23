@@ -20,7 +20,7 @@
 #include "Services/UserService/Dto.h"
 
 using namespace std::chrono;
-namespace chs = csp::services::generated::userservice;
+namespace chs = csp::systems::generated::userservice;
 
 namespace
 {
@@ -67,14 +67,14 @@ const ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() const
 	return ProviderDetails;
 }
 
-void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void ProviderDetailsResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* InfoResponse					   = static_cast<chs::SocialProviderInfo*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		InfoResponse->FromJson(Response->GetPayload().GetContent());

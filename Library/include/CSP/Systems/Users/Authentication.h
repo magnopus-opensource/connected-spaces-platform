@@ -28,19 +28,13 @@ class DateTime;
 } // namespace csp::common
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-
-
-namespace csp::systems
-{
 
 class UserSystem;
 class LoginStateResult;
@@ -107,11 +101,11 @@ enum class ELoginStateResultFailureReason
 
 
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public csp::services::ResultBase
+class CSP_API LoginStateResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	friend class UserSystem;
 	CSP_END_IGNORE
 	/** @endcond */
@@ -127,7 +121,7 @@ private:
 	LoginStateResult();
 	LoginStateResult(LoginState* InStatePtr);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	LoginState* State;
 };
@@ -138,7 +132,7 @@ class CSP_API LogoutResult : public NullResult
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	friend class UserSystem;
 	CSP_END_IGNORE
 	/** @endcond */
@@ -147,7 +141,7 @@ private:
 	LogoutResult();
 	LogoutResult(LoginState* InStatePtr);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	LoginState* State;
 };
@@ -155,7 +149,7 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenReceived : public csp::services::ResultBase
+class CSP_API LoginTokenReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class UserSystem;
@@ -180,11 +174,11 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when a ping response is received
-class CSP_API PingResponseReceived : public csp::services::ResultBase
+class CSP_API PingResponseReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	friend class UserSystem;
 	CSP_END_IGNORE
 	/** @endcond */
@@ -212,11 +206,11 @@ public:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public csp::services::ResultBase
+class CSP_API AgoraUserTokenResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	friend class UserSystem;
 	CSP_END_IGNORE
 	/** @endcond */
@@ -229,7 +223,7 @@ private:
 	AgoraUserTokenResult(void*) {};
 	AgoraUserTokenResult() = default;
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::String UserToken;
 };

@@ -20,7 +20,7 @@
 
 using namespace csp;
 
-namespace chs = csp::services::generated::aggregationservice;
+namespace chs = csp::systems::generated::aggregationservice;
 
 namespace csp::systems
 {
@@ -41,7 +41,7 @@ ECommerceSystem::~ECommerceSystem()
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
 			Callback,
 			nullptr,
@@ -52,7 +52,7 @@ void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const
 
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(
 			Callback,
 			nullptr,
@@ -63,7 +63,7 @@ void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, cons
 
 void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
 																									   nullptr,
 																									   csp::web::EResponseCodes::ResponseCreated);
@@ -73,7 +73,7 @@ void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCa
 
 void ECommerceSystem::GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
 																									   nullptr,
 																									   csp::web::EResponseCodes::ResponseCreated);
@@ -92,7 +92,7 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
 	ShopifyStorefrontInfo->SetPrivateAccessToken(PrivateAccessToken);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<AddShopifyStoreResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
 			Callback,
 			nullptr,
@@ -109,7 +109,7 @@ void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
 	ShopifyStorefrontValidationInfo->SetStoreName(StoreName);
 	ShopifyStorefrontValidationInfo->SetPrivateAccessToken(PrivateAccessToken);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<ValidateShopifyStoreResultCallback, ValidateShopifyStoreResult, void, chs::ShopifyStorefrontValidationRequest>(
 			Callback,
 			nullptr,
@@ -183,7 +183,7 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 		CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
 	}
 
-	csp::services::ResponseHandlerPtr ResponseHandler
+	csp::systems::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
 																									   nullptr,
 																									   csp::web::EResponseCodes::ResponseCreated);

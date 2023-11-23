@@ -240,10 +240,10 @@ private:
 
 	void ResetAuthenticationState();
 
-	csp::services::ApiBase* AuthenticationAPI;
-	csp::services::ApiBase* ProfileAPI;
-	csp::services::ApiBase* PingAPI;
-	csp::services::ApiBase* ExternalServiceProxyApi;
+	csp::systems::ApiBase* AuthenticationAPI;
+	csp::systems::ApiBase* ProfileAPI;
+	csp::systems::ApiBase* PingAPI;
+	csp::systems::ApiBase* ExternalServiceProxyApi;
 
 	LoginState CurrentLoginState;
 

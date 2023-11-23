@@ -34,7 +34,7 @@ class WebClient;
 } // namespace csp::web
 
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
@@ -43,10 +43,6 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-namespace csp::systems
-{
 
 /// @brief Asset type enum, defines the allowed and implemented types of assets.
 enum class EAssetType
@@ -200,13 +196,13 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset.
-class CSP_API AssetResult : public csp::services::ResultBase
+class CSP_API AssetResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -224,21 +220,21 @@ protected:
 	AssetResult(void*) {};
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
-	CSP_NO_EXPORT AssetResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	Asset Asset;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of assets.
-class CSP_API AssetsResult : public csp::services::ResultBase
+class CSP_API AssetsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -258,10 +254,10 @@ public:
 protected:
 	AssetsResult() = delete;
 	AssetsResult(void*) {};
-	AssetsResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	csp::common::Array<Asset> Assets;
 };
@@ -269,13 +265,13 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to upload an asset.
-class CSP_API UriResult : public csp::services::ResultBase
+class CSP_API UriResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
 	friend class SpaceSystem;
 	friend class SettingsSystem;
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -306,8 +302,8 @@ protected:
 
 private:
 	UriResult(const csp::common::String Uri);
-	UriResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	void SetResponseBody(const csp::common::String& Contents);
 
@@ -318,11 +314,11 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download asset data.
-class CSP_API AssetDataResult : public csp::services::ResultBase
+class CSP_API AssetDataResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -341,7 +337,7 @@ protected:
 	AssetDataResult(void*);
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 };
 
 

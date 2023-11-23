@@ -130,7 +130,7 @@ protected:
 private:
 	void DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback);
 
-	csp::services::ApiBase* POIApiPtr;
+	csp::systems::ApiBase* POIApiPtr;
 };
 
 } // namespace csp::systems

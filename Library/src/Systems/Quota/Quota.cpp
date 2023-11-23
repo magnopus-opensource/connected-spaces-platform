@@ -20,7 +20,7 @@
 #include "Services/TrackingService/Api.h"
 #include "Services/UserService/Dto.h"
 
-namespace chs = csp::services::generated::trackingservice;
+namespace chs = csp::systems::generated::trackingservice;
 
 namespace csp::systems
 {
@@ -32,14 +32,14 @@ const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimi
 	return FeaturesLimitInfo;
 }
 
-void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void FeaturesLimitResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* FeatureProgressResponse		   = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
+	auto* FeatureProgressResponse		   = static_cast<csp::systems::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		FeatureProgressResponse->FromJson(Response->GetPayload().GetContent());
@@ -73,14 +73,14 @@ const FeatureLimitInfo& FeatureLimitResult::GetFeatureLimitInfo() const
 	return FeatureLimitInfo;
 }
 
-void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void FeatureLimitResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* FeatureProgressResponse		   = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
+	auto* FeatureProgressResponse		   = static_cast<csp::systems::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		FeatureProgressResponse->FromJson(Response->GetPayload().GetContent());
@@ -109,14 +109,14 @@ const UserTierInfo& UserTierResult::GetUserTierInfo() const
 	return UserTierInfo;
 }
 
-void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void UserTierResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* UserTierResponse				   = static_cast<chs::QuotaTierAssignmentDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		UserTierResponse->FromJson(Response->GetPayload().GetContent());
@@ -143,14 +143,14 @@ const FeatureQuotaInfo& FeatureQuotaResult::GetFeatureQuotaInfo() const
 	return FeatureQuotaInfo;
 }
 
-void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void FeatureQuotaResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto* FeatureQuotaResponse			   = static_cast<chs::QuotaFeatureTierDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		FeatureQuotaResponse->FromJson(Response->GetPayload().GetContent());
@@ -187,14 +187,14 @@ const csp::common::Array<FeatureQuotaInfo>& FeaturesQuotaResult::GetFeaturesQuot
 	return FeaturesQuotaInfo;
 }
 
-void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void FeaturesQuotaResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	auto* FeaturesQuotaResponse			   = static_cast<csp::services::DtoArray<chs::QuotaFeatureTierDto>*>(ApiResponse->GetDto());
+	auto* FeaturesQuotaResponse			   = static_cast<csp::systems::DtoArray<chs::QuotaFeatureTierDto>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		FeaturesQuotaResponse->FromJson(Response->GetPayload().GetContent());

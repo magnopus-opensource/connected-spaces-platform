@@ -26,8 +26,8 @@
 
 
 using namespace std::chrono;
-namespace chs			  = csp::services::generated::userservice;
-namespace chs_aggregation = csp::services::generated::aggregationservice;
+namespace chs			  = csp::systems::generated::userservice;
+namespace chs_aggregation = csp::systems::generated::aggregationservice;
 
 
 namespace csp::systems
@@ -114,14 +114,14 @@ int LoginStateResult::ParseErrorCode(const csp::common::String& Value)
 	return ResultBase::ParseErrorCode(Value);
 }
 
-void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void LoginStateResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
 	auto AuthResponse					   = static_cast<chs::AuthDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		AuthResponse->FromJson(Response->GetPayload().GetContent());
@@ -198,11 +198,11 @@ LogoutResult::LogoutResult(LoginState* InStatePtr) : NullResult(InStatePtr), Sta
 {
 }
 
-void LogoutResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void LogoutResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		if (State)
 		{
@@ -250,7 +250,7 @@ void LoginTokenReceived::FillLoginTokenInfo(const csp::common::String& AccessTok
 											const csp::common::String& RefreshToken,
 											const csp::common::String& RefreshTokenExpiry)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	LoginTokenInfo.AccessToken		 = AccessToken;
 	LoginTokenInfo.AccessExpiryTime	 = AccessTokenExpiry;
@@ -268,14 +268,14 @@ const csp::common::String& AgoraUserTokenResult::GetUserToken()
 	return UserToken;
 }
 
-void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void AgoraUserTokenResult::OnResponse(const csp::systems::ApiResponseBase* ApiResponse)
 {
-	csp::services::ResultBase::OnResponse(ApiResponse);
+	csp::systems::ResultBase::OnResponse(ApiResponse);
 
 	auto AuthResponse					   = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == csp::systems::EResponseCode::ResponseSuccess)
 	{
 		AuthResponse->FromJson(Response->GetPayload().GetContent());
 

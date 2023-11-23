@@ -32,7 +32,7 @@ RemoteFileManager::~RemoteFileManager()
 }
 
 void RemoteFileManager::GetFile(const csp::common::String& FileUrl,
-								csp::services::ResponseHandlerPtr ResponseHandler,
+								csp::systems::ResponseHandlerPtr ResponseHandler,
 								csp::common::CancellationToken& CancellationToken)
 {
 	csp::web::Uri GetUri(FileUrl);
@@ -43,7 +43,7 @@ void RemoteFileManager::GetFile(const csp::common::String& FileUrl,
 	WebClient->SendRequest(csp::web::ERequestVerb::GET, GetUri, Payload, ResponseHandler, CancellationToken);
 }
 
-void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler)
+void RemoteFileManager::GetResponseHeaders(const csp::common::String& Url, csp::systems::ResponseHandlerPtr ResponseHandler)
 {
 	csp::web::Uri GetUri(Url);
 	csp::web::HttpPayload Payload;

@@ -23,7 +23,7 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 class ApiResponseBase;
@@ -32,10 +32,6 @@ CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 CSP_END_IGNORE
 
-} // namespace csp::services
-
-namespace csp::systems
-{
 
 /// @ingroup Asset System
 /// @brief An LODAsset represents an asset for a singular LOD level, and contains both the data and the specified LOD level.
@@ -58,13 +54,13 @@ public:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
-class CSP_API LODChainResult : public csp::services::ResultBase
+class CSP_API LODChainResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
 
 	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	template <typename T, typename U, typename V, typename W> friend class csp::systems::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -75,14 +71,14 @@ public:
 protected:
 private:
 	LODChainResult(void*) {};
-	LODChainResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT LODChainResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT LODChainResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	void SetLODChain(const LODChain& Chain);
 	void SetLODChain(LODChain&& Chain);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+	void OnResponse(const csp::systems::ApiResponseBase* ApiResponse) override;
 
 	LODChain Chain;
 };

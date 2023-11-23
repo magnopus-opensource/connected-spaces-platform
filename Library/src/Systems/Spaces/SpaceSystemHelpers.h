@@ -55,11 +55,11 @@ String GetAssetFileExtension(const String& MimeType);
 
 bool IdCheck(const common::String& UserId, const common::Array<common::String>& Ids);
 
-std::shared_ptr<csp::services::generated::userservice::GroupDto> DefaultGroupInfo();
+std::shared_ptr<csp::systems::generated::userservice::GroupDto> DefaultGroupInfo();
 
 Map<String, String> LegacyAssetConversion(const systems::AssetCollection& AssetCollection);
 
-std::vector<std::shared_ptr<csp::services::generated::userservice::GroupInviteDto>>
+std::vector<std::shared_ptr<csp::systems::generated::userservice::GroupInviteDto>>
 	GenerateGroupInvites(const common::Array<systems::InviteUserRoleInfo> InviteUsers);
 
 void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, String>& OutMapMetadata);

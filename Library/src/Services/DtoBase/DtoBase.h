@@ -22,7 +22,7 @@
 #include <memory>
 #include <vector>
 
-namespace csp::services
+namespace csp::systems
 {
 
 namespace utility
@@ -88,4 +88,4 @@ public:
 	}
 };
 
-} // namespace csp::services
+} // namespace csp::systems
