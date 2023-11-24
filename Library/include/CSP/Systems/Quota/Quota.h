@@ -42,10 +42,10 @@ namespace csp::systems
 /// @brief Data representation period of time.
 enum class PeriodEnum
 {
-	Total,
+	Total = 0,
 	CalendarMonth,
-	Hours24
-
+	Hours24,
+	Invalid
 };
 
 enum class TierFeatures
@@ -58,7 +58,8 @@ enum class TierFeatures
 	Agora,
 	OpenAI,
 	Shopify,
-	TicketedSpace
+	TicketedSpace,
+	Invalid
 };
 
 enum class TierNames
@@ -66,7 +67,8 @@ enum class TierNames
 	Basic = 0,
 	Premium,
 	Pro,
-	Enterprise
+	Enterprise,
+	Invalid
 };
 
 /// @ingroup Quota System
