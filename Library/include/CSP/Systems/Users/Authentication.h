@@ -96,16 +96,6 @@ public:
 	csp::common::String RefreshExpiryTime;
 };
 
-
-enum class ELoginStateResultFailureReason
-{
-	Unknown = -1,
-	None	= 0,
-	AgeNotVerified,
-	EmailNotConfirmed
-};
-
-
 /// @brief Result structure for a login state request.
 class CSP_API LoginStateResult : public csp::systems::ResultBase
 {
@@ -119,9 +109,6 @@ class CSP_API LoginStateResult : public csp::systems::ResultBase
 public:
 	LoginState& GetLoginState();
 	const LoginState& GetLoginState() const;
-
-protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	LoginStateResult();

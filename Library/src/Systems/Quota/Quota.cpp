@@ -25,7 +25,7 @@ namespace chs = csp::services::generated::trackingservice;
 namespace csp::systems
 {
 FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn)
-	: FeatureName(FeatureNameIn), TierName(TierNameIn), Limit(LimitIn), Period(PeriodIn), AllowReductions(AllowReductionsIn) {};
+	: FeatureName(FeatureNameIn), TierName(TierNameIn), Limit(LimitIn), Period(PeriodIn) {};
 
 const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimitInfo() const
 {
@@ -174,11 +174,6 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 		{
 			FeatureQuotaInfo.Period = static_cast<PeriodEnum>(FeatureQuotaResponse->GetPeriod()->GetValue());
 		}
-
-		if (FeatureQuotaResponse->HasAllowReductions())
-		{
-			FeatureQuotaInfo.AllowReductions = FeatureQuotaResponse->GetAllowReductions();
-		}
 	}
 }
 
@@ -220,11 +215,6 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 			if (QuotaArray[i].HasPeriod())
 			{
 				FeaturesQuotaInfo[i].Period = static_cast<PeriodEnum>(QuotaArray[i].GetPeriod()->GetValue());
-			}
-
-			if (QuotaArray[i].HasAllowReductions())
-			{
-				FeaturesQuotaInfo[i].AllowReductions = QuotaArray[i].GetAllowReductions();
 			}
 		}
 	}

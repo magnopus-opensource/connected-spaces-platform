@@ -263,7 +263,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].TierName, ExpectedInfoArray[i].TierName);
 		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Limit, ExpectedInfoArray[i].Limit);
 		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Period, ExpectedInfoArray[i].Period);
-		EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].AllowReductions, ExpectedInfoArray[i].AllowReductions);
 	}
 }
 #endif

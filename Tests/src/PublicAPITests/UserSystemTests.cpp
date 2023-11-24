@@ -82,7 +82,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 		   const csp::common::String& Password,
 		   bool AgeVerified,
 		   csp::systems::EResultCode ExpectedResultCode,
-		   int ExpectedResultFailureCode)
+		   csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
 	auto [Result] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email, Password, AgeVerified).Await(RequestPredicate);
 
@@ -1030,7 +1030,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  DefaultLoginPassword,
 		  false,
 		  csp::systems::EResultCode::Failed,
-		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::AgeNotVerified));
+		  csp::systems::ERequestFailureReason::UserAgeNotVerified);
 
 	// null Log in
 	// does not use login helper function as the login helper function defaults to false.
@@ -1039,7 +1039,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(Result.GetFailureReason(), static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	LogOut(UserSystem);
 
@@ -1050,7 +1050,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  DefaultLoginPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
-		  static_cast<int>(csp::systems::ELoginStateResultFailureReason::None));
+		  csp::systems::ERequestFailureReason::None);
 
 	LogOut(UserSystem);
 }
