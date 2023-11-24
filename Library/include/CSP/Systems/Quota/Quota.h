@@ -108,7 +108,6 @@ public:
 	TierNames TierName;
 	int32_t Limit;
 	PeriodEnum Period;
-	bool AllowReductions;
 };
 
 /// @ingroup Quota System
