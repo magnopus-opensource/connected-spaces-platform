@@ -107,7 +107,7 @@ enum class ELoginStateResultFailureReason
 
 
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public csp::services::ResultBase
+class CSP_API LoginStateResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -155,7 +155,7 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenReceived : public csp::services::ResultBase
+class CSP_API LoginTokenReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class UserSystem;
@@ -180,7 +180,7 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when a ping response is received
-class CSP_API PingResponseReceived : public csp::services::ResultBase
+class CSP_API PingResponseReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -212,7 +212,7 @@ public:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public csp::services::ResultBase
+class CSP_API AgoraUserTokenResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

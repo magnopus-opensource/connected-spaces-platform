@@ -18,8 +18,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::services
@@ -84,7 +84,7 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of User Roles information.
-class CSP_API UserRoleCollectionResult : public csp::services::ResultBase
+class CSP_API UserRoleCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -100,7 +100,7 @@ public:
 
 private:
 	UserRoleCollectionResult(void*) {};
-	UserRoleCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UserRoleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	UserRoleCollectionResult() {};
 
 	void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);

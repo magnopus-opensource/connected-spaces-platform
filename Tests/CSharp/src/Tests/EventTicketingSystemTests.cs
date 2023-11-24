@@ -1,5 +1,4 @@
 ﻿using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -32,7 +31,7 @@ namespace CSPEngine
 
             using var result = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId, testVendorEventUri, true).Result;
 
-            Assert.AreEqual(result.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvent = result.GetTicketedEvent();
 
@@ -63,7 +62,7 @@ namespace CSPEngine
 
             using var result = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId, testVendorEventUri, false).Result;
 
-            Assert.AreEqual(result.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvent = result.GetTicketedEvent();
 
@@ -97,7 +96,7 @@ namespace CSPEngine
 
             using var result1 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId1, testVendorEventUri1, true).Result;
 
-            Assert.AreEqual(result1.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(result1.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvent1 = result1.GetTicketedEvent();
 
@@ -109,7 +108,7 @@ namespace CSPEngine
 
             using var result2 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId2, testVendorEventUri2, false).Result;
 
-            Assert.AreEqual(result2.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(result2.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvent2 = result2.GetTicketedEvent();
 
@@ -144,7 +143,7 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
-            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var createdEvent = createResult.GetTicketedEvent();
 
@@ -156,7 +155,7 @@ namespace CSPEngine
 
             using var updateResult = eventTicketingSystem.UpdateTicketedEvent(space.Id, createdEvent.Id, Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
 
-            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var updatedEvent = updateResult.GetTicketedEvent();
 
@@ -190,7 +189,7 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
-            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var createdEvent = createResult.GetTicketedEvent();
 
@@ -202,7 +201,7 @@ namespace CSPEngine
 
             using var updateResult = eventTicketingSystem.UpdateTicketedEvent("12a345678b9cdd01ef23456a", createdEvent.Id, Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
 
-            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Failed);
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Systems.EResultCode.Failed);
             Assert.AreEqual(updateResult.GetHttpResultCode(), 404);
         }
 #endif
@@ -228,7 +227,7 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, initialVendorEventId, initialVendorEventUri, false).Result;
-            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var createdEvent = createResult.GetTicketedEvent();
 
@@ -240,7 +239,7 @@ namespace CSPEngine
 
             using var updateResult = eventTicketingSystem.UpdateTicketedEvent(space.Id, "12a345678b9cdd01ef23456a", Csp.Systems.EventTicketingVendor.Eventbrite, updatedVendorEventId, updatedVendorEventUri, true).Result;
 
-            Assert.AreEqual(updateResult.GetResultCode(), Csp.Services.EResultCode.Failed);
+            Assert.AreEqual(updateResult.GetResultCode(), Csp.Systems.EResultCode.Failed);
             Assert.AreEqual(updateResult.GetHttpResultCode(), 404);
         }
 #endif
@@ -264,7 +263,7 @@ namespace CSPEngine
 
             using var result = eventTicketingSystem.GetTicketedEvents(spaceIds, null, null).Result;
 
-            Assert.AreEqual(result.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Csp.Systems.EResultCode.Success);
             Assert.AreEqual(result.GetTicketedEvents().Size(), 0UL);
         }
 #endif
@@ -288,14 +287,14 @@ namespace CSPEngine
 
             using var createResult = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId, testVendorEventUri, true).Result;
 
-            Assert.AreEqual(createResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent = createResult.GetTicketedEvent();
            
             using var spaceIds = new Csp.Common.Array<string>(1);
             spaceIds[0] = space.Id;
 
             using var getResult = eventTicketingSystem.GetTicketedEvents(spaceIds, null, null).Result;
-            Assert.AreEqual(getResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(getResult.GetResultCode(), Csp.Systems.EResultCode.Success);
             
             using var ticketedEvents = getResult.GetTicketedEvents();
 
@@ -333,18 +332,18 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult1 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId1, testVendorEventUri1, true).Result;
-            Assert.AreEqual(createResult1.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult1.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent1 = createResult1.GetTicketedEvent();
 
             using var createdResult2 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId2, testVendorEventUri2, false).Result;
-            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent2 = createdResult2.GetTicketedEvent();
 
             using var spaceIds = new Csp.Common.Array<string>(1);
             spaceIds[0] = space.Id;
 
             using var getResult = eventTicketingSystem.GetTicketedEvents(spaceIds, null, null).Result;
-            Assert.AreEqual(getResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(getResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvents = getResult.GetTicketedEvents();
 
@@ -410,11 +409,11 @@ namespace CSPEngine
             var space2 = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName2, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult1 = eventTicketingSystem.CreateTicketedEvent(space1.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId1, testVendorEventUri1, true).Result;
-            Assert.AreEqual(createResult1.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult1.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent1 = createResult1.GetTicketedEvent();
 
             using var createdResult2 = eventTicketingSystem.CreateTicketedEvent(space2.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId2, testVendorEventUri2, false).Result;
-            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent2 = createdResult2.GetTicketedEvent();
 
             using var spaceIds = new Csp.Common.Array<string>(2);
@@ -422,7 +421,7 @@ namespace CSPEngine
             spaceIds[1] = space2.Id;
 
             using var getResult = eventTicketingSystem.GetTicketedEvents(spaceIds, null, null).Result;
-            Assert.AreEqual(getResult.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(getResult.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvents = getResult.GetTicketedEvents();
 
@@ -487,11 +486,11 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             using var createResult1 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId1, testVendorEventUri1, true).Result;
-            Assert.AreEqual(createResult1.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createResult1.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent1 = createResult1.GetTicketedEvent();
 
             using var createdResult2 = eventTicketingSystem.CreateTicketedEvent(space.Id, Csp.Systems.EventTicketingVendor.Eventbrite, testVendorEventId2, testVendorEventUri2, false).Result;
-            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(createdResult2.GetResultCode(), Csp.Systems.EResultCode.Success);
             using var createdEvent2 = createdResult2.GetTicketedEvent();
 
             bool foundFirst = false;
@@ -502,7 +501,7 @@ namespace CSPEngine
             spaceIds[0] = space.Id;
 
             using var getResult1 = eventTicketingSystem.GetTicketedEvents(spaceIds, 0, 1).Result;
-            Assert.AreEqual(getResult1.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(getResult1.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvents1 = getResult1.GetTicketedEvents();
 
@@ -525,7 +524,7 @@ namespace CSPEngine
             }
 
             using var getResult2 = eventTicketingSystem.GetTicketedEvents(spaceIds, 1, 1).Result;
-            Assert.AreEqual(getResult2.GetResultCode(), Csp.Services.EResultCode.Success);
+            Assert.AreEqual(getResult2.GetResultCode(), Csp.Systems.EResultCode.Success);
 
             using var ticketedEvents2 = getResult2.GetTicketedEvents();
 

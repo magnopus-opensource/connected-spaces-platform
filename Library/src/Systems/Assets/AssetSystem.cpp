@@ -690,7 +690,7 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 	{
 		UInt64Result InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			auto& Headers		= Result.GetValue();
 			auto& ContentLength = Headers["content-length"];
@@ -713,7 +713,7 @@ CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetColle
 	{
 		LODChainResult LODResult(AssetsResult);
 
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			LODChain Chain = CreateLODChainFromAssets(AssetsResult.GetAssets(), AssetCollection.Id);
 			LODResult.SetLODChain(std::move(Chain));
@@ -731,7 +731,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	// GetAssetsByCriteria
 	auto GetAssetsCallback = [this, AssetCollection, Asset, LODLevel, Callback](const AssetsResult& AssetsResult)
 	{
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();
 			LODChain Chain										  = CreateLODChainFromAssets(Assets, AssetCollection.Id);

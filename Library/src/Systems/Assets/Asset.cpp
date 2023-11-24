@@ -260,7 +260,7 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 AssetsResult AssetsResult::Invalid()
 {
-	static AssetsResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static AssetsResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
@@ -321,14 +321,14 @@ const csp::common::String& UriResult::GetXErrorCode() const
 
 UriResult UriResult::Invalid()
 {
-	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static UriResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
 
 void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)

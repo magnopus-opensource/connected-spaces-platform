@@ -36,9 +36,9 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 #endif
 
@@ -96,7 +96,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
 
@@ -112,7 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
 	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
 	if (Result.HasAnyMaintenanceWindows())

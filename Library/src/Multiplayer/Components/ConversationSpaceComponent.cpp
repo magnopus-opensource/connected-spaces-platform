@@ -50,7 +50,7 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 	{
 		const StringResultCallback CreateConversationIdCallback = [=](const StringResult& StringResult)
 		{
-			if (StringResult.GetResultCode() == csp::services::EResultCode::Success)
+			if (StringResult.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				SetConversationId(StringResult.GetValue());
 			}
@@ -100,15 +100,15 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 	{
 		csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult)
 		{
-			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::InProgress)
+			if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 			{
 				return;
 			}
-			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::Success)
+			if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				this->ConversationSystem->AddMessageToConversation(GetConversationId(), GetProfileResult.GetProfile().DisplayName, Message, Callback);
 			}
-			if (GetProfileResult.GetResultCode() == csp::services::EResultCode::Failed)
+			if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
 				const MessageResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
 				Callback(InternalResult);

@@ -29,9 +29,9 @@
 
 using namespace csp::systems;
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -110,7 +110,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	auto Details = GetShopifyDetails();
 
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformation, RequestPredicate, Details["SpaceId"], Details["ProductId"]);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 
 	EXPECT_EQ(Result.GetProductInfo().Id, ProductId);
@@ -193,7 +193,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 
 	// The additional info such as "CartId" inside of this test need to be added to the ShopifyCreds.txt file on a new line as: <Key> <Value>
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], Details["CartId"]);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_TRUE(std::string(Result.GetCheckoutInfo().StoreUrl.c_str()).find(Details["StoreName"]));
 
@@ -203,15 +203,15 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 
 	// False Ids
 	auto [FalseResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, FalseCartId);
-	EXPECT_EQ(FalseResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(FalseResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// False SpaceId
 	auto [FalseSpaceResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, FalseSpaceId, Details["CartId"]);
-	EXPECT_EQ(FalseSpaceResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(FalseSpaceResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// False CartId
 	auto [FalseCartResult] = AWAIT_PRE(ECommerceSystem, GetCheckoutInformation, RequestPredicate, Details["SpaceId"], FalseCartId);
-	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
 }
@@ -251,7 +251,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedCart = CreateCartResult.GetCartInfo();
 
@@ -262,7 +262,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 
 	auto [GetCartResult] = AWAIT_PRE(ECommerceSystem, GetCart, RequestPredicate, SpaceId, CreatedCart.CartId);
 
-	EXPECT_EQ(GetCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Cart = CreateCartResult.GetCartInfo();
 
@@ -292,7 +292,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(CreateCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
@@ -316,7 +316,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 
 	auto [GetCartResult] = AWAIT_PRE(ECommerceSystem, GetCart, RequestPredicate, SpaceId, "NotAValidCartId");
 
-	EXPECT_EQ(GetCartResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(GetCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(GetCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
@@ -364,7 +364,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedCart = CreateCartResult.GetCartInfo();
 
@@ -397,7 +397,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 	// Add Cart Lines
 	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
 
@@ -452,7 +452,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedCart = CreateCartResult.GetCartInfo();
 
@@ -482,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 	// Add Cart Lines
 	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
 
@@ -518,7 +518,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 	// Add Cart Lines
 	auto [UpdateCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(UpdateCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UpdateCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto UpdateCartLinesCart = UpdateCartLinesResult.GetCartInfo();
 
@@ -574,7 +574,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateCartResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedCart = CreateCartResult.GetCartInfo();
 
@@ -604,7 +604,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 	// Add Cart Lines
 	auto [AddCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto AddCartLinesCart = AddCartLinesResult.GetCartInfo();
 
@@ -639,7 +639,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 	// Delete Cart Lines
 	auto [DeleteCartLinesResult] = AWAIT_PRE(ECommerceSystem, UpdateCartInformation, RequestPredicate, CreatedCart);
 
-	EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(DeleteCartLinesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto DeleteCartLinesCart = DeleteCartLinesResult.GetCartInfo();
 
@@ -676,13 +676,13 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 
 	auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
 
-	EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_TRUE(ValidateShopifyStoreResult.ValidateResult);
 
 	auto [AddShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, AddShopifyStore, RequestPredicate, StoreName, SpaceId, false, PrivateAccessToken);
 
-	EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto ShopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
 

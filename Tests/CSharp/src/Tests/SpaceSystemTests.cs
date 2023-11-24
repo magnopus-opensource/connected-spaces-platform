@@ -2,7 +2,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 using Web = Csp.Web;
 
@@ -24,7 +23,7 @@ namespace CSPEngine
             using var result = spaceSystem.DeleteSpace(space.Id).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug($"Space deleted (Id: {spaceId})");
 
@@ -51,7 +50,7 @@ namespace CSPEngine
             using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var space = result.GetSpace();
             LogDebug($"Space created (Id: {space.Id}, Name: {space.Name})");
@@ -79,7 +78,7 @@ namespace CSPEngine
             using var result = spaceSystem.CreateSpaceWithBuffer(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var space = result.GetSpace();
             LogDebug($"Space created (Id: {space.Id}, Name: {space.Name})");
@@ -100,7 +99,7 @@ namespace CSPEngine
             using var result = spaceSystem.EnterSpace(id).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             if (pushCleanupFunction)
                 PushCleanupFunction(() => ExitSpace(spaceSystem));
@@ -111,7 +110,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSpace(spaceId).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var space = result.GetSpace();
 
@@ -128,7 +127,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSpacesByIds(_spaceIds).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var _spaces = result.GetSpaces();
             var spaces = new Systems.Space[_spaces.Size()];
@@ -144,7 +143,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSpacesByAttributes(isDiscoverable, requiresInvitation, resultsSkipNo, resultsMaxNo).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             spaces = result.GetSpaces();
             var spacesTotalCount = result.GetTotalCount();
@@ -158,7 +157,7 @@ namespace CSPEngine
             var result = spaceSystem.UpdateSpace(space.Id, newName, newDescription, newAttributes).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             updatedSpace = result.GetSpace();
         }
@@ -174,7 +173,7 @@ namespace CSPEngine
             using var result = spaceSystem.AddSiteInfo(space.Id, siteInfo).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             site = result.GetSite();
             LogDebug($"Site created (Id: {site.Id}, Name: {site.Name})");
@@ -190,7 +189,7 @@ namespace CSPEngine
             
             var resCode = result.GetResultCode();
             var httpResultCode = result.GetHttpResultCode();
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
             Assert.AreEqual(httpResultCode, 204);
             LogDebug($"Site deleted (Id: {site.Id}, Name: {site.Name})");
         }
@@ -200,7 +199,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSitesInfo(space.Id).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             sites = result.GetSites();
         }
@@ -210,7 +209,7 @@ namespace CSPEngine
             using var result = spaceSystem.UpdateUserRole(space.Id, newUserRole).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
             LogDebug($"The user role for UserId {newUserRole.UserId} has been updated to {newUserRole.UserRole} successfully");
         }
 
@@ -222,7 +221,7 @@ namespace CSPEngine
             var result = spaceSystem.GetUsersRoles(space.Id, requestedUserIds).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var returnedUserRolesInfo = result.GetUsersRoles();
 
@@ -237,7 +236,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetUsersRoles(space.Id, requestedUserIds).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             usersRoles = result.GetUsersRoles();
         }
@@ -247,7 +246,7 @@ namespace CSPEngine
             using var result = spaceSystem.UpdateSpaceMetadata(space.Id, newMetadata ?? new Common.Map<string, string>()).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug($"Space metadata have been updated successfully");
         }
@@ -257,7 +256,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSpaceMetadata(space.Id).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             spaceMetadata = result.GetMetadata();
         }
@@ -274,7 +273,7 @@ namespace CSPEngine
             using var result = spaceSystem.GetSpacesMetadata(spaceIds).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             spaceMetadata = result.GetMetadata();
         }
@@ -354,7 +353,7 @@ namespace CSPEngine
             using var getInvitesResult = spaceSystem.GetPendingUserInvites(space.Id).Result;
             var resCode = getInvitesResult.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var pendingInvites = getInvitesResult.GetPendingInvitesEmails();
 
@@ -440,7 +439,7 @@ namespace CSPEngine
             using var getInvitesResult = spaceSystem.GetPendingUserInvites(space.Id).Result;
             var resCode = getInvitesResult.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var pendingInvites = getInvitesResult.GetPendingInvitesEmails();
 
@@ -541,7 +540,7 @@ namespace CSPEngine
                 using var result = spaceSystem.GetSpaces().Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var spaces = result.GetSpaces();
 
@@ -843,7 +842,7 @@ namespace CSPEngine
             using var result = spaceSystem.AddUserToSpace(publicSpace.Id, guestUserId).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug($"User { guestUserId } was added to space { publicSpace.Id }");
 
@@ -951,7 +950,7 @@ namespace CSPEngine
 
             var responseBody = addUserResult.GetResponseBody();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             space = addUserResult.GetSpace();
 
@@ -998,7 +997,7 @@ namespace CSPEngine
             using var result = spaceSystem.AddUserToSpace(publicSpace.Id, guestUserId).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             UserSystemTests.LogOut(userSystem);
 
@@ -1038,7 +1037,7 @@ namespace CSPEngine
             using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
 
             using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, testEmailLinkUrl, testSignupUrl).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             GetRoleForSpecificUser(spaceSystem, space, altUserId, out var userRoleInfo);
             Assert.AreEqual(userRoleInfo.UserRole, Systems.SpaceUserRole.Moderator);
@@ -1140,7 +1139,7 @@ namespace CSPEngine
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseNotFound);
                 Assert.AreEqual(result.GetUri(), "");
             }
@@ -1155,11 +1154,11 @@ namespace CSPEngine
 
                 using var result = spaceSystem.UpdateSpaceThumbnail(space.Id, spaceThumbnail).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
                 using var resultGetThumbnail = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(resultGetThumbnail.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(resultGetThumbnail.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(IsUriValid(resultGetThumbnail.GetUri(), localFileName));
             }
         }
@@ -1182,7 +1181,7 @@ namespace CSPEngine
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseNotFound);
                 Assert.AreEqual(result.GetUri(), "");
             }
@@ -1205,11 +1204,11 @@ namespace CSPEngine
 
                 using var result = spaceSystem.UpdateSpaceThumbnailWithBuffer(space.Id, source).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
                 using var resultGetThumbnail = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(resultGetThumbnail.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(resultGetThumbnail.GetResultCode(), Systems.EResultCode.Success);
 
                 var downloadedAsset = new Systems.Asset
                 {
@@ -1281,12 +1280,12 @@ namespace CSPEngine
             using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null, testEmailLinkUrl, testSignupUrl).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var getInvitesResult = spaceSystem.GetPendingUserInvites(space.Id).Result;
             resCode = getInvitesResult.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var pendingInvites = getInvitesResult.GetPendingInvitesEmails();
 
@@ -1316,12 +1315,12 @@ namespace CSPEngine
             using var result = spaceSystem.BulkInviteToSpace(space.Id, InviteUsers).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var getInvitesResult = spaceSystem.GetPendingUserInvites(space.Id).Result;
             resCode = getInvitesResult.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var pendingInvites = getInvitesResult.GetPendingInvitesEmails();
 
@@ -1404,7 +1403,7 @@ namespace CSPEngine
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
                 initialSpaceThumbnailUri = result.GetUri();
 
@@ -1419,7 +1418,7 @@ namespace CSPEngine
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(initialSpaceThumbnailUri, result.GetUri());
             }
 
@@ -1465,13 +1464,13 @@ namespace CSPEngine
                 // A guest shouldn't be able to update the space thumbnail
                 using var result = spaceSystem.UpdateSpaceThumbnail(space.Id, updateSpaceThumbnail).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 // but it should be able to retrieve it
                 var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(IsUriValid(result.GetUri(), localFileName));
             }
 
@@ -1503,7 +1502,7 @@ namespace CSPEngine
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, guestUserId).Result;
             var addUserResCode = addUserResult.GetResultCode();
-            Assert.AreEqual(addUserResCode, Services.EResultCode.Success);
+            Assert.AreEqual(addUserResCode, Systems.EResultCode.Success);
             space = addUserResult.GetSpace();
 
             // Add to ban list
@@ -1511,7 +1510,7 @@ namespace CSPEngine
                 using var result = spaceSystem.AddUserToSpaceBanList(space.Id, guestUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var _space = GetSpace(spaceSystem, space.Id);
 
@@ -1523,7 +1522,7 @@ namespace CSPEngine
                 using var result = spaceSystem.DeleteUserFromSpaceBanList(space.Id, guestUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var _space = GetSpace(spaceSystem, space.Id);
 
@@ -1554,7 +1553,7 @@ namespace CSPEngine
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, altUserId).Result;
             var addUserResCode = addUserResult.GetResultCode();
-            Assert.AreEqual(addUserResCode, Services.EResultCode.Success);
+            Assert.AreEqual(addUserResCode, Systems.EResultCode.Success);
             space = addUserResult.GetSpace();
 
             // Add to ban list
@@ -1562,7 +1561,7 @@ namespace CSPEngine
                 using var result = spaceSystem.AddUserToSpaceBanList(space.Id, altUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var _space = GetSpace(spaceSystem, space.Id);
 
@@ -1574,7 +1573,7 @@ namespace CSPEngine
                 using var result = spaceSystem.DeleteUserFromSpaceBanList(space.Id, altUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var _space = GetSpace(spaceSystem, space.Id);
 
@@ -1611,7 +1610,7 @@ namespace CSPEngine
                 using var result = spaceSystem.EnterSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Failed);
+                Assert.AreEqual(resCode, Systems.EResultCode.Failed);
             }
 
             UserSystemTests.LogOut(userSystem);
@@ -1659,7 +1658,7 @@ namespace CSPEngine
             initialGeoFence[2] = geoFence2;
 
             using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, initialLocation, initialOrientation, initialGeoFence).Result;
-            Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(addGeoResult.HasSpaceGeoLocation());
             Assert.AreEqual(addGeoResult.GetSpaceGeoLocation().Location.Latitude, initialLocation.Latitude);
             Assert.AreEqual(addGeoResult.GetSpaceGeoLocation().Location.Longitude, initialLocation.Longitude);
@@ -1702,7 +1701,7 @@ namespace CSPEngine
             secondGeoFence[2] = geoFence2;
 
             using var updateGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, secondLocation, secondOrientation, secondGeoFence).Result;
-            Assert.AreEqual(updateGeoResult.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(updateGeoResult.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(updateGeoResult.HasSpaceGeoLocation());
             Assert.AreEqual(updateGeoResult.GetSpaceGeoLocation().Location.Latitude, secondLocation.Latitude);
             Assert.AreEqual(updateGeoResult.GetSpaceGeoLocation().Location.Longitude, secondLocation.Longitude);
@@ -1715,7 +1714,7 @@ namespace CSPEngine
             }
 
             using var getUpdatedGeoResult = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(getUpdatedGeoResult.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(getUpdatedGeoResult.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(getUpdatedGeoResult.HasSpaceGeoLocation());
             Assert.AreEqual(getUpdatedGeoResult.GetSpaceGeoLocation().Location.Latitude, secondLocation.Latitude);
             Assert.AreEqual(getUpdatedGeoResult.GetSpaceGeoLocation().Location.Longitude, secondLocation.Longitude);
@@ -1728,10 +1727,10 @@ namespace CSPEngine
             }
 
             using var deleteGeoResult = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(deleteGeoResult.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(deleteGeoResult.GetResultCode(), Systems.EResultCode.Success);
 
             using var GetDeletedGeoResult = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(GetDeletedGeoResult.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(GetDeletedGeoResult.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsFalse(GetDeletedGeoResult.HasSpaceGeoLocation());
         }
 #endif
@@ -1797,63 +1796,63 @@ namespace CSPEngine
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, invalidLocation, validOrientation, validGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, invalidOrientation, validGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
             
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, shortGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
             
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, invalidGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, invalidGeoLocationGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             // Actually add a geo location and test again since a different code path is followed when one exists
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, validGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, invalidLocation, validOrientation, validGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, invalidOrientation, validGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, shortGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, invalidGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var addGeoResult = spaceSystem.UpdateSpaceGeoLocation(space.Id, validLocation, validOrientation, invalidGeoLocationGeoFence).Result;
-                Assert.AreEqual(addGeoResult.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(addGeoResult.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var deleteGeoResult = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-                Assert.AreEqual(deleteGeoResult.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(deleteGeoResult.GetResultCode(), Systems.EResultCode.Success);
             }
         }
 #endif
@@ -1885,11 +1884,11 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
 
             using var addGeoResultAsAlt = spaceSystem.UpdateSpaceGeoLocation(space.Id, initialLocation, initialOrientation, null).Result;
-            Assert.AreEqual(addGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(addGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(addGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             using var getGeoResultAsAlt = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(getGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(getGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(getGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             // Switch back to the primary user to actually create the geo location
@@ -1897,7 +1896,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword, pushCleanupFunction: false);
 
             using var addGeoResultAsPrimary = spaceSystem.UpdateSpaceGeoLocation(space.Id, initialLocation, initialOrientation, null).Result;
-            Assert.AreEqual(addGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(addGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(addGeoResultAsPrimary.HasSpaceGeoLocation());
             Assert.AreEqual(addGeoResultAsPrimary.GetSpaceGeoLocation().Location.Latitude, initialLocation.Latitude);
             Assert.AreEqual(addGeoResultAsPrimary.GetSpaceGeoLocation().Location.Longitude, initialLocation.Longitude);
@@ -1915,12 +1914,12 @@ namespace CSPEngine
 
             // Test they cannot update
             using var updateGeoResultAsAlt = spaceSystem.UpdateSpaceGeoLocation(space.Id, secondLocation, secondOrientation, null).Result;
-            Assert.AreEqual(updateGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(updateGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(updateGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             // Test they cannot delete
             using var deleteGeoResultAsAlt = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(deleteGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(deleteGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(deleteGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             // Switch back to the primary user to cleanup
@@ -1928,10 +1927,10 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword);
 
             using var deleteGeoResultAsPrimary = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(deleteGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(deleteGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
 
             using var GetDeletedGeoResultAsPrimary = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(GetDeletedGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(GetDeletedGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsFalse(GetDeletedGeoResultAsPrimary.HasSpaceGeoLocation());
 
             DeleteSpace(spaceSystem, space);
@@ -1965,7 +1964,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
 
             using var addGeoResultAsAlt = spaceSystem.UpdateSpaceGeoLocation(space.Id, initialLocation, initialOrientation, null).Result;
-            Assert.AreEqual(addGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(addGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(addGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
             
             // Switch back to the primary user to actually create the geo location
@@ -1973,7 +1972,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword, pushCleanupFunction: false);
 
             using var addGeoResultAsPrimary = spaceSystem.UpdateSpaceGeoLocation(space.Id, initialLocation, initialOrientation, null).Result;
-            Assert.AreEqual(addGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(addGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(addGeoResultAsPrimary.HasSpaceGeoLocation());
             Assert.AreEqual(addGeoResultAsPrimary.GetSpaceGeoLocation().Location.Latitude, initialLocation.Latitude);
             Assert.AreEqual(addGeoResultAsPrimary.GetSpaceGeoLocation().Location.Longitude, initialLocation.Longitude);
@@ -1991,16 +1990,16 @@ namespace CSPEngine
 
             // Test they cannot update
             using var updateGeoResultAsAlt = spaceSystem.UpdateSpaceGeoLocation(space.Id, secondLocation, secondOrientation, null).Result;
-            Assert.AreEqual(updateGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(updateGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(updateGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             // Test they cannot delete
             using var deleteGeoResultAsAlt = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(deleteGeoResultAsAlt.GetResultCode(), Services.EResultCode.Failed);
+            Assert.AreEqual(deleteGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Failed);
             Assert.AreEqual(deleteGeoResultAsAlt.GetHttpResultCode(), (ushort)Web.EResponseCodes.ResponseForbidden);
 
             using var getGeoResultAsAlt = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(getGeoResultAsAlt.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(getGeoResultAsAlt.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsTrue(getGeoResultAsAlt.HasSpaceGeoLocation());
             Assert.AreEqual(getGeoResultAsAlt.GetSpaceGeoLocation().Location.Latitude, initialLocation.Latitude);
             Assert.AreEqual(getGeoResultAsAlt.GetSpaceGeoLocation().Location.Longitude, initialLocation.Longitude);
@@ -2011,10 +2010,10 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword);
 
             using var deleteGeoResultAsPrimary = spaceSystem.DeleteSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(deleteGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(deleteGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
 
             using var GetDeletedGeoResultAsPrimary = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
-            Assert.AreEqual(GetDeletedGeoResultAsPrimary.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(GetDeletedGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsFalse(GetDeletedGeoResultAsPrimary.HasSpaceGeoLocation());
 
             DeleteSpace(spaceSystem, space);

@@ -133,7 +133,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 		{
 			Callback(LoginStateRes);
 
-			if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				NotifyRefreshTokenHasChanged();
 			}
@@ -148,7 +148,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -159,7 +159,7 @@ void UserSystem::LoginWithToken(const csp::common::String& UserId, const csp::co
 	{
 		Callback(LoginStateRes);
 
-		if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			NotifyRefreshTokenHasChanged();
 		}
@@ -191,7 +191,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -214,7 +214,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 	// Get provider_base_url and client_id
 	ProviderDetailsResultCallback ThirdPartyAuthenticationDetailsCallback = [=](const ProviderDetailsResult& ProviderDetailsRes)
 	{
-		if (ProviderDetailsRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (ProviderDetailsRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto AuthoriseUrl				   = ProviderDetailsRes.GetDetails().AuthoriseURL;
 			const auto ProviderClientId			   = ProviderDetailsRes.GetDetails().ProviderClientId;
@@ -235,7 +235,7 @@ void UserSystem::GetThirdPartyProviderAuthoriseURL(EThirdPartyAuthenticationProv
 			SuccessResult.SetValue(AuthoriseURL);
 			Callback(SuccessResult);
 		}
-		else if (ProviderDetailsRes.GetResultCode() != csp::services::EResultCode::InProgress)
+		else if (ProviderDetailsRes.GetResultCode() != csp::systems::EResultCode::InProgress)
 		{
 			CSP_LOG_FORMAT(LogLevel::Error,
 						   "The retrieval of third party details was not successful. ResCode: %d, HttpResCode: %d",
@@ -275,7 +275,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;
-		ErrorResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseForbidden);
+		ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseForbidden);
 		Callback(ErrorResult);
 	}
 
@@ -286,7 +286,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 		CurrentLoginState.State = ELoginState::Error;
 
 		csp::systems::LoginStateResult ErrorResult;
-		ErrorResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		ErrorResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(ErrorResult);
 	}
 
@@ -294,7 +294,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 	{
 		Callback(LoginStateRes);
 
-		if (LoginStateRes.GetResultCode() == csp::services::EResultCode::Success)
+		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			NotifyRefreshTokenHasChanged();
 		}
@@ -340,7 +340,7 @@ void UserSystem::ExchangeKey(const csp::common::String& UserId, const csp::commo
 	else
 	{
 		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -366,7 +366,7 @@ void UserSystem::Logout(LogoutResultCallback Callback)
 	else
 	{
 		csp::systems::LogoutResult BadResult;
-		BadResult.SetResult(csp::services::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		Callback(BadResult);
 	}
 }
@@ -525,7 +525,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 	}
 	else
 	{
-		Callback(csp::systems::NullResult(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest)));
+		Callback(csp::systems::NullResult(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest)));
 	}
 }
 

@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::services
+namespace csp::systems
 {
 
 ResultBase::ResultBase() : FailureReason(0)
 {
 }
 
-ResultBase::ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
+ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(0)
 {
 }
 
-void ResultBase::OnProgress(const ApiResponseBase* ApiResponse)
+void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 {
 	if (ApiResponse)
 	{
@@ -43,9 +43,9 @@ void ResultBase::OnProgress(const ApiResponseBase* ApiResponse)
 
 /// @brief Standard response handler
 /// @param ApiResponse
-void ResultBase::OnResponse(const ApiResponseBase* ApiResponse)
+void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
-	if (ApiResponse->GetResponseCode() == EResponseCode::ResponseSuccess)
+	if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
 	{
 		Result = EResultCode::Success;
 	}
@@ -98,7 +98,7 @@ int ResultBase::GetFailureReason() const
 	return FailureReason;
 }
 
-void ResultBase::SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode)
+void ResultBase::SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 {
 	Result			 = ResCode;
 	HttpResponseCode = HttpResCode;
@@ -109,4 +109,4 @@ int ResultBase::ParseErrorCode(const csp::common::String& Value)
 	return (int) EResultBaseFailureReason::Unknown;
 }
 
-} // namespace csp::services
+} // namespace csp::systems

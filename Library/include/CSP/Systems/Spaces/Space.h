@@ -19,9 +19,9 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
 
 #include <functional>
 
@@ -155,7 +155,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get a space.
-class CSP_API SpaceResult : public csp::services::ResultBase
+class CSP_API SpaceResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -176,9 +176,9 @@ public:
 
 private:
 	SpaceResult(void*) {};
-	SpaceResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT SpaceResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT SpaceResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	void SetSpace(const Space& InSpace);
 
@@ -195,7 +195,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class CSP_API SpacesResult : public csp::services::ResultBase
+class CSP_API SpacesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -216,7 +216,7 @@ public:
 
 private:
 	SpacesResult(void*) {};
-	SpacesResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	SpacesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -226,7 +226,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to update the Space details.
-class CSP_API BasicSpaceResult : public csp::services::ResultBase
+class CSP_API BasicSpaceResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -249,7 +249,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class CSP_API BasicSpacesResult : public csp::services::ResultBase
+class CSP_API BasicSpacesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -286,7 +286,7 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve the Space metadata information.
-class CSP_API SpaceMetadataResult : public csp::services::ResultBase
+class CSP_API SpaceMetadataResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -301,7 +301,7 @@ public:
 
 private:
 	SpaceMetadataResult(void*) {};
-	SpaceMetadataResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	SpaceMetadataResult() {};
 
 	void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& MetadataAssetCollection);
@@ -312,7 +312,7 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve multiple Spaces metadata information.
-class CSP_API SpacesMetadataResult : public csp::services::ResultBase
+class CSP_API SpacesMetadataResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -327,7 +327,7 @@ public:
 
 private:
 	SpacesMetadataResult(void*) {};
-	SpacesMetadataResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	SpacesMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	SpacesMetadataResult() {};
 
 	void SetMetadata(const csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>& InMetadata);
@@ -338,7 +338,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain the obfuscated email addresses of the users that have not yet accepted the space invites
-class CSP_API PendingInvitesResult : public csp::services::ResultBase
+class CSP_API PendingInvitesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -366,7 +366,7 @@ private:
 /// @ingroup Space System
 /// @brief Data class used to contain the outcome of space geo location operations.
 /// The result can be successful and still return no geo location if one does not exist.
-class CSP_API SpaceGeoLocationResult : public csp::services::ResultBase
+class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -390,7 +390,7 @@ public:
 
 private:
 	SpaceGeoLocationResult(void*) {};
-	SpaceGeoLocationResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	SpaceGeoLocationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -401,7 +401,7 @@ private:
 
 /// @ingroup Space System
 /// @brief Collection result to be used only by the PointOfInterestSystem
-class SpaceGeoLocationCollectionResult : public csp::services::ResultBase
+class SpaceGeoLocationCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class PointOfInterestSystem;
@@ -413,7 +413,7 @@ class SpaceGeoLocationCollectionResult : public csp::services::ResultBase
 
 private:
 	SpaceGeoLocationCollectionResult(void*) {};
-	SpaceGeoLocationCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	SpaceGeoLocationCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
