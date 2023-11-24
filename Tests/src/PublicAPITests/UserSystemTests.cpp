@@ -1055,3 +1055,57 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// False Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::services::EResultCode::Success,
+		  csp::services::ERequestFailureReason::None);
+
+	auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), csp::services::ERequestFailureReason::None);
+
+	EXPECT_NE(Result.GetUrl(), "");
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CHECKOUT_SESSION_URL_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// False Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::services::EResultCode::Success,
+		  csp::services::ERequestFailureReason::None);
+
+	auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, csp::systems::TierNames::Pro);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), csp::services::ERequestFailureReason::None);
+
+	EXPECT_NE(Result.GetUrl(), "");
+}
+#endif

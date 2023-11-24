@@ -87,6 +87,7 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClien
 	ProfileAPI				= CSP_NEW chs::ProfileApi(InWebClient);
 	PingAPI					= CSP_NEW chs::PingApi(InWebClient);
 	ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
+	StripeAPI				= CSP_NEW chs::StripeApi(InWebClient);
 }
 
 UserSystem::~UserSystem()
@@ -95,6 +96,7 @@ UserSystem::~UserSystem()
 	CSP_DELETE(ProfileAPI);
 	CSP_DELETE(AuthenticationAPI);
 	CSP_DELETE(ExternalServiceProxyApi);
+	CSP_DELETE(StripeAPI);
 }
 
 const LoginState& UserSystem::GetLoginState() const
@@ -521,7 +523,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 																									  csp::web::EResponseCodes::ResponseNoContent);
 
 		static_cast<chs::ProfileApi*>(ProfileAPI)
-			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, Request, ResponseHandler);
+			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, "", Request, ResponseHandler);
 	}
 	else
 	{
@@ -598,6 +600,32 @@ void UserSystem::ResendVerificationEmail(const csp::common::String& InEmail,
 
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersEmailsEmailConfirmEmailReSendPost(InEmail, Tenant, RedirectUrl, ResponseHandler);
 }
+
+void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, CustomerPortalUrlResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= StripeAPI->CreateHandler<CustomerPortalUrlResultCallback,
+								   CustomerPortalUrlResult,
+								   void,
+								   csp::services::generated::userservice::StripeCustomerPortalDto>(Callback, nullptr);
+
+	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCustomerPortalsUserIdGet(UserId, ResponseHandler);
+};
+
+void UserSystem::GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback)
+{
+	auto CheckoutSessionInfo = std::make_shared<chs::StripeCheckoutRequest>();
+
+	CheckoutSessionInfo->SetLookupKey(TierNameEnumToString(Tier));
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= StripeAPI->CreateHandler<CheckoutSessionUrlResultCallback,
+								   CheckoutSessionUrlResult,
+								   void,
+								   csp::services::generated::userservice::StripeCheckoutSessionDto>(Callback, nullptr);
+
+	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
+};
 
 void UserSystem::RefreshAuthenticationSession(const csp::common::String& UserId,
 											  const csp::common::String& RefreshToken,

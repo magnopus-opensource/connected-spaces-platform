@@ -20,6 +20,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
+#include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
@@ -222,6 +223,15 @@ public:
 												  const csp::common::Optional<csp::common::String>& InRedirectUrl,
 												  NullResultCallback Callback);
 
+	/// @brief Get the Customer Portal Url for a user from Stripe
+	/// @param UserId csp::common::String : the id of the user associated with the customer portal
+	/// @param Callback StringResultCallback : callback that contains the customer portal URL of the User
+	CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& UserId, CustomerPortalUrlResultCallback Callback);
+
+	/// @brief Get the checkout session Url for a user from Stripe
+	/// @param Tier csp::systems::TierNames : the tier of the checkout session needed
+	/// @param Callback CheckoutSessionUrlResultCallback : callback that contains the customer portal URL of the User
+	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback);
 
 protected:
 	CSP_NO_EXPORT UserSystem(csp::web::WebClient* InWebClient);
@@ -244,6 +254,7 @@ private:
 	csp::services::ApiBase* ProfileAPI;
 	csp::services::ApiBase* PingAPI;
 	csp::services::ApiBase* ExternalServiceProxyApi;
+	csp::services::ApiBase* StripeAPI;
 
 	LoginState CurrentLoginState;
 
