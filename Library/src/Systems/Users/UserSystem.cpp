@@ -501,6 +501,7 @@ bool UserSystem::EmailCheck(const std::string& Email) const
 
 void UserSystem::ForgotPassword(const csp::common::String& Email,
 								const csp::common::Optional<csp::common::String>& RedirectUrl,
+								const csp::common::Optional<csp::common::String>& EmailLinkUrl,
 								bool UseTokenChangePasswordUrl,
 								NullResultCallback Callback)
 {
@@ -511,10 +512,16 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 		Request->SetTenant(csp::CSPFoundation::GetTenant());
 
 		std::optional<csp::common::String> RedirectUrlValue;
+		std::optional<csp::common::String> EmailLinkUrlValue;
 
 		if (RedirectUrl.HasValue())
 		{
 			RedirectUrlValue = *RedirectUrl;
+		}
+
+		if (EmailLinkUrl.HasValue())
+		{
+			EmailLinkUrlValue = *EmailLinkUrl;
 		}
 
 		csp::services::ResponseHandlerPtr ResponseHandler
@@ -523,7 +530,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 																									  csp::web::EResponseCodes::ResponseNoContent);
 
 		static_cast<chs::ProfileApi*>(ProfileAPI)
-			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, "", Request, ResponseHandler);
+			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, EmailLinkUrlValue, Request, ResponseHandler);
 	}
 	else
 	{
