@@ -33,11 +33,11 @@ void LoadTestAccountCredentials();
 
 void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
-		   const csp::common::String& Email				 = DefaultLoginEmail,
-		   const csp::common::String& Password			 = DefaultLoginPassword,
-		   bool AgeVerified								 = true,
-		   csp::services::EResultCode ExpectedResultCode = csp::services::EResultCode::Success,
-		   int ExpectedResultFailureCode				 = 0);
+		   const csp::common::String& Email								  = DefaultLoginEmail,
+		   const csp::common::String& Password							  = DefaultLoginPassword,
+		   bool AgeVerified												  = true,
+		   csp::services::EResultCode ExpectedResultCode				  = csp::services::EResultCode::Success,
+		   csp::services::ERequestFailureReason ExpectedResultFailureCode = csp::services::ERequestFailureReason::None);
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem,
 				  csp::common::String& OutUserId,

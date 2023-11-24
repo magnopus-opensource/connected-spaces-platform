@@ -59,10 +59,43 @@ enum class EResultCode : uint8_t
 };
 
 
-enum class EResultBaseFailureReason
+enum class ERequestFailureReason
 {
 	Unknown = -1,
-	None	= 0
+	None	= 0,
+	AddUserToSpaceDenied,
+	UserSpaceAccessDenied,
+	UserSpaceBannedAccessDenied,
+	UserSpaceFullAccessDenied,
+	UserSpaceInviteExpired,
+	SpacePublicNameDuplicate,
+	UserMaxSpaceLimitReached,
+	UserAccountLocked,
+	UserMissingPassword,
+	UserUnverifiedEmail,
+	UserBannedFromSpace,
+	UserInvalidEmailDomain,
+	UserInvalidThirdPartyAuth,
+	UserAgeNotVerified,
+	UserGuestLoginDisallowed,
+	UserAgoraLimitReached,
+	UserOpenAILimitReached,
+	UserTicketedSpacesLimitReached,
+	UserSpaceConcurrentUsersLimitReached,
+	PrototypeReservedKeysNotAllowed,
+	AssetInvalidFileContents,
+	AssetInvalidFileType,
+	AssetAudioVideoLimitReached,
+	AssetObjectCaptureLimitReached,
+	AssetTotalUploadSizeLimitReached,
+	TicketUnknownNumber,
+	TicketEmailMismatch,
+	TicketVendorOAuthFailure,
+	TicketOAuthTokenInvalid,
+	TicketAlreadyApplied,
+	ShopifyConnectionBroken,
+	ShopifyInvalidStoreName,
+	UserShopifyLimitReached
 };
 
 
@@ -105,14 +138,12 @@ public:
 
 	/// @brief Get a code representing the failure reason, if relevant.
 	/// @return int
-	int GetFailureReason() const;
+	ERequestFailureReason GetFailureReason() const;
 
 protected:
 	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
 
 	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
-
-	virtual int ParseErrorCode(const csp::common::String& Value);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
@@ -121,7 +152,10 @@ protected:
 	float ResponseProgress = 0.0f;
 
 	csp::common::String ResponseBody;
-	int FailureReason;
+	ERequestFailureReason FailureReason;
+
+private:
+	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
 };
 
 } // namespace csp::services
