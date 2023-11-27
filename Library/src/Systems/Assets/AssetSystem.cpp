@@ -646,7 +646,7 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection,
 
 	UriResultCallback InternalCallback = [Callback, Asset](const UriResult& LocalCallback)
 	{
-		if (LocalCallback.GetFailureReason() != services::ERequestFailureReason::None)
+		if (LocalCallback.GetFailureReason() != systems::ERequestFailureReason::None)
 		{
 			CSP_LOG_ERROR_MSG(csp::common::String("Asset with Id %s has failed to upload").c_str());
 		}
