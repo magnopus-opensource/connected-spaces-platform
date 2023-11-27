@@ -1200,7 +1200,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 
 	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(UploadResult.GetFailureReason(), csp::services::ERequestFailureReason::None);
+	EXPECT_EQ(UploadResult.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	Asset.Uri = UploadResult.GetUri();
 
@@ -1297,7 +1297,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
-	EXPECT_EQ(Result.GetFailureReason(), csp::services::ERequestFailureReason::AssetInvalidFileContents);
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::AssetInvalidFileContents);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
