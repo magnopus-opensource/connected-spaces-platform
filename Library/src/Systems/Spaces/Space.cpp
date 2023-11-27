@@ -167,7 +167,7 @@ const Array<Space>& SpacesResult::GetSpaces() const
 
 SpacesResult SpacesResult::Invalid()
 {
-	static SpacesResult result(csp::services::EResultCode::Failed, 0);
+	static SpacesResult result(csp::systems::EResultCode::Failed, 0);
 
 	return result;
 }
@@ -350,7 +350,7 @@ const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const
 
 SpaceGeoLocationResult SpaceGeoLocationResult::Invalid()
 {
-	static SpaceGeoLocationResult InvalidResult(csp::services::EResultCode::Failed, 0);
+	static SpaceGeoLocationResult InvalidResult(csp::systems::EResultCode::Failed, 0);
 
 	return InvalidResult;
 }

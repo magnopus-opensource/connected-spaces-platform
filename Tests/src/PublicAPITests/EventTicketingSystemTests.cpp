@@ -31,9 +31,9 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 } // namespace
@@ -72,7 +72,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 										   TestVendorEventUri,
 										   true);
 
-	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Event = TicketedEventResult.GetTicketedEvent();
 
@@ -121,7 +121,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 										   TestVendorEventUri,
 										   false);
 
-	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Event = TicketedEventResult.GetTicketedEvent();
 
@@ -173,7 +173,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 											TestVendorEventUri1,
 											true);
 
-	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Event1 = TicketedEventResult1.GetTicketedEvent();
 
@@ -192,7 +192,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 											TestVendorEventUri2,
 											false);
 
-	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Event2 = TicketedEventResult2.GetTicketedEvent();
 
@@ -245,7 +245,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 									 InitialVendorEventUri,
 									 false);
 
-	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedEvent = CreatedResult.GetTicketedEvent();
 
@@ -265,7 +265,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 									 UpdatedVendorEventUri,
 									 true);
 
-	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto UpdatedEvent = UpdatedResult.GetTicketedEvent();
 
@@ -317,7 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 									 InitialVendorEventUri,
 									 false);
 
-	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedEvent = CreatedResult.GetTicketedEvent();
 
@@ -331,7 +331,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 									 UpdatedVendorEventUri,
 									 true);
 
-	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(UpdatedResult.GetHttpResultCode(), 404);
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -375,7 +375,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 									 InitialVendorEventUri,
 									 false);
 
-	EXPECT_EQ(CreatedResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto CreatedEvent = CreatedResult.GetTicketedEvent();
 
@@ -389,7 +389,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 									 UpdatedVendorEventUri,
 									 true);
 
-	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(UpdatedResult.GetHttpResultCode(), 404);
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -424,7 +424,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetTicketedEvents().Size(), 0);
 
@@ -466,11 +466,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 										 TestVendorEventId,
 										 TestVendorEventUri,
 										 false);
-	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetTicketedEvents().Size(), 1);
 
@@ -521,11 +521,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 										 TestVendorEventId,
 										 TestVendorEventUri,
 										 true);
-	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_TRUE(Result.GetIsTicketedEvent());
 
@@ -562,7 +562,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 	// Test for IsTicketedEvent prior to creating an event, ensure it returns false
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_FALSE(Result.GetIsTicketedEvent());
 
@@ -574,12 +574,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 										 TestVendorEventId,
 										 TestVendorEventUri,
 										 false);
-	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Test for IsTicketedEvent post creating an event, but with ticketing disabled, ensure it returns false
 	auto [SecondResult] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SecondResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_FALSE(SecondResult.GetIsTicketedEvent());
 
@@ -625,7 +625,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  TestVendorEventId1,
 										  TestVendorEventUri1,
 										  true);
-	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
 
 	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
@@ -636,12 +636,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  TestVendorEventId2,
 										  TestVendorEventUri2,
 										  false);
-	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Events = Result.GetTicketedEvents();
 
@@ -727,7 +727,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  TestVendorEventId1,
 										  TestVendorEventUri1,
 										  true);
-	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
 
 	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
@@ -738,12 +738,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  TestVendorEventId2,
 										  TestVendorEventUri2,
 										  false);
-	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space1.Id, Space2.Id}, nullptr, nullptr);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Events = Result.GetTicketedEvents();
 
@@ -827,7 +827,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 										  TestVendorEventId1,
 										  TestVendorEventUri1,
 										  true);
-	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
 
 	auto [CreateEventResult2] = AWAIT_PRE(EventTicketingSystem,
@@ -838,7 +838,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 										  TestVendorEventId2,
 										  TestVendorEventUri2,
 										  false);
-	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
 
 	bool FoundFirst		 = false;
@@ -847,7 +847,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
 	auto [GetResult1] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 0, 1);
 
-	EXPECT_EQ(GetResult1.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetResult1.GetTicketedEvents().Size(), 1);
 
 	auto GetEvent1 = GetResult1.GetTicketedEvents()[0];
@@ -867,7 +867,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
 	auto [GetResult2] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 1, 1);
 
-	EXPECT_EQ(GetResult2.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetResult2.GetTicketedEvents().Size(), 1);
 
 	auto GetEvent2 = GetResult2.GetTicketedEvents()[0];
@@ -891,7 +891,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
 	auto [GetResult3] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, 2, 1);
 
-	EXPECT_EQ(GetResult3.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetResult3.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetResult3.GetTicketedEvents().Size(), 0);
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -914,7 +914,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest
 	auto [TicketedEventVendorAuthInfoResult]
 		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
 
-	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
@@ -945,7 +945,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 			= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Unknown, UserId);
 
 		// specifying an unknown vendor when attempting to get auth info should return a fail and an empty vendor auth info object
-		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
@@ -964,7 +964,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 															 "n0taR3alC1ien7");
 
 		// specifying an unknown user ID when attempting to get auth info should return a fail and an empty vendor auth info object
-		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
@@ -983,7 +983,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 															 "n0taR3alC1ien7");
 
 		// specifying an unknown vendor ID and user ID when attempting to get auth info should return a fail and an empty vendor auth info object
-		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 		const auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
@@ -1050,7 +1050,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Add the attendee to the space
 	auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
-	EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display, "SpaceId: %s", Space.Id.c_str());
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display, "CreatorUserId: %s", EventCreatorUserId.c_str());
@@ -1061,7 +1061,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 														 RequestPredicate,
 														 csp::systems::EventTicketingVendor::Eventbrite,
 														 EventCreatorUserId);
-	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display,
@@ -1077,7 +1077,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 										   TestVendorEventUri,
 										   true);
 
-	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event = TicketedEventResult.GetTicketedEvent();
 
 	// Log out as the creator
@@ -1095,7 +1095,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 											   TestVendorTicketId,
 											   nullptr);
 
-	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto SubmittedEventTicket = SubmitEventTicketResult.GetEventTicket();
 
@@ -1155,7 +1155,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Add the attendee to the space
 	auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
-	EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserToSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display, "SpaceId: %s", Space.Id.c_str());
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display, "CreatorUserId: %s", EventCreatorUserId.c_str());
@@ -1166,7 +1166,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 														 RequestPredicate,
 														 csp::systems::EventTicketingVendor::Eventbrite,
 														 EventCreatorUserId);
-	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventVendorAuthInfoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	auto VendorAuthInfo = TicketedEventVendorAuthInfoResult.GetVendorAuthInfo();
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::Display,
@@ -1182,7 +1182,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 										   TestVendorEventUri,
 										   true);
 
-	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(TicketedEventResult.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event = TicketedEventResult.GetTicketedEvent();
 
 	auto [SubmitEventTicketResult] = AWAIT_PRE(EventTicketingSystem,
@@ -1194,7 +1194,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 											   TestVendorTicketId,
 											   EventAttendeeUserId);
 
-	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SubmitEventTicketResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto SubmittedEventTicket = SubmitEventTicketResult.GetEventTicket();
 

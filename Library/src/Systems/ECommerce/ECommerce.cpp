@@ -339,7 +339,7 @@ CartInfo& CartInfoResult::GetCartInfo()
 
 CartInfoResult CartInfoResult::Invalid()
 {
-	static CartInfoResult InvalidResult(csp::services::EResultCode::Failed, 0);
+	static CartInfoResult InvalidResult(csp::systems::EResultCode::Failed, 0);
 
 	return InvalidResult;
 }

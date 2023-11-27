@@ -19,9 +19,9 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::services
 {
@@ -85,7 +85,7 @@ enum class ConversationMessageType
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when a message is being retrieved
-class CSP_API MessageResult : public csp::services::ResultBase
+class CSP_API MessageResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -112,7 +112,7 @@ public:
 private:
 	explicit MessageResult(void*) {};
 	MessageResult() = default;
-	MessageResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
 
@@ -121,7 +121,7 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a collection of messages
-class CSP_API MessageCollectionResult : public csp::services::ResultBase
+class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -155,7 +155,7 @@ public:
 private:
 	explicit MessageCollectionResult(void*) {};
 	explicit MessageCollectionResult(uint64_t ResultTotalCount) : ResultTotalCount(ResultTotalCount) {};
-	MessageCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
 
@@ -165,7 +165,7 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a conversation.
-class CSP_API ConversationResult : public csp::services::ResultBase
+class CSP_API ConversationResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -191,7 +191,7 @@ public:
 private:
 	explicit ConversationResult(void*) {};
 	ConversationResult() = default;
-	ConversationResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
 

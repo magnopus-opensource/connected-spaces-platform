@@ -62,7 +62,7 @@ async {{ name }}(
 {{/ type.is_number }}
 
 {{# type.is_result_base }}
-        if (_{{ name }}Instance.getResultCode() == Services.EResultCode.InProgress) {
+        if (_{{ name }}Instance.getResultCode() == Systems.EResultCode.InProgress) {
 {{# is_async_result_with_progress }}
             if (progressCallback != null) {
                 progressCallback(_{{ name }}Instance.getRequestProgress(), _{{ name }}Instance.getResponseProgress());
