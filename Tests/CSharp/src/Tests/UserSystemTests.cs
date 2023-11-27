@@ -181,38 +181,38 @@ namespace CSPEngine
 
             // Tests passing false for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, false).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
 
             // Tests passing true for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, true).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
             }
