@@ -47,10 +47,10 @@ void SetClientUserAgentInfo()
 	csp::ClientUserAgent ClientHeaderInfo;
 	ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetBuildID();
 	ClientHeaderInfo.ClientSKU = "foundation-cPlusPlus-examples";
-	ClientHeaderInfo.ClientEnvironment = "DEV";
+	ClientHeaderInfo.ClientEnvironment = "oStage";
 	ClientHeaderInfo.ClientOS = "WIN64";
 	ClientHeaderInfo.ClientVersion = "1.0";
-	ClientHeaderInfo.CHSEnvironment = "ODEV";
+	ClientHeaderInfo.CHSEnvironment = "oStage";
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 }
