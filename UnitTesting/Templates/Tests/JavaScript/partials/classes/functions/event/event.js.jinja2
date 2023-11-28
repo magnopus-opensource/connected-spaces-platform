@@ -1,0 +1,108 @@
+{% for p in config.primitives %}
+    // Get {{ p.type }} min value via promise
+    test('classFunctions_Event_Return{{ p.type }}ByValue_min', async function() {
+        let count = 0;
+        let resolve;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+        });
+
+        const instance = dummy.EventTestClass.create();
+        const result = await instance.setClassFunctions_Event_Return{{ p.type }}ByValue_minCallback((result) => {
+            {{ assert_are_equal(p.use_epsilon, "result", p.min) }}
+            // Event callback will be called twice, so ensure we wait for both calls before resolving the promise
+            count++;
+
+            if (count > 1)
+                resolve();
+        });
+
+        // Invoke event callback
+        instance.classFunctions_Event_Return{{ p.type }}ByValue_min();
+
+        await promise;
+
+        assert.areEqual(count, 2);
+    });
+
+    // Get {{ p.type }} max value via promise
+    test('classFunctions_Event_Return{{ p.type }}ByValue_max', async function() {
+        let count = 0;
+        let resolve;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+        });
+
+        const instance = dummy.EventTestClass.create();
+        const result = await instance.setClassFunctions_Event_Return{{ p.type }}ByValue_maxCallback((result) => {
+            {{ assert_are_equal(p.use_epsilon, "result", p.max) }}
+            count++;
+
+            if (count > 1)
+                resolve();
+        });
+
+        instance.classFunctions_Event_Return{{ p.type }}ByValue_max();
+
+        await promise;
+
+        assert.areEqual(count, 2);
+    });
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via promise
+    test('classFunctions_Event_ReturnStringBy{{ x }}', async function() {
+        let count = 0;
+        let resolve;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+        });
+
+        const instance = dummy.EventTestClass.create();
+        instance.setClassFunctions_Event_ReturnStringBy{{ x }}Callback((result) => {
+            assert.areEqual(result, "{{ config.string_value }}");
+
+            count++;
+
+            if (count > 1)
+                resolve();
+        });
+
+        instance.classFunctions_Event_ReturnStringBy{{ x }}();
+
+        await promise;
+
+        assert.areEqual(count, 2);
+    });
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    // Get class by {{ x }} via promise
+    test('classFunctions_Event_ReturnClassBy{{ x }}', async function() {
+        let count = 0;
+        let resolve;
+        const promise = new Promise((res, rej) => {
+            resolve = res;
+        });
+
+        const instance = dummy.EventTestClass.create();
+        instance.setClassFunctions_Event_ReturnClassBy{{ x }}Callback((result) => {
+            assert.isTrue(result.pointerIsValid());
+            assert.areEqual(result.someValue, {{ config.class_int_value_first }});
+
+            count++;
+
+            if (count > 1)
+                resolve();
+        });
+
+        instance.classFunctions_Event_ReturnClassBy{{ x }}();
+
+        await promise;
+
+        assert.areEqual(count, 2);
+    });
+{% endfor %}
+
+{# TODO: Add MultiThread tests when we can call callbacks from other threads. #}
