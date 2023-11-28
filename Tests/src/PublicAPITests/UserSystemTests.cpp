@@ -1072,14 +1072,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 		  DefaultLoginEmail,
 		  DefaultLoginPassword,
 		  true,
-		  csp::services::EResultCode::Success,
-		  csp::services::ERequestFailureReason::None);
+		  csp::systems::EResultCode::Success,
+		  csp::systems::ERequestFailureReason::None);
 
 	auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(Result.GetFailureReason(), csp::services::ERequestFailureReason::None);
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	EXPECT_NE(Result.GetUrl(), "");
 }
@@ -1100,14 +1100,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 		  DefaultLoginEmail,
 		  DefaultLoginPassword,
 		  true,
-		  csp::services::EResultCode::Success,
-		  csp::services::ERequestFailureReason::None);
+		  csp::systems::EResultCode::Success,
+		  csp::systems::ERequestFailureReason::None);
 
 	auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, csp::systems::TierNames::Pro);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(Result.GetFailureReason(), csp::services::ERequestFailureReason::None);
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	EXPECT_NE(Result.GetUrl(), "");
 }

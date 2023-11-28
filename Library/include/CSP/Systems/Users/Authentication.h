@@ -222,7 +222,7 @@ private:
 };
 
 /// @brief Result url for a tier checkout session request
-class CSP_API CheckoutSessionUrlResult : public csp::services::ResultBase
+class CSP_API CheckoutSessionUrlResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -244,7 +244,7 @@ private:
 };
 
 /// @brief Result url for a user customer portal request
-class CSP_API CustomerPortalUrlResult : public csp::services::ResultBase
+class CSP_API CustomerPortalUrlResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
