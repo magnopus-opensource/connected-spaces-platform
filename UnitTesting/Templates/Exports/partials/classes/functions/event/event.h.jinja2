@@ -1,0 +1,82 @@
+{% for p in config.primitives %}
+    typedef std::function<void({{ p.type }})> {{ p.type }}ValueCallback;
+{% endfor %}
+
+typedef std::function<void(csp::common::String)> StringValueCallback;
+typedef std::function<void(const csp::common::String&)> StringConstReferenceCallback;
+
+typedef std::function<void(MyReallyCoolClass)> ClassValueCallback;
+typedef std::function<void(MyReallyCoolClass*)> ClassPointerCallback;
+typedef std::function<void(const MyReallyCoolClass*)> ClassConstPointerCallback;
+typedef std::function<void(MyReallyCoolClass&)> ClassReferenceCallback;
+typedef std::function<void(const MyReallyCoolClass&)> ClassConstReferenceCallback;
+
+class CSP_API EventTestClass {
+public:
+{% for p in config.primitives %}
+    CSP_EVENT void SetClassFunctions_Event_Return{{ p.type }}ByValue_minCallback({{ p.type }}ValueCallback Callback);
+    void ClassFunctions_Event_Return{{ p.type }}ByValue_min();
+    CSP_EVENT void SetClassFunctions_Event_Return{{ p.type }}ByValue_maxCallback({{ p.type }}ValueCallback Callback);
+    void ClassFunctions_Event_Return{{ p.type }}ByValue_max();
+
+    CSP_EVENT void SetClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_minCallback(
+        {{ p.type }}ValueCallback Callback
+    );
+    void ClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_min();
+    CSP_EVENT void SetClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_maxCallback(
+        {{ p.type }}ValueCallback Callback
+    );
+    void ClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_max();
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    CSP_EVENT void SetClassFunctions_Event_ReturnStringBy{{ x }}Callback(String{{ x }}Callback Callback);
+    void ClassFunctions_Event_ReturnStringBy{{ x }}();
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    CSP_EVENT void SetClassFunctions_Event_ReturnStringBy{{ x }}_MultiThreadCallback(String{{ x }}Callback Callback);
+    void ClassFunctions_Event_ReturnStringBy{{ x }}_MultiThread();
+{% endfor %}
+
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByPointerCallback(ClassPointerCallback Callback);
+    void ClassFunctions_Event_ReturnClassByPointer();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByConstPointerCallback(ClassConstPointerCallback Callback);
+    void ClassFunctions_Event_ReturnClassByConstPointer();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByReferenceCallback(ClassReferenceCallback Callback);
+    void ClassFunctions_Event_ReturnClassByReference();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByConstReferenceCallback(ClassConstReferenceCallback Callback);
+    void ClassFunctions_Event_ReturnClassByConstReference();
+
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByPointer_MultiThreadCallback(ClassPointerCallback Callback);
+    void ClassFunctions_Event_ReturnClassByPointer_MultiThread();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByConstPointer_MultiThreadCallback(
+        ClassConstPointerCallback Callback
+    );
+    void ClassFunctions_Event_ReturnClassByConstPointer_MultiThread();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByReference_MultiThreadCallback(
+        ClassReferenceCallback Callback
+    );
+    void ClassFunctions_Event_ReturnClassByReference_MultiThread();
+    CSP_EVENT void SetClassFunctions_Event_ReturnClassByConstReference_MultiThreadCallback(
+        ClassConstReferenceCallback Callback
+    );
+    void ClassFunctions_Event_ReturnClassByConstReference_MultiThread();
+
+private:
+    csp::common::String String_Field;
+    MyReallyCoolClass Class_Field;
+
+    {% for p in config.primitives %}
+        {{ p.type }}ValueCallback _{{ p.type }}ValueCallback;
+    {% endfor %}
+
+    StringValueCallback _StringValueCallback;
+    StringConstReferenceCallback _StringConstReferenceCallback;
+
+    ClassValueCallback _ClassValueCallback;
+    ClassPointerCallback _ClassPointerCallback;
+    ClassConstPointerCallback _ClassConstPointerCallback;
+    ClassReferenceCallback _ClassReferenceCallback;
+    ClassConstReferenceCallback _ClassConstReferenceCallback;
+};
