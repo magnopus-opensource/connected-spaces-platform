@@ -1,5 +1,4 @@
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -43,7 +42,7 @@ namespace CSPEngine
                 .Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchor = result.GetAnchor();
             LogDebug($"Anchor Created (Id: {anchor.Id})");
@@ -86,7 +85,7 @@ namespace CSPEngine
                 .Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchor = result.GetAnchor();
             LogDebug($"Anchor Created (Id: {anchor.Id})");
@@ -115,7 +114,7 @@ namespace CSPEngine
             var result = anchorSystem.DeleteAnchors(_anchorIDs).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             foreach (var id in anchorIDs)
                 LogDebug($"Anchor Deleted (Id: {id})");
@@ -133,7 +132,7 @@ namespace CSPEngine
             var result = anchorSystem.CreateAnchorResolution(anchorId, successfullyResolved, resolveAttempted, resolveTime, tags).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchorResolution = result.GetAnchorResolution();
 
@@ -370,7 +369,7 @@ namespace CSPEngine
                 using var result = anchorSystem.GetAnchorsInArea(searchLocationOrigin, searchRadius, spacialKeys, spacialValues, tags, true, spaceIds, null, null).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 anchorCollection = result.GetAnchors();
             }
@@ -471,7 +470,7 @@ namespace CSPEngine
                 using var result = anchorSystem.GetAnchorsInSpace(space.Id, null, null).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 anchorCollection = result.GetAnchors();
 

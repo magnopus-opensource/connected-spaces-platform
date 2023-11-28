@@ -57,7 +57,6 @@ class TypeScriptWrapperGenerator_Jinja2:
         'csp': '',
         'csp::memory': 'Memory',
         'csp::multiplayer': 'Multiplayer',
-        'csp::services': 'Services',
         'csp::systems': 'Systems',
         'csp::web': 'Web'
     }

@@ -19,7 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 #include "CSP/Web/HTTPResponseCodes.h"
 
 #include <functional>
@@ -57,7 +57,7 @@ public:
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
-class CSP_API SettingsCollectionResult : public csp::services::ResultBase
+class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

@@ -30,7 +30,6 @@ class TypeScriptWrapperGenerator:
         "common": "Common",
         "memory": "Memory",
         "multiplayer": "Multiplayer",
-        "services": "Services",
         "systems": "Systems",
         "web": "Web",
     }
@@ -361,7 +360,7 @@ class TypeScriptWrapperGenerator:
                             "is_result_base",
                             full_type_name in classes
                             and self.__class_derives_from(
-                                classes[full_type_name], "csp::services", "ResultBase", classes
+                                classes[full_type_name], "csp::systems", "ResultBase", classes
                             ),
                         )
 
@@ -467,7 +466,7 @@ class TypeScriptWrapperGenerator:
                             "is_result_base",
                             full_type_name in classes
                             and self.__class_derives_from(
-                                classes[full_type_name], "csp::services", "ResultBase", classes
+                                classes[full_type_name], "csp::systems", "ResultBase", classes
                             ),
                         )
 

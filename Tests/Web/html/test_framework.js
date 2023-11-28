@@ -1,6 +1,6 @@
 import { C, CONSOLE_RED, CONSOLE_GREEN, CHS_ENDPOINT_BASE_URI } from './test_helpers.js'
 
-import { ClientUserAgent, CSPFoundation, Services, Systems } from './connected_spaces_platform.js';
+import { ClientUserAgent, CSPFoundation, Systems } from './connected_spaces_platform.js';
 
 
 /**
@@ -364,10 +364,10 @@ export const assert = {
 
     /**
      * Asserts that a ResultBase instance contains the expected ResultCode value
-     * @param {!Services.ResultBase} a 
-     * @param {Services.EResultCode} [expectedResultCode] 
+     * @param {!Systems.ResultBase} a 
+     * @param {Systems.EResultCode} [expectedResultCode] 
      */
-    succeeded(a, expectedResultCode = Services.EResultCode.Success) {
+    succeeded(a, expectedResultCode = Systems.EResultCode.Success) {
         const resCode = a.getResultCode();
 
         if (resCode !== expectedResultCode)
@@ -376,10 +376,10 @@ export const assert = {
 
     /**
      * Asserts that a ResultBase instance contains the expected ResultCode value
-     * @param {!Services.ResultBase} a 
-     * @param {Services.EResultCode} [expectedResultCode] 
+     * @param {!Systems.ResultBase} a 
+     * @param {Systems.EResultCode} [expectedResultCode] 
      */
-    failed(a, expectedResultCode = Services.EResultCode.Success) {
+    failed(a, expectedResultCode = Systems.EResultCode.Success) {
         const resCode = a.getResultCode();
 
         if (resCode === expectedResultCode)

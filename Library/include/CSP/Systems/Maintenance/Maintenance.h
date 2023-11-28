@@ -18,7 +18,7 @@
 
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::services
@@ -45,7 +45,7 @@ public:
 
 /// @ingroup CSPFoundation
 /// @brief Data class used to contain information when a Response is received from Maintenance Window Server
-class CSP_API MaintenanceInfoResult : public csp::services::ResultBase
+class CSP_API MaintenanceInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -55,7 +55,7 @@ class CSP_API MaintenanceInfoResult : public csp::services::ResultBase
 public:
 	MaintenanceInfoResult() {};
 	MaintenanceInfoResult(void*) {};
-	MaintenanceInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	MaintenanceInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
