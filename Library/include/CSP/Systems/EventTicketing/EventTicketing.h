@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::systems
 {
@@ -107,7 +108,7 @@ public:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a TicketedEvent.
-class CSP_API TicketedEventResult : public csp::services::ResultBase
+class CSP_API TicketedEventResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -134,7 +135,7 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
-class CSP_API TicketedEventCollectionResult : public csp::services::ResultBase
+class CSP_API TicketedEventCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -161,7 +162,7 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a ticket for an event.
-class CSP_API EventTicketResult : public csp::services::ResultBase
+class CSP_API EventTicketResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -188,7 +189,7 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
-class CSP_API SpaceIsTicketedResult : public csp::services::ResultBase
+class CSP_API SpaceIsTicketedResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -215,7 +216,7 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
-class CSP_API TicketedEventVendorAuthInfoResult : public csp::services::ResultBase
+class CSP_API TicketedEventVendorAuthInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

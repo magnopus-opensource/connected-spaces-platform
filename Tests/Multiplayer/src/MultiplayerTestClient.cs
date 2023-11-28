@@ -216,7 +216,7 @@ namespace MultiplayerTestClient
 
             Log($"Login using username '{login}'");
 
-            return resCode == Csp.Services.EResultCode.Success;
+            return resCode == Csp.Systems.EResultCode.Success;
         }
 
         public void Logout()

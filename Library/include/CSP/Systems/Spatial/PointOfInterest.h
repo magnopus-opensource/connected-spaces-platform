@@ -19,8 +19,8 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
+#include "CSP/Systems/WebService.h"
 
 
 
@@ -70,7 +70,7 @@ public:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information after creating or retrieving a POI.
-class CSP_API POIResult : public csp::services::ResultBase
+class CSP_API POIResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -92,7 +92,7 @@ private:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information when attempting to get an array of POIs.
-class CSP_API POICollectionResult : public csp::services::ResultBase
+class CSP_API POICollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

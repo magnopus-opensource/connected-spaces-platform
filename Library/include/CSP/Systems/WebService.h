@@ -27,25 +27,8 @@ class ApiBase;
 class ApiResponseBase;
 } // namespace csp::services
 
-namespace csp::services
+namespace csp::systems
 {
-
-
-/// @namespace csp::services
-/// This namespace wraps abstraction layers around Magnopus Services
-
-/// @brief Abstract base class for all CHS web services.
-class CSP_API WebService
-{
-public:
-	// @brief Constructs a web service.
-	WebService()
-	{
-	}
-
-	// @brief virtual destructor.
-	virtual ~WebService() = default;
-};
 
 
 /// @brief Code to indicate the result of a request.
@@ -111,11 +94,11 @@ public:
 
 	/// @brief Called when progress has been updated.
 	/// @param ApiResponse const ApiResponseBase* : Response received from the request
-	CSP_NO_EXPORT virtual void OnProgress(const ApiResponseBase* ApiResponse);
+	CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);
 
 	/// @brief Called when a response has been received.
 	/// @param ApiResponse const ApiResponseBase* : Response received from the request
-	CSP_NO_EXPORT virtual void OnResponse(const ApiResponseBase* ApiResponse);
+	CSP_NO_EXPORT virtual void OnResponse(const services::ApiResponseBase* ApiResponse);
 
 	/// @brief Status of this response.
 	/// @return EResultCode
@@ -141,9 +124,9 @@ public:
 	ERequestFailureReason GetFailureReason() const;
 
 protected:
-	ResultBase(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
-	void SetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode);
+	void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
 	EResultCode Result		  = EResultCode::Init;
 	uint16_t HttpResponseCode = 0;
@@ -158,4 +141,4 @@ private:
 	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
 };
 
-} // namespace csp::services
+} // namespace csp::systems

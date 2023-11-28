@@ -471,12 +471,12 @@ void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& Space
 
 	SpaceGeoLocationCollectionResultCallback CollectionCallback = [=](const SpaceGeoLocationCollectionResult Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			SpaceGeoLocationResult GeoLocationResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			Callback(GeoLocationResult);
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			SpaceGeoLocationResult GeoLocationResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			if (!Result.GeoLocations.IsEmpty())

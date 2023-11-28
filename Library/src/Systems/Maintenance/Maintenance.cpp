@@ -36,7 +36,7 @@ bool MaintenanceInfo::IsInsideWindow() const
 
 MaintenanceInfoResult MaintenanceInfoResult::Invalid()
 {
-	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static MaintenanceInfoResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 	return result;
 }
 

@@ -235,7 +235,7 @@ void LoginTokenReceived::FillLoginTokenInfo(const csp::common::String& AccessTok
 											const csp::common::String& RefreshToken,
 											const csp::common::String& RefreshTokenExpiry)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	LoginTokenInfo.AccessToken		 = AccessToken;
 	LoginTokenInfo.AccessExpiryTime	 = AccessTokenExpiry;
@@ -255,7 +255,7 @@ const csp::common::String& AgoraUserTokenResult::GetUserToken()
 
 void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	csp::services::ResultBase::OnResponse(ApiResponse);
+	csp::systems::ResultBase::OnResponse(ApiResponse);
 
 	auto AuthResponse					   = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();

@@ -5,7 +5,7 @@ import { createSpace } from './spacesystem_tests_helpers.js';
 import { createAsset, createAssetCollection, getAssetsByCriteria, getAssetCollectionsByCriteria, uploadAssetData } from './assetsystem_tests_helpers.js'
 import { jsArrayToCommonArray } from '../conversion_helpers.js';
 
-import { freeBuffer, stringToBuffer, Services, Systems } from '../connected_spaces_platform.js';
+import { freeBuffer, stringToBuffer, Systems } from '../connected_spaces_platform.js';
 
 
 test('AssetSystemTests', 'GetAssetCollectionsByDifferentCriteriaTest', async function() {
@@ -145,7 +145,7 @@ test('AssetSystemTests', 'GetAssetsFromMultipleAssetCollectionsTest', async func
     {
         const assetCollectionIds = [];
         const result = await assetSystem.getAssetsByCriteria(jsArrayToCommonArray(assetCollectionIds, String), null, null, null);
-        assert.succeeded(result, Services.EResultCode.Failed);
+        assert.succeeded(result, Systems.EResultCode.Failed);
     }
 
     // Search by both asset collection Ids at the same time

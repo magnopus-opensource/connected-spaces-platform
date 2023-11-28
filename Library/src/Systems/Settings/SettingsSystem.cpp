@@ -72,7 +72,7 @@ void SettingsSystem::SetSettingValue(const csp::common::String& InUserId,
 
 	SettingsResultCallback InternalCallback = [InKey, Callback](const csp::systems::SettingsCollectionResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
 			return;
 		}
@@ -103,11 +103,11 @@ void SettingsSystem::GetSettingValue(const csp::common::String& InUserId,
 	{
 		StringResult StringResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
 			return;
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			// Only attempt to read settings if result is valid
 
@@ -183,7 +183,7 @@ void SettingsSystem::AddRecentlyVisitedSpace(const csp::common::String& InUserId
 {
 	StringArrayResultCallback GetRecentSpacesCallback = [=](StringArrayResult Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -229,7 +229,7 @@ void SettingsSystem::GetRecentlyVisitedSpaces(const csp::common::String& InUserI
 	{
 		StringArrayResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			auto& RecentSpacesString = Result.GetValue();
 
@@ -260,7 +260,7 @@ void SettingsSystem::AddBlockedSpace(const csp::common::String& InUserId, const 
 {
 	StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -299,7 +299,7 @@ void SettingsSystem::RemoveBlockedSpace(const csp::common::String& InUserId, con
 {
 	StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -348,7 +348,7 @@ void SettingsSystem::GetBlockedSpaces(const csp::common::String& InUserId, Strin
 	{
 		StringArrayResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			auto BlockedSpacesString = Result.GetValue();
 
@@ -381,7 +381,7 @@ void SettingsSystem::UpdateAvatarPortrait(const csp::common::String& UserId,
 {
 	AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
@@ -396,11 +396,11 @@ void SettingsSystem::UpdateAvatarPortrait(const csp::common::String& UserId,
 
 				AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& AssetsResult)
 				{
-					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+					if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 					{
 						UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
 						{
-							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
+							if (UploadResult.GetResultCode() == csp::systems::EResultCode::Failed)
 							{
 								CSP_LOG_FORMAT(LogLevel::Log,
 											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
@@ -442,15 +442,14 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String& UserId, UriRes
 {
 	AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
 			if (AssetCollections.IsEmpty())
 			{
 				// User Doesn't have a Avatar Portrait
-				const UriResult InternalResult(csp::services::EResultCode::Success,
-											   static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
+				const UriResult InternalResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
 				Callback(InternalResult);
 			}
 			else
@@ -459,7 +458,7 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String& UserId, UriRes
 
 				AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& AssetsResult)
 				{
-					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+					if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 					{
 						const auto& Assets = AssetsResult.GetAssets();
 
@@ -470,7 +469,7 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String& UserId, UriRes
 						}
 						else
 						{
-							UriResult InternalResult(csp::services::EResultCode::Failed, 200);
+							UriResult InternalResult(csp::systems::EResultCode::Failed, 200);
 							InternalResult.SetResponseBody(
 								"Invalid avatar portrait AssetCollection. AssetCollection should contain an Asset but does not!");
 							InternalResult.Uri = "";
@@ -504,7 +503,7 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const csp::common::String& U
 {
 	AssetCollectionsResultCallback ThumbnailAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
@@ -519,11 +518,11 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const csp::common::String& U
 
 				AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& AssetsResult)
 				{
-					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+					if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 					{
 						UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
 						{
-							if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
+							if (UploadResult.GetResultCode() == csp::systems::EResultCode::Failed)
 							{
 								CSP_LOG_FORMAT(LogLevel::Log,
 											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
@@ -569,27 +568,27 @@ void SettingsSystem::AddAvatarPortrait(const csp::common::String& UserId,
 	const auto AssetSystem								  = SystemsManager::Get().GetAssetSystem();
 	AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
 			return;
 		}
 
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& PortraitAssetColl = AssetCollResult.GetAssetCollection();
 
 			AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
 			{
-				if (CreateAssetResult.GetResultCode() == csp::services::EResultCode::InProgress)
+				if (CreateAssetResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 				{
 					return;
 				}
 
-				if (CreateAssetResult.GetResultCode() == csp::services::EResultCode::Success)
+				if (CreateAssetResult.GetResultCode() == csp::systems::EResultCode::Success)
 				{
 					UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
 					{
-						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
+						if (UploadResult.GetResultCode() == csp::systems::EResultCode::Failed)
 						{
 							CSP_LOG_FORMAT(LogLevel::Error,
 										   "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
@@ -649,27 +648,27 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const csp::common::String& User
 
 	AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
 			return;
 		}
 
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& PortraitAvatarAssetColl = AssetCollResult.GetAssetCollection();
 
 			AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
 			{
-				if (CreateAssetResult.GetResultCode() == csp::services::EResultCode::InProgress)
+				if (CreateAssetResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 				{
 					return;
 				}
 
-				if (CreateAssetResult.GetResultCode() == csp::services::EResultCode::Success)
+				if (CreateAssetResult.GetResultCode() == csp::systems::EResultCode::Success)
 				{
 					UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
 					{
-						if (UploadResult.GetResultCode() == csp::services::EResultCode::Failed)
+						if (UploadResult.GetResultCode() == csp::systems::EResultCode::Failed)
 						{
 							CSP_LOG_FORMAT(LogLevel::Error,
 										   "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
@@ -733,7 +732,7 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String&
 {
 	AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			CSP_LOG_FORMAT(LogLevel::Error,
 						   "The Avatar Portrait asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
@@ -761,7 +760,7 @@ void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortrai
 {
 	AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& AssetsResult)
 	{
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Failed)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			CSP_LOG_FORMAT(LogLevel::Error,
 						   "The Avatar Portrait asset retrieval has failed. ResCode: %d, HttpResCode: %d",
@@ -782,12 +781,12 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 
 	AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
 			return;
 		}
 
-		if (AssetCollResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetCollResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
@@ -803,25 +802,25 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 
 				AssetsResultCallback PortraitAvatarAssetCallback = [=](const AssetsResult& AssetsResult)
 				{
-					if (AssetsResult.GetResultCode() == csp::services::EResultCode::InProgress)
+					if (AssetsResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 					{
 						return;
 					}
 
-					if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+					if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 					{
 						NullResultCallback DeleteAssetCallback = [=](const NullResult& DeleteAssetResult)
 						{
-							if (DeleteAssetResult.GetResultCode() == csp::services::EResultCode::InProgress)
+							if (DeleteAssetResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 							{
 								return;
 							}
 
-							if (DeleteAssetResult.GetResultCode() == csp::services::EResultCode::Success)
+							if (DeleteAssetResult.GetResultCode() == csp::systems::EResultCode::Success)
 							{
 								NullResultCallback DeleteAssetCollCallback = [=](const NullResult& DeleteAssetCollResult)
 								{
-									if (DeleteAssetCollResult.GetResultCode() == csp::services::EResultCode::Failed)
+									if (DeleteAssetCollResult.GetResultCode() == csp::systems::EResultCode::Failed)
 									{
 										CSP_LOG_FORMAT(LogLevel::Error,
 													   "The Portrait Avatar asset collection deletion has failed. ResCode: %d, HttpResCode: %d",

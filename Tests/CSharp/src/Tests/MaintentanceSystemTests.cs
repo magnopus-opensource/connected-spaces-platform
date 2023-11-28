@@ -1,4 +1,4 @@
-﻿using Services = Csp.Services;
+﻿using Systems = Csp.Systems;
 
 using CSharpTests;
 using static CSharpTests.TestHelper;
@@ -15,7 +15,7 @@ namespace CSPEngine
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
         }
 #endif
@@ -27,7 +27,7 @@ namespace CSPEngine
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             using var LatestMaintenanceInfo = result.GetLatestMaintenanceInfo();
             Assert.IsFalse(LatestMaintenanceInfo.IsInsideWindow());
@@ -41,7 +41,7 @@ namespace CSPEngine
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
             using var result = maintenanceSystem.GetMaintenanceInfo().Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             using var latestMaintenanceInfo = result.GetLatestMaintenanceInfo();
 	        if (result.HasAnyMaintenanceWindows())
