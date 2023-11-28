@@ -3,7 +3,6 @@ using System.IO;
 
 using Csp;
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
@@ -323,7 +322,7 @@ namespace CSPEngine
             var spaceDescription = "Created by C# test - UpdateObjectTest";
 
             // Log in
-            _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Services.EResultCode.Success, false);
+            _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Systems.EResultCode.Success, false);
 
             var InviteUsers = new Systems.InviteUserRoleInfoCollection();
             InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
@@ -403,7 +402,7 @@ namespace CSPEngine
             UserSystemTests.LogOut(userSystem);
 
             // Log in
-            _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Services.EResultCode.Success);
+            _ = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, Systems.EResultCode.Success);
 
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
         }
@@ -515,7 +514,7 @@ namespace CSPEngine
                 using var result = spaceSystem.EnterSpace(space1.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             {
@@ -559,7 +558,7 @@ namespace CSPEngine
                 using var result = spaceSystem.EnterSpace(space2.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             {
@@ -577,7 +576,7 @@ namespace CSPEngine
                 using var result = spaceSystem.GetSpacesByIds(spaceIds).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.IsGreaterThan(result.GetSpaces().Size(), 0);
 
                 using var spaces = result.GetSpaces();
@@ -705,7 +704,7 @@ namespace CSPEngine
             portalComponent.SetSpaceId(space.Id);
             var result = portalComponent.GetSpaceThumbnail().Result;
 
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsFalse(string.IsNullOrEmpty(result.GetUri()));
         }
 #endif
@@ -1017,7 +1016,7 @@ namespace CSPEngine
                 var result = spaceSystem.EnterSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             var connection = CreateMultiplayerConnection(space.Id);
@@ -1089,12 +1088,12 @@ namespace CSPEngine
 
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 {
                     using var resultInfo = conversationComponent.GetConversationInfo().Result;
 
-                    Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
+                    Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
                     Assert.IsFalse(resultInfo.GetConversationInfo().Resolved);
 
                     using var TestdefaultTransform = new Multiplayer.SpaceTransform();
@@ -1120,7 +1119,7 @@ namespace CSPEngine
             {
                 using var result = conversationComponent.GetConversationInfo().Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsFalse(result.GetConversationInfo().Resolved);
 
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
@@ -1147,7 +1146,7 @@ namespace CSPEngine
 
                 using var result = conversationComponent.SetConversationInfo(newData).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(result.GetConversationInfo().Resolved);
 
                 Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, cameraTransformValue.Position.X);
@@ -1169,7 +1168,7 @@ namespace CSPEngine
                 using var result = conversationComponent.AddMessage("Test").Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 messageId = result.GetMessageInfo().Id;
 
@@ -1180,7 +1179,7 @@ namespace CSPEngine
                 using var result = conversationComponent.GetMessage(messageId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(messageId, result.GetMessageInfo().Id);
 
             }
@@ -1188,7 +1187,7 @@ namespace CSPEngine
             {
                 using var result = conversationComponent.GetMessageInfo(messageId).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsFalse(result.GetMessageInfo().Edited);
             }
 
@@ -1198,7 +1197,7 @@ namespace CSPEngine
 
                 using var result = conversationComponent.SetMessageInfo(messageId, newData).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(result.GetMessageInfo().Edited);
             }
 
@@ -1206,7 +1205,7 @@ namespace CSPEngine
                 var result = conversationComponent.GetAllMessages().Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetTotalCount().ToString(), "1");
                 Assert.AreEqual(messageId, result.GetMessages()[0].Id);
             }
@@ -1215,14 +1214,14 @@ namespace CSPEngine
                 var result = conversationComponent.DeleteMessage(messageId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             {
                 var result = conversationComponent.DeleteConversation().Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             spaceSystem.ExitSpace();
@@ -1249,7 +1248,7 @@ namespace CSPEngine
                 var result = spaceSystem.EnterSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             var connection = CreateMultiplayerConnection(space.Id);
@@ -1277,7 +1276,7 @@ namespace CSPEngine
             {
                 var result = conversationComponent1.CreateConversation("TestMessage").Result;
                 var resCode = result.GetResultCode();
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 conversationId = result.GetValue();
             }
 
@@ -1286,7 +1285,7 @@ namespace CSPEngine
             {
                 using var resultInfo = conversationComponent1.GetConversationInfo().Result;
 
-                Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
@@ -1311,7 +1310,7 @@ namespace CSPEngine
             {
                 using var result = conversationComponent2.GetConversationInfo().Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
@@ -1323,13 +1322,13 @@ namespace CSPEngine
             {
                 using var result = conversationComponent1.GetConversationInfo().Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             {
                 using var resultInfo = conversationComponent2.GetConversationInfo().Result;
 
-                Assert.AreEqual(resultInfo.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
@@ -1362,7 +1361,7 @@ namespace CSPEngine
                 using var result = conversationComponent2.DeleteConversation().Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             spaceSystem.ExitSpace();

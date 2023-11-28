@@ -44,11 +44,11 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
 	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](const MaintenanceInfoResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			Callback(Result);
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			Callback(MaintenanceInfoResult::Invalid());
 		}

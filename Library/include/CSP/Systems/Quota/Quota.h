@@ -19,7 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 #include "CSP/Web/HTTPResponseCodes.h"
 
 
@@ -108,12 +108,11 @@ public:
 	TierNames TierName;
 	int32_t Limit;
 	PeriodEnum Period;
-	bool AllowReductions;
 };
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progress.
-class CSP_API FeaturesLimitResult : public csp::services::ResultBase
+class CSP_API FeaturesLimitResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -136,7 +135,7 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progresses.
-class CSP_API FeatureLimitResult : public csp::services::ResultBase
+class CSP_API FeatureLimitResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -159,7 +158,7 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving user tier information.
-class CSP_API UserTierResult : public csp::services::ResultBase
+class CSP_API UserTierResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -182,7 +181,7 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving feature quota information.
-class CSP_API FeatureQuotaResult : public csp::services::ResultBase
+class CSP_API FeatureQuotaResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -205,7 +204,7 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature quota information.
-class CSP_API FeaturesQuotaResult : public csp::services::ResultBase
+class CSP_API FeaturesQuotaResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

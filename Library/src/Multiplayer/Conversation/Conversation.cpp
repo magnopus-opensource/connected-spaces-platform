@@ -56,14 +56,14 @@ ConversationInfo::ConversationInfo(const ConversationInfo& ConversationData)
 
 MessageResult MessageResult::Invalid()
 {
-	static MessageResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static MessageResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
 }
@@ -80,7 +80,7 @@ const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() co
 
 MessageCollectionResult MessageCollectionResult::Invalid()
 {
-	static MessageCollectionResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static MessageCollectionResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
@@ -92,7 +92,7 @@ uint64_t MessageCollectionResult::GetTotalCount() const
 
 void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	ConversationMessages = csp::common::Array<MessageInfo>(MessagesAssetCollections.Size());
 
@@ -116,14 +116,14 @@ const ConversationInfo& ConversationResult::GetConversationInfo() const
 
 ConversationResult ConversationResult::Invalid()
 {
-	static ConversationResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static ConversationResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
 }

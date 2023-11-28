@@ -93,14 +93,14 @@ const csp::common::Map<csp::common::String, csp::common::String>& HTTPHeadersRes
 
 NullResult NullResult::Invalid()
 {
-	static NullResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static NullResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 StringResult StringResult::Invalid()
 {
-	static StringResult InvalidResult(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static StringResult InvalidResult(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 	InvalidResult.SetValue("");
 	return InvalidResult;
 }

@@ -28,16 +28,16 @@
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 void GetLODChain(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, csp::systems::LODChain& OutLODChain)
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetLODChain, AssetSystem, AssetCollection).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutLODChain = Result.GetLODChain();
 
@@ -52,7 +52,7 @@ void RegisterAssetToLODChain(csp::systems::AssetSystem* AssetSystem,
 	auto [Result]
 		= Awaitable(&csp::systems::AssetSystem::RegisterAssetToLODChain, AssetSystem, AssetCollection, Asset, LODLevel).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset = Result.GetAsset();
 }

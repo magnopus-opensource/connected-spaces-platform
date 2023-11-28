@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -19,7 +18,7 @@ namespace CSPEngine
             using var result = assetSystem.GetLODChain(assetCollection).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LODChain = result.GetLODChain();
         }
@@ -29,7 +28,7 @@ namespace CSPEngine
             using var result = assetSystem.RegisterAssetToLODChain(assetCollection, asset, LODLevel).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
         }
 
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_GET_EMPTY_LODCHAIN_TEST
