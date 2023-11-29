@@ -49,8 +49,8 @@ if not Project then
         files {
             "%{wks.location}/Library/**.h",
             "%{wks.location}/Library/**.cpp",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.h",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.cpp"
+            "%{wks.location}/modules/csp-services/generated/**.h",
+            "%{wks.location}/modules/csp-services/generated/**.cpp"
         }
         
         -- Exclude signalr clients as appropriate for specified configs
@@ -77,7 +77,7 @@ if not Project then
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
-            "%{wks.location}/modules/olympus-foundation-chs/generated",
+            "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"
         }
 
