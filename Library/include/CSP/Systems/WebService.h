@@ -120,7 +120,7 @@ public:
 	float GetResponseProgress() const;
 
 	/// @brief Get a code representing the failure reason, if relevant.
-	/// @return int
+	/// @return ERequestFailureReason
 	ERequestFailureReason GetFailureReason() const;
 
 protected:
