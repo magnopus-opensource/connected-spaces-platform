@@ -206,28 +206,28 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	// Tests passing false for UseTokenChangePasswordUrl
-	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, false);
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, nullptr, false);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, false);
+	auto [Result2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, nullptr, false);
 
 	EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, false);
+	auto [FailResult] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, nullptr, false);
 
 	EXPECT_EQ(FailResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// Tests passing true for UseTokenChangePasswordUrl
-	auto [Result3] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, true);
+	auto [Result3] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon@magnopus.com", nullptr, nullptr, true);
 
 	EXPECT_EQ(Result3.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [Result4] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, true);
+	auto [Result4] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "testnopus.pokemon+1@magnopus.com", nullptr, nullptr, true);
 
 	EXPECT_EQ(Result4.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [FailResult2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, true);
+	auto [FailResult2] = AWAIT_PRE(UserSystem, UserSystem::ForgotPassword, RequestPredicate, "email", nullptr, nullptr, true);
 
 	EXPECT_EQ(FailResult2.GetResultCode(), csp::systems::EResultCode::Failed);
 }
@@ -1053,5 +1053,62 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 		  csp::systems::ERequestFailureReason::None);
 
 	LogOut(UserSystem);
+}
+#endif
+
+#if 0
+// Currently disabled whilst stripe testing is unavailable for OKO_TESTS
+	#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// False Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::systems::EResultCode::Success,
+		  csp::systems::ERequestFailureReason::None);
+
+	auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+	EXPECT_NE(Result.GetUrl(), "");
+}
+	#endif
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CHECKOUT_SESSION_URL_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// False Log in
+	LogIn(UserSystem,
+		  UserId,
+		  DefaultLoginEmail,
+		  DefaultLoginPassword,
+		  true,
+		  csp::systems::EResultCode::Success,
+		  csp::systems::ERequestFailureReason::None);
+
+	auto [Result] = AWAIT_PRE(UserSystem, GetCheckoutSessionUrl, RequestPredicate, csp::systems::TierNames::Pro);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+
+	EXPECT_NE(Result.GetUrl(), "");
 }
 #endif
