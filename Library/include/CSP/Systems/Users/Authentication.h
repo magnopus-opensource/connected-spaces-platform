@@ -221,6 +221,50 @@ private:
 	csp::common::String UserToken;
 };
 
+/// @brief Result url for a tier checkout session request
+class CSP_API CheckoutSessionUrlResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	friend class UserSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	CheckoutSessionUrlResult() = default;
+	CheckoutSessionUrlResult(void*) {};
+
+	const csp::common::String& GetUrl();
+	const csp::common::String& GetUrl() const;
+
+private:
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::String CheckoutSessionUrl;
+};
+
+/// @brief Result url for a user customer portal request
+class CSP_API CustomerPortalUrlResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	friend class UserSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	CustomerPortalUrlResult() = default;
+	CustomerPortalUrlResult(void*) {};
+
+	const csp::common::String& GetUrl();
+	const csp::common::String& GetUrl() const;
+
+private:
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::String CustomerPortalUrl;
+};
+
 
 typedef std::function<void(LoginStateResult& Result)> LoginStateResultCallback;
 typedef std::function<void(LogoutResult& Result)> LogoutResultCallback;
@@ -231,6 +275,8 @@ typedef std::function<void(PingResponseReceived& Result)> PingResponseReceivedCa
 
 typedef std::function<void(AgoraUserTokenResult& Result)> UserTokenResultCallback;
 
+typedef std::function<void(CheckoutSessionUrlResult& Result)> CheckoutSessionUrlResultCallback;
 
+typedef std::function<void(CustomerPortalUrlResult& Result)> CustomerPortalUrlResultCallback;
 
 } // namespace csp::systems
