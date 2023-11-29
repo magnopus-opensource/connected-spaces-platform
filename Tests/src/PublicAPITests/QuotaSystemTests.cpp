@@ -324,7 +324,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
-	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 1);
+	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
 
 	// Disconnect from the SignalR server

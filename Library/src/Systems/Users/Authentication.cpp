@@ -282,4 +282,61 @@ void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiR
 	}
 }
 
+const csp::common::String& CheckoutSessionUrlResult::GetUrl() const
+{
+	return CheckoutSessionUrl;
+}
+
+const csp::common::String& CheckoutSessionUrlResult::GetUrl()
+{
+	return CheckoutSessionUrl;
+}
+
+void CheckoutSessionUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CheckoutSessionResponse		   = static_cast<chs::StripeCheckoutSessionDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CheckoutSessionResponse->HasCheckoutUrl())
+		{
+			CheckoutSessionUrl = CheckoutSessionResponse->GetCheckoutUrl();
+		}
+	}
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl() const
+{
+	return CustomerPortalUrl;
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl()
+{
+	return CustomerPortalUrl;
+}
+
+void CustomerPortalUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CustomerPortalResponse			   = static_cast<chs::StripeCustomerPortalDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CustomerPortalResponse->HasCustomerPortalUrl())
+		{
+			CustomerPortalUrl = CustomerPortalResponse->GetCustomerPortalUrl();
+		}
+	}
+}
+
+
 } // namespace csp::systems
