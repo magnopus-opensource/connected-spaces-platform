@@ -51,13 +51,6 @@ def main():
             case _:
                 pass
 
-        match p["type"]:
-            case "float":
-                p["min"] = str(p["min"]) + "f"
-                p["max"] = str(p["max"]) + "f"
-            case _:
-                pass
-
     # Render tests
     unity_tests_template = env.get_template("tests.cs.jinja2")
 
@@ -102,6 +95,14 @@ def main():
                 p["max"] = "dummy.Limits.UINT64_MAX"
             case "LLONG_MAX":
                 p["max"] = "dummy.Limits.INT64_MAX"
+            case _:
+                pass
+
+        # Remove 'f' suffix
+        match p["type"]:
+            case "float":
+                p["min"] = p["min"][:-1]
+                p["max"] = p["max"][:-1]
             case _:
                 pass
 

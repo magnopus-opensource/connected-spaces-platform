@@ -1,0 +1,129 @@
+{% for p in config.primitives %}
+    {% for x in ['', '_MultiThread'] %}
+        // Get {{ p.type }} min value via async task
+        [Test]
+        public static async Task ClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_min() {
+            var tcs = new TaskCompletionSource<bool>();
+            var count = 0;
+
+            using var instance = new EventTestClass();
+            instance.OnClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_min += (s, e) => {
+                {{ assert_are_equal(p.use_epsilon, "e", p.min) }}
+                count++;
+
+                if (count > 1)
+                    tcs.SetResult(true);
+            };
+
+            instance.ClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_min();
+
+            // Timeout after 10 seconds
+            await Task.WhenAny(tcs.Task, Task.Delay(10000));
+
+            Assert.AreEqual(2, count);
+        }
+
+        // Get {{ p.type }} max value via async task
+        [Test]
+        public static async Task ClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_max() {
+            var tcs = new TaskCompletionSource<bool>();
+            var count = 0;
+
+            using var instance = new EventTestClass();
+            instance.OnClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_max += (s, e) => {
+                {{ assert_are_equal(p.use_epsilon, "e", p.max) }}
+                count++;
+
+                if (count > 1)
+                    tcs.SetResult(true);
+            };
+
+            instance.ClassFunctions_Event_Return{{ p.type }}ByValue{{ x }}_max();
+
+            // Timeout after 10 seconds
+            await Task.WhenAny(tcs.Task, Task.Delay(10000));
+
+            Assert.AreEqual(2, count);
+        }
+    {% endfor %}
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via async task
+    [Test]
+    public static async Task ClassFunctions_Event_ReturnStringBy{{ x }}() {
+        var tcs = new TaskCompletionSource<bool>();
+        var count = 0;
+
+        using var instance = new EventTestClass();
+        instance.OnClassFunctions_Event_ReturnStringBy{{ x }} += (s, e) => {
+            Assert.AreEqual("{{ config.string_value }}", e);
+            count++;
+
+            if (count > 1)
+                tcs.SetResult(true);
+        };
+
+        instance.ClassFunctions_Event_ReturnStringBy{{ x }}();
+
+        await Task.WhenAny(tcs.Task, Task.Delay(10000));
+
+        Assert.AreEqual(2, count);
+    }
+{% endfor %}
+
+{% for x in ['Value', 'ConstReference'] %}
+    // Get string by {{ x }} via async task
+    [Test]
+    public static async Task ClassFunctions_Event_ReturnStringBy{{ x }}_MultiThread() {
+        var tcs = new TaskCompletionSource<bool>();
+        var count = 0;
+
+        using var instance = new EventTestClass();
+        instance.OnClassFunctions_Event_ReturnStringBy{{ x }}_MultiThread += (s, e) => {
+            Assert.AreEqual("{{ config.string_value }}", e);
+            count++;
+
+            if (count > 1)
+                tcs.SetResult(true);
+        };
+
+        instance.ClassFunctions_Event_ReturnStringBy{{ x }}_MultiThread();
+
+        // Timeout after 10 seconds
+        await Task.WhenAny(tcs.Task, Task.Delay(10000));
+
+        Assert.AreEqual(2, count);
+    }
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer', 'Reference', 'ConstReference'] %}
+    {% for y in ['', '_MultiThread'] %}
+        // Get class by {{ x }} via async task
+        [Test]
+        public static async Task ClassFunctions_Event_ReturnClassBy{{ x }}{{ y }}() {
+            var tcs = new TaskCompletionSource<bool>();
+            var count = 0;
+
+            using var instance = new EventTestClass();
+            instance.OnClassFunctions_Event_ReturnClassBy{{ x }}{{ y }} += (s, e) => {
+                Assert.IsTrue(e.PointerIsValid);
+                Assert.AreEqual({{ config.class_int_value_first }}, e.SomeValue);
+
+                e.Dispose();
+
+                count++;
+
+                if (count > 1)
+                    tcs.SetResult(true);
+            };
+
+            instance.ClassFunctions_Event_ReturnClassBy{{ x }}{{ y }}();
+
+            // Timeout after 10 seconds
+            await Task.WhenAny(tcs.Task, Task.Delay(10000));
+
+            Assert.AreEqual(2, count);
+        }
+    {% endfor %}
+{% endfor %}
