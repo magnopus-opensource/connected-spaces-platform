@@ -619,7 +619,7 @@ void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, Custome
 	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCustomerPortalsUserIdGet(UserId, ResponseHandler);
 };
 
-void UserSystem::GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback)
+void UserSystem::GetCheckoutSessionUrl(TierNames Tier, CheckoutSessionUrlResultCallback Callback)
 {
 	auto CheckoutSessionInfo = std::make_shared<chs::StripeCheckoutRequest>();
 

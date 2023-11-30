@@ -1,10 +1,10 @@
-from typing import TypedDict, Union, List
+from typing import TypedDict, List
 
 
 class Primitive(TypedDict):
     type: str
-    min: Union[str, int]
-    max: Union[str, int]
+    min: str
+    max: str
     use_epsilon: bool
 
 
@@ -23,8 +23,8 @@ config: Config = {
         {"type": "int32_t", "min": "INT_MIN", "max": "INT_MAX", "use_epsilon": False},
         {"type": "uint64_t", "min": "0ULL", "max": "ULLONG_MAX", "use_epsilon": False},
         {"type": "int64_t", "min": "LLONG_MIN", "max": "LLONG_MAX", "use_epsilon": False},
-        {"type": "float", "min": "-3.40282347E+38", "max": "3.40282347E+38", "use_epsilon": True},
-        {"type": "double", "min": "-1.7976931348623157E+308", "max": "1.7976931348623157E+308", "use_epsilon": True},
+        {"type": "float", "min": "1.175494351E-38f", "max": "3.402823466E+38f", "use_epsilon": True},
+        {"type": "double", "min": "2.2250738585072014E-308", "max": "1.7976931348623158E+308", "use_epsilon": True},
     ],
     "string_value": "This is a test string!",
     "class_int_value_first": "42",
