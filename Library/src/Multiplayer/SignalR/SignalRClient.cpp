@@ -179,7 +179,7 @@ CSPHttpClient::CSPHttpClient()
 
 void CSPHttpClient::send(const std::string& url, const http_request& request, std::function<void(const http_response&, std::exception_ptr)> callback)
 {
-	FOUNDATION_PROFILE_SCOPED();
+	CSP_PROFILE_SCOPED();
 
 	SignalRResponseReceiver SignalRConnectionReceiver;
 	csp::web::HttpPayload PayLoad;

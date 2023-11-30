@@ -34,9 +34,9 @@
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 } // namespace
@@ -95,9 +95,9 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem,
 							  POILocation,
 							  POIAssetCollection)
 						.Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		OutPOI = Result.GetPointOfInterest();
 		std::cerr << "POI Created: Name=" << OutPOI.Name << " Id=" << OutPOI.Id << std::endl;
@@ -107,9 +107,9 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem,
 void DeletePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const csp::systems::PointOfInterest& POI)
 {
 	auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, POISystem, POI).Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		std::cerr << "POI Deleted: Name=" << POI.Name << " Id=" << POI.Id << std::endl;
 	}
@@ -120,9 +120,9 @@ void GetAssetCollectionFromPOI(csp::systems::AssetSystem* AssetSystem,
 							   csp::systems::AssetCollection& OutAssetCollection)
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionById, AssetSystem, POI.AssetCollectionId).Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		OutAssetCollection = Result.GetAssetCollection();
 	}
@@ -142,9 +142,9 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 							  csp::systems::EAssetCollectionType::DEFAULT,
 							  nullptr)
 						.Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		OutAssetCollection = Result.GetAssetCollection();
 	}
@@ -152,8 +152,8 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 
 void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection.Id).Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 bool AreTestAssetCollectionsEqual(const csp::systems::AssetCollection& Lhs, const csp::systems::AssetCollection& Rhs)
@@ -251,9 +251,9 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	auto [Result]
 		= Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		const auto& ResultPOIs = Result.GetPOIs();
 		POICollection		   = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());

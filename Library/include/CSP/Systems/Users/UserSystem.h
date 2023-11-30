@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
+#include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
@@ -62,10 +64,12 @@ public:
 	/// @param UserName csp::common::String
 	/// @param Email csp::common::String
 	/// @param Password csp::common::String
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void Login(const csp::common::String& UserName,
 								const csp::common::String& Email,
 								const csp::common::String& Password,
+								const csp::common::Optional<bool>& UserHasVerifiedAge,
 								LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services using a login token
@@ -77,8 +81,9 @@ public:
 	CSP_ASYNC_RESULT void LoginWithToken(const csp::common::String& UserId, const csp::common::String& LoginToken, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services as a guest.
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void LoginAsGuest(LoginStateResultCallback Callback);
+	CSP_ASYNC_RESULT void LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback);
 
 	/// @ingroup Third Party Authentication
 	/// @brief As a Connected Spaces Platform user the 3rd party authentication flow consists of two steps, first calling
@@ -104,16 +109,12 @@ public:
 	/// Note: The Authentication Provider and the Redirect URL you've passed in the first step will be used now
 	/// @param ThirdPartyToken csp::common::String : The authentication token returned by the Provider
 	/// @param ThirdPartyStateId csp::common::String : The state Id returned by the Provider
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param Callback LoginStateResultCallback : callback that contains the result of the Magnopus Connected Services Authentication operation
 	CSP_ASYNC_RESULT void LoginToThirdPartyAuthenticationProvider(const csp::common::String& ThirdPartyToken,
 																  const csp::common::String& ThirdPartyStateId,
+																  const csp::common::Optional<bool>& UserHasVerifiedAge,
 																  LoginStateResultCallback Callback);
-
-	/// @brief Log in to Magnopus Connected Services services as a guest.
-	/// @param DeviceId csp::common::String : The device Id to use when logging in
-	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	[[deprecated("This is no longer needed as we now have proper device ID generation! Please use LoginAsGuest() instead.")]] CSP_ASYNC_RESULT void
-		LoginAsGuestWithId(const csp::common::String& DeviceId, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services using the given one-time password/key.
 	/// @param UserId csp::common::String : the user Id
@@ -133,6 +134,7 @@ public:
 	/// @param Email csp::common::String : email address associated with the new profile
 	/// @param Password csp::common::String : password associated with the new profile
 	/// @param ReceiveNewsletter bool : `true` if the user wants to receive the Magnopus Connected Services newsletter
+	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
 	/// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
 	/// @param InviteToken csp::common::Optional<csp::common::String> : A token provided to the user that can be used to auto-confirm their account
 	/// @param Callback ProfileResultCallback : callback when asynchronous task finishes
@@ -141,6 +143,7 @@ public:
 									 const csp::common::String& Email,
 									 const csp::common::String& Password,
 									 bool ReceiveNewsletter,
+									 bool UserHasVerifiedAge,
 									 const csp::common::Optional<csp::common::String>& RedirectUrl,
 									 const csp::common::Optional<csp::common::String>& InviteToken,
 									 ProfileResultCallback Callback);
@@ -163,9 +166,13 @@ public:
 
 	/// @brief Reset the users password.
 	/// @param Token csp::common::String : Token received through email by user
+	/// @param UserId csp::common::String : The id of the user resetting their password
 	/// @param NewPassword csp::common::String : The new password for the associated account
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token, const csp::common::String& NewPassword, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ResetUserPassword(const csp::common::String& Token,
+											const csp::common::String& UserId,
+											const csp::common::String& NewPassword,
+											NullResultCallback Callback);
 
 	/// @brief Updates the user display name information.
 	/// @param UserId csp::common::String : id of the user that will be updated
@@ -182,10 +189,12 @@ public:
 	/// @brief Allow a user to reset their password if forgotten by providing an email address.
 	/// @param Email csp::common::String : account to recover password for
 	/// @param RedirectUrl csp::common::Optional<csp::common::String> : the URL to redirect the user to after they have registered
+	/// @param EmailLinkUrl csp::common::Optional<csp::common::String> : the URL inside the reset email sent to the user
 	/// @Param UseTokenChangePasswordUrl bool : if true the link in the email will direct the user to the Token Change URL
 	/// @param Callback NullResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void ForgotPassword(const csp::common::String& Email,
 										 const csp::common::Optional<csp::common::String>& RedirectUrl,
+										 const csp::common::Optional<csp::common::String>& EmailLinkUrl,
 										 bool UseTokenChangePasswordUrl,
 										 NullResultCallback Callback);
 
@@ -208,6 +217,23 @@ public:
 	/// @param Callback UserTokenResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetAgoraUserToken(const AgoraUserTokenParams& Params, UserTokenResultCallback Callback);
 
+	/// @brief Re-send user verification email
+	/// @param InEmail csp::common::String : User's email address
+	/// @param InRedirectUrl csp::common::Optional<csp::common::String> : URL to redirect user to after they have registered
+	/// @param Callback NullResultCallback : Callback to call when response is received
+	CSP_ASYNC_RESULT void ResendVerificationEmail(const csp::common::String& InEmail,
+												  const csp::common::Optional<csp::common::String>& InRedirectUrl,
+												  NullResultCallback Callback);
+
+	/// @brief Get the Customer Portal Url for a user from Stripe
+	/// @param UserId csp::common::String : the id of the user associated with the customer portal
+	/// @param Callback StringResultCallback : callback that contains the customer portal URL of the User
+	CSP_ASYNC_RESULT void GetCustomerPortalUrl(const csp::common::String& UserId, CustomerPortalUrlResultCallback Callback);
+
+	/// @brief Get the checkout session Url for a user from Stripe
+	/// @param Tier csp::systems::TierNames : the tier of the checkout session needed
+	/// @param Callback CheckoutSessionUrlResultCallback : callback that contains the checkout session URL of the tier
+	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback);
 
 protected:
 	CSP_NO_EXPORT UserSystem(csp::web::WebClient* InWebClient);
@@ -230,6 +256,7 @@ private:
 	csp::services::ApiBase* ProfileAPI;
 	csp::services::ApiBase* PingAPI;
 	csp::services::ApiBase* ExternalServiceProxyApi;
+	csp::services::ApiBase* StripeAPI;
 
 	LoginState CurrentLoginState;
 

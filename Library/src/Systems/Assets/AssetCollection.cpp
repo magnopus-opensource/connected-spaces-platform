@@ -198,7 +198,7 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 AssetCollectionsResult AssetCollectionsResult::Invalid()
 {
-	static AssetCollectionsResult result(csp::services::EResultCode::Failed, 0);
+	static AssetCollectionsResult result(csp::systems::EResultCode::Failed, 0);
 
 	return result;
 }

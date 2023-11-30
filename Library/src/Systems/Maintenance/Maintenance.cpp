@@ -36,7 +36,7 @@ bool MaintenanceInfo::IsInsideWindow() const
 
 MaintenanceInfoResult MaintenanceInfoResult::Invalid()
 {
-	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static MaintenanceInfoResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 	return result;
 }
 
@@ -81,7 +81,7 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 
 		if (MaintenanceInfoResponses.Size() == 0)
 		{
-			FOUNDATION_LOG_MSG(LogLevel::Verbose, "No future maintenance windows are defined by the services");
+			CSP_LOG_MSG(LogLevel::Verbose, "No future maintenance windows are defined by the services");
 		}
 
 		// Sort maintenance windows by latest date
@@ -107,7 +107,7 @@ const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
+		CSP_LOG_MSG(LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
 		return GetDefaultMaintenanceInfo();
 	}
 }

@@ -54,7 +54,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::SCRIPT_MODULE;
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
 		return csp::systems::EAssetType::IMAGE;
 	}
 }
@@ -67,7 +67,7 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 		return EAssetPlatform::DEFAULT;
 	}
 }
@@ -80,7 +80,7 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 			return "Default";
 	}
 
-	FOUNDATION_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
+	CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
 	return "Default";
 }
 
@@ -262,7 +262,7 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 AssetsResult AssetsResult::Invalid()
 {
-	static AssetsResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static AssetsResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
@@ -311,26 +311,16 @@ const csp::common::String& UriResult::GetUri() const
 	return Uri;
 }
 
-csp::common::String& UriResult::GetXErrorCode()
-{
-	return XCodeError;
-}
-
-const csp::common::String& UriResult::GetXErrorCode() const
-{
-	return XCodeError;
-}
-
 UriResult UriResult::Invalid()
 {
-	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
+	static UriResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
 
 	return result;
 }
 
 UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
 
 void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
@@ -339,11 +329,6 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 	const auto* Response = ApiResponse->GetResponse();
 	const auto& Headers	 = Response->GetPayload().GetHeaders();
-
-	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
-	{
-		XCodeError = Headers.at("x-errorcode").c_str();
-	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{

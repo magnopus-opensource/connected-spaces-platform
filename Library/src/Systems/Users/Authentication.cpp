@@ -124,10 +124,10 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 
 			if (CurrentTime >= Expiry)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-									  "AccessToken Expired: %s %s",
-									  AuthResponse->GetAccessToken().c_str(),
-									  AuthResponse->GetAccessTokenExpiresAt().c_str());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+							   "AccessToken Expired: %s %s",
+							   AuthResponse->GetAccessToken().c_str(),
+							   AuthResponse->GetAccessTokenExpiresAt().c_str());
 
 				return;
 			}
@@ -143,10 +143,10 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 
 			if (RefreshTime >= Expiry)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error,
-									  "RefreshToken Expired: %s %s",
-									  AuthResponse->GetRefreshToken().c_str(),
-									  AuthResponse->GetRefreshTokenExpiresAt().c_str());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+							   "RefreshToken Expired: %s %s",
+							   AuthResponse->GetRefreshToken().c_str(),
+							   AuthResponse->GetRefreshTokenExpiresAt().c_str());
 
 				return;
 			}
@@ -235,7 +235,7 @@ void LoginTokenReceived::FillLoginTokenInfo(const csp::common::String& AccessTok
 											const csp::common::String& RefreshToken,
 											const csp::common::String& RefreshTokenExpiry)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	LoginTokenInfo.AccessToken		 = AccessToken;
 	LoginTokenInfo.AccessExpiryTime	 = AccessTokenExpiry;
@@ -255,7 +255,7 @@ const csp::common::String& AgoraUserTokenResult::GetUserToken()
 
 void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	csp::services::ResultBase::OnResponse(ApiResponse);
+	csp::systems::ResultBase::OnResponse(ApiResponse);
 
 	auto AuthResponse					   = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
@@ -268,18 +268,75 @@ void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiR
 
 		if (!Result)
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult invalid");
+			CSP_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult invalid");
 			return;
 		}
 
 		if (!Result->HasMember("token"))
 		{
-			FOUNDATION_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
+			CSP_LOG_MSG(csp::systems::LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
 			return;
 		}
 
 		UserToken = Result->operator[]("token").GetString();
 	}
 }
+
+const csp::common::String& CheckoutSessionUrlResult::GetUrl() const
+{
+	return CheckoutSessionUrl;
+}
+
+const csp::common::String& CheckoutSessionUrlResult::GetUrl()
+{
+	return CheckoutSessionUrl;
+}
+
+void CheckoutSessionUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CheckoutSessionResponse		   = static_cast<chs::StripeCheckoutSessionDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CheckoutSessionResponse->HasCheckoutUrl())
+		{
+			CheckoutSessionUrl = CheckoutSessionResponse->GetCheckoutUrl();
+		}
+	}
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl() const
+{
+	return CustomerPortalUrl;
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl()
+{
+	return CustomerPortalUrl;
+}
+
+void CustomerPortalUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CustomerPortalResponse			   = static_cast<chs::StripeCustomerPortalDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CustomerPortalResponse->HasCustomerPortalUrl())
+		{
+			CustomerPortalUrl = CustomerPortalResponse->GetCustomerPortalUrl();
+		}
+	}
+}
+
 
 } // namespace csp::systems

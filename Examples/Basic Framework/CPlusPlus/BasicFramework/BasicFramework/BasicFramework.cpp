@@ -9,54 +9,55 @@
 #include <future>
 #include <filesystem>
 #include <nlohmann/json.hpp>
-#include "Olympus/Common/String.h"
-#include "Olympus/OlympusFoundation.h"
-#include "Olympus/Systems/SystemsManager.h"
-#include "Olympus/Systems/Users/UserSystem.h"
-#include "Olympus/Systems/Users/Authentication.h"
-#include "Olympus/Systems/Spaces/Space.h"
-#include "Olympus/Systems/Spaces/SpaceSystem.h"
-#include "Olympus/Systems/GraphQL/GraphQL.h"
-#include "Olympus/Systems/GraphQL/GraphQLSystem.h"
-#include "Olympus/Multiplayer/MultiPlayerConnection.h"
-#include "Olympus/Multiplayer/SpaceEntity.h"
-#include "Olympus/Multiplayer/Components/AvatarSpaceComponent.h"
-#include "Olympus/Systems/Assets/AssetSystem.h"
-#include "Olympus/Systems/Assets/AssetCollection.h"
-#include "Olympus/Systems/Assets/Asset.h"
+#include "CSP/Common/String.h"
+#include "CSP/CSPFoundation.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
+#include "CSP/Systems/Users/Authentication.h"
+#include "CSP/Systems/Spaces/Space.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
+#include "CSP/Systems/GraphQL/GraphQL.h"
+#include "CSP/Systems/GraphQL/GraphQLSystem.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
+#include "CSP/Systems/Assets/AssetSystem.h"
+#include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/Asset.h"
 
 using namespace std;
 using namespace nlohmann;
 
-const oly_common::String Tenant = "FOUNDATION_HELLO_WORLD";
-oly_common::String CurrentSpaceId;
-oly_multiplayer::MultiplayerConnection* MultiplayerConnection = nullptr;
-oly_multiplayer::SpaceEntity* Avatar = nullptr;
-oly_systems::AssetCollection AssetCollection;
-oly_systems::Asset Asset;
+const csp::common::String Tenant = "CSP_HELLO_WORLD";
+csp::common::String CurrentSpaceId;
+csp::multiplayer::MultiplayerConnection* MultiplayerConnection = nullptr;
+csp::multiplayer::SpaceEntity* Avatar = nullptr;
+csp::systems::AssetCollection AssetCollection;
+csp::systems::Asset Asset;
 
-bool StartupFoundation()
+bool StartupCSPFoundation()
 {
-    const oly_common::String EndpointRootURI = "https://ogs-ostage.magnoboard.com";
-	return oly::OlympusFoundation::Initialise(EndpointRootURI, Tenant);
+    const csp::common::String EndpointRootURI = "https://ogs-ostage.magnoboard.com";
+	return csp::CSPFoundation::Initialise(EndpointRootURI, Tenant);
 }
 
 void SetClientUserAgentInfo()
 {
-	oly::ClientUserAgent ClientHeaderInfo;
-	ClientHeaderInfo.OlympusVersion = oly::OlympusFoundation::GetBuildID();
+	csp::ClientUserAgent ClientHeaderInfo;
+	ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetBuildID();
 	ClientHeaderInfo.ClientSKU = "foundation-cPlusPlus-examples";
-	ClientHeaderInfo.ClientEnvironment = "DEV";
+	ClientHeaderInfo.ClientEnvironment = "oStage";
 	ClientHeaderInfo.ClientOS = "WIN64";
 	ClientHeaderInfo.ClientVersion = "1.0";
-	ClientHeaderInfo.CHSEnvironment = "ODEV";
+	ClientHeaderInfo.CHSEnvironment = "oStage";
 
-	oly::OlympusFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 }
 
-bool ShutdownFoundation()
+bool ShutdownCSPFoundation()
 {
-	return oly::OlympusFoundation::Shutdown();
+	return csp::CSPFoundation::Shutdown();
 }
 
 void Signup()
@@ -70,19 +71,19 @@ void Signup()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	oly_systems::UserSystem* UserSystem = oly_systems::SystemsManager::Get().GetUserSystem();
+	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false,
-				"", "", [&](const oly_systems::ProfileResult& Result)
+	UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false, true,
+				"", "", [&](const csp::systems::ProfileResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "\nSuccessfully signed up as " + Email << endl;
 			cout << "You should have received a verification email at " + Email << endl;
 			cout << "Please restart this application once verified" << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "\nSign up failed. Please double check if have an account already and restart this application. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -103,16 +104,16 @@ void Login()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	oly_systems::UserSystem* UserSystem = oly_systems::SystemsManager::Get().GetUserSystem();
+	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->Login("", Email.c_str(), Password.c_str(), [&](const oly_systems::LoginStateResult& Result)
+	UserSystem->Login("", Email.c_str(), Password.c_str(), true, [&](const csp::systems::LoginStateResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "Successfully logged in as " + Email << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Login failed. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -127,16 +128,16 @@ void Logout()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	oly_systems::UserSystem* UserSystem = oly_systems::SystemsManager::Get().GetUserSystem();
+	csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-	UserSystem->Logout([&](const oly_systems::LogoutResult& Result)
+	UserSystem->Logout([&](const csp::systems::LogoutResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "\nSuccessfully logged out" << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "\nLogout failed. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -152,7 +153,7 @@ void SearchSpaces()
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
 	//Query to get the first 10 spaces
-	oly_common::String SpacesQuery =
+	csp::common::String SpacesQuery =
 		"spaces("
 		"pagination: { limit: 10, skip: 0 }"
 		"filters: {}"
@@ -166,11 +167,11 @@ void SearchSpaces()
 		"}"
 	;
 
-	oly_systems::GraphQLSystem* QuerySystem = oly_systems::SystemsManager::Get().GetGraphQLSystem();
+	csp::systems::GraphQLSystem* QuerySystem = csp::systems::SystemsManager::Get().GetGraphQLSystem();
 
-	QuerySystem->RunQuery(SpacesQuery, [&](oly_systems::GraphQLResult& Result)
+	QuerySystem->RunQuery(SpacesQuery, [&](csp::systems::GraphQLResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{			
 			json JsonData = json::parse(Result.GetResponse().c_str());
 			int TotalSpacesCount = JsonData["data"]["spaces"]["itemTotalCount"];
@@ -189,25 +190,67 @@ void CreateSpace()
 
 	cout << "\nCreate Space: please specify a name for the new space" << endl;
 	string SpaceName;
-	cin >> SpaceName;
+	cin.ignore();
+	std::getline(cin, SpaceName);
 
-	oly_common::Map<oly_common::String, oly_common::String> TestMetadata;	
-	oly_systems::SpaceSystem* SpaceSystem = oly_systems::SystemsManager::Get().GetSpaceSystem();
+	csp::systems::SystemsManager& SystemsManager = csp::systems::SystemsManager::Get();
+	csp::systems::SpaceSystem* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
-	SpaceSystem->CreateSpace(SpaceName.c_str(), "", oly_systems::SpaceType::Private, nullptr, 
-							TestMetadata, nullptr, [&](const oly_systems::SpaceResult& Result)
+	csp::common::Map<csp::common::String, csp::common::String> TestMetadata = {{"spaceData", "myData"}};
+	
+	SpaceSystem->CreateSpace(SpaceName.c_str(), "", csp::systems::SpaceAttributes::Private, nullptr, TestMetadata, nullptr, [&CallbackPromise](const csp::systems::SpaceResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			string SpaceID = Result.GetSpace().Id.c_str();
+			string SpaceName = Result.GetSpace().Name.c_str();
 			cout << "Created a new space called " + SpaceName + " and ID: " + SpaceID << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: could not create the new space. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
 		}
+	});
+
+	CallbackFuture.wait();
+}
+
+void SetupConnection()
+{
+	promise<void> CallbackPromise;
+	future<void> CallbackFuture = CallbackPromise.get_future();
+
+	cout << "\nEnter Space: please specify the space ID to enter" << endl;
+	string SpaceId;
+	cin >> SpaceId;
+
+	CurrentSpaceId = SpaceId.c_str();
+
+	MultiplayerConnection = new csp::multiplayer::MultiplayerConnection(CurrentSpaceId);
+
+	csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
+
+	SpaceEntitySystem->SetEntityCreatedCallback([] (csp::multiplayer::SpaceEntity* Entity)
+	{
+		cout << "A new remote Entity has been created: " + Entity->GetName() << endl;
+	});
+
+	MultiplayerConnection->Connect([&](bool IsOk)
+	{
+		if (IsOk)
+		{
+			MultiplayerConnection->InitialiseConnection([&](bool Ok)
+			{
+				cout << "Connection has been established." << endl;
+			});
+		}
+		else
+		{
+			cout << "Error: could not create a new connection." << endl;
+		}
+		CallbackPromise.set_value();
 	});
 
 	CallbackFuture.wait();
@@ -218,47 +261,17 @@ void EnterSpace()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	cout << "\nEnter Space: please specify the space ID to enter" << endl;
-	string SpaceId;
-	cin >> SpaceId;
+	csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
-	oly_systems::SpaceSystem* SpaceSystem = oly_systems::SystemsManager::Get().GetSpaceSystem();
-
-	SpaceSystem->EnterSpace(SpaceId.c_str(), true, [&] (const oly_systems::EnterSpaceResult& Result)
+	SpaceSystem->EnterSpace(CurrentSpaceId.c_str(), [&] (const csp::systems::NullResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
-			cout << "Entered space with ID: " + SpaceId << endl;
-
-			CurrentSpaceId = SpaceId.c_str();
-
-			//Set Multiplayer Connection once entered a space
-			MultiplayerConnection = Result.GetConnection();
+			cout << "Entered space with ID: " + CurrentSpaceId << endl;
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: Could not enter space. " + Result.GetResponseBody()<< endl;
-		}
-		CallbackPromise.set_value();
-	});
-
-	CallbackFuture.wait();
-}
-
-void SetSelfMessaging()
-{
-	promise<void> CallbackPromise;
-	future<void> CallbackFuture = CallbackPromise.get_future();
-
-	MultiplayerConnection->SetAllowSelfMessagingFlag(true, [&] (bool IsSuccessful)
-	{
-		if(IsSuccessful)
-		{
-			cout << "\nAllowed this client to receive its own messages through multiplayer"<< endl;
-		}
-		else
-		{
-			cout << "\nError: Could not allow this client to receive every message it sends through multiplayer"<< endl;
 		}
 		CallbackPromise.set_value();
 	});
@@ -271,12 +284,12 @@ void CreateAvatarEntity()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	oly_multiplayer::SpaceTransform InSpaceTransform = {oly_common::Vector3::Zero(), oly_common::Vector4::Zero(), oly_common::Vector3::One()};
-	oly_multiplayer::SpaceEntitySystem* SpaceEntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
+	csp::multiplayer::SpaceTransform InSpaceTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+	csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
 
 	string AvatarName = "TestAvatar";
-	SpaceEntitySystem->CreateAvatar(AvatarName.c_str(), InSpaceTransform, oly_multiplayer::AvatarState::Idle, "id",
-									oly_multiplayer::AvatarPlayMode::Default, [&] (oly_multiplayer::SpaceEntity* AvatarSpaceEntity)
+	SpaceEntitySystem->CreateAvatar(AvatarName.c_str(), InSpaceTransform, csp::multiplayer::AvatarState::Idle, "id",
+									csp::multiplayer::AvatarPlayMode::Default, [&] (csp::multiplayer::SpaceEntity* AvatarSpaceEntity)
 	{
 		if(AvatarSpaceEntity != nullptr)
 		{
@@ -296,25 +309,25 @@ void CreateAvatarEntity()
 int WaitForTimeoutCountMs;
 int WaitForTimeoutLimit = 20000;
 
-void MoveEntity(oly_multiplayer::SpaceEntity* Entity)
+void MoveEntity(csp::multiplayer::SpaceEntity* Entity)
 {
 	bool EntityUpdated = false;
 
 	//Set Entity Update Callback
-	Entity->SetUpdateCallback([&](const oly_multiplayer::SpaceEntity* SpaceEntity, oly_multiplayer::SpaceEntityUpdateFlags UpdateFlags, 
-									oly_common::Array<oly_multiplayer::ComponentUpdateInfo> ComponentUpdateInfo)
+	Entity->SetUpdateCallback([&](const csp::multiplayer::SpaceEntity* SpaceEntity, csp::multiplayer::SpaceEntityUpdateFlags UpdateFlags, 
+									csp::common::Array<csp::multiplayer::ComponentUpdateInfo> ComponentUpdateInfo)
 	{
-		if (UpdateFlags & oly_multiplayer::SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+		if (UpdateFlags & csp::multiplayer::SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
 		{
 			string SpaceEntityName = SpaceEntity->GetName().c_str();
-			oly_common::Vector3 EntityPosition = SpaceEntity->GetTransform().Position;
+			csp::common::Vector3 EntityPosition = SpaceEntity->GetTransform().Position;
 			cout << "Received update from Entity " + SpaceEntityName + " : it moved to " + to_string(EntityPosition.X) + ", " + to_string(EntityPosition.Y) + ", " + to_string(EntityPosition.Z) << endl;
 			EntityUpdated = true;
 		}
 	});
 
 	//Move Entity
-	oly_common::Vector3 EntityNewPosition = oly_common::Vector3{1.0f, 2.0f, 3.0f};
+	csp::common::Vector3 EntityNewPosition = csp::common::Vector3{1.0f, 2.0f, 3.0f};
 	Entity->SetPosition(EntityNewPosition);
 	Entity->QueueUpdate();
 	string EntityName = Entity->GetName().c_str();
@@ -323,7 +336,7 @@ void MoveEntity(oly_multiplayer::SpaceEntity* Entity)
 	//Simulate "tick", which is needed for Multiplayer
 	while (!EntityUpdated && WaitForTimeoutCountMs < WaitForTimeoutLimit)
 	{
-		oly_multiplayer::SpaceEntitySystem* EntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
+		csp::multiplayer::SpaceEntitySystem* EntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
 		EntitySystem->ProcessPendingEntityOperations();
 		std::this_thread::sleep_for(50ms);
 		WaitForTimeoutCountMs += 50;
@@ -337,20 +350,21 @@ void CreateAssetCollection()
 
 	cout << "\nCreate Asset Collection: please enter a unique name" << endl;
 	string AssetCollectionName;
-	cin >> AssetCollectionName;
+	cin.ignore();
+	std::getline(cin, AssetCollectionName);
 
-	oly_systems::AssetSystem* AssetSystem = oly_systems::SystemsManager::Get().GetAssetSystem();
+	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 	AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(),
-									nullptr, oly_systems::EAssetCollectionType::DEFAULT, nullptr, 
-									[&](const oly_systems::AssetCollectionResult Result)
+									nullptr, csp::systems::EAssetCollectionType::DEFAULT, nullptr, 
+									[&](const csp::systems::AssetCollectionResult Result)
 	{
-		if(Result.GetResultCode() == oly_services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			AssetCollection = Result.GetAssetCollection();
 			cout << "Created a new Asset Collection called " + AssetCollection.Name + ".ID: " + AssetCollection.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: Could not create a new Asset Collection. " + Result.GetResponseBody()<< endl;
 		}
@@ -366,19 +380,20 @@ void CreateAsset()
 
 	cout << "\nCreate Asset: please enter a unique name" << endl;
 	string AssetName;
-	cin >> AssetName;
+	cin.ignore();
+	std::getline(cin, AssetName);
 
-	oly_systems::AssetSystem* AssetSystem = oly_systems::SystemsManager::Get().GetAssetSystem();
+	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 	AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr,
-							oly_systems::EAssetType::IMAGE, [&](const oly_systems::AssetResult Result)
+							csp::systems::EAssetType::IMAGE, [&](const csp::systems::AssetResult Result)
 	{
-		if(Result.GetResultCode() == oly_services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			Asset = Result.GetAsset();
 			cout << "Created a new Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: Could not create a new Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -397,21 +412,21 @@ void UploadAsset()
 	string SolutionPath = _SOLUTION_DIR;
 	filesystem::path FilePath = std::filesystem::absolute(SolutionPath + "TestAsset/TestImage.png");
 
-	oly_systems::FileAssetDataSource AssetDataSource;
+	csp::systems::FileAssetDataSource AssetDataSource;
 	AssetDataSource.FilePath = FilePath.u8string().c_str();
 	AssetDataSource.SetMimeType("image/png");
 
 	//Upload Asset
-	oly_systems::AssetSystem* AssetSystem = oly_systems::SystemsManager::Get().GetAssetSystem();
+	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-	AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&](const oly_systems::UriResult& Result)
+	AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&](const csp::systems::UriResult& Result)
 	{
-		if(Result.GetResultCode() == oly_services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "\nUploaded Test Asset from path: " + AssetDataSource.FilePath << endl;
 			CallbackPromise.set_value();
 		}
-		else if(Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if(Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "\nError: Could not upload Test Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -426,15 +441,15 @@ void DeleteAsset()
 	promise<void> CallbackPromise;
 	future<void> CallbackFuture = CallbackPromise.get_future();
 
-	oly_systems::AssetSystem* AssetSystem = oly_systems::SystemsManager::Get().GetAssetSystem();
-	AssetSystem->DeleteAsset(AssetCollection, Asset, [&](const oly_systems::NullResult Result)
+	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+	AssetSystem->DeleteAsset(AssetCollection, Asset, [&](const csp::systems::NullResult Result)
 	{
-		if(Result.GetResultCode() == oly_services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "\nDeleted Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "\nError: Could not delete Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -446,7 +461,7 @@ void DeleteAsset()
 
 void ExitSpace()
 {
-	oly_systems::SpaceSystem* SpaceSystem = oly_systems::SystemsManager::Get().GetSpaceSystem();
+	csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
 	SpaceSystem->ExitSpace();
 	cout << "\nExited space"  << endl;
@@ -461,16 +476,16 @@ void DeleteSpace()
 	string SpaceId;
 	cin >> SpaceId;
 
-	oly_systems::SpaceSystem* SpaceSystem = oly_systems::SystemsManager::Get().GetSpaceSystem();
+	csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
-	SpaceSystem->DeleteSpace(SpaceId.c_str(), [&](const oly_systems::NullResult& Result)
+	SpaceSystem->DeleteSpace(SpaceId.c_str(), [&](const csp::systems::NullResult& Result)
 	{
-		if (Result.GetResultCode() == oly_services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::services::EResultCode::Success)
 		{
 			cout << "Deleted space with ID: " + SpaceId << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == oly_services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
 		{
 			cout << "Error: could not delete the space. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -482,15 +497,15 @@ void DeleteSpace()
 
 int main()
 {
-	//Initialise Foundation
-	if(StartupFoundation())
+	//Initialise CSP Foundation
+	if(StartupCSPFoundation())
 	{
-		cout << "Welcome to Foundation! \nThis is a simple Hello World example to demonstrate basic Foundation functionality."  << endl;
+		cout << "Welcome to the Connected Spaces Platform (CSP)! \nThis is a simple Hello World example to demonstrate basic CSP functionality."  << endl;
 		SetClientUserAgentInfo();
 	}
 	else
 	{
-		cout << "Error: Foundation could not be initialized."  << endl;
+		cout << "Error: The Connected Spaces Platform (CSP) could not be initialized."  << endl;
 		return 1;
 	}
 
@@ -529,15 +544,14 @@ int main()
 		}
 	}
 
+	//Set up a multiplayer connection
+	SetupConnection();
+
 	//Enter an existing space
 	EnterSpace();
 
 	if(MultiplayerConnection != nullptr)
 	{
-		//For this example we want to demonstrate that we are able to
-		//receive multiplayer updates, even the ones we send
-		SetSelfMessaging();
-
 		//Create an Avatar
 		CreateAvatarEntity();
 
@@ -574,14 +588,14 @@ int main()
 	//Logout
 	Logout();
 
-	//Shut down Foundation
-	if(ShutdownFoundation())
+	//Shut down CSP Foundation
+	if(ShutdownCSPFoundation())
 	{
-		cout << "\nFoundation shut down" << endl;
+		cout << "\nCSP Foundation shut down" << endl;
 	}
 	else
 	{
-		cout << "\nError: Foundation could not shut down"  << endl;
+		cout << "\nError: CSP Foundation could not shut down"  << endl;
 		return 1;
 	}
 }

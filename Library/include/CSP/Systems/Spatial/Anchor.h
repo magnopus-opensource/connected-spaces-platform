@@ -19,8 +19,8 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::services
@@ -85,7 +85,7 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an Anchor.
-class CSP_API AnchorResult : public csp::services::ResultBase
+class CSP_API AnchorResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -108,7 +108,7 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of Anchors.
-class CSP_API AnchorCollectionResult : public csp::services::ResultBase
+class CSP_API AnchorCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -159,7 +159,7 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an AnchorResolution.
-class CSP_API AnchorResolutionResult : public csp::services::ResultBase
+class CSP_API AnchorResolutionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -187,7 +187,7 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of AnchorResolutions.
-class CSP_API AnchorResolutionCollectionResult : public csp::services::ResultBase
+class CSP_API AnchorResolutionCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

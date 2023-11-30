@@ -220,7 +220,7 @@ void EntityScriptLog(qjs::rest<std::string> Args)
 		Str << Arg << " ";
 	}
 
-	FOUNDATION_LOG_ERROR_FORMAT("%s", Str.str().c_str());
+	CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "%s", Str.str().c_str());
 }
 
 
@@ -381,7 +381,7 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
 		.PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible");
 
-	Module->class_<PortalSpaceComponentScriptInterface>("StaticModelSpaceComponent")
+	Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
 		.PROPERTY_GET_SET(PortalSpaceComponent, SpaceId, "spaceId")

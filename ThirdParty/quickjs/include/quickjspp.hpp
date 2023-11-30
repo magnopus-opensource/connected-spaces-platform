@@ -43,12 +43,12 @@ static void csp_dump_obj(JSContext* ctx, FILE* f, JSValueConst val)
 	str = JS_ToCString(ctx, val);
 	if (str)
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("%s\n", str);
+		CSP_LOG_ERROR_FORMAT("%s\n", str);
 		JS_FreeCString(ctx, str);
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("[exception]\n");
+		CSP_LOG_ERROR_MSG("[exception]\n");
 	}
 }
 
@@ -74,7 +74,7 @@ inline void csp_dump_error(JSContext* ctx)
 {
 	JSValue exception_val;
 
-	FOUNDATION_LOG_ERROR_MSG("csp_dump_error...\n");
+	CSP_LOG_ERROR_MSG("csp_dump_error...\n");
 
 	exception_val = JS_GetException(ctx);
 	csp_dump_error1(ctx, exception_val);

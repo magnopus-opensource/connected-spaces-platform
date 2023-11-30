@@ -23,6 +23,8 @@ function MiMalloc.AddProject()
     }
 
     filter "platforms:Android"
-        staticruntime("On")
+        flags { "ExcludeFromBuild" }
+    filter "platforms:macosx"
+        flags { "ExcludeFromBuild" }
     filter {}
 end

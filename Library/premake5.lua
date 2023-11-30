@@ -1,6 +1,6 @@
 #!lua
 
-include "Tools/VisualStudioNDK21Fix/VisualStudioNDK21Fix.lua"
+include "Tools/PremakeFixes/AndroidFixes.lua"
 
 include "Library/CSharpWrapper/premake5.lua"
 
@@ -49,20 +49,20 @@ if not Project then
         files {
             "%{wks.location}/Library/**.h",
             "%{wks.location}/Library/**.cpp",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.h",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.cpp"
+            "%{wks.location}/modules/csp-services/generated/**.h",
+            "%{wks.location}/modules/csp-services/generated/**.cpp"
         }
         
         -- Exclude signalr clients as appropriate for specified configs
         if CSP.IsWebAssemblyGeneration() then 
             excludes { 
                 "**POCOSignalRClient**",
-                "**POCOWebClient**",
+                "**POCOWebClient**"
             }
         else
             excludes { 
                 "**EmscriptenSignalRClient**",
-                "**EmscriptenWebClient**",
+                "**EmscriptenWebClient**"
             }
         end
 
@@ -77,14 +77,15 @@ if not Project then
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
-            "%{wks.location}/modules/olympus-foundation-chs/generated",
-			"%{wks.location}/modules/tinyspline/src",
+            "%{wks.location}/modules/csp-services/generated",
+			"%{wks.location}/modules/tinyspline/src"
         }
 
         filter "platforms:not wasm"
             externalincludedirs {
-                -- mimalloc and POCO are not used in WASM builds 
+                -- mimalloc is not used in WASM builds 
                 "%{wks.location}/ThirdParty/mimalloc/include",
+                -- POCO is not used in WASM builds
                 "%{wks.location}/ThirdParty/poco/Foundation/include",
                 "%{wks.location}/ThirdParty/poco/Util/include",
                 "%{wks.location}/ThirdParty/poco/Net/include",
@@ -158,7 +159,10 @@ if not Project then
                 "WS2_32"
             }
         filter "platforms:Android"
-            defines { "CSP_ANDROID" }
+            defines {
+                "CSP_ANDROID",
+                "USE_STD_MALLOC=1"
+            }
             staticruntime("On")
 
             linkoptions { "-lm" } -- For gcc's math lib
@@ -181,7 +185,8 @@ if not Project then
             }
         filter "platforms:macosx"
             defines { 
-                "CSP_MACOSX", 				
+                "CSP_MACOSX",
+                "USE_STD_MALLOC=1",
                 "JS_STRICT_NAN_BOXING"
             }
 
@@ -297,12 +302,14 @@ if not Project then
 			"tinyspline"
         }
 
+        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx" }
+            links {
+                "mimalloc"
+            }
         filter "platforms:not wasm"
             links {
-                "POCONetSSL_OpenSSL",
-                "mimalloc",
+                "POCONetSSL_OpenSSL"
             }
-
         filter {}
 
         -- Debug/Release config settings

@@ -47,15 +47,32 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
 			if (VariantProductInformation[i]->HasImage())
 			{
-				if (VariantProductInformation[i]->GetImage()->HasMediaContentType())
+				auto VariantProductImage = VariantProductInformation[i]->GetImage();
+
+				if (VariantProductImage->HasMediaContentType())
 				{
-					ProductInfo.Variants[i].Media.MediaContentType = VariantProductInformation[i]->GetImage()->GetMediaContentType();
+					ProductInfo.Variants[i].Media.MediaContentType = VariantProductImage->GetMediaContentType();
 				}
 
-				ProductInfo.Variants[i].Media.Alt	 = VariantProductInformation[i]->GetImage()->GetAlt();
-				ProductInfo.Variants[i].Media.Url	 = VariantProductInformation[i]->GetImage()->GetUrl();
-				ProductInfo.Variants[i].Media.Width	 = VariantProductInformation[i]->GetImage()->GetWidth();
-				ProductInfo.Variants[i].Media.Height = VariantProductInformation[i]->GetImage()->GetHeight();
+				if (VariantProductImage->HasAlt())
+				{
+					ProductInfo.Variants[i].Media.Alt = VariantProductImage->GetAlt();
+				}
+
+				if (VariantProductImage->HasUrl())
+				{
+					ProductInfo.Variants[i].Media.Url = VariantProductImage->GetUrl();
+				}
+
+				if (VariantProductImage->HasWidth())
+				{
+					ProductInfo.Variants[i].Media.Width = VariantProductImage->GetWidth();
+				}
+
+				if (VariantProductImage->HasHeight())
+				{
+					ProductInfo.Variants[i].Media.Height = VariantProductImage->GetHeight();
+				}
 			}
 
 			if (Dto.GetVariants()[i]->HasSelectedOptions())
@@ -106,11 +123,30 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
 		for (int i = 0; i < MediaProductInformation.size(); ++i)
 		{
-			ProductInfo.Media[i].Alt			  = MediaProductInformation[i]->GetAlt();
-			ProductInfo.Media[i].Url			  = MediaProductInformation[i]->GetUrl();
-			ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
-			ProductInfo.Media[i].Width			  = MediaProductInformation[i]->GetWidth();
-			ProductInfo.Media[i].Height			  = MediaProductInformation[i]->GetHeight();
+			if (MediaProductInformation[i]->HasAlt())
+			{
+				ProductInfo.Media[i].Alt = MediaProductInformation[i]->GetAlt();
+			}
+
+			if (MediaProductInformation[i]->HasUrl())
+			{
+				ProductInfo.Media[i].Url = MediaProductInformation[i]->GetUrl();
+			}
+
+			if (MediaProductInformation[i]->HasMediaContentType())
+			{
+				ProductInfo.Media[i].MediaContentType = MediaProductInformation[i]->GetMediaContentType();
+			}
+
+			if (MediaProductInformation[i]->HasWidth())
+			{
+				ProductInfo.Media[i].Width = MediaProductInformation[i]->GetWidth();
+			}
+
+			if (MediaProductInformation[i]->HasHeight())
+			{
+				ProductInfo.Media[i].Height = MediaProductInformation[i]->GetHeight();
+			}
 		}
 	}
 }
@@ -123,7 +159,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing SpaceId");
 	}
 
 	if (CartDto.HasShopifyCartId())
@@ -136,7 +172,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing ShopifyCartId");
 	}
 
 	if (CartDto.HasLines())
@@ -156,7 +192,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ShopifyCartLineId");
 			}
 
 			if (CartLineDto.HasProductVariantId())
@@ -165,7 +201,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing ProductVariantId");
 			}
 
 			if (CartLineDto.HasQuantity())
@@ -174,13 +210,13 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 			}
 			else
 			{
-				FOUNDATION_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
+				CSP_LOG_ERROR_MSG("ShopifyCartLineDto missing Quantity");
 			}
 		}
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing Lines");
 	}
 
 	if (CartDto.HasTotalQuantity())
@@ -189,7 +225,7 @@ void CartDtoToCartInfo(const chs_aggregation::ShopifyCartDto& CartDto, csp::syst
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
+		CSP_LOG_ERROR_MSG("ShopifyCartDto missing TotalQuantity");
 	}
 }
 
@@ -201,7 +237,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
 	}
 
 	if (StoreDto.HasStoreName())
@@ -210,7 +246,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
 	}
 
 	if (StoreDto.HasSpaceOwnerId())
@@ -219,7 +255,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
 	}
 
 	if (StoreDto.HasSpaceId())
@@ -228,7 +264,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
 	}
 
 	if (StoreDto.HasIsEcommerceActive())
@@ -237,7 +273,7 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+		CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
 	}
 }
 
@@ -303,7 +339,7 @@ CartInfo& CartInfoResult::GetCartInfo()
 
 CartInfoResult CartInfoResult::Invalid()
 {
-	static CartInfoResult InvalidResult(csp::services::EResultCode::Failed, 0);
+	static CartInfoResult InvalidResult(csp::systems::EResultCode::Failed, 0);
 
 	return InvalidResult;
 }

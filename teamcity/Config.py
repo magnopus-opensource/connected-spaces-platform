@@ -53,11 +53,11 @@ config = Config(
         ],
         macosx=[
             "libConnectedSpacesPlatform.dylib",
-            "libConnectedSpacesPlatform_D.dylib"
+            #"libConnectedSpacesPlatform_D.dylib"
         ],
         ios=[
             "libConnectedSpacesPlatform.a",
-            "libConnectedSpacesPlatform_D.a",
+            #"libConnectedSpacesPlatform_D.a",
             "libcrypto.a",
             "libssl.a"
         ],

@@ -19,7 +19,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 #include <functional>
 
@@ -99,7 +99,7 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset collection.
-class CSP_API AssetCollectionResult : public csp::services::ResultBase
+class CSP_API AssetCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -128,7 +128,7 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of asset collections.
-class CSP_API AssetCollectionsResult : public csp::services::ResultBase
+class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -159,7 +159,7 @@ public:
 
 private:
 	AssetCollectionsResult(void*) {};
-	AssetCollectionsResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

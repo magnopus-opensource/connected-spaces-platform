@@ -53,7 +53,7 @@ bool GetUserRole(const Space& Space, const csp::common::String& UserId, UserRole
 		}
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("UserId is not a member of the Space");
+	CSP_LOG_ERROR_MSG("UserId is not a member of the Space");
 	return false;
 }
 } // namespace UserRolesHelpers
@@ -70,7 +70,7 @@ const csp::common::Array<UserRoleInfo>& UserRoleCollectionResult::GetUsersRoles(
 
 void UserRoleCollectionResult::FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	UserRoles = csp::common::Array<UserRoleInfo>(RequestedUserIds.Size());
 

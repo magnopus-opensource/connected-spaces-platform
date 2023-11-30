@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/MultiplayerKeyConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
@@ -46,95 +47,6 @@
 
 
 using namespace std::chrono_literals;
-
-namespace
-{
-void ParseEventParams(const std::vector<signalr::value>& EventValues,
-					  csp::common::String& OutEventType,
-					  uint64_t OutSenderId,
-					  csp::common::Array<csp::multiplayer::ReplicatedValue>& OutEventData)
-{
-	/*
-	 * class EventMessage
-	 * [0] string EventType
-	 * [1] uint SenderClientId
-	 * [2] uint? RecipientClientId
-	 * [3] map<uint, vec> Components
-	 */
-	OutEventType = (csp::common::String) EventValues[0].as_string().c_str();
-	// RecipientClientId can be processed if needed, but currently not required, though note it is a nullable uint,
-	// null for an all-client broadcast, and a uint for the intended receiving client's Id : RecipientClientId = EventValues[2];
-	OutSenderId = EventValues[1].as_uinteger();
-
-	if (!EventValues[3].is_null())
-	{
-		const std::map<uint64_t, signalr::value>& Components = EventValues[3].as_uint_map();
-
-		OutEventData = csp::common::Array<csp::multiplayer::ReplicatedValue>(Components.size());
-		int i		 = 0;
-
-		for (auto& Component : Components)
-		{
-			// Component is in form [TypeId, [Field0, Field1, ...]]
-			auto Type	= Component.second.as_array()[0].as_uinteger();
-			auto& Value = Component.second.as_array()[1].as_array()[0]; // ItemComponentData<T> only has a single field
-
-			if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_BOOL)
-			{
-				OutEventData[i++] = Value.as_bool();
-			}
-			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_INT64)
-			{
-				if (Value.is_integer())
-				{
-					OutEventData[i++] = (int64_t) Value.as_integer();
-				}
-				else
-				{
-					OutEventData[i++] = (int64_t) Value.as_uinteger();
-				}
-			}
-			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_DOUBLE)
-			{
-				OutEventData[i++] = (float) Value.as_double();
-			}
-			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::STRING)
-			{
-				OutEventData[i++] = Value.as_string().c_str();
-			}
-			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::FLOAT_ARRAY)
-			{
-				auto& Array = Value.as_array();
-
-				if (Array.size() == 3)
-				{
-					OutEventData[i++]
-						= csp::common::Vector3 {(float) Array[0].as_double(), (float) Array[1].as_double(), (float) Array[2].as_double()};
-				}
-				else if (Array.size() == 4)
-				{
-					OutEventData[i++] = csp::common::Vector4 {(float) Array[0].as_double(),
-															  (float) Array[1].as_double(),
-															  (float) Array[2].as_double(),
-															  (float) Array[3].as_double()};
-				}
-				else
-				{
-					FOUNDATION_LOG_ERROR_MSG("Unsupported event argument type: Only Vector3 and Vector4 float array arguments are accepted.");
-				}
-			}
-			else if (Type == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_UINT16)
-			{
-				OutEventData[i++] = (int64_t) Value.as_uinteger();
-			}
-			else
-			{
-				FOUNDATION_LOG_ERROR_MSG("Unsupported event argument type.");
-			}
-		}
-	}
-}
-} // namespace
 
 namespace csp::multiplayer
 {
@@ -321,7 +233,7 @@ void MultiplayerConnection::InitialiseConnection(CallbackHandler Callback)
 					}
 				}
 
-				FOUNDATION_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
+				CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
 			});
 
 		Callback(true);
@@ -352,7 +264,7 @@ void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reas
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "%s, Exception: %s", "Could not Disconnect", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s, Exception: %s", "Could not Disconnect", e.what());
 			}
 		}
 		else
@@ -433,6 +345,11 @@ CSP_EVENT void MultiplayerConnection::SetConversationSystemCallback(Conversation
 	ConversationSystemCallback = Callback;
 }
 
+void MultiplayerConnection::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
+{
+	UserPermissionsChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr)
@@ -464,50 +381,44 @@ void MultiplayerConnection::StartEventMessageListening()
 		}
 
 		std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
-
-		csp::common::String EventType;
-		uint64_t SenderClientId = 0;
-		csp::common::Array<ReplicatedValue> EventData;
-
-		ParseEventParams(EventValues, EventType, SenderClientId, EventData);
+		const csp::common::String EventType(EventValues[0].as_string().c_str());
 
 		if (EventType == "AssetDetailBlobChanged")
 		{
 			if (AssetDetailBlobChangedCallback)
 			{
-				EAssetChangeType AssetChangeType = EAssetChangeType::Invalid;
-
-				if (EventData[0].GetInt() < static_cast<int64_t>(EAssetChangeType::Num))
-				{
-					AssetChangeType = static_cast<EAssetChangeType>(EventData[0].GetInt());
-				}
-				else
-				{
-					FOUNDATION_LOG_ERROR_MSG("AssetDetailBlob - AssetChangeType out of range of acceptable enum values.");
-				}
-
-				AssetDetailBlobParams Params {AssetChangeType,
-											  EventData[1].GetString(),
-											  EventData[2].GetString(),
-											  csp::systems::ConvertDTOAssetDetailType(EventData[3].GetString()),
-											  EventData[4].GetString()};
-
-				AssetDetailBlobChangedCallback(Params);
+				AssetChangedEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+				AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
 			}
 		}
 		else if (EventType == "ConversationSystem")
 		{
 			if (ConversationSystemCallback)
 			{
-				ConversationSystemParams params {static_cast<ConversationMessageType>(EventData[0].GetInt()), EventData[1].GetString()};
-				ConversationSystemCallback(params);
+				ConversationEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+				ConversationSystemCallback(Deserialiser.GetEventParams());
+			}
+		}
+		else if (EventType == "AccessControlChanged")
+		{
+			if (UserPermissionsChangedCallback)
+			{
+				UserPermissionsChangedEventDeserialiser Deserialiser;
+				Deserialiser.Parse(EventValues);
+				UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 			}
 		}
 		else
 		{
+			// for everything else, use the generic deserialiser
+			EventDeserialiser Deserialiser;
+			Deserialiser.Parse(EventValues);
+
 			for (auto Callback : NetworkEventMap[EventType])
 			{
-				Callback(true, EventData);
+				Callback(true, Deserialiser.GetEventData());
 			}
 		}
 	};
@@ -587,7 +498,7 @@ void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, CallbackHand
 	}
 
 	signalr::value DeleteEntityMessage = signalr::value(std::move(ParamsVec));
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling DeleteObjects");
 	Connection->Invoke("DeleteObjects", DeleteEntityMessage, LocalCallback);
 }
 
@@ -616,13 +527,13 @@ void MultiplayerConnection::RequestClientId(CallbackHandler Callback)
 		}
 		else
 		{
-			FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "ClientId=%i", Result.as_uinteger());
 			this->ClientId = Result.as_uinteger();
 			Callback(true);
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling GetClientId");
 	Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -681,7 +592,7 @@ void MultiplayerConnection::StartListening(CallbackHandler Callback)
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
 	Connection->Invoke("StartListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -706,7 +617,7 @@ void MultiplayerConnection::StopListening(CallbackHandler Callback)
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StopListening");
 	Connection->Invoke("StopListening", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
@@ -734,7 +645,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 {
 	if (!Callback)
 	{
-		FOUNDATION_LOG_ERROR_MSG("No callback was passed when SetAllowSelfMessagingFlag was invoked. This will result in this function earlying out");
+		CSP_LOG_ERROR_MSG("No callback was passed when SetAllowSelfMessagingFlag was invoked. This will result in this function earlying out");
 		return;
 	}
 
@@ -752,7 +663,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 			}
 			catch (const std::exception& e)
 			{
-				FOUNDATION_LOG_FORMAT(csp::systems::LogLevel::Error, "Caught exception: '%s'", e.what());
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Caught exception: '%s'", e.what());
 			}
 
 			// @todo Handle error
@@ -765,7 +676,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 		}
 	};
 
-	FOUNDATION_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
+	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");
 	const std::vector InvokeArguments = {signalr::value(InAllowSelfMessaging)};
 	Connection->Invoke("SetAllowSelfMessaging", InvokeArguments, LocalCallback);
 }

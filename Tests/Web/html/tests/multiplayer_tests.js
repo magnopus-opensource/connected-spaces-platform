@@ -4,7 +4,7 @@ import { DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, getProfileByUserId, logIn,
 import { createSpace, deleteSpace, getSpace, getSpacesByIds, updateSpace } from './spacesystem_tests_helpers.js'
 import { createAsset, createAssetCollection, createBufferAssetDataSource, uploadAssetData } from './assetsystem_tests_helpers.js';
 
-import { freeBuffer, CSPFoundation, Multiplayer, Services, Systems, Common } from '../connected_spaces_platform.js';
+import { freeBuffer, CSPFoundation, Multiplayer, Systems, Common } from '../connected_spaces_platform.js';
 import { commonArrayToJSArray } from '../conversion_helpers.js';
 
 
@@ -17,7 +17,7 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -85,6 +85,8 @@ test('MultiplayerTests', 'ConnectionInterruptTest', async function() {
 
 test('MultiplayerTests', 'ManualConnectionTest', async function() {
 
+    console.log("test start")
+
     const systemsManager = Systems.SystemsManager.get();
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
@@ -138,7 +140,7 @@ test('MultiplayerTests', 'RunScriptTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -215,7 +217,7 @@ test('MultiplayerTests', 'UsePortalTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -319,7 +321,7 @@ test('MultiplayerTests', 'ImageScriptInterfaceTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -394,7 +396,7 @@ test('MultiplayerTests', 'PortalScriptInterfaceTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -479,7 +481,7 @@ test('MultiplayerTests', 'PortalThumbnailTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -548,7 +550,7 @@ test('MultiplayerTests', 'DeleteMultipleEntitiesTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const spaceName = generateUniqueString('CSP-TESTS-WASM-SPACE');
@@ -943,7 +945,7 @@ test('MultiplayerTests', 'ConversationSpaceTest', async function() {
     let spaceSystem = systemsManager.getSpaceSystem();
 
     // Log in
-    const userId = await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    const userId = await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
     const userProfile = await getProfileByUserId(userSystem, userId);
     const userDisplayName = userProfile.displayName;
     userProfile.delete();

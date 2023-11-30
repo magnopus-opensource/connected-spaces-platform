@@ -2,6 +2,9 @@
 export namespace {{ translated_namespace }} {
 {{/ translated_namespace }}
 
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
 export function {{ name }}(
 {{# parameters }}
     {{ name }}: {{# type }}{{> TypeName }}{{/ type }}{{> Comma }}
@@ -26,7 +29,8 @@ export function {{ name }}(
 
 {{# return_type }}
 {{^ is_void }}
-{{# is_integer }}
+{{# is_number }}
+{{^ is_float }}
 {{^ is_pointer_or_reference }}
 {{# is_signed }}
     return _result;
@@ -71,10 +75,14 @@ export function {{ name }}(
     );
 {{/ is_const }}
 {{/ is_pointer_or_reference }}
-{{/ is_integer }}
-{{^ is_integer }}
+{{/ is_float }}
+{{# is_float }}
     return _result;
-{{/ is_integer }}
+{{/ is_float }}
+{{/ is_number }}
+{{^ is_number }}
+    return _result;
+{{/ is_number }}
 {{/ is_void }}
 {{/ return_type }}
 }

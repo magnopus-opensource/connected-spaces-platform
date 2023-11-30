@@ -2,6 +2,9 @@
 export namespace {{ translated_namespace }} {
 {{/ translated_namespace }}
 
+{{# doc_comments }}
+{{& . }}
+{{/ doc_comments }}
 export class {{ name }}
 {{^ is_static }}
 {{# base }}
@@ -83,14 +86,16 @@ export class {{ name }}
             ]
         );
 
-{{# type.is_integer }}
+{{# type.is_number }}
+{{^ type.is_float }}
 {{^ type.is_signed }}
         const _unfixedValue = _result;
         {{# type }}{{> UnsignedFix }}{{/ type }}
         
         _result = _fixedValue;
 {{/ type.is_signed }}
-{{/ type.is_integer }}
+{{/ type.is_float }}
+{{/ type.is_number }}
 
         return _result;
 {{/ type.is_class_or_interface }}

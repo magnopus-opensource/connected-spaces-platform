@@ -18,7 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::multiplayer
@@ -42,7 +42,7 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 /// @brief A result handler that is used to notify a user of an error.
-class CSP_API NullResult : public csp::services::ResultBase
+class CSP_API NullResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -61,15 +61,15 @@ public:
 	CSP_NO_EXPORT static NullResult Invalid();
 
 protected:
-	NullResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT NullResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 	NullResult() = default;
 	NullResult(void*) {};
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
-class CSP_API BooleanResult : public csp::services::ResultBase
+class CSP_API BooleanResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -88,7 +88,7 @@ public:
 private:
 	BooleanResult() = default;
 	BooleanResult(void*) {};
-	BooleanResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	BooleanResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(bool InValue);
 
@@ -96,7 +96,7 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
-class CSP_API StringResult : public csp::services::ResultBase
+class CSP_API StringResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -119,7 +119,7 @@ public:
 private:
 	StringResult() = default;
 	StringResult(void*) {};
-	StringResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::String& InValue);
 
@@ -127,7 +127,7 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
-class CSP_API StringArrayResult : public csp::services::ResultBase
+class CSP_API StringArrayResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -145,7 +145,7 @@ public:
 private:
 	StringArrayResult() = default;
 	StringArrayResult(void*) {};
-	StringArrayResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	StringArrayResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::Array<csp::common::String>& InValue);
 
@@ -153,7 +153,7 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
-class CSP_API UInt64Result : public csp::services::ResultBase
+class CSP_API UInt64Result : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -171,7 +171,7 @@ public:
 private:
 	UInt64Result() = default;
 	UInt64Result(void*) {};
-	UInt64Result(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UInt64Result(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(uint64_t InValue);
 
@@ -180,7 +180,7 @@ private:
 
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
 /// passing a Map of Strings representing the HTTP Responses.
-class CSP_API HTTPHeadersResult : public csp::services::ResultBase
+class CSP_API HTTPHeadersResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -202,7 +202,7 @@ public:
 private:
 	HTTPHeadersResult() = default;
 	HTTPHeadersResult(void*) {};
-	HTTPHeadersResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	HTTPHeadersResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	csp::common::Map<csp::common::String, csp::common::String> Value;
 };

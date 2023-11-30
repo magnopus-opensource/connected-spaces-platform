@@ -200,8 +200,7 @@ void AssetSystem::DeleteAssetCollection(const csp::common::String& AssetCollecti
 	}
 	else
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
-
+		CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 		Callback(NullResult::Invalid());
 	}
 }
@@ -226,7 +225,7 @@ void AssetSystem::GetAssetCollectionsByIds(const csp::common::Array<csp::common:
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
 		// Call callback with an invalid result to let the user know an error occurred.
 		Callback(AssetCollectionsResult::Invalid());
@@ -505,6 +504,8 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 										 std::nullopt,
 										 PrototypeIds,
 										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -525,7 +526,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 		Callback(AssetsResult::Invalid());
 		return;
 	}
@@ -584,6 +585,8 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 										 std::nullopt,
 										 PrototypeIds,
 										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -591,7 +594,7 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 {
 	if (AssetCollectionIds.IsEmpty())
 	{
-		FOUNDATION_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
 		// Call callback with an invalid result to let the user know an error occurred.
 		Callback(AssetsResult::Invalid());
@@ -619,6 +622,8 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 										 std::nullopt,
 										 Ids,
 										 std::nullopt,
+										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -643,12 +648,9 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection,
 
 	UriResultCallback InternalCallback = [Callback, Asset](const UriResult& LocalCallback)
 	{
-		if (!LocalCallback.GetXErrorCode().IsEmpty())
+		if (LocalCallback.GetFailureReason() != systems::ERequestFailureReason::None)
 		{
-			FOUNDATION_LOG_ERROR_MSG(csp::common::StringFormat("Asset with Id %s has failed to upload with Error Code: %s",
-															   Asset.Id.c_str(),
-															   LocalCallback.GetXErrorCode().c_str())
-										 .c_str());
+			CSP_LOG_ERROR_MSG(csp::common::String("Asset with Id %s has failed to upload").c_str());
 		}
 
 		Callback(LocalCallback);
@@ -687,7 +689,7 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 	{
 		UInt64Result InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			auto& Headers		= Result.GetValue();
 			auto& ContentLength = Headers["content-length"];
@@ -710,7 +712,7 @@ CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetColle
 	{
 		LODChainResult LODResult(AssetsResult);
 
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			LODChain Chain = CreateLODChainFromAssets(AssetsResult.GetAssets(), AssetCollection.Id);
 			LODResult.SetLODChain(std::move(Chain));
@@ -728,14 +730,14 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	// GetAssetsByCriteria
 	auto GetAssetsCallback = [this, AssetCollection, Asset, LODLevel, Callback](const AssetsResult& AssetsResult)
 	{
-		if (AssetsResult.GetResultCode() == csp::services::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();
 			LODChain Chain										  = CreateLODChainFromAssets(Assets, AssetCollection.Id);
 
 			if (ValidateNewLODLevelForChain(Chain, LODLevel) == false)
 			{
-				FOUNDATION_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
+				CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
 				Callback(AssetsResult);
 				return;
 			}

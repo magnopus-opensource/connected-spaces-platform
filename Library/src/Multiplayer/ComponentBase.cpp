@@ -65,7 +65,7 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 		return Properties[Key];
 	}
 
-	FOUNDATION_LOG_ERROR_FORMAT("No Property with this key: %d", Key);
+	CSP_LOG_ERROR_FORMAT("No Property with this key: %d", Key);
 
 	return InvalidValue;
 }
@@ -74,9 +74,9 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 {
 	if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("ValueType is unexpected. Expected: %d Received: %d",
-									static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
-									static_cast<uint32_t>(Value.GetReplicatedValueType()));
+		CSP_LOG_ERROR_FORMAT("ValueType is unexpected. Expected: %d Received: %d",
+							 static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
+							 static_cast<uint32_t>(Value.GetReplicatedValueType()));
 	}
 
 	/*DirtyProperties.Remove(Key);
@@ -149,7 +149,7 @@ void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, E
 	else
 	{
 		// Already registered
-		FOUNDATION_LOG_ERROR_FORMAT("Action %s already registered\n", InAction.c_str());
+		CSP_LOG_ERROR_FORMAT("Action %s already registered\n", InAction.c_str());
 	}
 }
 
@@ -161,7 +161,7 @@ void ComponentBase::UnregisterActionHandler(const csp::common::String& InAction)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Action %s not found\n", InAction.c_str());
+		CSP_LOG_ERROR_FORMAT("Action %s not found\n", InAction.c_str());
 	}
 }
 

@@ -96,9 +96,8 @@ public:
 	csp::common::String RefreshExpiryTime;
 };
 
-
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public csp::services::ResultBase
+class CSP_API LoginStateResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -117,7 +116,6 @@ private:
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-private:
 	LoginState* State;
 };
 
@@ -144,7 +142,7 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenReceived : public csp::services::ResultBase
+class CSP_API LoginTokenReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class UserSystem;
@@ -169,7 +167,7 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when a ping response is received
-class CSP_API PingResponseReceived : public csp::services::ResultBase
+class CSP_API PingResponseReceived : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -201,7 +199,7 @@ public:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public csp::services::ResultBase
+class CSP_API AgoraUserTokenResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -223,6 +221,50 @@ private:
 	csp::common::String UserToken;
 };
 
+/// @brief Result url for a tier checkout session request
+class CSP_API CheckoutSessionUrlResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	friend class UserSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	CheckoutSessionUrlResult() = default;
+	CheckoutSessionUrlResult(void*) {};
+
+	const csp::common::String& GetUrl();
+	const csp::common::String& GetUrl() const;
+
+private:
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::String CheckoutSessionUrl;
+};
+
+/// @brief Result url for a user customer portal request
+class CSP_API CustomerPortalUrlResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	friend class UserSystem;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	CustomerPortalUrlResult() = default;
+	CustomerPortalUrlResult(void*) {};
+
+	const csp::common::String& GetUrl();
+	const csp::common::String& GetUrl() const;
+
+private:
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::String CustomerPortalUrl;
+};
+
 
 typedef std::function<void(LoginStateResult& Result)> LoginStateResultCallback;
 typedef std::function<void(LogoutResult& Result)> LogoutResultCallback;
@@ -233,6 +275,8 @@ typedef std::function<void(PingResponseReceived& Result)> PingResponseReceivedCa
 
 typedef std::function<void(AgoraUserTokenResult& Result)> UserTokenResultCallback;
 
+typedef std::function<void(CheckoutSessionUrlResult& Result)> CheckoutSessionUrlResultCallback;
 
+typedef std::function<void(CustomerPortalUrlResult& Result)> CustomerPortalUrlResultCallback;
 
 } // namespace csp::systems

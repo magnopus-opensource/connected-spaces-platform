@@ -67,7 +67,7 @@ public:
 
 
 /// @brief Result structure for a Profile request
-class CSP_API ProfileResult : public csp::services::ResultBase
+class CSP_API ProfileResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -89,7 +89,7 @@ private:
 
 
 /// @brief Result structure for a BasicProfile request
-class CSP_API BasicProfilesResult : public csp::services::ResultBase
+class CSP_API BasicProfilesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

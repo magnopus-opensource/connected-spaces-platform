@@ -18,8 +18,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::services
@@ -40,7 +40,8 @@ enum class SpaceUserRole
 {
 	Owner,
 	Moderator,
-	User
+	User,
+	Invalid
 };
 
 /// @ingroup Space System
@@ -56,7 +57,7 @@ public:
 };
 
 /// @ingroup Space System
-/// @brief Data representation of User Roles inside a space
+/// @brief Data representation of roles for an invited user inside a space
 class CSP_API InviteUserRoleInfo
 {
 public:
@@ -67,10 +68,23 @@ public:
 	SpaceUserRole UserRole;
 };
 
+/// @ingroup Space System
+/// @brief Data representation of roles for a group of invited users, the email link and the destination link to be included in the invite emails
+class CSP_API InviteUserRoleInfoCollection
+{
+public:
+	InviteUserRoleInfoCollection()											= default;
+	InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
+
+	csp::common::String EmailLinkUrl;
+	csp::common::String SignupUrl;
+	csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
+};
+
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of User Roles information.
-class CSP_API UserRoleCollectionResult : public csp::services::ResultBase
+class CSP_API UserRoleCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -86,7 +100,7 @@ public:
 
 private:
 	UserRoleCollectionResult(void*) {};
-	UserRoleCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UserRoleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	UserRoleCollectionResult() {};
 
 	void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);

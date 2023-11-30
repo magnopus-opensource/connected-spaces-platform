@@ -53,7 +53,7 @@ const csp::common::Vector3& AudioSpaceComponent::GetPosition() const
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -70,7 +70,7 @@ AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 		return static_cast<AudioPlaybackState>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return AudioPlaybackState::Pause;
 }
 
@@ -87,7 +87,7 @@ AudioType AudioSpaceComponent::GetAudioType() const
 		return static_cast<AudioType>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return AudioType::Global;
 }
 
@@ -104,7 +104,7 @@ const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -121,7 +121,7 @@ const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -138,7 +138,7 @@ float AudioSpaceComponent::GetAttenuationRadius() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -155,7 +155,7 @@ bool AudioSpaceComponent::GetIsLoopPlayback() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -172,7 +172,7 @@ float AudioSpaceComponent::GetTimeSincePlay() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -189,7 +189,7 @@ float AudioSpaceComponent::GetVolume() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -201,7 +201,7 @@ void AudioSpaceComponent::SetVolume(float Value)
 	}
 	else
 	{
-		FOUNDATION_LOG_ERROR_FORMAT("Invalid value for volume (%.2f). Must be from 0.0 to 1.0", Value);
+		CSP_LOG_ERROR_FORMAT("Invalid value for volume (%.2f). Must be from 0.0 to 1.0", Value);
 	}
 }
 
@@ -213,7 +213,7 @@ bool AudioSpaceComponent::GetIsEnabled() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -230,7 +230,7 @@ const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() cons
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 

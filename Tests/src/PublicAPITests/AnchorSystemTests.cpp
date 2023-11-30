@@ -35,9 +35,9 @@
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem,
@@ -71,9 +71,9 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem,
 						.Await(RequestPredicate);
 
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		OutAnchor = Result.GetAnchor();
 		std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
@@ -115,9 +115,9 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem,
 						.Await(RequestPredicate);
 
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		OutAnchor = Result.GetAnchor();
 		std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
@@ -128,9 +128,9 @@ void DeleteAnchors(csp::systems::AnchorSystem* AnchorSystem, const csp::common::
 {
 	auto [Result] = Awaitable(&csp::systems::AnchorSystem::DeleteAnchors, AnchorSystem, AnchorIDs).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		for (int idx = 0; idx < AnchorIDs.Size(); idx++)
 		{
@@ -159,7 +159,7 @@ void CreateAnchorResolution(csp::systems::AnchorSystem* AnchorSystem,
 							  Tags)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& AnchorResolution = Result.GetAnchorResolution();
 
@@ -248,7 +248,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -336,7 +336,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -393,14 +393,14 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 
 	auto [PreDeleteGetResult]
 		= Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
-	EXPECT_EQ(PreDeleteGetResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(PreDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(PreDeleteGetResult.GetAnchors().Size(), 2);
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
 	auto [PostDeleteGetResult]
 		= Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
-	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
 	AWAIT(Connection, Disconnect);
@@ -445,7 +445,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -511,9 +511,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 							  nullptr)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		const auto& ResultAnchors = Result.GetAnchors();
 		AnchorCollection		  = csp::common::Array<csp::systems::Anchor>(ResultAnchors.Size());
@@ -608,7 +608,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -664,7 +664,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	CreatedAnchorIds[1] = Anchor2.Id;
 
 	auto [Result] = Awaitable(&csp::systems::AnchorSystem::GetAnchorsInSpace, AnchorSystem, Space.Id, nullptr, nullptr).Await(RequestPredicate);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto Anchors = Result.GetAnchors();
 	EXPECT_EQ(Anchors.Size(), 2);
@@ -732,7 +732,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 	{
 		auto [Result] = AWAIT_PRE(AnchorSystem, GetAnchorsByAssetCollectionId, RequestPredicate, AssetCollection.Id, nullptr, nullptr);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		const auto& Anchors = Result.GetAnchors();
 
@@ -789,7 +789,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);

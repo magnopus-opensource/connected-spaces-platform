@@ -40,17 +40,17 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 } // namespace
 
 
-bool RequestPredicateWithProgress(const csp::services::ResultBase& Result)
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-	if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 	{
 		PrintProgress(Result.GetRequestProgress());
 
@@ -65,7 +65,7 @@ void CreateSpace(::SpaceSystem* SpaceSystem,
 				 const String& Description,
 				 SpaceAttributes Attributes,
 				 const Optional<Map<String, String>>& Metadata,
-				 const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+				 const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 				 const Optional<FileAssetDataSource>& Thumbnail,
 				 Space& OutSpace)
 {
@@ -74,7 +74,7 @@ void CreateSpace(::SpaceSystem* SpaceSystem,
 	// TODO: Add tests for public spaces
 	auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutSpace = Result.GetSpace();
 }
@@ -84,7 +84,7 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem,
 						   const String& Description,
 						   SpaceAttributes Attributes,
 						   const Optional<Map<String, String>>& Metadata,
-						   const Optional<Array<InviteUserRoleInfo>>& InviteUsers,
+						   const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 						   BufferAssetDataSource& Thumbnail,
 						   Space& OutSpace)
 {
@@ -93,7 +93,7 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem,
 	auto [Result]
 		= AWAIT_PRE(SpaceSystem, CreateSpaceWithBuffer, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutSpace = Result.GetSpace();
 }
@@ -102,7 +102,7 @@ void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpace, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutSpace = Result.GetSpace();
 }
@@ -115,7 +115,7 @@ Array<BasicSpace> GetSpacesByAttributes(::SpaceSystem* SpaceSystem,
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto SpacesTotalCount = Result.GetTotalCount();
 	const auto Spaces			= Result.GetSpaces();
@@ -132,7 +132,7 @@ Array<Space> GetSpacesByIds(::SpaceSystem* SpaceSystem, const Array<String>& Spa
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByIds, RequestPredicate, SpaceIDs);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	return Result.GetSpaces();
 }
@@ -146,7 +146,7 @@ void UpdateSpace(::SpaceSystem* SpaceSystem,
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpace, RequestPredicate, SpaceId, NewName, NewDescription, NewAttributes);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutSpace = Result.GetSpace();
 }
@@ -165,7 +165,7 @@ void AddSiteInfo(::SpaceSystem* SpaceSystem, const char* Name, const String& Spa
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, AddSiteInfo, RequestPredicate, SpaceId, SiteInfo);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutSite = Result.GetSite();
 	std::cerr << "Site Created: Name=" << OutSite.Name << " Id=" << OutSite.Id << std::endl;
@@ -175,14 +175,14 @@ void DeleteSpace(::SpaceSystem* SpaceSystem, const String& SpaceId)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, DeleteSpace, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void RemoveSiteInfo(::SpaceSystem* SpaceSystem, const String& SpaceId, ::Site& Site)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, RemoveSiteInfo, RequestPredicate, SpaceId, Site);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	std::cerr << "Site Deleted: Name=" << Site.Name << " Id=" << Site.Id << std::endl;
 }
@@ -191,7 +191,7 @@ void GetSpaceSites(::SpaceSystem* SpaceSystem, const String& SpaceId, Array<Site
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSitesInfo, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& ResultSites = Result.GetSites();
 	OutSites				= Array<Site>(ResultSites.Size());
@@ -206,9 +206,9 @@ void UpdateUserRole(::SpaceSystem* SpaceSystem, const String& SpaceId, UserRoleI
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, SpaceId, NewUserRoleInfo);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	if (Result.GetResultCode() == csp::services::EResultCode::Success)
+	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		std::cerr << "The user role for UserId: " << NewUserRoleInfo.UserId << " has been updated successfully" << std::endl;
 	}
@@ -219,7 +219,7 @@ void GetRoleForSpecificUser(::SpaceSystem* SpaceSystem, const String& SpaceId, c
 	Array<String> Ids = {UserId};
 	auto [Result]	  = AWAIT_PRE(SpaceSystem, GetUsersRoles, RequestPredicate, SpaceId, Ids);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& ReturnedRolesInfo = Result.GetUsersRoles();
 
@@ -232,7 +232,7 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetUsersRoles, RequestPredicate, SpaceId, RequestedUserIds);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& ReturnedRolesInfo = Result.GetUsersRoles();
 	OutUsersRoles				  = Array<UserRoleInfo>(ReturnedRolesInfo.Size());
@@ -249,7 +249,7 @@ void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, cons
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	std::cerr << "Space metadata has been updated successfully" << std::endl;
 }
@@ -258,7 +258,7 @@ void GetSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, Map<Str
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceMetadata, RequestPredicate, SpaceId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutMetadata = Result.GetMetadata();
 }
@@ -267,7 +267,7 @@ void GetSpacesMetadata(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesMetadata, RequestPredicate, SpaceIds);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutMetadata = Result.GetMetadata();
 }
@@ -288,7 +288,7 @@ bool IsUriValid(const std::string& Uri, const std::string& FileName)
 }
 
 
-Array<InviteUserRoleInfo> CreateInviteUsers()
+InviteUserRoleInfoCollection CreateInviteUsers()
 {
 	// Create normal users
 	const auto TestUser1Email = String("testnopus.pokemon+1@magnopus.com");
@@ -314,7 +314,13 @@ Array<InviteUserRoleInfo> CreateInviteUsers()
 	ModInviteUser2.UserEmail = TestModInviteUser2Email;
 	ModInviteUser2.UserRole	 = SpaceUserRole::Moderator;
 
-	return {InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2};
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser1, InviteUser2, ModInviteUser1, ModInviteUser2};
+	InviteUsers.EmailLinkUrl		= "https://dev.magnoverse.space";
+	InviteUsers.SignupUrl			= "https://dev.magnoverse.space";
+
+
+	return InviteUsers;
 }
 
 #if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_TEST
@@ -376,10 +382,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
-	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
-	EXPECT_EQ(PendingInvites.Size(), InviteUsers.Size());
+	EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
 	for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
 	{
@@ -483,10 +489,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
 	CreateSpaceWithBuffer(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, BufferSource, Space);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
-	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
-	EXPECT_EQ(PendingInvites.Size(), InviteUsers.Size());
+	EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
 	for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
 	{
@@ -628,7 +634,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
 	// Get spaces
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto& ResultSpaces = Result.GetSpaces();
 
@@ -979,7 +985,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		const auto SpacesTotalCount = Result.GetTotalCount();
 		const auto Spaces			= Result.GetSpaces();
@@ -1029,7 +1035,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 
 	auto [AddUserResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, PublicSpace.Id, GuestUserId);
 
-	EXPECT_EQ(AddUserResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	std::cerr << "User added to space" << std::endl;
 
@@ -1185,12 +1191,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Create test space
 	InviteUserRoleInfo InviteUser;
-	InviteUser.UserEmail								   = AlternativeLoginEmail;
-	InviteUser.UserRole									   = SpaceUserRole::User;
-	csp::common::Array<InviteUserRoleInfo> InviteUserArray = {InviteUser};
+	InviteUser.UserEmail = AlternativeLoginEmail;
+	InviteUser.UserRole	 = SpaceUserRole::User;
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser};
+	InviteUsers.EmailLinkUrl		= "dev.magnoverse.space";
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUserArray, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
 
 	// Log out
 	LogOut(UserSystem);
@@ -1202,7 +1210,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		ASSERT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		SpaceSystem->ExitSpace();
 	}
@@ -1222,12 +1230,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	auto [DefaultResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedDefaultUserRole);
 
 	// Update first account role should fail
-	EXPECT_EQ(DefaultResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(DefaultResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [SecondResult] = AWAIT_PRE(SpaceSystem, UpdateUserRole, RequestPredicate, Space.Id, UpdatedSecondTestUserRole);
 
 	// Update second account role should fail
-	EXPECT_EQ(SecondResult.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(SecondResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// Verify updated user roles
 	Array<::UserRoleInfo> RetrievedUserRoles;
@@ -1290,7 +1298,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
 	LogInAsGuest(UserSystem, GuestUserId);
 
 	auto [AddUserResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, PublicSpace.Id, GuestUserId);
-	EXPECT_EQ(AddUserResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	LogOut(UserSystem);
 
@@ -1336,11 +1344,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 
 	// create a space with no other user Ids invited
 	::Space Space;
+	// CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	::UserRoleInfo UserRoleInfo;
 	GetRoleForSpecificUser(SpaceSystem, Space.Id, AltUserId, UserRoleInfo);
@@ -1471,7 +1480,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
 		EXPECT_TRUE(Result.GetUri().IsEmpty());
 	}
@@ -1485,11 +1494,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 
 		auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnail, RequestPredicate, Space.Id, SpaceThumbnail);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetThumbnailResult.GetUri().c_str(), LocalFileName));
 	}
 
@@ -1525,7 +1534,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseNotFound));
 		EXPECT_TRUE(Result.GetUri().IsEmpty());
 	}
@@ -1546,10 +1555,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 	SpaceThumbnail.SetMimeType("image/png");
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnailWithBuffer, RequestPredicate, Space.Id, SpaceThumbnail);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetThumbnailResult] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
-	EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetThumbnailResult.GetResultCode(), csp::systems::EResultCode::Success);
 	printf("Downloading asset data...\n");
 
 	// Get asset uri
@@ -1560,7 +1569,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 	// Get data
 	auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Download_Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1663,7 +1672,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
-	const char* TestUserEmail = "testnopus.pokemon@magnopus.com";
+	const char* TestUserEmail	 = "testnopus.pokemon@magnopus.com";
+	const char* TestEmailLinkUrl = "https://dev.magnoverse.space/";
+	const char* TestSignupUrl	 = "https://dev.magnoverse.space/";
 
 	String UserId;
 	LogIn(UserSystem, UserId);
@@ -1671,13 +1682,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr);
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
 
@@ -1709,7 +1720,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
 
-	Array<InviteUserRoleInfo> InviteUsers = CreateInviteUsers();
+	auto InviteUsers = CreateInviteUsers();
 
 	String UserId;
 	LogIn(UserSystem, UserId);
@@ -1719,11 +1730,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, BulkInviteToSpace, RequestPredicate, Space.Id, InviteUsers);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
 
@@ -1773,7 +1784,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	ASSERT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Get metadata for public space
 	Map<String, String> RetrievedMetadata;
@@ -1788,7 +1799,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		SpaceSystem->ExitSpace();
 	}
@@ -1837,7 +1848,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		InitialSpaceThumbnailUri = Result.GetUri();
 
@@ -1853,7 +1864,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(InitialSpaceThumbnailUri, Result.GetUri());
 	}
 
@@ -1907,14 +1918,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 		// A guest shouldn't be able to update the space thumbnail
 		auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnail, RequestPredicate, Space.Id, UpdatedSpaceThumbnail);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		// But it should be able to retrieve it
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(Result.GetUri().c_str(), LocalFileName));
 	}
 
@@ -1956,7 +1967,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 
 	auto [AddUserResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, GuestId);
 
-	EXPECT_EQ(AddUserResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	LogOut(UserSystem);
 
@@ -1968,7 +1979,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, AddUserToSpaceBanList, RequestPredicate, Space.Id, GuestId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -1979,7 +1990,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, DeleteUserFromSpaceBanList, RequestPredicate, Space.Id, GuestId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -2021,7 +2032,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 
 	auto [AddUserResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, AltUserId);
 
-	EXPECT_EQ(AddUserResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddUserResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	LogOut(UserSystem);
 
@@ -2033,7 +2044,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, AddUserToSpaceBanList, RequestPredicate, Space.Id, AltUserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -2043,7 +2054,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, DeleteUserFromSpaceBanList, RequestPredicate, Space.Id, AltUserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -2078,7 +2089,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		SpaceSystem->ExitSpace();
 	}
@@ -2091,7 +2102,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	LogOut(UserSystem);
@@ -2133,7 +2144,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	LogOut(UserSystem);
@@ -2170,8 +2181,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	InviteUserRoleInfo InviteUser;
 	InviteUser.UserEmail = AlternativeLoginEmail;
 	InviteUser.UserRole	 = SpaceUserRole::User;
-	auto InviteUserArray = {InviteUser};
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUserArray, nullptr, Space);
+	InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteUser};
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
 
 	::UserRoleInfo NewUserRoleInfo;
 	NewUserRoleInfo.UserId	 = AltUserId;
@@ -2188,7 +2200,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		SpaceSystem->ExitSpace();
 	}
@@ -2249,7 +2261,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 	auto [AddGeoResult]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, InitialGeoFence);
 
-	EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_TRUE(AddGeoResult.HasSpaceGeoLocation());
 	EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Location.Latitude, InitialGeoLocation.Latitude);
 	EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Location.Longitude, InitialGeoLocation.Longitude);
@@ -2263,7 +2275,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 
 	auto [GetGeoResult] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_TRUE(GetGeoResult.HasSpaceGeoLocation());
 	EXPECT_DOUBLE_EQ(GetGeoResult.GetSpaceGeoLocation().Location.Latitude, InitialGeoLocation.Latitude);
 	EXPECT_DOUBLE_EQ(GetGeoResult.GetSpaceGeoLocation().Location.Longitude, InitialGeoLocation.Longitude);
@@ -2290,7 +2302,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 	auto [UpdateGeoResult]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SecondGeoLocation, SecondOrientation, SecondGeoFence);
 
-	EXPECT_EQ(UpdateGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UpdateGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_TRUE(UpdateGeoResult.HasSpaceGeoLocation());
 	EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Location.Latitude, SecondGeoLocation.Latitude);
 	EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
@@ -2304,7 +2316,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 
 	auto [GetUpdatedGeoResult] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetUpdatedGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetUpdatedGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_TRUE(GetUpdatedGeoResult.HasSpaceGeoLocation());
 	EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Location.Latitude, SecondGeoLocation.Latitude);
 	EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
@@ -2318,11 +2330,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 
 	auto [DeleteGeoResult] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(DeleteGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(DeleteGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetDeletedGeoResult] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_FALSE(GetDeletedGeoResult.HasSpaceGeoLocation());
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2397,28 +2409,28 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InvalidGeoLocation, ValidOrientation, ValidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, InvalidOrientation, ValidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, ValidOrientation, ShortGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, ValidOrientation, InvalidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
@@ -2430,7 +2442,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 										ValidOrientation,
 										InvalidGeoLocationGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	// Actually add a geo location and test again since a different code path is followed when one exists
@@ -2438,35 +2450,35 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, ValidOrientation, ValidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InvalidGeoLocation, ValidOrientation, ValidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, InvalidOrientation, ValidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, ValidOrientation, ShortGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [AddGeoResult]
 			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, ValidGeoLocation, ValidOrientation, InvalidGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
@@ -2478,13 +2490,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 										ValidOrientation,
 										InvalidGeoLocationGeoFence);
 
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	{
 		auto [DeleteGeoResult] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(DeleteGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(DeleteGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2527,7 +2539,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 	auto [AddGeoResultAsAlt]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, nullptr);
 
-	EXPECT_EQ(AddGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(AddGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(AddGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Switch back to the primary user to actually create the geo location
@@ -2538,7 +2550,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 	auto [AddGeoResultAsPrimary]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, nullptr);
 
-	EXPECT_EQ(AddGeoResultAsPrimary.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddGeoResultAsPrimary.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Switch back to the alt user again
 	LogOut(UserSystem);
@@ -2547,7 +2559,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 	// Test they cannot get the space geo location details since the space is private
 	auto [GetGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(GetGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(GetGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Test they cannot update the geolocation
@@ -2560,13 +2572,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 	auto [UpdateGeoResultAsAlt]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SecondGeoLocation, SecondOrientation, nullptr);
 
-	EXPECT_EQ(UpdateGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdateGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(UpdateGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Test they cannot delete the geo location
 	auto [DeleteGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(DeleteGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(DeleteGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(DeleteGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Log back in as primary to clean up
@@ -2575,11 +2587,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 
 	auto [DeleteGeoResultAsPrimary] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(DeleteGeoResultAsPrimary.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(DeleteGeoResultAsPrimary.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetDeletedGeoResult] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_FALSE(GetDeletedGeoResult.HasSpaceGeoLocation());
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2622,7 +2634,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	auto [AddGeoResultAsAlt]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, nullptr);
 
-	EXPECT_EQ(AddGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(AddGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(AddGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Switch back to the primary user to actually create the geo location
@@ -2632,7 +2644,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	auto [AddGeoResultAsPrimary]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, nullptr);
 
-	EXPECT_EQ(AddGeoResultAsPrimary.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(AddGeoResultAsPrimary.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Switch back to the alt user again
 	LogOut(UserSystem);
@@ -2641,7 +2653,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	// Test they can get the space geo location details since the space is public
 	auto [GetGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_TRUE(GetGeoResultAsAlt.HasSpaceGeoLocation());
 	EXPECT_DOUBLE_EQ(GetGeoResultAsAlt.GetSpaceGeoLocation().Location.Latitude, InitialGeoLocation.Latitude);
 	EXPECT_DOUBLE_EQ(GetGeoResultAsAlt.GetSpaceGeoLocation().Location.Longitude, InitialGeoLocation.Longitude);
@@ -2657,13 +2669,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	auto [UpdateGeoResultAsAlt]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SecondGeoLocation, SecondOrientation, nullptr);
 
-	EXPECT_EQ(UpdateGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(UpdateGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(UpdateGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Test they cannot delete the geo location
 	auto [DeleteGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(DeleteGeoResultAsAlt.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(DeleteGeoResultAsAlt.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(DeleteGeoResultAsAlt.GetHttpResultCode(), static_cast<uint16_t>(csp::web::EResponseCodes::ResponseForbidden));
 
 	// Log back in as primary to clean up
@@ -2672,11 +2684,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 
 	auto [DeleteGeoResultAsPrimary] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(DeleteGeoResultAsPrimary.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(DeleteGeoResultAsPrimary.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetDeletedGeoResult] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetDeletedGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_FALSE(GetDeletedGeoResult.HasSpaceGeoLocation());
 
 	DeleteSpace(SpaceSystem, Space.Id);

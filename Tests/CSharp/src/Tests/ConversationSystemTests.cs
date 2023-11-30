@@ -1,7 +1,7 @@
 using System.Threading;
 
 using Common = Csp.Common;
-using Services = Csp.Services;
+using Services = Csp.Systems;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
@@ -40,7 +40,7 @@ namespace CSPEngine
 
             // Add the second test user to the space
             {
-                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true).Result;
+                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, "", "").Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }
@@ -343,7 +343,7 @@ namespace CSPEngine
 
             // Add the second test user to the space
             {
-                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true).Result;
+                using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, "", "").Result;
 
                 Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
             }

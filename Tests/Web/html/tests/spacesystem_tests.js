@@ -3,7 +3,7 @@ import { generateUniqueString } from '../test_helpers.js';
 import { logIn, logInAsGuest, logOut, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD } from './usersystem_tests_helpers.js';
 import { createSpace, getSpace, getSpacesByIds, updateSpace, createInviteUsers, deleteSpace } from './spacesystem_tests_helpers.js';
 
-import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Services, Web } from '../connected_spaces_platform.js';
+import { freeBuffer, uint8ArrayToBuffer, Systems, Common, Web } from '../connected_spaces_platform.js';
 
 
 test('SpaceSystemTests', 'CreateSpaceTest', async function() {
@@ -45,7 +45,7 @@ test('SpaceSystemTests', 'CreateSpaceWithBulkInviteTest', async function() {
     assert.succeeded(pendingUserInvitesResult);
 
     const pendingUserInviteEmails = pendingUserInvitesResult.getPendingInvitesEmails();
-    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.size());
+    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.inviteUserRoleInfos.size());
 
     pendingUserInvitesResult.delete();
     inviteUsers.delete();
@@ -462,7 +462,7 @@ test('SpaceSystemTests', 'EnterSpaceTest', async function() {
     const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
-    await logIn(userSystem,DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem,DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     // Create space
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
@@ -478,11 +478,11 @@ test('SpaceSystemTests', 'EnterSpaceTest', async function() {
     await logOut(userSystem)
 
     // log in as guest to check we cannot enter
-    await logIn(userSystem,ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem,ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Systems.EResultCode.Success, false);
 
     {
         const result = await spaceSystem.enterSpace(space.id, true);
-        assert.areEqual(result.getResultCode(),Services.EResultCode.Failed)
+        assert.areEqual(result.getResultCode(),Systems.EResultCode.Failed)
         result.delete();
     }
 
@@ -520,7 +520,7 @@ test('SpaceSystemTests', 'BulkInviteToSpaceTest', async function() {
     assert.succeeded(pendingUserInvitesResult);
 
     const pendingUserInviteEmails = pendingUserInvitesResult.getPendingInvitesEmails();
-    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.size());
+    assert.areEqual(pendingUserInviteEmails.size(), inviteUsers.inviteUserRoleInfos.size());
 
     pendingUserInvitesResult.delete();
     inviteUsers.delete();
@@ -811,14 +811,14 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
     const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Create space as the primary user
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, false);
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -827,13 +827,13 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
     const initialOrientation = 90.0;
     
     const addGeoResultAsAlt = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
-    assert.areEqual(addGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(addGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(addGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     addGeoResultAsAlt.delete();
 
     // Switch back to the primary user to actually create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const addGeoResultAsPrimary = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
     assert.succeeded(addGeoResultAsPrimary);
@@ -841,11 +841,11 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Test they cannot access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);
-    assert.areEqual(getGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(getGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(getGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     getGeoResultAsAlt.delete();
 
@@ -857,12 +857,12 @@ test('SpaceSystemTests', 'GeoLocationWithoutPermissionTest', async function() {
     const secondOrientation = 270.0;
 
     const updateGeoResultAsAlt = await spaceSystem.updateSpaceGeoLocation(space.id, secondLocation, secondOrientation, null);
-    assert.areEqual(updateGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(updateGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(updateGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     updateGeoResultAsAlt.delete();
 
     const deleteGeoResultAsAlt = await spaceSystem.deleteSpaceGeoLocation(space.id);
-    assert.areEqual(deleteGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(deleteGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(deleteGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     deleteGeoResultAsAlt.delete();    
 
@@ -895,14 +895,14 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
     const spaceDescription = 'CSP-TESTS-WASM-SPACEDESC';
 
     // Log in as primary user
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None,false);
 
     // Create space as the primary user
     const space = await createSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Public, null, null, null, false);
 
     // Switch to the alt user to try and create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const initialLocation = Systems.GeoLocation.create();
     initialLocation.latitude = 1.1;
@@ -911,13 +911,13 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
     const initialOrientation = 90.0;
     
     const addGeoResultAsAlt = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
-    assert.areEqual(addGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(addGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(addGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     addGeoResultAsAlt.delete();
 
     // Switch back to the primary user to actually create the geo location
     await logOut(userSystem);
-    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, DEFAULT_LOGIN_EMAIL, DEFAULT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     const addGeoResultAsPrimary = await spaceSystem.updateSpaceGeoLocation(space.id, initialLocation, initialOrientation, null);
     assert.succeeded(addGeoResultAsPrimary);
@@ -925,7 +925,7 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
 
     // Switch to the alt user again
     await logOut(userSystem);
-    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, Services.EResultCode.Success, false);
+    await logIn(userSystem, ALT_LOGIN_EMAIL, ALT_LOGIN_PASSWORD, true, Systems.EResultCode.Success, Systems.ELoginStateResultFailureReason.None, false);
 
     // Test they can access the geo location
     const getGeoResultAsAlt = await spaceSystem.getSpaceGeoLocation(space.id);
@@ -944,12 +944,12 @@ test('SpaceSystemTests', 'GeoLocationPublicSpaceTest', async function() {
     const secondOrientation = 270.0;
 
     const updateGeoResultAsAlt = await spaceSystem.updateSpaceGeoLocation(space.id, secondLocation, secondOrientation, null);
-    assert.areEqual(updateGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(updateGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(updateGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     updateGeoResultAsAlt.delete();
 
     const deleteGeoResultAsAlt = await spaceSystem.deleteSpaceGeoLocation(space.id);
-    assert.areEqual(deleteGeoResultAsAlt.getResultCode(), Services.EResultCode.Failed);
+    assert.areEqual(deleteGeoResultAsAlt.getResultCode(), Systems.EResultCode.Failed);
     assert.areEqual(deleteGeoResultAsAlt.getHttpResultCode(), Web.EResponseCodes.ResponseForbidden);
     deleteGeoResultAsAlt.delete();    
 

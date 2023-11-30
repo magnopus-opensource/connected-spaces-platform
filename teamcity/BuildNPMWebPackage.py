@@ -5,6 +5,8 @@ import subprocess
 
 from distutils.dir_util import copy_tree
 
+from Config import config
+
 class ConnectedSpacesPlatformPyError(Exception): pass
 class FileHandlingError(ConnectedSpacesPlatformPyError): pass
 
@@ -48,6 +50,9 @@ def get_arguments_commandline():
     parser.add_argument('--release_mode',
                         help="NPM release command, pack and publish are available.",
                         default="pack")
+    parser.add_argument('--scope',
+                        help="Enter the scope of the published package. Appends the registry URL.",
+                        default=None)
                      
     args = parser.parse_args()
 
@@ -83,14 +88,16 @@ def create_output_path(output_path):
 
 def copy_packages_in(input_args, output_path):
     input_paths = []
-
+    print("Copying packages...")
     rel_wasm_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_wasm_path)
     if os.path.isdir(rel_wasm_path):
         input_paths.append(rel_wasm_path)
+        print("Wasm path created")
 
     rel_typescript_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), input_args.relative_typescript_path)
     if os.path.isdir(rel_typescript_path):
         input_paths.append(rel_typescript_path)
+        print("typescript path created")
 
     for path in input_paths:
         for file in os.listdir(path):
@@ -102,10 +109,16 @@ def copy_packages_in(input_args, output_path):
                 shutil.copy2(file_path, output_path)
 
     if(input_paths):
+        print("input paths true")
         return True
     else:
+        print("input paths false")
         return False
 
+def copy_readme(input_args, output_path):
+    # Copy readme
+    if (os.path.exists(f"{config.default_output_directory}/README.md")):
+        shutil.copy(f"{config.default_output_directory}/README.md", output_path)
 
 def create_package_file(input_args, output_path):
     print("Creating package file...")
@@ -122,7 +135,7 @@ def create_package_file(input_args, output_path):
         '  "main": "./connectedspacesplatform.js",\n',
         '  "types": "./connectedspacesplatform.d.ts",\n',
         '  "publishConfig": {\n',
-       f'    "registry": "{input_args.registry}/@magnopus-opensource"\n',
+       f'    "registry": "{input_args.registry}/{input_args.scope}"\n',
         '  },\n'
         '  "repository": "https://github.com/magnopus-opensource/connected-spaces-platform"'
         '}\n'
@@ -147,6 +160,7 @@ def main():
     package_dir_valid = copy_packages_in(input_args, generation_folder)
 
     if package_dir_valid == True:
+        copy_readme(input_args, generation_folder)
         create_package_file(input_args, generation_folder)
         generate_final_package(input_args, generation_folder)
         

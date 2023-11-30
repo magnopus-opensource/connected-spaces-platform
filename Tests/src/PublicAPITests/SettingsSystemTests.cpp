@@ -30,13 +30,13 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
-bool RequestPredicateWithProgress(const csp::services::ResultBase& Result)
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-	if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 	{
 		PrintProgress(Result.GetRequestProgress());
 
@@ -76,14 +76,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 	LogIn(UserSystem, UserId);
 
 	auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, UserId, true);
-	EXPECT_EQ(SetNDATrue.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetNDATrue.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetNDAResult] = AWAIT(SettingsSystem, GetNDAStatus, UserId);
-	EXPECT_EQ(GetNDAResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetNDAResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetNDAResult.GetValue(), true);
 
 	auto [SetNDAFalse] = AWAIT(SettingsSystem, SetNDAStatus, UserId, false);
-	EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -103,14 +103,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 	LogIn(UserSystem, UserId);
 
 	auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, true);
-	EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetNewsletterResult] = AWAIT(SettingsSystem, GetNewsletterStatus, UserId);
-	EXPECT_EQ(GetNewsletterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetNewsletterResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetNewsletterResult.GetValue(), true);
 
 	auto [SetNewsletterFalse] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, false);
-	EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -130,16 +130,16 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 	LogIn(UserSystem, UserId);
 
 	auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, UserId, "RecentSpace");
-	EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetRecentSpaces] = AWAIT(SettingsSystem, GetRecentlyVisitedSpaces, UserId);
-	EXPECT_EQ(GetRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetRecentSpaces.GetValue();
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("RecentSpace"));
 
 	auto [ClearRecentSpaces] = AWAIT(SettingsSystem, ClearRecentlyVisitedSpaces, UserId);
-	EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -160,19 +160,19 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, "BlockedSpace");
-	EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
-	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("BlockedSpace"));
 
 	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -194,7 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	csp::common::String BlockedSpace1Name = "BlockedSpace1";
@@ -204,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto& BlockedSpaces = Result.GetValue();
 
@@ -216,14 +216,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace2Name);
 
-		EXPECT_EQ(Result2.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto& BlockedSpaces = Result.GetValue();
 
@@ -234,14 +234,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, UserId, BlockedSpace2Name);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto& BlockedSpaces = Result.GetValue();
 
@@ -252,32 +252,32 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Clear at start in case another test left something in the list
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Add 2 blocked spaces
 	{
 		auto [Result1] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace1Name);
 
-		EXPECT_EQ(Result1.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace2Name);
 
-		EXPECT_EQ(Result2.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto& BlockedSpaces = Result.GetValue();
 
@@ -288,14 +288,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, UserId, BlockedSpace2Name);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
 		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto& BlockedSpaces = Result.GetValue();
 
@@ -307,7 +307,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Log out
@@ -329,7 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	constexpr int NUM_BLOCKED_SPACES = 10;
 
@@ -339,11 +339,11 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 		SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
 
 		auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpaceName);
-		EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
-	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
 
 	EXPECT_EQ(ReturnedStringArray.Size(), NUM_BLOCKED_SPACES);
@@ -358,7 +358,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 	}
 
 	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
-	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -386,10 +386,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		AvatarPortrait.SetMimeType("image/png");
 
 		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, UserId, AvatarPortrait);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
-		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
 
@@ -401,10 +401,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		AvatarPortrait.SetMimeType("image/png");
 
 		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, UserId, AvatarPortrait);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
-		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
 	LogOut(UserSystem);
@@ -441,7 +441,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 
 	auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, UserId, AvatarPortraitThumbnail);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	// get asset uri
 	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
 	csp::systems::Asset Asset;
@@ -451,7 +451,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 	// Get data
 	auto [Download_Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Download_Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Download_Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Download_Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];

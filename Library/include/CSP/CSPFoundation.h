@@ -31,6 +31,7 @@ public:
 	csp::common::String SpatialDataServiceURI;
 	csp::common::String MultiplayerServiceURI;
 	csp::common::String AggregationServiceURI;
+	csp::common::String TrackingServiceURI;
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.
@@ -63,7 +64,7 @@ class CSP_API CSPFoundation
 public:
 	/// @brief Sets the endpoints for the various services needed for foundation, passes over the client header information and initialises the
 	/// systems required for foundation to operate.
-	/// @param EndpointRootURI
+	/// @param EndpointRootURI csp::common::String : Root URI for service endpoints
 	/// @param Tenant csp::common::String : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants cannot
 	/// interact with each other.
 	/// @return bool : True for successful initialisation.

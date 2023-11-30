@@ -5,7 +5,6 @@ using System.Threading;
 
 using Common = Csp.Common;
 using Systems = Csp.Systems;
-using Services = Csp.Services;
 
 using CSharpTests;
 using static CSharpTests.TestHelper;
@@ -54,21 +53,18 @@ namespace CSPEngine
             using var result = userSystem.Logout().Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug("Logged out");
         }
 
         /// <returns>User Id</returns>
-        public static string LogIn(Systems.UserSystem userSystem, string email = null, string password = null, Services.EResultCode expectedResult = Services.EResultCode.Success, bool pushCleanupFunction = true)
+        public static string LogIn(Systems.UserSystem userSystem, string email = null, string password = null, Systems.EResultCode expectedResult = Systems.EResultCode.Success, bool pushCleanupFunction = true)
         {
-            if (email == null)
-                email = DefaultLoginEmail;
+            email ??= DefaultLoginEmail;
+            password ??= DefaultLoginPassword;
 
-            if (password == null)
-                password = DefaultLoginPassword;
-
-            using var result = userSystem.Login("", email, password).Result;
+            using var result = userSystem.Login("", email, password, null).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, expectedResult);
@@ -76,12 +72,12 @@ namespace CSPEngine
             using var loginState = result.GetLoginState();
             var userId = loginState.UserId;
 
-            if (resCode == Services.EResultCode.Success)
+            if (resCode == Systems.EResultCode.Success)
             {
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => LogOut(userSystem));
 
-                LogDebug($"Logged in (UserId: { userId })");
+                LogDebug($"Logged in (UserId: {userId})");
             }
 
             return userId;
@@ -90,20 +86,20 @@ namespace CSPEngine
         /// <returns>User Id</returns>
         public static string LogInAsGuest(Systems.UserSystem userSystem, bool pushCleanupFunction = true)
         {
-            using var result = userSystem.LoginAsGuest().Result;
+            using var result = userSystem.LoginAsGuest(null).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var loginState = result.GetLoginState();
             var userId = result.GetLoginState().UserId;
 
-            if (resCode == Services.EResultCode.Success)
+            if (resCode == Systems.EResultCode.Success)
             {
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => LogOut(userSystem));
 
-                LogDebug($"Logged in as guest (UserId: { userId })");
+                LogDebug($"Logged in as guest (UserId: {userId})");
             }
 
             return userId;
@@ -112,7 +108,7 @@ namespace CSPEngine
         public static Systems.Profile GetFullProfileByUserId(Systems.UserSystem userSystem, string userId)
         {
             using var result = userSystem.GetProfileByUserId(userId).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             return result.GetProfile();
         }
@@ -184,40 +180,40 @@ namespace CSPEngine
 
             // Tests passing false for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, false).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, false).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, false).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, false).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             // Tests passing true for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, true).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, true).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, true).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, true).Result;
 
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
         }
 #endif
@@ -233,9 +229,9 @@ namespace CSPEngine
 
             userSystem.OnNewLoginTokenReceived += (s, result) =>
             {
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
-                if (result.GetResultCode() == Services.EResultCode.Success)
+                if (result.GetResultCode() == Systems.EResultCode.Success)
                 {
                     using var tokenInfo = result.GetLoginTokenInfo();
                     loginToken = tokenInfo.RefreshToken;
@@ -263,7 +259,7 @@ namespace CSPEngine
             using var result = userSystem.LoginWithToken(userId, loginToken).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             loginTokenAvailable = false;
             waitForTestTimeoutCountMs = 0;
@@ -280,8 +276,8 @@ namespace CSPEngine
             Assert.AreEqual(currentLoginState.State, Systems.ELoginState.LoggedIn);
 
             //check that we're successfully logged in to CHS by creating a space
-            string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
-            string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testSpaceName = GenerateUniqueString("CSP-UNITTEST-SPACE-REWIND");
+            string testSpaceDescription = "CSP-UNITTEST-SPACEDESC-REWIND";
 
             // Create space
             _ = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
@@ -316,7 +312,7 @@ namespace CSPEngine
                 using var result = userSystem.ExchangeKey(userId, key).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var loginState = result.GetLoginState();
                 var gotUserID = loginState.UserId;
@@ -333,7 +329,7 @@ namespace CSPEngine
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             // Log in with invalid credentials
-            _ = LogIn(userSystem, email: "invalidlogin@rewind.co", password: "", expectedResult: Services.EResultCode.Failed);
+            _ = LogIn(userSystem, email: "invalidlogin@rewind.co", password: "", expectedResult: Systems.EResultCode.Failed);
 
             // Log in
             _ = LogIn(userSystem);
@@ -348,14 +344,14 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLY-UNITTEST-DISPLAY-NAME");
+            var newDisplayName = GenerateUniqueString("NAME");
 
             // Update display name
             {
                 using var result = userSystem.UpdateUserDisplayName(userId, newDisplayName).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             // Retrieve user profile and verify display name has been updated
@@ -376,14 +372,14 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLY UNITTEST DISPLAY NAME WITH SPACES");
+            var newDisplayName = GenerateUniqueString("TEST ");
 
             // Update display name
             {
                 using var result = userSystem.UpdateUserDisplayName(userId, newDisplayName).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             // Retrieve user profile and verify display name has been updated
@@ -404,14 +400,14 @@ namespace CSPEngine
 
             var userId = LogIn(userSystem);
 
-            var newDisplayName = GenerateUniqueString("OLYUNITTEST DISPLAY NAME *&^\\%$@~#!;?.,{}[]()=");
+            var newDisplayName = GenerateUniqueString("()= - ");
 
             // Update display name
             {
                 using var result = userSystem.UpdateUserDisplayName(userId, newDisplayName).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
             // Retrieve user profile and verify display name has been updated
@@ -430,18 +426,20 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out var settingsSystem, out _, out _, out _);
 
-            string uniqueUserName = GenerateUniqueString("OLY-TEST-NAME");
-            string testDisplayName = "OLY-TEST-DISPLAY";
+            string uniqueUserName = GenerateUniqueString(GenerateUniqueString("CSP-TEST-NAME"));
+            string testDisplayName = "CSP-TEST-DISPLAY";
             string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
 
             string createdUserId;
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, null, null).Result;
+                using var result = userSystem.CreateUser(uniqueUserName, testDisplayName, uniqueTestEmail, GeneratedTestAccountPassword, true, true, null, null).Result;
                 var resCode = result.GetResultCode();
+                var failureReason = result.GetFailureReason();
+                var body = result.GetResponseBody();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var createdProfile = result.GetProfile();
                 createdUserId = createdProfile.UserId;
@@ -457,8 +455,9 @@ namespace CSPEngine
             {
                 using var result = settingsSystem.GetNewsletterStatus(createdUserId).Result;
                 var resCode = result.GetResultCode();
+                var body = result.GetResponseBody();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.IsTrue(result.GetValue());
             }
 
@@ -470,7 +469,7 @@ namespace CSPEngine
                 using var result = userSystem.GetProfilesByUserId(ids).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetProfiles().Size(), 1UL);
 
                 using var profiles = result.GetProfiles();
@@ -495,7 +494,7 @@ namespace CSPEngine
                 using var result = userSystem.DeleteUser(createdUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
         }
 #endif
@@ -512,10 +511,10 @@ namespace CSPEngine
 
             // Create new user
             {
-                using var result = userSystem.CreateUser(null, null, uniqueTestEmail, GeneratedTestAccountPassword, false, null, null).Result;
+                using var result = userSystem.CreateUser(null, null, uniqueTestEmail, GeneratedTestAccountPassword, false, true, null, null).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var createdProfile = result.GetProfile();
                 createdUserId = createdProfile.UserId;
@@ -535,7 +534,7 @@ namespace CSPEngine
                 using var result = userSystem.GetProfilesByUserId(ids).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetProfiles().Size(), 1UL);
 
                 using var profiles = result.GetProfiles();
@@ -560,7 +559,7 @@ namespace CSPEngine
                 using var result = userSystem.DeleteUser(createdUserId).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
         }
 #endif
@@ -573,7 +572,7 @@ namespace CSPEngine
 
             using var result = userSystem.Ping().Result;
 
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
         }
 
 #endif
@@ -626,7 +625,7 @@ namespace CSPEngine
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Google, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             ValidateThirdPartyAuthoriseURL(authoriseURL, redirectURL);
@@ -643,7 +642,7 @@ namespace CSPEngine
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Discord, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             ValidateThirdPartyAuthoriseURL(authoriseURL, redirectURL);
@@ -660,7 +659,7 @@ namespace CSPEngine
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Apple, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             ValidateThirdPartyAuthoriseURL(authoriseURL, redirectURL);
@@ -669,8 +668,7 @@ namespace CSPEngine
 
         // As the following two tests require manual actions explained inside, they are currently disabled
         // ATM only the WASM tests would be able to have a end-to-end testing flow using Selenium for the URL redirects
-#if false
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
+#if RUN_USERSYSTEM_GOOGLE_LOGIN_TEST
         [Test] 
         public static void GoogleLogInTest()
         {
@@ -680,7 +678,7 @@ namespace CSPEngine
             
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Google, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             var tokens = authoriseURL.Split('&');
@@ -706,7 +704,7 @@ namespace CSPEngine
 
             var googleToken = File.ReadAllText("third_party_auth_token.txt");
             using var resultLogin = userSystem.LoginToThirdPartyAuthenticationProvider(googleToken, stateId).Result;
-            Assert.AreEqual(resultLogin.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(resultLogin.GetResultCode(), Systems.EResultCode.Success);
 
             using var loginState = resultLogin.GetLoginState();
             var userId = loginState.UserId;
@@ -715,7 +713,8 @@ namespace CSPEngine
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
 #endif
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DISCORD_LOGIN_TEST
+
+#if RUN_USERSYSTEM_DISCORD_LOGIN_TEST
         [Test] 
         public static void DiscordLogInTest()
         {
@@ -725,7 +724,7 @@ namespace CSPEngine
             
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Discord, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             var tokens = authoriseURL.Split('&');
@@ -751,7 +750,7 @@ namespace CSPEngine
 
             var discordToken = File.ReadAllText("third_party_auth_token.txt");
             using var resultLogin = userSystem.LoginToThirdPartyAuthenticationProvider(discordToken, stateId).Result;
-            Assert.AreEqual(resultLogin.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(resultLogin.GetResultCode(), Systems.EResultCode.Success);
 
             using var loginState = resultLogin.GetLoginState();
             var userId = loginState.UserId;
@@ -760,7 +759,8 @@ namespace CSPEngine
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
 #endif
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_APPLE_LOGIN_TEST
+
+#if RUN_USERSYSTEM_APPLE_LOGIN_TEST
         [Test] 
         public static void AppleLogInTest()
         {
@@ -770,7 +770,7 @@ namespace CSPEngine
             
             // Retrieve Authorise URL for Apple
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Apple, redirectURL).Result;
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             var authoriseURL = result.GetValue();
             var tokens = authoriseURL.Split('&');
@@ -796,7 +796,7 @@ namespace CSPEngine
 
             var appleToken = File.ReadAllText("third_party_auth_token.txt");
             using var resultLogin = userSystem.LoginToThirdPartyAuthenticationProvider(appleToken, stateId).Result;
-            Assert.AreEqual(resultLogin.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(resultLogin.GetResultCode(), Systems.EResultCode.Success);
 
             using var loginState = resultLogin.GetLoginState();
             var userId = loginState.UserId;
@@ -804,7 +804,6 @@ namespace CSPEngine
             // test that we are in fact logged in
             using var FullProfile = GetFullProfileByUserId(userSystem, userId);
         }
-#endif
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_AGORA_USER_TOKEN_TEST
@@ -834,7 +833,7 @@ namespace CSPEngine
             // Get token
             var result = userSystem.GetAgoraUserToken(tokenParams).Result;
 
-            Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             Assert.AreNotEqual(result.GetUserToken(), "");
         }
 #endif
@@ -843,7 +842,7 @@ namespace CSPEngine
         [Test]
         public static void GetGuestProfileTest()
         {
-            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
             string id = LogInAsGuest(userSystem);
 

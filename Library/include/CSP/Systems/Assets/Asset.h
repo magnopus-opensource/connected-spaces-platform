@@ -18,7 +18,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 #include "CSP/ThirdPartyPlatforms.h"
 
 #include <functional>
@@ -137,8 +137,7 @@ public:
 	virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
 
 	CSP_NO_EXPORT virtual void
-		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
-		= 0;
+		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const = 0;
 
 protected:
 	virtual ~AssetDataSource() = default;
@@ -202,7 +201,7 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset.
-class CSP_API AssetResult : public csp::services::ResultBase
+class CSP_API AssetResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -228,15 +227,15 @@ protected:
 private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	CSP_NO_EXPORT AssetResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	CSP_NO_EXPORT AssetResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	Asset Asset;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of assets.
-class CSP_API AssetsResult : public csp::services::ResultBase
+class CSP_API AssetsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -260,7 +259,7 @@ public:
 protected:
 	AssetsResult() = delete;
 	AssetsResult(void*) {};
-	AssetsResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
@@ -271,7 +270,7 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to upload an asset.
-class CSP_API UriResult : public csp::services::ResultBase
+class CSP_API UriResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -294,33 +293,24 @@ public:
 	/// @return csp::common::String : uri of the uploaded asset.
 	const csp::common::String& GetUri() const;
 
-	/// @brief Retrieves the Error Code if the asset upload is unsuccessful.
-	/// @return csp::common::String : Error code of the failed asset upload.
-	csp::common::String& GetXErrorCode();
-
-	/// @brief Retrieves the Error Code if the asset upload is unsuccessful.
-	/// @return csp::common::String : Error code of the failed asset upload.
-	const csp::common::String& GetXErrorCode() const;
-
 protected:
 	UriResult() = delete;
 	UriResult(void*) {};
 
 private:
 	UriResult(const csp::common::String Uri);
-	UriResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	void SetResponseBody(const csp::common::String& Contents);
 
 	csp::common::String Uri;
-	csp::common::String XCodeError;
 };
 
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download asset data.
-class CSP_API AssetDataResult : public csp::services::ResultBase
+class CSP_API AssetDataResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

@@ -59,7 +59,7 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
 			AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
 			break;
 		default:
-			FOUNDATION_LOG_WARN_MSG("Unknown third party anchor provider");
+			CSP_LOG_WARN_MSG("Unknown third party anchor provider");
 			break;
 	}
 
@@ -142,7 +142,7 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
 			AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
 			break;
 		default:
-			FOUNDATION_LOG_WARN_MSG("Unknown third party anchor provider");
+			CSP_LOG_WARN_MSG("Unknown third party anchor provider");
 			break;
 	}
 

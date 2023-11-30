@@ -104,7 +104,7 @@ void ScriptSystem::Initialise()
 {
 	if (TheScriptRuntime != nullptr)
 	{
-		FOUNDATION_LOG_ERROR_MSG("ScriptSystem::Initialise already called\n");
+		CSP_LOG_ERROR_MSG("ScriptSystem::Initialise already called\n");
 		return;
 	}
 
@@ -137,7 +137,7 @@ void ScriptSystem::Shutdown()
 
 bool ScriptSystem::RunScript(int64_t ContextId, const String& ScriptText)
 {
-	// FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
+	// CSP_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
 
 	ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
 	if (TheScriptContext == nullptr)
@@ -152,7 +152,7 @@ bool ScriptSystem::RunScript(int64_t ContextId, const String& ScriptText)
 
 bool ScriptSystem::RunScriptFile(int64_t ContextId, const String& ScriptFilePath)
 {
-	FOUNDATION_LOG_FORMAT(LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
+	CSP_LOG_FORMAT(LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
 
 	ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
 	if (TheScriptContext == nullptr)

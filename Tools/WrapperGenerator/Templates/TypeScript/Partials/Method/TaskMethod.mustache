@@ -48,11 +48,21 @@ async {{ name }}(
 {{/ type.template_arguments }}
         );
 {{/ type.is_class_or_interface }}
-{{^ type.is_class_or_interface }}
-{{/ type.is_class_or_interface }}
+
+{{# type.is_number }}
+{{^ type.is_float }}
+{{^ type.is_signed }}
+        {
+            const _unfixedValue = {{ name }};
+            {{# type }}{{> UnsignedFix }}{{/ type }}
+            {{ name }} = _fixedValue;
+        }
+{{/ type.is_signed }}
+{{/ type.is_float }}
+{{/ type.is_number }}
 
 {{# type.is_result_base }}
-        if (_{{ name }}Instance.getResultCode() == Services.EResultCode.InProgress) {
+        if (_{{ name }}Instance.getResultCode() == Systems.EResultCode.InProgress) {
 {{# is_async_result_with_progress }}
             if (progressCallback != null) {
                 progressCallback(_{{ name }}Instance.getRequestProgress(), _{{ name }}Instance.getResponseProgress());
@@ -94,12 +104,20 @@ async {{ name }}(
     var {{ name }}Pointer = 0;
     if ({{ name }} != null) {
         {{ name }}Pointer = Module._malloc(4);
-{{# type.is_float }}
-        Module.setValue({{ name }}Pointer, {{ name }}, "float");
-{{/ type.is_float }}
+{{# type.is_number }}
 {{^ type.is_float }}
         Module.setValue({{ name }}Pointer, {{ name }}, "i32");
 {{/ type.is_float }}
+{{# type.is_float }}
+        Module.setValue({{ name }}Pointer, {{ name }}, "float");
+{{/ type.is_float }}
+{{/ type.is_number }}
+{{# type.is_bool }}
+        Module.setValue({{ name }}Pointer, {{ name }} ? 1 : 0, "i32");
+{{/ type.is_bool }}
+{{# type.is_enum }}
+        Module.setValue({{ name }}Pointer, {{ name }}, "i32");
+{{/ type.is_enum }}
     }
 
 {{/ type.is_class_or_interface }}

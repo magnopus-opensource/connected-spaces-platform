@@ -1,0 +1,33 @@
+{%- macro print_changes(changes, list_title) -%}
+{%- if changes | length > 0 %}
+### {{ list_title }}
+{% for change in changes %}
+- {{ change.title | capitalize }} *({{ change.commit_hash | truncate(7, true, '') }})* [**{{ change.jira_id }}**]
+{%- endfor %}
+{% endif %}
+{%- endmacro -%}
+
+# Built from changelist ID {{ changelist_id }}
+
+<br>
+
+## Summary Lists
+
+{{ print_changes(breaking_changes, "🔥 ❗ Breaking Changes") }}
+{{ print_changes(new_features, "🍰 🙌 New Features") }}
+{{ print_changes(bug_fixes, "🐛 🔨 Bug Fixes") }}
+{{ print_changes(style_changes, "😎 Code Style Changes") }}
+{{ print_changes(refactors, "💫 💥 Code Refactors") }}
+{{ print_changes(test_changes, "🙈 🙉 🙊 Test Changes") }}
+{{ print_changes(doc_changes, "📖 ✍ Documentation Changes") }}
+{{ print_changes(misc_changes, "🧩 Miscellaneous Changes") }}
+
+<br>
+
+## Revision Change Details
+
+| Change ID | Author | Description |
+| --------- | ------ | ----------- |
+{%- for commit in commits %}
+| {{ commit.hexsha | truncate(7, true, '') }} | {{ commit.author }} | {{ commit.message | trim | replace('\r', '') | replace('\n\n', '<br>') | replace('\n', '<br>') | replace('*', '&bull;') }} |
+{%- endfor %}

@@ -60,7 +60,7 @@ namespace MultiplayerTestClient
                 {
                     WriteLogEventToFile(logEvent);
                 }
-                else 
+                else
                 {
                     Thread.Sleep(1);
                 }
@@ -75,11 +75,11 @@ namespace MultiplayerTestClient
             {
                 Directory.CreateDirectory(sessionDirectory);
             }
-            
+
             using (StreamWriter outputFile = new StreamWriter(fileName, append: true))
             {
                 double ns = 1000000000.0 * (double)logEvent.ticks / Stopwatch.Frequency;
-                string eventText = String.Format("[{0:D12}|{1}|{2}] {3}", (long)ns/100, logEvent.clientId, logEvent.timeStamp.ToString("hh:mm:ss.fffffff"), logEvent.message);
+                string eventText = String.Format("[{0:D12}|{1}|{2}] {3}", (long)ns / 100, logEvent.clientId, logEvent.timeStamp.ToString("hh:mm:ss.fffffff"), logEvent.message);
                 outputFile.WriteLine(eventText);
             }
         }
@@ -144,18 +144,18 @@ namespace MultiplayerTestClient
                 // Create ServiceWire NamedPipe connection for inter process comms
                 nphost = new NpHost(pipeName, logger, stats);
                 nphost.AddService<IMultiplayerTestClient>(this);
-            
+
                 nphost.Open();
             }
-            catch 
+            catch
             {
-                isRunning = false;            
+                isRunning = false;
             }
 
             if (isRunning)
             {
                 InitialiseFoundationWithUserAgentInfo(CHSEndpointBaseUri);
-                
+
                 logSystem = Systems.SystemsManager.Get().GetLogSystem();
                 logSystem.OnLog += LogHandler;
             }
@@ -211,12 +211,12 @@ namespace MultiplayerTestClient
             var systemsManager = Csp.Systems.SystemsManager.Get();
             var userSystem = systemsManager.GetUserSystem();
 
-            using var result = userSystem.Login("", login, password).Result;
+            using var result = userSystem.Login("", login, password, null).Result;
             var resCode = result.GetResultCode();
 
             Log($"Login using username '{login}'");
 
-            return resCode == Csp.Services.EResultCode.Success;
+            return resCode == Csp.Systems.EResultCode.Success;
         }
 
         public void Logout()
@@ -262,7 +262,7 @@ namespace MultiplayerTestClient
         {
             var entitySystem = connection.GetSpaceEntitySystem();
             entitySystem.DestroyEntity(avatar);
-            avatar.Dispose();            
+            avatar.Dispose();
         }
 
         private void CreateObject(Multiplayer.SpaceEntitySystem entitySystem, string name, out Multiplayer.SpaceEntity entity)

@@ -47,10 +47,8 @@
 // registration from Barthelemy Dagenais' (barthelemy@prologique.com)
 // easyUnit framework.
 
-// GOOGLETEST_CM0001 DO NOT DELETE
-
-#ifndef GTEST_INCLUDE_GTEST_GTEST_H_
-#define GTEST_INCLUDE_GTEST_GTEST_H_
+#ifndef GOOGLETEST_INCLUDE_GTEST_GTEST_H_
+#define GOOGLETEST_INCLUDE_GTEST_GTEST_H_
 
 #include "gtest/gtest-death-test.h"
 #include "gtest/gtest-matchers.h"
@@ -70,18 +68,6 @@
 #include <vector>
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4251 /* class A needs to have dll-interface to be used by clients of class B */)
-
-namespace testing
-{
-
-// Silence C4100 (unreferenced formal parameter) and 4805
-// unsafe mix of type 'const int' and type 'const bool'
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable : 4805)
-	#pragma warning(disable : 4100)
-#endif
-
 
 // Declares the flags.
 
@@ -137,6 +123,12 @@ GTEST_DECLARE_int32_(random_seed);
 // is 1. If the value is -1 the tests are repeating forever.
 GTEST_DECLARE_int32_(repeat);
 
+// This flag controls whether Google Test Environments are recreated for each
+// repeat of the tests. The default value is true. If set to false the global
+// test Environment objects are only set up once, for the first iteration, and
+// only torn down once, for the last.
+GTEST_DECLARE_bool_(recreate_environments_when_repeating);
+
 // This flag controls whether Google Test includes Google Test internal
 // stack frames in failure stack traces.
 GTEST_DECLARE_bool_(show_internal_stack_frames);
@@ -161,6 +153,17 @@ GTEST_DECLARE_string_(stream_result_to);
 #if GTEST_USE_OWN_FLAGFILE_FLAG_
 GTEST_DECLARE_string_(flagfile);
 #endif // GTEST_USE_OWN_FLAGFILE_FLAG_
+
+namespace testing
+{
+
+// Silence C4100 (unreferenced formal parameter) and 4805
+// unsafe mix of type 'const int' and type 'const bool'
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 4805)
+	#pragma warning(disable : 4100)
+#endif
 
 // The upper limit for valid stack trace depths.
 const int kMaxStackTraceDepth = 100;
@@ -731,7 +734,7 @@ private:
 
 	// Protects mutable state of the property vector and of owned
 	// properties, whose values may be updated.
-	internal::Mutex test_properites_mutex_;
+	internal::Mutex test_properties_mutex_;
 
 	// The vector of TestPartResults
 	std::vector<TestPartResult> test_part_results_;
@@ -1273,6 +1276,11 @@ public:
 	// Fired before the test starts.
 	virtual void OnTestStart(const TestInfo& test_info) = 0;
 
+	// Fired when a test is disabled
+	virtual void OnTestDisabled(const TestInfo& /*test_info*/)
+	{
+	}
+
 	// Fired after a failed assertion or a SUCCEED() invocation.
 	// If you want to throw an exception from this function to skip to the next
 	// TEST, it must be AssertionException defined above, or inherited from it.
@@ -1337,6 +1345,9 @@ public:
 #endif //  GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
 	void OnTestStart(const TestInfo& /*test_info*/) override
+	{
+	}
+	void OnTestDisabled(const TestInfo& /*test_info*/) override
 	{
 	}
 	void OnTestPartResult(const TestPartResult& /*test_part_result*/) override
@@ -1740,11 +1751,6 @@ template <typename T1, typename T2> AssertionResult CmpHelperEQ(const char* lhs_
 	return CmpHelperEQFailure(lhs_expression, rhs_expression, lhs, rhs);
 }
 
-// With this overloaded version, we allow anonymous enums to be used
-// in {ASSERT|EXPECT}_EQ when compiled with gcc 4, as anonymous enums
-// can be implicitly cast to BiggestInt.
-GTEST_API_ AssertionResult CmpHelperEQ(const char* lhs_expression, const char* rhs_expression, BiggestInt lhs, BiggestInt rhs);
-
 class EqHelper
 {
 public:
@@ -1797,11 +1803,6 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2, const T
 // ASSERT_?? and EXPECT_??.  It is here just to avoid copy-and-paste
 // of similar code.
 //
-// For each templatized helper function, we also define an overloaded
-// version for BiggestInt in order to reduce code bloat and allow
-// anonymous enums to be used with {ASSERT|EXPECT}_?? when compiled
-// with gcc 4.
-//
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 #define GTEST_IMPL_CMP_HELPER_(op_name, op)                                                                                                      \
@@ -1815,21 +1816,20 @@ AssertionResult CmpHelperOpFailure(const char* expr1, const char* expr2, const T
 		{                                                                                                                                        \
 			return CmpHelperOpFailure(expr1, expr2, val1, val2, #op);                                                                            \
 		}                                                                                                                                        \
-	}                                                                                                                                            \
-	GTEST_API_ AssertionResult CmpHelper##op_name(const char* expr1, const char* expr2, BiggestInt val1, BiggestInt val2)
+	}
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN A USER PROGRAM.
 
 // Implements the helper function for {ASSERT|EXPECT}_NE
-GTEST_IMPL_CMP_HELPER_(NE, !=);
+GTEST_IMPL_CMP_HELPER_(NE, !=)
 // Implements the helper function for {ASSERT|EXPECT}_LE
-GTEST_IMPL_CMP_HELPER_(LE, <=);
+GTEST_IMPL_CMP_HELPER_(LE, <=)
 // Implements the helper function for {ASSERT|EXPECT}_LT
-GTEST_IMPL_CMP_HELPER_(LT, <);
+GTEST_IMPL_CMP_HELPER_(LT, <)
 // Implements the helper function for {ASSERT|EXPECT}_GE
-GTEST_IMPL_CMP_HELPER_(GE, >=);
+GTEST_IMPL_CMP_HELPER_(GE, >=)
 // Implements the helper function for {ASSERT|EXPECT}_GT
-GTEST_IMPL_CMP_HELPER_(GT, >);
+GTEST_IMPL_CMP_HELPER_(GT, >)
 
 #undef GTEST_IMPL_CMP_HELPER_
 
@@ -2120,10 +2120,29 @@ template <typename T> class TestWithParam : public Test, public WithParamInterfa
 // Boolean assertions. Condition can be either a Boolean expression or an
 // AssertionResult. For more information on how to use AssertionResult with
 // these macros see comments on that class.
-#define EXPECT_TRUE(condition)	GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_NONFATAL_FAILURE_)
-#define EXPECT_FALSE(condition) GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, GTEST_NONFATAL_FAILURE_)
-#define ASSERT_TRUE(condition)	GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_FATAL_FAILURE_)
-#define ASSERT_FALSE(condition) GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, GTEST_FATAL_FAILURE_)
+#define GTEST_EXPECT_TRUE(condition)  GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_NONFATAL_FAILURE_)
+#define GTEST_EXPECT_FALSE(condition) GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, GTEST_NONFATAL_FAILURE_)
+#define GTEST_ASSERT_TRUE(condition)  GTEST_TEST_BOOLEAN_(condition, #condition, false, true, GTEST_FATAL_FAILURE_)
+#define GTEST_ASSERT_FALSE(condition) GTEST_TEST_BOOLEAN_(!(condition), #condition, true, false, GTEST_FATAL_FAILURE_)
+
+// Define these macros to 1 to omit the definition of the corresponding
+// EXPECT or ASSERT, which clashes with some users' own code.
+
+#if !GTEST_DONT_DEFINE_EXPECT_TRUE
+	#define EXPECT_TRUE(condition) GTEST_EXPECT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_EXPECT_FALSE
+	#define EXPECT_FALSE(condition) GTEST_EXPECT_FALSE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_TRUE
+	#define ASSERT_TRUE(condition) GTEST_ASSERT_TRUE(condition)
+#endif
+
+#if !GTEST_DONT_DEFINE_ASSERT_FALSE
+	#define ASSERT_FALSE(condition) GTEST_ASSERT_FALSE(condition)
+#endif
 
 // Macros for testing equalities and inequalities.
 //
@@ -2468,11 +2487,10 @@ template <typename T1, typename T2> constexpr bool StaticAssertTypeEq() noexcept
 //     EXPECT_EQ(a_.size(), 0);
 //     EXPECT_EQ(b_.size(), 1);
 //   }
-//
-// GOOGLETEST_CM0011 DO NOT DELETE
-#if !GTEST_DONT_DEFINE_TEST
-	#define TEST_F(test_fixture, test_name) GTEST_TEST_(test_fixture, test_name, test_fixture, ::testing::internal::GetTypeId<test_fixture>())
-#endif // !GTEST_DONT_DEFINE_TEST
+#define GTEST_TEST_F(test_fixture, test_name) GTEST_TEST_(test_fixture, test_name, test_fixture, ::testing::internal::GetTypeId<test_fixture>())
+#if !GTEST_DONT_DEFINE_TEST_F
+	#define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
+#endif
 
 // Returns a path to temporary directory.
 // Tries to determine an appropriate directory for the platform.
@@ -2533,6 +2551,7 @@ GTEST_API_ std::string TempDir();
 // }
 // ...
 // int main(int argc, char** argv) {
+//   ::testing::InitGoogleTest(&argc, argv);
 //   std::vector<int> values_to_test = LoadValuesFromConfig();
 //   RegisterMyTests(values_to_test);
 //   ...
@@ -2595,4 +2614,4 @@ inline int RUN_ALL_TESTS()
 
 GTEST_DISABLE_MSC_WARNINGS_POP_() //  4251
 
-#endif // GTEST_INCLUDE_GTEST_GTEST_H_
+#endif // GOOGLETEST_INCLUDE_GTEST_GTEST_H_

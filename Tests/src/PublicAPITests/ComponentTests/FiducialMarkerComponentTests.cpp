@@ -42,9 +42,9 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -77,7 +77,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
@@ -210,7 +210,7 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Set up multiplayer connection
 	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);

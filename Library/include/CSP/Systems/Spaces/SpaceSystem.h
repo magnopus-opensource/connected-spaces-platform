@@ -89,14 +89,15 @@ public:
 	/// @param Name csp::common::String : name for the new space
 	/// @param Description csp::common::String : description for the new space
 	/// @param Type csp::systems::SpaceType : type of the new space
-	/// @param InviteUsers csp::common::Array<csp::systems::InviteUserRoleInfo> : optional array of users to be invited into the space
+	/// @param InviteUsers csp::common::Optional<InviteUserRoleInfoCollection> : Collection containing the email link URL and the users to invite with
+	/// their emails and roles
 	/// @param Metadata csp::common::String : metadata information for the new space
 	/// @param FileThumbnail csp::systems::FileAssetDataSource : optional thumbnail image for the new space
 	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateSpace(const csp::common::String& Name,
 									  const csp::common::String& Description,
 									  SpaceAttributes Attributes,
-									  const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
+									  const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 									  const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
 									  SpaceResultCallback Callback);
@@ -105,14 +106,15 @@ public:
 	/// @param Name csp::common::String : name for the new space
 	/// @param Description csp::common::String : description for the new space
 	/// @param Type csp::systems::SpaceType : type of the new space
-	/// @param InviteUsers csp::common::Array<csp::systems::InviteUserRoleInfo> : optional array of users to be invited into the space
+	/// @param InviteUsers csp::common::Optional<InviteUserRoleInfoCollection> : Collection containing the email link URL and the users to invite with
+	/// their emails and roles
 	/// @param Metadata csp::common::String : metadata information for the new space
 	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
 	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateSpaceWithBuffer(const csp::common::String& Name,
 												const csp::common::String& Description,
 												SpaceAttributes Attributes,
-												const csp::common::Optional<csp::common::Array<csp::systems::InviteUserRoleInfo>>& InviteUsers,
+												const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 												const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 												const csp::systems::BufferAssetDataSource& Thumbnail,
 												SpaceResultCallback Callback);
@@ -173,18 +175,22 @@ public:
 	/// @param Email csp::common::String : email to invite to space
 	/// @param IsModeratorRole csp::common::Optional<bool> : if present and true sets the user's role in the space to "Moderator", pass false or
 	/// nullptr to leave role as default
+	/// @param EmailLinkUrl csp::common::Optional<csp::common::String> : link that will be provided in the invite email
+	/// @param SignupUrl csp::common::Optional<csp::common::String> : destination link that will be provided in the invite email
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void InviteToSpace(const csp::common::String& SpaceId,
 										const csp::common::String& Email,
 										const csp::common::Optional<bool>& IsModeratorRole,
+										const csp::common::Optional<csp::common::String>& EmailLinkUrl,
+										const csp::common::Optional<csp::common::String>& SignupUrl,
 										NullResultCallback Callback);
 
 	/// @brief Invites all the given emails to a specific space.
 	/// @param Space Space : space to invite to
-	/// @param InviteUsers csp::common::Array<InviteUserRoleInfo> : Array of users to invite with their email and role
+	/// @param InviteUsers InviteUserRoleInfoCollection : Collection containing the email link URL and the users to invite with their emails and roles
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void
-		BulkInviteToSpace(const csp::common::String& SpaceId, const csp::common::Array<InviteUserRoleInfo>& InviteUsers, NullResultCallback Callback);
+		BulkInviteToSpace(const csp::common::String& SpaceId, const InviteUserRoleInfoCollection& InviteUsers, NullResultCallback Callback);
 
 	/// @brief Returns an array of obfuscated email addresses, addresses of users that have not yet accepted the space invite
 	/// @param Space Space : Space for which the invites where sent
@@ -337,6 +343,7 @@ private:
 	void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
 	csp::services::ApiBase* GroupAPI;
+	csp::services::ApiBase* SpaceAPI;
 	Space CurrentSpace;
 };
 

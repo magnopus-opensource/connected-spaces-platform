@@ -52,7 +52,7 @@ const csp::common::String& AvatarSpaceComponent::GetAvatarId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -69,7 +69,7 @@ const csp::common::String& AvatarSpaceComponent::GetUserId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -86,7 +86,7 @@ AvatarState AvatarSpaceComponent::GetState() const
 		return static_cast<AvatarState>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return AvatarState::Idle;
 }
 
@@ -103,7 +103,7 @@ AvatarPlayMode AvatarSpaceComponent::GetAvatarPlayMode() const
 		return static_cast<AvatarPlayMode>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return AvatarPlayMode::Default;
 }
 
@@ -120,7 +120,7 @@ const int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
 		return RepVal.GetInt();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0;
 }
 
@@ -137,7 +137,7 @@ const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -154,7 +154,7 @@ const csp::common::String& AvatarSpaceComponent::GetCustomAvatarUrl() const
 		return RepVal.GetString();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultString();
 }
 
@@ -171,7 +171,7 @@ const bool AvatarSpaceComponent::GetIsHandIKEnabled() const
 		return RepVal.GetBool();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return false;
 }
 
@@ -188,7 +188,7 @@ const csp::common::Vector3& AvatarSpaceComponent::GetTargetHandIKTargetLocation(
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -205,7 +205,7 @@ const csp::common::Vector4& AvatarSpaceComponent::GetHandRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -222,7 +222,7 @@ const csp::common::Vector4& AvatarSpaceComponent::GetHeadRotation() const
 		return RepVal.GetVector4();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -239,7 +239,7 @@ const float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -256,7 +256,7 @@ const float AvatarSpaceComponent::GetTorsoTwistAlpha() const
 		return RepVal.GetFloat();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return 0.0f;
 }
 
@@ -273,7 +273,7 @@ const csp::common::Vector3& csp::multiplayer::AvatarSpaceComponent::GetMovementD
 		return RepVal.GetVector3();
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -290,7 +290,7 @@ LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
 		return static_cast<LocomotionModel>(RepVal.GetInt());
 	}
 
-	FOUNDATION_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return LocomotionModel::Grounded;
 }
 

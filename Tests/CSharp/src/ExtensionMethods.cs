@@ -1,5 +1,4 @@
 ﻿using Systems = Csp.Systems;
-using Services = Csp.Services;
 
 using CSPEngine;
 
@@ -17,20 +16,17 @@ namespace CSharpTests
             using var result = userSystem.Logout().Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug("Logged out");
         }
 
-        public static string TestLogIn(this Systems.UserSystem userSystem, string email = null, string password = null, Services.EResultCode expectedResult = Services.EResultCode.Success, bool pushCleanupFunction = true)
+        public static string TestLogIn(this Systems.UserSystem userSystem, string email = null, string password = null, Systems.EResultCode expectedResult = Systems.EResultCode.Success, bool pushCleanupFunction = true)
         {
-            if (email == null)
-                email = UserSystemTests.DefaultLoginEmail;
+            email ??= UserSystemTests.DefaultLoginEmail;
+            password ??= UserSystemTests.DefaultLoginPassword;
 
-            if (password == null)
-                password = UserSystemTests.DefaultLoginPassword;
-
-            using var result = userSystem.Login("", email, password).Result;
+            using var result = userSystem.Login("", email, password, null).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, expectedResult);
@@ -38,12 +34,12 @@ namespace CSharpTests
             using var loginState = result.GetLoginState();
             var userId = loginState.UserId;
 
-            if (resCode == Services.EResultCode.Success)
+            if (resCode == Systems.EResultCode.Success)
             {
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => userSystem.TestLogOut());
 
-                LogDebug($"Logged in (UserId: { userId })");
+                LogDebug($"Logged in (UserId: {userId})");
             }
 
             return userId;
@@ -51,20 +47,20 @@ namespace CSharpTests
 
         public static string TestGuestLogIn(this Systems.UserSystem userSystem, bool pushCleanupFunction = true)
         {
-            using var result = userSystem.LoginAsGuest().Result;
+            using var result = userSystem.LoginAsGuest(null).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var loginState = result.GetLoginState();
             var userId = result.GetLoginState().UserId;
 
-            if (resCode == Services.EResultCode.Success)
+            if (resCode == Systems.EResultCode.Success)
             {
                 if (pushCleanupFunction)
                     PushCleanupFunction(() => userSystem.TestLogOut());
 
-                LogDebug($"Logged in as guest (UserId: { userId })");
+                LogDebug($"Logged in as guest (UserId: {userId})");
             }
 
             return userId;
