@@ -233,7 +233,7 @@ public:
 	/// @brief Get the checkout session Url for a user from Stripe
 	/// @param Tier csp::systems::TierNames : the tier of the checkout session needed
 	/// @param Callback CheckoutSessionUrlResultCallback : callback that contains the checkout session URL of the tier
-	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback);
+	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, CheckoutSessionUrlResultCallback Callback);
 
 protected:
 	CSP_NO_EXPORT UserSystem(csp::web::WebClient* InWebClient);
