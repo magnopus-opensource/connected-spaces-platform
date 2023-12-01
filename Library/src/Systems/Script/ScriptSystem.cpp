@@ -364,7 +364,7 @@ void ScriptSystem::_GetScriptModuleCollectionCallback(ScriptModuleCollectionResu
 	const auto& Metadata		= AssetCollection.GetMetadataImmutable();
 
 	// TODO: Handle failures in GetLookupTableById
-	ScriptModuleCollectionResult InternalResult(csp::services::EResultCode::Success, 400);
+	ScriptModuleCollectionResult InternalResult(csp::systems::EResultCode::Success, 400);
 
 	// Grab and modify ScriptModuleCollection instance
 	auto& Collection	   = InternalResult.GetCollection();
@@ -433,7 +433,7 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 
 	AssetResultCallback GetAssetCallback = [Callback, AssetSystem, ScriptModuleName](const AssetResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const Asset& InternalAsset = Result.GetAsset();
 
@@ -441,7 +441,7 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 			{
 				ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-				if (Result.GetResultCode() == csp::services::EResultCode::Success)
+				if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 				{
 					ScriptModuleAsset& InternalScriptModuleAsset = InternalResult.GetModule();
 
@@ -452,13 +452,15 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 
 					Callback(InternalResult);
 				}
-
-				Callback(InternalResult);
+				else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+				{
+					Callback(InternalResult);
+				}
 			};
 
 			AssetSystem->DownloadAssetData(InternalAsset, GetAssetDataCallback);
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			Callback(InternalResult);
@@ -481,7 +483,7 @@ void ScriptSystem::GetScriptModuleAssetNames(const csp::common::String& ModuleNa
 	{
 		ScriptModuleAssetNamesResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			const csp::common::Array<Asset>& InternalModuleAssets = Result.GetAssets();
 
@@ -522,7 +524,7 @@ void ScriptSystem::GetScriptModuleAsset(const ScriptModuleCollection& ModuleName
 		ScriptModuleCollectionResultCallback GetScriptModuleCollectionCallback
 			= [Name, AssetSystem, GetAssetCallback, Callback](const ScriptModuleCollectionResult& Result)
 		{
-			if (Result.GetResultCode() == csp::services::EResultCode::Success)
+			if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				const auto& Collection	= Result.GetCollection();
 				const auto& LookupTable = Collection.GetLookupTable();
@@ -533,12 +535,12 @@ void ScriptSystem::GetScriptModuleAsset(const ScriptModuleCollection& ModuleName
 				}
 				else
 				{
-					ScriptModuleAssetResult InternalResult(csp::services::EResultCode::Failed, Result.GetHttpResultCode());
+					ScriptModuleAssetResult InternalResult(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
 					InternalResult.ResponseBody = "Module does not exist in namespace!";
 					Callback(InternalResult);
 				}
 			}
-			else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+			else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
 				ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 				Callback(InternalResult);

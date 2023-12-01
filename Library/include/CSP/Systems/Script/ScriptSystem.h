@@ -69,7 +69,7 @@ private:
 };
 
 
-class CSP_API ScriptModuleCollectionResult : public csp::services::ResultBase
+class CSP_API ScriptModuleCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -84,7 +84,7 @@ public:
 
 private:
 	ScriptModuleCollectionResult(void*) {};
-	ScriptModuleCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	ScriptModuleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	// void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -115,7 +115,7 @@ private:
 };
 
 
-class CSP_API ScriptModuleAssetResult : public csp::services::ResultBase
+class CSP_API ScriptModuleAssetResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -130,7 +130,7 @@ public:
 
 private:
 	ScriptModuleAssetResult(void*) {};
-	ScriptModuleAssetResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	ScriptModuleAssetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	// void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -161,7 +161,7 @@ private:
 };
 
 
-class CSP_API ScriptModuleAssetNamesResult : public csp::services::ResultBase
+class CSP_API ScriptModuleAssetNamesResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -176,7 +176,7 @@ public:
 
 private:
 	ScriptModuleAssetNamesResult(void*) {};
-	ScriptModuleAssetNamesResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	ScriptModuleAssetNamesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	ScriptModuleAssetNames ModuleAssets;
