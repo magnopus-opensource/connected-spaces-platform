@@ -78,7 +78,7 @@ For information on how to obtain one, head over here.
 
 ## 🖥️ Usage
 
-Examples for each supported language are below.
+To helo you get started using the Connected Spaces Platform, we have a set of examples for each supported language that we keep up to date with each new major version of the library.
 
 - WebAssembly
   - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
