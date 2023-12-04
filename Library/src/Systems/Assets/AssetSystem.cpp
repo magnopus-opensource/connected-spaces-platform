@@ -518,24 +518,35 @@ void AssetSystem::GetAssetById(const csp::common::String& AssetCollectionId, con
 		->apiV1PrototypesPrototypeIdAssetDetailsAssetDetailIdGet(AssetCollectionId, AssetId, ResponseHandler);
 }
 
-void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
+void AssetSystem::GetAssetsByCriteria(const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionIds,
+									  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionNames,
 									  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
 									  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
 									  const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes,
 									  AssetsResultCallback Callback)
 {
-	if (AssetCollectionIds.IsEmpty())
+	std::optional<std::vector<csp::common::String>> PrototypeIds;
+	if (AssetCollectionIds.HasValue())
 	{
-		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
-		Callback(AssetsResult::Invalid());
-		return;
+		PrototypeIds.emplace(std::vector<csp::common::String>());
+		PrototypeIds->reserve(AssetCollectionIds->Size());
+
+		for (size_t idx = 0; idx < AssetCollectionIds->Size(); ++idx)
+		{
+			PrototypeIds->push_back({(*AssetCollectionIds)[idx]});
+		}
 	}
 
-	std::vector<csp::common::String> PrototypeIds;
-	PrototypeIds.reserve(AssetCollectionIds.Size());
-	for (size_t idx = 0; idx < AssetCollectionIds.Size(); ++idx)
+	std::optional<std::vector<csp::common::String>> PrototypeNames;
+	if (AssetCollectionNames.HasValue())
 	{
-		PrototypeIds.push_back(AssetCollectionIds[idx]);
+		PrototypeNames.emplace(std::vector<csp::common::String>());
+		PrototypeNames->reserve(AssetCollectionNames->Size());
+
+		for (size_t idx = 0; idx < AssetCollectionNames->Size(); ++idx)
+		{
+			PrototypeNames->push_back({(*AssetCollectionNames)[idx]});
+		}
 	}
 
 	std::optional<std::vector<csp::common::String>> AssetDetailIds;
@@ -543,6 +554,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 	{
 		AssetDetailIds.emplace(std::vector<csp::common::String>());
 		AssetDetailIds->reserve(AssetIds->Size());
+
 		for (size_t idx = 0; idx < AssetIds->Size(); ++idx)
 		{
 			AssetDetailIds->push_back({(*AssetIds)[idx]});
@@ -584,7 +596,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Array<csp::common::Stri
 										 AssetDetailNames,
 										 std::nullopt,
 										 PrototypeIds,
-										 std::nullopt,
+										 PrototypeNames,
 										 std::nullopt,
 										 std::nullopt,
 										 ResponseHandler);

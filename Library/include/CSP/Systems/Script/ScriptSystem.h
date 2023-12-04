@@ -107,10 +107,14 @@ public:
 	~ScriptModuleAsset();
 
 	const csp::common::String& GetId() const;
+	const csp::common::String& GetName() const;
+	const csp::common::String& GetNamespace() const;
 	const csp::common::String& GetModuleText() const;
 
 private:
 	csp::common::String Id;
+	csp::common::String ModuleName;
+	csp::common::String ModuleNamespace;
 	csp::common::String ModuleText;
 };
 

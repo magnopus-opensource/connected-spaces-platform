@@ -489,4 +489,26 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 	return JoinedString;
 }
 
+String String::SubString(size_t Pos, size_t Len)
+{
+	auto Length = ImplPtr->Length;
+	auto Text	= ImplPtr->Text;
+
+	if (Pos >= Length)
+	{
+		throw std::out_of_range("Specified position out of range.");
+	}
+
+	if (Len == 0 || Pos + Len > Length)
+	{
+		Len = Length - Pos;
+	}
+
+	auto* SubString = CSP_NEW char[Len + 1];
+	memcpy(SubString, &Text[Pos], Len);
+	SubString[Len] = '\0';
+
+	return SubString;
+}
+
 } // namespace csp::common

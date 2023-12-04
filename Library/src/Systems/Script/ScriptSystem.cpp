@@ -48,7 +48,8 @@ constexpr int MAX_SCRIPT_FUNCTION_LEN = 256;
 constexpr auto ASSET_COLLECTION_NAME_PREFIX = "OKO_SCRIPTMODULENAMESPACE_";
 constexpr auto LOOKUP_TABLE_METADATA_KEY	= "module_lookup_table";
 
-constexpr auto SCRIPT_MODULE_PREFIX = "SCRIPT_MODULE_";
+constexpr auto SCRIPT_MODULE_PREFIX			 = "SCRIPT_MODULE_";
+constexpr size_t SCRIPT_MODULE_PREFIX_LENGTH = std::char_traits<char>::length(SCRIPT_MODULE_PREFIX);
 
 
 // Template specializations for some custom csp types we want to use
@@ -288,6 +289,16 @@ const String& ScriptModuleAsset::GetId() const
 	return Id;
 }
 
+const String& ScriptModuleAsset::GetName() const
+{
+	return ModuleName;
+}
+
+const String& ScriptModuleAsset::GetNamespace() const
+{
+	return ModuleNamespace;
+}
+
 const String& ScriptModuleAsset::GetModuleText() const
 {
 	return ModuleText;
@@ -431,40 +442,53 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str(), ModuleName.c_str());
 	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
 
-	AssetResultCallback GetAssetCallback = [Callback, AssetSystem, ScriptModuleName](const AssetResult& Result)
+	AssetResultCallback GetAssetCallback = [Callback, AssetSystem, ModuleName, ModuleNamespace](const AssetResult& Result)
 	{
-		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			const Asset& InternalAsset = Result.GetAsset();
-
-			AssetDataResultCallback GetAssetDataCallback = [Callback](const AssetDataResult& Result)
-			{
-				ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-
-				if (Result.GetResultCode() == csp::systems::EResultCode::Success)
-				{
-					ScriptModuleAsset& InternalScriptModuleAsset = InternalResult.GetModule();
-
-					// size_t DownloadedAssetDataSize = Result.GetDataLength();
-					// auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
-
-					InternalScriptModuleAsset.ModuleText = (char*) Result.GetData();
-
-					Callback(InternalResult);
-				}
-				else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
-				{
-					Callback(InternalResult);
-				}
-			};
-
-			AssetSystem->DownloadAssetData(InternalAsset, GetAssetDataCallback);
+			return;
 		}
-		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			Callback(InternalResult);
+			return;
 		}
+
+		const Asset& InternalAsset = Result.GetAsset();
+
+		AssetDataResultCallback GetAssetDataCallback = [Callback, InternalAsset, ModuleName, ModuleNamespace](const AssetDataResult& Result)
+		{
+			if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+			{
+				return;
+			}
+
+			ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+			if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+			{
+
+				Callback(InternalResult);
+				return;
+			}
+
+			ScriptModuleAsset& InternalScriptModuleAsset = InternalResult.GetModule();
+
+			size_t DownloadedAssetDataSize = Result.GetDataLength();
+			auto DownloadedAssetData	   = CSP_NEW char[DownloadedAssetDataSize];
+			std::memcpy(DownloadedAssetData, Result.GetData(), DownloadedAssetDataSize);
+
+			InternalScriptModuleAsset.Id			  = InternalAsset.Id;
+			InternalScriptModuleAsset.ModuleName	  = ModuleName;
+			InternalScriptModuleAsset.ModuleNamespace = ModuleNamespace;
+			InternalScriptModuleAsset.ModuleText	  = DownloadedAssetData;
+
+			Callback(InternalResult);
+		};
+
+		AssetSystem->DownloadAssetData(InternalAsset, GetAssetDataCallback);
 	};
 
 	AssetSystem->GetAssetById(ScriptModuleName, ScriptModuleNamespace, GetAssetCallback);
@@ -476,30 +500,41 @@ void ScriptSystem::GetScriptModuleAssetNames(const csp::common::String& ModuleNa
 
 	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
 
-	csp::systems::AssetCollection InternalAssetCollection;
-	InternalAssetCollection.Id = ScriptModuleNamespace;
-
-	AssetsResultCallback GetAssetsResultCallback = [Callback](const AssetsResult& Result)
+	AssetsResultCallback GetAssetsResultCallback = [Callback, ModuleNamespace](const AssetsResult& Result)
 	{
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
 		ScriptModuleAssetNamesResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
-			const csp::common::Array<Asset>& InternalModuleAssets = Result.GetAssets();
 
-			ScriptModuleAssetNames& InternalScriptModuleAssetNames	  = InternalResult.GetModuleAssetNames();
-			csp::common::Array<csp::common::String>& ModuleAssetNames = InternalScriptModuleAssetNames.ModuleAssetNames;
-
-			for (size_t idx = 0; idx < InternalModuleAssets.Size(); ++idx)
-			{
-				ModuleAssetNames[idx] = InternalModuleAssets[idx].Id;
-			}
+			Callback(InternalResult);
+			return;
 		}
+
+		const csp::common::Array<Asset>& InternalModuleAssets = Result.GetAssets();
+
+		ScriptModuleAssetNames& InternalScriptModuleAssetNames = InternalResult.GetModuleAssetNames();
+		csp::common::Array<csp::common::String> ModuleAssetNames(InternalModuleAssets.Size());
+
+		for (size_t i = 0; i < InternalModuleAssets.Size(); ++i)
+		{
+			csp::common::String AssetName  = InternalModuleAssets[i].Name;
+			size_t Index				   = SCRIPT_MODULE_PREFIX_LENGTH + ModuleNamespace.Length() + sizeof('_');
+			csp::common::String ModuleName = AssetName.SubString(Index);
+			ModuleAssetNames[i]			   = ModuleName;
+		}
+
+		InternalScriptModuleAssetNames.ModuleAssetNames = ModuleAssetNames;
 
 		Callback(InternalResult);
 	};
 
-	AssetSystem->GetAssetsInCollection(InternalAssetCollection, GetAssetsResultCallback);
+	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, nullptr, nullptr, GetAssetsResultCallback);
 }
 
 /*

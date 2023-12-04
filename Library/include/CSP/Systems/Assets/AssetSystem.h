@@ -171,7 +171,8 @@ public:
 	/// @param AssetNames csp::common::Array<csp::common::String> : optional array of strings representing asset names
 	/// @param AssetTypes csp::common::Array<EAssetType> : optional array of asset types
 	/// @param Callback AssetsResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAssetsByCriteria(const csp::common::Array<csp::common::String>& AssetCollectionIds,
+	CSP_ASYNC_RESULT void GetAssetsByCriteria(const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionIds,
+											  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionNames,
 											  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetIds,
 											  const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetNames,
 											  const csp::common::Optional<csp::common::Array<EAssetType>>& AssetTypes,

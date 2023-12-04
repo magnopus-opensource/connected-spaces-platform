@@ -182,6 +182,8 @@ public:
 	/// @return String
 	static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
 
+	String SubString(size_t Pos, size_t Len = 0);
+
 private:
 	/// @brief Returns internal buffer.
 	/// @return const char*
