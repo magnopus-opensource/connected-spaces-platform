@@ -163,15 +163,14 @@ inline void SetRandSeed()
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 }
 
-inline std::string GetUniqueHexString(int Length = 16)
+inline std::string GetUniqueString(int Length = 16)
 {
 	std::string str;
+	const auto Epoch = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
 	for (int i = 0; i < Length; i++)
 	{
-		char hex[2];
-		SPRINTF(hex, "%x", rand() % 16);
-		str += hex;
+		str += Epoch[rand() % Epoch.length()];
 	}
 
 	return str;
