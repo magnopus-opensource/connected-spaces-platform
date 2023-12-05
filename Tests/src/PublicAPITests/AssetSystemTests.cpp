@@ -306,10 +306,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -355,7 +355,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -396,13 +396,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -472,13 +472,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -539,10 +539,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -600,13 +600,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 	const char* TestExternalUri			  = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb";
 	const char* TestExternalMimeType	  = "model/gltf-binary";
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -683,16 +683,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256], UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName1[256], UniqueAssetName2[256], UniqueAssetName3[256];
-	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetName3, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetName3, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -774,16 +774,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName3[256];
-	SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -929,16 +929,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetName[256];
-	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetName[256];
-	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1040,19 +1040,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetCollectionName[256];
-	SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetCollectionName[256];
-	SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetName[256];
-	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetName[256];
-	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1144,13 +1144,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1263,13 +1263,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1326,10 +1326,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1434,13 +1434,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1526,13 +1526,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1615,13 +1615,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1712,10 +1712,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1764,10 +1764,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1834,13 +1834,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier	   = "OKO interoperable assets Test";
 	csp::common::String ThirdPartyPackagedAssetIdentifierLocal = "OKO interoperable assets Test Local";
@@ -1917,13 +1917,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -2040,7 +2040,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -2148,7 +2148,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;

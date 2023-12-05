@@ -428,7 +428,7 @@ namespace CSPEngine
 
             string uniqueUserName = GenerateUniqueString(GenerateUniqueString("CSP-TEST-NAME"));
             string testDisplayName = "CSP-TEST-DISPLAY";
-            string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
+            string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueString());
 
             string createdUserId;
 
@@ -505,7 +505,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
+            string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueString());
 
             string createdUserId;
 

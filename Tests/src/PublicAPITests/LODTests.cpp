@@ -75,10 +75,10 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -123,16 +123,16 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 	const char* TestAssetName2			= "OLY-UNITTEST-ASSET2-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName1[256];
-	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueString().c_str());
 
 	char UniqueAssetName2[256];
-	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
