@@ -162,15 +162,18 @@ inline void SetRandSeed()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 }
-
+// This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString(int Length = 16)
 {
 	std::string str;
+	const std::string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	const auto Epoch = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-	for (int i = 0; i < Length; i++)
+	for (int i = 0; i < Length / 2; i++)
 	{
-		str += Epoch[rand() % Epoch.length()];
+		int RandomNumber = rand();
+		str += Epoch[RandomNumber % Epoch.length()];
+		str += Characters[RandomNumber % Characters.length()];
 	}
 
 	return str;
