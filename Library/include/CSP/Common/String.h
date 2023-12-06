@@ -182,7 +182,11 @@ public:
 	/// @return String
 	static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
 
-	String SubString(size_t Pos, size_t Len = 0);
+    /// @brief Returns a newly constructed string object with value initialised to a copy of a substring of this object.
+	/// @param Pos size_t : Position of the first character to be copied as a substring.
+	/// @param Len size_t : Number of characters to include in the substring (if the string is shorter, as many characters as possible are used).
+	/// @return String
+	String SubString(size_t Pos, size_t Len = 0) const;
 
 private:
 	/// @brief Returns internal buffer.

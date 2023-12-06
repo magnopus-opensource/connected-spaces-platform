@@ -489,14 +489,14 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 	return JoinedString;
 }
 
-String String::SubString(size_t Pos, size_t Len)
+String String::SubString(size_t Pos, size_t Len) const
 {
 	auto Length = ImplPtr->Length;
 	auto Text	= ImplPtr->Text;
 
 	if (Pos >= Length)
 	{
-		throw std::out_of_range("Specified position out of range.");
+		throw std::out_of_range("Specified position of first character is greater than string length.");
 	}
 
 	if (Len == 0 || Pos + Len > Length)
