@@ -186,13 +186,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// we'll be using this in a few places below as part of the test, so we declare it upfront
@@ -311,13 +311,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	OnConnect();
@@ -430,13 +430,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	csp::common::String UserName = "Player 1";
@@ -545,13 +545,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	csp::common::String UserName = "Player 1";
@@ -639,13 +639,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	OnConnect();
@@ -749,13 +749,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	OnConnect();
@@ -878,13 +878,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
@@ -1027,13 +1027,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	OnConnect();
@@ -1145,13 +1145,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
@@ -1263,13 +1263,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	OnConnect();
@@ -1290,9 +1290,9 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
 	// Disconnect from the SignalR server
-	auto [Ok] = AWAIT(Connection, Disconnect);
+	auto [Error] = AWAIT(Connection, Disconnect);
 
-	EXPECT_TRUE(Ok);
+	ASSERT_EQ(Error, ErrorCode::None);
 
 	SpaceSystem->ExitSpace();
 

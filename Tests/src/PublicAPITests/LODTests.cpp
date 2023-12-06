@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -25,6 +26,7 @@
 #include <Awaitable.h>
 #include <filesystem>
 
+
 namespace
 {
 
@@ -35,7 +37,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 
 void GetLODChain(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, csp::systems::LODChain& OutLODChain)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetLODChain, AssetSystem, AssetCollection).Await(RequestPredicate);
+	auto [Result] = AWAIT_PRE(AssetSystem, GetLODChain, RequestPredicate, AssetCollection);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -49,16 +51,15 @@ void RegisterAssetToLODChain(csp::systems::AssetSystem* AssetSystem,
 							 csp::systems::Asset& Asset,
 							 int LODLevel)
 {
-	auto [Result]
-		= Awaitable(&csp::systems::AssetSystem::RegisterAssetToLODChain, AssetSystem, AssetCollection, Asset, LODLevel).Await(RequestPredicate);
+	auto [Result] = AWAIT_PRE(AssetSystem, RegisterAssetToLODChain, RequestPredicate, AssetCollection, Asset, LODLevel);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset = Result.GetAsset();
 }
 
-
 } // namespace
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_GET_EMPTY_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)

@@ -96,13 +96,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
@@ -358,13 +358,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		csp::common::String ObjectName1 = "Object 1";
@@ -381,6 +381,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 		csp::common::String ConversationId;
 		csp::common::String MessageId;
+
 		{
 			auto [Result] = AWAIT(ConversationComponent1, CreateConversation, "TestMessage");
 
@@ -517,13 +518,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		// Create object to represent the conversation

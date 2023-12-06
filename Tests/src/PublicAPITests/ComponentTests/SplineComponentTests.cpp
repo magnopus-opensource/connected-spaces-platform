@@ -90,13 +90,13 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		// Ensure we're in the first space
@@ -196,13 +196,13 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Create object to represent the spline

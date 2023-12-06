@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -27,10 +28,6 @@
 #include <map>
 #include <vector>
 
-namespace csp::systems
-{
-class SpaceSystem;
-}
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -43,6 +40,7 @@ class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
 
+
 /// @brief Enum used to specify the current state of the muiltiplayer connection.
 enum class ConnectionState
 {
@@ -51,6 +49,17 @@ enum class ConnectionState
 	Disconnecting,
 	Disconnected
 };
+
+
+enum class ErrorCode
+{
+	None,
+	Unknown,
+	NotConnected,
+	AlreadyConnected,
+	SpaceUserLimitExceeded
+};
+
 
 /// @ingroup Multiplayer
 /// @brief Handling of all multiplayer connection functionality, such as connect, disconnect, entity replication and network events.
@@ -63,7 +72,6 @@ public:
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class ClientElectionEventHandler;
-	friend class csp::systems::SpaceSystem;
 	/** @endcond */
 
 	MultiplayerConnection(csp::common::String InSpaceId);
@@ -72,7 +80,7 @@ public:
 	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
 	// Simple callback that provides a success/fail boolean.
-	typedef std::function<void(bool)> CallbackHandler;
+	typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
 
 	// The callback used to register to listen to network events.
 	typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
@@ -97,22 +105,22 @@ public:
 
 	/// @brief Start the connection and register to start receiving updates from the server.
 	/// @param Callback CallbackHandler : a callback with success status.
-	CSP_ASYNC_RESULT void Connect(CallbackHandler Callback);
+	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief End the multiplayer connection.
 	/// @param Callback CallbackHandler: a callback with success status.
-	CSP_ASYNC_RESULT void Disconnect(CallbackHandler Callback);
+	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Initialise the connection and get initial entity data from the server.
 	/// @param Callback CallbackHandler : a callback with success status.
-	CSP_ASYNC_RESULT void InitialiseConnection(CallbackHandler Callback);
+	CSP_ASYNC_RESULT void InitialiseConnection(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
 	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
 	/// @param Callback CallbackHandler : A status callback which indicates if the event successfully sent.
 	CSP_ASYNC_RESULT void
-		SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, CallbackHandler Callback);
+		SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName, to TargetClientId.
 	/// @param EventName csp::common::String : The identifying name for the event.
@@ -122,7 +130,7 @@ public:
 	CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName,
 												   const csp::common::Array<ReplicatedValue>& Args,
 												   uint64_t TargetClientId,
-												   CallbackHandler Callback);
+												   ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sets a callback for a disconnection event.
 	/// @param Callback DisconnectionCallbackHandler : The callback for disconnection, contains a string with a reason for disconnection.
@@ -133,9 +141,7 @@ public:
 	CSP_EVENT void SetConnectionCallback(ConnectionCallbackHandler Callback);
 
 	/// @brief Sets a callback for a network interruption event.
-	///
 	/// Connection isn't recoverable after this point and Disconnect should be called.
-	///
 	/// @param Callback NetworkInterruptionCallbackHandler : The callback for network interruption, contains a string showing failure.
 	CSP_EVENT void SetNetworkInterruptionCallback(NetworkInterruptionCallbackHandler Callback);
 
@@ -178,13 +184,11 @@ public:
 	ConnectionState GetConnectionState() const;
 
 	/// @brief Sets the Self Messaging flag for this client.
-	///
 	/// This allows a client to declare that it wishes to recieve every patch and object message it sends.
-	///
 	/// @warning Don't use this function if you aren't sure of the consequences, it's very unlikely that a client would want to use this!
 	/// @param AllowSelfMessaging bool : True to allow and false to disallow.
 	/// @param Callback CallbackHandler : Callback providing success/fail boolean.
-	CSP_ASYNC_RESULT void SetAllowSelfMessagingFlag(const bool AllowSelfMessaging, CallbackHandler Callback);
+	CSP_ASYNC_RESULT void SetAllowSelfMessagingFlag(const bool AllowSelfMessaging, ErrorCodeCallbackHandler Callback);
 
 	/// @brief Gets the bool representing if we're using self-messaging or not.
 	/// @return True if self messaging is allowed, false otherwise.
@@ -196,16 +200,15 @@ private:
 	void Start(ExceptionCallbackHandler Callback) const;
 	void Stop(ExceptionCallbackHandler Callback) const;
 
-	void StartListening(CallbackHandler Callback);
-	void StopListening(CallbackHandler Callback);
+	void StartListening(ErrorCodeCallbackHandler Callback);
+	void StopListening(ErrorCodeCallbackHandler Callback);
 
-	void InternalDeleteEntity(uint64_t EntityId, CallbackHandler Callback) const;
-	void DeleteOwnedEntities(CallbackHandler Callback);
-	void SetScopes(CallbackHandler Callback);
-	void RequestClientId(CallbackHandler Callback);
+	void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
+	void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
+	void SetScopes(ErrorCodeCallbackHandler Callback);
+	void RequestClientId(ErrorCodeCallbackHandler Callback);
 
-
-	void DisconnectWithReason(const csp::common::String& Reason, CallbackHandler Callback);
+	void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
 
 	void StartEventMessageListening();
 
@@ -227,6 +230,8 @@ private:
 	ConversationSystemCallbackHandler ConversationSystemCallback;
 	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
+	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
+	//   change depending on which runtime is used.
 	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
 	std::map<csp::common::String, Callbacks> NetworkEventMap;
 
