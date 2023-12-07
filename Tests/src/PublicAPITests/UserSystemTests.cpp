@@ -233,8 +233,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_RESETPASSWORD_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordTest)
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_RESETPASSWORD_BADTOKEN_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
