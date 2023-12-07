@@ -233,6 +233,20 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_RESETPASSWORD_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ResetUserPassword, RequestPredicate, "badtoken", UserId, "NewPassword");
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+}
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
@@ -249,6 +263,45 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGIN_AS_GUEST_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogInAsGuest(UserSystem, UserId);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADTOKENLOGIN_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// Log in to get UserId
+	LogIn(UserSystem, UserId);
+
+	// Log out
+	LogOut(UserSystem);
+
+	// Log in
+	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginWithToken, UserSystem, UserId, "badtoken").Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_BADLOGOUT_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadLogOutTest)
 {
@@ -432,6 +485,24 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 		EXPECT_EQ(FullProfile.DisplayName, UniqueTestDisplayName);
 	}
 
+	// Attempt Update - bad display name
+	{
+		UniqueTestDisplayName = csp::common::String("??//-\"#~*") + GetUniqueString().c_str();
+
+		auto [Result] = AWAIT_PRE(UserSystem, UpdateUserDisplayName, RequestPredicate, UserId, UniqueTestDisplayName);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Attempt update other user
+	{
+		UniqueTestDisplayName = csp::common::String("Test") + GetUniqueString().c_str();
+
+		auto [Result] = AWAIT_PRE(UserSystem, UpdateUserDisplayName, RequestPredicate, "6551f988dd6b04c1e99a71b8", UniqueTestDisplayName);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
 	LogOut(UserSystem);
 }
 #endif
@@ -583,11 +654,74 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 		EXPECT_EQ(LiteProfile.DisplayName, TestDisplayName);
 	}
 
-	// Whilst logged in as one user with normal roles, we cannot delete another
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_DELETE_USER_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+
+	const char* TestUserName	= "CSP-TEST-NAME";
+	const char* TestDisplayName = "CSP-TEST-DISPLAY";
+
+	char UniqueUserName[256];
+	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
+
+	char UniqueEmail[256];
+	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+
+	csp::common::String CreatedUserId;
+
+	// Create new user
+	{
+		auto [Result] = AWAIT_PRE(UserSystem,
+								  CreateUser,
+								  RequestPredicate,
+								  UniqueUserName,
+								  TestDisplayName,
+								  UniqueEmail,
+								  GeneratedTestAccountPassword,
+								  true,
+								  true,
+								  nullptr,
+								  nullptr);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+		const auto& CreatedProfile = Result.GetProfile();
+		CreatedUserId			   = CreatedProfile.UserId;
+
+		EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
+		EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
+		EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
+	}
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Whilst logged in as default test account attempt (and fail) to delete original user
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	LogOut(UserSystem);
+
+	csp::common::String OriginalUserId;
+	LogIn(UserSystem, OriginalUserId, UniqueEmail, GeneratedTestAccountPassword);
+
+	// Whilst logged in as created account attempt to delete self
+	{
+		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	LogOut(UserSystem);
@@ -1009,7 +1143,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 	csp::common::String UserId;
 	LogInAsGuest(UserSystem, UserId);
 
-	GetFullProfileByUserId(UserSystem, UserId);
+	auto Profile = GetFullProfileByUserId(UserSystem, UserId);
+
+	EXPECT_EQ(Profile.Email, "");
+	EXPECT_EQ(Profile.AvatarId, "6551f055887fdbb3d18250b6");
+	EXPECT_EQ(Profile.CreatedAt, "2023-11-13T09:45:57.608+00:00");
+	EXPECT_EQ(Profile.CreatedBy, "");
+	EXPECT_EQ(Profile.DisplayName, "PleasantPurpleCricket");
+	EXPECT_EQ(Profile.IsEmailConfirmed, false);
 
 	LogOut(UserSystem);
 }

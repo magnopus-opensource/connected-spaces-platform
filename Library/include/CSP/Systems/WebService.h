@@ -78,7 +78,8 @@ enum class ERequestFailureReason
 	TicketAlreadyApplied,
 	ShopifyConnectionBroken,
 	ShopifyInvalidStoreName,
-	UserShopifyLimitReached
+	UserShopifyLimitReached,
+	UserTokenRefreshFailed,
 };
 
 
