@@ -317,6 +317,8 @@ void ConversationSystem::GetMessagesFromConversation(const csp::common::String& 
 						   GetMessagesResult.GetHttpResultCode());
 
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
+
+			return;
 		}
 
 		InternalResult.SetTotalCount(GetMessagesResult.GetTotalCount());
@@ -497,9 +499,10 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 						   (int) GetMessagesResult.GetResultCode(),
 						   GetMessagesResult.GetHttpResultCode());
 
-			const csp::systems::NullResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
+			csp::systems::NullResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
+			INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
-			Callback(InternalResult);
+			return;
 		}
 
 		const csp::systems::NullResultCallback DeleteMessagesCallback
@@ -643,8 +646,9 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 			return;
 		}
 
-		csp::systems::ProfileResultCallback GetProfileCallback =
-			[Callback, GetConversationResult, ConversationId, ConversationData, AssetSystem, this](const csp::systems::ProfileResult& GetProfileResult)
+		csp::systems::ProfileResultCallback GetProfileCallback
+			= [Callback, GetConversationResult, ConversationId, ConversationData, AssetSystem, this](
+				  const csp::systems::ProfileResult& GetProfileResult)
 		{
 			if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 			{
@@ -686,7 +690,7 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 					if (Error != ErrorCode::None)
 					{
 						CSP_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
-						
+
 						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
 
 						return;

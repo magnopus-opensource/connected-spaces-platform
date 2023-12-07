@@ -1450,6 +1450,8 @@ void SpaceSystem::RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullR
 
 					NullResult InternalResult(DeleteAssetResult);
 					INVOKE_IF_NOT_NULL(Callback, DeleteAssetResult);
+
+					return;
 				}
 
 				NullResultCallback DeleteAssetCollCallback = [Callback, DeleteAssetResult, AssetSystem](const NullResult& DeleteAssetCollResult)

@@ -144,9 +144,12 @@ public:
 	///
 	/// @return uint64_t : count number as described above.
 	[[nodiscard]] uint64_t GetTotalCount() const;
-	void SetTotalCount(uint64_t Value);
 
-	CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	/// @brief Sets the value returned by `GetTotalCount()`
+	CSP_NO_EXPORT void SetTotalCount(uint64_t Value);
+
+	CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	explicit MessageCollectionResult(void*) {};

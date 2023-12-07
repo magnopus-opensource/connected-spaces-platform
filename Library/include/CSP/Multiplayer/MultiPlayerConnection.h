@@ -41,7 +41,7 @@ class SignalRConnection;
 class IWebSocketClient;
 
 
-/// @brief Enum used to specify the current state of the muiltiplayer connection.
+/// @brief Enum used to specify the current state of the multiplayer connection.
 enum class ConnectionState
 {
 	Connecting,
@@ -51,6 +51,7 @@ enum class ConnectionState
 };
 
 
+/// @brief Enum used to indicate the failure state of a multiplayer request.
 enum class ErrorCode
 {
 	None,
@@ -79,7 +80,7 @@ public:
 
 	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
-	// Simple callback that provides a success/fail boolean.
+	// Simple callback that receives an error code.
 	typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
 
 	// The callback used to register to listen to network events.
@@ -104,21 +105,21 @@ public:
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
 	/// @brief Start the connection and register to start receiving updates from the server.
-	/// @param Callback CallbackHandler : a callback with success status.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief End the multiplayer connection.
-	/// @param Callback CallbackHandler: a callback with success status.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Initialise the connection and get initial entity data from the server.
-	/// @param Callback CallbackHandler : a callback with success status.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void InitialiseConnection(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
 	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
-	/// @param Callback CallbackHandler : A status callback which indicates if the event successfully sent.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void
 		SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
 
@@ -126,7 +127,7 @@ public:
 	/// @param EventName csp::common::String : The identifying name for the event.
 	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
 	/// @param TargetClientId uint64_t : The client ID to send the event to.
-	/// @param Callback CallbackHandler : A status callback which indicates if the event successfully sent.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName,
 												   const csp::common::Array<ReplicatedValue>& Args,
 												   uint64_t TargetClientId,
@@ -187,7 +188,7 @@ public:
 	/// This allows a client to declare that it wishes to recieve every patch and object message it sends.
 	/// @warning Don't use this function if you aren't sure of the consequences, it's very unlikely that a client would want to use this!
 	/// @param AllowSelfMessaging bool : True to allow and false to disallow.
-	/// @param Callback CallbackHandler : Callback providing success/fail boolean.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void SetAllowSelfMessagingFlag(const bool AllowSelfMessaging, ErrorCodeCallbackHandler Callback);
 
 	/// @brief Gets the bool representing if we're using self-messaging or not.
