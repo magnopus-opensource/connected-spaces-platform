@@ -5,7 +5,7 @@
     "start": "serve . -p 8080"
   },
   "dependencies": {
-    "connected-spaces-platform.web": "4.15.1"
+    "connected-spaces-platform.web": "4.17.1"
   },
   "devDependencies": {
     "serve": "^14.2.0"
