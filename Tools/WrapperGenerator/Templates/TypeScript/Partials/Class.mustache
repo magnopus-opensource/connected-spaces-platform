@@ -33,6 +33,30 @@ export class {{ name }}
     /** @internal */
     constructor(pointer: NativePointer) {
         super(pointer);
+        const ptr = pointer.pointer;
+        const ownsPointer = this.ownsPointer;
+        {{# should_dispose }}
+        // Free WASM pointer when this object is garbage collected
+        registry.register(this, {
+            fn: (dFn, p, ownsPointer) => {
+                if (ownsPointer) {
+                    const systemsManager = Systems.SystemsManager.get();
+                    const logSystem = systemsManager.getLogSystem();
+                    if (logSystem.loggingEnabled(Systems.LogLevel.Verbose)) {
+                        console.log("Deleting unreferences object",dFn, p);
+                    }
+                    try {
+                        Module.ccall(dFn, "void", ["number"], [p]);
+                    } catch(e) {
+                        // Nothing to do
+                    }
+                }
+            },
+            destructorName: "csp_{{# namespace_underscore }}{{namespace_underscore}}_{{/ namespace_underscore }}{{name}}_Dtor",
+            ptr,
+            ownsPointer
+        })
+        {{/ should_dispose }}
     }
 
 {{# has_base_type }}

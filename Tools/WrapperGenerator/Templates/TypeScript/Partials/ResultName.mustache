@@ -1,0 +1,12 @@
+
+{{# type.is_class_or_interface }}
+            _{{ name }}Instance{{> Comma }}
+{{/ type.is_class_or_interface }}
+{{^ type.is_class_or_interface }}
+{{# type.is_string }}
+            Module.UTF8ToString({{name}}){{> Comma }}
+{{/ type.is_string }}
+{{^ type.is_string }}
+            {{# type.is_bool}}!!{{/ type.is_bool }}{{ name }}{{> Comma }}
+{{/ type.is_string }}
+{{/ type.is_class_or_interface }}

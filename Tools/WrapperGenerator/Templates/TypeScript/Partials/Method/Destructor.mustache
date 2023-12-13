@@ -1,5 +1,6 @@
 delete(): void {
     if (this.ownsPointer && !this.disposed) {
+        registry.unregister(this);
         Module.ccall(
             "{{ unique_name }}",
             "void",
