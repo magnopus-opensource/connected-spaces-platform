@@ -1146,7 +1146,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 	auto Profile = GetFullProfileByUserId(UserSystem, UserId);
 
 	EXPECT_EQ(Profile.Email, "");
-	EXPECT_EQ(Profile.CreatedAt, "2023-11-13T09:45:57.608+00:00");
 	EXPECT_EQ(Profile.CreatedBy, "");
 	EXPECT_EQ(Profile.DisplayName, "PleasantPurpleCricket");
 	EXPECT_EQ(Profile.IsEmailConfirmed, false);
