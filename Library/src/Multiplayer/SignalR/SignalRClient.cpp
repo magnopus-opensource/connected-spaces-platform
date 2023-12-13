@@ -208,8 +208,9 @@ void CSPHttpClient::send(const std::string& url, const http_request& request, st
 	{
 		if (SignalRConnectionReceiver.GetResponse().GetResponseCode() == csp::web::EResponseCodes::ResponseOK)
 		{
-			std::string ResponseContent	   = SignalRConnectionReceiver.GetResponse().GetPayload().GetContent().c_str();
-			http_response ReceivedResponse = http_response((int) SignalRConnectionReceiver.GetResponse().GetResponseCode(), ResponseContent);
+			std::string ResponseContent = SignalRConnectionReceiver.GetResponse().GetPayload().GetContent().c_str();
+			http_response ReceivedResponse
+				= http_response(static_cast<int>(SignalRConnectionReceiver.GetResponse().GetResponseCode()), ResponseContent);
 			callback(ReceivedResponse, nullptr);
 		}
 		else
