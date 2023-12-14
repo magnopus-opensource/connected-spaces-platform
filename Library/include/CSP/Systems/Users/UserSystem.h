@@ -181,7 +181,7 @@ public:
 	CSP_ASYNC_RESULT void
 		UpdateUserDisplayName(const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback);
 
-	/// @brief Delete the user.
+	/// @brief Delete the user. Note that you need permission to be able to delete the user (You can delete the user you are logged in as).
 	/// @param UserId csp::common::String : id of the user that will be deleted
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteUser(const csp::common::String& UserId, NullResultCallback Callback);
