@@ -224,7 +224,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            string loginToken = "";
+            string refreshToken = "";
             var loginTokenAvailable = false;
 
             userSystem.OnNewLoginTokenReceived += (s, result) =>
@@ -234,7 +234,7 @@ namespace CSPEngine
                 if (result.GetResultCode() == Systems.EResultCode.Success)
                 {
                     using var tokenInfo = result.GetLoginTokenInfo();
-                    loginToken = tokenInfo.RefreshToken;
+                    refreshToken = tokenInfo.RefreshToken;
                     loginTokenAvailable = true;
 
                     LogDebug($"New Login token {result.GetLoginTokenInfo().RefreshToken} expires at {result.GetLoginTokenInfo().RefreshExpiryTime}");
@@ -256,7 +256,7 @@ namespace CSPEngine
                 waitForTestTimeoutCountMs += 50;
             }
 
-            using var result = userSystem.LoginWithToken(userId, loginToken).Result;
+            using var result = userSystem.RefreshSession(userId, refreshToken).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);

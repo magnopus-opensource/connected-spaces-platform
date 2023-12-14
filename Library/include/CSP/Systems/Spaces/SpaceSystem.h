@@ -321,7 +321,7 @@ public:
 
 private:
 	SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT SpaceSystem(csp::web::WebClient* InWebClient);
+	SpaceSystem(csp::web::WebClient* InWebClient);
 
 	// Space Metadata
 	void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
