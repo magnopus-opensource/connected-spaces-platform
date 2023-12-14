@@ -259,6 +259,9 @@ public:
 											   const csp::common::String& ModuleName,
 											   const ScriptModuleAssetResultCallback& Callback);
 	CSP_ASYNC_RESULT void GetScriptModuleAssetNames(const csp::common::String& ModuleNamespace, const ScriptModuleAssetNamesResultCallback& Callback);
+	CSP_ASYNC_RESULT void DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
+												  const csp::common::String& ModuleName,
+												  const NullResultCallback& Callback);
 
 	// TODO: Delete these and replace with above
 	// CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
