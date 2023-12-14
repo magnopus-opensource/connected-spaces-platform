@@ -847,7 +847,7 @@ void SpaceSystem::UpdateSpaceThumbnail(const String& SpaceId, const FileAssetDat
 							{
 								CSP_LOG_FORMAT(LogLevel::Log,
 											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-											   (int) UploadResult.GetResultCode(),
+											   static_cast<int>(UploadResult.GetResultCode()),
 											   UploadResult.GetHttpResultCode());
 							}
 
@@ -907,7 +907,7 @@ void SpaceSystem::UpdateSpaceThumbnailWithBuffer(const String& SpaceId, const Bu
 							{
 								CSP_LOG_FORMAT(LogLevel::Log,
 											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-											   (int) UploadResult.GetResultCode(),
+											   static_cast<int>(UploadResult.GetResultCode()),
 											   UploadResult.GetHttpResultCode());
 							}
 

@@ -404,7 +404,7 @@ void SettingsSystem::UpdateAvatarPortrait(const csp::common::String& UserId,
 							{
 								CSP_LOG_FORMAT(LogLevel::Log,
 											   "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
-											   (int) UploadResult.GetResultCode(),
+											   static_cast<int>(UploadResult.GetResultCode()),
 											   UploadResult.GetHttpResultCode());
 							}
 
