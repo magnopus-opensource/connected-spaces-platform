@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "SignalRClient.h"
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/String.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/WebSocketClient.h"
-#include "Systems/Users/UserSystem.internal.h"
 
 #ifdef CSP_WASM
 	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
@@ -55,7 +56,7 @@ CSPWebsocketClient::CSPWebsocketClient() noexcept : UserSystem(nullptr), LoginSt
 void CSPWebsocketClient::start(const std::string& url, std::function<void(std::exception_ptr)> callback)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	UserSystem			 = static_cast<csp::systems_internal::UserSystem*>(SystemsManager.GetUserSystem());
+	UserSystem			 = SystemsManager.GetUserSystem();
 	LoginState			 = &UserSystem->GetLoginState();
 
 	IWebSocketClient::CallbackHandler LocalCallback = [callback](bool ok)

@@ -35,17 +35,11 @@
 namespace csp::systems
 {
 
-class SystemsManager;
 class LoginState;
-
-} // namespace csp::systems
-
-namespace csp::systems_internal
-{
-
+class SystemsManager;
 class UserSystem;
 
-} // namespace csp::systems_internal
+} // namespace csp::systems
 
 
 namespace csp::web
@@ -138,7 +132,7 @@ private:
 	void AddRequest(HttpRequest* Request, std::chrono::milliseconds SendDelay = std::chrono::milliseconds(0));
 	void RefreshIfExpired();
 	void PrintClientErrorResponseMessages(const HttpResponse& Response);
-	csp::systems_internal::UserSystem* UserSystem;
+	csp::systems::UserSystem* UserSystem;
 	const csp::systems::LoginState* LoginState;
 	std::atomic_bool RefreshNeeded, RefreshStarted;
 	bool AutoRefreshEnabled;

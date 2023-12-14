@@ -157,6 +157,8 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 			csp::events::Event* LoginEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::USERSERVICE_LOGIN_EVENT_ID);
 			LoginEvent->AddString("UserId", AuthResponse->GetUserId());
 			csp::events::EventSystem::Get().EnqueueEvent(LoginEvent);
+
+			SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
 		}
 	}
 	else
