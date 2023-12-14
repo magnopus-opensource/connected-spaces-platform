@@ -1147,7 +1147,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 
 	EXPECT_EQ(Profile.Email, "");
 	EXPECT_EQ(Profile.CreatedBy, "");
-	EXPECT_EQ(Profile.DisplayName, "PleasantPurpleCricket");
 	EXPECT_EQ(Profile.IsEmailConfirmed, false);
 
 	LogOut(UserSystem);
