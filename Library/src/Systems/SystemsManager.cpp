@@ -27,11 +27,11 @@
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Spatial/AnchorSystem.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
-#include "Systems/Users/UserSystem.internal.h"
 #include "signalrclient/signalr_value.h"
 
 #ifdef CSP_WASM
@@ -166,7 +166,7 @@ void SystemsManager::CreateSystems()
 
 	AnalyticsSystem = CSP_NEW csp::systems::AnalyticsSystem();
 
-	UserSystem			  = CSP_NEW csp::systems_internal::UserSystem(WebClient);
+	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
 	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
 	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
 	AnchorSystem		  = CSP_NEW csp::systems::AnchorSystem(WebClient);

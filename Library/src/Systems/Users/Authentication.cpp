@@ -157,6 +157,8 @@ void LoginStateResult::OnResponse(const csp::services::ApiResponseBase* ApiRespo
 			csp::events::Event* LoginEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::USERSERVICE_LOGIN_EVENT_ID);
 			LoginEvent->AddString("UserId", AuthResponse->GetUserId());
 			csp::events::EventSystem::Get().EnqueueEvent(LoginEvent);
+
+			SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
 		}
 	}
 	else
@@ -281,5 +283,62 @@ void AgoraUserTokenResult::OnResponse(const csp::services::ApiResponseBase* ApiR
 		UserToken = Result->operator[]("token").GetString();
 	}
 }
+
+const csp::common::String& CheckoutSessionUrlResult::GetUrl() const
+{
+	return CheckoutSessionUrl;
+}
+
+const csp::common::String& CheckoutSessionUrlResult::GetUrl()
+{
+	return CheckoutSessionUrl;
+}
+
+void CheckoutSessionUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CheckoutSessionResponse		   = static_cast<chs::StripeCheckoutSessionDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CheckoutSessionResponse->HasCheckoutUrl())
+		{
+			CheckoutSessionUrl = CheckoutSessionResponse->GetCheckoutUrl();
+		}
+	}
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl() const
+{
+	return CustomerPortalUrl;
+}
+
+const csp::common::String& CustomerPortalUrlResult::GetUrl()
+{
+	return CustomerPortalUrl;
+}
+
+void CustomerPortalUrlResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto CustomerPortalResponse			   = static_cast<chs::StripeCustomerPortalDto*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
+
+		if (CustomerPortalResponse->HasCustomerPortalUrl())
+		{
+			CustomerPortalUrl = CustomerPortalResponse->GetCustomerPortalUrl();
+		}
+	}
+}
+
 
 } // namespace csp::systems

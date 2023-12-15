@@ -63,7 +63,7 @@ void ConversationSystem::StoreConversationMessage(const csp::common::String& Con
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 						   "The Comment asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-						   (int) AddCommentResult.GetResultCode(),
+						   static_cast<int>(AddCommentResult.GetResultCode()),
 						   AddCommentResult.GetHttpResultCode());
 
 			const MessageResult InternalResult(AddCommentResult.GetResultCode(), AddCommentResult.GetHttpResultCode());
@@ -129,7 +129,7 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
 				CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 							   "Delete asset collection for message ID %s has failed. ResCode: %d, HttpResCode: %d",
 							   Messages[idx].Id.c_str(),
-							   (int) DeleteCommentResult.GetResultCode(),
+							   static_cast<int>(DeleteCommentResult.GetResultCode()),
 							   DeleteCommentResult.GetHttpResultCode());
 
 				++*DeletionCounter;
@@ -313,7 +313,7 @@ void ConversationSystem::GetMessagesFromConversation(const csp::common::String& 
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 						   "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-						   (int) GetMessagesResult.GetResultCode(),
+						   static_cast<int>(GetMessagesResult.GetResultCode()),
 						   GetMessagesResult.GetHttpResultCode());
 
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -352,7 +352,7 @@ void ConversationSystem::GetMessage(const csp::common::String& MessageId, Messag
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 						   "The retrieval of the Message asset collection was not successful. ResCode: %d, HttpResCode: %d",
-						   (int) GetMessageResult.GetResultCode(),
+						   static_cast<int>(GetMessageResult.GetResultCode()),
 						   GetMessageResult.GetHttpResultCode());
 
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -388,7 +388,7 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 			{
 				CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 							   "The Update of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-							   (int) GetMessageResult.GetResultCode(),
+							   static_cast<int>(GetMessageResult.GetResultCode()),
 							   GetMessageResult.GetHttpResultCode());
 
 				const MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
@@ -427,7 +427,7 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 						   "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
-						   (int) GetMessageResult.GetResultCode(),
+						   static_cast<int>(GetMessageResult.GetResultCode()),
 						   GetMessageResult.GetHttpResultCode());
 
 			const MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());

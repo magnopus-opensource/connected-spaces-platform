@@ -81,10 +81,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	const csp::common::String ApplicationOrigin = "Application Origin 1";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;

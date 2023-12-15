@@ -180,38 +180,38 @@ namespace CSPEngine
 
             // Tests passing false for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, false).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, false).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, false).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             // Tests passing true for UseTokenChangePasswordUrl
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon@magnopus.com", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, true).Result;
+                using var result = userSystem.ForgotPassword("testnopus.pokemon+1@magnopus.com", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
 
             {
-                using var result = userSystem.ForgotPassword("email", null, true).Result;
+                using var result = userSystem.ForgotPassword("email", null, null, true).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
@@ -224,7 +224,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            string loginToken = "";
+            string refreshToken = "";
             var loginTokenAvailable = false;
 
             userSystem.OnNewLoginTokenReceived += (s, result) =>
@@ -234,7 +234,7 @@ namespace CSPEngine
                 if (result.GetResultCode() == Systems.EResultCode.Success)
                 {
                     using var tokenInfo = result.GetLoginTokenInfo();
-                    loginToken = tokenInfo.RefreshToken;
+                    refreshToken = tokenInfo.RefreshToken;
                     loginTokenAvailable = true;
 
                     LogDebug($"New Login token {result.GetLoginTokenInfo().RefreshToken} expires at {result.GetLoginTokenInfo().RefreshExpiryTime}");
@@ -256,7 +256,7 @@ namespace CSPEngine
                 waitForTestTimeoutCountMs += 50;
             }
 
-            using var result = userSystem.LoginWithToken(userId, loginToken).Result;
+            using var result = userSystem.RefreshSession(userId, refreshToken).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
@@ -428,7 +428,7 @@ namespace CSPEngine
 
             string uniqueUserName = GenerateUniqueString(GenerateUniqueString("CSP-TEST-NAME"));
             string testDisplayName = "CSP-TEST-DISPLAY";
-            string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
+            string uniqueTestEmail = String.Format(GeneratedTestAccountEmailFormat, GetUniqueString());
 
             string createdUserId;
 
@@ -505,7 +505,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueHexString());
+            string uniqueTestEmail = string.Format(GeneratedTestAccountEmailFormat, GetUniqueString());
 
             string createdUserId;
 

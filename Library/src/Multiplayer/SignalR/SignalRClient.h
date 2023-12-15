@@ -26,13 +26,6 @@ namespace csp::systems
 {
 
 class LoginState;
-
-}
-
-
-namespace csp::systems_internal
-{
-
 class UserSystem;
 
 }
@@ -52,7 +45,7 @@ public:
 	void receive(std::function<void(const std::string&, std::exception_ptr)> callback) override;
 
 private:
-	csp::systems_internal::UserSystem* UserSystem;
+	csp::systems::UserSystem* UserSystem;
 	const csp::systems::LoginState* LoginState;
 	std::atomic_bool RefreshInitialised;
 };

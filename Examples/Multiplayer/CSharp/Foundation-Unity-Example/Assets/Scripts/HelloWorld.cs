@@ -287,7 +287,7 @@ public class HelloWorld : MonoBehaviour
         using CspSystems.SpaceResult spaceResult = await spaceSystem.CreateSpace(spaceName, string.Empty,
             CspSystems.SpaceAttributes.Public, null, ToCSPMap(metadata), null);
 
-        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
         {
             createdSpace = spaceResult.GetSpace();
             Debug.Log($"Created space with name: {createdSpace.Name} and ID: {createdSpace.Id}");
@@ -321,7 +321,7 @@ public class HelloWorld : MonoBehaviour
 
         using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpace(targetSpaceId);
 
-        if (spaceResult.GetResultCode() == Csp.Services.EResultCode.Success)
+        if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
         {
             var space = spaceResult.GetSpace();
             await EnterSpaceAsync(space);

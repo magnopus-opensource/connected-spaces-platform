@@ -15,11 +15,11 @@
  */
 #include "WebClient.h"
 
+#include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Json.h"
 #include "Memory/Memory.h"
 #include "Services/ApiBase/ApiBase.h"
-#include "Systems/Users/UserSystem.internal.h"
 
 #include <chrono>
 
@@ -114,7 +114,7 @@ void WebClient::RefreshIfExpired()
 
 	if (LoginState == nullptr)
 	{
-		UserSystem = static_cast<csp::systems_internal::UserSystem*>(csp::systems::SystemsManager::Get().GetUserSystem());
+		UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 		LoginState = &UserSystem->GetLoginState();
 	}
 
@@ -129,7 +129,6 @@ void WebClient::RefreshIfExpired()
 #else
 		RefreshNeeded = true;
 #endif
-
 
 		csp::systems::LoginStateResultCallback LoginStateResCallback = [this](csp::systems::LoginStateResult& LoginStateRes)
 		{
@@ -152,7 +151,6 @@ void WebClient::RefreshIfExpired()
 				RefreshNeeded = false;
 #endif
 				RefreshStarted = false;
-				UserSystem->NotifyRefreshTokenHasChanged();
 			}
 			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
@@ -160,10 +158,7 @@ void WebClient::RefreshIfExpired()
 			}
 		};
 
-		UserSystem->RefreshAuthenticationSession(UserSystem->GetLoginState().UserId,
-												 csp::web::HttpAuth::GetRefreshToken(),
-												 UserSystem->GetLoginState().DeviceId,
-												 LoginStateResCallback);
+		UserSystem->RefreshSession(UserSystem->GetLoginState().UserId, csp::web::HttpAuth::GetRefreshToken(), LoginStateResCallback);
 	}
 }
 

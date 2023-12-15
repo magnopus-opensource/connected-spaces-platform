@@ -226,6 +226,11 @@
           {{/ parameters }}
         ) {
           {{# parameters }}
+            {{# type.is_string }}
+              auto _{{ name }} = (char*)csp::memory::DllAlloc({{ name }}.Length() + 1);
+              std::memcpy(_{{ name }}, {{ name }}.c_str(), {{ name }}.Length());
+              _{{ name }}[{{ name }}.Length()] = '\0';
+            {{/ type.is_string }}
             {{^ type.is_string }}
               {{# type.is_reference }}
                 auto* _{{ name }} =
@@ -239,7 +244,7 @@
 
             {{# parameters }}
               {{# type.is_string }}
-                {{ name }}.c_str()
+                _{{ name }}
               {{/ type.is_string }}
 
               {{^ type.is_string }}

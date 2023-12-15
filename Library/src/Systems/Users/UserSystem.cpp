@@ -87,6 +87,7 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClien
 	ProfileAPI				= CSP_NEW chs::ProfileApi(InWebClient);
 	PingAPI					= CSP_NEW chs::PingApi(InWebClient);
 	ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
+	StripeAPI				= CSP_NEW chs::StripeApi(InWebClient);
 }
 
 UserSystem::~UserSystem()
@@ -95,6 +96,7 @@ UserSystem::~UserSystem()
 	CSP_DELETE(ProfileAPI);
 	CSP_DELETE(AuthenticationAPI);
 	CSP_DELETE(ExternalServiceProxyApi);
+	CSP_DELETE(StripeAPI);
 }
 
 const LoginState& UserSystem::GetLoginState() const
@@ -153,19 +155,17 @@ void UserSystem::Login(const csp::common::String& UserName,
 	}
 }
 
-void UserSystem::LoginWithToken(const csp::common::String& UserId, const csp::common::String& LoginToken, LoginStateResultCallback Callback)
+void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
 {
-	LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
-	{
-		Callback(LoginStateRes);
+	auto Request = std::make_shared<chs::RefreshRequest>();
+	Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+	Request->SetUserId(UserId);
+	Request->SetRefreshToken(RefreshToken);
 
-		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
-		{
-			NotifyRefreshTokenHasChanged();
-		}
-	};
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
 
-	RefreshAuthenticationSession(UserId, LoginToken, csp::CSPFoundation::GetDeviceId(), LoginStateResCallback);
+	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
 }
 
 void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
@@ -499,6 +499,7 @@ bool UserSystem::EmailCheck(const std::string& Email) const
 
 void UserSystem::ForgotPassword(const csp::common::String& Email,
 								const csp::common::Optional<csp::common::String>& RedirectUrl,
+								const csp::common::Optional<csp::common::String>& EmailLinkUrl,
 								bool UseTokenChangePasswordUrl,
 								NullResultCallback Callback)
 {
@@ -509,10 +510,16 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 		Request->SetTenant(csp::CSPFoundation::GetTenant());
 
 		std::optional<csp::common::String> RedirectUrlValue;
+		std::optional<csp::common::String> EmailLinkUrlValue;
 
 		if (RedirectUrl.HasValue())
 		{
 			RedirectUrlValue = *RedirectUrl;
+		}
+
+		if (EmailLinkUrl.HasValue())
+		{
+			EmailLinkUrlValue = *EmailLinkUrl;
 		}
 
 		csp::services::ResponseHandlerPtr ResponseHandler
@@ -521,7 +528,7 @@ void UserSystem::ForgotPassword(const csp::common::String& Email,
 																									  csp::web::EResponseCodes::ResponseNoContent);
 
 		static_cast<chs::ProfileApi*>(ProfileAPI)
-			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, Request, ResponseHandler);
+			->apiV1UsersForgotPasswordPost(RedirectUrlValue, UseTokenChangePasswordUrl, EmailLinkUrlValue, Request, ResponseHandler);
 	}
 	else
 	{
@@ -599,21 +606,31 @@ void UserSystem::ResendVerificationEmail(const csp::common::String& InEmail,
 	static_cast<chs::ProfileApi*>(ProfileAPI)->apiV1UsersEmailsEmailConfirmEmailReSendPost(InEmail, Tenant, RedirectUrl, ResponseHandler);
 }
 
-void UserSystem::RefreshAuthenticationSession(const csp::common::String& UserId,
-											  const csp::common::String& RefreshToken,
-											  const csp::common::String& DeviceId,
-											  const LoginStateResultCallback& Callback)
+void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, CustomerPortalUrlResultCallback Callback)
 {
-	auto Request = std::make_shared<chs::RefreshRequest>();
-	Request->SetDeviceId(DeviceId);
-	Request->SetUserId(UserId);
-	Request->SetRefreshToken(RefreshToken);
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= StripeAPI->CreateHandler<CustomerPortalUrlResultCallback,
+								   CustomerPortalUrlResult,
+								   void,
+								   csp::services::generated::userservice::StripeCustomerPortalDto>(Callback, nullptr);
+
+	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCustomerPortalsUserIdGet(UserId, ResponseHandler);
+};
+
+void UserSystem::GetCheckoutSessionUrl(TierNames Tier, CheckoutSessionUrlResultCallback Callback)
+{
+	auto CheckoutSessionInfo = std::make_shared<chs::StripeCheckoutRequest>();
+
+	CheckoutSessionInfo->SetLookupKey(TierNameEnumToString(Tier));
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
+		= StripeAPI->CreateHandler<CheckoutSessionUrlResultCallback,
+								   CheckoutSessionUrlResult,
+								   void,
+								   csp::services::generated::userservice::StripeCheckoutSessionDto>(Callback, nullptr);
 
-	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
-}
+	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
+};
 
 void UserSystem::NotifyRefreshTokenHasChanged()
 {

@@ -49,7 +49,7 @@ const csp::web::HttpResponse* ApiResponseBase::GetResponse() const
 
 void ApiResponseBase::SetResponseCode(csp::web::EResponseCodes InResponseCode, csp::web::EResponseCodes InValidResponseCode)
 {
-	bool IsValidCode = IsValidResponseCode((int) InResponseCode, (int) InValidResponseCode);
+	bool IsValidCode = IsValidResponseCode(static_cast<int>(InResponseCode), static_cast<int>(InValidResponseCode));
 
 	if (IsValidCode)
 	{

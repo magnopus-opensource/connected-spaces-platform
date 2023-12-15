@@ -1,0 +1,176 @@
+{% for p in config.primitives %}
+    void EventTestClass::SetClassFunctions_Event_Return{{ p.type }}ByValue_minCallback(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        _{{ p.type }}ValueCallback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_Return{{ p.type }}ByValue_min() {
+        _{{ p.type }}ValueCallback({{ p.min }});
+        // Sleep for 1 second to allow the listener to run
+        std::this_thread::sleep_for(250ms);
+        // Call the event listener again to verify that it is kept alive after the first call
+        _{{ p.type }}ValueCallback({{ p.min }});
+    }
+
+    void EventTestClass::SetClassFunctions_Event_Return{{ p.type }}ByValue_maxCallback(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        _{{ p.type }}ValueCallback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_Return{{ p.type }}ByValue_max() {
+        _{{ p.type }}ValueCallback({{ p.max }});
+        std::this_thread::sleep_for(250ms);
+        _{{ p.type }}ValueCallback({{ p.max }});
+    }
+
+    void EventTestClass::SetClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_minCallback(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        _{{ p.type }}ValueCallback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_min() {
+        std::thread t([this]() {
+            _{{ p.type }}ValueCallback({{ p.min }});
+            std::this_thread::sleep_for(250ms);
+            _{{ p.type }}ValueCallback({{ p.min }});
+        });
+        t.detach();
+    }
+
+    void EventTestClass::SetClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_maxCallback(
+        {{ p.type }}ValueCallback Callback
+    ) {
+        _{{ p.type }}ValueCallback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_Return{{ p.type }}ByValue_MultiThread_max() {
+        std::thread t([this]() {
+            _{{ p.type }}ValueCallback({{ p.max }});
+            std::this_thread::sleep_for(250ms);
+            _{{ p.type }}ValueCallback({{ p.max }});
+        });
+        t.detach();
+    }
+{% endfor %}
+
+void EventTestClass::SetClassFunctions_Event_ReturnStringByValueCallback(StringValueCallback Callback) {
+    _StringValueCallback = Callback;
+}
+
+void EventTestClass::ClassFunctions_Event_ReturnStringByValue() {
+    _StringValueCallback("{{ config.string_value }}");
+    std::this_thread::sleep_for(250ms);
+    _StringValueCallback("{{ config.string_value }}");
+}
+
+void EventTestClass::SetClassFunctions_Event_ReturnStringByConstReferenceCallback(
+    StringConstReferenceCallback Callback
+) {
+    _StringConstReferenceCallback = Callback;
+}
+
+void EventTestClass::ClassFunctions_Event_ReturnStringByConstReference() {
+    String_Field = "{{ config.string_value }}";
+    _StringConstReferenceCallback(String_Field);
+    std::this_thread::sleep_for(250ms);
+    _StringConstReferenceCallback(String_Field);
+}
+
+void EventTestClass::SetClassFunctions_Event_ReturnStringByValue_MultiThreadCallback(StringValueCallback Callback) {
+    _StringConstReferenceCallback = Callback;
+}
+
+void EventTestClass::ClassFunctions_Event_ReturnStringByValue_MultiThread() {
+    std::thread t([this]() {
+        _StringConstReferenceCallback("{{ config.string_value }}");
+        std::this_thread::sleep_for(250ms);
+        _StringConstReferenceCallback("{{ config.string_value }}");
+    });
+    t.detach();
+}
+
+void EventTestClass::SetClassFunctions_Event_ReturnStringByConstReference_MultiThreadCallback(
+    StringConstReferenceCallback Callback
+) {
+    _StringConstReferenceCallback = Callback;
+}
+
+void EventTestClass::ClassFunctions_Event_ReturnStringByConstReference_MultiThread() {
+    String_Field = "{{ config.string_value }}";
+
+    std::thread t([this]() {
+        _StringConstReferenceCallback(String_Field);
+        std::this_thread::sleep_for(250ms);
+        _StringConstReferenceCallback(String_Field);
+    });
+    t.detach();
+}
+
+{% for x in ['Pointer', 'ConstPointer'] %}
+    void EventTestClass::SetClassFunctions_Event_ReturnClassBy{{ x }}Callback(Class{{ x }}Callback Callback) {
+        _Class{{ x }}Callback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_ReturnClassBy{{ x }}() {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+        _Class{{ x }}Callback(&Class_Field);
+        std::this_thread::sleep_for(250ms);
+        _Class{{ x }}Callback(&Class_Field);
+    }
+{% endfor %}
+
+{% for x in ['Reference', 'ConstReference'] %}
+    void EventTestClass::SetClassFunctions_Event_ReturnClassBy{{ x }}Callback(Class{{ x }}Callback Callback) {
+        _Class{{ x }}Callback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_ReturnClassBy{{ x }}() {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+
+        _Class{{ x }}Callback(Class_Field);
+        std::this_thread::sleep_for(250ms);
+        _Class{{ x }}Callback(Class_Field);
+    }
+{% endfor %}
+
+{% for x in ['Pointer', 'ConstPointer'] %}
+    void EventTestClass::SetClassFunctions_Event_ReturnClassBy{{ x }}_MultiThreadCallback(
+        Class{{ x }}Callback Callback
+    ) {
+        _Class{{ x }}Callback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_ReturnClassBy{{ x }}_MultiThread() {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+        
+        std::thread t([this]() {
+            _Class{{ x }}Callback(&Class_Field);
+            std::this_thread::sleep_for(250ms);
+            _Class{{ x }}Callback(&Class_Field);
+        });
+        t.detach();
+    }
+{% endfor %}
+
+{% for x in ['Reference', 'ConstReference'] %}
+    void EventTestClass::SetClassFunctions_Event_ReturnClassBy{{ x }}_MultiThreadCallback(
+        Class{{ x }}Callback Callback
+    ) {
+        _Class{{ x }}Callback = Callback;
+    }
+
+    void EventTestClass::ClassFunctions_Event_ReturnClassBy{{ x }}_MultiThread() {
+        Class_Field.SomeValue = {{ config.class_int_value_first }};
+        
+        std::thread t([this]() {
+            _Class{{ x }}Callback(Class_Field);
+            std::this_thread::sleep_for(250ms);
+            _Class{{ x }}Callback(Class_Field);
+        });
+        t.detach();
+    }
+{% endfor %}

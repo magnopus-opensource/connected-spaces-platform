@@ -27,6 +27,26 @@
 {{/ type.template_arguments }}
         );
 {{/ type.is_class_or_interface }}
+{{# type.is_string }}
+        {
+            const _stringValue = Module.UTF8ToString({{ name }});
+            free({{ name }});
+
+            {{ name }} = _stringValue;
+        }
+{{/ type.is_string }}
+{{# type.is_number }}
+{{^ type.is_float }}
+{{^ type.is_signed }}
+        {
+            const _unfixedValue = {{ name }};
+            {{# type }}{{> UnsignedFix }}{{/ type }}
+
+            {{ name }} = _fixedValue;
+        }
+{{/ type.is_signed }}
+{{/ type.is_float }}
+{{/ type.is_number }}
 {{/ parameters }}
 
         callback(
