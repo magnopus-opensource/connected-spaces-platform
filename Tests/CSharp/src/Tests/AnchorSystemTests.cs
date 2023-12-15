@@ -1,4 +1,5 @@
 using Common = Csp.Common;
+using Multiplayer = Csp.Multiplayer;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -193,16 +194,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";
@@ -246,16 +247,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName1 = "TestObject1";
@@ -323,16 +324,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";
@@ -438,16 +439,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName1 = "TestObject1";
@@ -482,6 +483,7 @@ namespace CSPEngine
             for (uint idx = 0; idx < anchorCollection.Size(); ++idx)
             {
                 Assert.AreEqual(anchorCollection[idx].SpaceId, space.Id);
+
                 if (anchorCollection[idx].ThirdPartyAnchorId == anchor1.ThirdPartyAnchorId ||
                     anchorCollection[idx].ThirdPartyAnchorId == anchor2.ThirdPartyAnchorId)
                 {
@@ -519,16 +521,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";

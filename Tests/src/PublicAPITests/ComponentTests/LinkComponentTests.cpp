@@ -88,13 +88,13 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		csp::common::String ObjectName = "Object 1";

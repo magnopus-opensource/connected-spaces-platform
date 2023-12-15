@@ -261,13 +261,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";
@@ -349,13 +349,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -458,13 +458,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";
@@ -621,13 +621,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -802,13 +802,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";

@@ -1949,13 +1949,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Setup Asset callback
@@ -2066,13 +2066,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Setup Asset callback
@@ -2102,9 +2102,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
 										 {Param1, Param2, Param3, Param4, Param5},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 EXPECT_EQ(Error, ErrorCode::None);
 										 });
 
 	// Wait for message

@@ -51,13 +51,11 @@ class CSP_API NullResult : public csp::systems::ResultBase
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
+
 public:
-	/// @brief Creates an invalid NullResult instance that can be used to notify the user of an error.
-	/// @return NullResult : invalid NullResult instance
-	CSP_NO_EXPORT static NullResult Invalid();
+	CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 protected:
-	NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
 		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 	NullResult() = default;
@@ -108,14 +106,11 @@ public:
 	/// @brief A getter which returns the String passed via the result.
 	[[nodiscard]] const csp::common::String& GetValue() const;
 
-	/// @brief Creates an invalid StringResult instance that can be used to notify the user of an error.
-	/// @return StringResult : invalid StringResult instance
-	CSP_NO_EXPORT static StringResult Invalid();
+	CSP_NO_EXPORT StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	StringResult() = default;
 	StringResult(void*) {};
-	StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::String& InValue);
 

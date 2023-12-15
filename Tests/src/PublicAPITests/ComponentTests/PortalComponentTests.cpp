@@ -102,13 +102,13 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
@@ -150,13 +150,13 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			EXPECT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
@@ -220,13 +220,13 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Create object to represent the portal
@@ -317,13 +317,13 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Create object to represent the portal
