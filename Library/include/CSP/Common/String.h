@@ -168,7 +168,11 @@ public:
 
 	/// @brief Returns a copy of this string with all leading and trailing whitespace removed.
 	/// @return String : A copy of this string with leading and trailing whitespace removed.
-	String Trim();
+	String Trim() const;
+
+	/// @brief Returns a copy of this string with all characters converted to lower-case.
+	/// @return String : A copy of this string with characters converted to lower-case.
+	String ToLower() const;
 
 	/// @brief Concatenates all elements in the list with a separator after each element and returns as a string.
 	/// @param Parts const csp::common::List<String>& : List to concatenate
