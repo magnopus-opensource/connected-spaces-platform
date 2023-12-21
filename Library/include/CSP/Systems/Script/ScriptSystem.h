@@ -299,6 +299,21 @@ private:
 												 const NullResultCallback& Callback);
 
 	static void _GetScriptModuleCollectionCallback(ScriptModuleCollectionResultCallback Callback, const AssetCollectionResult& Result);
+
+	void _DeleteScriptModuleAsset(const NullResultCallback& Callback, const AssetsResult& Result);
+	void _GetSciptModuleAssetCollection(const csp::common::String& ModuleName,
+										const csp::common::String& ModuleNamespace,
+										const csp::common::Optional<csp::common::String>& ScriptSource,
+										UriResultCallback Callback,
+										const AssetCollectionResult& Result);
+	void _CreateScriptModuleCollection(const csp::common::String& ScriptModuleNamespace,
+									   const csp::common::Optional<csp::common::String>& ScriptSource,
+									   UriResultCallback Callback,
+									   ScriptModuleCollectionResult& Result);
+	void _CreateScriptModuleAsset(const AssetCollection& ScriptModuleAssetCollection,
+								  const csp::common::Optional<csp::common::String>& ScriptSource,
+								  UriResultCallback Callback,
+								  const AssetResult& Result);
 };
 
 } // namespace csp::systems

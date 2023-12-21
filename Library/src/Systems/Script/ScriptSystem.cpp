@@ -517,7 +517,7 @@ void ScriptSystem::DeleteScriptModuleAsset(const csp::common::String& ModuleName
 	const csp::common::String ScriptModuleName
 		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str(), ModuleName.c_str());
 
-	AssetsResultCallback GetAssetResultCallback = [AssetSystem, Callback](const AssetsResult& Result)
+	/*AssetsResultCallback GetAssetResultCallback = [AssetSystem, Callback](const AssetsResult& Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
@@ -555,28 +555,28 @@ void ScriptSystem::DeleteScriptModuleAsset(const csp::common::String& ModuleName
 		InternalAssetCollection.Id = InternalModuleAsset[0].AssetCollectionId;
 
 		AssetSystem->DeleteAsset(InternalAssetCollection, InternalModuleAsset[0], DeleteAssetCallback);
-	};
+	};*/
 
-	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetResultCallback);
+	AssetsResultCallback GetAssetResultCallbackTemp(std::bind(&_DeleteScriptModuleAsset, this, Callback, std::placeholders::_1));
+
+	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetResultCallbackTemp);
 }
 
-void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& ModuleNamespace,
-										   const csp::common::String& ModuleName,
-										   const csp::common::Optional<csp::common::String>& ScriptSource,
-										   UriResultCallback Callback)
+void ScriptSystem::_DeleteScriptModuleAsset(const NullResultCallback& Callback, const AssetsResult& Result)
 {
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		return;
+	}
 
+	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+	{
+		NullResult InvalidNullResult = NullResult::Invalid();
+		Callback(InvalidNullResult);
+		return;
+	}
 
-	// 3. AssetCollection/prototype exists - Create a module.
-	// 4. If ScriptSource specified then upload Asset Data.
-
-	// GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback)
-
-	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
-
-	AssetCollectionResultCallback GetAssetCollectionCallback = [this, Callback, ModuleNamespace](const AssetCollectionResult& Result)
+	const NullResultCallback DeleteAssetCallback = [Callback](const NullResult& Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
@@ -585,32 +585,172 @@ void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& ModuleName
 
 		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
-			ScriptModuleCollectionResultCallback GetScriptModuleCollectionCallback = [Callback](ScriptModuleCollectionResult& Result)
-			{
-				if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
-				{
-					return;
-				}
-
-				if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
-				{
-					// Create UriResult
-					// NullResult InvalidNullResult = NullResult::Invalid();
-					// Callback(InvalidNullResult);
-					return;
-				}
-			};
-
-			// 2. AssetCollection/prototype does not exist - Create an ModuleNamespace AssetCollection and goto 3.
-			CreateScriptModuleCollection(ModuleNamespace, GetScriptModuleCollectionCallback);
+			NullResult InvalidNullResult = NullResult::Invalid();
+			Callback(InvalidNullResult);
+			return;
 		}
-		else
-		{
-		}
+
+		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		Callback(InternalResult);
 	};
+
+	const csp::common::Array<Asset>& InternalModuleAsset = Result.GetAssets();
+
+	csp::systems::AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id = InternalModuleAsset[0].AssetCollectionId;
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+	AssetSystem->DeleteAsset(InternalAssetCollection, InternalModuleAsset[0], DeleteAssetCallback);
+}
+
+void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& ModuleNamespace,
+										   const csp::common::String& ModuleName,
+										   const csp::common::Optional<csp::common::String>& ScriptSource,
+										   UriResultCallback Callback)
+{
+	// 1. Try and get the modulenamespace AssetCollection. If the module exists goto 3, if not goto 2.
+	// 2. AssetCollection/prototype does not exist - Create an ModuleNamespace AssetCollection and goto 3.
+	// 3. AssetCollection/prototype exists - Create a module.
+	// 4. If ScriptSource specified then upload Asset Data.
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
+
+	const AssetCollectionResultCallback GetAssetCollectionCallback(
+		std::bind(&_GetSciptModuleAssetCollection, this, ModuleName, ScriptModuleNamespace, ScriptSource, Callback, std::placeholders::_1));
 
 	// 1. Try and get the modulenamespace AssetCollection. If the module exists goto 3, if not goto 2.
 	AssetSystem->GetAssetCollectionByName(ScriptModuleNamespace, GetAssetCollectionCallback);
+}
+
+void ScriptSystem::_GetSciptModuleAssetCollection(const csp::common::String& ModuleName,
+												  const csp::common::String& ScriptModuleNamespace,
+												  const csp::common::Optional<csp::common::String>& ScriptSource,
+												  UriResultCallback Callback,
+												  const AssetCollectionResult& Result)
+{
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		return;
+	}
+
+	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+	{
+		// 2. AssetCollection/prototype does not exist - Create an ModuleNamespace AssetCollection and goto 3.
+		const ScriptModuleCollectionResultCallback CreateScriptModuleCollectionCallback(
+			std::bind(&_CreateScriptModuleCollection, this, ScriptModuleNamespace, ScriptSource, Callback, std::placeholders::_1));
+
+		CreateScriptModuleCollection(ScriptModuleNamespace, CreateScriptModuleCollectionCallback);
+		return;
+	}
+
+	// 3. AssetCollection/prototype exists - Create a module.
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	const csp::common::String ScriptModuleName
+		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ScriptModuleNamespace.c_str(), ModuleName.c_str());
+
+	const AssetResultCallback CreateScriptModuleAssetCallback(
+		std::bind(&_CreateScriptModuleAsset, this, Result.GetAssetCollection(), ScriptSource, Callback, std::placeholders::_1));
+
+	AssetSystem
+		->CreateAsset(Result.GetAssetCollection(), ScriptModuleName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateScriptModuleAssetCallback);
+}
+
+void ScriptSystem::_CreateScriptModuleCollection(const csp::common::String& ScriptModuleNamespace,
+												 const csp::common::Optional<csp::common::String>& ScriptSource,
+												 UriResultCallback Callback,
+												 ScriptModuleCollectionResult& Result)
+{
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		return;
+	}
+
+	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+	{
+		const UriResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		Callback(InternalResult);
+		return;
+	}
+
+	// 3. AssetCollection/prototype exists - Create a module.
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	const csp::common::String ScriptModuleName
+		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ScriptModuleNamespace.c_str(), ModuleName.c_str());
+
+	csp::systems::AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id = Result.GetCollection().GetId();
+	const AssetResultCallback CreateScriptModuleAssetCallback(
+		std::bind(&_CreateScriptModuleAsset, this, InternalAssetCollection, ScriptSource, Callback, std::placeholders::_1));
+
+	AssetSystem->CreateAsset(Result.GetCollection(), ScriptModuleName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateScriptModuleAssetCallback);
+}
+
+void ScriptSystem::_CreateScriptModuleAsset(const AssetCollection& ScriptModuleAssetCollection,
+											const csp::common::Optional<csp::common::String>& ScriptSource,
+											UriResultCallback Callback,
+											const AssetResult& Result)
+{
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		return;
+	}
+
+	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+	{
+		const UriResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		Callback(InternalResult);
+		return;
+	}
+
+	// No Script Module source provided.
+	if (!ScriptSource.HasValue())
+	{
+		UriResult InternalResult(csp::systems::EResultCode::Success, Result.GetHttpResultCode());
+		InternalResult.SetResponseBody("Script Module Asset created, no script source specified.");
+		InternalResult.Uri = "";
+
+		Callback(InternalResult);
+		return;
+	}
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	const auto& Asset = Result.GetAsset();
+
+	BufferAssetDataSource AssetData;
+	AssetData.SetMimeType("text/javascript");
+	AssetData.Buffer	   = const_cast<char*>(ScriptSource->c_str());
+	AssetData.BufferLength = ScriptSource->Length();
+
+	UriResultCallback UploadAssetDataCallback = [Callback](const UriResult& Result)
+	{
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+		{
+			UriResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+			InternalResult.SetResponseBody("Script module source failed to upload.");
+			InternalResult.Uri = "";
+
+			Callback(InternalResult);
+			return;
+		}
+
+		UriResult InternalResult(csp::systems::EResultCode::Success, Result.GetHttpResultCode());
+		InternalResult.SetResponseBody(Result.GetResponseBody());
+		InternalResult.Uri = Result.GetUri();
+
+		Callback(InternalResult);
+	};
+
+	AssetSystem->UploadAssetData(ScriptModuleAssetCollection, Asset, AssetData, UploadAssetDataCallback);
 }
 
 void ScriptSystem::CreateScriptModuleCollection(const String& ModuleNamespace, const ScriptModuleCollectionResultCallback& Callback)

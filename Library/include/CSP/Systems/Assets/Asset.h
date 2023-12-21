@@ -276,6 +276,7 @@ class CSP_API UriResult : public csp::systems::ResultBase
 	CSP_START_IGNORE
 	friend class SpaceSystem;
 	friend class SettingsSystem;
+	friend class ScriptSystem;
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
