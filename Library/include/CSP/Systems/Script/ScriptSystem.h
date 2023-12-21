@@ -262,11 +262,17 @@ public:
 	CSP_ASYNC_RESULT void DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
 												  const csp::common::String& ModuleName,
 												  const NullResultCallback& Callback);
+	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& ModuleNamespace,
+												  const csp::common::String& ModuleName,
+												  const csp::common::Optional<csp::common::String>& ScriptSource,
+												  UriResultCallback Callback);
+	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& ModuleNamespace,
+													   const ScriptModuleCollectionResultCallback& Callback);
 
 	// TODO: Delete these and replace with above
 	// CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
 	// CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
-	// CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
+	//
 	// CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
 	// CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
 	//										   const csp::common::String& Name,
