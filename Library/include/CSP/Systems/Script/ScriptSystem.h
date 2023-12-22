@@ -241,23 +241,53 @@ public:
 	const char* GetImportedModule(int64_t ContextId, size_t Index) const;
 	CSP_END_IGNORE
 
+	/// @brief Retrieve the Script Module from the specified module namespace
+	/// @param ModuleNamespace const csp::common::String& : The Namespace the Script Module belongs to
+	/// @param ModuleName const csp::common::String& : The Name of the Script Module
+	/// @param Callback const ScriptModuleAssetResultCallback& : Callback for when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetScriptModuleAsset(const csp::common::String& ModuleNamespace,
 											   const csp::common::String& ModuleName,
 											   const ScriptModuleAssetResultCallback& Callback);
+
+	/// @brief Retrieve the names of all Script Modules that belong to the specified module namespace
+	/// @param ModuleNamespace const csp::common::String& : The Namespace the Script Module belongs to
+	/// @param Callback const ScriptModuleAssetNamesResultCallback& : Callback for when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetScriptModuleAssetNames(const csp::common::String& ModuleNamespace, const ScriptModuleAssetNamesResultCallback& Callback);
-	CSP_ASYNC_RESULT void DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
-												  const csp::common::String& ModuleName,
-												  const NullResultCallback& Callback);
+
+	/// @brief Create a new Script Module in the specified module namespace
+	/// The Module script source is optional and if not supplied the module will be created without source.
+	/// @param ModuleNamespace const csp::common::String& : The Namespace the Script Module belongs to
+	/// @param ModuleName const csp::common::String& : The Name of the Script Module
+	/// @param ScriptSource const csp::common::Optional<csp::common::String>& : The optional source for the Script Module
+	/// @param Callback const UriResultCallback& : Callback for when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& ModuleNamespace,
 												  const csp::common::String& ModuleName,
 												  const csp::common::Optional<csp::common::String>& ScriptSource,
 												  UriResultCallback Callback);
+
+	/// @brief Update the Script Module from the specified module namespace
+	/// @param ModuleNamespace const csp::common::String& : The Namespace the Script Module belongs to
+	/// @param ModuleName const csp::common::String& : The Name of the Script Module
+	/// @param ScriptSource const csp::common::String& : The source for the Script Module
+	/// @param Callback const UriResultCallback& : Callback for when asynchronous task finishes
 	CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const csp::common::String& ModuleNamespace,
 												  const csp::common::String& ModuleName,
 												  const csp::common::String& ScriptSource,
 												  UriResultCallback Callback);
-	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& ModuleNamespace,
-													   const ScriptModuleCollectionResultCallback& Callback);
+
+	/// @brief Delete the Script Module from the specified module namespace
+	/// @param ModuleNamespace const csp::common::String& : The Namespace the Script Module belongs to
+	/// @param ModuleName const csp::common::String& : The Name of the Script Module
+	/// @param Callback const NullResultCallback& : Callback for when asynchronous task finishes
+	CSP_ASYNC_RESULT void DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
+												  const csp::common::String& ModuleName,
+												  const NullResultCallback& Callback);
+
+	/// @brief Create a new Script Module namespace
+	/// @param ModuleNamespace const csp::common::String& : The name for the new Script Module namespace
+	/// @param Callback const ScriptModuleCollectionResultCallback& : Callback for when asynchronous task finishes
+	CSP_ASYNC_RESULT void CreateScriptModuleNamespace(const csp::common::String& ModuleNamespace,
+													  const ScriptModuleCollectionResultCallback& Callback);
 
 private:
 	ScriptSystem();
@@ -269,21 +299,26 @@ private:
 							 const csp::common::String& ScriptModuleAssetId,
 							 const ScriptModuleAssetResultCallback& Callback,
 							 const AssetDataResult& Result);
+
 	void OnScriptModuleAssetRetrieved(const NullResultCallback& Callback, const AssetsResult& Result);
+
 	void OnScriptModuleAssetCollectionRetrieved(const csp::common::String& ModuleName,
 												const csp::common::String& ModuleNamespace,
 												const csp::common::Optional<csp::common::String>& ScriptSource,
 												UriResultCallback Callback,
 												const AssetCollectionResult& Result);
+
 	void OnScriptModuleCollectionCreated(const csp::common::String& ScriptModuleName,
 										 const csp::common::String& ScriptModuleNamespace,
 										 const csp::common::Optional<csp::common::String>& ScriptSource,
 										 UriResultCallback Callback,
 										 ScriptModuleCollectionResult& Result);
+
 	void OnScriptModuleAssetCreated(const AssetCollection& ScriptModuleAssetCollection,
 									const csp::common::Optional<csp::common::String>& ScriptSource,
 									UriResultCallback Callback,
 									const AssetResult& Result);
+
 	void OnScriptModuleSourceUploaded(UriResultCallback Callback, const UriResult& Result);
 };
 

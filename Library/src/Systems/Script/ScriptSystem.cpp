@@ -452,62 +452,6 @@ void ScriptSystem::GetScriptModuleAssetNames(const csp::common::String& ModuleNa
 	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, nullptr, nullptr, GetAssetsResultCallback);
 }
 
-void ScriptSystem::DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
-										   const csp::common::String& ModuleName,
-										   const NullResultCallback& Callback)
-{
-	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-
-	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
-	const csp::common::String ScriptModuleName
-		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str(), ModuleName.c_str());
-
-	AssetsResultCallback GetAssetResultCallback(std::bind(&ScriptSystem::OnScriptModuleAssetRetrieved, this, Callback, std::placeholders::_1));
-
-	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetResultCallback);
-}
-
-void ScriptSystem::OnScriptModuleAssetRetrieved(const NullResultCallback& Callback, const AssetsResult& Result)
-{
-	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
-	{
-		return;
-	}
-
-	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
-	{
-		NullResult InvalidNullResult = NullResult::Invalid();
-		Callback(InvalidNullResult);
-		return;
-	}
-
-	const NullResultCallback DeleteAssetCallback = [Callback](const NullResult& Result)
-	{
-		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
-		{
-			return;
-		}
-
-		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
-		{
-			NullResult InvalidNullResult = NullResult::Invalid();
-			Callback(InvalidNullResult);
-			return;
-		}
-
-		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-		Callback(InternalResult);
-	};
-
-	const csp::common::Array<Asset>& InternalModuleAsset = Result.GetAssets();
-
-	csp::systems::AssetCollection InternalAssetCollection;
-	InternalAssetCollection.Id = InternalModuleAsset[0].AssetCollectionId;
-
-	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-	AssetSystem->DeleteAsset(InternalAssetCollection, InternalModuleAsset[0], DeleteAssetCallback);
-}
-
 void ScriptSystem::CreateScriptModuleAsset(const csp::common::String& ModuleNamespace,
 										   const csp::common::String& ModuleName,
 										   const csp::common::Optional<csp::common::String>& ScriptSource,
@@ -556,7 +500,7 @@ void ScriptSystem::OnScriptModuleAssetCollectionRetrieved(const csp::common::Str
 																								  Callback,
 																								  std::placeholders::_1));
 
-		CreateScriptModuleCollection(ScriptModuleNamespace, CreateScriptModuleCollectionCallback);
+		CreateScriptModuleNamespace(ScriptModuleNamespace, CreateScriptModuleCollectionCallback);
 		return;
 	}
 
@@ -722,7 +666,63 @@ void ScriptSystem::UpdateScriptModuleAsset(const csp::common::String& ModuleName
 	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetsCallback);
 }
 
-void ScriptSystem::CreateScriptModuleCollection(const String& ModuleNamespace, const ScriptModuleCollectionResultCallback& Callback)
+void ScriptSystem::DeleteScriptModuleAsset(const csp::common::String& ModuleNamespace,
+										   const csp::common::String& ModuleName,
+										   const NullResultCallback& Callback)
+{
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+
+	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
+	const csp::common::String ScriptModuleName
+		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str(), ModuleName.c_str());
+
+	AssetsResultCallback GetAssetResultCallback(std::bind(&ScriptSystem::OnScriptModuleAssetRetrieved, this, Callback, std::placeholders::_1));
+
+	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetResultCallback);
+}
+
+void ScriptSystem::OnScriptModuleAssetRetrieved(const NullResultCallback& Callback, const AssetsResult& Result)
+{
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		return;
+	}
+
+	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+	{
+		NullResult InvalidNullResult = NullResult::Invalid();
+		Callback(InvalidNullResult);
+		return;
+	}
+
+	const NullResultCallback DeleteAssetCallback = [Callback](const NullResult& Result)
+	{
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+		{
+			NullResult InvalidNullResult = NullResult::Invalid();
+			Callback(InvalidNullResult);
+			return;
+		}
+
+		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		Callback(InternalResult);
+	};
+
+	const csp::common::Array<Asset>& InternalModuleAsset = Result.GetAssets();
+
+	csp::systems::AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id = InternalModuleAsset[0].AssetCollectionId;
+
+	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
+	AssetSystem->DeleteAsset(InternalAssetCollection, InternalModuleAsset[0], DeleteAssetCallback);
+}
+
+void ScriptSystem::CreateScriptModuleNamespace(const String& ModuleNamespace, const ScriptModuleCollectionResultCallback& Callback)
 {
 	const csp::common::String ScriptModuleNamespace = csp::common::StringFormat("%s%s", SCRIPT_MODULE_PREFIX, ModuleNamespace.c_str());
 
