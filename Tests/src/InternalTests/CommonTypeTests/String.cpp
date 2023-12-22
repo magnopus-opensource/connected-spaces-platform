@@ -596,6 +596,46 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimAllWhitespaceTest)
 	}
 }
 
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, SubStringTest)
+{
+	try
+	{
+		String Instance	  = "abcdefgh";
+		String SubString1 = Instance.SubString(3, 5);
+		String SubString2 = Instance.SubString(0, 4);
+		String SubString3 = Instance.SubString(0);
+
+		// The original String should not be modified
+		EXPECT_EQ(Instance, "abcdefgh");
+		EXPECT_EQ(SubString1, "defgh");
+		EXPECT_EQ(SubString2, "abcd");
+		EXPECT_EQ(SubString3, "abcdefgh");
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
+
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, SubStringInvalidLenTest)
+{
+	try
+	{
+		String Instance	  = "abcdefgh";
+		String SubString1 = Instance.SubString(2, 0);
+		String SubString2 = Instance.SubString(0, 10);
+
+		// The original String should not be modified
+		EXPECT_EQ(Instance, "abcdefgh");
+		EXPECT_EQ(SubString1, "cdefgh");
+		EXPECT_EQ(SubString2, "abcdefgh");
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
+
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListTest)
 {
 	try

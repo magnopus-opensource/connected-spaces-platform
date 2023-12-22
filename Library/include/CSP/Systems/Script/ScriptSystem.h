@@ -161,7 +161,7 @@ public:
 	const csp::common::Array<csp::common::String>& GetScriptModuleAssetNames() const;
 
 private:
-	csp::common::Array<csp::common::String>& ModuleAssetNames;
+	csp::common::Array<csp::common::String> ModuleAssetNames;
 };
 
 
@@ -241,20 +241,6 @@ public:
 	const char* GetImportedModule(int64_t ContextId, size_t Index) const;
 	CSP_END_IGNORE
 
-	/*
-	 * // Use `/api/v1/prototypes/asset-details` to fetch this by constructing full asset name from
-	 * // `namespace` and `moduleName` and using this in the `Names` filter.
-	 * //  ScriptModuleAsset name currently uses ScriptModuleCollection ID, but should instead use its name
-	 * // ie. SCRIPT_MODULE_ASSET_{ namespace }_{ moduleName }
-	 * // eg. SCRIPT_MODULE_ASSET_magnopus_physics
-	 * void GetScriptModuleAsset(string namespace, string moduleName, callback);
-	 *
-	 * // Use `/api/v1/prototypes/asset-details` to fetch this by constructing full asset collection name from
-	 * // `namespace` and using this in the `PrototypeParentNames` filter.
-	 * // ie. SCRIPT_MODULE_COLLECTION_{ moduleName }
-	 * // eg. SCRIPT_MODULE_COLLECTION_magnopus
-	 * void GetScriptModuleAssetsByNamespace(string namespace, callback);
-	 */
 	CSP_ASYNC_RESULT void GetScriptModuleAsset(const csp::common::String& ModuleNamespace,
 											   const csp::common::String& ModuleName,
 											   const ScriptModuleAssetResultCallback& Callback);
@@ -266,54 +252,39 @@ public:
 												  const csp::common::String& ModuleName,
 												  const csp::common::Optional<csp::common::String>& ScriptSource,
 												  UriResultCallback Callback);
+	CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const csp::common::String& ModuleNamespace,
+												  const csp::common::String& ModuleName,
+												  const csp::common::String& ScriptSource,
+												  UriResultCallback Callback);
 	CSP_ASYNC_RESULT void CreateScriptModuleCollection(const csp::common::String& ModuleNamespace,
 													   const ScriptModuleCollectionResultCallback& Callback);
-
-	// TODO: Delete these and replace with above
-	// CSP_ASYNC_RESULT void GetScriptModuleCollection(const csp::common::String& Namespace, const ScriptModuleCollectionResultCallback& Callback);
-	// CSP_ASYNC_RESULT void GetScriptModuleCollectionById(const csp::common::String& Id, const ScriptModuleCollectionResultCallback& Callback);
-	//
-	// CSP_ASYNC_RESULT void DeleteScriptModuleCollection(const ScriptModuleCollection& Collection, const NullResultCallback& Callback);
-	// CSP_ASYNC_RESULT void GetScriptModuleAsset(const ScriptModuleCollection& Collection,
-	//										   const csp::common::String& Name,
-	//										   const ScriptModuleAssetResultCallback& Callback);
-	// CSP_ASYNC_RESULT void CreateScriptModuleAsset(const csp::common::String& Namespace,
-	//											  const csp::common::String& Name,
-	//											  const csp::common::String& ModuleText,
-	//											  const NullResultCallback& Callback);
-	// CSP_ASYNC_RESULT void UpdateScriptModuleAsset(const ScriptModuleCollection& Collection,
-	//											  const ScriptModuleAsset& Module,
-	//											  const csp::common::String& NewModuleText,
-	//											  const NullResultCallback& Callback);
-	// CSP_ASYNC_RESULT void
-	//	DeleteScriptModuleAsset(const ScriptModuleCollection& Collection, const ScriptModuleAsset& Module, const NullResultCallback& Callback);
-	// Will also need a means of getting the names/Ids of all modules associated with a namespace.
 
 private:
 	ScriptSystem();
 
 	class ScriptRuntime* TheScriptRuntime;
 
-	void UpdateScriptModuleCollectionLookupTable(const ScriptModuleCollection& Collection,
-												 const csp::common::Map<csp::common::String, csp::common::String>& NewLookupTable,
-												 const NullResultCallback& Callback);
-
-	static void _GetScriptModuleCollectionCallback(ScriptModuleCollectionResultCallback Callback, const AssetCollectionResult& Result);
-
-	void _DeleteScriptModuleAsset(const NullResultCallback& Callback, const AssetsResult& Result);
-	void _GetSciptModuleAssetCollection(const csp::common::String& ModuleName,
-										const csp::common::String& ModuleNamespace,
-										const csp::common::Optional<csp::common::String>& ScriptSource,
-										UriResultCallback Callback,
-										const AssetCollectionResult& Result);
-	void _CreateScriptModuleCollection(const csp::common::String& ScriptModuleNamespace,
-									   const csp::common::Optional<csp::common::String>& ScriptSource,
-									   UriResultCallback Callback,
-									   ScriptModuleCollectionResult& Result);
-	void _CreateScriptModuleAsset(const AssetCollection& ScriptModuleAssetCollection,
-								  const csp::common::Optional<csp::common::String>& ScriptSource,
-								  UriResultCallback Callback,
-								  const AssetResult& Result);
+	void OnDownloadAssetData(const csp::common::String& ModuleNamespace,
+							 const csp::common::String& ModuleName,
+							 const csp::common::String& ScriptModuleAssetId,
+							 const ScriptModuleAssetResultCallback& Callback,
+							 const AssetDataResult& Result);
+	void OnScriptModuleAssetRetrieved(const NullResultCallback& Callback, const AssetsResult& Result);
+	void OnScriptModuleAssetCollectionRetrieved(const csp::common::String& ModuleName,
+												const csp::common::String& ModuleNamespace,
+												const csp::common::Optional<csp::common::String>& ScriptSource,
+												UriResultCallback Callback,
+												const AssetCollectionResult& Result);
+	void OnScriptModuleCollectionCreated(const csp::common::String& ScriptModuleName,
+										 const csp::common::String& ScriptModuleNamespace,
+										 const csp::common::Optional<csp::common::String>& ScriptSource,
+										 UriResultCallback Callback,
+										 ScriptModuleCollectionResult& Result);
+	void OnScriptModuleAssetCreated(const AssetCollection& ScriptModuleAssetCollection,
+									const csp::common::Optional<csp::common::String>& ScriptSource,
+									UriResultCallback Callback,
+									const AssetResult& Result);
+	void OnScriptModuleSourceUploaded(UriResultCallback Callback, const UriResult& Result);
 };
 
 } // namespace csp::systems
