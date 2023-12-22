@@ -165,13 +165,6 @@ const Array<Space>& SpacesResult::GetSpaces() const
 	return Spaces;
 }
 
-SpacesResult SpacesResult::Invalid()
-{
-	static SpacesResult result(csp::systems::EResultCode::Failed, 0);
-
-	return result;
-}
-
 void SpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
@@ -346,13 +339,6 @@ const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const
 {
 	return GeoLocation;
-}
-
-SpaceGeoLocationResult SpaceGeoLocationResult::Invalid()
-{
-	static SpaceGeoLocationResult InvalidResult(csp::systems::EResultCode::Failed, 0);
-
-	return InvalidResult;
 }
 
 void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, SpaceGeoLocation& GeoLocation)

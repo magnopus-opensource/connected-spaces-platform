@@ -66,30 +66,14 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
 
 	auto& Response = Request->GetMutableResponse();
 	auto& Payload  = Response.GetMutablePayload();
-	auto Keys	   = Headers.Keys();
+	auto* Keys	   = Headers.Keys();
 
 	for (int i = 0; i < Keys->Size(); ++i)
 	{
-		auto Key	  = Keys->operator[](i);
-		auto Val	  = std::string(Headers[Key].c_str());
-		auto KeyValue = std::string(Key.c_str());
-		// Make Key and Val lower-case
-		std::transform(KeyValue.begin(),
-					   KeyValue.end(),
-					   KeyValue.begin(),
-					   [](unsigned char c)
-					   {
-						   return std::tolower(c);
-					   });
-		std::transform(Val.begin(),
-					   Val.end(),
-					   Val.begin(),
-					   [](unsigned char c)
-					   {
-						   return std::tolower(c);
-					   });
+		auto Key   = Keys->operator[](i).ToLower();
+		auto Value = Headers[Key].ToLower();
 
-		Payload.AddHeader(KeyValue.c_str(), Val.c_str());
+		Payload.AddHeader(Key, Value);
 	}
 
 	CSP_DELETE(Keys);

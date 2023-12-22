@@ -128,7 +128,7 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 
 		auto Done = false;
 		Connection->DisconnectWithReason(Reason,
-										 [&Done](bool Ok)
+										 [&Done](ErrorCode Error)
 										 {
 											 Done = true;
 										 });

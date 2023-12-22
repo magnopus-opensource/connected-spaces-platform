@@ -168,7 +168,11 @@ public:
 
 	/// @brief Returns a copy of this string with all leading and trailing whitespace removed.
 	/// @return String : A copy of this string with leading and trailing whitespace removed.
-	String Trim();
+	String Trim() const;
+
+	/// @brief Returns a copy of this string with all characters converted to lower-case.
+	/// @return String : A copy of this string with characters converted to lower-case.
+	String ToLower() const;
 
 	/// @brief Concatenates all elements in the list with a separator after each element and returns as a string.
 	/// @param Parts const csp::common::List<String>& : List to concatenate
@@ -182,7 +186,7 @@ public:
 	/// @return String
 	static String Join(const std::initializer_list<String>& Parts, Optional<char> Separator = nullptr);
 
-    /// @brief Returns a newly constructed string object with value initialised to a copy of a substring of this object.
+	/// @brief Returns a newly constructed string object with value initialised to a copy of a substring of this object.
 	/// @param Pos size_t : Position of the first character to be copied as a substring.
 	/// @param Len size_t : Number of characters to include in the substring (if the string is shorter, as many characters as possible are used).
 	/// @return String

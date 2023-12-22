@@ -244,10 +244,6 @@ class CSP_API AssetsResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	/// @brief Creates an invalid AssetsResult instance that can be used to notify the user of an error.
-	/// @return AssetsResult : invalid AssetsResult instance.
-	CSP_NO_EXPORT static AssetsResult Invalid();
-
 	/// @brief Retrieves the asset array being stored as a pointer.
 	/// @return csp::common::Array<Asset> : pointer to asset array being stored.
 	csp::common::Array<Asset>& GetAssets();
@@ -256,10 +252,11 @@ public:
 	/// @return csp::common::Array<Asset> : pointer to asset array being stored.
 	const csp::common::Array<Asset>& GetAssets() const;
 
+	CSP_NO_EXPORT AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 protected:
 	AssetsResult() = delete;
 	AssetsResult(void*) {};
-	AssetsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
@@ -282,10 +279,6 @@ class CSP_API UriResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	/// @brief Creates an invalid UriResult instance that can be used to notify the user of an error.
-	/// @return UriResult : invalid UriResult instance.
-	CSP_NO_EXPORT static UriResult Invalid();
-
 	/// @brief Retrieves the uri for the asset uploaded.
 	/// @return csp::common::String : uri of the uploaded asset.
 	csp::common::String& GetUri();
@@ -294,13 +287,16 @@ public:
 	/// @return csp::common::String : uri of the uploaded asset.
 	const csp::common::String& GetUri() const;
 
+	void SetUri(const csp::common::String& Value);
+
+	CSP_NO_EXPORT UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 protected:
 	UriResult() = delete;
 	UriResult(void*) {};
 
 private:
 	UriResult(const csp::common::String Uri);
-	UriResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	void SetResponseBody(const csp::common::String& Contents);

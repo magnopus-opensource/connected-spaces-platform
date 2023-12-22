@@ -139,10 +139,6 @@ class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	/// @brief Creates an invalid AssetCollectionsResult instance that can be used to notify the user of an error.
-	/// @return AssetCollectionsResult : invalid AssetCollectionsResult instance
-	CSP_NO_EXPORT static AssetCollectionsResult Invalid();
-
 	/// @brief Retrieves the asset collection array being stored as a pointer.
 	/// @return csp::common::Array<AssetCollection> : pointer to asset collection array
 	csp::common::Array<AssetCollection>& GetAssetCollections();
@@ -157,9 +153,10 @@ public:
 	/// @return uint64_t : count number as described above
 	uint64_t GetTotalCount() const;
 
+	CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	AssetCollectionsResult(void*) {};
-	AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

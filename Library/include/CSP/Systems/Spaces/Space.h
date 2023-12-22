@@ -174,9 +174,10 @@ public:
 	/// @return csp::common::String : the space code
 	const csp::common::String& GetSpaceCode() const;
 
+	CSP_NO_EXPORT SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	SpaceResult(void*) {};
-	SpaceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 	CSP_NO_EXPORT SpaceResult(const csp::systems::ResultBase& InResult)
 		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
@@ -212,11 +213,10 @@ public:
 	/// @return csp::common::Array<Space> : pointer to spaces array
 	const csp::common::Array<Space>& GetSpaces() const;
 
-	CSP_NO_EXPORT static SpacesResult Invalid();
+	CSP_NO_EXPORT SpacesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	SpacesResult(void*) {};
-	SpacesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
@@ -386,11 +386,10 @@ public:
 	/// @return SpaceGeoLocation : Geo location of the space
 	const SpaceGeoLocation& GetSpaceGeoLocation() const;
 
-	CSP_NO_EXPORT static SpaceGeoLocationResult Invalid();
+	CSP_NO_EXPORT SpaceGeoLocationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	SpaceGeoLocationResult(void*) {};
-	SpaceGeoLocationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

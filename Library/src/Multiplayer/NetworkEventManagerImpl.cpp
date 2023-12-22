@@ -18,17 +18,21 @@
 
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CallHelpers.h"
 #include "Multiplayer/MultiplayerKeyConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 
 #include <iostream>
 
+
 namespace csp::multiplayer
 {
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
+extern ErrorCode ParseError(std::exception_ptr Exception);
 
+
+constexpr const uint64_t ALL_CLIENTS_ID = -1;
 
 
 NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
@@ -44,9 +48,14 @@ void NetworkEventManagerImpl::SetConnection(csp::multiplayer::SignalRConnection*
 void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName,
 											   const csp::common::Array<ReplicatedValue>& Arguments,
 											   uint64_t TargetClientId,
-											   CallbackHandler Callback)
+											   ErrorCodeCallbackHandler Callback)
 {
-	assert(Connection != nullptr);
+	if (Connection == nullptr)
+	{
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
+
+		return;
+	}
 
 	csp::multiplayer::SignalRConnection* SignalRConnectionPtr = static_cast<csp::multiplayer::SignalRConnection*>(Connection);
 
@@ -54,21 +63,13 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 	{
 		if (Except != nullptr)
 		{
-			try
-			{
-				std::rethrow_exception(Except);
-			}
-			catch (const std::exception& e)
-			{
-				std::cout << "Caught exception \"" << e.what() << "\"\n";
-			}
+			auto Error = ParseError(Except);
+			INVOKE_IF_NOT_NULL(Callback, Error);
 
-			Callback(false);
+			return;
 		}
-		else
-		{
-			Callback(true);
-		}
+
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
 	};
 
 	std::map<uint64_t, signalr::value> Components;

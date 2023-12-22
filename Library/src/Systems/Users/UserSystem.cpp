@@ -155,19 +155,17 @@ void UserSystem::Login(const csp::common::String& UserName,
 	}
 }
 
-void UserSystem::LoginWithToken(const csp::common::String& UserId, const csp::common::String& LoginToken, LoginStateResultCallback Callback)
+void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
 {
-	LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
-	{
-		Callback(LoginStateRes);
+	auto Request = std::make_shared<chs::RefreshRequest>();
+	Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+	Request->SetUserId(UserId);
+	Request->SetRefreshToken(RefreshToken);
 
-		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
-		{
-			NotifyRefreshTokenHasChanged();
-		}
-	};
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
 
-	RefreshAuthenticationSession(UserId, LoginToken, csp::CSPFoundation::GetDeviceId(), LoginStateResCallback);
+	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
 }
 
 void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerifiedAge, LoginStateResultCallback Callback)
@@ -619,7 +617,7 @@ void UserSystem::GetCustomerPortalUrl(const csp::common::String& UserId, Custome
 	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCustomerPortalsUserIdGet(UserId, ResponseHandler);
 };
 
-void UserSystem::GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback)
+void UserSystem::GetCheckoutSessionUrl(TierNames Tier, CheckoutSessionUrlResultCallback Callback)
 {
 	auto CheckoutSessionInfo = std::make_shared<chs::StripeCheckoutRequest>();
 
@@ -633,22 +631,6 @@ void UserSystem::GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, Chec
 
 	static_cast<chs::StripeApi*>(StripeAPI)->apiV1VendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
 };
-
-void UserSystem::RefreshAuthenticationSession(const csp::common::String& UserId,
-											  const csp::common::String& RefreshToken,
-											  const csp::common::String& DeviceId,
-											  const LoginStateResultCallback& Callback)
-{
-	auto Request = std::make_shared<chs::RefreshRequest>();
-	Request->SetDeviceId(DeviceId);
-	Request->SetUserId(UserId);
-	Request->SetRefreshToken(RefreshToken);
-
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs::AuthDto>(Callback, &CurrentLoginState);
-
-	static_cast<chs::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
-}
 
 void UserSystem::NotifyRefreshTokenHasChanged()
 {

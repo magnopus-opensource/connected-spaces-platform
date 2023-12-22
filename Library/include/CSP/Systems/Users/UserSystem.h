@@ -43,6 +43,11 @@ namespace csp::systems
 /// Offers methods for creating accounts, authenticating, and retrieving user profiles.
 class CSP_API CSP_NO_DISPOSE UserSystem : public SystemBase
 {
+	/** @cond DO_NOT_DOCUMENT */
+	friend class SystemsManager;
+	friend class LoginStateResult;
+	/** @endcond */
+
 public:
 	~UserSystem();
 
@@ -72,13 +77,13 @@ public:
 								const csp::common::Optional<bool>& UserHasVerifiedAge,
 								LoginStateResultCallback Callback);
 
-	/// @brief Log in to Magnopus Connected Services using a login token
-	/// The login token can be obtained after using the Login API with credentials and having registered a callback through
-	/// SetNewLoginTokenReceivedCallback. If the login is successful in the callback result the token and it's expiration time will be provided.
-	/// @param UserId csp::common::String : the user ID associated with this login token
-	/// @param LoginToken csp::common::String : token to be used for authenticating
-	/// @param Callback LoginStateResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void LoginWithToken(const csp::common::String& UserId, const csp::common::String& LoginToken, LoginStateResultCallback Callback);
+	/// @brief Resume a previous session for the associated user ID using a refresh token
+	/// The refresh token can be obtained after registering a callback with `SetNewLoginTokenReceivedCallback` and logging in regularly.
+	/// @param UserId csp::common::String : User ID for the previous session
+	/// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
+	/// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void
+		RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services as a guest.
 	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
@@ -181,7 +186,7 @@ public:
 	CSP_ASYNC_RESULT void
 		UpdateUserDisplayName(const csp::common::String& UserId, const csp::common::String& NewUserDisplayName, NullResultCallback Callback);
 
-	/// @brief Delete the user.
+	/// @brief Delete the user. Note that you need permission to be able to delete the user (You can delete the user you are logged in as).
 	/// @param UserId csp::common::String : id of the user that will be deleted
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteUser(const csp::common::String& UserId, NullResultCallback Callback);
@@ -233,23 +238,15 @@ public:
 	/// @brief Get the checkout session Url for a user from Stripe
 	/// @param Tier csp::systems::TierNames : the tier of the checkout session needed
 	/// @param Callback CheckoutSessionUrlResultCallback : callback that contains the checkout session URL of the tier
-	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(const csp::systems::TierNames& Tier, CheckoutSessionUrlResultCallback Callback);
-
-protected:
-	CSP_NO_EXPORT UserSystem(csp::web::WebClient* InWebClient);
-
-	void RefreshAuthenticationSession(const csp::common::String& UserId,
-									  const csp::common::String& RefreshToken,
-									  const csp::common::String& DeviceId,
-									  const LoginStateResultCallback& Callback);
-
-	void NotifyRefreshTokenHasChanged();
+	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, CheckoutSessionUrlResultCallback Callback);
 
 private:
 	UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+	UserSystem(csp::web::WebClient* InWebClient);
 
 	[[nodiscard]] bool EmailCheck(const std::string& Email) const;
 
+	void NotifyRefreshTokenHasChanged();
 	void ResetAuthenticationState();
 
 	csp::services::ApiBase* AuthenticationAPI;

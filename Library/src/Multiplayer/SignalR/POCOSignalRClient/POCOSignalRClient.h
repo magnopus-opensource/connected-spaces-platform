@@ -20,6 +20,7 @@
 #include <Poco/Net/WebSocket.h>
 #include <atomic>
 #include <mutex>
+#include <signalrclient/hub_exception.h>
 #include <signalrclient/signalr_client_config.h>
 #include <thread>
 

@@ -15,18 +15,22 @@
  */
 #include "CSP/Systems/Assets/AssetSystem.h"
 
+#include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
 #include "Services/PrototypeService/Api.h"
+#include "Systems/ResultHelpers.h"
 #include "Web/RemoteFileManager.h"
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
 
+
 namespace chs = csp::services::generated::prototypeservice;
 
 constexpr int DEFAULT_SKIP_NUMBER		= 0;
 constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
+
 
 namespace
 {
@@ -139,6 +143,7 @@ std::shared_ptr<chs::PrototypeDto>
 
 } // namespace
 
+
 namespace csp::systems
 {
 
@@ -171,6 +176,7 @@ void AssetSystem::CreateAssetCollection(const csp::common::Optional<csp::common:
 										AssetCollectionResultCallback Callback)
 {
 	csp::common::Optional<csp::common::String> SpaceId;
+
 	if (InSpaceId.HasValue())
 	{
 		SpaceId = *InSpaceId;
@@ -201,8 +207,18 @@ void AssetSystem::DeleteAssetCollection(const csp::common::String& AssetCollecti
 	else
 	{
 		CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
-		Callback(NullResult::Invalid());
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+		return;
 	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
+																									nullptr,
+																									csp::web::EResponseCodes::ResponseNoContent);
+
+	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(AssetCollectionId, ResponseHandler);
 }
 
 void AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollectionId, AssetCollectionResultCallback Callback)
@@ -227,8 +243,7 @@ void AssetSystem::GetAssetCollectionsByIds(const csp::common::Array<csp::common:
 	{
 		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
-		// Call callback with an invalid result to let the user know an error occurred.
-		Callback(AssetCollectionsResult::Invalid());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
 
 		return;
 	}
@@ -280,18 +295,21 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 												AssetCollectionsResultCallback Callback)
 {
 	std::optional<std::vector<csp::common::String>> GroupIds;
+
 	if (SpaceId.HasValue())
 	{
 		GroupIds.emplace({*SpaceId});
 	}
 
 	std::optional<csp::common::String> ParentId;
+
 	if (AssetCollectionParentId.HasValue())
 	{
 		ParentId = *AssetCollectionParentId;
 	}
 
 	std::optional<std::vector<csp::common::String>> Tags;
+
 	if (AssetCollectionTags.HasValue())
 	{
 		Tags.emplace(std::vector<csp::common::String>());
@@ -304,6 +322,7 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 	}
 
 	std::optional<std::vector<csp::common::String>> Names;
+
 	if (AssetCollectionNames.HasValue())
 	{
 		Names.emplace(std::vector<csp::common::String>());
@@ -316,6 +335,7 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 	}
 
 	std::optional<int32_t> Skip;
+
 	if (ResultsSkipNumber.HasValue())
 	{
 		Skip = *ResultsSkipNumber;
@@ -326,6 +346,7 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 	}
 
 	std::optional<int32_t> Limit;
+
 	if (ResultsMaxNumber.HasValue())
 	{
 		Limit = *ResultsMaxNumber;
@@ -336,6 +357,7 @@ void AssetSystem::GetAssetCollectionsByCriteria(const csp::common::Optional<csp:
 	}
 
 	std::optional<std::vector<csp::common::String>> AssetsType;
+
 	if (AssetCollectionType.HasValue())
 	{
 		AssetsType.emplace(std::vector<csp::common::String>());
@@ -400,6 +422,7 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,
 	AssetInfo->SetName(Name);
 	AssetInfo->SetPrototypeId(AssetCollection.Id);
 	csp::common::String InAddressableId;
+
 	if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue())
 	{
 		if (ThirdPartyPackagedAssetIdentifier.HasValue() && ThirdPartyPlatform.HasValue())
@@ -415,18 +438,20 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,
 		{
 			InAddressableId = csp::common::StringFormat("%s|%d", "", static_cast<int>(*ThirdPartyPlatform));
 		}
-		// TODO CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
+
+		// TODO: CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
 		AssetInfo->SetAddressableId(InAddressableId);
 	}
+
 	AssetInfo->SetAssetType(ConvertAssetTypeToString(Type));
 
-	// TODO Move this to a separate function when we have some different values than DEFAULT
+	// TODO: Move this to a separate function when we have some different values than DEFAULT
 	std::vector<csp::common::String> Styles;
 	const auto DefaultStyle = "Default";
 	Styles.push_back(DefaultStyle);
 	AssetInfo->SetStyle(Styles);
 
-	// TODO Move this to a separate function when we have some different values than DEFAULT
+	// TODO: Move this to a separate function when we have some different values than DEFAULT
 	std::vector<csp::common::String> Platform;
 	const auto DefaultPlatform = "Default";
 	Platform.push_back(DefaultPlatform);
@@ -442,8 +467,6 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,
 
 void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 {
-
-
 	auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
 	AssetInfo->SetName(Asset.Name);
 	AssetInfo->SetId(Asset.Id);
@@ -452,7 +475,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 	AssetInfo->SetPrototypeId(Asset.AssetCollectionId);
 	AssetInfo->SetStyle(csp::common::Convert(Asset.Styles));
 
-	// TODO Move this to a separate function when we have some different values than DEFAULT
+	// TODO: Move this to a separate function when we have some different values than DEFAULT
 	std::vector<csp::common::String> Platform;
 	const auto DefaultPlatform = "Default";
 	Platform.push_back(DefaultPlatform);
@@ -550,6 +573,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Optional<csp::common::A
 	}
 
 	std::optional<std::vector<csp::common::String>> AssetDetailIds;
+
 	if (AssetIds.HasValue())
 	{
 		AssetDetailIds.emplace(std::vector<csp::common::String>());
@@ -562,6 +586,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Optional<csp::common::A
 	}
 
 	std::optional<std::vector<csp::common::String>> AssetDetailNames;
+
 	if (AssetNames.HasValue())
 	{
 		AssetDetailNames.emplace(std::vector<csp::common::String>());
@@ -574,6 +599,7 @@ void AssetSystem::GetAssetsByCriteria(const csp::common::Optional<csp::common::A
 	}
 
 	std::optional<std::vector<csp::common::String>> AssetDetailTypes;
+
 	if (AssetTypes.HasValue())
 	{
 		AssetDetailTypes.emplace(std::vector<csp::common::String>());
@@ -608,8 +634,7 @@ void AssetSystem::GetAssetsByCollectionIds(const csp::common::Array<csp::common:
 	{
 		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
-		// Call callback with an invalid result to let the user know an error occurred.
-		Callback(AssetsResult::Invalid());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
 
 		return;
 	}
@@ -653,19 +678,24 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection,
 									csp::common::CancellationToken& CancellationToken,
 									UriResultCallback Callback)
 {
-	assert(!Asset.Name.IsEmpty());
+	if (Asset.Name.IsEmpty())
+	{
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<UriResult>());
+
+		return;
+	}
 
 	auto FormFile = std::make_shared<csp::web::HttpPayload>();
 	AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
 
-	UriResultCallback InternalCallback = [Callback, Asset](const UriResult& LocalCallback)
+	UriResultCallback InternalCallback = [Callback, Asset](const UriResult& Result)
 	{
-		if (LocalCallback.GetFailureReason() != systems::ERequestFailureReason::None)
+		if (Result.GetFailureReason() != systems::ERequestFailureReason::None)
 		{
 			CSP_LOG_ERROR_MSG(csp::common::String("Asset with Id %s has failed to upload").c_str());
 		}
 
-		Callback(LocalCallback);
+		INVOKE_IF_NOT_NULL(Callback, Result);
 	};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -709,7 +739,7 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 			InternalResult.SetValue(Value);
 		}
 
-		Callback(InternalResult);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
 	};
 
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -720,9 +750,9 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 
 CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetCollection, LODChainResultCallback Callback)
 {
-	auto GetAssetsCallback = [AssetCollection, Callback](const AssetsResult& AssetsResult)
+	auto GetAssetsCallback = [AssetCollection, Callback](const csp::systems::AssetsResult& AssetsResult)
 	{
-		LODChainResult LODResult(AssetsResult);
+		LODChainResult LODResult(AssetsResult.GetResultCode(), AssetsResult.GetHttpResultCode());
 
 		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
 		{
@@ -730,10 +760,10 @@ CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetColle
 			LODResult.SetLODChain(std::move(Chain));
 		}
 
-		Callback(LODResult);
+		INVOKE_IF_NOT_NULL(Callback, LODResult);
 	};
 
-	GetAssetsByCriteria({AssetCollection.Id}, nullptr, nullptr, csp::common::Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
+	GetAssetsByCriteria({AssetCollection.Id}, nullptr, nullptr, nullptr, csp::common::Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
 }
 
 CSP_ASYNC_RESULT_WITH_PROGRESS void
@@ -742,45 +772,52 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	// GetAssetsByCriteria
 	auto GetAssetsCallback = [this, AssetCollection, Asset, LODLevel, Callback](const AssetsResult& AssetsResult)
 	{
-		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Success)
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();
-			LODChain Chain										  = CreateLODChainFromAssets(Assets, AssetCollection.Id);
-
-			if (ValidateNewLODLevelForChain(Chain, LODLevel) == false)
-			{
-				CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
-				Callback(AssetsResult);
-				return;
-			}
-
-			// UpdateAsset
-			auto UpdateAssetCallback = [this, AssetCollection, Callback, Assets](const AssetResult& AssetResult)
-			{
-				Callback(AssetResult);
-			};
-
-			// Add new LOD style
-			csp::systems::Asset NewAsset = Asset;
-			csp::common::Array<csp::common::String> NewStyles(NewAsset.Styles.Size() + 1);
-
-			for (int i = 0; i < NewAsset.Styles.Size(); ++i)
-			{
-				NewStyles[i] = NewAsset.Styles[i];
-			}
-
-			NewStyles[NewAsset.Styles.Size()] = CreateLODStyleVar(LODLevel);
-			NewAsset.Styles					  = std::move(NewStyles);
-
-			UpdateAsset(NewAsset, UpdateAssetCallback);
+			return;
 		}
-		else
+
+		if (AssetsResult.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
-			Callback(AssetsResult);
+			INVOKE_IF_NOT_NULL(Callback, AssetsResult);
+
+			return;
 		}
+
+		const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();
+		LODChain Chain										  = CreateLODChainFromAssets(Assets, AssetCollection.Id);
+
+		if (!ValidateNewLODLevelForChain(Chain, LODLevel))
+		{
+			CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
+
+			INVOKE_IF_NOT_NULL(Callback, AssetsResult);
+
+			return;
+		}
+
+		// UpdateAsset
+		auto UpdateAssetCallback = [this, AssetCollection, Callback, Assets](const AssetResult& AssetResult)
+		{
+			INVOKE_IF_NOT_NULL(Callback, AssetResult);
+		};
+
+		// Add new LOD style
+		csp::systems::Asset NewAsset = Asset;
+		csp::common::Array<csp::common::String> NewStyles(NewAsset.Styles.Size() + 1);
+
+		for (int i = 0; i < NewAsset.Styles.Size(); ++i)
+		{
+			NewStyles[i] = NewAsset.Styles[i];
+		}
+
+		NewStyles[NewAsset.Styles.Size()] = CreateLODStyleVar(LODLevel);
+		NewAsset.Styles					  = std::move(NewStyles);
+
+		UpdateAsset(NewAsset, UpdateAssetCallback);
 	};
 
-	GetAssetsByCriteria({Asset.AssetCollectionId}, nullptr, nullptr, csp::common::Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
+	GetAssetsByCriteria({Asset.AssetCollectionId}, nullptr, nullptr, nullptr, csp::common::Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
 }
 
 } // namespace csp::systems

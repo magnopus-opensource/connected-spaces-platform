@@ -48,7 +48,7 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem,
 				  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
 	char UniqueThirdPartyAnchorId[256];
-	SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueHexString().c_str());
+	SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueString().c_str());
 
 	auto AnchorPosition		   = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
 	auto AnchorRotation		   = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -90,7 +90,7 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem,
 						 const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags)
 {
 	char UniqueThirdPartyAnchorId[256];
-	SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueHexString().c_str());
+	SPRINTF(UniqueThirdPartyAnchorId, "OLY-UNITTEST-ID-%s", GetUniqueString().c_str());
 
 	auto AnchorPosition		   = csp::systems::OlyAnchorPosition(100.0, 100.0, 100.0);
 	auto AnchorRotation		   = csp::systems::OlyRotation(100.0, 100.0, 100.0, 100.0);
@@ -191,7 +191,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -236,9 +236,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -261,13 +261,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";
@@ -322,11 +322,11 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -349,13 +349,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -431,9 +431,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -458,13 +458,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";
@@ -594,11 +594,11 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -621,13 +621,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -706,9 +706,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", "OLY-UNITTEST-SPACE-REWIND", GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", "OLY-UNITTEST-SPACE-REWIND", GetUniqueString().c_str());
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", "OLY-UNITTEST-ASSET-COLLECTION-REWIND", GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", "OLY-UNITTEST-ASSET-COLLECTION-REWIND", GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -777,9 +777,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSET-COLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -802,13 +802,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 	}
 
 	csp::common::String ObjectName					 = "Object 1";

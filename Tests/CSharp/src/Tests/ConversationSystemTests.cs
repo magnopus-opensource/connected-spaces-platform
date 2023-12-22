@@ -60,16 +60,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var conversationSystem = connection.GetConversationSystem();
@@ -307,9 +307,9 @@ namespace CSPEngine
 
             // Disconnect
             {
-                var ok = connection.Disconnect().Result;
+                var err = connection.Disconnect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             connection.Dispose();
@@ -363,16 +363,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var conversationSystem = connection.GetConversationSystem();
@@ -539,9 +539,9 @@ namespace CSPEngine
 
             // Cleanup
             {
-                var ok = connection.Disconnect().Result;
+                var err = connection.Disconnect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             connection.Dispose();
@@ -583,16 +583,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var conversationSystem = connection.GetConversationSystem();
@@ -651,9 +651,9 @@ namespace CSPEngine
             }
 
             {
-                var ok = connection.Disconnect().Result;
+                var err = connection.Disconnect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             connection.Dispose();
@@ -698,16 +698,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Setup Asset callback
@@ -795,9 +795,9 @@ namespace CSPEngine
             }
 
             {
-                var ok = connection.Disconnect().Result;
+                var err = connection.Disconnect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             connection.Dispose();
@@ -1139,16 +1139,16 @@ namespace CSPEngine
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             // Fetch all entities, etc.
             {
-                var ok = connection.InitialiseConnection().Result;
+                var err = connection.InitialiseConnection().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var gotMessage = false;
@@ -1289,9 +1289,9 @@ namespace CSPEngine
 
             // Disconnect
             {
-                var ok = connection.Disconnect().Result;
+                var err = connection.Disconnect().Result;
 
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             connection.Dispose();

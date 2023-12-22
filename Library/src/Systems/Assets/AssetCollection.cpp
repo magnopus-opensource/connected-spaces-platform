@@ -195,14 +195,6 @@ void AssetCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
 }
 
 
-
-AssetCollectionsResult AssetCollectionsResult::Invalid()
-{
-	static AssetCollectionsResult result(csp::systems::EResultCode::Failed, 0);
-
-	return result;
-}
-
 csp::common::Array<AssetCollection>& AssetCollectionsResult::GetAssetCollections()
 {
 	return AssetCollections;
@@ -258,6 +250,7 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
 
 			uint64_t ConvertedTotalCount = 0;
 			const auto result = std::from_chars(TotalCountStr.c_str(), TotalCountStr.c_str() + TotalCountStr.Length(), ConvertedTotalCount);
+
 			if (result.ec == std::errc())
 			{
 				ResultTotalCount = ConvertedTotalCount;

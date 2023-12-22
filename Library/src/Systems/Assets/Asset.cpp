@@ -260,13 +260,6 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 }
 
 
-AssetsResult AssetsResult::Invalid()
-{
-	static AssetsResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
 csp::common::Array<Asset>& AssetsResult::GetAssets()
 {
 	return Assets;
@@ -311,11 +304,9 @@ const csp::common::String& UriResult::GetUri() const
 	return Uri;
 }
 
-UriResult UriResult::Invalid()
+void UriResult::SetUri(const csp::common::String& Value)
 {
-	static UriResult result(csp::systems::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
+	Uri = Value;
 }
 
 UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)

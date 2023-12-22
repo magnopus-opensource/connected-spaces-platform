@@ -19,6 +19,7 @@
 #include "Memory/Memory.h"
 
 #include <algorithm>
+#include <cctype>
 
 
 namespace csp::common
@@ -348,7 +349,7 @@ String& String::operator+=(const char* Other)
 	return *this;
 }
 
-String String::Trim()
+String String::Trim() const
 {
 	static char Whitespace[] = {' ', '\r', '\n', '\t'};
 
@@ -379,6 +380,20 @@ String String::Trim()
 	}
 
 	return String(Text, Length);
+}
+
+String String::ToLower() const
+{
+	String Copy = *this;
+	auto Length = Copy.ImplPtr->Length;
+	auto Text	= Copy.ImplPtr->Text;
+
+	for (int i = 0; i < Length; ++i)
+	{
+		Text[i] = std::tolower(Text[i]);
+	}
+
+	return Copy;
 }
 
 String String::Join(const List<String>& Parts, Optional<char> Separator)
