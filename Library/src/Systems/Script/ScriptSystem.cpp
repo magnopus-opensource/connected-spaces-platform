@@ -538,7 +538,7 @@ void ScriptSystem::OnScriptModuleCollectionCreated(const csp::common::String& Sc
 	// 3. AssetCollection/prototype exists - Create a module.
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-	const csp::common::String ScriptModuleName
+	const csp::common::String FullScriptModuleName
 		= csp::common::StringFormat("%s%s_%s", SCRIPT_MODULE_PREFIX, ScriptModuleNamespace.c_str(), ScriptModuleName.c_str());
 
 	csp::systems::AssetCollection InternalAssetCollection;
@@ -547,7 +547,8 @@ void ScriptSystem::OnScriptModuleCollectionCreated(const csp::common::String& Sc
 	const AssetResultCallback CreateScriptModuleAssetCallback(
 		std::bind(&ScriptSystem::OnScriptModuleAssetCreated, this, InternalAssetCollection, ScriptSource, Callback, std::placeholders::_1));
 
-	AssetSystem->CreateAsset(InternalAssetCollection, ScriptModuleName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateScriptModuleAssetCallback);
+	AssetSystem
+		->CreateAsset(InternalAssetCollection, FullScriptModuleName, nullptr, nullptr, EAssetType::SCRIPT_MODULE, CreateScriptModuleAssetCallback);
 }
 
 void ScriptSystem::OnScriptModuleAssetCreated(const AssetCollection& ScriptModuleAssetCollection,
