@@ -62,7 +62,7 @@ namespace CSPEngine
         static bool AreTestAssetCollectionsEqual(Systems.AssetCollection lhs, Systems.AssetCollection rhs)
             => lhs.Id == rhs.Id
             && lhs.Name == rhs.Name
-            && lhs.SpaceIds[0] == rhs.SpaceIds[0];
+            && lhs.SpaceId == rhs.SpaceId;
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_CREATEPOI_TEST
