@@ -2193,10 +2193,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	LogIn(UserSystem, UserId);
 
 	// Create 'source' space and asset collection
+	csp::systems::Space SourceSpace;
 	{
 		printf("Creating source space and asset collection.\n");
 
-		csp::systems::Space SourceSpace;
 		CreateSpace(SpaceSystem, SourceSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, SourceSpace);
 
 		char AssetCollectionName[256];
@@ -2292,7 +2292,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
-	// Validating we cannot perform a copy of assets that belong to different spaces.
+	// Validating we cannot perform a copy of assets that belong to different spaces
 	{
 		printf("Validating we cannot perform a copy of assets that belong to different spaces but still get the async response...\n");
 
@@ -2306,6 +2306,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
+
+	// Delete spaces
+	DeleteSpace(SpaceSystem, SourceSpace.Id);
+	DeleteSpace(SpaceSystem, DestSpace.Id);
 
 	// Log out
 	LogOut(UserSystem);
