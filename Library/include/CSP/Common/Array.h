@@ -75,10 +75,10 @@ public:
 		{
 			AllocArray(Size);
 
-			// Perform the copy per-element, via the assignment operator, to avoid
-			// introducing inadvertent shared memory ownership between elements in different arrays.
-			// We do not, for example, want an array of strings to hold the same pointers to string
-			// memory as another array it has been constructed from.
+			// Perform the copy per-element via the assignment operator, rather than memcpy.
+			// This is to avoid introducing inadvertent shared memory ownership between elements in different arrays.
+			// We do not, for example, want strings in an array to hold the same pointers to
+			// memory as another array containing strings that it was constructed from.
 			for (size_t i = 0; i < Size; i++)
 			{
 				ObjectArray[i] = Buffer[i];
