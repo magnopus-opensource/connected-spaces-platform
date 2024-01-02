@@ -20,7 +20,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-
+#include "Interfaces/IExternalResourceComponent.h"
 
 
 namespace csp::multiplayer
@@ -40,26 +40,55 @@ enum class ScriptComponentPropertyKeys
 	ScriptSource = 1,
 	OwnerId,
 	ScriptScope,
+	ExternalResourceAssetId,
+	ExternalResourceAssetCollectionId,
 	Num
 };
 
 
 /// @ingroup ScriptSpaceComponent
 /// @brief Data representation of a ScriptSpaceComponent.
-class CSP_API ScriptSpaceComponent : public ComponentBase
+class CSP_API ScriptSpaceComponent : public ComponentBase, public IExternalResourceComponent
 {
 public:
 	/// @brief Constructs the script space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
 	ScriptSpaceComponent(SpaceEntity* Parent);
 
+	/// \addtogroup IExternalResourceComponent
+	/// @{
+	/// @brief Get the ID for the asset used to store the Script source for this component.
+	/// @note To retrieve this component's Script source, both the Asset ID and the Asset Collection ID are required.
+	/// @return csp::common::String : The Script source asset ID.
+	const csp::common::String& GetExternalResourceAssetId() const override;
+
+	/// @brief Set the ID for the asset used to store the Script source for this component.
+	/// @note To retrieve this component's Script source, both the Asset ID and the Asset Collection ID are required.
+	/// @param csp::common::String : The Script source asset ID.
+	void SetExternalResourceAssetId(const csp::common::String& Value) override;
+
+	/// @brief Gets the ID of the asset collection associated with this component.
+	/// @note To retrieve this component's Script source, both the Asset ID and the Asset Collection ID are required.
+	/// @return The ID of the asset collection associated with this component.
+	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
+
+	/// @brief Sets the ID of the asset collection associated with this component.
+	/// @note To retrieve this component's Script source, both the Asset ID and the Asset Collection ID are required.
+	/// @param Value The ID of the asset collection associated with this component.
+	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
+	/// @}
+
+	/* clang-format off */
+	[[deprecated("The Script Component now uses an Asset to store the Script source. Please use the associated Get/SetExternalResourceAssetId and Get/SetExternalResourceAssetCollectionId methods.")]]
 	/// @brief Retrieves the source of the script of this script component.
 	/// @return The script source of this script component.
 	const csp::common::String& GetScriptSource() const;
-
+    
+	[[deprecated("The Script Component now uses an Asset to store the Script source. Please use the associated Get/SetExternalResourceAssetId and Get/SetExternalResourceAssetCollectionId methods.")]]
 	/// @brief Sets the source of the script of this script component.
 	/// @param ScriptSource The script source of this script component.
 	void SetScriptSource(const csp::common::String& ScriptSource);
+	/* clang-format on */
 
 	/// @brief Gets the ID of the owner of this script component.
 	/// @return The ID of the owner of this script.

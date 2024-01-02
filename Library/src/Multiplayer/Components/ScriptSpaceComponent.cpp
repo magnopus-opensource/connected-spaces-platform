@@ -24,11 +24,51 @@ namespace csp::multiplayer
 
 ScriptSpaceComponent::ScriptSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::ScriptData, Parent)
 {
-	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource)] = "";
-	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)]		 = static_cast<int64_t>(0);
-	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope)]	 = static_cast<int64_t>(ScriptScope::Owner);
+	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource)]					  = "";
+	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId)]							  = static_cast<int64_t>(0);
+	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptScope)]						  = static_cast<int64_t>(ScriptScope::Owner);
+	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetId)]			  = "";
+	Properties[static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetCollectionId)] = "";
 
 	Parent->GetScript()->SetScriptSpaceComponent(this);
+}
+
+const csp::common::String& ScriptSpaceComponent::GetExternalResourceAssetId() const
+{
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultString();
+}
+
+void ScriptSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetId), Value);
+}
+
+const csp::common::String& ScriptSpaceComponent::GetExternalResourceAssetCollectionId() const
+{
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetCollectionId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultString();
+}
+
+void ScriptSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
 const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
