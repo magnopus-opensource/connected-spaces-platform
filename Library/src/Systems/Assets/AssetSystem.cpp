@@ -218,6 +218,8 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	if (SourceAssetCollections.Size() == 0)
 	{
 		CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
 		return;
 	}
 
@@ -231,10 +233,23 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 		AssetCollectionIds.emplace_back(SourceAssetCollections[i].Id);
 	}
 
+	// Verify we have a valid space ID to copy from.
+	if (SourceSpaceId.IsEmpty())
+	{
+		CSP_LOG_MSG(
+			LogLevel::Error,
+			"An asset with no space ID was provided whilst attempting to perform a copy to another space. All assets must have a valid space ID.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
+		return;
+	}
+
 	// Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
 	if (AssetCollectionsBelongToSameSpace == false)
 	{
 		CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
 		return;
 	}
 
