@@ -74,7 +74,15 @@ public:
 		if (Buffer != nullptr && Size > 0)
 		{
 			AllocArray(Size);
-			memcpy(ObjectArray, Buffer, Size * sizeof(T));
+
+			// Perform the copy per-element, via the assignment operator, to avoid
+			// introducing inadvertent shared memory ownership between elements in different arrays.
+			// We do not, for example, want an array of strings to hold the same pointers to string
+			// memory as another array it has been constructed from.
+			for (size_t i = 0; i < Size; i++)
+			{
+				ObjectArray[i] = Buffer[i];
+			}
 		}
 	}
 
