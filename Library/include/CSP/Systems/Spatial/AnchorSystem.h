@@ -115,7 +115,7 @@ public:
 	/// @param SpatialValues csp::common::Array<csp::common::String> : optional searchable SpatialValues associated with the Anchor
 	/// @param Tags csp::common::Array<csp::common::String> : optional searchable Tags info associated with the Anchor
 	/// @param AllTags bool : optional flag to determine of all tags must be present in Anchor
-	/// @param SpaceIds csp::common::Array<csp::common::String> : optional array of ids of spaces to search within
+	/// @param SpaceId csp::common::Array<csp::common::String> : optional array of ids of spaces to search within
 	/// @param Skip int : optional Number of result entries that will be skipped from the result.
 	/// @param Limit int : optional Maximum number of result entries to be retrieved. for all available result entries pass
 	/// @param Callback AnchorCollectionResultCallback : callback when asynchronous task finishes

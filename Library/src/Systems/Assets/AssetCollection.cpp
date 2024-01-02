@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
 
+#include "CSP/Systems/Log/LogSystem.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/Dto.h"
 
@@ -93,12 +94,15 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 
 	if (Dto.HasGroupIds())
 	{
-		auto& GroupIds			 = Dto.GetGroupIds();
-		AssetCollection.SpaceIds = csp::common::Array<csp::common::String>(GroupIds.size());
-
-		for (int i = 0; i < GroupIds.size(); ++i)
+		auto& GroupIds = Dto.GetGroupIds();
+		if (GroupIds.size() > 0)
 		{
-			AssetCollection.SpaceIds[i] = GroupIds[i];
+			AssetCollection.SpaceId = GroupIds[0];
+		}
+		else
+		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Error,
+						"Encountered an asset collection that did not belong to any space whilst processing a response from services.");
 		}
 	}
 
@@ -143,7 +147,7 @@ AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
 	Tags			  = Other.Tags;
 	PointOfInterestId = Other.PointOfInterestId;
 	ParentId		  = Other.ParentId;
-	SpaceIds		  = Other.SpaceIds;
+	SpaceId			  = Other.SpaceId;
 	CreatedBy		  = Other.CreatedBy;
 	CreatedAt		  = Other.CreatedAt;
 	UpdatedBy		  = Other.UpdatedBy;

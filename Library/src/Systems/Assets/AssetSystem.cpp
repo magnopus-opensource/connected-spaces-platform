@@ -210,6 +210,65 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
 }
 
+void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections,
+											  const csp::common::String& DestSpaceId,
+											  bool CopyAsync,
+											  AssetCollectionsResultCallback Callback)
+{
+	if (SourceAssetCollections.Size() == 0)
+	{
+		CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
+		return;
+	}
+
+	csp::common::String SourceSpaceId					= SourceAssetCollections[0].SpaceId;
+	std::vector<csp::common::String> AssetCollectionIds = {SourceAssetCollections[0].Id};
+
+	bool AssetCollectionsBelongToSameSpace = true;
+	for (size_t i = 1; i < SourceAssetCollections.Size(); ++i)
+	{
+		AssetCollectionsBelongToSameSpace &= SourceAssetCollections[i].SpaceId == SourceSpaceId;
+		AssetCollectionIds.emplace_back(SourceAssetCollections[i].Id);
+	}
+
+	// Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
+	if (AssetCollectionsBelongToSameSpace == false)
+	{
+		CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
+		return;
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
+			Callback,
+			nullptr);
+
+	// Use `GET /api/v1/prototypes` and only pass asset collection IDs
+	static_cast<chs::PrototypeApi*>(PrototypeAPI)
+		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
+			std::nullopt,							// Tags
+			std::nullopt,							// TagsAll
+			AssetCollectionIds,						// const std::optional<std::vector<utility::string_t>>& Ids
+			std::nullopt,							// Names
+			std::nullopt,							// PartialNames
+			std::nullopt,							// ExcludedIds
+			std::nullopt,							// PointOfInterestIds
+			std::nullopt,							// ParentId
+			std::nullopt,							// GroupIds
+			std::nullopt,							// Types
+			true,									// HasGroup
+			std::nullopt,							// CreatedBy
+			std::nullopt,							// PrototypeOwnerIds
+			std::nullopt,							// ReadAccessFilters
+			std::nullopt,							// WriteAccessFilters
+			SourceSpaceId,							// originalGroupId
+			DestSpaceId,							// newGroupId
+			CopyAsync,								// asyncCall
+			ResponseHandler,						// ResponseHandler
+			csp::common::CancellationToken::Dummy() // CancellationToken
+		);
+}
+
 void AssetSystem::GetAssetCollectionById(const csp::common::String& AssetCollectionId, AssetCollectionResultCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -385,14 +444,8 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
 												const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
 												AssetCollectionResultCallback Callback)
 {
-	csp::common::Optional<csp::common::String> SpaceId;
-
-	if (!AssetCollection.SpaceIds.IsEmpty())
-	{
-		SpaceId = AssetCollection.SpaceIds[0];
-	}
-
-	auto PrototypeInfo = CreatePrototypeDto(SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, nullptr);
+	auto PrototypeInfo
+		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, nullptr);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
@@ -762,7 +815,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 		{
 			INVOKE_IF_NOT_NULL(Callback, AssetsResult);
 
-            return;
+			return;
 		}
 
 		const csp::common::Array<csp::systems::Asset>& Assets = AssetsResult.GetAssets();

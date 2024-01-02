@@ -76,6 +76,18 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
 
+	/// @brief Copies an array of asset collections to another space. Note that all source asset collections must belong to the same space.
+	/// @param SourceAssetCollections csp::common::Array<AssetCollection> : The array of asset collections to copy. They must all belong to the same
+	/// space.
+	/// @param DestSpaceId  const csp::common::String : The unique identifier of the space to copy these asset collections to.
+	/// @param CopyAsync const csp::common::Optional<bool> : Whether to instruct the services to perform the copy of the asset collections
+	/// asynchronously.
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections,
+													  const csp::common::String& DestSpaceId,
+													  bool CopyAsync,
+													  AssetCollectionsResultCallback Callback);
+
 	/// @brief Finds an asset collection by its Id.
 	/// @param AssetCollectionId csp::common::String : asset collection to delete
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
@@ -97,8 +109,8 @@ public:
 	/// @param Space Space : optional space to get asset collections associated with it
 	/// @param AssetCollectionParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
 	/// @param AssetCollectionType EAssetCollectionType : type of the asset collection
-	/// @param AssetCollectionTags csp::common::Array<csp::common::String : optional array of strings representing asset collection tags
-	/// @param AssetCollectionNames csp::common::Optional<csp::common::Array<csp::common::String : optional array of strings representing asset
+	/// @param AssetCollectionTags csp::common::Array<csp::common::String> : optional array of strings representing asset collection tags
+	/// @param AssetCollectionNames csp::common::Optional<csp::common::Array<csp::common::String>> : optional array of strings representing asset
 	/// collection names
 	/// @param ResultsSkipNumber int : optional param representing the number of result entries that will be skipped from the result. For no skip pass
 	/// nullptr.
