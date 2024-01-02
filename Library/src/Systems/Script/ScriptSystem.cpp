@@ -362,13 +362,15 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 		{
 			ScriptModuleAssetResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 			Callback(InternalResult);
+
 			return;
 		}
 
 		const Asset& InternalAsset = Result.GetAssets()[0];
 
-		AssetDataResultCallback GetAssetDataCallback(
-			std::bind(&ScriptSystem::OnDownloadAssetData, this, ModuleNamespace, ModuleName, InternalAsset.Id, Callback, std::placeholders::_1));
+		// todo: look at replacing these with a macro to make the intent clearer.
+		AssetDataResultCallback GetAssetDataCallback
+			= std::bind(&ScriptSystem::OnDownloadAssetData, this, ModuleNamespace, ModuleName, InternalAsset.Id, Callback, std::placeholders::_1);
 
 		AssetSystem->DownloadAssetData(InternalAsset, GetAssetDataCallback);
 	};
@@ -376,6 +378,7 @@ void ScriptSystem::GetScriptModuleAsset(const csp::common::String& ModuleNamespa
 	AssetSystem->GetAssetsByCriteria(nullptr, {ScriptModuleNamespace}, nullptr, {ScriptModuleName}, nullptr, GetAssetsCallback);
 }
 
+// todo: make these past tense rather, ie AssetDataDownloaded
 void ScriptSystem::OnDownloadAssetData(const csp::common::String& ModuleNamespace,
 									   const csp::common::String& ModuleName,
 									   const csp::common::String& ScriptModuleAssetId,
@@ -392,6 +395,7 @@ void ScriptSystem::OnDownloadAssetData(const csp::common::String& ModuleNamespac
 	if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 	{
 		Callback(InternalResult);
+
 		return;
 	}
 
@@ -428,6 +432,7 @@ void ScriptSystem::GetScriptModuleAssetNames(const csp::common::String& ModuleNa
 		{
 
 			Callback(InternalResult);
+
 			return;
 		}
 
