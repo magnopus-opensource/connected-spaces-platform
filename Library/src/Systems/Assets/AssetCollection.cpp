@@ -245,7 +245,11 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
 	{
 		JsonDoc.Parse(JsonContent.c_str());
 
-		if (JsonDoc.HasMember("itemTotalCount"))
+		if (JsonDoc.IsArray())
+		{
+			ResultTotalCount = JsonDoc.GetArray().Size();
+		}
+		else if (JsonDoc.HasMember("itemTotalCount"))
 		{
 			rapidjson::Value& Val	 = JsonDoc["itemTotalCount"];
 			const auto TotalCountStr = csp::web::JsonObjectToString(Val);
