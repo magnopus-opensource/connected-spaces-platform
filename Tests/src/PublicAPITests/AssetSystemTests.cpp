@@ -2178,6 +2178,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	const char* SpaceDescription		= "OLY-UNITTEST-SPACEDESC-REWIND";
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+	auto FilePath						= std::filesystem::absolute("assets/test.json");
 
 	char SourceSpaceName[256];
 	SPRINTF(SourceSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -2191,8 +2192,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Create 'source' space and asset
+	// Create 'source' space and asset collection
 	{
+		printf("Creating source space and asset collection.\n");
+
 		csp::systems::Space SourceSpace;
 		CreateSpace(SpaceSystem, SourceSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, SourceSpace);
 
@@ -2205,12 +2208,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 		// Create an asset collection that belongs to the source space with a single valid asset
 		CreateAssetCollection(AssetSystem, SourceSpace.Id, nullptr, AssetCollectionName, nullptr, nullptr, SourceAssetCollection);
 
-		// Create asset
+		// Create an asset that belongs to the source collection
 		csp::systems::Asset Asset;
 		CreateAsset(AssetSystem, SourceAssetCollection, AssetName, nullptr, nullptr, Asset);
 
-		// Upload asset data
-		auto FilePath = std::filesystem::absolute("assets/test.json");
+		// Upload data for the source asset we have created
 		csp::systems::FileAssetDataSource Source;
 		Source.FilePath = FilePath.u8string().c_str();
 		Source.SetMimeType("application/json");
@@ -2222,14 +2224,87 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	}
 
 	// Create 'dest' space and invoke the copy
+	csp::systems::Space DestSpace;
+	csp::common::Array<csp::systems::AssetCollection> DestAssetCollections;
 	{
-		csp::systems::Space DestSpace;
+		printf("Creating dest space and invoking the copy...\n");
+
 		CreateSpace(SpaceSystem, DestSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, DestSpace);
 
 		csp::common::Array<csp::systems::AssetCollection> SourceAssetCollections(&SourceAssetCollection, 1);
 		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+		DestAssetCollections = Result.GetAssetCollections();
+	}
+
+	// Validate the copied asset collection and its data
+	{
+		printf("Validating the copied asset collection and its data...\n");
+
+		EXPECT_EQ(DestAssetCollections.Size(), 1);
+		EXPECT_NE(DestAssetCollections[0].Id, SourceAssetCollection.Id);
+		EXPECT_EQ(DestAssetCollections[0].SpaceId, DestSpace.Id);
+		EXPECT_EQ(DestAssetCollections[0].Type, SourceAssetCollection.Type);
+		EXPECT_EQ(DestAssetCollections[0].Tags.Size(), 1);
+		EXPECT_EQ(DestAssetCollections[0].Tags[0],
+				  csp::common::String("origin-") + SourceAssetCollection.Id); // we expect the services to automatically denote the origin asset
+
+		csp::common::Array<csp::systems::Asset> DestAssets;
+		GetAssetsInCollection(AssetSystem, DestAssetCollections[0], DestAssets);
+		EXPECT_EQ(DestAssets.Size(), 1);
+
+		// Get the copied data and compare it with our source
+		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, DestAssets[0]);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+		size_t DownloadedAssetDataSize = Result.GetDataLength();
+		auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
+		memcpy(DownloadedAssetData, Result.GetData(), DownloadedAssetDataSize);
+
+		FILE* File		   = fopen(FilePath.string().c_str(), "rb");
+		uintmax_t FileSize = std::filesystem::file_size(FilePath);
+		auto* FileData	   = new unsigned char[FileSize];
+		fread(FileData, FileSize, 1, File);
+		fclose(File);
+
+		EXPECT_EQ(DownloadedAssetDataSize, FileSize);
+		EXPECT_EQ(memcmp(DownloadedAssetData, FileData, FileSize), 0);
+	}
+
+	// Validating that we must have at least one asset collection to copy
+	{
+		printf("Validating that we must have at least one asset collection to copy...\n");
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections;
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Validating we cannot perform a copy if the asset has no space ID
+	{
+		printf("Validating we cannot perform a copy if the asset has no space ID...\n");
+
+		csp::systems::AssetCollection NoSpaceIDAssetCollection;
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections = {NoSpaceIDAssetCollection};
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Validating we cannot perform a copy of assets that belong to different spaces.
+	{
+		printf("Validating we cannot perform a copy of assets that belong to different spaces but still get the async response...\n");
+
+		csp::systems::AssetCollection FirstSpaceAssetCollection;
+		FirstSpaceAssetCollection.SpaceId = "123456";
+
+		csp::systems::AssetCollection SecondSpaceAssetCollection;
+		SecondSpaceAssetCollection.SpaceId = "456789";
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections = {FirstSpaceAssetCollection, SecondSpaceAssetCollection};
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	}
 
 	// Log out
