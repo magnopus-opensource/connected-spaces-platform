@@ -95,16 +95,20 @@ void GetAssetCollections(csp::systems::AssetSystem* AssetSystem,
 						 csp::systems::Space& Space,
 						 csp::common::Array<csp::systems::AssetCollection>& OutAssetCollections)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionsByCriteria,
-							  AssetSystem,
-							  Space.Id,
+	csp::common::Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::DEFAULT};
+	csp::common::Array<csp::common::String> GroupIds					  = {Space.Id};
+
+	auto [Result] = AWAIT_PRE(AssetSystem,
+							  FindAssetCollections,
+							  RequestPredicate,
 							  nullptr,
-							  csp::systems::EAssetCollectionType::DEFAULT,
 							  nullptr,
 							  nullptr,
+							  PrototypeTypes,
 							  nullptr,
-							  nullptr)
-						.Await(RequestPredicate);
+							  GroupIds,
+							  nullptr,
+							  nullptr);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -135,7 +139,8 @@ void GetAssetCollectionsByIds(csp::systems::AssetSystem* AssetSystem,
 {
 	EXPECT_FALSE(Ids.IsEmpty());
 
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionsByIds, AssetSystem, Ids).Await(RequestPredicate);
+	auto [Result]
+		= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, Ids, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 

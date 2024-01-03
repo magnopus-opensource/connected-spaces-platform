@@ -1099,14 +1099,14 @@ void SpaceSystem::GetMetadataAssetCollection(const String& SpaceId, AssetCollect
 void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& SpaceIds, AssetCollectionsResultCallback Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-	Array<String> AssetCollectionNames(SpaceIds.Size());
+	Array<String> PrototypeNames(SpaceIds.Size());
 
 	for (auto item = 0; item < SpaceIds.Size(); ++item)
 	{
-		AssetCollectionNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
+		PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
 	}
 
-	AssetSystem->GetAssetCollectionsByCriteria(nullptr, nullptr, nullptr, nullptr, AssetCollectionNames, nullptr, nullptr, Callback);
+	AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
 }
 
 void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<String, String>& Metadata, NullResultCallback Callback)
@@ -1353,16 +1353,11 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
 	auto* AssetSystem				 = SystemsManager::Get().GetAssetSystem();
 	auto MetadataAssetCollectionName = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
 
-	const Array<String> Tag({SpaceId});
+	Array<csp::systems::EAssetCollectionType> PrototypeTypes = {EAssetCollectionType::SPACE_THUMBNAIL};
+	Array<String> PrototypeTags								 = {SpaceId};
+	Array<String> GroupIds									 = {SpaceId};
 
-	AssetSystem->GetAssetCollectionsByCriteria(SpaceId,
-											   nullptr,
-											   EAssetCollectionType::SPACE_THUMBNAIL,
-											   Tag,
-											   nullptr,
-											   nullptr,
-											   nullptr,
-											   GetAssetCollCallback);
+	AssetSystem->FindAssetCollections(nullptr, nullptr, nullptr, PrototypeTypes, PrototypeTags, GroupIds, nullptr, nullptr, GetAssetCollCallback);
 }
 
 void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback)

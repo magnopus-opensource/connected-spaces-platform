@@ -752,14 +752,10 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String&
 	auto AssetSystem														  = SystemsManager::Get().GetAssetSystem();
 	csp::common::Array<csp::common::String> AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
 
-	AssetSystem->GetAssetCollectionsByCriteria(nullptr,
-											   nullptr,
-											   EAssetCollectionType::DEFAULT,
-											   nullptr,
-											   AvatarPortraitAssetCollectionName,
-											   nullptr,
-											   nullptr,
-											   GetAssetCollCallback);
+	Array<String> PrototypeNames							 = {AvatarPortraitAssetCollectionName};
+	Array<csp::systems::EAssetCollectionType> PrototypeTypes = {EAssetCollectionType::DEFAULT};
+
+	AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, PrototypeTypes, nullptr, nullptr, nullptr, nullptr, GetAssetCollCallback);
 }
 
 void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback)

@@ -304,147 +304,113 @@ void AssetSystem::GetAssetCollectionByName(const String& AssetCollectionName, As
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesNameNameGet(AssetCollectionName, ResponseHandler);
 }
 
-void AssetSystem::GetAssetCollectionsByIds(const Array<String>& AssetCollectionIds, AssetCollectionsResultCallback Callback)
+void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
+									   const Optional<String>& ParentId,
+									   const Optional<Array<String>>& Names,
+									   const Optional<Array<EAssetCollectionType>>& Types,
+									   const Optional<Array<String>>& Tags,
+									   const Optional<Array<String>>& SpaceIds,
+									   const Optional<int>& ResultsSkipNumber,
+									   const Optional<int>& ResultsMaxNumber,
+									   AssetCollectionsResultCallback Callback)
 {
-	if (AssetCollectionIds.IsEmpty())
+	typedef std::optional<std::vector<String>> StringVec;
+
+	StringVec PrototypeIds;
+
+	if (Ids.HasValue())
 	{
-		CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
+		std::vector<String> Vals;
 
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
-
-		return;
-	}
-
-	std::vector<String> Ids;
-	Ids.reserve(AssetCollectionIds.Size());
-
-	for (int i = 0; i < AssetCollectionIds.Size(); ++i)
-	{
-		Ids.push_back(AssetCollectionIds[i]);
-	}
-
-	services::ResponseHandlerPtr ResponseHandler
-		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(Callback,
-																																		   nullptr);
-
-	// Use `GET /api/v1/prototypes` and only pass asset collection IDs
-	static_cast<chs::PrototypeApi*>(PrototypeAPI)
-		->apiV1PrototypesGet(std::nullopt,
-							 std::nullopt,
-							 Ids,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 ResponseHandler);
-}
-
-void AssetSystem::GetAssetCollectionsByCriteria(const Optional<String>& SpaceId,
-												const Optional<String>& AssetCollectionParentId,
-												const Optional<EAssetCollectionType>& AssetCollectionType,
-												const Optional<Array<String>>& AssetCollectionTags,
-												const Optional<Array<String>>& AssetCollectionNames,
-												const Optional<int>& ResultsSkipNumber,
-												const Optional<int>& ResultsMaxNumber,
-												AssetCollectionsResultCallback Callback)
-{
-	std::optional<std::vector<String>> GroupIds;
-
-	if (SpaceId.HasValue())
-	{
-		GroupIds.emplace({*SpaceId});
-	}
-
-	std::optional<String> ParentId;
-
-	if (AssetCollectionParentId.HasValue())
-	{
-		ParentId = *AssetCollectionParentId;
-	}
-
-	std::optional<std::vector<String>> Tags;
-
-	if (AssetCollectionTags.HasValue())
-	{
-		Tags.emplace(std::vector<String>());
-		Tags->reserve(AssetCollectionTags->Size());
-
-		for (size_t idx = 0; idx < AssetCollectionTags->Size(); ++idx)
+		for (size_t i = 0; i < Ids->Size(); ++i)
 		{
-			Tags->push_back({(*AssetCollectionTags)[idx]});
+			Vals.push_back(Ids->operator[](i));
 		}
+
+		PrototypeIds = std::move(Vals);
 	}
 
-	std::optional<std::vector<String>> Names;
+	std::optional<String> ParentPrototypeId;
 
-	if (AssetCollectionNames.HasValue())
+	if (ParentId.HasValue())
 	{
-		Names.emplace(std::vector<String>());
-		Names->reserve(AssetCollectionNames->Size());
+		ParentPrototypeId = *ParentId;
+	}
 
-		for (size_t idx = 0; idx < AssetCollectionNames->Size(); ++idx)
+	StringVec PrototypeNames;
+
+	if (Names.HasValue())
+	{
+		std::vector<String> Vals;
+
+		for (size_t i = 0; i < Names->Size(); ++i)
 		{
-			Names->push_back({(*AssetCollectionNames)[idx]});
+			Vals.push_back(Names->operator[](i));
 		}
+
+		PrototypeNames = std::move(Vals);
 	}
 
-	std::optional<int32_t> Skip;
+	StringVec PrototypeTypes;
 
-	if (ResultsSkipNumber.HasValue())
+	if (Types.HasValue())
 	{
-		Skip = *ResultsSkipNumber;
-	}
-	else
-	{
-		Skip = DEFAULT_SKIP_NUMBER;
-	}
+		std::vector<String> Vals;
 
-	std::optional<int32_t> Limit;
+		for (size_t i = 0; i < Types->Size(); ++i)
+		{
+			Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+		}
 
-	if (ResultsMaxNumber.HasValue())
-	{
-		Limit = *ResultsMaxNumber;
-	}
-	else
-	{
-		Limit = DEFAULT_RESULT_MAX_NUMBER;
+		PrototypeTypes = std::move(Vals);
 	}
 
-	std::optional<std::vector<String>> AssetsType;
+	StringVec PrototypeTags;
 
-	if (AssetCollectionType.HasValue())
+	if (Tags.HasValue())
 	{
-		AssetsType.emplace(std::vector<String>());
-		AssetsType->push_back({ConvertAssetCollectionTypeToString(*AssetCollectionType)});
-	};
+		std::vector<String> Vals;
+
+		for (size_t i = 0; i < Tags->Size(); ++i)
+		{
+			Vals.push_back(Tags->operator[](i));
+		}
+
+		PrototypeTags = std::move(Vals);
+	}
+
+	StringVec GroupIds;
+
+	if (SpaceIds.HasValue())
+	{
+		std::vector<String> Vals;
+
+		for (size_t i = 0; i < SpaceIds->Size(); ++i)
+		{
+			Vals.push_back(SpaceIds->operator[](i));
+		}
+
+		GroupIds = std::move(Vals);
+	}
+
+	int32_t Skip  = ResultsSkipNumber.HasValue() ? *ResultsSkipNumber : DEFAULT_SKIP_NUMBER;
+	int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
 
 	services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(Callback,
 																																		   nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
-		->apiV1PrototypesGet(Tags,
+		->apiV1PrototypesGet(PrototypeTags,
+							 std::nullopt,
+							 PrototypeIds,
+							 PrototypeNames,
 							 std::nullopt,
 							 std::nullopt,
-							 Names,
 							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 ParentId,
+							 ParentPrototypeId,
 							 GroupIds,
-							 AssetsType,
+							 PrototypeTypes,
 							 std::nullopt,
 							 std::nullopt,
 							 std::nullopt,
