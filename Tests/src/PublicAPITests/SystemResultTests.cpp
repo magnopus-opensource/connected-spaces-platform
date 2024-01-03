@@ -77,9 +77,6 @@ public:
 
 	void OnHttpResponse(csp::web::HttpResponse& InResponse) override
 	{
-		// We expect the callback to have come from a seperate Thread
-		// EXPECT_FALSE(std::this_thread::get_id() == ThreadId);
-
 		Response		 = InResponse;
 		ResponseReceived = true;
 	}
@@ -101,8 +98,16 @@ private:
 
 void NullResultTestFunction(NullResultCallback Callback)
 {
-	csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseNoContent);
-	INVOKE_IF_NOT_NULL(Callback, InternalResult);
+	try
+	{
+		csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseNoContent);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << e.what();
+		ADD_FAILURE();
+	}
 }
 
 #if RUN_ALL_UNIT_TESTS || RUN_SYSTEMRESULT_TESTS || RUN_SYSTEMRESULT_NULLRESULT_TEST
