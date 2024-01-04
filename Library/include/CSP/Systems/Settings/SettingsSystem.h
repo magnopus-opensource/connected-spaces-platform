@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Systems/Assets/Asset.h"
@@ -20,6 +21,7 @@
 #include "CSP/Systems/Settings/SettingsCollection.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
+
 
 namespace csp::services
 {
@@ -132,6 +134,11 @@ public:
 	CSP_ASYNC_RESULT void UpdateAvatarPortraitWithBuffer(const csp::common::String& UserId,
 														 const csp::systems::BufferAssetDataSource& NewAvatarPortrait,
 														 NullResultCallback Callback);
+
+	CSP_ASYNC_RESULT void
+		SetAvatarInfo(const csp::common::String& InUserId, AvatarType InType, const csp::common::Variant& InIdentifier, NullResultCallback Callback);
+
+	CSP_ASYNC_RESULT void GetAvatarInfo(const csp::common::String& InUserId, AvatarInfoResultCallback Callback);
 
 private:
 	SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

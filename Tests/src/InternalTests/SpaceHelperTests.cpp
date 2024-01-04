@@ -25,6 +25,7 @@
 	#include "TestHelpers.h"
 
 
+using namespace csp::common;
 using namespace csp::services;
 
 
