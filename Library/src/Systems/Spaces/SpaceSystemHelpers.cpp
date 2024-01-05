@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -20,7 +21,11 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 
+
+using namespace csp::common;
+
 namespace chs = csp::services::generated::userservice;
+
 
 namespace csp::systems
 {
@@ -55,12 +60,12 @@ String GetSpaceThumbnailAssetCollectionName(const String& SpaceId)
 
 String GetUniqueSpaceThumbnailAssetName(const String& SpaceId)
 {
-	return csp::common::String(SPACE_THUMBNAIL_ASSET_NAME_PREFIX) + SpaceId;
+	return String(SPACE_THUMBNAIL_ASSET_NAME_PREFIX) + SpaceId;
 }
 
 String GetUniqueAvatarThumbnailAssetName(const String& Extension)
 {
-	return csp::common::String(AVATAR_THUMBNAIL_ASSET_NAME_PREFIX) + Extension;
+	return String(AVATAR_THUMBNAIL_ASSET_NAME_PREFIX) + Extension;
 }
 
 String GetAssetFileExtension(const String& MimeType)
@@ -93,7 +98,7 @@ void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, St
 
 	if (!Json.IsObject())
 	{
-		CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
+		CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
 
 		OutMapMetadata["site"]				 = "Void";
 		OutMapMetadata["multiplayerVersion"] = "3"; // 2 represents double-msg-packed serialiser spaces, 3 represents the change to dictionary packing
@@ -117,7 +122,7 @@ void ConvertJsonMetadataToMapMetadata(const String& JsonMetadata, Map<String, St
 		}
 		else
 		{
-			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+			CSP_LOG_FORMAT(LogLevel::Error,
 						   "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)",
 						   Member.name.GetString(),
 						   Member.value.GetType());
@@ -131,7 +136,7 @@ std::shared_ptr<chs::GroupDto> DefaultGroupInfo()
 
 	DefaultGroupInfo->SetGroupType("Space");
 	DefaultGroupInfo->SetAutoModerator(false);
-	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+	const auto* UserSystem = SystemsManager::Get().GetUserSystem();
 	DefaultGroupInfo->SetGroupOwnerId(UserSystem->GetLoginState().UserId);
 
 	return DefaultGroupInfo;

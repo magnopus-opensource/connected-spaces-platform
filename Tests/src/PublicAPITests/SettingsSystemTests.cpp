@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -27,6 +28,8 @@
 
 
 using namespace std::chrono_literals;
+
+
 namespace
 {
 
@@ -34,6 +37,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
+
 bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
 	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -62,6 +66,7 @@ bool IsUriValid(const std::string& Uri, const std::string& FileName)
 }
 
 } // namespace
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_NDASTATUS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
@@ -407,6 +412,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
+
 	LogOut(UserSystem);
 }
 #endif
@@ -462,6 +468,46 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 	delete[] UploadFileData;
 	delete[] DownloadedAssetData;
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARINFO_TEST
+CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	auto Type					   = csp::systems::AvatarType::Custom;
+	csp::common::String Identifier = "https://notarealweb.site/my_cool_avatar.glb";
+
+	// Set Avatar info
+	{
+		auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, UserId, Type, Identifier);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+	}
+
+	// Get Avatar info
+	{
+		auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo, UserId);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+		EXPECT_EQ(Result.GetAvatarType(), Type);
+
+		const auto& ReceivedIdentifier = Result.GetAvatarIdentifier();
+
+		EXPECT_EQ(ReceivedIdentifier.GetValueType(), csp::common::VariantType::String);
+		EXPECT_EQ(ReceivedIdentifier.GetString(), Identifier);
+	}
 
 	// Log out
 	LogOut(UserSystem);
