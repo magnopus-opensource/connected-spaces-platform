@@ -21,9 +21,11 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CallHelpers.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
+#include "Systems/ResultHelpers.h"
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include <iostream>
@@ -83,7 +85,7 @@ void SettingsSystem::SetSettingValue(const csp::common::String& InUserId,
 
 		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		Callback(InternalResult);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
 	};
 
 	csp::services::ResponseHandlerPtr SettingsResponseHandler
@@ -132,7 +134,7 @@ void SettingsSystem::GetSettingValue(const csp::common::String& InUserId,
 			StringResult.SetValue("");
 		}
 
-		Callback(StringResult);
+		INVOKE_IF_NOT_NULL(Callback, StringResult);
 	};
 
 	csp::services::ResponseHandlerPtr SettingsResponseHandler
@@ -892,7 +894,13 @@ void SettingsSystem::SetAvatarInfo(const csp::common::String& InUserId,
 			Json.AddMember("identifier", rapidjson::Value(InIdentifier.GetString().c_str(), InIdentifier.GetString().Length()), Json.GetAllocator());
 			break;
 		default:
-			throw std::exception("Unsupported Avatar Identifier type");
+		{
+			CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+			return;
+		}
 	}
 
 	rapidjson::StringBuffer Buffer;
@@ -925,10 +933,16 @@ void SettingsSystem::GetAvatarInfo(const csp::common::String& InUserId, AvatarIn
 				InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
 				break;
 			default:
-				throw std::exception("Unsupported Avatar Identifier type");
+			{
+				CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
+
+				INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AvatarInfoResult>());
+
+				return;
+			}
 		}
 
-		Callback(InternalResult);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
 	};
 
 	GetSettingValue(InUserId, "UserSettings", "AvatarInfo", GetSettingCallback);
