@@ -834,7 +834,7 @@ namespace CSPEngine
             var result = userSystem.GetAgoraUserToken(tokenParams).Result;
 
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-            Assert.AreNotEqual(result.GetUserToken(), "");
+            Assert.AreNotEqual(result.GetValue(), "");
         }
 #endif
 

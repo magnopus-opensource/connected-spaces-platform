@@ -346,7 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInWithTokenTest)
 	csp::common::String LoginToken;
 	bool LoginTokenAvailable = false;
 
-	csp::systems::NewLoginTokenReceivedCallback LoginTokenReceivedCallback = [&](csp::systems::LoginTokenReceived& Result)
+	csp::systems::LoginTokenInfoResultCallback LoginTokenReceivedCallback = [&](csp::systems::LoginTokenInfoResult& Result)
 	{
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1122,7 +1122,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 	auto [Result] = AWAIT_PRE(UserSystem, GetAgoraUserToken, RequestPredicate, Params);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-	EXPECT_FALSE(Result.GetUserToken().IsEmpty());
+	EXPECT_FALSE(Result.GetValue().IsEmpty());
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1247,6 +1247,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
 	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-	EXPECT_NE(Result.GetUrl(), "");
+	EXPECT_NE(Result.GetValue(), "");
 }
 #endif
