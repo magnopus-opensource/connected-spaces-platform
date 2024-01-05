@@ -44,7 +44,6 @@ template class CSP_API csp::common::Array<csp::common::String>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentBase*>;
 template class CSP_API csp::common::Array<csp::multiplayer::ComponentUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::MessageInfo>;
-template class CSP_API csp::common::Array<csp::multiplayer::PropertyUpdateInfo>;
 template class CSP_API csp::common::Array<csp::multiplayer::ReplicatedValue>;
 template class CSP_API csp::common::Array<csp::systems::Anchor>;
 template class CSP_API csp::common::Array<csp::systems::AnchorResolution>;
