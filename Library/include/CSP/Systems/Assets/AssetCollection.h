@@ -77,7 +77,7 @@ public:
 	csp::common::Array<csp::common::String> Tags;
 	csp::common::String PointOfInterestId;
 	csp::common::String ParentId;
-	csp::common::Array<csp::common::String> SpaceIds;
+	csp::common::String SpaceId;
 	csp::common::String CreatedBy;
 	csp::common::String CreatedAt;
 	csp::common::String UpdatedBy;

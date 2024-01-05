@@ -163,7 +163,7 @@ bool AreTestAssetCollectionsEqual(const csp::systems::AssetCollection& Lhs, cons
 
 	AreEqual &= (Lhs.Id == Rhs.Id);
 	AreEqual &= (Lhs.Name == Rhs.Name);
-	AreEqual &= (Lhs.SpaceIds[0] == Rhs.SpaceIds[0]);
+	AreEqual &= (Lhs.SpaceId == Rhs.SpaceId);
 
 	return AreEqual;
 }

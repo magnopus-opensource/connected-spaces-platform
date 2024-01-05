@@ -234,7 +234,7 @@ namespace CSPEngine
             GetAssetCollectionByName(assetSystem, testAssetCollectionName, out var assetCollection);
 
             Assert.AreEqual(assetCollection.Name, testAssetCollectionName);
-            Assert.IsTrue(assetCollection.SpaceIds.IsEmpty());
+            Assert.IsTrue(assetCollection.SpaceId.Length > 0);
         }
 #endif
 
@@ -1379,6 +1379,110 @@ namespace CSPEngine
             Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifierAlphanumeric);
             Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNITY);
 
+        }
+#endif
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
+        [Test]
+        public static void copyAssetCollectionTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _, out _);
+
+            string sourceSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
+            string destSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
+            string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
+            string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
+
+            var sourceAssetCollection = new Systems.AssetCollection();
+
+            // Log in
+            _ = UserSystemTests.LogIn(userSystem);
+
+            // Create 'source' space and asset collection
+            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            {
+                CreateAssetCollection(assetSystem, sourceSpace, null, testAssetCollectionName, null, null, out sourceAssetCollection);
+                CreateAsset(assetSystem, sourceAssetCollection, testAssetName, null, null, out var sourceAsset);
+
+                var fileSource = new Systems.FileAssetDataSource
+                {
+                    FilePath = Path.GetFullPath("assets/test.json")
+                };
+                fileSource.SetMimeType("application/json");
+
+                assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
+                using var result = assetSystem.UploadAssetData(sourceAssetCollection, sourceAsset, fileSource).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
+            }
+
+            // Create 'dest' space and invoke the copy
+            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var destAssetCollections = new Common.Array<Systems.AssetCollection>();
+            {
+                Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
+                sourceAssetCollections[0] = sourceAssetCollection;
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(sourceAssetCollections, destSpace.Id, false).Result;
+                
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
+                destAssetCollections = result.GetAssetCollections();
+            }
+
+            // Validate the copied asset collection and its data
+	        {
+                Assert.AreEqual(destAssetCollections.Size(), 1UL);
+		        Assert.AreNotEqual(destAssetCollections[0].Id, sourceAssetCollection.Id);
+		        Assert.AreEqual(destAssetCollections[0].SpaceId, destSpace.Id);
+		        Assert.AreEqual(destAssetCollections[0].Type, sourceAssetCollection.Type);
+		        Assert.AreEqual(destAssetCollections[0].Tags.Size(), 1UL);
+
+                GetAssetsInCollection(assetSystem, destAssetCollections[0], out var destAssets);
+                Assert.AreEqual(destAssets.Size(), 1UL);
+
+                // Get the copied data and compare it with our source
+                using var result = assetSystem.DownloadAssetData(destAssets[0]).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
+
+                byte[] downloadedData = new byte[result.GetDataLength()];
+                Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
+
+                var fileData = File.ReadAllBytes(Path.GetFullPath("assets/test.json"));
+                Assert.IsTrue(downloadedData.SequenceEqual(fileData));
+            }
+
+            // Validating that we must have at least one asset collection to copy
+	        {
+		        Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
+                using var result = assetSystem.CopyAssetCollectionsToSpace(sourceAssetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+	        }
+
+            // Validating we cannot perform a copy if the asset has no space ID
+            {
+                Common.Array<Systems.AssetCollection> assetCollections = new Common.Array<Systems.AssetCollection>(1);
+                assetCollections[0] = new Systems.AssetCollection();
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(assetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+            }
+
+            // Validating we cannot perform a copy of assets that belong to different spaces
+            {
+                var firstSpaceAssetCollection = new Systems.AssetCollection();
+                firstSpaceAssetCollection.SpaceId = "123456";
+
+                var secondSpaceAssetCollection = new Systems.AssetCollection();
+                secondSpaceAssetCollection.SpaceId = "456789";
+
+                Common.Array<Systems.AssetCollection> assetCollections = new Common.Array<Systems.AssetCollection>(2);
+                assetCollections[0] = firstSpaceAssetCollection;
+                assetCollections[1] = secondSpaceAssetCollection;
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(assetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+            }
         }
 #endif
     }
