@@ -193,6 +193,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, PendingRemoves(CSP_NEW(SpaceEntityQueue))
 	, PendingOutgoingUpdateUniqueSet(CSP_NEW(SpaceEntitySet))
 	, PendingIncomingUpdates(CSP_NEW(PatchMessageQueue))
+	//	, PendingEntityScriptSourceDownload(CSP_NEW(EntityScriptMap))
 	, EnableEntityTick(false)
 	, LastTickTime(std::chrono::system_clock::now())
 	, EntityPatchRate(90)
@@ -222,6 +223,7 @@ SpaceEntitySystem::~SpaceEntitySystem()
 	CSP_DELETE(PendingRemoves);
 	CSP_DELETE(PendingOutgoingUpdateUniqueSet);
 	CSP_DELETE(PendingIncomingUpdates);
+	// CSP_DELETE(PendingEntityScriptSourceDownload);
 }
 
 void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
@@ -771,6 +773,25 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
+
+	/*
+	 Before performing the logic below we first need to download all asset files.
+	 */
+
+	// Iterate over all EntityScript, get their asset and asset collection Ids and store them
+	// Download assets using GetAssetsByCriteria.
+	// Download all of the files and store the file (or it's contents) in each corresponding EntityScript.
+	// Call method with lambda. Pass EntityScript in and call new method on it when completed (on EntityScript downloaded).
+	// Create a map with AssetCollectionId as key and EntityScript* as value.
+	// Once assets have been downloaded, use assetcollectionId to retrieve associated EntityScript.
+	for (size_t i = 0; i < Entities.Size(); ++i)
+	{
+		EntityScript* Script = Entities[i]->GetScript();
+		//
+		// guard against not having valid asset collection Ids and early out if they do not.
+		PendingEntityScriptSourceDownload[Script->GetScriptSourceAssetCollectionId()] = Entities[i]->GetScript();
+	}
+	//
 
 	// Register all scripts for import
 	for (size_t i = 0; i < Entities.Size(); ++i)

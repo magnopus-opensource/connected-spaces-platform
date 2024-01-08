@@ -56,6 +56,7 @@ enum class EAssetType
 	SIMULATION,
 	MODEL,
 	VIDEO,
+	SCRIPT,
 	SCRIPT_LIBRARY,
 	HOLOCAP_VIDEO,
 	HOLOCAP_AUDIO,
@@ -136,8 +137,7 @@ public:
 	virtual void SetMimeType(const csp::common::String& InMimeType) = 0;
 
 	CSP_NO_EXPORT virtual void
-		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const
-		= 0;
+		SetUploadContent(csp::web::WebClient* InWebClient, csp::web::HttpPayload* InPayload, const csp::systems::Asset& InAsset) const = 0;
 
 protected:
 	virtual ~AssetDataSource() = default;

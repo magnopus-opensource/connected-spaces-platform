@@ -52,6 +52,14 @@ public:
 	/// @param ScriptSource csp::common::String : The source as a string.
 	void SetScriptSource(const csp::common::String& ScriptSource);
 
+	/// @brief Get the Asset Id of the Script source.
+	/// @return csp::common::String : The Id of the Script source Asset.
+	const csp::common::String& GetScriptSourceAssetId() const;
+
+	/// @brief Get the AssetCollection Id of the Script source.
+	/// @return csp::common::String : The Id of the Script source AssetCollection.
+	const csp::common::String& GetScriptSourceAssetCollectionId() const;
+
 	/// @brief Runs the script.
 	/// @return True if the script runs successfully or false if there are errors.
 	bool Invoke();

@@ -120,6 +120,18 @@ void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)
 	Entity->MarkForUpdate();
 }
 
+const csp::common::String& EntityScript::GetScriptSourceAssetId() const
+{
+	// todo: assert EntityScriptComponent is valid.
+	return EntityScriptComponent->GetExternalResourceAssetId();
+}
+
+const csp::common::String& EntityScript::GetScriptSourceAssetCollectionId() const
+{
+	// todo: assert EntityScriptComponent is valid.
+	return EntityScriptComponent->GetExternalResourceAssetCollectionId();
+}
+
 bool EntityScript::HasError()
 {
 	return HasLastError;
