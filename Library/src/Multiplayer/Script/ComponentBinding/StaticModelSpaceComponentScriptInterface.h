@@ -40,6 +40,13 @@ public:
 	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
 	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+
+	DECLARE_SCRIPT_PROPERTY(float, EmissiveMultiplier);
+	DECLARE_SCRIPT_PROPERTY(bool, IsSecondaryNormalMapActive);
+	DECLARE_SCRIPT_PROPERTY(Vector2, UVOffset);
+	DECLARE_SCRIPT_PROPERTY(Vector2, UVScale);
+	DECLARE_SCRIPT_PROPERTY(Vector2, UVOffset2);
+	DECLARE_SCRIPT_PROPERTY(Vector2, UVScale2);
 };
 
 } // namespace csp::multiplayer

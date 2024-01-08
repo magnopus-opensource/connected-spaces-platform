@@ -41,4 +41,11 @@ DEFINE_SCRIPT_PROPERTY_VEC4(StaticModelSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsVisible);
 
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, float, float, EmissiveMultiplier);
+DEFINE_SCRIPT_PROPERTY_TYPE(StaticModelSpaceComponent, bool, bool, IsSecondaryNormalMapActive);
+DEFINE_SCRIPT_PROPERTY_VEC2(StaticModelSpaceComponent, UVOffset);
+DEFINE_SCRIPT_PROPERTY_VEC2(StaticModelSpaceComponent, UVScale);
+DEFINE_SCRIPT_PROPERTY_VEC2(StaticModelSpaceComponent, UVOffset2);
+DEFINE_SCRIPT_PROPERTY_VEC2(StaticModelSpaceComponent, UVScale2);
+
 } // namespace csp::multiplayer

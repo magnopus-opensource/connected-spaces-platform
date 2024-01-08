@@ -22,6 +22,39 @@
 namespace csp::common
 {
 
+/// @brief Represents a 2 dimensional vector.
+class CSP_API Vector2
+{
+public:
+	/// @brief Returns a Vector2 with all fields set to 0.
+	/// @return const Vector2&
+	static const Vector2& Zero();
+
+	/// @brief Returns a Vector2 with all fields set to 1.
+	/// @return const Vector2&
+	static const Vector2& One();
+
+	/// @brief Constructs a Vector2 with all fields set to 0.
+	Vector2() : X(0), Y(0)
+	{
+	}
+
+	/// @brief Constructs a Vector2 with the given x & y values.
+	/// @param X float
+	/// @param Y float
+	Vector2(float X, float Y) : X(X), Y(Y)
+	{
+	}
+
+	CSP_START_IGNORE
+	bool operator==(Vector2 Other) const;
+	bool operator!=(Vector2 Other) const;
+	CSP_END_IGNORE
+
+	float X;
+	float Y;
+};
+
 /// @brief Represents a 3 dimensional vector.
 class CSP_API Vector3
 {

@@ -35,6 +35,12 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]						  = true;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)]			  = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]					  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::EmissiveMultiplier)]				  = 1.0f;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsSecondaryNormalMapActive)]		  = false;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset)]						  = csp::common::Vector2::Zero();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::UVScale)]							  = csp::common::Vector2::One();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset2)]						  = csp::common::Vector2::Zero();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::UVScale2)]						  = csp::common::Vector2::One();
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }
@@ -240,6 +246,114 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
 void StaticModelSpaceComponent::SetIsShadowCaster(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value);
+}
+
+float StaticModelSpaceComponent::GetEmissiveMultiplier() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::EmissiveMultiplier));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
+	{
+		return RepVal.GetFloat();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return 1.0f;
+}
+
+void StaticModelSpaceComponent::SetEmissiveMultiplier(float Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::EmissiveMultiplier), Value);
+}
+
+bool StaticModelSpaceComponent::GetIsSecondaryNormalMapActive() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsSecondaryNormalMapActive));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return false;
+}
+
+void StaticModelSpaceComponent::SetIsSecondaryNormalMapActive(bool Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsSecondaryNormalMapActive), Value);
+}
+
+const csp::common::Vector2& StaticModelSpaceComponent::GetUVOffset() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+	{
+		return RepVal.GetVector2();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultVector2();
+}
+
+void StaticModelSpaceComponent::SetUVOffset(const csp::common::Vector2& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset), Value);
+}
+
+const csp::common::Vector2& StaticModelSpaceComponent::GetUVScale() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVScale));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+	{
+		return RepVal.GetVector2();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultVector2();
+}
+
+void StaticModelSpaceComponent::SetUVScale(const csp::common::Vector2& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVScale), Value);
+}
+
+const csp::common::Vector2& StaticModelSpaceComponent::GetUVOffset2() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset2));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+	{
+		return RepVal.GetVector2();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultVector2();
+}
+
+void StaticModelSpaceComponent::SetUVOffset2(const csp::common::Vector2& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset2), Value);
+}
+
+const csp::common::Vector2& StaticModelSpaceComponent::GetUVScale2() const
+{
+	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVScale2));
+		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+	{
+		return RepVal.GetVector2();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultVector2();
+}
+
+void StaticModelSpaceComponent::SetUVScale2(const csp::common::Vector2& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::UVScale2), Value);
 }
 
 } // namespace csp::multiplayer

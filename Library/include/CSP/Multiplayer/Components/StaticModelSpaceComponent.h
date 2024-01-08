@@ -44,6 +44,12 @@ enum class StaticModelPropertyKeys
 	IsARVisible,
 	ThirdPartyComponentRef,
 	IsShadowCaster,
+	EmissiveMultiplier,
+	IsSecondaryNormalMapActive,
+	UVOffset,
+	UVScale,
+	UVOffset2,
+	UVScale2,
 	Num
 };
 
@@ -126,6 +132,21 @@ public:
 	bool GetIsShadowCaster() const override;
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
 	void SetIsShadowCaster(bool Value) override;
+	/// @}
+
+	/// \addtogroup MaterialOverride
+	float GetEmissiveMultiplier() const;
+	void SetEmissiveMultiplier(float Value);
+	bool GetIsSecondaryNormalMapActive() const;
+	void SetIsSecondaryNormalMapActive(bool Value);
+	const csp::common::Vector2& GetUVOffset() const;
+	void SetUVOffset(const csp::common::Vector2& Value);
+	const csp::common::Vector2& GetUVScale() const;
+	void SetUVScale(const csp::common::Vector2& Value);
+	const csp::common::Vector2& GetUVOffset2() const;
+	void SetUVOffset2(const csp::common::Vector2& Value);
+	const csp::common::Vector2& GetUVScale2() const;
+	void SetUVScale2(const csp::common::Vector2& Value);
 	/// @}
 };
 
