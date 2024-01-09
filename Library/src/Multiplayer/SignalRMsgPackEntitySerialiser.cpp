@@ -96,6 +96,14 @@ void SignalRMsgPackEntitySerialiser::WriteString(const csp::common::String& Valu
 	Fields.push_back(signalr::value(Value));
 }
 
+void SignalRMsgPackEntitySerialiser::WriteVector2(const csp::common::Vector2& Value)
+{
+	assert(CurrentState == SerialiserState::InEntity && "WriteVector2() function not supported in current state!");
+
+	double ArrayValue[] = {Value.X, Value.Y};
+	Fields.push_back(signalr::value(ArrayValue));
+}
+
 void SignalRMsgPackEntitySerialiser::WriteVector3(const csp::common::Vector3& Value)
 {
 	assert(CurrentState == SerialiserState::InEntity && "WriteVector3() function not supported in current state!");
@@ -235,6 +243,13 @@ void SignalRMsgPackEntitySerialiser::WriteProperty(uint64_t Id, const Replicated
 			ValueType = ItemComponentData::STRING;
 			NewValue  = signalr::value(Value.GetString().c_str(), Value.GetString().Length());
 			break;
+		case ReplicatedValueType::Vector2:
+		{
+			ValueType	= ItemComponentData::FLOAT_ARRAY;
+			auto VValue = Value.GetVector2();
+			NewValue	= signalr::value(std::vector {signalr::value(VValue.X), signalr::value(VValue.Y)});
+			break;
+		}
 		case ReplicatedValueType::Vector3:
 		{
 			ValueType	= ItemComponentData::FLOAT_ARRAY;
@@ -274,6 +289,14 @@ void SignalRMsgPackEntitySerialiser::AddViewComponent(uint16_t Id, const Replica
 			Type   = ItemComponentData::STRING;
 			SValue = Value.GetString().c_str();
 			break;
+		case csp::multiplayer::ReplicatedValueType::Vector2:
+		{
+			Type							  = ItemComponentData::FLOAT_ARRAY;
+			auto Vector						  = Value.GetVector2();
+			std::vector<signalr::value> Array = {Vector.X, Vector.Y};
+			SValue							  = Array;
+			break;
+		}
 		case csp::multiplayer::ReplicatedValueType::Vector3:
 		{
 			Type							  = ItemComponentData::FLOAT_ARRAY;
@@ -459,6 +482,35 @@ csp::common::String SignalRMsgPackEntityDeserialiser::ReadString()
 			return csp::common::String(PropertyObjectHandle.get().via.str.ptr, PropertyObjectHandle.get().via.str.size);
 		default:
 			throw std::runtime_error("ReadString() function not supported in current state!");
+	}
+}
+
+csp::common::Vector2 SignalRMsgPackEntityDeserialiser::ReadVector2()
+{
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+		{
+			assert(CurrentFieldIterator->is_array() && CurrentFieldIterator->as_array().size() == 2 && CurrentFieldIterator->as_array()[0].is_double()
+				   && "Current field is not a Vector2!");
+
+			auto Value = (CurrentFieldIterator++)->as_array();
+
+			return {(float) Value[0].as_double(), (float) Value[1].as_double()};
+		}
+		case SerialiserState::InComponent:
+		{
+			PropertyUnpacker.next(PropertyObjectHandle);
+
+			assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 2
+				   && PropertyObjectHandle.get().via.array.ptr[0].type == msgpack::type::object_type::FLOAT64);
+
+			auto* Array = PropertyObjectHandle.get().via.array.ptr;
+
+			return {(float) Array[0].via.f64, (float) Array[1].via.f64};
+		}
+		default:
+			throw std::runtime_error("ReadVector2() function not supported in current state!");
 	}
 }
 
@@ -733,6 +785,15 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::STR);
 
 				return csp::common::String(PropertyObjectHandle.get().via.str.ptr, PropertyObjectHandle.get().via.str.size);
+			case ReplicatedValueType::Vector2:
+			{
+				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 2
+					   && PropertyObjectHandle.get().via.array.ptr[0].type == msgpack::type::object_type::FLOAT64);
+
+				auto* Array = PropertyObjectHandle.get().via.array.ptr;
+
+				return csp::common::Vector2 {(float) Array[0].via.f64, (float) Array[1].via.f64};
+			}
 			case ReplicatedValueType::Vector3:
 			{
 				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 3
@@ -782,7 +843,11 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 			{
 				auto& Array = Value.as_array();
 
-				if (Array.size() == 3)
+				if (Array.size() == 2)
+				{
+					return csp::common::Vector2 {(float) Array[0].as_double(), (float) Array[1].as_double()};
+				}
+				else if (Array.size() == 3)
 				{
 					return csp::common::Vector3 {(float) Array[0].as_double(), (float) Array[1].as_double(), (float) Array[2].as_double()};
 				}
@@ -817,6 +882,11 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::GetViewComponent(uint16_t Id)
 		case signalr::value_type::array:
 		{
 			auto& Array = ComponentValue.as_array();
+
+			if (Array.size() == 2)
+			{
+				return ReplicatedValue(csp::common::Vector2 {(float) Array[0].as_double(), (float) Array[1].as_double()});
+			}
 
 			if (Array.size() == 3)
 			{
