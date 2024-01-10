@@ -22,6 +22,7 @@
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
+#include "CSP/Systems/MaterialOverrides/MaterialOverrideSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
@@ -128,6 +129,11 @@ QuotaSystem* SystemsManager::GetQuotaSystem()
 	return QuotaSystem;
 }
 
+MaterialOverrideSystem* SystemsManager::GetMaterialOverrideSystem()
+{
+	return MaterialOverrideSystem;
+}
+
 SystemsManager::SystemsManager()
 	: WebClient(nullptr)
 	, UserSystem(nullptr)
@@ -145,6 +151,7 @@ SystemsManager::SystemsManager()
 	, EventTicketingSystem(nullptr)
 	, ECommerceSystem(nullptr)
 	, QuotaSystem(nullptr)
+	, MaterialOverrideSystem(nullptr)
 {
 }
 
@@ -166,19 +173,20 @@ void SystemsManager::CreateSystems()
 
 	AnalyticsSystem = CSP_NEW csp::systems::AnalyticsSystem();
 
-	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
-	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
-	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
-	AnchorSystem		  = CSP_NEW csp::systems::AnchorSystem(WebClient);
-	PointOfInterestSystem = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
-	SettingsSystem		  = CSP_NEW csp::systems::SettingsSystem(WebClient);
-	GraphQLSystem		  = CSP_NEW csp::systems::GraphQLSystem(WebClient);
-	ScriptSystem		  = CSP_NEW csp::systems::ScriptSystem();
-	VoipSystem			  = CSP_NEW csp::systems::VoipSystem();
-	MaintenanceSystem	  = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
-	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
-	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
-	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
+	UserSystem			   = CSP_NEW csp::systems::UserSystem(WebClient);
+	SpaceSystem			   = CSP_NEW csp::systems::SpaceSystem(WebClient);
+	AssetSystem			   = CSP_NEW csp::systems::AssetSystem(WebClient);
+	AnchorSystem		   = CSP_NEW csp::systems::AnchorSystem(WebClient);
+	PointOfInterestSystem  = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
+	SettingsSystem		   = CSP_NEW csp::systems::SettingsSystem(WebClient);
+	GraphQLSystem		   = CSP_NEW csp::systems::GraphQLSystem(WebClient);
+	ScriptSystem		   = CSP_NEW csp::systems::ScriptSystem();
+	VoipSystem			   = CSP_NEW csp::systems::VoipSystem();
+	MaintenanceSystem	   = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
+	EventTicketingSystem   = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
+	ECommerceSystem		   = CSP_NEW csp::systems::ECommerceSystem(WebClient);
+	QuotaSystem			   = CSP_NEW csp::systems::QuotaSystem(WebClient);
+	MaterialOverrideSystem = CSP_NEW csp::systems::MaterialOverrideSystem(WebClient);
 }
 
 void SystemsManager::DestroySystems()
@@ -200,6 +208,7 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(EventTicketingSystem);
 	CSP_DELETE(ECommerceSystem);
 	CSP_DELETE(QuotaSystem);
+	CSP_DELETE(MaterialOverrideSystem);
 }
 
 void SystemsManager::Instantiate()

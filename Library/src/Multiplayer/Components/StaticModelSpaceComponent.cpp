@@ -35,6 +35,8 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]						  = true;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)]			  = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]					  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetId)]			  = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetCollectionId)] = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::EmissiveMultiplier)]				  = 1.0f;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsSecondaryNormalMapActive)]		  = false;
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::UVOffset)]						  = csp::common::Vector2::Zero();
@@ -246,6 +248,54 @@ bool StaticModelSpaceComponent::GetIsShadowCaster() const
 void StaticModelSpaceComponent::SetIsShadowCaster(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster), Value);
+}
+
+const csp::common::String& StaticModelSpaceComponent::GetMaterialOverrideAssetId() const
+{
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultString();
+}
+
+void StaticModelSpaceComponent::SetMaterialOverrideAssetId(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetId), Value);
+}
+
+const csp::common::String& StaticModelSpaceComponent::GetMaterialOverrideAssetCollectionId() const
+{
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetCollectionId));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
+	return ReplicatedValue::GetDefaultString();
+}
+
+void StaticModelSpaceComponent::SetMaterialOverrideAssetCollectionId(const csp::common::String& Value)
+{
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrideAssetCollectionId), Value);
+}
+
+const csp::systems::MaterialDefinition& StaticModelSpaceComponent::GetMaterialDefinition() const
+{
+	return _MaterialDefinition;
+}
+
+void StaticModelSpaceComponent::SetMaterialDefinition(const csp::systems::MaterialDefinition& Value)
+{
+	_MaterialDefinition = Value;
 }
 
 float StaticModelSpaceComponent::GetEmissiveMultiplier() const

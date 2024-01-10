@@ -26,6 +26,8 @@
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
+//#include "Interfaces/IMaterialOverrideComponent.h"
+#include "CSP/Systems/MaterialOverrides/MaterialDefinition.h"
 
 
 namespace csp::multiplayer
@@ -44,6 +46,8 @@ enum class StaticModelPropertyKeys
 	IsARVisible,
 	ThirdPartyComponentRef,
 	IsShadowCaster,
+	MaterialOverrideAssetId,
+	MaterialOverrideAssetCollectionId,
 	EmissiveMultiplier,
 	IsSecondaryNormalMapActive,
 	UVOffset,
@@ -134,7 +138,38 @@ public:
 	void SetIsShadowCaster(bool Value) override;
 	/// @}
 
-	/// \addtogroup MaterialOverride
+	/// \addtogroup Material Override
+	/// @{
+	/// @brief Gets the ID of the Material Override asset.
+	/// @note To retrieve the Material Override asset, both the Asset ID and the Asset Collection ID are required.
+	/// @return The ID of the Material Override asset.
+	const csp::common::String& GetMaterialOverrideAssetId() const;
+
+	/// @brief Sets the ID of the Material Override asset.
+	/// @note To retrieve the Material Override asset, both the Asset ID and the Asset Collection ID are required.
+	/// @param Value const csp::common::String& : The ID of the Material Override asset.
+	void SetMaterialOverrideAssetId(const csp::common::String& Value);
+
+	/// @brief Gets the ID of the Material Override asset collection.
+	/// @note To retrieve this component's static asset, both the Asset ID and the Asset Collection ID are required.
+	/// @return The ID of the Material Override asset collection.
+	const csp::common::String& GetMaterialOverrideAssetCollectionId() const;
+
+	/// @brief Sets the ID of the Material Override asset collection.
+	/// @note To retrieve the Material Override asset, both the Asset ID and the Asset Collection ID are required.
+	/// @param Value const csp::common::String& : The ID of the Material Override asset collection.
+	void SetMaterialOverrideAssetCollectionId(const csp::common::String& Value);
+
+	/// @brief Get the Material Definition for this component.
+	/// @return The Material Definition for this component.
+	const csp::systems::MaterialDefinition& GetMaterialDefinition() const;
+
+	/// @brief Set the Material Definition for this component.
+	/// @param The Material Definition for this component.
+	void SetMaterialDefinition(const csp::systems::MaterialDefinition& Value);
+	/// @}
+
+	/// \addtogroup Material Override parameters
 	float GetEmissiveMultiplier() const;
 	void SetEmissiveMultiplier(float Value);
 	bool GetIsSecondaryNormalMapActive() const;
@@ -148,6 +183,9 @@ public:
 	const csp::common::Vector2& GetUVScale2() const;
 	void SetUVScale2(const csp::common::Vector2& Value);
 	/// @}
+
+private:
+	csp::systems::MaterialDefinition _MaterialDefinition;
 };
 
 } // namespace csp::multiplayer
