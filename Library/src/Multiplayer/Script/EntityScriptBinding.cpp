@@ -379,7 +379,13 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(StaticModelSpaceComponent, Position, "position")
 		.PROPERTY_GET_SET(StaticModelSpaceComponent, Scale, "scale")
 		.PROPERTY_GET_SET(StaticModelSpaceComponent, Rotation, "rotation")
-		.PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible");
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, IsVisible, "isVisible")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, EmissiveMultiplier, "emissiveMultiplier")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, IsSecondaryNormalMapActive, "isSecondaryNormalMapActive")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, UVOffset, "uvOffset")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, UVScale, "uvScale")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, UVOffset2, "uvOffset2")
+		.PROPERTY_GET_SET(StaticModelSpaceComponent, UVScale2, "uvScale2");
 
 	Module->class_<PortalSpaceComponentScriptInterface>("PortalSpaceComponent")
 		.constructor<>()
