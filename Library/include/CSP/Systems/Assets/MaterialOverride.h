@@ -46,7 +46,7 @@ class CSP_API MaterialOverrideAsset
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
 	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class MaterialOverrideSystem;
+	friend class AssetSystem;
 	CSP_END_IGNORE
 	/** @endcond */
 
@@ -66,7 +66,7 @@ private:
 class CSP_API MaterialOverrideResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class MaterialOverrideSystem;
+	friend class AssetSystem;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

@@ -20,12 +20,6 @@
 #include <chrono>
 #include <functional>
 
-
-namespace csp::systems
-{
-class MaterialOverrideSystem;
-}
-
 namespace csp::systems
 {
 
@@ -141,10 +135,6 @@ public:
 	/// @return QuotaSystem : pointer to the Quota system class
 	QuotaSystem* GetQuotaSystem();
 
-	/// @brief Retrieves the Material Override system.
-	/// @return MaterialOverrideSystem : pointer to the Material Override system class
-	MaterialOverrideSystem* GetMaterialOverrideSystem();
-
 private:
 	SystemsManager();
 
@@ -173,7 +163,6 @@ private:
 	EventTicketingSystem* EventTicketingSystem;
 	ECommerceSystem* ECommerceSystem;
 	QuotaSystem* QuotaSystem;
-	MaterialOverrideSystem* MaterialOverrideSystem;
 };
 
 } // namespace csp::systems

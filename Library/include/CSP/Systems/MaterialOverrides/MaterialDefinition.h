@@ -227,7 +227,7 @@ private:
 class CSP_API MaterialDefinition
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class MaterialOverrideSystem;
+	friend class AssetSystem;
 	/** @endcond */
 
 public:

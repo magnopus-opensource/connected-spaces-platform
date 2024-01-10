@@ -22,8 +22,10 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/LOD.h"
+#include "CSP/Systems/Assets/MaterialOverride.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
+#include "MaterialOverride.h"
 
 namespace csp::services
 {
@@ -230,6 +232,23 @@ public:
 	/// @param Callback AssetResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
+
+	/// @brief Uploads a Material Override to the specified Asset.
+	/// @param AssetCollectionId csp::common::String& : The Id of the AssetCollection to which the Material Override Asset will be uploaded.
+	/// @param AssetId csp::common::String& : The Id of the Asset to which the Material Override will be uploaded.
+	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void UploadMaterialOverride(const MaterialDefinition& Definition,
+												 const csp::common::String& AssetCollectionId,
+												 const csp::common::String& AssetId,
+												 NullResultCallback Callback);
+
+	/// @brief Get the Material Override from the specified Asset.
+	/// @param AssetCollectionId const csp::common::String& : The Asset Collection Id for the Material Override asset.
+	/// @param AssetId const csp::common::String& : The Asset Id for the Material Override asset.
+	/// @param Callback MaterialOverrideAssetResultCallback : Callback when asynchronous task finishes containing the new MaterialDefinition.
+	CSP_ASYNC_RESULT void GetMaterialOverride(const csp::common::String& AssetCollectionId,
+											  const csp::common::String& AssetId,
+											  MaterialOverrideResultCallback Callback);
 
 
 private:
