@@ -237,18 +237,18 @@ public:
 	/// @param AssetCollectionId csp::common::String& : The Id of the AssetCollection to which the Material Override Asset will be uploaded.
 	/// @param AssetId csp::common::String& : The Id of the Asset to which the Material Override will be uploaded.
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-	CSP_ASYNC_RESULT void UploadMaterialOverride(const MaterialDefinition& Definition,
-												 const csp::common::String& AssetCollectionId,
-												 const csp::common::String& AssetId,
-												 NullResultCallback Callback);
+	CSP_ASYNC_RESULT void UploadMaterialDefinition(const MaterialDefinition& Definition,
+												   const csp::common::String& AssetCollectionId,
+												   const csp::common::String& AssetId,
+												   NullResultCallback Callback);
 
 	/// @brief Get the Material Override from the specified Asset.
 	/// @param AssetCollectionId const csp::common::String& : The Asset Collection Id for the Material Override asset.
 	/// @param AssetId const csp::common::String& : The Asset Id for the Material Override asset.
 	/// @param Callback MaterialOverrideAssetResultCallback : Callback when asynchronous task finishes containing the new MaterialDefinition.
-	CSP_ASYNC_RESULT void GetMaterialOverride(const csp::common::String& AssetCollectionId,
-											  const csp::common::String& AssetId,
-											  MaterialOverrideResultCallback Callback);
+	CSP_ASYNC_RESULT void GetMaterialDefinition(const csp::common::String& AssetCollectionId,
+												const csp::common::String& AssetId,
+												MaterialDefinitionResultCallback Callback);
 
 
 private:

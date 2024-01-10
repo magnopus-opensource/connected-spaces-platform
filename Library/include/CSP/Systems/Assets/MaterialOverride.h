@@ -16,12 +16,8 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-#include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
-#include "CSP/Common/String.h"
-#include "CSP/Common/Vector.h"
 #include "CSP/Systems/Assets/Asset.h"
-#include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/MaterialOverrides/MaterialDefinition.h"
 #include "CSP/Systems/WebService.h"
 
@@ -39,31 +35,9 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
-/// @ingroup Material Override System
-/// @brief A MaterialOverrideAsset represents an asset contains a MaterialDeinition object.
-class CSP_API MaterialOverrideAsset
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	// template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class AssetSystem;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-	MaterialOverrideAsset();
-	~MaterialOverrideAsset() {};
-
-	MaterialDefinition& GetMaterialDefinition();
-
-private:
-	MaterialDefinition Definition;
-};
-
-
-/// @ingroup Material Override System
-/// @brief Data class used to contain information when attempting to download a MaterialOverride Asset.
-class CSP_API MaterialOverrideResult : public csp::systems::ResultBase
+/// @ingroup Asset System
+/// @brief Data class used to contain information when attempting to download a MaterialDefinition Object.
+class CSP_API MaterialDefinitionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -74,27 +48,28 @@ class CSP_API MaterialOverrideResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	MaterialOverrideAsset& GetMaterialOverrideAsset();
-	const MaterialOverrideAsset& GetMaterialOverrideAsset() const;
+	MaterialDefinition& GetMaterialDefinition();
+	const MaterialDefinition& GetMaterialDefinition() const;
 
 protected:
-	MaterialOverrideResult() = delete;
-	MaterialOverrideResult(void*) {};
+	MaterialDefinitionResult() = delete;
+	MaterialDefinitionResult(void*) {};
 
 private:
-	CSP_NO_EXPORT MaterialOverrideResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT MaterialDefinitionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-	void SetMaterialOverrideAsset(const MaterialOverrideAsset& InAsset);
-	void SetMaterialOverrideAsset(MaterialOverrideAsset&& InAsset);
+	void SetMaterialDefinition(const MaterialDefinition& InDefinition);
+	void SetMaterialDefinition(MaterialDefinition&& InDefinition);
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	MaterialOverrideAsset MaterialAsset;
+	MaterialDefinition Definition;
 };
 
-/// @brief Callback containing MaterialOverride Asset.
-/// @param Result MaterialOverrideResult : result class
-typedef std::function<void(const MaterialOverrideResult& Result)> MaterialOverrideResultCallback;
+/// @brief Callback containing MaterialDefinition Object.
+/// @param Result MaterialDefinitionResult : result class
+typedef std::function<void(const MaterialDefinitionResult& Result)> MaterialDefinitionResultCallback;
 
 
 } // namespace csp::systems

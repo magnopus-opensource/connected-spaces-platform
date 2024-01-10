@@ -29,8 +29,9 @@
 
 namespace chs = csp::services::generated::prototypeservice;
 
-constexpr int DEFAULT_SKIP_NUMBER		= 0;
-constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
+constexpr int DEFAULT_SKIP_NUMBER					= 0;
+constexpr int DEFAULT_RESULT_MAX_NUMBER				= 100;
+constexpr auto MATERIALDEFINITION_ASSET_NAME_PREFIX = "OKO_MaterialDefinition_";
 
 
 namespace
@@ -802,26 +803,93 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	GetAssetsByCriteria({Asset.AssetCollectionId}, nullptr, nullptr, csp::common::Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
 }
 
-CSP_ASYNC_RESULT void AssetSystem::UploadMaterialOverride(const MaterialDefinition& Definition,
-														  const csp::common::String& AssetCollectionId,
-														  const csp::common::String& AssetId,
-														  NullResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::UploadMaterialDefinition(const MaterialDefinition& Definition,
+															const csp::common::String& AssetCollectionId,
+															const csp::common::String& AssetId,
+															NullResultCallback Callback)
 {
-	// 1. Logic to parse the MaterialDefinition and turn into a json file.
-	// 2. Upload json file to CHS.
-	// 3. Store json file Asset Id and Asset Collection Id in the material definition.
-	// 4. Return true or false.
-
 	csp::common::String MaterialDefinitionJson = Definition.SerialiseToJson();
+
+	CSP_LOG_MSG(LogLevel::Log, "Parsed the MaterialDefinition object to json.");
+
+	const csp::common::String ModuleDefinitionAssetName
+		= csp::common::StringFormat("%s%s", MATERIALDEFINITION_ASSET_NAME_PREFIX, Definition.GetMaterialName().c_str());
+	const csp::common::String ModuleDefinitionAssetFileName
+		= csp::common::StringFormat("%s%s.json", MATERIALDEFINITION_ASSET_NAME_PREFIX, Definition.GetMaterialName().c_str());
+
+	AssetCollection InternalAssetCollection;
+	InternalAssetCollection.Id = AssetCollectionId;
+	Asset InternalAsset;
+	InternalAsset.Id	   = AssetId;
+	InternalAsset.Name	   = ModuleDefinitionAssetName;
+	InternalAsset.FileName = ModuleDefinitionAssetFileName;
+
+	BufferAssetDataSource AssetData;
+	AssetData.SetMimeType("application/json");
+	AssetData.Buffer	   = const_cast<char*>(MaterialDefinitionJson.c_str());
+	AssetData.BufferLength = MaterialDefinitionJson.Length();
+
+	UriResultCallback UploadMaterialDefinitionCallback = [Callback](const UriResult& UploadResult)
+	{
+		if (UploadResult.GetResultCode() == csp::systems::EResultCode::Failed)
+		{
+			CSP_LOG_FORMAT(LogLevel::Log,
+						   "Failed to upload generated material override file. ResCode: %d, HttpResCode: %d",
+						   static_cast<int>(UploadResult.GetResultCode()),
+						   UploadResult.GetHttpResultCode());
+		}
+
+		const NullResult InternalResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
+		Callback(InternalResult);
+	};
+
+	UploadAssetData(InternalAssetCollection, InternalAsset, AssetData, UploadMaterialDefinitionCallback);
 }
 
-CSP_ASYNC_RESULT void AssetSystem::GetMaterialOverride(const csp::common::String& AssetCollectionId,
-													   const csp::common::String& AssetId,
-													   MaterialOverrideResultCallback Callback)
+CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::String& AssetCollectionId,
+														 const csp::common::String& AssetId,
+														 MaterialDefinitionResultCallback Callback)
 {
 	// 1. Retrieve the Material Definition json file using the provided Asset Id and AssetCollection Id.
 	// 2. Parse the json file and create a new MaterialDefinition.
 	// 3. Return the MaterialDefinition via the Callback.
+
+	AssetResultCallback AssetResultCallbackHandler = [this, Callback](const AssetResult& Result)
+	{
+		const Asset& InternalAsset = Result.GetAsset();
+
+		AssetDataResultCallback AssetDataResultCallbackHandler = [Callback](const AssetDataResult& DataResult)
+		{
+			if (DataResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+			{
+				return;
+			}
+
+			MaterialDefinitionResult InternalResult(DataResult.GetResultCode(), DataResult.GetHttpResultCode());
+
+			if (DataResult.GetResultCode() == csp::systems::EResultCode::Failed)
+			{
+				Callback(InternalResult);
+
+				return;
+			}
+
+			size_t DownloadedAssetDataSize = DataResult.GetDataLength();
+			auto DownloadedAssetData	   = CSP_NEW char[DownloadedAssetDataSize];
+			std::memcpy(DownloadedAssetData, DataResult.GetData(), DownloadedAssetDataSize);
+
+			MaterialDefinition& InternalMaterialDefinition = InternalResult.GetMaterialDefinition();
+
+			InternalMaterialDefinition.DeserialiseFromJson(DownloadedAssetData);
+
+			Callback(InternalResult);
+		};
+		//= std::bind(&ScriptSystem::OnDownloadAssetData, this, ModuleNamespace, ModuleName, InternalAsset.Id, Callback, std::placeholders::_1);
+
+		this->DownloadAssetData(InternalAsset, AssetDataResultCallbackHandler);
+	};
+
+	GetAssetById(AssetCollectionId, AssetId, AssetResultCallbackHandler);
 }
 
 } // namespace csp::systems

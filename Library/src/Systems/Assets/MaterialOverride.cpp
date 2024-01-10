@@ -16,44 +16,33 @@
 
 #include "CSP/Systems/Assets/MaterialOverride.h"
 
-#include "CSP/Common/String.h"
-#include "CSP/Common/Vector.h"
 #include "CSP/Systems/MaterialOverrides/MaterialDefinition.h"
 #include "Debug/Logging.h"
 
 namespace csp::systems
 {
 
-MaterialOverrideAsset::MaterialOverrideAsset() : Definition()
-{
-}
-
-MaterialDefinition& MaterialOverrideAsset::GetMaterialDefinition()
+MaterialDefinition& MaterialDefinitionResult::GetMaterialDefinition()
 {
 	return Definition;
 }
 
-MaterialOverrideAsset& MaterialOverrideResult::GetMaterialOverrideAsset()
+const MaterialDefinition& MaterialDefinitionResult::GetMaterialDefinition() const
 {
-	return MaterialAsset;
+	return Definition;
 }
 
-const MaterialOverrideAsset& MaterialOverrideResult::GetMaterialOverrideAsset() const
+void MaterialDefinitionResult::SetMaterialDefinition(const MaterialDefinition& InDefinition)
 {
-	return MaterialAsset;
+	Definition = InDefinition;
 }
 
-void MaterialOverrideResult::SetMaterialOverrideAsset(const MaterialOverrideAsset& InAsset)
+void MaterialDefinitionResult::SetMaterialDefinition(MaterialDefinition&& InDefinition)
 {
-	MaterialAsset = InAsset;
+	Definition = std::move(InDefinition);
 }
 
-void MaterialOverrideResult::SetMaterialOverrideAsset(MaterialOverrideAsset&& InAsset)
-{
-	MaterialAsset = std::move(InAsset);
-}
-
-void MaterialOverrideResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void MaterialDefinitionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 }

@@ -2169,3 +2169,101 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 	LogOut(UserSystem);
 }
 #endif
+
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADMATERIALDEFINITION_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadMaterialDefinitionTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+
+	// Create a new MaterialDefinition object.
+	csp::systems::MaterialDefinition InternalMaterialDefinition = csp::systems::MaterialDefinition("MyTestMaterial");
+
+	// Get references to each of the materials parameters.
+	csp::systems::MaterialParameterTexture2d& BaseColorParamater = InternalMaterialDefinition.GetBaseColor();
+	csp::systems::MaterialParameterTexture2d& NormalParamater	 = InternalMaterialDefinition.GetNormal();
+	csp::systems::MaterialParameterTexture2d& EmissiveParamater	 = InternalMaterialDefinition.GetEmissive();
+	csp::systems::MaterialParameterFloat& EmissiveMultParamater	 = InternalMaterialDefinition.GetEmissiveMultiplier();
+	csp::systems::MaterialParameterTexture2d& OpacityParamater	 = InternalMaterialDefinition.GetOpacity();
+	csp::systems::MaterialParameterTexture2d& AOParamater		 = InternalMaterialDefinition.GetAO();
+	csp::systems::MaterialParameterVector2& UVOffsetParamater	 = InternalMaterialDefinition.GetUVOffset();
+	csp::systems::MaterialParameterVector2& UVScaleParamater	 = InternalMaterialDefinition.GetUVScale();
+
+	// Set values for each of the material parameters.
+	BaseColorParamater.SetParameterAssetCollectionId("AssetCollectionId_BaseColor_123");
+	BaseColorParamater.SetParameterAssetId("AssetId_BaseColor_123");
+	NormalParamater.SetParameterAssetCollectionId("AssetCollectionId_Normal_123");
+	NormalParamater.SetParameterAssetId("AssetId_Normal_123");
+	EmissiveParamater.SetParameterAssetCollectionId("AssetCollectionId_Emissive_123");
+	EmissiveParamater.SetParameterAssetId("AssetId_Emissive_123");
+	EmissiveMultParamater.SetParameterValue(0.75f);
+	OpacityParamater.SetParameterAssetCollectionId("AssetCollectionId_Opacity_123");
+	OpacityParamater.SetParameterAssetId("AssetId_Opacity_123");
+	AOParamater.SetParameterAssetCollectionId("AssetCollectionId_AO_123");
+	AOParamater.SetParameterAssetId("AssetId_AO_123");
+	UVOffsetParamater.SetParameterValue({1.1f, 1.2f});
+	UVScaleParamater.SetParameterValue({2.1f, 2.2f});
+
+	// Add the Secondary Normal feature and define parameter values.
+	csp::systems::MaterialParameterVector2 UVOffset2("UVOffset2");
+	UVOffset2.SetParameterValue({3.1f, 3.2f});
+	csp::systems::MaterialParameterVector2 UVScale2("UVScale2");
+	UVScale2.SetParameterValue({4.1f, 4.2f});
+	csp::common::Array<csp::systems::MaterialParameterBase> FeatureParameters = {UVOffset2, UVScale2};
+	InternalMaterialDefinition.SetFeatureParameters(csp::systems::EMaterialFeatures::Secondary_Normal_Map, FeatureParameters);
+
+	auto [Result] = AWAIT_PRE(AssetSystem, UploadMaterialDefinition, RequestPredicate, InternalMaterialDefinition, AssetCollection.Id, Asset.Id);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+	EXPECT_EQ(Result.GetHttpResultCode(), 200);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
