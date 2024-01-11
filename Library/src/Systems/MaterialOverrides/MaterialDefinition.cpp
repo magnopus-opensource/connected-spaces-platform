@@ -173,9 +173,10 @@ MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
 {
+	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>();
 }
 
-MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other)
+MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other) : MaterialDefinition()
 {
 	*this = Other;
 }
