@@ -409,7 +409,7 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	return JsonString;
 }
 
-bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& json)
+bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 {
 
 
