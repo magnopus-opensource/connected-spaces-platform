@@ -235,7 +235,7 @@ public:
 	MaterialDefinition(const csp::common::String& Name);
 	MaterialDefinition(const MaterialDefinition& Other);
 	~MaterialDefinition();
-	MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Other);
+	MaterialDefinition& operator=(const MaterialDefinition& Other);
 
 	/// @brief Get the name of the Material.
 	/// @return const csp::common::String& : The name of the Material.
