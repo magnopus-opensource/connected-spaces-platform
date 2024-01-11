@@ -19,6 +19,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 #include "Debug/Logging.h"
+#include "Memory/Memory.h"
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/stringbuffer.h>
@@ -157,6 +158,7 @@ MaterialDefinition::MaterialDefinition()
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
 {
+	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>();
 }
 
 MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
@@ -173,11 +175,39 @@ MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
 {
 }
 
+MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other)
+{
+	*this = Other;
+}
+
+MaterialDefinition::~MaterialDefinition()
+{
+	CSP_DELETE(MaterialFeatures);
+}
+
+MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Other)
+{
+	MaterialName	   = Other.MaterialName;
+	DefinitionVersion  = Other.DefinitionVersion;
+	BaseColor		   = Other.BaseColor;
+	Normal			   = Other.Normal;
+	Emissive		   = Other.Emissive;
+	EmissiveMultiplier = Other.EmissiveMultiplier;
+	Opacity			   = Other.Opacity;
+	AO				   = Other.AO;
+	UVOffset		   = Other.UVOffset;
+	UVScale			   = Other.UVScale;
+
+	*MaterialFeatures = *Other.MaterialFeatures;
+
+	return *this;
+}
+
 csp::common::Array<MaterialParameterBase> MaterialDefinition::GetFeatureParameters(EMaterialFeatures Feature) const
 {
-	if (MaterialFeatures.HasKey(Feature))
+	if (MaterialFeatures->HasKey(Feature))
 	{
-		return MaterialFeatures[Feature];
+		return (*MaterialFeatures)[Feature];
 	}
 
 	CSP_LOG_ERROR_FORMAT("Specified Material feature has not been added.");
@@ -187,22 +217,22 @@ csp::common::Array<MaterialParameterBase> MaterialDefinition::GetFeatureParamete
 
 void MaterialDefinition::SetFeatureParameters(EMaterialFeatures Feature, csp::common::Array<MaterialParameterBase> FeatureParameters)
 {
-	MaterialFeatures[Feature] = FeatureParameters;
+	(*MaterialFeatures)[Feature] = FeatureParameters;
 }
 
 void MaterialDefinition::RemoveFeature(EMaterialFeatures Feature)
 {
-	MaterialFeatures.Remove(Feature);
+	(*MaterialFeatures).Remove(Feature);
 }
 
 int32_t MaterialDefinition::GetFeatureCount() const
 {
-	return static_cast<int32_t>(MaterialFeatures.Size());
+	return static_cast<int32_t>(MaterialFeatures->Size());
 }
 
 bool MaterialDefinition::IsFeatureDefined(EMaterialFeatures Feature) const
 {
-	return MaterialFeatures.HasKey(Feature);
+	return MaterialFeatures->HasKey(Feature);
 }
 
 csp::common::String MaterialDefinition::SerialiseToJson() const

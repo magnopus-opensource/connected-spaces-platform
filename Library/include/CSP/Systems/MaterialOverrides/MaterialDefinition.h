@@ -233,6 +233,9 @@ class CSP_API MaterialDefinition
 public:
 	MaterialDefinition();
 	MaterialDefinition(const csp::common::String& Name);
+	MaterialDefinition(const MaterialDefinition& Other);
+	~MaterialDefinition();
+	MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Other);
 
 	/// @brief Get the name of the Material.
 	/// @return const csp::common::String& : The name of the Material.
@@ -351,7 +354,7 @@ private:
 	MaterialParameterVector2 UVOffset;
 	MaterialParameterVector2 UVScale;
 
-	csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>> MaterialFeatures;
+	csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>* MaterialFeatures;
 };
 
 
