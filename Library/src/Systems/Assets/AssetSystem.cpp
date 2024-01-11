@@ -76,6 +76,8 @@ csp::common::String ConvertAssetTypeToString(csp::systems::EAssetType AssetType)
 		return "HolocapAudio";
 	else if (AssetType == csp::systems::EAssetType::AUDIO)
 		return "Audio";
+	else if (AssetType == csp::systems::EAssetType::MATERIAL_DEFINITION)
+		return "MaterialDefinition";
 	else
 	{
 		assert(false && "Unsupported Asset Type!");

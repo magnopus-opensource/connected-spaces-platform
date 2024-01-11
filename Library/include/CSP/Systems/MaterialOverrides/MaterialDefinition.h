@@ -338,8 +338,11 @@ public:
 	/// @return bool : Result of check.
 	bool IsFeatureDefined(EMaterialFeatures Feature) const;
 
-private:
+	/// @brief Serialising the MaterialDefinition object to a json string.
+	/// @return csp::common::String : Serialised json string.
 	csp::common::String SerialiseToJson() const;
+
+private:
 	bool DeserialiseFromJson(const csp::common::String& json);
 
 	csp::common::String MaterialName;

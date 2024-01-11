@@ -50,6 +50,8 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::HOLOCAP_AUDIO;
 	else if (DTOAssetDetailType == "Audio")
 		return csp::systems::EAssetType::AUDIO;
+	else if (DTOAssetDetailType == "MaterialDefinition")
+		return csp::systems::EAssetType::MATERIAL_DEFINITION;
 	else
 	{
 		CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
