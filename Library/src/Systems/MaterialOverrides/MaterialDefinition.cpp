@@ -211,7 +211,7 @@ csp::common::Array<MaterialParameterBase> MaterialDefinition::GetFeatureParamete
 		return (*MaterialFeatures)[Feature];
 	}
 
-	CSP_LOG_ERROR_FORMAT("Specified Material feature has not been added.");
+	CSP_LOG_ERROR_FORMAT("Specified Material feature has not been added: %s.", ConvertFeatureNamesToString(Feature));
 
 	return InvalidParameters;
 }
