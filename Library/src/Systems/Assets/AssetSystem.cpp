@@ -856,7 +856,17 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::Stri
 
 	AssetResultCallback AssetResultCallbackHandler = [this, Callback](const AssetResult& Result)
 	{
-		const Asset& InternalAsset = Result.GetAsset();
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+		{
+			const MaterialDefinitionResult FailureResult(Result.GetResultCode(), Result.GetHttpResultCode());
+			Callback(FailureResult);
+			return;
+		}
 
 		AssetDataResultCallback AssetDataResultCallbackHandler = [Callback](const AssetDataResult& DataResult)
 		{
@@ -884,8 +894,8 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::Stri
 
 			Callback(InternalResult);
 		};
-		//= std::bind(&ScriptSystem::OnDownloadAssetData, this, ModuleNamespace, ModuleName, InternalAsset.Id, Callback, std::placeholders::_1);
 
+		const Asset& InternalAsset = Result.GetAsset();
 		this->DownloadAssetData(InternalAsset, AssetDataResultCallbackHandler);
 	};
 
