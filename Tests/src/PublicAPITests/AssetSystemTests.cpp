@@ -2242,12 +2242,14 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadMaterialDefinitionTest)
 	UVScaleParamater.SetParameterValue({2.1f, 2.2f});
 
 	// Add the Secondary Normal feature and define parameter values.
-	csp::systems::MaterialFeatureSecondaryNormal FeatureSecondaryNormal;
-	csp::systems::MaterialParameterVector2& UVOffsetParam = FeatureSecondaryNormal.GetParameterUVOffset();
-	csp::systems::MaterialParameterVector2& UVScaleParam  = FeatureSecondaryNormal.GetParameterUVScale();
-	UVOffsetParam.SetParameterValue({3.1f, 3.2f});
-	UVScaleParam.SetParameterValue({4.1f, 4.2f});
-	InternalMaterialDefinition.SetFeatureParameters(csp::systems::EMaterialFeatures::Secondary_Normal_Map, FeatureSecondaryNormal);
+	InternalMaterialDefinition.SetIsFeatureActive(true);
+	csp::systems::MaterialFeatureSecondaryNormal& FeatureSecondaryNormal = InternalMaterialDefinition.GetMaterialFeature();
+	csp::common::Vector2 Vec2UVOffset({3.1f, 3.2f});
+	csp::systems::MaterialParameterVector2 Vector2ParamUVOffset("UVOffset", Vec2UVOffset);
+	FeatureSecondaryNormal.SetParameterUVOffset(Vector2ParamUVOffset);
+	csp::common::Vector2 Vec2UVScale({4.1f, 4.2f});
+	csp::systems::MaterialParameterVector2 Vector2ParamUVScale("UVOffset", Vec2UVScale);
+	FeatureSecondaryNormal.SetParameterUVScale(Vector2ParamUVScale);
 
 	// Upload MaterialDefinition
 	auto [UploadResult]

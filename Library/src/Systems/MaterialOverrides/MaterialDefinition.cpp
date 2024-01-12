@@ -284,8 +284,6 @@ void SetMaterialFeatureValues(MaterialDefinition& OutMaterialDefinition,
 							  const csp::common::String& FeatureName,
 							  const rapidjson::Value::ConstValueIterator& MatFeatItr)
 {
-	EMaterialFeatures MaterialFeature = ConvertFeatureNameStringToEnum(FeatureName);
-
 	const rapidjson::Value::ConstMemberIterator featParamsAttribute = MatFeatItr->FindMember("featureParameters");
 
 	if (featParamsAttribute == MatFeatItr->MemberEnd() || !featParamsAttribute->value.IsArray())
@@ -293,55 +291,54 @@ void SetMaterialFeatureValues(MaterialDefinition& OutMaterialDefinition,
 		CSP_LOG_ERROR_FORMAT("Invalid json format for Material feature: %s.", FeatureName);
 	}
 
-	if (MaterialFeature == EMaterialFeatures::Secondary_Normal_Map)
+	csp::common::String ParamName;
+
+	for (rapidjson::Value::ConstValueIterator FeatParamItr = featParamsAttribute->value.Begin(); FeatParamItr != featParamsAttribute->value.End();
+		 ++FeatParamItr)
 	{
-		MaterialFeatureSecondaryNormal SecondaryNormalFeature;
+		const rapidjson::Value::ConstMemberIterator paramNameAttribute = FeatParamItr->FindMember("parameterName");
+		csp::common::String ParameterName							   = paramNameAttribute->value.GetString();
 
-		csp::common::String ParamName;
-
-		for (rapidjson::Value::ConstValueIterator FeatParamItr = featParamsAttribute->value.Begin(); FeatParamItr != featParamsAttribute->value.End();
-			 ++FeatParamItr)
+		if (paramNameAttribute != FeatParamItr->MemberEnd() && paramNameAttribute->value.IsString())
 		{
-			const rapidjson::Value::ConstMemberIterator paramNameAttribute = FeatParamItr->FindMember("parameterName");
-			csp::common::String ParameterName							   = paramNameAttribute->value.GetString();
+			const rapidjson::Value::ConstMemberIterator paramValueAttribute = FeatParamItr->FindMember("parameterValue");
 
-			if (paramNameAttribute != FeatParamItr->MemberEnd() && paramNameAttribute->value.IsString())
+			if (paramValueAttribute == FeatParamItr->MemberEnd() || !paramValueAttribute->value.IsArray())
 			{
-				const rapidjson::Value::ConstMemberIterator paramValueAttribute = FeatParamItr->FindMember("parameterValue");
+				CSP_LOG_ERROR_MSG("Invalide type for parameter Array.");
+			}
 
-				if (paramValueAttribute == FeatParamItr->MemberEnd() || !paramValueAttribute->value.IsArray())
+			float _X;
+			float _Y;
+
+			for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin();
+				 Vec2PropItr != paramValueAttribute->value.End();
+				 ++Vec2PropItr)
+			{
+				const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
+				if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
 				{
-					CSP_LOG_ERROR_MSG("Invalide type for parameter Array.");
+					_X = XAttribute->value.GetFloat();
 				}
 
-				float _X;
-				float _Y;
-
-				for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin();
-					 Vec2PropItr != paramValueAttribute->value.End();
-					 ++Vec2PropItr)
+				const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
+				if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
 				{
-					const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
-					if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
-					{
-						_X = XAttribute->value.GetFloat();
-					}
+					_Y = YAttribute->value.GetFloat();
+				}
+			}
 
-					const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
-					if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
-					{
-						_Y = YAttribute->value.GetFloat();
-					}
-				}
-
-				if (ParameterName == "UVOffset")
-				{
-					SecondaryNormalFeature.GetParameterUVOffset().SetParameterValue({_X, _Y});
-				}
-				else if (ParameterName == "UVScale")
-				{
-					SecondaryNormalFeature.GetParameterUVScale().SetParameterValue({_X, _Y});
-				}
+			if (ParameterName == "UVOffset")
+			{
+				csp::common::Vector2 Vec2({_X, _Y});
+				MaterialParameterVector2 Vector2Param("UVOffset", Vec2);
+				OutMaterialDefinition.GetMaterialFeature().SetParameterUVOffset(Vector2Param);
+			}
+			else if (ParameterName == "UVScale")
+			{
+				csp::common::Vector2 Vec2({_X, _Y});
+				MaterialParameterVector2 Vector2Param("UVScale", Vec2);
+				OutMaterialDefinition.GetMaterialFeature().SetParameterUVScale(Vector2Param);
 			}
 		}
 	}
@@ -429,20 +426,10 @@ MaterialParameterTexture2d::MaterialParameterTexture2d(csp::common::String Name,
 {
 }
 
-MaterialFeatureBase::MaterialFeatureBase() : FeatureName("")
+
+MaterialFeatureSecondaryNormal::MaterialFeatureSecondaryNormal() : FeatureName("secondary_normal_map"), UVOffsetParameter(), UVScaleParameter()
 {
 }
-
-MaterialFeatureBase::MaterialFeatureBase(csp::common::String Name) : FeatureName(Name)
-{
-}
-
-MaterialFeatureSecondaryNormal::MaterialFeatureSecondaryNormal()
-	: MaterialFeatureBase("secondary_normal_map"), UVOffsetParameter(), UVScaleParameter()
-{
-}
-
-static MaterialFeatureBase InvalidParameters = MaterialFeatureBase();
 
 
 MaterialDefinition::MaterialDefinition()
@@ -456,8 +443,9 @@ MaterialDefinition::MaterialDefinition()
 	, AO("AO")
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
+	, MaterialFeature()
+	, IsFeatureActive(false)
 {
-	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, MaterialFeatureBase>();
 }
 
 MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
@@ -471,8 +459,9 @@ MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
 	, AO("AO")
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
+	, MaterialFeature()
+	, IsFeatureActive(false)
 {
-	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, MaterialFeatureBase>();
 }
 
 MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other) : MaterialDefinition()
@@ -482,7 +471,6 @@ MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other) : Materi
 
 MaterialDefinition::~MaterialDefinition()
 {
-	CSP_DELETE(MaterialFeatures);
 }
 
 MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Other)
@@ -497,42 +485,10 @@ MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Othe
 	AO				   = Other.AO;
 	UVOffset		   = Other.UVOffset;
 	UVScale			   = Other.UVScale;
-
-	*MaterialFeatures = *Other.MaterialFeatures;
+	MaterialFeature	   = Other.MaterialFeature;
+	IsFeatureActive	   = Other.IsFeatureActive;
 
 	return *this;
-}
-
-MaterialFeatureBase MaterialDefinition::GetFeatureParameters(EMaterialFeatures Feature) const
-{
-	if (MaterialFeatures->HasKey(Feature))
-	{
-		return (*MaterialFeatures)[Feature];
-	}
-
-	CSP_LOG_ERROR_FORMAT("Specified Material feature has not been added: %s.", ConvertFeatureNamesToString(Feature));
-
-	return InvalidParameters;
-}
-
-void MaterialDefinition::SetFeatureParameters(EMaterialFeatures FeatureName, MaterialFeatureBase Feature)
-{
-	(*MaterialFeatures)[FeatureName] = Feature;
-}
-
-void MaterialDefinition::RemoveFeature(EMaterialFeatures Feature)
-{
-	(*MaterialFeatures).Remove(Feature);
-}
-
-int32_t MaterialDefinition::GetFeatureCount() const
-{
-	return static_cast<int32_t>(MaterialFeatures->Size());
-}
-
-bool MaterialDefinition::IsFeatureDefined(EMaterialFeatures Feature) const
-{
-	return MaterialFeatures->HasKey(Feature);
 }
 
 csp::common::String MaterialDefinition::SerialiseToJson() const
@@ -671,12 +627,10 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	// End material parameter array
 	StringBufferWriter.EndArray(8);
 
-	if (IsFeatureDefined(EMaterialFeatures::Secondary_Normal_Map))
+	if (IsFeatureActive)
 	{
-		MaterialFeatureSecondaryNormal* SecondaryNormalFeature
-			= (MaterialFeatureSecondaryNormal*) &(MaterialFeatures->operator[](EMaterialFeatures::Secondary_Normal_Map));
-		MaterialParameterVector2& UVOffsetParam = SecondaryNormalFeature->GetParameterUVOffset();
-		MaterialParameterVector2& UVScaleParam	= SecondaryNormalFeature->GetParameterUVScale();
+		const MaterialParameterVector2& UVOffsetParam = MaterialFeature.GetParameterUVOffset();
+		const MaterialParameterVector2& UVScaleParam  = MaterialFeature.GetParameterUVScale();
 
 		// Begin material features array
 		StringBufferWriter.String("materialFeatures");
@@ -803,6 +757,8 @@ bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 		CSP_LOG_MSG(LogLevel::Log, "No material features found.");
 		return false;
 	}
+
+	SetIsFeatureActive(true);
 
 	for (rapidjson::Value::ConstValueIterator MatFeatItr = materialPropertyFeatures.Begin(); MatFeatItr != materialPropertyFeatures.End();
 		 ++MatFeatItr)

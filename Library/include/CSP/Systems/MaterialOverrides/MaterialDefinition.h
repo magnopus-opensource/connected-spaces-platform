@@ -241,50 +241,51 @@ private:
 
 // Material Features
 
-/// @brief The base class for all Material features.
-class CSP_API MaterialFeatureBase
-{
-
-public:
-	MaterialFeatureBase();
-	MaterialFeatureBase(csp::common::String Name);
-
-	virtual ~MaterialFeatureBase() {};
-
-	/// @brief Get the Name of the Material parameter.
-	/// @return const csp::common::string& : The Name of the Material parameter.
-	csp::common::String GetFeatureName() const
-	{
-		return FeatureName;
-	}
-
-private:
-	csp::common::String FeatureName;
-};
-
 /// @brief The Secondary Normal feature.
-class CSP_API MaterialFeatureSecondaryNormal : public MaterialFeatureBase
+class CSP_API MaterialFeatureSecondaryNormal
 {
 
 public:
 	MaterialFeatureSecondaryNormal();
 	// MaterialFeatureSecondaryNormal(csp::common::Vector2& UVOffsetValue, csp::common::Vector2& UVScaleValue);
 
+	/// @brief Get the Name of the Material Feature.
+	/// @return const csp::common::string& : The Name of the Material Feature.
+	csp::common::String GetFeatureName() const
+	{
+		return FeatureName;
+	}
+
 	/// @brief Get the Value of the Feature UVOffset parameter.
-	/// @return csp::common::Vector2& : The Value of the Feature UVOffset parameter.
-	MaterialParameterVector2& GetParameterUVOffset()
+	/// @return const MaterialParameterVector2& : The Value of the Feature UVOffset parameter.
+	const MaterialParameterVector2& GetParameterUVOffset() const
 	{
 		return UVOffsetParameter;
+	}
+
+	/// @brief Set the Value of the Feature UVOffset parameter.
+	/// @param MaterialParameterVector2& : The Value of the Feature UVOffset parameter.
+	void SetParameterUVOffset(MaterialParameterVector2& Vector2Parameter)
+	{
+		UVOffsetParameter = Vector2Parameter;
 	}
 
 	/// @brief Get the Value of the Feature UVScale parameter.
-	/// @return csp::common::Vector2& : The Value of the Feature UVScale parameter.
-	MaterialParameterVector2& GetParameterUVScale()
+	/// @return const MaterialParameterVector2& : The Value of the Feature UVScale parameter.
+	const MaterialParameterVector2& GetParameterUVScale() const
 	{
-		return UVOffsetParameter;
+		return UVScaleParameter;
+	}
+
+	/// @brief Set the Value of the Feature UVScale parameter.
+	/// @param MaterialParameterVector2& : The Value of the Feature UVScale parameter.
+	void SetParameterUVScale(MaterialParameterVector2& Vector2Parameter)
+	{
+		UVScaleParameter = Vector2Parameter;
 	}
 
 private:
+	csp::common::String FeatureName;
 	MaterialParameterVector2 UVOffsetParameter;
 	MaterialParameterVector2 UVScaleParameter;
 };
@@ -380,29 +381,26 @@ public:
 		return UVScale;
 	}
 
-	/// @brief Get the Material feature parameters.
-	/// @param Feature EMaterialFeatures : The name of the feature.
-	/// @return MaterialFeatureBase : The Material Feature.
-	MaterialFeatureBase GetFeatureParameters(EMaterialFeatures Feature) const;
+	/// @brief Get the Material Feature.
+	/// @return MaterialFeatureSecondaryNormal& : The Material Feature.
+	MaterialFeatureSecondaryNormal& GetMaterialFeature()
+	{
+		return MaterialFeature;
+	}
 
-	/// @brief Set the Material parameters for a feature.
-	/// @param Feature EMaterialFeatures : The name of the feature.
-	/// @param FeatureParameters csp::common::Array<MaterialParameterBase> : The array of feature parameters.
-	/// @return const csp::common::Array<MaterialParameterBase>& : Array of Material feature parameters.
-	void SetFeatureParameters(EMaterialFeatures FeatureName, MaterialFeatureBase Feature);
+	/// @brief Check if Feature active.
+	/// @return bool : Is Feature active.
+	bool GetIsFeatureActive()
+	{
+		return IsFeatureActive;
+	}
 
-	/// @brief Remove specified Material feature.
-	/// @param Feature EMaterialFeatures : The name of the feature.
-	void RemoveFeature(EMaterialFeatures Feature);
-
-	/// @brief Get the number of Material features.
-	/// @return int32_t : Number of Material features.
-	int32_t GetFeatureCount() const;
-
-	/// @brief Verify if a Material feature has been defined.
-	/// @param Feature EMaterialFeatures : The name of the feature.
-	/// @return bool : Result of check.
-	bool IsFeatureDefined(EMaterialFeatures Feature) const;
+	/// @brief Set if Feature active.
+	/// @param bool : Is Feature active.
+	void SetIsFeatureActive(bool IsActive)
+	{
+		IsFeatureActive = IsActive;
+	}
 
 	/// @brief Deserialse a json string into a MaterialDefinition object.
 	/// @param Json const csp::common::String& : The Json string to be deserialised.
@@ -424,7 +422,8 @@ private:
 	MaterialParameterVector2 UVOffset;
 	MaterialParameterVector2 UVScale;
 
-	csp::common::Map<EMaterialFeatures, MaterialFeatureBase>* MaterialFeatures;
+	MaterialFeatureSecondaryNormal MaterialFeature;
+	bool IsFeatureActive;
 };
 
 
