@@ -21,12 +21,38 @@
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 
-#include <rapidjson/rapidjson.h>
+#include <rapidjson/document.h>
+//#include <rapidjson/rapidjson.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
 namespace
 {
+csp::systems::EMaterialParameterSetName ConvertParameterNameStringToEnum(const csp::common::String& ParameterName)
+{
+	if (ParameterName == "BaseColor")
+		return csp::systems::EMaterialParameterSetName::BaseColor;
+	else if (ParameterName == "Normal")
+		return csp::systems::EMaterialParameterSetName::Normal;
+	else if (ParameterName == "Emissive")
+		return csp::systems::EMaterialParameterSetName::Emissive;
+	else if (ParameterName == "EmissiveMultiplier")
+		return csp::systems::EMaterialParameterSetName::EmissiveMultiplier;
+	else if (ParameterName == "Opacity")
+		return csp::systems::EMaterialParameterSetName::Opacity;
+	else if (ParameterName == "AO")
+		return csp::systems::EMaterialParameterSetName::AO;
+	else if (ParameterName == "UVOffset")
+		return csp::systems::EMaterialParameterSetName::UVOffset;
+	else if (ParameterName == "UVScale")
+		return csp::systems::EMaterialParameterSetName::UVScale;
+	else
+	{
+		assert(false && "Unsupported Parameter Name!");
+		return csp::systems::EMaterialParameterSetName::Invalid;
+	}
+}
+
 csp::common::String ConvertParameterTypeToString(csp::systems::EMaterialParameterType ParameterType)
 {
 	if (ParameterType == csp::systems::EMaterialParameterType::Int)
@@ -46,6 +72,25 @@ csp::common::String ConvertParameterTypeToString(csp::systems::EMaterialParamete
 	}
 }
 
+csp::systems::EMaterialParameterType ConvertParameterStringToType(csp::common::String ParameterType)
+{
+	if (ParameterType == "int")
+		return csp::systems::EMaterialParameterType::Int;
+	else if (ParameterType == "float")
+		return csp::systems::EMaterialParameterType::Float;
+	else if (ParameterType == "vector2")
+		return csp::systems::EMaterialParameterType::Vector2;
+	else if (ParameterType == "vector3")
+		return csp::systems::EMaterialParameterType::Vector3;
+	else if (ParameterType == "texture2d")
+		return csp::systems::EMaterialParameterType::Texture2d;
+	else
+	{
+		assert(false && "Unsupported Parameter Type!");
+		return csp::systems::EMaterialParameterType::Invalid;
+	}
+}
+
 csp::common::String ConvertFeatureNamesToString(csp::systems::EMaterialFeatures MaterialFeature)
 {
 	if (MaterialFeature == csp::systems::EMaterialFeatures::Secondary_Normal_Map)
@@ -56,6 +101,18 @@ csp::common::String ConvertFeatureNamesToString(csp::systems::EMaterialFeatures 
 		return "invalid";
 	}
 }
+
+csp::systems::EMaterialFeatures ConvertFeatureNameStringToEnum(const csp::common::String& FeatureName)
+{
+	if (FeatureName == "secondary_normal_map")
+		return csp::systems::EMaterialFeatures::Secondary_Normal_Map;
+	else
+	{
+		assert(false && "Unsupported Feature name!");
+		return csp::systems::EMaterialFeatures::Invalid;
+	}
+}
+
 } // namespace
 
 namespace csp::systems
@@ -143,7 +200,20 @@ MaterialParameterTexture2d::MaterialParameterTexture2d(csp::common::String Name,
 {
 }
 
-static const csp::common::Array<MaterialParameterBase> InvalidParameters = csp::common::Array<MaterialParameterBase>();
+MaterialFeatureBase::MaterialFeatureBase() : FeatureName("")
+{
+}
+
+MaterialFeatureBase::MaterialFeatureBase(csp::common::String Name) : FeatureName(Name)
+{
+}
+
+MaterialFeatureSecondaryNormal::MaterialFeatureSecondaryNormal()
+	: MaterialFeatureBase("secondary_normal_map"), UVOffsetParameter(), UVScaleParameter()
+{
+}
+
+static MaterialFeatureBase InvalidParameters = MaterialFeatureBase();
 
 
 MaterialDefinition::MaterialDefinition()
@@ -158,7 +228,7 @@ MaterialDefinition::MaterialDefinition()
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
 {
-	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>();
+	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, MaterialFeatureBase>();
 }
 
 MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
@@ -173,7 +243,7 @@ MaterialDefinition::MaterialDefinition(const csp::common::String& Name)
 	, UVOffset("UVOffset")
 	, UVScale("UVScale")
 {
-	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>();
+	MaterialFeatures = CSP_NEW csp::common::Map<EMaterialFeatures, MaterialFeatureBase>();
 }
 
 MaterialDefinition::MaterialDefinition(const MaterialDefinition& Other) : MaterialDefinition()
@@ -204,7 +274,7 @@ MaterialDefinition& MaterialDefinition::operator=(const MaterialDefinition& Othe
 	return *this;
 }
 
-csp::common::Array<MaterialParameterBase> MaterialDefinition::GetFeatureParameters(EMaterialFeatures Feature) const
+MaterialFeatureBase MaterialDefinition::GetFeatureParameters(EMaterialFeatures Feature) const
 {
 	if (MaterialFeatures->HasKey(Feature))
 	{
@@ -216,9 +286,9 @@ csp::common::Array<MaterialParameterBase> MaterialDefinition::GetFeatureParamete
 	return InvalidParameters;
 }
 
-void MaterialDefinition::SetFeatureParameters(EMaterialFeatures Feature, csp::common::Array<MaterialParameterBase> FeatureParameters)
+void MaterialDefinition::SetFeatureParameters(EMaterialFeatures FeatureName, MaterialFeatureBase Feature)
 {
-	(*MaterialFeatures)[Feature] = FeatureParameters;
+	(*MaterialFeatures)[FeatureName] = Feature;
 }
 
 void MaterialDefinition::RemoveFeature(EMaterialFeatures Feature)
@@ -283,15 +353,23 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	StringBufferWriter.String(Emissive.GetParameterName());
 	StringBufferWriter.String("parameterType");
 	StringBufferWriter.String(ConvertParameterTypeToString(Emissive.GetParameterType()));
-	StringBufferWriter.String(EmissiveMultiplier.GetParameterName());
-	StringBufferWriter.Double(EmissiveMultiplier.GetParameterValue());
 	StringBufferWriter.String("assetId");
 	StringBufferWriter.String(Emissive.GetParameterAssetId());
 	StringBufferWriter.String("assetCollectionId");
 	StringBufferWriter.String(Emissive.GetParameterAssetCollectionId());
-	StringBufferWriter.EndObject(5);
+	StringBufferWriter.EndObject(4);
 
-	// Parameter 4: Opacity
+	// Parameter 4: Emissive Multiplier
+	StringBufferWriter.StartObject();
+	StringBufferWriter.String("parameterName");
+	StringBufferWriter.String(EmissiveMultiplier.GetParameterName());
+	StringBufferWriter.String("parameterType");
+	StringBufferWriter.String(ConvertParameterTypeToString(EmissiveMultiplier.GetParameterType()));
+	StringBufferWriter.String("parameterValue");
+	StringBufferWriter.Double(EmissiveMultiplier.GetParameterValue());
+	StringBufferWriter.EndObject(3);
+
+	// Parameter 5: Opacity
 	StringBufferWriter.StartObject();
 	StringBufferWriter.String("parameterName");
 	StringBufferWriter.String(Opacity.GetParameterName());
@@ -303,7 +381,7 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	StringBufferWriter.String(Opacity.GetParameterAssetCollectionId());
 	StringBufferWriter.EndObject(4);
 
-	// Parameter 5: AO
+	// Parameter 6: AO
 	StringBufferWriter.StartObject();
 	StringBufferWriter.String("parameterName");
 	StringBufferWriter.String(AO.GetParameterName());
@@ -315,7 +393,7 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	StringBufferWriter.String(AO.GetParameterAssetCollectionId());
 	StringBufferWriter.EndObject(4);
 
-	// Parameter 6: UVOffset
+	// Parameter 7: UVOffset
 	StringBufferWriter.StartObject();
 	StringBufferWriter.String("parameterName");
 	StringBufferWriter.String(UVOffset.GetParameterName());
@@ -323,14 +401,22 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	StringBufferWriter.String(ConvertParameterTypeToString(UVOffset.GetParameterType()));
 	StringBufferWriter.String("parameterValue");
 	StringBufferWriter.StartArray();
+	// Begin parameter X object
+	StringBufferWriter.StartObject();
 	StringBufferWriter.String("X");
 	StringBufferWriter.Double(UVOffset.GetParameterValue().X);
+	// End parameter X object
+	StringBufferWriter.EndObject(1);
+	// Start parameter Y object
+	StringBufferWriter.StartObject();
 	StringBufferWriter.String("Y");
 	StringBufferWriter.Double(UVOffset.GetParameterValue().Y);
+	// End parameter X object
+	StringBufferWriter.EndObject(1);
 	StringBufferWriter.EndArray(2);
 	StringBufferWriter.EndObject(3);
 
-	// Parameter 7: UVScale
+	// Parameter 8: UVScale
 	StringBufferWriter.StartObject();
 	StringBufferWriter.String("parameterName");
 	StringBufferWriter.String(UVScale.GetParameterName());
@@ -338,69 +424,99 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 	StringBufferWriter.String(ConvertParameterTypeToString(UVScale.GetParameterType()));
 	StringBufferWriter.String("parameterValue");
 	StringBufferWriter.StartArray();
+	// Begin parameter X object
+	StringBufferWriter.StartObject();
 	StringBufferWriter.String("X");
 	StringBufferWriter.Double(UVScale.GetParameterValue().X);
+	// End parameter X object
+	StringBufferWriter.EndObject(1);
+	// Start parameter Y object
+	StringBufferWriter.StartObject();
 	StringBufferWriter.String("Y");
 	StringBufferWriter.Double(UVScale.GetParameterValue().Y);
+	// End parameter X object
+	StringBufferWriter.EndObject(1);
 	StringBufferWriter.EndArray(2);
 	StringBufferWriter.EndObject(3);
 
-	StringBufferWriter.EndArray(7);
 	// End material parameter array
+	StringBufferWriter.EndArray(8);
 
-	if (GetFeatureCount() > 0)
+	if (IsFeatureDefined(EMaterialFeatures::Secondary_Normal_Map))
 	{
+		MaterialFeatureSecondaryNormal* SecondaryNormalFeature
+			= (MaterialFeatureSecondaryNormal*) &(MaterialFeatures->operator[](EMaterialFeatures::Secondary_Normal_Map));
+		MaterialParameterVector2& UVOffsetParam = SecondaryNormalFeature->GetParameterUVOffset();
+		MaterialParameterVector2& UVScaleParam	= SecondaryNormalFeature->GetParameterUVScale();
+
 		// Begin material features array
 		StringBufferWriter.String("materialFeatures");
 		StringBufferWriter.StartArray();
 
 		// Begin feature object
 		StringBufferWriter.StartObject();
-		StringBufferWriter.String("featureName");
-		StringBufferWriter.String(ConvertFeatureNamesToString(EMaterialFeatures::Secondary_Normal_Map));
 
-		const csp::common::Array<MaterialParameterBase>& FeatureParameters = GetFeatureParameters(EMaterialFeatures::Secondary_Normal_Map);
+		StringBufferWriter.String("featureName");
+		StringBufferWriter.String("secondary_normal_map");
 
 		StringBufferWriter.String("featureParameters");
 		// Begin feature parameters array
 		StringBufferWriter.StartArray();
 
-		for (size_t i = 0; i < FeatureParameters.Size(); ++i)
-		{
-			MaterialParameterBase ParameterBase = FeatureParameters.operator[](i);
+		// Begin UVOffset Feature parameter object
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("parameterName");
+		StringBufferWriter.String("UVOffset");
+		StringBufferWriter.String("parameterType");
+		StringBufferWriter.String("vector2");
+		StringBufferWriter.String("parameterValue");
+		// Begin UVOffset Array
+		StringBufferWriter.StartArray();
+		// X element
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("X");
+		StringBufferWriter.Double(UVOffsetParam.GetParameterValue().X);
+		StringBufferWriter.EndObject(1);
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("Y");
+		StringBufferWriter.Double(UVOffsetParam.GetParameterValue().Y);
+		StringBufferWriter.EndObject(1);
+		// End UVOffset Array
+		StringBufferWriter.EndArray(2);
+		// End feature parameter object
+		StringBufferWriter.EndObject(3);
 
-			// Begin feature parameter object
-			StringBufferWriter.StartObject();
-			StringBufferWriter.String("parameterName");
-			StringBufferWriter.String(ParameterBase.GetParameterName());
+		// Begin UVScale Feature parameter object
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("parameterName");
+		StringBufferWriter.String("UVScale");
+		StringBufferWriter.String("parameterType");
+		StringBufferWriter.String("vector2");
+		StringBufferWriter.String("parameterValue");
+		// Begin UVOffset Array
+		StringBufferWriter.StartArray();
+		// X element
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("X");
+		StringBufferWriter.Double(UVScaleParam.GetParameterValue().X);
+		StringBufferWriter.EndObject(1);
+		StringBufferWriter.StartObject();
+		StringBufferWriter.String("Y");
+		StringBufferWriter.Double(UVScaleParam.GetParameterValue().Y);
+		StringBufferWriter.EndObject(1);
+		// End UVOffset Array
+		StringBufferWriter.EndArray(2);
+		// End feature parameter object
+		StringBufferWriter.EndObject(3);
 
-			if (ParameterBase.GetParameterType() == EMaterialParameterType::Vector2)
-			{
-				StringBufferWriter.String("parameterType");
-				StringBufferWriter.String(ConvertParameterTypeToString(ParameterBase.GetParameterType()));
-
-				const MaterialParameterVector2* Vector2Parameter = (MaterialParameterVector2*) &ParameterBase;
-
-				StringBufferWriter.String("parameterValue");
-				StringBufferWriter.StartArray();
-				StringBufferWriter.String("X");
-				StringBufferWriter.Double(Vector2Parameter->GetParameterValue().X);
-				StringBufferWriter.String("Y");
-				StringBufferWriter.Double(Vector2Parameter->GetParameterValue().Y);
-				StringBufferWriter.EndArray(2);
-			}
-
-			// End feature parameter object
-			StringBufferWriter.EndObject(3);
-		}
 		// End feature parameters array
 		StringBufferWriter.EndArray(2);
 
 		// End feature object
-		StringBufferWriter.EndObject(GetFeatureCount());
+		StringBufferWriter.EndObject(2);
 
 		// End material features array
-		StringBufferWriter.EndArray(GetFeatureCount());
+		StringBufferWriter.EndArray(1);
 	}
 
 	StringBufferWriter.EndObject();
@@ -411,10 +527,283 @@ csp::common::String MaterialDefinition::SerialiseToJson() const
 
 bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 {
+	if (Json.IsEmpty())
+	{
+		return false;
+	}
 
+	// Check string is valid json.
+	rapidjson::Document doc;
+	if (doc.Parse(Json.c_str()).HasParseError())
+	{
+		return false;
+	}
+
+	MaterialName	  = doc["materialName"].GetString();
+	DefinitionVersion = doc["definitionVersion"].GetString();
+
+	// Get the material properties array.
+	const rapidjson::Value& materialPropertyAttributes = doc["materialProperties"];
+	if (!materialPropertyAttributes.IsArray())
+	{
+		return false;
+	}
+
+	for (rapidjson::Value::ConstValueIterator MatPropItr = materialPropertyAttributes.Begin(); MatPropItr != materialPropertyAttributes.End();
+		 ++MatPropItr)
+	{
+		const rapidjson::Value::ConstMemberIterator currentAttribute = MatPropItr->FindMember("parameterType");
+
+		if (currentAttribute != MatPropItr->MemberEnd() && currentAttribute->value.IsString())
+		{
+			csp::systems::EMaterialParameterType MaterialParameterType = ConvertParameterStringToType(currentAttribute->value.GetString());
+
+			SetMaterialPropertyValues(MaterialParameterType, MatPropItr);
+		}
+	}
+
+	const rapidjson::Value& materialPropertyFeatures = doc["materialFeatures"];
+	if (!materialPropertyFeatures.IsArray())
+	{
+		CSP_LOG_MSG(LogLevel::Log, "No material features found.");
+		return false;
+	}
+
+	for (rapidjson::Value::ConstValueIterator MatFeatItr = materialPropertyFeatures.Begin(); MatFeatItr != materialPropertyFeatures.End();
+		 ++MatFeatItr)
+	{
+		const rapidjson::Value::ConstMemberIterator currentFeatureAttribute = MatFeatItr->FindMember("featureName");
+
+		if (currentFeatureAttribute != MatFeatItr->MemberEnd() && currentFeatureAttribute->value.IsString())
+		{
+			csp::common::String FeatureName = currentFeatureAttribute->value.GetString();
+
+			SetMaterialFeatureValues(FeatureName, MatFeatItr);
+		}
+	}
 
 	return true;
 }
 
+void MaterialDefinition::SetMaterialFeatureValues(const csp::common::String& FeatureName, const rapidjson::Value::ConstValueIterator& MatFeatItr)
+{
+	EMaterialFeatures MaterialFeature = ConvertFeatureNameStringToEnum(FeatureName);
+
+	const rapidjson::Value::ConstMemberIterator featParamsAttribute = MatFeatItr->FindMember("featureParameters");
+
+	if (featParamsAttribute == MatFeatItr->MemberEnd() || !featParamsAttribute->value.IsArray())
+	{
+		CSP_LOG_ERROR_FORMAT("Invalid json format for Material feature: %s.", FeatureName);
+	}
+
+	if (MaterialFeature == EMaterialFeatures::Secondary_Normal_Map)
+	{
+		MaterialFeatureSecondaryNormal SecondaryNormalFeature;
+
+		csp::common::String ParamName;
+
+		for (rapidjson::Value::ConstValueIterator FeatParamItr = featParamsAttribute->value.Begin(); FeatParamItr != featParamsAttribute->value.End();
+			 ++FeatParamItr)
+		{
+			const rapidjson::Value::ConstMemberIterator paramNameAttribute = FeatParamItr->FindMember("parameterName");
+			csp::common::String ParameterName							   = paramNameAttribute->value.GetString();
+
+			if (paramNameAttribute != FeatParamItr->MemberEnd() && paramNameAttribute->value.IsString())
+			{
+				const rapidjson::Value::ConstMemberIterator paramValueAttribute = FeatParamItr->FindMember("parameterValue");
+
+				if (paramValueAttribute == FeatParamItr->MemberEnd() || !paramValueAttribute->value.IsArray())
+				{
+					CSP_LOG_ERROR_MSG("Invalide type for parameter Array.");
+				}
+
+				float _X;
+				float _Y;
+
+				for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin();
+					 Vec2PropItr != paramValueAttribute->value.End();
+					 ++Vec2PropItr)
+				{
+					const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
+					if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
+					{
+						_X = XAttribute->value.GetFloat();
+					}
+
+					const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
+					if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
+					{
+						_Y = YAttribute->value.GetFloat();
+					}
+				}
+
+				if (ParameterName == "UVOffset")
+				{
+					SecondaryNormalFeature.GetParameterUVOffset().SetParameterValue({_X, _Y});
+				}
+				else if (ParameterName == "UVScale")
+				{
+					SecondaryNormalFeature.GetParameterUVScale().SetParameterValue({_X, _Y});
+				}
+			}
+		}
+	}
+}
+
+void MaterialDefinition::SetMaterialPropertyValues(const EMaterialParameterType& MaterialParameterType,
+												   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramNameAttribute = MatPropItr->FindMember("parameterName");
+	if (paramNameAttribute == MatPropItr->MemberEnd() || !paramNameAttribute->value.IsString())
+	{
+		CSP_LOG_ERROR_MSG("Invalid json format for Material property.");
+	}
+
+	csp::common::String AtttributeParameterName		= paramNameAttribute->value.GetString();
+	EMaterialParameterSetName MaterialParameterName = ConvertParameterNameStringToEnum(AtttributeParameterName);
+
+	switch (MaterialParameterType)
+	{
+		case EMaterialParameterType::Int:
+			SetIntMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Float:
+			SetFloatMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Vector2:
+			SetVector2MaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Vector3:
+			SetVector3MaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Texture2d:
+			SetTexture2dMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("Specified Material property does not have a valid type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void MaterialDefinition::SetIntMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+												 const csp::common::String& AtttributeParameterName,
+												 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	CSP_LOG_ERROR_FORMAT("Function SetIntMaterialParameter not implement yet: %s.", AtttributeParameterName);
+}
+
+void MaterialDefinition::SetFloatMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+												   const csp::common::String& AtttributeParameterName,
+												   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
+
+	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsFloat())
+	{
+		CSP_LOG_ERROR_FORMAT("Float parameter value for property invalid: %s.", AtttributeParameterName);
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::EmissiveMultiplier:
+			EmissiveMultiplier.SetParameterValue(paramValueAttribute->value.GetFloat());
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void MaterialDefinition::SetVector2MaterialParameter(EMaterialParameterSetName MaterialParameterName,
+													 const csp::common::String& AtttributeParameterName,
+													 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
+
+	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsArray())
+	{
+		CSP_LOG_ERROR_FORMAT("Vector2 parameter value for property invalid: %s.", AtttributeParameterName);
+	}
+
+	float _X;
+	float _Y;
+
+	for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin(); Vec2PropItr != paramValueAttribute->value.End();
+		 ++Vec2PropItr)
+	{
+		const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
+		if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
+		{
+			_X = XAttribute->value.GetFloat();
+		}
+
+		const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
+		if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
+		{
+			_Y = YAttribute->value.GetFloat();
+		}
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::UVOffset:
+			UVOffset.SetParameterValue({_X, _Y});
+			break;
+		case EMaterialParameterSetName::UVScale:
+			UVOffset.SetParameterValue({_X, _Y});
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void MaterialDefinition::SetVector3MaterialParameter(EMaterialParameterSetName MaterialParameterName,
+													 const csp::common::String& AtttributeParameterName,
+													 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	CSP_LOG_ERROR_FORMAT("Function SetVector3MaterialParameter not implement yet: %s.", AtttributeParameterName);
+}
+
+void MaterialDefinition::SetTexture2dMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+													   const csp::common::String& AtttributeParameterName,
+													   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramAssetCollectionAttribute = MatPropItr->FindMember("assetCollectionId");
+	const rapidjson::Value::ConstMemberIterator paramAssetAttribute			  = MatPropItr->FindMember("assetId");
+
+	if (paramAssetCollectionAttribute == MatPropItr->MemberEnd() || paramAssetAttribute == MatPropItr->MemberEnd()
+		|| !paramAssetCollectionAttribute->value.IsString() || !paramAssetAttribute->value.IsString())
+	{
+		CSP_LOG_ERROR_FORMAT("AssetCollection ID and/or Asset Id for texture2d property invalid: %s.", AtttributeParameterName);
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::BaseColor:
+			BaseColor.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			BaseColor.SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Normal:
+			Normal.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			Normal.SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Emissive:
+			Emissive.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			Emissive.SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Opacity:
+			Opacity.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			Opacity.SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::AO:
+			AO.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			AO.SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
 
 } // namespace csp::systems

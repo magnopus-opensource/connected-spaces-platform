@@ -23,8 +23,24 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 
+#include <rapidjson/document.h>
+
 namespace csp::systems
 {
+
+/// @brief Enumerates the list of material parameter set names.
+enum class EMaterialParameterSetName
+{
+	Invalid,
+	BaseColor,
+	Normal,
+	Emissive,
+	EmissiveMultiplier,
+	Opacity,
+	AO,
+	UVOffset,
+	UVScale
+};
 
 /// @brief Enumerates the list of material override parameter types.
 enum class EMaterialParameterType
@@ -43,6 +59,8 @@ enum class EMaterialFeatures
 	Invalid,
 	Secondary_Normal_Map
 };
+
+// Material Parameters
 
 /// @brief The base class for all Material parameters.
 class CSP_API MaterialParameterBase
@@ -223,6 +241,56 @@ private:
 	csp::common::String ParameterAssetCollectionIdValue;
 };
 
+// Material Features
+
+/// @brief The base class for all Material features.
+class CSP_API MaterialFeatureBase
+{
+
+public:
+	MaterialFeatureBase();
+	MaterialFeatureBase(csp::common::String Name);
+
+	virtual ~MaterialFeatureBase() {};
+
+	/// @brief Get the Name of the Material parameter.
+	/// @return const csp::common::string& : The Name of the Material parameter.
+	csp::common::String GetFeatureName() const
+	{
+		return FeatureName;
+	}
+
+private:
+	csp::common::String FeatureName;
+};
+
+/// @brief The Secondary Normal feature.
+class CSP_API MaterialFeatureSecondaryNormal : public MaterialFeatureBase
+{
+
+public:
+	MaterialFeatureSecondaryNormal();
+	// MaterialFeatureSecondaryNormal(csp::common::Vector2& UVOffsetValue, csp::common::Vector2& UVScaleValue);
+
+	/// @brief Get the Value of the Feature UVOffset parameter.
+	/// @return csp::common::Vector2& : The Value of the Feature UVOffset parameter.
+	MaterialParameterVector2& GetParameterUVOffset()
+	{
+		return UVOffsetParameter;
+	}
+
+	/// @brief Get the Value of the Feature UVScale parameter.
+	/// @return csp::common::Vector2& : The Value of the Feature UVScale parameter.
+	MaterialParameterVector2& GetParameterUVScale()
+	{
+		return UVOffsetParameter;
+	}
+
+private:
+	MaterialParameterVector2 UVOffsetParameter;
+	MaterialParameterVector2 UVScaleParameter;
+};
+
 
 class CSP_API MaterialDefinition
 {
@@ -316,14 +384,14 @@ public:
 
 	/// @brief Get the Material feature parameters.
 	/// @param Feature EMaterialFeatures : The name of the feature.
-	/// @return const csp::common::Array<MaterialParameterBase>& : Array of Material feature parameters.
-	csp::common::Array<MaterialParameterBase> GetFeatureParameters(EMaterialFeatures Feature) const;
+	/// @return MaterialFeatureBase : The Material Feature.
+	MaterialFeatureBase GetFeatureParameters(EMaterialFeatures Feature) const;
 
 	/// @brief Set the Material parameters for a feature.
 	/// @param Feature EMaterialFeatures : The name of the feature.
 	/// @param FeatureParameters csp::common::Array<MaterialParameterBase> : The array of feature parameters.
 	/// @return const csp::common::Array<MaterialParameterBase>& : Array of Material feature parameters.
-	void SetFeatureParameters(EMaterialFeatures Feature, csp::common::Array<MaterialParameterBase> FeatureParameters);
+	void SetFeatureParameters(EMaterialFeatures FeatureName, MaterialFeatureBase Feature);
 
 	/// @brief Remove specified Material feature.
 	/// @param Feature EMaterialFeatures : The name of the feature.
@@ -345,6 +413,24 @@ public:
 
 private:
 	csp::common::String SerialiseToJson() const;
+	void SetMaterialPropertyValues(const EMaterialParameterType& MaterialParameterType, const rapidjson::Value::ConstValueIterator& MatPropItr);
+	void SetIntMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+								 const csp::common::String& AtttributeParameterName,
+								 const rapidjson::Value::ConstValueIterator& MatPropItr);
+	void SetFloatMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+								   const csp::common::String& AtttributeParameterName,
+								   const rapidjson::Value::ConstValueIterator& MatPropItr);
+	void SetVector2MaterialParameter(EMaterialParameterSetName MaterialParameterName,
+									 const csp::common::String& AtttributeParameterName,
+									 const rapidjson::Value::ConstValueIterator& MatPropItr);
+	void SetVector3MaterialParameter(EMaterialParameterSetName MaterialParameterName,
+									 const csp::common::String& AtttributeParameterName,
+									 const rapidjson::Value::ConstValueIterator& MatPropItr);
+	void SetTexture2dMaterialParameter(EMaterialParameterSetName MaterialParameterName,
+									   const csp::common::String& AtttributeParameterName,
+									   const rapidjson::Value::ConstValueIterator& MatPropItr);
+
+	void SetMaterialFeatureValues(const csp::common::String& MaterialFeature, const rapidjson::Value::ConstValueIterator& MatFeatItr);
 
 	csp::common::String MaterialName;
 	csp::common::String DefinitionVersion;
@@ -358,7 +444,7 @@ private:
 	MaterialParameterVector2 UVOffset;
 	MaterialParameterVector2 UVScale;
 
-	csp::common::Map<EMaterialFeatures, csp::common::Array<MaterialParameterBase>>* MaterialFeatures;
+	csp::common::Map<EMaterialFeatures, MaterialFeatureBase>* MaterialFeatures;
 };
 
 

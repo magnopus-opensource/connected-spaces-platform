@@ -852,10 +852,6 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::Stri
 														 const csp::common::String& AssetId,
 														 MaterialDefinitionResultCallback Callback)
 {
-	// 1. Retrieve the Material Definition json file using the provided Asset Id and AssetCollection Id.
-	// 2. Parse the json file and create a new MaterialDefinition.
-	// 3. Return the MaterialDefinition via the Callback.
-
 	AssetResultCallback AssetResultCallbackHandler = [this, Callback](const AssetResult& Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -892,7 +888,10 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::Stri
 
 			MaterialDefinition& InternalMaterialDefinition = InternalResult.GetMaterialDefinition();
 
-			InternalMaterialDefinition.DeserialiseFromJson(DownloadedAssetData);
+			if (!InternalMaterialDefinition.DeserialiseFromJson(DownloadedAssetData))
+			{
+				CSP_LOG_MSG(LogLevel::Log, "Deserialisation of MaterialDefinition failed.");
+			}
 
 			Callback(InternalResult);
 		};

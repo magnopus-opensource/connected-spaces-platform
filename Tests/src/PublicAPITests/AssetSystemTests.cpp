@@ -2242,17 +2242,25 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadMaterialDefinitionTest)
 	UVScaleParamater.SetParameterValue({2.1f, 2.2f});
 
 	// Add the Secondary Normal feature and define parameter values.
-	csp::systems::MaterialParameterVector2 UVOffset2("UVOffset2");
-	UVOffset2.SetParameterValue({3.1f, 3.2f});
-	csp::systems::MaterialParameterVector2 UVScale2("UVScale2");
-	UVScale2.SetParameterValue({4.1f, 4.2f});
-	csp::common::Array<csp::systems::MaterialParameterBase> FeatureParameters = {UVOffset2, UVScale2};
-	InternalMaterialDefinition.SetFeatureParameters(csp::systems::EMaterialFeatures::Secondary_Normal_Map, FeatureParameters);
+	csp::systems::MaterialFeatureSecondaryNormal FeatureSecondaryNormal;
+	csp::systems::MaterialParameterVector2& UVOffsetParam = FeatureSecondaryNormal.GetParameterUVOffset();
+	csp::systems::MaterialParameterVector2& UVScaleParam  = FeatureSecondaryNormal.GetParameterUVScale();
+	UVOffsetParam.SetParameterValue({3.1f, 3.2f});
+	UVScaleParam.SetParameterValue({4.1f, 4.2f});
+	InternalMaterialDefinition.SetFeatureParameters(csp::systems::EMaterialFeatures::Secondary_Normal_Map, FeatureSecondaryNormal);
 
-	auto [Result] = AWAIT_PRE(AssetSystem, UploadMaterialDefinition, RequestPredicate, InternalMaterialDefinition, AssetCollection.Id, Asset.Id);
+	// Upload MaterialDefinition
+	auto [UploadResult]
+		= AWAIT_PRE(AssetSystem, UploadMaterialDefinition, RequestPredicate, InternalMaterialDefinition, AssetCollection.Id, Asset.Id);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-	EXPECT_EQ(Result.GetHttpResultCode(), 200);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
+	EXPECT_EQ(UploadResult.GetHttpResultCode(), 200);
+
+	// Download MaterialDefinition
+	auto [DownloadResult] = AWAIT_PRE(AssetSystem, GetMaterialDefinition, RequestPredicate, AssetCollection.Id, Asset.Id);
+
+	EXPECT_EQ(DownloadResult.GetResultCode(), csp::systems::EResultCode::Success);
+	EXPECT_EQ(DownloadResult.GetHttpResultCode(), 200);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
