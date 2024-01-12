@@ -883,14 +883,15 @@ CSP_ASYNC_RESULT void AssetSystem::GetMaterialDefinition(const csp::common::Stri
 			}
 
 			size_t DownloadedAssetDataSize = DataResult.GetDataLength();
-			auto DownloadedAssetData	   = CSP_NEW char[DownloadedAssetDataSize];
+			auto DownloadedAssetData	   = CSP_NEW char[DownloadedAssetDataSize + 1];
 			std::memcpy(DownloadedAssetData, DataResult.GetData(), DownloadedAssetDataSize);
+			DownloadedAssetData[DownloadedAssetDataSize] = 0x0; // null terminate
 
 			MaterialDefinition& InternalMaterialDefinition = InternalResult.GetMaterialDefinition();
 
 			if (!InternalMaterialDefinition.DeserialiseFromJson(DownloadedAssetData))
 			{
-				CSP_LOG_MSG(LogLevel::Log, "Deserialisation of MaterialDefinition failed.");
+				CSP_LOG_MSG(LogLevel::Error, "Deserialisation of MaterialDefinition failed.");
 			}
 
 			Callback(InternalResult);

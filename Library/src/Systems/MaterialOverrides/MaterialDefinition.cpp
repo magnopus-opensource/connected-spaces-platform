@@ -719,6 +719,9 @@ bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 	rapidjson::Document doc;
 	if (doc.Parse(Json.c_str()).HasParseError())
 	{
+		const rapidjson::ParseErrorCode ParseError = doc.GetParseError();
+		CSP_LOG_FORMAT(LogLevel::Error, "Failed to deserialise a material definition JSON. Error code: %i", static_cast<int>(ParseError));
+
 		return false;
 	}
 
