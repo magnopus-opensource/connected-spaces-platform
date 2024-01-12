@@ -118,6 +118,235 @@ csp::systems::EMaterialFeatures ConvertFeatureNameStringToEnum(const csp::common
 namespace csp::systems
 {
 
+void SetIntMaterialParameter(MaterialDefinition& OutMaterialDefinition,
+							 EMaterialParameterSetName MaterialParameterName,
+							 const csp::common::String& AtttributeParameterName,
+							 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	CSP_LOG_ERROR_FORMAT("Function SetIntMaterialParameter not implement yet: %s.", AtttributeParameterName);
+}
+
+void SetFloatMaterialParameter(MaterialDefinition& OutMaterialDefinition,
+							   EMaterialParameterSetName MaterialParameterName,
+							   const csp::common::String& AtttributeParameterName,
+							   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
+
+	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsFloat())
+	{
+		CSP_LOG_ERROR_FORMAT("Float parameter value for property invalid: %s.", AtttributeParameterName);
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::EmissiveMultiplier:
+			OutMaterialDefinition.GetEmissiveMultiplier().SetParameterValue(paramValueAttribute->value.GetFloat());
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void SetVector2MaterialParameter(MaterialDefinition& OutMaterialDefinition,
+								 EMaterialParameterSetName MaterialParameterName,
+								 const csp::common::String& AtttributeParameterName,
+								 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
+
+	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsArray())
+	{
+		CSP_LOG_ERROR_FORMAT("Vector2 parameter value for property invalid: %s.", AtttributeParameterName);
+	}
+
+	float _X;
+	float _Y;
+
+	for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin(); Vec2PropItr != paramValueAttribute->value.End();
+		 ++Vec2PropItr)
+	{
+		const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
+		if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
+		{
+			_X = XAttribute->value.GetFloat();
+		}
+
+		const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
+		if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
+		{
+			_Y = YAttribute->value.GetFloat();
+		}
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::UVOffset:
+			OutMaterialDefinition.GetUVOffset().SetParameterValue({_X, _Y});
+			break;
+		case EMaterialParameterSetName::UVScale:
+			OutMaterialDefinition.GetUVScale().SetParameterValue({_X, _Y});
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void SetVector3MaterialParameter(MaterialDefinition& OutMaterialDefinition,
+								 EMaterialParameterSetName MaterialParameterName,
+								 const csp::common::String& AtttributeParameterName,
+								 const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	CSP_LOG_ERROR_FORMAT("Function SetVector3MaterialParameter not implement yet: %s.", AtttributeParameterName);
+}
+
+void SetTexture2dMaterialParameter(MaterialDefinition& OutMaterialDefinition,
+								   EMaterialParameterSetName MaterialParameterName,
+								   const csp::common::String& AtttributeParameterName,
+								   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramAssetCollectionAttribute = MatPropItr->FindMember("assetCollectionId");
+	const rapidjson::Value::ConstMemberIterator paramAssetAttribute			  = MatPropItr->FindMember("assetId");
+
+	if (paramAssetCollectionAttribute == MatPropItr->MemberEnd() || paramAssetAttribute == MatPropItr->MemberEnd()
+		|| !paramAssetCollectionAttribute->value.IsString() || !paramAssetAttribute->value.IsString())
+	{
+		CSP_LOG_ERROR_FORMAT("AssetCollection ID and/or Asset Id for texture2d property invalid: %s.", AtttributeParameterName);
+	}
+
+	switch (MaterialParameterName)
+	{
+		case EMaterialParameterSetName::BaseColor:
+			OutMaterialDefinition.GetBaseColor().SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			OutMaterialDefinition.GetBaseColor().SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Normal:
+			OutMaterialDefinition.GetNormal().SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			OutMaterialDefinition.GetNormal().SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Emissive:
+			OutMaterialDefinition.GetEmissive().SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			OutMaterialDefinition.GetEmissive().SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::Opacity:
+			OutMaterialDefinition.GetOpacity().SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			OutMaterialDefinition.GetOpacity().SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		case EMaterialParameterSetName::AO:
+			OutMaterialDefinition.GetAO().SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
+			OutMaterialDefinition.GetAO().SetParameterAssetId(paramAssetAttribute->value.GetString());
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void SetMaterialPropertyValues(MaterialDefinition& OutMaterialDefinition,
+							   const EMaterialParameterType& MaterialParameterType,
+							   const rapidjson::Value::ConstValueIterator& MatPropItr)
+{
+	const rapidjson::Value::ConstMemberIterator paramNameAttribute = MatPropItr->FindMember("parameterName");
+	if (paramNameAttribute == MatPropItr->MemberEnd() || !paramNameAttribute->value.IsString())
+	{
+		CSP_LOG_ERROR_MSG("Invalid json format for Material property.");
+	}
+
+	csp::common::String AtttributeParameterName		= paramNameAttribute->value.GetString();
+	EMaterialParameterSetName MaterialParameterName = ConvertParameterNameStringToEnum(AtttributeParameterName);
+
+	switch (MaterialParameterType)
+	{
+		case EMaterialParameterType::Int:
+			SetIntMaterialParameter(OutMaterialDefinition, MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Float:
+			SetFloatMaterialParameter(OutMaterialDefinition, MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Vector2:
+			SetVector2MaterialParameter(OutMaterialDefinition, MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Vector3:
+			SetVector3MaterialParameter(OutMaterialDefinition, MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		case EMaterialParameterType::Texture2d:
+			SetTexture2dMaterialParameter(OutMaterialDefinition, MaterialParameterName, AtttributeParameterName, MatPropItr);
+			break;
+		default:
+			CSP_LOG_ERROR_FORMAT("Specified Material property does not have a valid type: %s.", AtttributeParameterName);
+			break;
+	}
+}
+
+void SetMaterialFeatureValues(MaterialDefinition& OutMaterialDefinition,
+							  const csp::common::String& FeatureName,
+							  const rapidjson::Value::ConstValueIterator& MatFeatItr)
+{
+	EMaterialFeatures MaterialFeature = ConvertFeatureNameStringToEnum(FeatureName);
+
+	const rapidjson::Value::ConstMemberIterator featParamsAttribute = MatFeatItr->FindMember("featureParameters");
+
+	if (featParamsAttribute == MatFeatItr->MemberEnd() || !featParamsAttribute->value.IsArray())
+	{
+		CSP_LOG_ERROR_FORMAT("Invalid json format for Material feature: %s.", FeatureName);
+	}
+
+	if (MaterialFeature == EMaterialFeatures::Secondary_Normal_Map)
+	{
+		MaterialFeatureSecondaryNormal SecondaryNormalFeature;
+
+		csp::common::String ParamName;
+
+		for (rapidjson::Value::ConstValueIterator FeatParamItr = featParamsAttribute->value.Begin(); FeatParamItr != featParamsAttribute->value.End();
+			 ++FeatParamItr)
+		{
+			const rapidjson::Value::ConstMemberIterator paramNameAttribute = FeatParamItr->FindMember("parameterName");
+			csp::common::String ParameterName							   = paramNameAttribute->value.GetString();
+
+			if (paramNameAttribute != FeatParamItr->MemberEnd() && paramNameAttribute->value.IsString())
+			{
+				const rapidjson::Value::ConstMemberIterator paramValueAttribute = FeatParamItr->FindMember("parameterValue");
+
+				if (paramValueAttribute == FeatParamItr->MemberEnd() || !paramValueAttribute->value.IsArray())
+				{
+					CSP_LOG_ERROR_MSG("Invalide type for parameter Array.");
+				}
+
+				float _X;
+				float _Y;
+
+				for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin();
+					 Vec2PropItr != paramValueAttribute->value.End();
+					 ++Vec2PropItr)
+				{
+					const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
+					if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
+					{
+						_X = XAttribute->value.GetFloat();
+					}
+
+					const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
+					if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
+					{
+						_Y = YAttribute->value.GetFloat();
+					}
+				}
+
+				if (ParameterName == "UVOffset")
+				{
+					SecondaryNormalFeature.GetParameterUVOffset().SetParameterValue({_X, _Y});
+				}
+				else if (ParameterName == "UVScale")
+				{
+					SecondaryNormalFeature.GetParameterUVScale().SetParameterValue({_X, _Y});
+				}
+			}
+		}
+	}
+}
+
 MaterialParameterBase::MaterialParameterBase() : ParameterName(""), ParameterType(EMaterialParameterType::Invalid)
 {
 }
@@ -558,7 +787,7 @@ bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 		{
 			csp::systems::EMaterialParameterType MaterialParameterType = ConvertParameterStringToType(currentAttribute->value.GetString());
 
-			SetMaterialPropertyValues(MaterialParameterType, MatPropItr);
+			SetMaterialPropertyValues(*this, MaterialParameterType, MatPropItr);
 		}
 	}
 
@@ -578,232 +807,11 @@ bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 		{
 			csp::common::String FeatureName = currentFeatureAttribute->value.GetString();
 
-			SetMaterialFeatureValues(FeatureName, MatFeatItr);
+			SetMaterialFeatureValues(*this, FeatureName, MatFeatItr);
 		}
 	}
 
 	return true;
-}
-
-void MaterialDefinition::SetMaterialFeatureValues(const csp::common::String& FeatureName, const rapidjson::Value::ConstValueIterator& MatFeatItr)
-{
-	EMaterialFeatures MaterialFeature = ConvertFeatureNameStringToEnum(FeatureName);
-
-	const rapidjson::Value::ConstMemberIterator featParamsAttribute = MatFeatItr->FindMember("featureParameters");
-
-	if (featParamsAttribute == MatFeatItr->MemberEnd() || !featParamsAttribute->value.IsArray())
-	{
-		CSP_LOG_ERROR_FORMAT("Invalid json format for Material feature: %s.", FeatureName);
-	}
-
-	if (MaterialFeature == EMaterialFeatures::Secondary_Normal_Map)
-	{
-		MaterialFeatureSecondaryNormal SecondaryNormalFeature;
-
-		csp::common::String ParamName;
-
-		for (rapidjson::Value::ConstValueIterator FeatParamItr = featParamsAttribute->value.Begin(); FeatParamItr != featParamsAttribute->value.End();
-			 ++FeatParamItr)
-		{
-			const rapidjson::Value::ConstMemberIterator paramNameAttribute = FeatParamItr->FindMember("parameterName");
-			csp::common::String ParameterName							   = paramNameAttribute->value.GetString();
-
-			if (paramNameAttribute != FeatParamItr->MemberEnd() && paramNameAttribute->value.IsString())
-			{
-				const rapidjson::Value::ConstMemberIterator paramValueAttribute = FeatParamItr->FindMember("parameterValue");
-
-				if (paramValueAttribute == FeatParamItr->MemberEnd() || !paramValueAttribute->value.IsArray())
-				{
-					CSP_LOG_ERROR_MSG("Invalide type for parameter Array.");
-				}
-
-				float _X;
-				float _Y;
-
-				for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin();
-					 Vec2PropItr != paramValueAttribute->value.End();
-					 ++Vec2PropItr)
-				{
-					const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
-					if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
-					{
-						_X = XAttribute->value.GetFloat();
-					}
-
-					const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
-					if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
-					{
-						_Y = YAttribute->value.GetFloat();
-					}
-				}
-
-				if (ParameterName == "UVOffset")
-				{
-					SecondaryNormalFeature.GetParameterUVOffset().SetParameterValue({_X, _Y});
-				}
-				else if (ParameterName == "UVScale")
-				{
-					SecondaryNormalFeature.GetParameterUVScale().SetParameterValue({_X, _Y});
-				}
-			}
-		}
-	}
-}
-
-void MaterialDefinition::SetMaterialPropertyValues(const EMaterialParameterType& MaterialParameterType,
-												   const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	const rapidjson::Value::ConstMemberIterator paramNameAttribute = MatPropItr->FindMember("parameterName");
-	if (paramNameAttribute == MatPropItr->MemberEnd() || !paramNameAttribute->value.IsString())
-	{
-		CSP_LOG_ERROR_MSG("Invalid json format for Material property.");
-	}
-
-	csp::common::String AtttributeParameterName		= paramNameAttribute->value.GetString();
-	EMaterialParameterSetName MaterialParameterName = ConvertParameterNameStringToEnum(AtttributeParameterName);
-
-	switch (MaterialParameterType)
-	{
-		case EMaterialParameterType::Int:
-			SetIntMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
-			break;
-		case EMaterialParameterType::Float:
-			SetFloatMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
-			break;
-		case EMaterialParameterType::Vector2:
-			SetVector2MaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
-			break;
-		case EMaterialParameterType::Vector3:
-			SetVector3MaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
-			break;
-		case EMaterialParameterType::Texture2d:
-			SetTexture2dMaterialParameter(MaterialParameterName, AtttributeParameterName, MatPropItr);
-			break;
-		default:
-			CSP_LOG_ERROR_FORMAT("Specified Material property does not have a valid type: %s.", AtttributeParameterName);
-			break;
-	}
-}
-
-void MaterialDefinition::SetIntMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-												 const csp::common::String& AtttributeParameterName,
-												 const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	CSP_LOG_ERROR_FORMAT("Function SetIntMaterialParameter not implement yet: %s.", AtttributeParameterName);
-}
-
-void MaterialDefinition::SetFloatMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-												   const csp::common::String& AtttributeParameterName,
-												   const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
-
-	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsFloat())
-	{
-		CSP_LOG_ERROR_FORMAT("Float parameter value for property invalid: %s.", AtttributeParameterName);
-	}
-
-	switch (MaterialParameterName)
-	{
-		case EMaterialParameterSetName::EmissiveMultiplier:
-			EmissiveMultiplier.SetParameterValue(paramValueAttribute->value.GetFloat());
-			break;
-		default:
-			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
-			break;
-	}
-}
-
-void MaterialDefinition::SetVector2MaterialParameter(EMaterialParameterSetName MaterialParameterName,
-													 const csp::common::String& AtttributeParameterName,
-													 const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	const rapidjson::Value::ConstMemberIterator paramValueAttribute = MatPropItr->FindMember("parameterValue");
-
-	if (paramValueAttribute == MatPropItr->MemberEnd() || !paramValueAttribute->value.IsArray())
-	{
-		CSP_LOG_ERROR_FORMAT("Vector2 parameter value for property invalid: %s.", AtttributeParameterName);
-	}
-
-	float _X;
-	float _Y;
-
-	for (rapidjson::Value::ConstValueIterator Vec2PropItr = paramValueAttribute->value.Begin(); Vec2PropItr != paramValueAttribute->value.End();
-		 ++Vec2PropItr)
-	{
-		const rapidjson::Value::ConstMemberIterator XAttribute = Vec2PropItr->FindMember("X");
-		if (XAttribute != Vec2PropItr->MemberEnd() && XAttribute->value.IsFloat())
-		{
-			_X = XAttribute->value.GetFloat();
-		}
-
-		const rapidjson::Value::ConstMemberIterator YAttribute = Vec2PropItr->FindMember("Y");
-		if (YAttribute != Vec2PropItr->MemberEnd() && YAttribute->value.IsFloat())
-		{
-			_Y = YAttribute->value.GetFloat();
-		}
-	}
-
-	switch (MaterialParameterName)
-	{
-		case EMaterialParameterSetName::UVOffset:
-			UVOffset.SetParameterValue({_X, _Y});
-			break;
-		case EMaterialParameterSetName::UVScale:
-			UVOffset.SetParameterValue({_X, _Y});
-			break;
-		default:
-			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
-			break;
-	}
-}
-
-void MaterialDefinition::SetVector3MaterialParameter(EMaterialParameterSetName MaterialParameterName,
-													 const csp::common::String& AtttributeParameterName,
-													 const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	CSP_LOG_ERROR_FORMAT("Function SetVector3MaterialParameter not implement yet: %s.", AtttributeParameterName);
-}
-
-void MaterialDefinition::SetTexture2dMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-													   const csp::common::String& AtttributeParameterName,
-													   const rapidjson::Value::ConstValueIterator& MatPropItr)
-{
-	const rapidjson::Value::ConstMemberIterator paramAssetCollectionAttribute = MatPropItr->FindMember("assetCollectionId");
-	const rapidjson::Value::ConstMemberIterator paramAssetAttribute			  = MatPropItr->FindMember("assetId");
-
-	if (paramAssetCollectionAttribute == MatPropItr->MemberEnd() || paramAssetAttribute == MatPropItr->MemberEnd()
-		|| !paramAssetCollectionAttribute->value.IsString() || !paramAssetAttribute->value.IsString())
-	{
-		CSP_LOG_ERROR_FORMAT("AssetCollection ID and/or Asset Id for texture2d property invalid: %s.", AtttributeParameterName);
-	}
-
-	switch (MaterialParameterName)
-	{
-		case EMaterialParameterSetName::BaseColor:
-			BaseColor.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
-			BaseColor.SetParameterAssetId(paramAssetAttribute->value.GetString());
-			break;
-		case EMaterialParameterSetName::Normal:
-			Normal.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
-			Normal.SetParameterAssetId(paramAssetAttribute->value.GetString());
-			break;
-		case EMaterialParameterSetName::Emissive:
-			Emissive.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
-			Emissive.SetParameterAssetId(paramAssetAttribute->value.GetString());
-			break;
-		case EMaterialParameterSetName::Opacity:
-			Opacity.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
-			Opacity.SetParameterAssetId(paramAssetAttribute->value.GetString());
-			break;
-		case EMaterialParameterSetName::AO:
-			AO.SetParameterAssetCollectionId(paramAssetCollectionAttribute->value.GetString());
-			AO.SetParameterAssetId(paramAssetAttribute->value.GetString());
-			break;
-		default:
-			CSP_LOG_ERROR_FORMAT("The property name specified does not match the property type: %s.", AtttributeParameterName);
-			break;
-	}
 }
 
 } // namespace csp::systems

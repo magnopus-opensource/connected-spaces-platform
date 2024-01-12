@@ -23,8 +23,6 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 
-#include <rapidjson/document.h>
-
 namespace csp::systems
 {
 
@@ -413,24 +411,6 @@ public:
 
 private:
 	csp::common::String SerialiseToJson() const;
-	void SetMaterialPropertyValues(const EMaterialParameterType& MaterialParameterType, const rapidjson::Value::ConstValueIterator& MatPropItr);
-	void SetIntMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-								 const csp::common::String& AtttributeParameterName,
-								 const rapidjson::Value::ConstValueIterator& MatPropItr);
-	void SetFloatMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-								   const csp::common::String& AtttributeParameterName,
-								   const rapidjson::Value::ConstValueIterator& MatPropItr);
-	void SetVector2MaterialParameter(EMaterialParameterSetName MaterialParameterName,
-									 const csp::common::String& AtttributeParameterName,
-									 const rapidjson::Value::ConstValueIterator& MatPropItr);
-	void SetVector3MaterialParameter(EMaterialParameterSetName MaterialParameterName,
-									 const csp::common::String& AtttributeParameterName,
-									 const rapidjson::Value::ConstValueIterator& MatPropItr);
-	void SetTexture2dMaterialParameter(EMaterialParameterSetName MaterialParameterName,
-									   const csp::common::String& AtttributeParameterName,
-									   const rapidjson::Value::ConstValueIterator& MatPropItr);
-
-	void SetMaterialFeatureValues(const csp::common::String& MaterialFeature, const rapidjson::Value::ConstValueIterator& MatFeatItr);
 
 	csp::common::String MaterialName;
 	csp::common::String DefinitionVersion;
