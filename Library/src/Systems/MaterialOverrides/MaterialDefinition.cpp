@@ -751,7 +751,7 @@ bool MaterialDefinition::DeserialiseFromJson(const csp::common::String& Json)
 	if (doc.HasMember("materialFeatures") == false)
 	{
 		CSP_LOG_MSG(LogLevel::Log, "No material features found.");
-		return false;
+		return true;
 	}
 
 	const rapidjson::Value& materialPropertyFeatures = doc["materialFeatures"];
