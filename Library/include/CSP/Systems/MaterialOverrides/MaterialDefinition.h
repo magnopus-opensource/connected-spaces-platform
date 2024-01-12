@@ -332,11 +332,25 @@ public:
 		return BaseColor;
 	}
 
+	/// @brief Set the Material BaseColor parameter.
+	/// @param Value MaterialParameterTexture2d& : The Material BaseColor.
+	void SetBaseColor(MaterialParameterTexture2d& Value)
+	{
+		BaseColor = Value;
+	}
+
 	/// @brief Get the Material Normal parameter.
 	/// @return MaterialParameterTexture2d& : The Material Normal parameter.
 	MaterialParameterTexture2d& GetNormal()
 	{
 		return Normal;
+	}
+
+	/// @brief Set the Material Normal parameter.
+	/// @param Value MaterialParameterTexture2d& : The Material Normal.
+	void SetNormal(MaterialParameterTexture2d& Value)
+	{
+		Normal = Value;
 	}
 
 	/// @brief Get the Material Emissive parameter.
@@ -346,11 +360,25 @@ public:
 		return Emissive;
 	}
 
+	/// @brief Set the Material Emissive parameter.
+	/// @param Value MaterialParameterTexture2d& : The Emissive Normal.
+	void SetEmissive(MaterialParameterTexture2d& Value)
+	{
+		Emissive = Value;
+	}
+
 	/// @brief Get the Material Emissive multiplier parameter.
 	/// @return MaterialParameterFloat& : The Material Emissive multiplier parameter.
 	MaterialParameterFloat& GetEmissiveMultiplier()
 	{
 		return EmissiveMultiplier;
+	}
+
+	/// @brief Set the Material EmissiveMultiplier parameter.
+	/// @param Value MaterialParameterFloat& : The EmissiveMultiplier Normal.
+	void SetEmissiveMultiplier(MaterialParameterFloat& Value)
+	{
+		EmissiveMultiplier = Value;
 	}
 
 	/// @brief Get the Material Opacity parameter.
@@ -360,11 +388,25 @@ public:
 		return Opacity;
 	}
 
+	/// @brief Set the Material Opacity parameter.
+	/// @param Value MaterialParameterTexture2d& : The Opacity Normal.
+	void SetOpacity(MaterialParameterTexture2d& Value)
+	{
+		Opacity = Value;
+	}
+
 	/// @brief Get the Material AO parameter.
 	/// @return MaterialParameterTexture2d& : The Material AO parameter.
 	MaterialParameterTexture2d& GetAO()
 	{
 		return AO;
+	}
+
+	/// @brief Set the Material AO parameter.
+	/// @param Value MaterialParameterTexture2d& : The AO Normal.
+	void SetAO(MaterialParameterTexture2d& Value)
+	{
+		AO = Value;
 	}
 
 	/// @brief Get the Material UVOffset parameter.
@@ -374,6 +416,13 @@ public:
 		return UVOffset;
 	}
 
+	/// @brief Set the Material UVOffset parameter.
+	/// @param Value MaterialParameterVector2& : The UVOffset Normal.
+	void SetUVOffset(MaterialParameterVector2& Value)
+	{
+		UVOffset = Value;
+	}
+
 	/// @brief Get the Material UVScale parameter.
 	/// @return MaterialParameterVector2& : The Material UVScale parameter.
 	MaterialParameterVector2& GetUVScale()
@@ -381,11 +430,25 @@ public:
 		return UVScale;
 	}
 
+	/// @brief Set the Material UVScale parameter.
+	/// @param Value MaterialParameterVector2& : The UVScale Normal.
+	void SetUVScale(MaterialParameterVector2& Value)
+	{
+		UVScale = Value;
+	}
+
 	/// @brief Get the Material Feature.
 	/// @return MaterialFeatureSecondaryNormal& : The Material Feature.
 	MaterialFeatureSecondaryNormal& GetMaterialFeature()
 	{
 		return MaterialFeature;
+	}
+
+	/// @brief Set the Material Feature.
+	/// @param Value MaterialFeatureSecondaryNormal& : The Material Feature.
+	void SetMaterialFeature(MaterialFeatureSecondaryNormal& Value)
+	{
+		MaterialFeature = Value;
 	}
 
 	/// @brief Check if Feature active.
