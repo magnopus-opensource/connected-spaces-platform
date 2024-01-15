@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file AudioSpaceComponent.h
 /// @brief Definitions and support for audio components.
-///
+
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"

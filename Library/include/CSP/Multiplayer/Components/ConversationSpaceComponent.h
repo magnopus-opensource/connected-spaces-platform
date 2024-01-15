@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file ConversationSpaceComponent.h
 /// @brief Definitions and support for conversation components.
 
 #pragma once
+
 // undef GetMessage is used because it clashes with a win32 macro
 #undef GetMessage
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
@@ -46,9 +51,10 @@ enum class ConversationPropertyKeys
 	Num
 };
 
+
 /// @ingroup ConversationSpaceComponent
 /// @brief Data representation of an ConversationSpaceComponent.
-class CSP_API ConversationSpaceComponent : public ComponentBase
+class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
 {
 public:
 	/// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
@@ -104,17 +110,21 @@ public:
 	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
-	/// @brief Gets the relative 3D position of this component.
-	const csp::common::Vector3& GetPosition() const;
-	/// @brief Sets the relative 3D position of this component.
-	/// @param Value - The new 3D position assigned to the origin of this component.
-	void SetPosition(const csp::common::Vector3& Value);
+	/// \addtogroup IPositionComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
-	/// @brief Gets the quaternion of the rotation of the origin of this component.
-	const csp::common::Vector4& GetRotation() const;
-	/// @brief Sets the quaternion of the rotation of the origin of this component.
-	/// @param Value - The new rotation assigned to the origin of this component.
-	void SetRotation(const csp::common::Vector4& Value);
+	/// \addtogroup IRotationComponent
+	/// @{
+	/// @copydoc IRotationComponent::GetRotation()
+	const csp::common::Vector4& GetRotation() const override;
+	/// @copydoc IRotationComponent::SetRotation()
+	void SetRotation(const csp::common::Vector4& InValue) override;
+	/// @}
 
 	bool GetIsVisible() const;
 	void SetIsVisible(bool Value);

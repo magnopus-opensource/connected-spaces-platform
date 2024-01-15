@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file LightSpaceComponent.h
 /// @brief Definitions and support for lights.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
-#include "CSP/Multiplayer/SpaceTransform.h"
 
 
 namespace csp::multiplayer
@@ -37,6 +40,7 @@ enum class LightType
 	Num
 };
 
+
 /// @brief Enumerates the types of light shadows supported by the light component.
 enum class LightShadowType
 {
@@ -45,6 +49,7 @@ enum class LightShadowType
 	Realtime,
 	Num
 };
+
 
 /// @brief Enumerates the types of cookie supported by the light component.
 enum class LightCookieType
@@ -80,7 +85,11 @@ enum class LightPropertyKeys
 
 /// @ingroup LightSpaceComponent
 /// @brief Data representation of an LightSpaceComponent.
-class CSP_API LightSpaceComponent : public ComponentBase, public IVisibleComponent, public IThirdPartyComponentRef
+class CSP_API LightSpaceComponent : public ComponentBase,
+									public IPositionComponent,
+									public IRotationComponent,
+									public IThirdPartyComponentRef,
+									public IVisibleComponent
 {
 public:
 	/// @brief Constructs the light space component, and associates it with the specified Parent space entity.
@@ -143,45 +152,21 @@ public:
 	/// @param Value The angle of the outer cone in a spotlight.
 	void SetOuterConeAngle(float Value);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
+	/// \addtogroup IPositionComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
-
-	/// @brief Gets a quaternion representing the rotation of the origin of this component, expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	const csp::common::Vector4& GetRotation() const;
-
-	/// @brief Sets the rotation of the origin of this component according to the specified quaternion "Value", expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	/// @param Value The quaternion in radians to use as new rotation of this component.
-	void SetRotation(const csp::common::Vector4& Value);
+	/// \addtogroup IRotationComponent
+	/// @{
+	/// @copydoc IRotationComponent::GetRotation()
+	const csp::common::Vector4& GetRotation() const override;
+	/// @copydoc IRotationComponent::SetRotation()
+	void SetRotation(const csp::common::Vector4& InValue) override;
+	/// @}
 
 	/// @brief Gets the ID of the asset used for the light cookie of this light component.
 	/// @return The ID of the asset used for the light cookie of this light component.

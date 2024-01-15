@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file AvatarSpaceComponent.h
 /// @brief Definitions and support for avatar components.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
@@ -53,6 +55,7 @@ enum class AvatarPlayMode
 	Num
 };
 
+
 /// @brief Enumerates the supported locomotion models available for the avatar movements.
 enum class LocomotionModel
 {
@@ -82,6 +85,7 @@ enum class AvatarComponentPropertyKeys
 	LocomotionModel,
 	Num
 };
+
 
 // @ingroup AvatarSpaceComponent
 /// @brief Data representation of an AvatarSpaceComponent.
