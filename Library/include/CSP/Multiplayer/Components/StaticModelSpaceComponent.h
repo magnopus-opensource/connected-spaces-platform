@@ -52,11 +52,13 @@ enum class StaticModelPropertyKeys
 /// @ingroup StaticModelSpaceComponent
 /// @brief Data representation of an StaticModelSpaceComponent.
 class CSP_API StaticModelSpaceComponent : public ComponentBase,
-										  public ITransformComponent,
-										  public IVisibleComponent,
 										  public IExternalResourceComponent,
+										  public IShadowCasterComponent,
 										  public IThirdPartyComponentRef,
-										  public IShadowCasterComponent
+										  public ITransformComponent,
+										  public IVisibleComponent
+
+
 {
 public:
 	/// @brief Constructs the static model space component, and associates it with the specified Parent space entity.

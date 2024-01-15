@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file SplineSpaceComponent.h
 /// @brief Definitions and support for spline components.
 
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"
+
 
 namespace csp::multiplayer
 {
@@ -28,8 +30,8 @@ enum class SplinePropertyKeys
 {
 	Waypoints = 0,
 	Num
-
 };
+
 
 /**
  * @ingroup SplineSpaceComponent
@@ -60,4 +62,5 @@ public:
 	/// @param Value csp::common::List<csp::common::Vector3> : number of positions between each waypoint
 	void SetWaypoints(const csp::common::List<csp::common::Vector3>& Waypoints);
 };
+
 } // namespace csp::multiplayer
