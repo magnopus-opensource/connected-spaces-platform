@@ -92,6 +92,9 @@ void ImageSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name), Value);
 }
 
+
+/* ITransformComponent */
+
 const csp::common::Vector3& ImageSpaceComponent::GetPosition() const
 {
 	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::Position));
@@ -142,6 +145,24 @@ void ImageSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Scale), Value);
 }
+
+SpaceTransform ImageSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void ImageSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
 
 bool ImageSpaceComponent::GetIsEmissive() const
 {
