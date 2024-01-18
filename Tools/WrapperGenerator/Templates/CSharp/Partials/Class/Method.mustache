@@ -1,4 +1,11 @@
 {{> DocComments }}
+{{# is_deprecated }}
+[Obsolete(
+    {{# deprecation_message }}
+        "{{& deprecation_message }}"
+    {{/ deprecation_message }}
+)]
+{{/ is_deprecated }}
 {{# is_operator_overload }}
 {{> Class/Method/Operator }}
 {{/ is_operator_overload }}

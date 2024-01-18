@@ -2,6 +2,13 @@
 {{# doc_comments }}
 {{& . }}
 {{/ doc_comments }}
+{{# is_deprecated }}
+/** @deprecated
+    {{# deprecation_message }}
+        {{& deprecation_message }}
+    {{/ deprecation_message }}
+*/
+{{/ is_deprecated }}
 {{# is_constructor }}
 {{> Method/Constructor }}
 {{/ is_constructor }}
