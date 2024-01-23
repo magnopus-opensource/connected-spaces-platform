@@ -99,11 +99,6 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 		{
 			AssetCollection.SpaceId = GroupIds[0];
 		}
-		else
-		{
-			CSP_LOG_MSG(csp::systems::LogLevel::Error,
-						"Encountered an asset collection that did not belong to any space whilst processing a response from services.");
-		}
 	}
 
 	AssetCollection.CreatedBy = Dto.GetCreatedBy();

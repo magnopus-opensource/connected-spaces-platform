@@ -71,16 +71,37 @@ public:
 	/// @return AssetCollection : immutable reference
 	const csp::common::Map<csp::common::String, csp::common::String>& GetMetadataImmutable() const;
 
+	// The unique identifier of this asset collection.
 	csp::common::String Id;
+
+	// The unique name of this asset collection.
 	csp::common::String Name;
+
+	// The type of this asset collection.
 	EAssetCollectionType Type;
+
+	// The set of tag strings that have been associated with this asset collection. Note that asset collections can be searched by tag.
 	csp::common::Array<csp::common::String> Tags;
+
+	// The unique identifier of the POI this asset collection relates to. Empty if it does not relate to a POI.
 	csp::common::String PointOfInterestId;
+
+	// The unique ID of the asset collection that is a parent to this asset collection. Empty if there is no parent relationship.
 	csp::common::String ParentId;
+
+	// Where the asset collection belongs to a space, the unique ID of the space that this asset collection belongs to. Empty otherwise.
 	csp::common::String SpaceId;
+
+	// The unique ID of the user who created the asset collection.
 	csp::common::String CreatedBy;
+
+	// The UTC string representing when this asset collection was created.
 	csp::common::String CreatedAt;
+
+	// The unique ID of the user who last updated the asset collection.
 	csp::common::String UpdatedBy;
+
+	// The UTC string representing when this asset collection was last updated.
 	csp::common::String UpdatedAt;
 	bool IsUnique;
 
