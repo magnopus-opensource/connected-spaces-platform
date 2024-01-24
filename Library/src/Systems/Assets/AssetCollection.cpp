@@ -95,6 +95,7 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 	if (Dto.HasGroupIds())
 	{
 		auto& GroupIds = Dto.GetGroupIds();
+
 		if (GroupIds.size() > 0)
 		{
 			AssetCollection.SpaceId = GroupIds[0];

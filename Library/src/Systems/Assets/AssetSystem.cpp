@@ -227,6 +227,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	std::vector<csp::common::String> AssetCollectionIds = {SourceAssetCollections[0].Id};
 
 	bool AssetCollectionsBelongToSameSpace = true;
+
 	for (size_t i = 1; i < SourceAssetCollections.Size(); ++i)
 	{
 		AssetCollectionsBelongToSameSpace &= SourceAssetCollections[i].SpaceId == SourceSpaceId;
@@ -245,7 +246,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	}
 
 	// Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
-	if (AssetCollectionsBelongToSameSpace == false)
+	if (!AssetCollectionsBelongToSameSpace)
 	{
 		CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
 

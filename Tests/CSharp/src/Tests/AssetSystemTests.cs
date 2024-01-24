@@ -1383,7 +1383,7 @@ namespace CSPEngine
 #endif
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
         [Test]
-        public static void copyAssetCollectionTest()
+        public static void CopyAssetCollectionTest()
         {
             GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _, out _);
 
@@ -1419,7 +1419,8 @@ namespace CSPEngine
 
             // Create 'dest' space and invoke the copy
             var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-            var destAssetCollections = new Common.Array<Systems.AssetCollection>();
+            var destAssetCollections = null;
+
             {
                 Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
                 sourceAssetCollections[0] = sourceAssetCollection;
@@ -1445,6 +1446,8 @@ namespace CSPEngine
                 using var result = assetSystem.DownloadAssetData(destAssets[0]).Result;
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
+                destAssets.Dispose();
+
                 byte[] downloadedData = new byte[result.GetDataLength()];
                 Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
 
@@ -1452,9 +1455,11 @@ namespace CSPEngine
                 Assert.IsTrue(downloadedData.SequenceEqual(fileData));
             }
 
+            destAssetCollections.Dispose();
+
             // Validating that we must have at least one asset collection to copy
 	        {
-		        Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
+		        using var sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
                 using var result = assetSystem.CopyAssetCollectionsToSpace(sourceAssetCollections, destSpace.Id, false).Result;
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
 	        }
