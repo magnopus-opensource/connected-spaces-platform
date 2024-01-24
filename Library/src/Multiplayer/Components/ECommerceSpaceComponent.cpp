@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
+
 
 namespace csp::multiplayer
 {
@@ -30,15 +32,20 @@ ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent) : Componen
 	SetScriptInterface(CSP_NEW ECommerceSpaceComponentScriptInterface(this));
 }
 
+
+/* IPositionComponent */
+
 const csp::common::Vector3& ECommerceSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -46,6 +53,7 @@ void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
 }
+
 
 csp::common::String ECommerceSpaceComponent::GetProductId() const
 {

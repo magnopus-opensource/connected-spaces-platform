@@ -106,7 +106,7 @@ namespace CSharpTests
             LogSystem = null;
         }
 
-        public static string GetUniqueHexString(int length = 16)
+        public static string GetUniqueString(int length = 16)
         {
             var sb = new StringBuilder(length * 2);
 
@@ -120,7 +120,7 @@ namespace CSharpTests
 
         public static string GenerateUniqueString(string prefix)
         {
-            return $"{prefix}-{GetUniqueHexString()}";
+            return $"{prefix}-{GetUniqueString()}";
         }
 
         public static void GetFoundationSystems(out Systems.UserSystem userSystem, out Systems.SpaceSystem spaceSystem, out Systems.AssetSystem assetSystem, out Systems.PointOfInterestSystem poiSystem,

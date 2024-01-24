@@ -60,10 +60,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -96,13 +96,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
@@ -331,7 +331,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -358,13 +358,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		csp::common::String ObjectName1 = "Object 1";
@@ -381,6 +381,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 		csp::common::String ConversationId;
 		csp::common::String MessageId;
+
 		{
 			auto [Result] = AWAIT(ConversationComponent1, CreateConversation, "TestMessage");
 
@@ -491,7 +492,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -517,13 +518,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 		// Connect and initialise
 		{
-			auto [Ok] = AWAIT(Connection, Connect);
+			auto [Error] = AWAIT(Connection, Connect);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+			std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-			ASSERT_TRUE(Ok);
+			ASSERT_EQ(Error, ErrorCode::None);
 		}
 
 		// Create object to represent the conversation

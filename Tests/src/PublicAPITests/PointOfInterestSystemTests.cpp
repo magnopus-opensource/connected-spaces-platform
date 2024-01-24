@@ -82,7 +82,7 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem,
 	}
 
 	char UniquePOIName[256];
-	SPRINTF(UniquePOIName, "%s-%s", POITitle, GetUniqueHexString().c_str());
+	SPRINTF(UniquePOIName, "%s-%s", POITitle, GetUniqueString().c_str());
 
 	auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::CreatePOI,
 							  POISystem,
@@ -306,10 +306,10 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);

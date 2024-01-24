@@ -596,6 +596,23 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimAllWhitespaceTest)
 	}
 }
 
+CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringToLowerTest)
+{
+	try
+	{
+		String Instance	   = "\nAbC! _76-WHAT-lol";
+		String Transformed = Instance.ToLower();
+
+		// The original String instance should not be modified
+		EXPECT_EQ(Instance, "\nAbC! _76-WHAT-lol");
+		EXPECT_EQ(Transformed, "\nabc! _76-what-lol");
+	}
+	catch (...)
+	{
+		FAIL();
+	}
+}
+
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListTest)
 {
 	try

@@ -1,5 +1,4 @@
 import {
-  Services,
   Systems,
   uint8ArrayToBuffer,
 } from "./node_modules/connected-spaces-platform.web/connectedspacesplatform.js";
@@ -9,9 +8,9 @@ export const testImage =
 
 export const resultState = (resultObject) => {
   switch (resultObject.getResultCode()) {
-    case Services.EResultCode.Success:
+    case Systems.EResultCode.Success:
       return "Successful";
-    case Services.EResultCode.Failed:
+    case Systems.EResultCode.Failed:
       return "Failed";
     default:
       return "Unknown";

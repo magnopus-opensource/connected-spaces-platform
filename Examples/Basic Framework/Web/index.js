@@ -1,19 +1,18 @@
 import {
-  fileToBuffer,
-  dataUrlToFile,
-  testImage,
   commonArrayToJSArray,
+  dataUrlToFile,
+  fileToBuffer,
   resultState as resultStatus,
+  testImage,
 } from "./helpers.js";
 import {
   ClientUserAgent,
-  Multiplayer,
-  Systems,
-  ready,
-  freeBuffer,
   Common,
-  Services,
   CSPFoundation,
+  freeBuffer,
+  Multiplayer,
+  ready,
+  Systems,
 } from "./node_modules/connected-spaces-platform.web/connectedspacesplatform.js";
 
 // Magnopus Services Endpoint to connect to.
@@ -79,7 +78,7 @@ const runAllExamples = () => {
       null,
       null
     );
-    if (signupResult.getResultCode() === Services.EResultCode.Success) {
+    if (signupResult.getResultCode() === Systems.EResultCode.Success) {
       console.log(
         "Signup successful, please check you email and re-run this example when verified."
       );
@@ -110,7 +109,7 @@ const runAllExamples = () => {
         null
       );
 
-      if (spaceResult.getResultCode() === Services.EResultCode.Success) {
+      if (spaceResult.getResultCode() === Systems.EResultCode.Success) {
         SPACE_ID = spaceResult.getSpace().id;
         console.log("created space", SPACE_ID);
       }

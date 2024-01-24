@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
+
 namespace
 {
+
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 constexpr const float DefaultVolume			   = 1.f;
+
 } // namespace
+
 
 namespace csp::multiplayer
 {
