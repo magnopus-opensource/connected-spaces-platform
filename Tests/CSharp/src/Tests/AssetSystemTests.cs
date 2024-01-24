@@ -1466,7 +1466,7 @@ namespace CSPEngine
 
             // Validating we cannot perform a copy if the asset has no space ID
             {
-                Common.Array<Systems.AssetCollection> assetCollections = new Common.Array<Systems.AssetCollection>(1);
+                using var assetCollections = new Common.Array<Systems.AssetCollection>(1);
                 assetCollections[0] = new Systems.AssetCollection();
 
                 using var result = assetSystem.CopyAssetCollectionsToSpace(assetCollections, destSpace.Id, false).Result;
