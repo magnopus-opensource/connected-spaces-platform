@@ -308,7 +308,7 @@ private:
 	using SpaceEntityQueue	= std::deque<SpaceEntity*>;
 	using PatchMessageQueue = std::deque<signalr::value*>;
 	using SpaceEntitySet	= std::set<SpaceEntity*>;
-	using EntityScriptMap	= csp::common::Map<const csp::common::String, EntityScript*>;
+	using EntityScriptList	= csp::common::List<EntityScript*>;
 
 	SpaceEntityList Avatars;
 	SpaceEntityList Objects;
@@ -335,6 +335,7 @@ private:
 
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();
+	void FinalizeEntityScripts();
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;
@@ -356,8 +357,8 @@ private:
 	SpaceEntityQueue* PendingRemoves;
 	SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
 	PatchMessageQueue* PendingIncomingUpdates;
-	// csp::common::Map<const csp::common::String, EntityScript*> PendingEntityScriptSourceDownload;
-	EntityScriptMap PendingEntityScriptSourceDownload;
+	EntityScriptList* PendingEntityScriptSourceDownload;
+	int EntityScriptDownloadCount;
 
 	bool EnableEntityTick;
 	std::list<SpaceEntity*> TickUpdateEntities;

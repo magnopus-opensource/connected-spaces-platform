@@ -41,6 +41,8 @@
 	#include "Multiplayer/SignalR/POCOSignalRClient/POCOSignalRClient.h"
 #endif
 
+#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
+
 #include <chrono>
 #include <exception>
 #include <iostream>
@@ -193,7 +195,8 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, PendingRemoves(CSP_NEW(SpaceEntityQueue))
 	, PendingOutgoingUpdateUniqueSet(CSP_NEW(SpaceEntitySet))
 	, PendingIncomingUpdates(CSP_NEW(PatchMessageQueue))
-	//	, PendingEntityScriptSourceDownload(CSP_NEW(EntityScriptMap))
+	, PendingEntityScriptSourceDownload(CSP_NEW(EntityScriptList))
+	, EntityScriptDownloadCount(0)
 	, EnableEntityTick(false)
 	, LastTickTime(std::chrono::system_clock::now())
 	, EntityPatchRate(90)
@@ -223,7 +226,7 @@ SpaceEntitySystem::~SpaceEntitySystem()
 	CSP_DELETE(PendingRemoves);
 	CSP_DELETE(PendingOutgoingUpdateUniqueSet);
 	CSP_DELETE(PendingIncomingUpdates);
-	// CSP_DELETE(PendingEntityScriptSourceDownload);
+	CSP_DELETE(PendingEntityScriptSourceDownload);
 }
 
 void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
@@ -774,67 +777,69 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
 
-	/*
-	 Before performing the logic below we first need to download all asset files.
-	 */
-
-	// Iterate over all EntityScript, get their asset and asset collection Ids and store them
-	// Download assets using GetAssetsByCriteria.
-	// Download all of the files and store the file (or it's contents) in each corresponding EntityScript.
-	// Call method with lambda. Pass EntityScript in and call new method on it when completed (on EntityScript downloaded).
-	// Create a map with AssetCollectionId as key and EntityScript* as value.
-	// Once assets have been downloaded, use assetcollectionId to retrieve associated EntityScript.
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		EntityScript* Script = Entities[i]->GetScript();
-		//
-		// guard against not having valid asset collection Ids and early out if they do not.
-		PendingEntityScriptSourceDownload[Script->GetScriptSourceAssetCollectionId()] = Entities[i]->GetScript();
-	}
-	//
-
-	// Register all scripts for import
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		EntityScript* Script = Entities[i]->GetScript();
-		Script->RegisterSourceAsModule();
-	}
-
-	// Bind and invoke all scripts
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
 		EntityScript* Script = Entities[i]->GetScript();
 
-		Script->Bind();
-		Script->Invoke();
-	}
+		PendingEntityScriptSourceDownload->Append(Script);
+		EntityScriptDownloadCount++;
 
-	// Tell all scripts that all entities are now loaded
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		EntityScript* Script = Entities[i]->GetScript();
-		Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+		systems::NullResultCallback Callback = std::bind(&SpaceEntitySystem::FinalizeEntityScripts, this);
+		Script->RetrieveScriptSource(Callback);
 	}
+}
 
-	if (IsLeaderElectionEnabled())
-	{
-		// Start listening for election events
-		//
-		// If we are the first client to connect then this
-		// will also set this client as the leader
-		ElectionManager->OnConnect(Avatars, Objects);
-	}
-	else
-	{
-		DetermineScriptOwners();
-	}
+void SpaceEntitySystem::FinalizeEntityScripts()
+{
+	--EntityScriptDownloadCount;
 
-	// Enable entity tick events
-	EnableEntityTick = true;
-
-	if (InitialEntitiesRetrievedCallback)
+	if (EntityScriptDownloadCount == 0)
 	{
-		InitialEntitiesRetrievedCallback(true);
+		// Register all scripts for import
+		for (size_t i = 0; i < PendingEntityScriptSourceDownload->Size(); ++i)
+		{
+			EntityScript* Script = (*PendingEntityScriptSourceDownload)[i];
+			Script->RegisterSourceAsModule();
+		}
+
+		// Bind and invoke all scripts
+		for (size_t i = 0; i < PendingEntityScriptSourceDownload->Size(); ++i)
+		{
+			EntityScript* Script = (*PendingEntityScriptSourceDownload)[i];
+
+			Script->Bind();
+			Script->Invoke();
+		}
+
+		// Tell all scripts that all entities are now loaded
+		for (size_t i = 0; i < PendingEntityScriptSourceDownload->Size(); ++i)
+		{
+			EntityScript* Script = (*PendingEntityScriptSourceDownload)[i];
+			Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
+		}
+
+		PendingEntityScriptSourceDownload->Clear();
+
+		if (IsLeaderElectionEnabled())
+		{
+			// Start listening for election events
+			//
+			// If we are the first client to connect then this
+			// will also set this client as the leader
+			ElectionManager->OnConnect(Avatars, Objects);
+		}
+		else
+		{
+			DetermineScriptOwners();
+		}
+
+		// Enable entity tick events
+		EnableEntityTick = true;
+
+		if (InitialEntitiesRetrievedCallback)
+		{
+			InitialEntitiesRetrievedCallback(true);
+		}
 	}
 }
 

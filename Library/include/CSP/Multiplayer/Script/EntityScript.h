@@ -16,6 +16,9 @@
 #pragma once
 
 #include "CSP/Common/String.h"
+#include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
+#include "Services/ApiBase/ApiBase.h"
 
 #include <map>
 #include <string>
@@ -32,6 +35,7 @@ class SpaceEntitySystem;
 
 class SpaceEntity;
 class ScriptSpaceComponent;
+
 
 /// @brief Manages the script attached to an Entity.
 ///
@@ -60,6 +64,10 @@ public:
 	/// @return csp::common::String : The Id of the Script source AssetCollection.
 	const csp::common::String& GetScriptSourceAssetCollectionId() const;
 
+	/// @brief Get the AssetCollection Id of the Script source.
+	/// @return csp::common::String : The Id of the Script source AssetCollection.
+	void RetrieveScriptSource(systems::NullResultCallback Callback) const;
+
 	/// @brief Runs the script.
 	/// @return True if the script runs successfully or false if there are errors.
 	bool Invoke();
@@ -86,6 +94,10 @@ public:
 	/// @brief Sets the related component for this script.
 	/// @param InEnityScriptComponent ScriptSpaceComponent : The component related to this script.
 	void SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptComponent);
+
+	/// @brief Gets the related component for this script.
+	/// @return ScriptSpaceComponent : The component related to this script.
+	const ScriptSpaceComponent* GetScriptSpaceComponent() const;
 
 	/// @brief Called when a component property changes so that a message can be passed to the script if a subscription has been setup.
 	/// @param ComponentId int32_t : ID of the component that changed.

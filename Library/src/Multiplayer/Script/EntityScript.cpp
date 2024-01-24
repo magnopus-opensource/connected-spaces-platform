@@ -19,15 +19,47 @@
 #include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
+#include "Memory/Memory.h"
 
 namespace csp::multiplayer
 {
 
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
+
+EntityScript& EntityScriptSourceRetrievalResult::GetEntityScript()
+{
+	return _EntityScript;
+}
+
+const EntityScript& EntityScriptSourceRetrievalResult::GetEntityScript() const
+{
+	return _EntityScript;
+}
+
+bool EntityScriptSourceRetrievalResult::GetRetrievalResult()
+{
+	return _IsRetrievalSuccessful;
+}
+
+void EntityScriptSourceRetrievalResult::SetEntityScript(const EntityScript& Source)
+{
+	_EntityScript = std::move(Source);
+}
+
+void EntityScriptSourceRetrievalResult::SetEntityScript(EntityScript&& Source)
+{
+	_EntityScript = Source;
+}
+
+void EntityScriptSourceRetrievalResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	systems::ResultBase::OnResponse(ApiResponse);
+}
 
 EntityScript::EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
 	: ScriptSystem(csp::systems::SystemsManager::Get().GetScriptSystem())
@@ -132,6 +164,80 @@ const csp::common::String& EntityScript::GetScriptSourceAssetCollectionId() cons
 	return EntityScriptComponent->GetExternalResourceAssetCollectionId();
 }
 
+void EntityScript::RetrieveScriptSource(systems::NullResultCallback Callback) const
+{
+	// For backwards compatibility we are continuing to support replicated property backed Script source.
+	// If a replicated property Script source is found we can return.
+	const auto& ScriptSource = EntityScriptComponent->GetScriptSource();
+	if (!ScriptSource.IsEmpty())
+	{
+		systems::NullResult InternalResult(csp::systems::EResultCode::Success, 200);
+		Callback(InternalResult);
+
+		return;
+	}
+
+	const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+	const systems::AssetResultCallback AssetResultCallbackHandler = [this, AssetSystem, Callback](const systems::AssetResult& Result)
+	{
+		if (Result.GetResultCode() == systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		if (Result.GetResultCode() == systems::EResultCode::Failed)
+		{
+			systems::NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+			Callback(InternalResult);
+
+			return;
+		}
+
+		const systems::AssetDataResultCallback AssetDataResultCallbackHandler = [this, Callback](const systems::AssetDataResult& DataResult)
+		{
+			if (DataResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+			{
+				return;
+			}
+
+			systems::NullResult InternalResult(DataResult.GetResultCode(), DataResult.GetHttpResultCode());
+
+			if (DataResult.GetResultCode() == csp::systems::EResultCode::Failed)
+			{
+				Callback(InternalResult);
+
+				return;
+			}
+
+			size_t DownloadedAssetDataSize = DataResult.GetDataLength();
+			auto DownloadedAssetData	   = CSP_NEW char[DownloadedAssetDataSize + 1];
+			std::memcpy(DownloadedAssetData, DataResult.GetData(), DownloadedAssetDataSize);
+			DownloadedAssetData[DownloadedAssetDataSize] = 0x0; // null terminate
+
+			EntityScriptComponent->SetComponentScriptSource(DownloadedAssetData);
+
+			Callback(InternalResult);
+		};
+
+		const systems::Asset& InternalAsset = Result.GetAsset();
+		AssetSystem->DownloadAssetData(InternalAsset, AssetDataResultCallbackHandler);
+	};
+
+	const auto& InternalAssetCollectionId = GetScriptSourceAssetCollectionId();
+	const auto& InternalAssetId			  = GetScriptSourceAssetId();
+
+	if (InternalAssetCollectionId.IsEmpty() || InternalAssetId.IsEmpty())
+	{
+		systems::NullResult InternalResult(csp::systems::EResultCode::Failed, 400);
+		Callback(InternalResult);
+
+		return;
+	}
+
+	AssetSystem->GetAssetById(GetScriptSourceAssetCollectionId(), GetScriptSourceAssetId(), AssetResultCallbackHandler);
+}
+
 bool EntityScript::HasError()
 {
 	return HasLastError;
@@ -146,6 +252,11 @@ void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptCo
 {
 	EntityScriptComponent = InEnityScriptComponent;
 	ScriptSystem->CreateContext(Entity->GetId());
+}
+
+const ScriptSpaceComponent* EntityScript::GetScriptSpaceComponent() const
+{
+	return EntityScriptComponent;
 }
 
 csp::common::String EntityScript::GetScriptSource()

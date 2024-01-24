@@ -50,6 +50,12 @@ enum class ScriptComponentPropertyKeys
 /// @brief Data representation of a ScriptSpaceComponent.
 class CSP_API ScriptSpaceComponent : public ComponentBase, public IExternalResourceComponent
 {
+	CSP_START_IGNORE
+	/** @cond DO_NOT_DOCUMENT */
+	friend class EntityScript;
+	/** @endcond */
+	CSP_END_IGNORE
+
 public:
 	/// @brief Constructs the script space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
@@ -90,6 +96,14 @@ public:
 	void SetScriptSource(const csp::common::String& ScriptSource);
 	/* clang-format on */
 
+	/// @brief Returns whether the Script source is prototype backed or not.
+	/// This check is present to support backwards compatibility.
+	/// @return bool : Whether Script source is prototype backed.
+	bool GetIsPrototypeBacked() const
+	{
+		return IsPrototypeBacked;
+	}
+
 	/// @brief Gets the ID of the owner of this script component.
 	/// @return The ID of the owner of this script.
 	int64_t GetOwnerId() const;
@@ -109,6 +123,13 @@ public:
 protected:
 	void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
 	void OnRemove() override;
+
+private:
+	void SetComponentScriptSource(const csp::common::String& Value);
+
+	// Required to support backwards compatibility of ScriptComponents that store their source via a replicated property.
+	bool IsPrototypeBacked;
+	csp::common::String ScriptSource;
 };
 
 } // namespace csp::multiplayer

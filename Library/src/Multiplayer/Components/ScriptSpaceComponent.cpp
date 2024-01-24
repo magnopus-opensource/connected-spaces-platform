@@ -73,6 +73,15 @@ void ScriptSpaceComponent::SetExternalResourceAssetCollectionId(const csp::commo
 
 const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
 {
+	if (IsPrototypeBacked)
+	{
+		CSP_LOG_MSG(systems::LogLevel::Log, "Prototype backed Script Source being used.");
+
+		return ScriptSource;
+	}
+
+	CSP_LOG_MSG(systems::LogLevel::Log, "Replicated property backed Script Source being used.");
+
 	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource));
 		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
 	{
@@ -89,6 +98,12 @@ void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 
 	SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
 	Parent->GetScript()->OnSourceChanged(Value);
+}
+
+void ScriptSpaceComponent::SetComponentScriptSource(const csp::common::String& Value)
+{
+	IsPrototypeBacked = true;
+	ScriptSource	  = Value;
 }
 
 int64_t ScriptSpaceComponent::GetOwnerId() const
