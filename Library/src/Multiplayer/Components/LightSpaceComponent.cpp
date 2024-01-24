@@ -146,15 +146,20 @@ void LightSpaceComponent::SetOuterConeAngle(float Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle), Value);
 }
 
+
+/* IPositionComponent */
+
 const csp::common::Vector3& LightSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -163,15 +168,20 @@ void LightSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::Position), Value);
 }
 
+
+/* IRotationComponent */
+
 const csp::common::Vector4& LightSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -179,6 +189,7 @@ void LightSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation), Value);
 }
+
 
 /* IVisibleComponent */
 
@@ -198,6 +209,7 @@ void LightSpaceComponent::SetIsVisible(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible), Value);
 }
+
 
 bool LightSpaceComponent::GetIsARVisible() const
 {

@@ -93,14 +93,6 @@ public:
 	/// @return const csp::common::String : Returns the build ID for the foundation build
 	static const csp::common::String& GetBuildID();
 
-	/// @brief Gets the EntitySystemVersion number.
-	/// This represents the system used to parse data for Entities,
-	/// and is used to prevent conflicting entity data versions from being used together where we cannot parse both.
-	/// This is currently unused.
-	/// @return int32_t : The system version number, a manually incremented counter that changes when significant breaking changes occur in the entity
-	/// parsing systems
-	static int32_t GetEntitySystemVersion();
-
 	/// @brief Unique identifier for the current device.
 	/// Used internally by certain user authentication endpoints.
 	/// @return csp::common::String& : A string representing the current device
@@ -140,8 +132,6 @@ private:
 	static csp::common::String* DeviceId;
 	static csp::common::String* ClientUserAgentString;
 	static csp::common::String* Tenant;
-
-	static const uint32_t EntitySystemVersion = 3;
 };
 
 
