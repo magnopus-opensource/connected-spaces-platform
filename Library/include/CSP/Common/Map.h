@@ -60,7 +60,7 @@ public:
 		new (Container) MapType(*Other.Container);
 	}
 
-	/// @brief Constructs an map from an initializer_list.
+	/// @brief Constructs a map from a `std::initializer_list`.
 	/// @param Values const std::initializer_list<std::pair<const TKey, const TValue>> : Elements to construct the map from
 	CSP_NO_EXPORT Map(const std::initializer_list<std::pair<const TKey, const TValue>> Values)
 	{
@@ -81,19 +81,26 @@ public:
 		csp::memory::DllFree(Container);
 	}
 
-	/// @brief Returns an element at the given index of the map.
-	/// @param Key const TKey& : Elements key to access
+	/// @brief Returns a reference to the element with the given key in this map.
+	///        Will create a new element if the given key is not present.
+	/// @param Key const TKey& : Key of element in this map
 	/// @return TValue& : Map element
 	TValue& operator[](const TKey& Key)
 	{
 		return Container->operator[](Key);
 	}
 
-	/// @brief Returns a const element at the given index of the map.
-	/// @param Key const TKey& : Elements key to access
+	/// @brief Returns a const reference to the element with the given key in this map.
+	///        Throws if the given key is not present.
+	/// @param Key const TKey& : Key of element in this map
 	/// @return const TValue& : Map element
 	const TValue& operator[](const TKey& Key) const
 	{
+		if (Container->count(Key) == 0)
+		{
+			throw std::runtime_error("Key not present in Map. Please ensure an element with the given key exists before attempting to access it.");
+		}
+
 		return Container->operator[](Key);
 	}
 
@@ -129,14 +136,14 @@ public:
 		return *this;
 	}
 
-	/// @brief Returns the number of elements in the map.
+	/// @brief Returns the number of elements in this map.
 	/// @return size_t
 	size_t Size() const
 	{
 		return Container->size();
 	}
 
-	/// @brief Checks if the map has the given key.
+	/// @brief Returns `true` if this map contains an element with the given key.
 	/// @param Key const TKey& : key to check if the map contains
 	/// @return bool
 	bool HasKey(const TKey& Key) const
@@ -144,7 +151,8 @@ public:
 		return Container->count(Key) > 0;
 	}
 
-	/// @brief Returns all keys in the map.
+	/// @brief Returns a copy of all keys in this map.
+	///        This copy should be disposed by the caller once it is no longer needed.
 	/// @return const csp::common::Array<TKey>* : Array of keys
 	const Array<TKey>* Keys() const
 	{
@@ -160,7 +168,7 @@ public:
 		return Keys;
 	}
 
-	/// @brief Returns all values in the map.
+	/// @brief Returns all values in this map.
 	/// @return const csp::common::Array<TValue>* : Array of values
 	const Array<TValue>* Values() const
 	{
@@ -176,7 +184,7 @@ public:
 		return Values;
 	}
 
-	/// @brief Removes the given element from the map.
+	/// @brief Removes the element with the given key from this map.
 	/// @param Key const TKey& : Key to remove from the map
 	void Remove(const TKey& Key)
 	{
@@ -186,7 +194,7 @@ public:
 		}
 	}
 
-	/// @brief Removes all elements in the map.
+	/// @brief Removes all elements in this map.
 	void Clear()
 	{
 		Container->clear();
