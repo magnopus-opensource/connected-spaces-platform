@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
 #include "CSP/CSPFoundation.h"
@@ -37,6 +38,7 @@
 
 
 using namespace csp;
+using namespace csp::common;
 
 namespace chs			 = csp::services::generated::userservice;
 namespace chsaggregation = csp::services::generated::aggregationservice;

@@ -148,6 +148,8 @@ class FunctionMetadata:
     is_notequal_operator: bool = False
     doc_comments: List[str] = None
     is_private: bool = False
+    is_deprecated: bool = False
+    deprecation_message: str | None = None
 
 
 @dataclass

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Settings/SettingsSystem.h"
 
 #include "CSP/Common/Array.h"
@@ -20,18 +21,23 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CallHelpers.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
 #include "Services/UserService/Dto.h"
+#include "Systems/ResultHelpers.h"
 #include "Systems/Spaces/SpaceSystemHelpers.h"
 
 #include <iostream>
+#include <rapidjson/rapidjson.h>
 #include <sstream>
+
 
 #define MAX_RECENT_SPACES 10
 
 constexpr const char* AVATAR_PORTRAIT_ASSET_NAME			= "AVATAR_PORTRAIT_ASSET_";
 constexpr const char* AVATAR_PORTRAIT_ASSET_COLLECTION_NAME = "AVATAR_PORTRAIT_ASSET_COLLECTION_";
+
 
 namespace chs = csp::services::generated::userservice;
 
@@ -79,7 +85,7 @@ void SettingsSystem::SetSettingValue(const csp::common::String& InUserId,
 
 		NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-		Callback(InternalResult);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
 	};
 
 	csp::services::ResponseHandlerPtr SettingsResponseHandler
@@ -128,7 +134,7 @@ void SettingsSystem::GetSettingValue(const csp::common::String& InUserId,
 			StringResult.SetValue("");
 		}
 
-		Callback(StringResult);
+		INVOKE_IF_NOT_NULL(Callback, StringResult);
 	};
 
 	csp::services::ResponseHandlerPtr SettingsResponseHandler
@@ -192,7 +198,7 @@ void SettingsSystem::AddRecentlyVisitedSpace(const csp::common::String& InUserId
 			return;
 		}
 
-		auto RecentSpacesArray = Result.GetValue();
+		const auto& RecentSpacesArray = Result.GetValue();
 
 		auto RecentSpaces = RecentSpacesArray.ToList();
 		RecentSpaces.Insert(0, InSpaceID);
@@ -716,7 +722,7 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const csp::common::String& User
 
 
 
-	const String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId;
+	const csp::common::String SpaceThumbnailAssetCollectionName = AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId;
 
 	// don't associate this asset collection with a particular space so that it can be retrieved by guest users that have not joined this space
 	AssetSystem->CreateAssetCollection(nullptr,
@@ -868,4 +874,78 @@ void SettingsSystem::RemoveAvatarPortrait(const csp::common::String& UserId, Nul
 
 	GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
+
+void SettingsSystem::SetAvatarInfo(const csp::common::String& InUserId,
+								   AvatarType InType,
+								   const csp::common::Variant& InIdentifier,
+								   NullResultCallback Callback)
+{
+	rapidjson::Document Json;
+	Json.SetObject();
+	Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
+	Json.AddMember("identifierType", static_cast<int>(InIdentifier.GetValueType()), Json.GetAllocator());
+
+	switch (InIdentifier.GetValueType())
+	{
+		case csp::common::VariantType::Integer:
+			Json.AddMember("identifier", InIdentifier.GetInt(), Json.GetAllocator());
+			break;
+		case csp::common::VariantType::String:
+			Json.AddMember("identifier", rapidjson::Value(InIdentifier.GetString().c_str(), InIdentifier.GetString().Length()), Json.GetAllocator());
+			break;
+		default:
+		{
+			CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+			return;
+		}
+	}
+
+	rapidjson::StringBuffer Buffer;
+	rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+	Json.Accept(Writer);
+
+	SetSettingValue(InUserId, "UserSettings", "AvatarInfo", Buffer.GetString(), Callback);
+}
+
+void SettingsSystem::GetAvatarInfo(const csp::common::String& InUserId, AvatarInfoResultCallback Callback)
+{
+	StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+	{
+		const auto& Value = Result.GetValue();
+
+		rapidjson::Document Json;
+		Json.Parse(Value.c_str());
+
+		AvatarInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+		InternalResult.SetAvatarType(static_cast<csp::systems::AvatarType>(Json["type"].GetInt()));
+
+		auto IdentifierType = static_cast<csp::common::VariantType>(Json["identifierType"].GetInt());
+
+		switch (IdentifierType)
+		{
+			case csp::common::VariantType::Integer:
+				InternalResult.SetAvatarIdentifier(static_cast<int64_t>(Json["identifier"].GetInt()));
+				break;
+			case csp::common::VariantType::String:
+				InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
+				break;
+			default:
+			{
+				CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
+
+				INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AvatarInfoResult>());
+
+				return;
+			}
+		}
+
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
+	};
+
+	GetSettingValue(InUserId, "UserSettings", "AvatarInfo", GetSettingCallback);
+}
+
 } // namespace csp::systems

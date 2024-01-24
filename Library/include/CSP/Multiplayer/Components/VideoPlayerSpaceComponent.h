@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file VideoPlayerSpaceComponent.h
 /// @brief Definitions and support for video player components.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
 
@@ -37,6 +40,7 @@ enum class VideoPlayerPlaybackState
 	Num
 };
 
+
 /// @brief Enumerates the actions that can be performed on a video player.
 enum class VideoPlayerActions
 {
@@ -44,6 +48,7 @@ enum class VideoPlayerActions
 	VideoEnd,
 	Num
 };
+
 
 /// @brief Enumerates the type of video sources the video player supports.
 enum class VideoPlayerSourceType
@@ -86,7 +91,7 @@ enum class VideoPlayerPropertyKeys
 
 /// @ingroup VideoPlayerSpaceComponent
 /// @brief Data representation of an VideoPlayerSpaceComponent.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent, public IEnableableComponent
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
 	/// @brief Constructs the video player component, and associates it with the specified Parent space entity.
@@ -127,63 +132,25 @@ public:
 	/// @param Value The ID of the asset collection associated with this component.
 	void SetAssetCollectionId(const csp::common::String& Value);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
-
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
-
-	/// @brief Gets a quaternion representing the rotation of the origin of this component, expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	const csp::common::Vector4& GetRotation() const;
-
-	/// @brief Sets the rotation of the origin of this component according to the specified quaternion "Value", expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	/// @param Value The quaternion in radians to use as new rotation of this component.
-	void SetRotation(const csp::common::Vector4& Value);
-
-	/// @brief Gets the scale of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D scale as vector (left, up, forward).
-	const csp::common::Vector3& GetScale() const;
-
-	/// @brief Sets the scale of the origin of this component in world space to the specified "Value".
-	/// @param Value The new value expressed as vector (left, up, forward).
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetScale(const csp::common::Vector3& Value);
+	/// \addtogroup ITransformComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @copydoc IRotationComponent::GetRotation()
+	const csp::common::Vector4& GetRotation() const override;
+	/// @copydoc IRotationComponent::SetRotation()
+	void SetRotation(const csp::common::Vector4& InValue) override;
+	/// @copydoc IScaleComponent::GetScale()
+	const csp::common::Vector3& GetScale() const override;
+	/// @copydoc IScaleComponent::SetScale()
+	void SetScale(const csp::common::Vector3& InValue) override;
+	/// @copydoc ITransformComponent::GetTransform()
+	SpaceTransform GetTransform() const override;
+	/// @copydoc ITransformComonent::SetTransform()
+	void SetTransform(const SpaceTransform& InValue) override;
+	/// @}
 
 	/// @brief Checks if the playback state of this video player needs to be shared with other users through replication.
 	/// @return True if the playback state of the video needs to be shared among all users, false otherwise.

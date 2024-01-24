@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file ReflectionSpaceComponent.h
 /// @brief Definitions and support for reflection components.
 
@@ -21,6 +22,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IScaleComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
 
@@ -34,12 +37,13 @@ enum class ReflectionPropertyKeys
 	ReflectionAssetId,
 	AssetCollectionId,
 	Position,
-	Rotation,
+	Rotation_NOT_USED,
 	Scale,
 	ReflectionShape,
 	ThirdPartyComponentRef,
 	Num
 };
+
 
 /// @brief Enumerates the supported shapes for a reflection component.
 enum class ReflectionShape
@@ -48,9 +52,10 @@ enum class ReflectionShape
 	UnitBox
 };
 
+
 /// @ingroup ReflectionSpaceComponent
 /// @brief Data representation of an ReflectionSpaceComponent.
-class CSP_API ReflectionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef
+class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionComponent, public IScaleComponent, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
@@ -82,25 +87,21 @@ public:
 	/// @param Value The ID of the asset collection associated with this component.
 	void SetAssetCollectionId(const csp::common::String& Value);
 
-	/// @brief Position of the Reflection component.
-	const csp::common::Vector3& GetPosition() const;
+	/// \addtogroup IPositionComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
-	/// @brief Set the position of the Reflection component.
-	/// @param Value const csp::common::Vector3& : Position of the Reflection Component.
-	void SetPosition(const csp::common::Vector3& Value);
-
-	/// @brief Rotation of the Reflection component.
-	/// @return Will return an Identity Quaternion (0, 0, 0, 1).
-	const csp::common::Vector4& GetRotation() const;
-
-	/// @brief Scale of the Reflection components spatial extents over which the reflection should apply.
-	/// UnitBox/Sphere * Scale == Spatial Extents.
-	const csp::common::Vector3& GetScale() const;
-
-	/// @brief Set the scale of the Reflection components spatial extents.
-	/// @param Value const csp::common::Vector3& : Scale extents of the Reflection Component.
-	/// UnitBox/Sphere * Scale == Spatial Extents.
-	void SetScale(const csp::common::Vector3& Value);
+	/// \addtogroup IScaleComponent
+	/// @{
+	/// @copydoc IScaleComponent::GetScale()
+	const csp::common::Vector3& GetScale() const override;
+	/// @copydoc IScaleComponent::SetScale()
+	void SetScale(const csp::common::Vector3& InValue) override;
+	/// @}
 
 	/// @brief Get the reflection shape enum value.
 	/// ReflectionShape.UnitBox: Projects a texture in a planar fashion from all six directions (like an inward facing cube).

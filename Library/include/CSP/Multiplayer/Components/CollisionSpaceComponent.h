@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file CollisionSpaceComponent.h
 /// @brief Definitions and support for collisions.
 
@@ -22,6 +23,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
+#include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 
 
 namespace csp::multiplayer
@@ -41,6 +43,7 @@ enum class CollisionPropertyKeys
 	Num
 };
 
+
 /// @brief Enumerates the list of shapes supported by the collision component.
 enum class CollisionShape
 {
@@ -50,6 +53,7 @@ enum class CollisionShape
 	Sphere
 };
 
+
 /// @brief Enumerates the list of collision modes supported by the collision component.
 enum class CollisionMode
 {
@@ -57,72 +61,35 @@ enum class CollisionMode
 	Trigger
 };
 
+
 /// @ingroup CollisionSpaceComponent
 /// @brief Data representation of an CollisionSpaceComponent.
-class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef
+class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent
 {
 public:
 	/// @brief Constructs the collision space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
 	CollisionSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
-
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
-
-	/// @brief Gets a quaternion representing the rotation of the origin of this component, expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	const csp::common::Vector4& GetRotation() const;
-
-	/// @brief Sets the rotation of the origin of this component according to the specified quaternion "Value", expressed in radians.
-	/// @note The coordinate system respects the following conventions:
-	///       - Right handed coordinate system
-	///       - Positive rotation is counterclockwise
-	///       - The geographic North is along the positive Z axis (+Z) at an orientation of 0 degrees.
-	///       - North: +Z
-	///       - East: -X
-	///       - South: -Z
-	///       - West: +X
-	/// @param Value The quaternion in radians to use as new rotation of this component.
-	void SetRotation(const csp::common::Vector4& Value);
-
-	/// @brief Gets the scale of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D scale as vector (left, up, forward).
-	const csp::common::Vector3& GetScale() const;
-
-	/// @brief Sets the scale of the origin of this component in world space to the specified "Value".
-	/// @param Value The new value expressed as vector (left, up, forward).
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetScale(const csp::common::Vector3& Value);
+	/// \addtogroup ITransformComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @copydoc IRotationComponent::GetRotation()
+	const csp::common::Vector4& GetRotation() const override;
+	/// @copydoc IRotationComponent::SetRotation()
+	void SetRotation(const csp::common::Vector4& InValue) override;
+	/// @copydoc IScaleComponent::GetScale()
+	const csp::common::Vector3& GetScale() const override;
+	/// @copydoc IScaleComponent::SetScale()
+	void SetScale(const csp::common::Vector3& InValue) override;
+	/// @copydoc ITransformComponent::GetTransform()
+	SpaceTransform GetTransform() const override;
+	/// @copydoc ITransformComonent::SetTransform()
+	void SetTransform(const SpaceTransform& InValue) override;
+	/// @}
 
 	/// @brief Gets the collision shape used by this collision component.
 	/// @return The colllision shape used by this collision component.
@@ -196,4 +163,3 @@ public:
 };
 
 } // namespace csp::multiplayer
-#pragma once

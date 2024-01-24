@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Spaces/Space.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -27,6 +28,7 @@
 
 
 using namespace csp;
+using namespace csp::common;
 
 namespace chs_users	  = csp::services::generated::userservice;
 namespace chs_spatial = csp::services::generated::spatialdataservice;

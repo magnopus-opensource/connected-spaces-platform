@@ -172,10 +172,12 @@ bool ConversationSpaceComponent::GetIsVisible() const
 
 	return false;
 }
+
 void ConversationSpaceComponent::SetIsVisible(const bool Value)
 {
 	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible), Value);
 }
+
 bool ConversationSpaceComponent::GetIsActive() const
 {
 	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive));
@@ -189,10 +191,14 @@ bool ConversationSpaceComponent::GetIsActive() const
 	return false;
 }
 
+
+/* IPositionComponent */
+
 const csp::common::Vector3& ConversationSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
@@ -207,10 +213,14 @@ void ConversationSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position), Value);
 }
 
+
+/* IRotationComponent */
+
 const csp::common::Vector4& ConversationSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
@@ -224,6 +234,7 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
 	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
+
 
 void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {

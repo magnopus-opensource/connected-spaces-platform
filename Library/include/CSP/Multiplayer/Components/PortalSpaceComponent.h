@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file PortalSpaceComponent.h
 /// @brief Definitions and support for portals.
 
@@ -20,7 +21,9 @@
 
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Systems/Assets/Asset.h"
+
 
 namespace csp::multiplayer
 {
@@ -39,6 +42,7 @@ enum class PortalPropertyKeys
 	Num
 };
 
+
 /**
  * @ingroup PortalSpaceComponent
  * @brief Data representation of a PortalSpaceComponent.
@@ -51,7 +55,7 @@ enum class PortalPropertyKeys
  * 4. Follow the standard procedure to re-connect to a space
  */
 
-class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent
+class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent
 {
 public:
 	/// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
@@ -70,22 +74,13 @@ public:
 	/// @param Value The ID of the space the portal component leads the player to.
 	void SetSpaceId(const csp::common::String& Value);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
-
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
+	/// \addtogroup IPositionComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
 	/// @brief Gets the radius of this portal.
 	/// @return The radius of this portal.

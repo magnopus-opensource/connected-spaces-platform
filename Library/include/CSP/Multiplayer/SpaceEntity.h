@@ -55,7 +55,13 @@ enum class SpaceEntityType
 	Object,
 };
 
-/// @brief Enum used to specify the type of an update operation
+/// @brief This Enum should be used to determine what kind of operation the component update represents.
+/// Update means properties on the component have updated, all need to be checked as we do not provide reference of specific property updates.
+/// Add means the component is newly added, clients should ensure that this triggers appropriate instantiation of wrapping objects.
+/// All properties for the component should be included.
+/// Delete means the component has been marked for deletion. It is likely that some other clients will not have the component at the point this is
+/// recieved. Any wrapping data objects should be deleted when this is recieved, and clients should cease updating this component as any call would
+/// fail. The CSP representation of the component has been removed at this point.
 enum class ComponentUpdateType
 {
 	Update,
@@ -63,27 +69,17 @@ enum class ComponentUpdateType
 	Delete,
 };
 
-// TODO: OF-1005 This is referenced in an unused array in ComponentUpdateInfo but otherwise not used, can we remove?
-class CSP_API PropertyUpdateInfo
-{
-public:
-	uint32_t PropertyId;
-	ComponentUpdateType UpdateType;
-};
-
-
-// TODO: OF-1005 The PropertyInfo here seems like it's been commented out and unused for a long time, can we remove this?
 /// @brief Info class that specifies a type of update and the ID of a component the update is applied to.
 class CSP_API ComponentUpdateInfo
 {
 public:
 	uint16_t ComponentId;
 	ComponentUpdateType UpdateType;
-	// Removing until we need this as part of the per property replication implementation
-	// csp::common::Array<PropertyUpdateInfo> PropertyInfo;
 };
 
-// @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.
+/// @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.
+/// Use this to determine which parts of an entity to copy values from when an update occurs.
+/// It is a bitwise flag enum, so values are additive, the value may represent several flags.
 enum SpaceEntityUpdateFlags
 {
 	UPDATE_FLAGS_NAME				  = 1,
@@ -226,6 +222,7 @@ public:
 	/// @brief Set a callback to be executed when a patch message is received for this Entity. Only one callback can be set.
 	/// @param Callback UpdateCallback : Contains the SpaceEntity that updated, a set of flags to tell which parts updated
 	/// and an array of information to tell which components updated.
+	/// When this callback is recieved, the flags and arrays should be used to determine which properties have updated data.
 	CSP_EVENT void SetUpdateCallback(UpdateCallback Callback);
 
 	/// @brief Set a callback to be executed when a patch message with a destroy flag is received for this Entity. Only one callback can be set.

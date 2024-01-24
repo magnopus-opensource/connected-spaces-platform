@@ -58,15 +58,20 @@ void csp::multiplayer::PortalSpaceComponent::GetSpaceThumbnail(csp::systems::Uri
 	SpaceSystem->GetSpaceThumbnail(GetSpaceId(), Callback);
 }
 
+
+/* IPositionComponent */
+
 const csp::common::Vector3& csp::multiplayer::PortalSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -74,6 +79,7 @@ void csp::multiplayer::PortalSpaceComponent::SetPosition(const csp::common::Vect
 {
 	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
 }
+
 
 float csp::multiplayer::PortalSpaceComponent::GetRadius() const
 {

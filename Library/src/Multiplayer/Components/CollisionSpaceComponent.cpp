@@ -48,6 +48,9 @@ CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent) : Componen
 	SetScriptInterface(CSP_NEW CollisionSpaceComponentScriptInterface(this));
 }
 
+
+/* ITransformComponent */
+
 const csp::common::Vector3& CollisionSpaceComponent::GetPosition() const
 {
 	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position));
@@ -66,6 +69,7 @@ void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position), Value);
 }
+
 
 const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
 {
@@ -86,6 +90,7 @@ void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), Value);
 }
 
+
 const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
 {
 	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale));
@@ -104,6 +109,25 @@ void CollisionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale), Value);
 }
+
+
+SpaceTransform CollisionSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void CollisionSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
 
 CollisionShape CollisionSpaceComponent::GetCollisionShape() const
 {

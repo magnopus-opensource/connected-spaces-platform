@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
 #include <functional>
+
 
 namespace csp::systems
 {
@@ -35,6 +37,7 @@ enum class LogLevel
 	VeryVerbose,
 	All
 };
+
 
 /// @brief A Connected Spaces Platform level Logger for debugging or printing to console, also handles logging to a file.
 /// Contains a callback system that allows clients to react to specific logs or events.
@@ -84,15 +87,15 @@ public:
 	/// @brief Log a message at a specific verbosity level.
 	/// @param Level The level to log this message at.
 	/// @param InMessage The message to be logged.
-	CSP_NO_EXPORT void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
+	void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
 	/// @brief Log an event.
 	/// @param InEvent The event to be logged.
-	CSP_NO_EXPORT void LogEvent(const csp::common::String& InEvent);
+	void LogEvent(const csp::common::String& InEvent);
 
 	/// @brief Specify a 'Marker' event which can be used to communicate a certain process occurring, usually for debugging.
-	CSP_NO_EXPORT void BeginMarker(const csp::common::String& InMarker);
+	void BeginMarker(const csp::common::String& InMarker);
 	/// @brief End a 'Marker' event.
-	CSP_NO_EXPORT void EndMarker();
+	void EndMarker();
 
 	/// @brief Clears all logging callbacks.
 	void ClearAllCallbacks();

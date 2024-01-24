@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 
 #include "Debug/Logging.h"
@@ -89,15 +90,20 @@ void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name), Value);
 }
 
+
+/* ITransformComponent */
+
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -106,15 +112,18 @@ void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& Value
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), Value);
 }
 
+
 const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -123,15 +132,18 @@ void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& Value
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), Value);
 }
 
+
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -139,6 +151,25 @@ void FiducialMarkerSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), Value);
 }
+
+
+SpaceTransform FiducialMarkerSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void FiducialMarkerSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
 
 /* IVisibleComponent */
 

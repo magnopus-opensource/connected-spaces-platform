@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file AudioSpaceComponent.h
 /// @brief Definitions and support for audio components.
+
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
+
 
 namespace csp::multiplayer
 {
@@ -33,6 +37,7 @@ enum class AudioPlaybackState
 	Num
 };
 
+
 /// @brief Specifies the type of audio source for an audio component.
 enum class AudioType
 {
@@ -42,6 +47,7 @@ enum class AudioType
 	Spatial,
 	Num
 };
+
 
 /// @brief Enumerates the list of properties that can be replicated for an audio component.
 enum class AudioPropertyKeys
@@ -60,31 +66,23 @@ enum class AudioPropertyKeys
 	Num
 };
 
+
 // @ingroup AudioSpaceComponent
 /// @brief Data representation of an AudioSpaceComponent.
-class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IThirdPartyComponentRef
+class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:
 	/// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
 	AudioSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
-
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
+	/// \addtogroup IPositionComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
 	/// @brief Gets the current playback state of the audio of this audio component.
 	/// @return The current playback state of the audio of this audio component.
