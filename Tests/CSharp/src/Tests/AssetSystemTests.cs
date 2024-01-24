@@ -1419,7 +1419,7 @@ namespace CSPEngine
 
             // Create 'dest' space and invoke the copy
             var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-            var destAssetCollections = null;
+            Common.Array<Systems.AssetCollection> destAssetCollections = null;
 
             {
                 Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
