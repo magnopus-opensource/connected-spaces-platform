@@ -1,16 +1,17 @@
-using System.Threading;
+using System;
 using System.IO;
+using System.Threading;
 
 using Csp;
+using CSharpTests;
+using MultiplayerTestClient;
+
 using Common = Csp.Common;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
-using CSharpTests;
-using MultiplayerTestClient;
-
 using static CSharpTests.TestHelper;
-using System;
+
 
 namespace CSPEngine
 {
@@ -20,7 +21,7 @@ namespace CSPEngine
         {
             var res = connection.Disconnect().Result;
 
-            Assert.IsTrue(res);
+            Assert.AreEqual(Multiplayer.ErrorCode.None, res);
 
             LogDebug("Multiplayer disconnected");
         }
@@ -29,11 +30,11 @@ namespace CSPEngine
         {
             var res = connection.Connect().Result;
 
-            Assert.IsTrue(res);
+            Assert.AreEqual(Multiplayer.ErrorCode.None, res);
 
             res = connection.InitialiseConnection().Result;
 
-            Assert.IsTrue(res);
+            Assert.AreEqual(Multiplayer.ErrorCode.None, res);
 
             LogDebug("Multiplayer connected");
 

@@ -36,6 +36,7 @@ std::map<csp::common::String, csp::systems::ERequestFailureReason> XErrorCodeToF
 	{"user_sociallogininvalid", csp::systems::ERequestFailureReason::UserInvalidThirdPartyAuth},
 	{"user_agenotverified", csp::systems::ERequestFailureReason::UserAgeNotVerified},
 	{"user_guestlogindisallowed", csp::systems::ERequestFailureReason::UserGuestLoginDisallowed},
+	{"user_tokenrefreshfailed", csp::systems::ERequestFailureReason::UserTokenRefreshFailed},
 	{"prototype_reservedkeysnotallowed", csp::systems::ERequestFailureReason::PrototypeReservedKeysNotAllowed},
 	{"assetdetail_invalidfilecontents", csp::systems::ERequestFailureReason::AssetInvalidFileContents},
 	{"assetdetail_invalidfiletype", csp::systems::ERequestFailureReason::AssetInvalidFileType},

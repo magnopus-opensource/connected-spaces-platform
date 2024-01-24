@@ -271,11 +271,10 @@ public:
 	/// @return ProductInfo : reference to the CartInfo
 	CartInfo& GetCartInfo();
 
-	CSP_NO_EXPORT static CartInfoResult Invalid();
+	CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	CartInfoResult(void*) {};
-	CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 

@@ -123,15 +123,20 @@ void VideoPlayerSpaceComponent::SetAssetCollectionId(const csp::common::String& 
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId), Value);
 }
 
+
+/* ITransformComponent */
+
 const csp::common::Vector3& VideoPlayerSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -140,15 +145,18 @@ void VideoPlayerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position), Value);
 }
 
+
 const csp::common::Vector4& VideoPlayerSpaceComponent::GetRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
 	{
 		return RepVal.GetVector4();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector4();
 }
 
@@ -157,15 +165,18 @@ void VideoPlayerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation), Value);
 }
 
+
 const csp::common::Vector3& VideoPlayerSpaceComponent::GetScale() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale));
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
 	{
 		return RepVal.GetVector3();
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
+
 	return ReplicatedValue::GetDefaultVector3();
 }
 
@@ -173,6 +184,25 @@ void VideoPlayerSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale), Value);
 }
+
+
+SpaceTransform VideoPlayerSpaceComponent::GetTransform() const
+{
+	SpaceTransform Transform;
+	Transform.Position = GetPosition();
+	Transform.Rotation = GetRotation();
+	Transform.Scale	   = GetScale();
+
+	return Transform;
+}
+
+void VideoPlayerSpaceComponent::SetTransform(const SpaceTransform& InValue)
+{
+	SetPosition(InValue.Position);
+	SetRotation(InValue.Rotation);
+	SetScale(InValue.Scale);
+}
+
 
 bool VideoPlayerSpaceComponent::GetIsStateShared() const
 {

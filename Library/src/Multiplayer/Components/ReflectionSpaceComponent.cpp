@@ -94,6 +94,9 @@ void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name), Value);
 }
 
+
+/* IPositionComponent */
+
 const csp::common::Vector3& ReflectionSpaceComponent::GetPosition() const
 {
 	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position));
@@ -113,12 +116,8 @@ void ReflectionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
 }
 
-const csp::common::Vector4& ReflectionSpaceComponent::GetRotation() const
-{
-	static csp::common::Vector4 Rotation(0, 0, 0, 1);
 
-	return Rotation;
-}
+/* IScaleComponent */
 
 const csp::common::Vector3& ReflectionSpaceComponent::GetScale() const
 {
@@ -138,6 +137,7 @@ void ReflectionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
 }
+
 
 ReflectionShape ReflectionSpaceComponent::GetReflectionShape() const
 {

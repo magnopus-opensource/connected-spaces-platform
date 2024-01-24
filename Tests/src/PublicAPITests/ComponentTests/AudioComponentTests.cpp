@@ -58,7 +58,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -83,13 +83,13 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Create object to represent the audio
@@ -177,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -202,13 +202,13 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Create object to represent the audio

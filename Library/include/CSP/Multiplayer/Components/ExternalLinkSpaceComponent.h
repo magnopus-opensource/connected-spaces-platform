@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file ExternalLinkSpaceComponent.h
 /// @brief Definitions and support for external links.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
+#include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
-#include "CSP/Multiplayer/SpaceTransform.h"
 
 
 namespace csp::multiplayer
@@ -55,7 +57,7 @@ enum class ExternalLinkPropertyKeys
 /// @ingroup ExternalLinkSpaceComponent
 /// @brief Data representation of an ExternalLinkSpaceComponent.
 /// @note This component can be used to handle external URLs that can be opened in game from a space.
-class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public IVisibleComponent
+class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
 	/// @brief Creates an external link component that can be added to an existing space entity.
@@ -74,23 +76,25 @@ public:
 	/// @param Value - The URL to be assigned to this external link component.
 	void SetLinkUrl(const csp::common::String& Value);
 
-	/// @brief Gets the 3D position in world coordinates where the origin of this component is located.
-	const csp::common::Vector3& GetPosition() const;
-	/// @brief Sets the 3D position in world coordinates where the origin of this component will be located.
-	/// @param Value - The new 3D position assigned to the origin of this component.
-	void SetPosition(const csp::common::Vector3& Value);
-
-	/// @brief Gets the quaternion of the rotation of the origin of this component.
-	const csp::common::Vector4& GetRotation() const;
-	/// @brief Sets the quaternion of the rotation of the origin of this component.
-	/// @param Value - The new rotation assigned to the origin of this component.
-	void SetRotation(const csp::common::Vector4& Value);
-
-	/// @brief Gets the 3D scale of this component.
-	const csp::common::Vector3& GetScale() const;
-	/// @brief Sets the 3D scale of this component.
-	/// @param Value - The new 3D scale assigned to this component.
-	void SetScale(const csp::common::Vector3& Value);
+	/// \addtogroup ITransformComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @copydoc IRotationComponent::GetRotation()
+	const csp::common::Vector4& GetRotation() const override;
+	/// @copydoc IRotationComponent::SetRotation()
+	void SetRotation(const csp::common::Vector4& InValue) override;
+	/// @copydoc IScaleComponent::GetScale()
+	const csp::common::Vector3& GetScale() const override;
+	/// @copydoc IScaleComponent::SetScale()
+	void SetScale(const csp::common::Vector3& InValue) override;
+	/// @copydoc ITransformComponent::GetTransform()
+	SpaceTransform GetTransform() const override;
+	/// @copydoc ITransformComonent::SetTransform()
+	void SetTransform(const SpaceTransform& InValue) override;
+	/// @}
 
 	/// @brief Gets the text that will be displayed by the component as hyperlink to the URL it redirects to.
 	const csp::common::String& GetDisplayText() const;
@@ -105,7 +109,6 @@ public:
 	/// @copydoc IEnableableComponent::SetIsEnabled()
 	void SetIsEnabled(bool InValue) override;
 	/// @}
-
 
 	/// \addtogroup IVisibleComponent
 	/// @{

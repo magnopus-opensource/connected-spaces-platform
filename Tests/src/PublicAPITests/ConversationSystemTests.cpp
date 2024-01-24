@@ -90,7 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String DefaultTestUserId;
 
@@ -118,13 +118,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	auto* ConvSystem = Connection->GetConversationSystem();
@@ -217,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String DefaultTestUserId;
 
@@ -248,13 +248,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	auto* ConvSystem = Connection->GetConversationSystem();
@@ -433,7 +433,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -464,13 +464,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	auto* ConvSystem = Connection->GetConversationSystem();
@@ -582,13 +582,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	ConvSystem = Connection->GetConversationSystem();
@@ -777,13 +777,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -809,13 +809,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Setup Asset callback
@@ -878,9 +878,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	Connection->SendNetworkEventToClient("ConversationSystem",
 										 {ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 ASSERT_EQ(Error, ErrorCode::None);
 										 });
 
 	// Wait for message
@@ -934,13 +934,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -966,13 +966,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Setup Asset callback
@@ -1045,9 +1045,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	Connection->SendNetworkEventToClient("ConversationSystem",
 										 {ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 ASSERT_EQ(Error, ErrorCode::None);
 										 });
 
 	// Wait for message
@@ -1101,13 +1101,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -1133,13 +1133,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	// Setup Asset callback
@@ -1215,9 +1215,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	Connection->SendNetworkEventToClient("ConversationSystem",
 										 {ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 ASSERT_EQ(Error, ErrorCode::None);
 										 });
 
 	// Wait for message
@@ -1260,7 +1260,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-OKO";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -1304,13 +1304,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	auto* ConvSystem = Connection->GetConversationSystem();
@@ -1409,9 +1409,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	Connection->SendNetworkEventToClient("ConversationSystem",
 										 {ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 ASSERT_EQ(Error, ErrorCode::None);
 										 });
 
 	{
@@ -1458,7 +1458,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-OKO";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -1502,13 +1502,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 
 	// Connect and initialise
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
+		auto [Error] = AWAIT(Connection, Connect);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-		ASSERT_TRUE(Ok);
+		ASSERT_EQ(Error, ErrorCode::None);
 	}
 
 	auto* ConvSystem = Connection->GetConversationSystem();
@@ -1578,9 +1578,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	Connection->SendNetworkEventToClient("ConversationSystem",
 										 {ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 ASSERT_EQ(Error, ErrorCode::None);
 										 });
 
 	{

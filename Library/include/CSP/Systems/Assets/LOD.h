@@ -72,12 +72,10 @@ public:
 	/// @brief Retreives the LODChain from the result.
 	const LODChain& GetLODChain() const;
 
-protected:
+	CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	LODChainResult(void*) {};
-	LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT LODChainResult(const csp::systems::ResultBase& InResult)
-		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	void SetLODChain(const LODChain& Chain);
 	void SetLODChain(LODChain&& Chain);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Systems/Assets/Asset.h"
@@ -20,6 +21,7 @@
 #include "CSP/Systems/Settings/SettingsCollection.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
+
 
 namespace csp::services
 {
@@ -132,6 +134,19 @@ public:
 	CSP_ASYNC_RESULT void UpdateAvatarPortraitWithBuffer(const csp::common::String& UserId,
 														 const csp::systems::BufferAssetDataSource& NewAvatarPortrait,
 														 NullResultCallback Callback);
+
+	/// @brief Sets the avatar type and identifier for a user.
+	/// @param InUserId csp::common::String : The ID of the user to set avatar info for.
+	/// @param InType csp::systems::AvatarType : The type of avatar (predefined, Ready Player Me, or custom).
+	/// @param InIdentifier csp::common::Variant : A value used to identify or locate the avatar. Differs depending on the value of InType.
+	/// @param Callback NullResultCallback : Callback to call when task finishes.
+	CSP_ASYNC_RESULT void
+		SetAvatarInfo(const csp::common::String& InUserId, AvatarType InType, const csp::common::Variant& InIdentifier, NullResultCallback Callback);
+
+	/// @brief Retrieves the avatar type and identifier for a user.
+	/// @param InUserId csp::common::String : The ID of the user to get avatar info for.
+	/// @param Callback NullResultCallback : Callback to call when task finishes.
+	CSP_ASYNC_RESULT void GetAvatarInfo(const csp::common::String& InUserId, AvatarInfoResultCallback Callback);
 
 private:
 	SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

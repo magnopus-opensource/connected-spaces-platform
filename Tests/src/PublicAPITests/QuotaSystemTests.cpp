@@ -173,7 +173,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -285,7 +285,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -306,13 +306,15 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
-	auto [Ok] = AWAIT(Connection, Connect);
+	{
+		auto [Error] = AWAIT(Connection, Connect);
 
-	EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
-	std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
 
-	EXPECT_TRUE(Ok);
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -328,9 +330,9 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
 
 	// Disconnect from the SignalR server
-	auto [Exit] = AWAIT(Connection, Disconnect);
+	auto [Error] = AWAIT(Connection, Disconnect);
 
-	EXPECT_TRUE(Exit);
+	ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
 	SpaceSystem->ExitSpace();
 
@@ -360,7 +362,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-CSP";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 

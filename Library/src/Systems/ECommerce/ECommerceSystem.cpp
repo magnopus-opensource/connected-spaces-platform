@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
 #include "ECommerceSystemHelpers.h"
 #include "Services/aggregationservice/Api.h"
+#include "CallHelpers.h"
+#include "Systems/ResultHelpers.h"
+
 
 using namespace csp;
 
 namespace chs = csp::services::generated::aggregationservice;
+
 
 namespace csp::systems
 {
@@ -40,7 +45,6 @@ ECommerceSystem::~ECommerceSystem()
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {
-
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
 			Callback,
@@ -120,11 +124,12 @@ void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
 {
-
 	if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
 	{
 		CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
-		Callback(CartInfoResult::Invalid());
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
+
 		return;
 	}
 

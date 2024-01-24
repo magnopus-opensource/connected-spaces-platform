@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
+#include "CSP/Common/Variant.h"
 #include "CSP/Systems/WebService.h"
 #include "CSP/Web/HTTPResponseCodes.h"
 
@@ -37,7 +39,6 @@ CSP_END_IGNORE
 } // namespace csp::services
 
 
-
 namespace csp::systems
 {
 
@@ -52,7 +53,6 @@ public:
 	csp::common::String Context;
 	csp::common::Map<csp::common::String, csp::common::String> Settings;
 };
-
 
 
 /// @ingroup Settings System
@@ -79,8 +79,49 @@ private:
 };
 
 
+/// @brief Used to specify the type of the user's avatar
+enum class AvatarType
+{
+	None,
+	Premade,
+	ReadyPlayerMe,
+	Custom,
+};
+
+
+/// @brief A result handler that is used to notify a user of an error while passing a String value.
+class CSP_API AvatarInfoResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	friend class SettingsSystem;
+	/** @endcond */
+
+public:
+	/// @brief A getter which returns the String passed via the result.
+	[[nodiscard]] AvatarType GetAvatarType() const;
+	[[nodiscard]] const csp::common::Variant& GetAvatarIdentifier() const;
+
+	CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: Type(AvatarType::None), csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+private:
+	AvatarInfoResult() : Type(AvatarType::None) {};
+	AvatarInfoResult(void*) : Type(AvatarType::None) {};
+
+	void SetAvatarType(AvatarType InValue);
+	void SetAvatarIdentifier(const csp::common::Variant& InValue);
+
+	AvatarType Type;
+	csp::common::Variant Identifier;
+};
+
+
 /// @brief Callback containing Settings collection.
 /// @param Result SettingsCollectionResult : result class
 typedef std::function<void(const SettingsCollectionResult& Result)> SettingsResultCallback;
+
+/// @brief Callback containing Avatar info.
+/// @param Result AvatarInfoResult : result class
+typedef std::function<void(const AvatarInfoResult& Result)> AvatarInfoResultCallback;
 
 } // namespace csp::systems

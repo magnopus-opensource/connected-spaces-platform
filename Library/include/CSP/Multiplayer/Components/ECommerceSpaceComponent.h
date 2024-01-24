@@ -14,11 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file ECommerceSpaceComponent.h
 /// @brief Definitions and support for ECommerce components.
+
 #pragma once
 
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
+
 
 namespace csp::multiplayer
 {
@@ -31,31 +35,23 @@ enum class ECommercePropertyKeys
 	Num
 };
 
+
 // @ingroup ECommerceSpaceComponent
 /// @brief Data representation of an ECommerceSpaceComponent.
-class CSP_API ECommerceSpaceComponent : public ComponentBase
+class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:
 	/// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
 	ECommerceSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Gets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return The 3D position as vector (left, up, forward) in meters.
-	const csp::common::Vector3& GetPosition() const;
-
-	/// @brief Sets the position of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification, in meters.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	void SetPosition(const csp::common::Vector3& Value);
+	/// \addtogroup ITransformComponent
+	/// @{
+	/// @copydoc IPositionComponent::GetPosition()
+	const csp::common::Vector3& GetPosition() const override;
+	/// @copydoc IPositionComponent::SetPosition()
+	void SetPosition(const csp::common::Vector3& InValue) override;
+	/// @}
 
 	/// @brief Gets the product ID associated with the ECommerce component.
 	/// @return The product ID associated with the ECommerce component.
