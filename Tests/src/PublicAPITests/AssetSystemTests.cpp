@@ -2235,6 +2235,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
 		DestAssetCollections = Result.GetAssetCollections();
 	}
 
@@ -2252,10 +2253,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
 		csp::common::Array<csp::systems::Asset> DestAssets;
 		GetAssetsInCollection(AssetSystem, DestAssetCollections[0], DestAssets);
+
 		EXPECT_EQ(DestAssets.Size(), 1);
 
 		// Get the copied data and compare it with our source
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, DestAssets[0]);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		size_t DownloadedAssetDataSize = Result.GetDataLength();
