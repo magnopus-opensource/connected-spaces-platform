@@ -66,7 +66,7 @@ public:
 
 	/// @brief Get the AssetCollection Id of the Script source.
 	/// @return csp::common::String : The Id of the Script source AssetCollection.
-	void RetrieveScriptSource(systems::NullResultCallback Callback) const;
+	void RetrieveScriptSource(csp::systems::NullResultCallback Callback) const;
 
 	/// @brief Runs the script.
 	/// @return True if the script runs successfully or false if there are errors.

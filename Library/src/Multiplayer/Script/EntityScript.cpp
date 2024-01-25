@@ -31,35 +31,6 @@ namespace csp::multiplayer
 constexpr const char* SCRIPT_ERROR_NO_COMPONENT = "No script component";
 constexpr const char* SCRIPT_ERROR_EMPTY_SCRIPT = "Script is empty";
 
-EntityScript& EntityScriptSourceRetrievalResult::GetEntityScript()
-{
-	return _EntityScript;
-}
-
-const EntityScript& EntityScriptSourceRetrievalResult::GetEntityScript() const
-{
-	return _EntityScript;
-}
-
-bool EntityScriptSourceRetrievalResult::GetRetrievalResult()
-{
-	return _IsRetrievalSuccessful;
-}
-
-void EntityScriptSourceRetrievalResult::SetEntityScript(const EntityScript& Source)
-{
-	_EntityScript = std::move(Source);
-}
-
-void EntityScriptSourceRetrievalResult::SetEntityScript(EntityScript&& Source)
-{
-	_EntityScript = Source;
-}
-
-void EntityScriptSourceRetrievalResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
-{
-	systems::ResultBase::OnResponse(ApiResponse);
-}
 
 EntityScript::EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEntitySystem)
 	: ScriptSystem(csp::systems::SystemsManager::Get().GetScriptSystem())
@@ -164,7 +135,7 @@ const csp::common::String& EntityScript::GetScriptSourceAssetCollectionId() cons
 	return EntityScriptComponent->GetExternalResourceAssetCollectionId();
 }
 
-void EntityScript::RetrieveScriptSource(systems::NullResultCallback Callback) const
+void EntityScript::RetrieveScriptSource(csp::systems::NullResultCallback Callback) const
 {
 	// For backwards compatibility we are continuing to support replicated property backed Script source.
 	// If a replicated property Script source is found we can return.

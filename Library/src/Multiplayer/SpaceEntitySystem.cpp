@@ -784,7 +784,7 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 		PendingEntityScriptSourceDownload->Append(Script);
 		EntityScriptDownloadCount++;
 
-		systems::NullResultCallback Callback = std::bind(&SpaceEntitySystem::FinalizeEntityScripts, this);
+		csp::systems::NullResultCallback Callback = std::bind(&SpaceEntitySystem::FinalizeEntityScripts, this);
 		Script->RetrieveScriptSource(Callback);
 	}
 }
