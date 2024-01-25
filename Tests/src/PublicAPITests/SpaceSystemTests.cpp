@@ -1485,6 +1485,19 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 		EXPECT_TRUE(Result.GetUri().IsEmpty());
 	}
 
+
+	{ /// Bad file path test
+		FileAssetDataSource SpaceThumbnail;
+		const std::string LocalFileName = "OKO.png";
+		const auto FilePath				= std::filesystem::absolute("assets/badpath/" + LocalFileName);
+		SpaceThumbnail.FilePath			= FilePath.u8string().c_str();
+		SpaceThumbnail.SetMimeType("image/png");
+
+		auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceThumbnail, RequestPredicate, Space.Id, SpaceThumbnail);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
 	{
 		FileAssetDataSource SpaceThumbnail;
 		const std::string LocalFileName = "OKO.png";
