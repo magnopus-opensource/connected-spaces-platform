@@ -488,7 +488,7 @@ void POCOWebClient::SetFileUploadContentFromFile(HttpPayload* Payload,
 	}
 	else
 	{
-		CSP_LOG_WARN_MSG("File not found.");
+		CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
 	}
 }
 
