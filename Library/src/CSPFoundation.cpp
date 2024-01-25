@@ -350,11 +350,6 @@ const csp::common::String& CSPFoundation::GetBuildID()
 	return BuildID;
 }
 
-int32_t CSPFoundation::GetEntitySystemVersion()
-{
-	return EntitySystemVersion;
-}
-
 const csp::common::String& CSPFoundation::GetDeviceId()
 {
 	return *DeviceId;

@@ -897,6 +897,8 @@ class Parser:
         )
 
         doc_comments: List[str] = []
+        is_deprecated = False
+        deprecation_message: str | None = None
 
         while word != '}':
             if word[0] == '/':
@@ -937,32 +939,73 @@ class Parser:
 
                     reader.skip(offset)
             elif word == 'CSP_START_IGNORE':
+                doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 word = reader.next_word()
 
                 while word != 'CSP_END_IGNORE':
                     word = reader.next_word()
+                
             elif word == '[':
                 # doc_comments.clear()
-                self.__exit_scope(reader, 1, opening_char='[', closing_char=']')
+                word = reader.next_word()
+
+                if word != '[':
+                    self.__exit_scope(reader, 1, opening_char='[', closing_char=']')
+                else:
+                    # Found an attribute!
+                    word = reader.next_word()
+
+                    if word == 'deprecated':
+                        is_deprecated = True
+                        word = reader.next_word()
+
+                        if word == '(': # Deprecated attribute has a string description
+                            # Read until closing parens
+                            deprecation_message = reader.next_word(delimiters=[')'])
+                            # Trim leading and trailing double quotes
+                            deprecation_message = deprecation_message[1:-1]
+                            # Skip closing parens and brackets
+                            reader.skip(3)  # ')]]'
+                        elif word == ']':
+                            # Skip closing bracket
+                            reader.next_word()
+                        else:
+                            error_in_file(filename, reader.current_line, 'Malformed `deprecated` attribute found.')
+                    else:
+                        # Ignore attribute
+                        self.__exit_scope(reader, 2, opening_char='[', closing_char=']')
             elif word == 'private':
                 doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 modifier = AccessModifier.PRIVATE
                 # Skip ':'
                 reader.next_word()
             elif word == 'protected':
                 doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 modifier = AccessModifier.PROTECTED
                 reader.next_word()
             elif word == 'public':
                 doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 modifier = AccessModifier.PUBLIC
                 reader.next_word()
             elif word == 'friend':
+                doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 word = reader.next_word()
                 
                 while word != ';':
                     word = reader.next_word()
             elif word == 'typedef':
+                is_deprecated = False
+                deprecation_message = None
                 self.namespaces.append(name)
                 word = reader.next_word()
                 typedef_type, word = self.__parse_type(reader, word)
@@ -986,6 +1029,8 @@ class Parser:
                 self.namespaces.pop()
             elif word == 'using':
                 doc_comments.clear()
+                is_deprecated = False
+                deprecation_message = None
                 self.namespaces.append(name)
                 word = reader.next_word()
                 alias_name = word
@@ -1014,6 +1059,8 @@ class Parser:
 
                 if word == config['no_export_macro']:
                     doc_comments.clear()
+                    is_deprecated = False
+                    deprecation_message = None
                     no_export = True
                     word = reader.next_word()
 
@@ -1029,7 +1076,7 @@ class Parser:
                 
                 hint = reader.find_next_of(['(', ';', '{'])
 
-                if hint == '(':                        
+                if hint == '(':
                     # We found a function
                     if word == '~':
                         # Destructor
@@ -1037,7 +1084,12 @@ class Parser:
 
                     res = self.__parse_function(filename, reader, word)
                     res.doc_comments = deepcopy(doc_comments)
+                    res.is_deprecated = is_deprecated
+                    res.deprecation_message = deprecation_message
+
                     doc_comments.clear()
+                    is_deprecated = False
+                    deprecation_message = None
 
                     is_pure_virtual = is_pure_virtual and res.is_virtual
 
@@ -1052,6 +1104,9 @@ class Parser:
                         if modifier == AccessModifier.PUBLIC or (res.is_constructor or res.is_destructor):
                             methods.append(res)
                 elif hint == '{':
+                    is_deprecated = False
+                    deprecation_message = None
+
                     # This must be a nested type
                     has_nested_types = True
                     self.namespaces.append(name)
@@ -1066,6 +1121,9 @@ class Parser:
                             
                         doc_comments.clear()
                     elif word == 'struct':
+                        is_deprecated = False
+                        deprecation_message = None
+                        
                         res = self.__parse_struct(filename, reader)
 
                         if res != None and modifier == AccessModifier.PUBLIC:
@@ -1075,6 +1133,9 @@ class Parser:
                             
                         doc_comments.clear()
                     elif word == 'class':
+                        is_deprecated = False
+                        deprecation_message = None
+                        
                         res = self.__parse_class(filename, reader, nested=True)
 
                         if res != None and modifier == AccessModifier.PUBLIC:
@@ -1086,6 +1147,9 @@ class Parser:
                     
                     self.namespaces.pop()
                 else:   # ';'
+                    is_deprecated = False
+                    deprecation_message = None
+
                     # Field!
                     res = self.__parse_field(filename, reader, word, _class)
 

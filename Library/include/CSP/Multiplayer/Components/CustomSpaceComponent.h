@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file CustomSpaceComponent.h
 /// @brief Definitions and support for custom components.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
-
 
 
 namespace csp::multiplayer
@@ -33,7 +34,6 @@ enum class CustomComponentPropertyKeys
 	CustomPropertyList,
 	Num
 };
-
 
 
 /// @ingroup CustomSpaceComponent

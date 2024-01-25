@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file ScriptSpaceComponent.h
 /// @brief Definitions and support for script components.
 
 #pragma once
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "Interfaces/IExternalResourceComponent.h"
-
 
 namespace csp::multiplayer
 {
@@ -33,6 +34,7 @@ enum class ScriptScope
 	Owner,
 	Num
 };
+
 
 /// @brief Enumerates the list of properties that can be replicated for a script component.
 enum class ScriptComponentPropertyKeys
