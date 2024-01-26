@@ -162,7 +162,7 @@ def main():
         f.write(minimal_meta_template.render(guid=generate_guid(), importer_type="Default"))
 
     for path in args.csharp_artifact_paths:
-        shutil.copytree(path, source_output_directory)
+        shutil.copytree(path, source_output_directory, dirs_exist_ok=True)
 
     for path, dirs, files in os.walk(source_output_directory):
         for dir in dirs:
