@@ -2231,7 +2231,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
 		CreateSpace(SpaceSystem, DestSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, DestSpace);
 
-		csp::common::Array<csp::systems::AssetCollection> SourceAssetCollections(&SourceAssetCollection, 1);
+		csp::common::Array<csp::systems::AssetCollection> SourceAssetCollections = {SourceAssetCollection};
 		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
