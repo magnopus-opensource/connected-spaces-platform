@@ -782,7 +782,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	String SpaceIds[SPACE_COUNT];
+	String SpaceId[SPACE_COUNT];
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
@@ -793,7 +793,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
 		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
 
-		SpaceIds[i] = Space.Id;
+		SpaceId[i] = Space.Id;
 	}
 
 	// Log out
@@ -824,7 +824,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
-		DeleteSpace(SpaceSystem, SpaceIds[i]);
+		DeleteSpace(SpaceSystem, SpaceId[i]);
 	}
 
 	LogOut(UserSystem);
@@ -851,7 +851,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	String SpaceIds[SPACE_COUNT];
+	String SpaceId[SPACE_COUNT];
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
@@ -862,7 +862,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 
 		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
 
-		SpaceIds[i] = Space.Id;
+		SpaceId[i] = Space.Id;
 	}
 
 	// Get only the public spaces
@@ -882,7 +882,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 	// Clean up
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
-		DeleteSpace(SpaceSystem, SpaceIds[i]);
+		DeleteSpace(SpaceSystem, SpaceId[i]);
 	}
 
 	LogOut(UserSystem);
@@ -909,7 +909,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	String SpaceIds[SPACE_COUNT];
+	String SpaceId[SPACE_COUNT];
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
@@ -920,7 +920,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 
 		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-		SpaceIds[i] = Space.Id;
+		SpaceId[i] = Space.Id;
 	}
 
 	// Get only the public spaces
@@ -940,7 +940,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 	// Clean up
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
-		DeleteSpace(SpaceSystem, SpaceIds[i]);
+		DeleteSpace(SpaceSystem, SpaceId[i]);
 	}
 
 	LogOut(UserSystem);
@@ -967,7 +967,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	String SpaceIds[SPACE_COUNT];
+	String SpaceId[SPACE_COUNT];
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
@@ -978,7 +978,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
 		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-		SpaceIds[i] = Space.Id;
+		SpaceId[i] = Space.Id;
 	}
 
 	// Get private spaces paginated
@@ -997,7 +997,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 	// Clean up
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
-		DeleteSpace(SpaceSystem, SpaceIds[i]);
+		DeleteSpace(SpaceSystem, SpaceId[i]);
 	}
 
 	// Log out
