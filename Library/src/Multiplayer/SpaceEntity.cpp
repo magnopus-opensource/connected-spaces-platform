@@ -145,6 +145,11 @@ const csp::common::String& SpaceEntity::GetName() const
 
 void SpaceEntity::SetName(const csp::common::String& Value)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_ENTITYNAME);
@@ -168,6 +173,11 @@ const csp::common::Vector3& SpaceEntity::GetPosition() const
 
 void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_POSITION);
@@ -185,6 +195,11 @@ const csp::common::Vector4& SpaceEntity::GetRotation() const
 
 void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_ROTATION);
@@ -202,6 +217,11 @@ const csp::common::Vector3& SpaceEntity::GetScale() const
 
 void SpaceEntity::SetScale(const csp::common::Vector3& Value)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_SCALE);
@@ -224,6 +244,11 @@ const csp::common::String& SpaceEntity::GetThirdPartyRef() const
 
 void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYREF);
@@ -236,6 +261,11 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 
 void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
 {
+	if (!IsModifiable())
+	{
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM);
@@ -1014,6 +1044,11 @@ bool SpaceEntity::Deselect()
 {
 	std::scoped_lock EntitiesLocker(*EntityLock);
 	return EntitySystem->SetSelectionStateOfEntity(false, this);
+}
+
+bool SpaceEntity::IsModifiable()
+{
+	return (OwnerId == EntitySystem->GetMultiplayerConnection()->GetClientId() || IsTransferable);
 }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)

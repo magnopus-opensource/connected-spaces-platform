@@ -298,6 +298,11 @@ public:
 	/// @return True if deselection occurred. False if not.
 	bool Deselect();
 
+	/// @brief Checks if the entity can be modified.
+	/// Specifically whether the local client already owns the entity or can take ownership of the entity.
+	/// @return True if the entity can be modified, False if not.
+	bool IsModifiable();
+
 private:
 	class DirtyComponent
 	{

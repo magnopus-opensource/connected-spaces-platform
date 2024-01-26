@@ -79,6 +79,14 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 							 static_cast<uint32_t>(Value.GetReplicatedValueType()));
 	}
 
+	// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
+	if (GetParent()->IsModifiable() == false)
+	{
+		CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
+							 GetParent()->GetName());
+		return;
+	}
+
 	/*DirtyProperties.Remove(Key);
 
 	if (Properties[Key] != Value)
