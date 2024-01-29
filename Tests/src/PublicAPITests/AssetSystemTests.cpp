@@ -820,7 +820,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
 
 		auto [Result]
-			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, SpaceIds, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, nullptr, SpaceIds, nullptr, nullptr);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 4);
@@ -922,7 +922,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 	{
 		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
 
-		auto [Result] = AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, SpaceIds, nullptr, nullptr, nullptr, nullptr, nullptr, 1, 1);
+		auto [Result] = AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, nullptr, SpaceIds, 1, 1);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
