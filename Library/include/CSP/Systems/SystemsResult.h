@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -23,8 +24,11 @@
 
 namespace csp::multiplayer
 {
+
 class ConversationSystem;
+
 }
+
 
 namespace csp::services
 {
@@ -39,6 +43,7 @@ CSP_END_IGNORE
 
 namespace csp::systems
 {
+
 /// @brief A result handler that is used to notify a user of an error.
 class CSP_API NullResult : public csp::systems::ResultBase
 {
@@ -62,6 +67,7 @@ protected:
 	NullResult(void*) {};
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
 class CSP_API BooleanResult : public csp::systems::ResultBase
 {
@@ -77,7 +83,8 @@ class CSP_API BooleanResult : public csp::systems::ResultBase
 
 public:
 	/// @brief A getter which returns the bool passed via the result.
-	[[nodiscard]] bool GetValue() const;
+	[[nodiscard]]
+	bool GetValue() const;
 
 private:
 	BooleanResult() = default;
@@ -88,6 +95,7 @@ private:
 
 	bool Value = false;
 };
+
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
 class CSP_API StringResult : public csp::systems::ResultBase
@@ -104,18 +112,21 @@ class CSP_API StringResult : public csp::systems::ResultBase
 
 public:
 	/// @brief A getter which returns the String passed via the result.
-	[[nodiscard]] const csp::common::String& GetValue() const;
+	[[nodiscard]]
+	const csp::common::String& GetValue() const;
 
 	CSP_NO_EXPORT StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-private:
+protected:
 	StringResult() = default;
 	StringResult(void*) {};
 
 	void SetValue(const csp::common::String& InValue);
 
+private:
 	csp::common::String Value;
 };
+
 
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
 class CSP_API StringArrayResult : public csp::systems::ResultBase
@@ -131,7 +142,8 @@ class CSP_API StringArrayResult : public csp::systems::ResultBase
 
 public:
 	/// @brief A getter which returns the StringArray passed via the result.
-	[[nodiscard]] const csp::common::Array<csp::common::String>& GetValue() const;
+	[[nodiscard]]
+	const csp::common::Array<csp::common::String>& GetValue() const;
 
 private:
 	StringArrayResult() = default;
@@ -142,6 +154,7 @@ private:
 
 	csp::common::Array<csp::common::String> Value;
 };
+
 
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
 class CSP_API UInt64Result : public csp::systems::ResultBase
@@ -157,7 +170,8 @@ class CSP_API UInt64Result : public csp::systems::ResultBase
 
 public:
 	/// @brief A getter which returns the uint64_t passed via the result.
-	[[nodiscard]] uint64_t GetValue() const;
+	[[nodiscard]]
+	uint64_t GetValue() const;
 
 private:
 	UInt64Result() = default;
@@ -168,6 +182,7 @@ private:
 
 	uint64_t Value = 0UL;
 };
+
 
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
 /// passing a Map of Strings representing the HTTP Responses.
@@ -188,7 +203,8 @@ public:
 	CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	/// @brief A getter which returns the map of strings representing HTTP responses passed via the result.
-	[[nodiscard]] const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
+	[[nodiscard]]
+	const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
 
 private:
 	HTTPHeadersResult() = default;

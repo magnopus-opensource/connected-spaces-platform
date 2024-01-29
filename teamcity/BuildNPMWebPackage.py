@@ -3,8 +3,6 @@ import argparse
 import shutil
 import subprocess
 
-from distutils.dir_util import copy_tree
-
 from Config import config
 
 class ConnectedSpacesPlatformPyError(Exception): pass
@@ -104,7 +102,7 @@ def copy_packages_in(input_args, output_path):
             file_path = os.path.join(path, file)
 
             if os.path.isdir(file_path):
-                copy_tree(file_path, output_path + "\\" + file)
+                shutil.copytree(file_path, output_path + "\\" + file, dirs_exist_ok=True)
             else:
                 shutil.copy2(file_path, output_path)
 
