@@ -764,8 +764,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETCOLLECTIONS_BY_DIFFERENT_CRITERIA_TEST
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCriteriaTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_FINDASSETCOLLECTIONS_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 {
 	SetRandSeed();
 
@@ -815,17 +815,21 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 						  AssetCollection2);
 	CreateAssetCollection(AssetSystem, Space.Id, AssetCollection1.Id, UniqueAssetCollectionName3, nullptr, nullptr, AssetCollection3);
 
+	// Search by space
 	{
-		// search by space
+		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
+
 		auto [Result]
-			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, SpaceIds, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 4);
 	}
+
+	// Search by parentId
 	{
-		// search by parentId
 		auto [Result] = AWAIT_PRE(AssetSystem,
-								  GetAssetCollectionsByCriteria,
+								  FindAssetCollections,
 								  RequestPredicate,
 								  nullptr,
 								  AssetCollection1.Id,
@@ -833,50 +837,63 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 								  nullptr,
 								  nullptr,
 								  nullptr,
+								  nullptr,
 								  nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection3.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection3.Name);
 	}
+
+	// Search by Tag
 	{
-		// search by Tag
 		auto [Result]
-			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, nullptr, nullptr, nullptr, Tag, nullptr, nullptr, nullptr);
+			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, Tag, nullptr, nullptr, nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection2.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection2.Name);
 	}
+
+	// Search by names and types
 	{
-		// search by names and types
 		csp::common::Array<csp::common::String> AssetNames = {UniqueAssetCollectionName1, UniqueAssetCollectionName2};
 
-		// search for Default types with these names
+		// Search for Default types with these names
+		csp::common::Array<csp::systems::EAssetCollectionType> SearchTypes = {csp::systems::EAssetCollectionType::DEFAULT};
+
 		auto [EmptyResult] = AWAIT_PRE(AssetSystem,
-									   GetAssetCollectionsByCriteria,
+									   FindAssetCollections,
 									   RequestPredicate,
 									   nullptr,
 									   nullptr,
-									   csp::systems::EAssetCollectionType::DEFAULT,
-									   nullptr,
 									   AssetNames,
+									   SearchTypes,
+									   nullptr,
+									   nullptr,
 									   nullptr,
 									   nullptr);
+
 		EXPECT_EQ(EmptyResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssetCollections().Size(), 0);
 
-		// next, search names and space thumbnail type
+		// Then search names and space thumbnail type
+		SearchTypes = {csp::systems::EAssetCollectionType::SPACE_THUMBNAIL};
+
 		auto [Result] = AWAIT_PRE(AssetSystem,
-								  GetAssetCollectionsByCriteria,
+								  FindAssetCollections,
 								  RequestPredicate,
 								  nullptr,
 								  nullptr,
-								  csp::systems::EAssetCollectionType::SPACE_THUMBNAIL,
-								  nullptr,
 								  AssetNames,
+								  SearchTypes,
+								  nullptr,
+								  nullptr,
 								  nullptr,
 								  nullptr);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 2);
 
@@ -900,9 +917,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 
 		EXPECT_EQ(FoundFirstAssetCollection && FoundSecondAssetCollection, true);
 	}
+
+	// Test Pagination
 	{
-		// Test Pagination,
-		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, 1, 1);
+		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
+
+		auto [Result] = AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, SpaceIds, nullptr, nullptr, nullptr, nullptr, nullptr, 1, 1);
+
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 	}

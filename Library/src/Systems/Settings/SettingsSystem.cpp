@@ -39,6 +39,8 @@ constexpr const char* AVATAR_PORTRAIT_ASSET_NAME			= "AVATAR_PORTRAIT_ASSET_";
 constexpr const char* AVATAR_PORTRAIT_ASSET_COLLECTION_NAME = "AVATAR_PORTRAIT_ASSET_COLLECTION_";
 
 
+using namespace csp::common;
+
 namespace chs = csp::services::generated::userservice;
 
 
