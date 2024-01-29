@@ -718,7 +718,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 	}
 
 	// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-	if (EntityToUpdate->IsModifiable() == false)
+	if (!EntityToUpdate->IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
 							 EntityToUpdate->GetName());
@@ -1147,7 +1147,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 			if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
 			{
 				// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-				if (PendingEntity->IsModifiable() == false)
+				if (!PendingEntity->IsModifiable())
 				{
 					CSP_LOG_ERROR_FORMAT(
 						"Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
