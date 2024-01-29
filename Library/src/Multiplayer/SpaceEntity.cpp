@@ -1066,7 +1066,14 @@ bool SpaceEntity::Deselect()
 
 bool SpaceEntity::IsModifiable()
 {
-	return (OwnerId == EntitySystem->GetMultiplayerConnection()->GetClientId() || IsTransferable);
+    if (EntitySystem != nullptr && EntitySystem->GetMultiplayerConnection() != nullptr)
+    {
+	    return (OwnerId == EntitySystem->GetMultiplayerConnection()->GetClientId() || IsTransferable);
+    }
+    else
+    {
+        return true;
+    }
 }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
