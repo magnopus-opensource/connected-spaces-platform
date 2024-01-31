@@ -154,7 +154,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 
 	if (Dto.HasUri())
 	{
-		Asset.Uri = Dto.GetUri();
+		Asset.Uri = web::Uri::Encode(Dto.GetUri());
 	}
 
 	if (Dto.HasChecksum())
