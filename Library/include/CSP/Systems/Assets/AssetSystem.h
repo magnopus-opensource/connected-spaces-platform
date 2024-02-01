@@ -98,12 +98,6 @@ public:
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback);
 
-	/// @brief Finds a collection of asset collections by their Ids.
-	/// @param AssetCollectionIds csp::common::Array<csp::common::String> : an array of Ids to search for
-	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAssetCollectionsByIds(const csp::common::Array<csp::common::String>& AssetCollectionIds,
-												   AssetCollectionsResultCallback Callback);
-
 	/// @brief Retrieves asset collections based on the specified search criteria.
 	/// Results pagination is supported through the use of ResultsSkipNumber and ResultsMaxNumber.
 	/// @param Space Space : optional space to get asset collections associated with it
@@ -117,14 +111,15 @@ public:
 	/// @param ResultsMaxNumber int : optional param representing the maximum number of result entries to be retrieved. For all available result
 	/// entries pass nullptr.
 	/// @param Callback AssetCollectionsResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAssetCollectionsByCriteria(const csp::common::Optional<csp::common::String>& SpaceId,
-														const csp::common::Optional<csp::common::String>& AssetCollectionParentId,
-														const csp::common::Optional<EAssetCollectionType>& AssetCollectionType,
-														const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionTags,
-														const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionNames,
-														const csp::common::Optional<int>& ResultsSkipNumber,
-														const csp::common::Optional<int>& ResultsMaxNumber,
-														AssetCollectionsResultCallback Callback);
+	CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+											   const csp::common::Optional<csp::common::String>& ParentId,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+											   const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
+											   const csp::common::Optional<int>& ResultsSkipNumber,
+											   const csp::common::Optional<int>& ResultsMaxNumber,
+											   AssetCollectionsResultCallback Callback);
 
 	/// @brief Updates the Metadata field of an Asset Collection
 	/// @param AssetCollection AssetCollection : asset collection to be updated
