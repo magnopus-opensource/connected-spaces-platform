@@ -265,7 +265,8 @@ if not Project then
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
                     "'wasmMemory'" ..
-                "]"
+                "]",
+                "-sUSE_ES6_IMPORT_META=0"                                       -- disable use of import.meta as it is not yet supported everywhere
             }
 
             links {
