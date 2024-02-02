@@ -28,7 +28,7 @@ namespace CSPEngine
 
             // Clear blocked spaces
             {
-                using var result = settingsSystem.ClearBlockedSpaces(userId).Result;
+                using var result = settingsSystem.ClearBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -36,7 +36,7 @@ namespace CSPEngine
 
             // Block space
             {
-                using var result = settingsSystem.AddBlockedSpace(userId, space.Id).Result;
+                using var result = settingsSystem.AddBlockedSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -44,7 +44,7 @@ namespace CSPEngine
 
             // Get blocked spaces
             {
-                using var result = settingsSystem.GetBlockedSpaces(userId).Result;
+                using var result = settingsSystem.GetBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -57,7 +57,7 @@ namespace CSPEngine
 
             // Clear blocked spaces
             {
-                using var result = settingsSystem.ClearBlockedSpaces(userId).Result;
+                using var result = settingsSystem.ClearBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -82,7 +82,7 @@ namespace CSPEngine
 
             // Clear blocked spaces
             {
-                using var result = settingsSystem.ClearBlockedSpaces(userId).Result;
+                using var result = settingsSystem.ClearBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -90,7 +90,7 @@ namespace CSPEngine
 
             // Block space
             {
-                using var result = settingsSystem.AddBlockedSpace(userId, space.Id).Result;
+                using var result = settingsSystem.AddBlockedSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -98,7 +98,7 @@ namespace CSPEngine
 
             // Get blocked spaces
             {
-                using var result = settingsSystem.GetBlockedSpaces(userId).Result;
+                using var result = settingsSystem.GetBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -111,7 +111,7 @@ namespace CSPEngine
 
             // Remove Blocked Spaces
             {
-                using var result = settingsSystem.RemoveBlockedSpace(userId, space.Id).Result;
+                using var result = settingsSystem.RemoveBlockedSpace(space.Id).Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -119,7 +119,7 @@ namespace CSPEngine
 
             // Get blocked spaces
             {
-                using var result = settingsSystem.GetBlockedSpaces(userId).Result;
+                using var result = settingsSystem.GetBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -131,7 +131,7 @@ namespace CSPEngine
 
             // Clear blocked spaces
             {
-                using var result = settingsSystem.ClearBlockedSpaces(userId).Result;
+                using var result = settingsSystem.ClearBlockedSpaces().Result;
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -152,12 +152,12 @@ namespace CSPEngine
                 FilePath = Path.GetFullPath("assets/" + localFileName)
             };
             {
-                using var result = settingsSystem.UpdateAvatarPortrait(userId, AvatarPortrait).Result;
+                using var result = settingsSystem.UpdateAvatarPortrait(AvatarPortrait).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
             {
-                using var result = settingsSystem.GetAvatarPortrait(userId).Result;
+                using var result = settingsSystem.GetAvatarPortrait().Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(result.GetUri().Contains(localFileName));
@@ -189,11 +189,11 @@ namespace CSPEngine
                 };
                 source.SetMimeType("image/png");
 
-                using var result = settingsSystem.UpdateAvatarPortraitWithBuffer(userId, source).Result;
+                using var result = settingsSystem.UpdateAvatarPortraitWithBuffer(source).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
-                using var resultGetThumbnail = settingsSystem.GetAvatarPortrait(userId).Result;
+                using var resultGetThumbnail = settingsSystem.GetAvatarPortrait().Result;
 
                 Assert.AreEqual(resultGetThumbnail.GetResultCode(), Systems.EResultCode.Success);
 
