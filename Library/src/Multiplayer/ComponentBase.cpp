@@ -43,17 +43,17 @@ ComponentBase::~ComponentBase()
 	}
 }
 
-uint16_t ComponentBase::GetId()
+uint16_t ComponentBase::GetId() const
 {
 	return Id;
 }
 
-ComponentType ComponentBase::GetComponentType()
+ComponentType ComponentBase::GetComponentType() const
 {
 	return Type;
 }
 
-const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties()
+const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties() const
 {
 	return &Properties;
 }
@@ -120,6 +120,11 @@ void ComponentBase::OnRemove()
 }
 
 SpaceEntity* ComponentBase::GetParent()
+{
+	return Parent;
+}
+
+const SpaceEntity* ComponentBase::GetParent() const
 {
 	return Parent;
 }

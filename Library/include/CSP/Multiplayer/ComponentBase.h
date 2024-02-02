@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -21,6 +22,7 @@
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
 #include <functional>
+
 
 CSP_START_IGNORE
 #ifdef CSP_TESTS
@@ -31,11 +33,13 @@ class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_T
 #endif
 CSP_END_IGNORE
 
+
 namespace csp::multiplayer
 {
 
 class SpaceEntity;
 class ComponentScriptInterface;
+
 
 /// @brief Represents the type of component.
 ///
@@ -44,13 +48,11 @@ enum class ComponentType
 {
 	Invalid,
 	Core,
-	UIController_DEPRECATED,
+	PropertyAnimation,
 	StaticModel,
 	AnimatedModel,
-	MediaSurface_DEPRECATED,
-	VideoPlayer,
-	ImageSequencer_DEPRECATED,
-	ExternalLink,
+	VideoPlayer	 = 6,
+	ExternalLink = 8,
 	AvatarData,
 	Light,
 	Button,
@@ -65,8 +67,10 @@ enum class ComponentType
 	Reflection,
 	Fog,
 	ECommerce,
-	FiducialMarker
+	FiducialMarker,
+	Num,
 };
+
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
 class CSP_API ComponentBase
@@ -98,11 +102,11 @@ public:
 	/// within the context of the entity it is attached to.
 	///
 	/// @return The ID.
-	uint16_t GetId();
+	uint16_t GetId() const;
 
 	/// @brief Get the ComponentType of the component.
 	/// @return The type of the component as an enum.
-	ComponentType GetComponentType();
+	ComponentType GetComponentType() const;
 
 	/// @brief Get a map of the replicated values defined for this component.
 	///
@@ -110,11 +114,15 @@ public:
 	/// intended to be defined in the inherited component as an enum of available properties keys.
 	///
 	/// @return A map of the replicated values, keyed by their unique key.
-	const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties();
+	const csp::common::Map<uint32_t, ReplicatedValue>* GetProperties() const;
 
 	/// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
 	/// @return A pointer to the parent SpaceEntity.
 	SpaceEntity* GetParent();
+
+	/// @brief Get the parent SpaceEntity for this component. Components can only attach to one parent.
+	/// @return A const pointer to the parent SpaceEntity.
+	const SpaceEntity* GetParent() const;
 
 	/// @brief Part of the scripting interface, allows you to subscribe to a property change and assign a script message to execute when activated.
 	/// @param PropertyKey uint32_t : The key of the property to subscribe to.
