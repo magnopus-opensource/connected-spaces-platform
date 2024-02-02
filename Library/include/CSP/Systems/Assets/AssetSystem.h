@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -24,6 +25,7 @@
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
+
 
 namespace csp::services
 {
@@ -38,7 +40,17 @@ namespace csp::web
 
 class RemoteFileManager;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -46,15 +58,16 @@ namespace csp::systems
 
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
-class CSP_API CSP_NO_DISPOSE AssetSystem : public SystemBase
+class CSP_API AssetSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<AssetSystem>(AssetSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~AssetSystem();
-
 	/// @brief Creates an asset collection.
 	/// @param Space Space : optional space to associate the asset collection with
 	/// @param ParentAssetCollectionId csp::common::String : optional parent asset collection Id
@@ -238,10 +251,10 @@ public:
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
 
-
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
+	~AssetSystem();
 
 	csp::services::ApiBase* PrototypeAPI;
 	csp::services::ApiBase* AssetDetailAPI;

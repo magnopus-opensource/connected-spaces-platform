@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -31,7 +32,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -40,15 +51,16 @@ namespace csp::systems
 /// @ingroup Anchor System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of an Anchor.
 /// Offers methods for creating and deleting Anchors.
-class CSP_API CSP_NO_DISPOSE AnchorSystem : public SystemBase
+class CSP_API AnchorSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<AnchorSystem>(AnchorSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~AnchorSystem();
-
 	/** @name Asynchronous Calls
 	 *   These are methods that perform WebClient calls and therefore operate asynchronously and require a callback to be passed for a completion
 	 * result
@@ -165,6 +177,7 @@ public:
 private:
 	AnchorSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT AnchorSystem(csp::web::WebClient* InWebClient);
+	~AnchorSystem();
 
 	csp::services::ApiBase* AnchorsAPI;
 };

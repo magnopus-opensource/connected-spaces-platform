@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Systems/Quota/Quota.h"
@@ -24,7 +25,7 @@ namespace csp::services
 
 class ApiBase;
 
-}
+} // namespace csp::services
 
 
 namespace csp::web
@@ -32,7 +33,18 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
+
 
 namespace csp::systems
 {
@@ -41,13 +53,14 @@ namespace csp::systems
 /// Offers methods for receiving Quota Queries.
 class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<QuotaSystem>(QuotaSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~QuotaSystem();
-
 	/// @brief Get the total number of Spaces owned by the current user and their tier space limit
 	/// @param Callback FeatureProgressCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback);
@@ -93,6 +106,7 @@ public:
 private:
 	QuotaSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT QuotaSystem(csp::web::WebClient* InWebClient);
+	~QuotaSystem();
 
 	csp::services::ApiBase* QuotaTierAssignmentAPI;
 	csp::services::ApiBase* QuotaManagementAPI;
