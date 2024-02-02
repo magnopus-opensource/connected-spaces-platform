@@ -803,6 +803,9 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 	if (SpaceId.IsEmpty())
 	{
 		CSP_LOG_ERROR_MSG("UpdateSpaceMetadata called with empty SpaceId. Aborting call.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
 		return;
 	}
 
@@ -870,6 +873,9 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 	if (SpaceId.IsEmpty())
 	{
 		CSP_LOG_ERROR_MSG("GetSpaceMetadata called with empty SpaceId. Aborting call.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceMetadataResult>());
+
 		return;
 	}
 	
@@ -1147,6 +1153,9 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
 	if (SpaceId.IsEmpty())
 	{
 		CSP_LOG_ERROR_MSG("RemoveMetadata called with empty SpaceId. Aborting call.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
 		return;
 	}
 
