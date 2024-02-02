@@ -800,6 +800,12 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
 
 void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, String>& NewMetadata, NullResultCallback Callback)
 {
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("UpdateSpaceMetadata called with empty SpaceId. Aborting call.");
+		return;
+	}
+
 	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
 	{
 		if (Result.GetResultCode() == EResultCode::InProgress)
@@ -861,7 +867,13 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 
 void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCallback Callback)
 {
-	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("GetSpaceMetadata called with empty SpaceId. Aborting call.");
+		return;
+	}
+	
+    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
 	{
 		SpaceMetadataResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -1132,6 +1144,12 @@ void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<Stri
 
 void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callback)
 {
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("RemoveMetadata called with empty SpaceId. Aborting call.");
+		return;
+	}
+
 	AssetCollectionResultCallback GetAssetCollCallback = [Callback](const AssetCollectionResult& AssetCollResult)
 	{
 		if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
