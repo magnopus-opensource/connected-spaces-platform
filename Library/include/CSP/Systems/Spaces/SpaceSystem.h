@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -26,12 +27,13 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
+
 namespace csp::services
 {
 
 class ApiBase;
 
-}
+} // namespace csp::services
 
 
 namespace csp::web
@@ -39,7 +41,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -50,13 +62,14 @@ namespace csp::systems
 /// Offers methods for creating, deleting and joining spaces.
 class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<SpaceSystem>(SpaceSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~SpaceSystem();
-
 	/** @name Helper Functions
 	 *
 	 *   @{ */
@@ -322,6 +335,7 @@ public:
 private:
 	SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	SpaceSystem(csp::web::WebClient* InWebClient);
+	~SpaceSystem();
 
 	// Space Metadata
 	void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);

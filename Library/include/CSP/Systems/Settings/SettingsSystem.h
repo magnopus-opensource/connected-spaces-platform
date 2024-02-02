@@ -28,7 +28,7 @@ namespace csp::services
 
 class ApiBase;
 
-}
+} // namespace csp::services
 
 
 namespace csp::web
@@ -36,7 +36,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -45,15 +55,16 @@ namespace csp::systems
 /// @ingroup Settings System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' settings service.
 /// Offers methods for storing and retrieving client settings.
-class CSP_API CSP_NO_DISPOSE SettingsSystem : public SystemBase
+class CSP_API SettingsSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<SettingsSystem>(SettingsSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~SettingsSystem();
-
 	/// @brief Set a boolean indicating whether the current user has completed a non-disclosure agreement.
 	/// NullResultCallback. Returns status of the update task, no payload expected.
 	/// @param InValue bool : boolean reflecting desired state to store in Magnopus Connected Services.
@@ -140,6 +151,7 @@ public:
 private:
 	SettingsSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT SettingsSystem(csp::web::WebClient* InWebClient);
+	~SettingsSystem();
 
 	void SetSettingValue(const csp::common::String& InContext,
 						 const csp::common::String& InKey,
