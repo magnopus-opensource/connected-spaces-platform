@@ -22,6 +22,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 
@@ -64,6 +65,19 @@ bool EntityScript::Invoke()
 	}
 	else
 	{
+		//
+		if (EntityScriptComponent->GetIsPrototypeBacked())
+		{
+			// Download the source
+			const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
+
+			if (!ScriptSource.IsEmpty())
+			{
+				// Source needs to be downloaded first.
+				// Invoke will have to be updated to take a callback.
+			}
+		}
+		//
 		const csp::common::String& ScriptSource = EntityScriptComponent->GetScriptSource();
 
 		if (!ScriptSource.IsEmpty())
@@ -135,6 +149,11 @@ const csp::common::String& EntityScript::GetScriptSourceAssetCollectionId() cons
 	return EntityScriptComponent->GetExternalResourceAssetCollectionId();
 }
 
+void EntityScript::CreateScriptSource(const csp::common::String& ScriptSource, csp::systems::UriResultCallback Callback) const
+{
+	// Create asset collection and asset and then upload the script source.
+}
+
 void EntityScript::RetrieveScriptSource(csp::systems::NullResultCallback Callback) const
 {
 	// For backwards compatibility we are continuing to support replicated property backed Script source.
@@ -186,7 +205,7 @@ void EntityScript::RetrieveScriptSource(csp::systems::NullResultCallback Callbac
 			std::memcpy(DownloadedAssetData, DataResult.GetData(), DownloadedAssetDataSize);
 			DownloadedAssetData[DownloadedAssetDataSize] = 0x0; // null terminate
 
-			EntityScriptComponent->SetComponentScriptSource(DownloadedAssetData);
+			EntityScriptComponent->SetScriptSource(DownloadedAssetData);
 
 			Callback(InternalResult);
 		};
@@ -206,7 +225,52 @@ void EntityScript::RetrieveScriptSource(csp::systems::NullResultCallback Callbac
 		return;
 	}
 
-	AssetSystem->GetAssetById(GetScriptSourceAssetCollectionId(), GetScriptSourceAssetId(), AssetResultCallbackHandler);
+	AssetSystem->GetAssetById(InternalAssetCollectionId, InternalAssetId, AssetResultCallbackHandler);
+}
+
+void EntityScript::UpdateScriptSource(const csp::common::String& ScriptSource, csp::systems::UriResultCallback Callback) const
+{
+	const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+	const systems::AssetResultCallback AssetResultCallbackHandler = [ScriptSource, AssetSystem, Callback](const systems::AssetResult& Result)
+	{
+		if (Result.GetResultCode() == systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		if (Result.GetResultCode() == systems::EResultCode::Failed)
+		{
+			const systems::UriResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+			INVOKE_IF_NOT_NULL(Callback, InternalResult);
+
+			return;
+		}
+
+		const systems::Asset& InternalAsset = Result.GetAsset();
+		csp::systems::AssetCollection InternalAssetCollection;
+		InternalAssetCollection.Id = InternalAsset.AssetCollectionId;
+
+		systems::BufferAssetDataSource AssetData;
+		AssetData.SetMimeType("text/javascript");
+		AssetData.Buffer	   = const_cast<char*>(ScriptSource.c_str());
+		AssetData.BufferLength = ScriptSource.Length();
+
+		AssetSystem->UploadAssetData(InternalAssetCollection, InternalAsset, AssetData, Callback);
+	};
+
+	const auto& InternalAssetCollectionId = GetScriptSourceAssetCollectionId();
+	const auto& InternalAssetId			  = GetScriptSourceAssetId();
+
+	if (InternalAssetCollectionId.IsEmpty() || InternalAssetId.IsEmpty())
+	{
+		const systems::UriResult InternalResult(csp::systems::EResultCode::Failed, 400);
+		INVOKE_IF_NOT_NULL(Callback, InternalResult);
+
+		return;
+	}
+
+	AssetSystem->GetAssetById(InternalAssetCollectionId, InternalAssetId, AssetResultCallbackHandler);
 }
 
 bool EntityScript::HasError()

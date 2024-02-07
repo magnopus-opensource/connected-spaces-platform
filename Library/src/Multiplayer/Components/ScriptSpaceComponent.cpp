@@ -73,7 +73,7 @@ void ScriptSpaceComponent::SetExternalResourceAssetCollectionId(const csp::commo
 
 const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
 {
-	if (IsPrototypeBacked)
+	if (!GetIsPrototypeBacked())
 	{
 		CSP_LOG_MSG(systems::LogLevel::Log, "Prototype backed Script Source being used.");
 
@@ -96,14 +96,46 @@ void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 {
 	// CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetScriptSource '%s'", Value.c_str());
 
-	SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), Value);
-	Parent->GetScript()->OnSourceChanged(Value);
+
+	// in all cases set replicated property to ""
+
+	// separatently to this respond to prototypepatch update.
+
+	if (!GetIsPrototypeBacked())
+	{
+		if (!ScriptSource.IsEmpty())
+		{
+			// This is a legacy component, set the replicated property to "".
+			SetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource), "");
+		}
+
+		// This is a legacy component OR is newly created.
+		// Create asset and upload source.
+		ScriptSource = Value;
+
+		Parent->GetScript()->OnSourceChanged(Value);
+		return;
+	}
+
+	// This is an existing component that needs to be updated.
+	ScriptSource = Value;
+
+	const systems::UriResultCallback UpdateAssetDataCallbackHandler = [this, Value](const systems::UriResult& Result)
+	{
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+		{
+			Parent->GetScript()->OnSourceChanged(Value);
+
+			return;
+		}
+	};
+
+	Parent->GetScript()->UpdateScriptSource(ScriptSource, UpdateAssetDataCallbackHandler);
 }
 
-void ScriptSpaceComponent::SetComponentScriptSource(const csp::common::String& Value)
+bool ScriptSpaceComponent::GetIsPrototypeBacked() const
 {
-	IsPrototypeBacked = true;
-	ScriptSource	  = Value;
+	return !GetExternalResourceAssetCollectionId().IsEmpty() && !GetExternalResourceAssetId().IsEmpty();
 }
 
 int64_t ScriptSpaceComponent::GetOwnerId() const

@@ -335,6 +335,7 @@ private:
 
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();
+	void OnScriptSourceRetrieved();
 	void FinalizeEntityScripts();
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
@@ -358,7 +359,8 @@ private:
 	SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
 	PatchMessageQueue* PendingIncomingUpdates;
 	EntityScriptList* PendingEntityScriptSourceDownload;
-	int EntityScriptDownloadCount;
+	std::recursive_mutex* EntityScriptSourceDownloadLock;
+	std::atomic<int> EntityScriptDownloadCount;
 
 	bool EnableEntityTick;
 	std::list<SpaceEntity*> TickUpdateEntities;

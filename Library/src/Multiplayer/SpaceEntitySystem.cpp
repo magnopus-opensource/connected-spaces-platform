@@ -773,27 +773,37 @@ void SpaceEntitySystem::MarkEntityForUpdate(SpaceEntity* Entity)
 void SpaceEntitySystem::OnAllEntitiesCreated()
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
+	std::scoped_lock EntityScriptSourceLocker(*EntityScriptSourceDownloadLock);
 
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
+
+	if (Entities.Size() == 0)
+	{
+		FinalizeEntityScripts();
+
+		return;
+	}
 
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
 		EntityScript* Script = Entities[i]->GetScript();
 
 		PendingEntityScriptSourceDownload->Append(Script);
-		EntityScriptDownloadCount++;
+		++EntityScriptDownloadCount;
 
-		csp::systems::NullResultCallback Callback = std::bind(&SpaceEntitySystem::FinalizeEntityScripts, this);
+		csp::systems::NullResultCallback Callback = std::bind(&SpaceEntitySystem::OnScriptSourceRetrieved, this);
 		Script->RetrieveScriptSource(Callback);
 	}
 }
 
-void SpaceEntitySystem::FinalizeEntityScripts()
+void SpaceEntitySystem::OnScriptSourceRetrieved()
 {
-	--EntityScriptDownloadCount;
+	std::scoped_lock EntityScriptSourceLocker(*EntityScriptSourceDownloadLock);
 
-	if (EntityScriptDownloadCount == 0)
+	const int DownloadCount = --EntityScriptDownloadCount;
+
+	if (DownloadCount == 0)
 	{
 		// Register all scripts for import
 		for (size_t i = 0; i < PendingEntityScriptSourceDownload->Size(); ++i)
@@ -818,28 +828,33 @@ void SpaceEntitySystem::FinalizeEntityScripts()
 			Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
 		}
 
-		PendingEntityScriptSourceDownload->Clear();
+		FinalizeEntityScripts();
+	}
+}
 
-		if (IsLeaderElectionEnabled())
-		{
-			// Start listening for election events
-			//
-			// If we are the first client to connect then this
-			// will also set this client as the leader
-			ElectionManager->OnConnect(Avatars, Objects);
-		}
-		else
-		{
-			DetermineScriptOwners();
-		}
+void SpaceEntitySystem::FinalizeEntityScripts()
+{
+	PendingEntityScriptSourceDownload->Clear();
 
-		// Enable entity tick events
-		EnableEntityTick = true;
+	if (IsLeaderElectionEnabled())
+	{
+		// Start listening for election events
+		//
+		// If we are the first client to connect then this
+		// will also set this client as the leader
+		ElectionManager->OnConnect(Avatars, Objects);
+	}
+	else
+	{
+		DetermineScriptOwners();
+	}
 
-		if (InitialEntitiesRetrievedCallback)
-		{
-			InitialEntitiesRetrievedCallback(true);
-		}
+	// Enable entity tick events
+	EnableEntityTick = true;
+
+	if (InitialEntitiesRetrievedCallback)
+	{
+		InitialEntitiesRetrievedCallback(true);
 	}
 }
 

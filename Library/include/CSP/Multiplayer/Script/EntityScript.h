@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/Common/String.h"
+#include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 #include "Services/ApiBase/ApiBase.h"
@@ -64,9 +65,19 @@ public:
 	/// @return csp::common::String : The Id of the Script source AssetCollection.
 	const csp::common::String& GetScriptSourceAssetCollectionId() const;
 
-	/// @brief Get the AssetCollection Id of the Script source.
-	/// @return csp::common::String : The Id of the Script source AssetCollection.
+	/// @brief Create Script source asset.
+	/// @param ScriptSource const csp::common::String& : The Script source.
+	/// @param Callback csp::systems::UriResultCallback : The resultant callback.
+	void CreateScriptSource(const csp::common::String& ScriptSource, csp::systems::UriResultCallback Callback) const;
+
+	/// @brief Retrieve the Script source.
+	/// @param Callback csp::systems::NullResultCallback : The resultant callback.
 	void RetrieveScriptSource(csp::systems::NullResultCallback Callback) const;
+
+	/// @brief Update the Script source.
+	/// @param ScriptSource const csp::common::String& : The updated Script source.
+	/// @param Callback csp::systems::UriResultCallback : The resultant callback.
+	void UpdateScriptSource(const csp::common::String& ScriptSource, csp::systems::UriResultCallback Callback) const;
 
 	/// @brief Runs the script.
 	/// @return True if the script runs successfully or false if there are errors.

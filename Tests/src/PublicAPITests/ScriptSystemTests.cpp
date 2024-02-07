@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
@@ -51,6 +52,18 @@ void OnUserCreated(SpaceEntity* InUser);
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
+}
+
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
+{
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+	{
+		PrintProgress(Result.GetRequestProgress());
+
+		return false;
+	}
+
+	return true;
 }
 
 void OnConnect()
@@ -226,6 +239,152 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
 		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
 		Object->GetScript()->Invoke();
+
+		const bool ScriptHasErrors = Object->GetScript()->HasError();
+		EXPECT_FALSE(ScriptHasErrors);
+
+		Object->QueueUpdate();
+
+		EntitySystem->ProcessPendingEntityOperations();
+	}
+
+	AWAIT(Connection, Disconnect);
+	delete Connection;
+
+	SpaceSystem->ExitSpace();
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_SCRIPT_CREATE_PROTOTYPEBACKEDSCRIPT_TEST
+CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreatePrototypeBackedScriptTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName			  = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	  = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName	  = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			  = "OLY-UNITTEST-ASSET-REWIND";
+	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String ThirdPartyPackagedAssetIdentifier;
+	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
+
+	// we'll be using this in a few places below as part of the test, so we declare it upfront
+	const std::string ScriptText = R"xx(
+
+         var entities = TheEntitySystem.getEntities();
+		  var entityIndex = TheEntitySystem.getIndexOfEntity(ThisEntity.id);
+
+		  globalThis.onClick = (_evtName, params) => {
+		    const { id, cid } = JSON.parse(params);
+		    CSP.Log(`Clicked entityId: ${id} componentId: ${cid}`);
+		  }
+
+		  globalThis.onTick = () => {
+		    CSP.Log('Tick');
+		  }
+
+		  ThisEntity.subscribeToMessage("buttonPressed", "onClick");
+		  ThisEntity.subscribeToMessage("entityTick", "onTick");
+
+			CSP.Log('Printing to the log from a script');
+		  
+    )xx";
+
+	//
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, ThirdPartyPackagedAssetIdentifier, nullptr, Asset);
+
+	csp::systems::BufferAssetDataSource TestAssetData;
+	TestAssetData.SetMimeType("text/javascript");
+	TestAssetData.Buffer	   = const_cast<char*>(ScriptText.c_str());
+	TestAssetData.BufferLength = ScriptText.size();
+
+	// Upload data
+	auto [UploadNoMimeResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, TestAssetData);
+
+	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+
+	//
+
+	// Let's create a simple script and see if we can invoke it OK
+	{
+		const csp::common::String ObjectName  = "Object 1";
+		SpaceTransform ObjectTransform		  = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
+
+		// ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
+		ScriptComponent->SetExternalResourceAssetCollectionId(AssetCollection.Id);
+		ScriptComponent->SetExternalResourceAssetId(Asset.Id);
+
+		Object->GetScript()
+			->RetrieveScriptSource()
+
+			// Do we need to be able to call invoke without first calling retrieve?
+			Object->GetScript()
+			->Invoke();
 
 		const bool ScriptHasErrors = Object->GetScript()->HasError();
 		EXPECT_FALSE(ScriptHasErrors);

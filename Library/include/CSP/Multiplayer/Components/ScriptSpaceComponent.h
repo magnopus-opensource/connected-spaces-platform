@@ -101,10 +101,7 @@ public:
 	/// @brief Returns whether the Script source is prototype backed or not.
 	/// This check is present to support backwards compatibility.
 	/// @return bool : Whether Script source is prototype backed.
-	bool GetIsPrototypeBacked() const
-	{
-		return IsPrototypeBacked;
-	}
+	bool GetIsPrototypeBacked() const;
 
 	/// @brief Gets the ID of the owner of this script component.
 	/// @return The ID of the owner of this script.
@@ -127,10 +124,6 @@ protected:
 	void OnRemove() override;
 
 private:
-	void SetComponentScriptSource(const csp::common::String& Value);
-
-	// Required to support backwards compatibility of ScriptComponents that store their source via a replicated property.
-	bool IsPrototypeBacked;
 	csp::common::String ScriptSource;
 };
 
