@@ -901,17 +901,62 @@ void SettingsSystem::SetAvatarInfo(AvatarType InType, const Variant& InIdentifie
 
 void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 {
+	if (!Callback)
+	{
+		CSP_LOG_ERROR_MSG("SettingsSystem::GetAvatarInfo(): Callback must not my empty!");
+
+		return;
+	}
+
 	StringResultCallback GetSettingCallback = [=](const StringResult& Result)
 	{
+		AvatarInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
+
+		if (Result.GetResultCode() == EResultCode::Failed)
+		{
+			CSP_LOG_ERROR_MSG("Failed to retrieve avatar info.");
+
+			Callback(InternalResult);
+
+			return;
+		}
+
 		const auto& Value = Result.GetValue();
+
+		if (Value.IsEmpty())
+		{
+			Callback(InternalResult);
+
+			return;
+		}
 
 		rapidjson::Document Json;
 		Json.Parse(Value.c_str());
 
-		AvatarInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
-		InternalResult.SetAvatarType(static_cast<AvatarType>(Json["type"].GetInt()));
+		if (!Json.HasMember("type") || !Json.HasMember("identifier"))
+		{
+			CSP_LOG_ERROR_MSG("Invalid avatar info!");
 
-		auto IdentifierType = static_cast<VariantType>(Json["identifierType"].GetInt());
+			Callback(InternalResult);
+
+			return;
+		}
+
+		const auto& type		   = Json["type"];
+		const auto& identifierType = Json["identifierType"];
+
+		if (!type.IsInt() || !identifierType.IsInt())
+		{
+			CSP_LOG_ERROR_MSG("Invalid avatar info!");
+
+			Callback(InternalResult);
+
+			return;
+		}
+
+		InternalResult.SetAvatarType(static_cast<AvatarType>(type.GetInt()));
+
+		auto IdentifierType = static_cast<VariantType>(identifierType.GetInt());
 
 		switch (IdentifierType)
 		{
@@ -925,13 +970,13 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 			{
 				CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
 
-				INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AvatarInfoResult>());
+				Callback(MakeInvalid<AvatarInfoResult>());
 
 				return;
 			}
 		}
 
-		INVOKE_IF_NOT_NULL(Callback, InternalResult);
+		Callback(InternalResult);
 	};
 
 	GetSettingValue("UserSettings", "AvatarInfo", GetSettingCallback);
