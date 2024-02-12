@@ -21,6 +21,13 @@
 #include "Services/UserService/Dto.h"
 
 
+namespace csp::multiplayer
+{
+
+class SignalRConnection;
+
+} // namespace csp::multiplayer
+
 namespace csp::systems
 {
 /// @ingroup Quota System
@@ -34,6 +41,53 @@ class CSP_API CSP_NO_DISPOSE OrganizationSystem : public SystemBase
 
 public:
 	~OrganizationSystem();
+
+	/// @brief Callback that will be fired when an Organization is updated.
+	/// @param csp::Common::String : Id of the updated Organization.
+	typedef std::function<void()> OrganizationUpdatedCallback;
+
+	/// @brief Callback that will be fired when an Organization deactivated.
+	typedef std::function<void()> OrganizationDeactivatedCallback;
+
+	/// @brief Callback that will be fired when a new member joins an Organization.
+	/// @param csp::Common::String : Id of the new member.
+	typedef std::function<void(csp::common::String)> MemberJoinedOrganizationCallback;
+
+	/// @brief Callback that will be fired when a member leaves an Organization.
+	/// @param csp::Common::String : Id of the member.
+	typedef std::function<void(csp::common::String)> MemberLeftOrganizationCallback;
+
+	/// @brief Callback that will be fired when a users role within the Organization changes.
+	/// @param csp::Common::String : Id of the User.
+	/// /// @param csp::common::Array<EOrganizationRole>)> : The users roles.
+	typedef std::function<void(csp::common::String, csp::common::Array<EOrganizationRole>)> UserRoleChangedCallback;
+
+	/// @brief Sets a callback to be executed when the Organization is updated.
+	/// Only one callback may be registered, calling this function again will override whatever was previously set.
+	/// @param Callback OrganizationUpdatedCallback : the callback to execute.
+	CSP_EVENT void SetOrganizationUpdatedCallback(OrganizationUpdatedCallback Callback);
+
+	// todo: Check the expected behaviour for when an Organization is deactivated.
+	/// @brief Sets a callback to be executed when the Organization is deactivated.
+	/// Only one callback may be registered, calling this function again will override whatever was previously set.
+	/// @param Callback OrganizationDeactivatedCallback : the callback to execute.
+	CSP_EVENT void SetOrganizationDeactivatedCallback(OrganizationDeactivatedCallback Callback);
+
+	/// @brief Sets a callback to be executed when a member joins an Organization.
+	/// Only one callback may be registered, calling this function again will override whatever was previously set.
+	/// @param Callback MemberJoinedOrganizationCallback : the callback to execute.
+	CSP_EVENT void SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback);
+
+	/// @brief Sets a callback to be executed when a member leaves an Organization.
+	/// Only one callback may be registered, calling this function again will override whatever was previously set.
+	/// @param Callback MemberLeftOrganizationCallback : the callback to execute.
+	CSP_EVENT void SetMemberLeftOrganizationCallback(MemberLeftOrganizationCallback Callback);
+
+	/// @brief Sets a callback to be executed when a members Organization role/s change.
+	/// Only one callback may be registered, calling this function again will override whatever was previously set.
+	/// @param Callback UserRoleChangedCallback : the callback to execute.
+	CSP_EVENT void SetUserRoleChangedCallback(UserRoleChangedCallback Callback);
+
 
 	/// @brief Retrieves the User's Organization by its cached Organization Id.
 	/// If this request is made by a User with an Owner or Admin Organization role, the resultant Organization object will contain an array of
@@ -117,9 +171,24 @@ private:
 	OrganizationSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT OrganizationSystem(csp::web::WebClient* InWebClient);
 
-	bool UserHasPermissions(EOrganizationRole RequiredRole);
+	bool HasUserPermissions(EOrganizationRole RequiredRole);
 	std::vector<std::shared_ptr<csp::services::generated::userservice::OrganizationInviteDto>>
 		GenerateOrganizationInvites(const common::Array<systems::InviteOrganizationRoleInfo> InviteUsers);
+
+	// todo: Currently a MultiplayerConnection is tied to a Space but this is being refactored.
+	csp::multiplayer::SignalRConnection* Connection;
+
+	OrganizationUpdatedCallback InternalOrganizationUpdatedCallback;
+	OrganizationDeactivatedCallback InternalOrganizationDeactivatedCallback;
+	MemberJoinedOrganizationCallback InternalMemberJoinedOrganizationCallback;
+	MemberLeftOrganizationCallback InternalMemberLeftOrganizationCallback;
+	UserRoleChangedCallback InternalUserRoleChangedCallback;
+
+	void BindOnOrganizationUpdated();
+	void BindOnOrganizationDeactivated();
+	void BindOnMemberJoinedOrganization();
+	void BindOnMemberLeftOrganization();
+	void BindOnUserRoleChanged();
 
 	csp::services::ApiBase* OrganizationAPI;
 	Organization CurrentOrganization;
