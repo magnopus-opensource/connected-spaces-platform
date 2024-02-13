@@ -68,8 +68,11 @@ def main():
     misc_changes = []
 
     for commit in commits:
-        index = commit.message.index('\n')
-        full_title = commit.message[:index]
+        index = commit.message.find('\n')
+
+        if index > -1:
+            full_title = commit.message[:index]
+
         description = commit.message[index + 1:]
         match = re.match(r'\[(?P<jira_id>[a-zA-Z]+\-[0-9]+)\] (?P<tag>[a-zA-Z]+)(?P<breaking_change>[\!]*)\: (?P<title>.*)', full_title)
 
@@ -77,6 +80,7 @@ def main():
             match = re.match(r'(?P<jira_id>[a-zA-Z]+\-[0-9]+) (?P<title>.*)', full_title)
             if match is None:
                 print("Invalid commit title format. Skipping...", file=sys.stderr)
+                print(">>", full_title)
                 continue
             
             jira_id = match.group("jira_id")

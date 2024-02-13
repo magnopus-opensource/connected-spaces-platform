@@ -2,7 +2,7 @@
 {%- if changes | length > 0 %}
 ### {{ list_title }}
 {% for change in changes %}
-- {{ change.title | capitalize }} *({{ change.commit_hash | truncate(7, true, '') }})* [**{{ change.jira_id }}**]
+- {{ change.title[0] | upper }}{{ change.title[1:] }} *({{ change.commit_hash | truncate(7, true, '') }})* [**{{ change.jira_id }}**]
 {%- endfor %}
 {% endif %}
 {%- endmacro -%}
