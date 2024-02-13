@@ -721,7 +721,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 	if (!EntityToUpdate->IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-							 EntityToUpdate->GetName());
+							 EntityToUpdate->GetName().c_str());
 		return;
 	}
 
@@ -1151,7 +1151,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 				{
 					CSP_LOG_ERROR_FORMAT(
 						"Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-						PendingEntity->GetName());
+						PendingEntity->GetName().c_str());
 
 					it = PendingOutgoingUpdateUniqueSet->erase(it);
 					continue;
