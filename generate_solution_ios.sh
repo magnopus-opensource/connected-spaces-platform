@@ -16,7 +16,8 @@ fi
 
 if [ ! -f /modules/premake/bin/release/premake5 ]
 then
-	if [ $((${XCODE_VERSION//.})) > 142 ]; then
+	MIN_XCODE_VERSION="14.2"
+    if [ "$(printf '%s\n' "$MIN_XCODE_VERSION" "$XCODE_VERSION" | sort -V | head -n1)" = "$MIN_XCODE_VERSION" ]; then
 		mkdir -p ./modules/premake/bin/release/
 		cd ./modules/premake/bin/release/
 		curl -O -L https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-macosx.tar.gz
