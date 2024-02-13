@@ -25,9 +25,15 @@ premake.override(_G, "project", function(base, ...)
     local args = {...}
 
     if(CSP.IsVisionOSTarget()) then
+        -- VisionOS builds are highly similar to iOS. Changing the target SDK for all build targets is all that is required.
         filter "system:ios"
             filename(args[1] .. "_visionos")
         filter {}
+
+        xcodebuildsettings
+        {
+            ["SDKROOT"] = "xros"
+        }
     else
         filter "system:ios"
             filename(args[1] .. "_ios")
