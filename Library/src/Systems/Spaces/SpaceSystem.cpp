@@ -800,6 +800,15 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
 
 void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, String>& NewMetadata, NullResultCallback Callback)
 {
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("UpdateSpaceMetadata called with empty SpaceId. Aborting call.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+		return;
+	}
+
 	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
 	{
 		if (Result.GetResultCode() == EResultCode::InProgress)
@@ -861,7 +870,16 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 
 void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCallback Callback)
 {
-	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("GetSpaceMetadata called with empty SpaceId. Aborting call.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceMetadataResult>());
+
+		return;
+	}
+	
+    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
 	{
 		SpaceMetadataResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -1099,14 +1117,14 @@ void SpaceSystem::GetMetadataAssetCollection(const String& SpaceId, AssetCollect
 void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& SpaceIds, AssetCollectionsResultCallback Callback)
 {
 	auto* AssetSystem = SystemsManager::Get().GetAssetSystem();
-	Array<String> AssetCollectionNames(SpaceIds.Size());
+	Array<String> PrototypeNames(SpaceIds.Size());
 
 	for (auto item = 0; item < SpaceIds.Size(); ++item)
 	{
-		AssetCollectionNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
+		PrototypeNames[item] = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceIds[item]);
 	}
 
-	AssetSystem->GetAssetCollectionsByCriteria(nullptr, nullptr, nullptr, nullptr, AssetCollectionNames, nullptr, nullptr, Callback);
+	AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
 }
 
 void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<String, String>& Metadata, NullResultCallback Callback)
@@ -1132,6 +1150,15 @@ void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<Stri
 
 void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callback)
 {
+	if (SpaceId.IsEmpty())
+	{
+		CSP_LOG_ERROR_MSG("RemoveMetadata called with empty SpaceId. Aborting call.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+		return;
+	}
+
 	AssetCollectionResultCallback GetAssetCollCallback = [Callback](const AssetCollectionResult& AssetCollResult)
 	{
 		if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
@@ -1353,16 +1380,11 @@ void SpaceSystem::GetSpaceThumbnailAssetCollection(const csp::common::String& Sp
 	auto* AssetSystem				 = SystemsManager::Get().GetAssetSystem();
 	auto MetadataAssetCollectionName = SpaceSystemHelpers::GetSpaceMetadataAssetCollectionName(SpaceId);
 
-	const Array<String> Tag({SpaceId});
+	Array<csp::systems::EAssetCollectionType> PrototypeTypes = {EAssetCollectionType::SPACE_THUMBNAIL};
+	Array<String> PrototypeTags								 = {SpaceId};
+	Array<String> GroupIds									 = {SpaceId};
 
-	AssetSystem->GetAssetCollectionsByCriteria(SpaceId,
-											   nullptr,
-											   EAssetCollectionType::SPACE_THUMBNAIL,
-											   Tag,
-											   nullptr,
-											   nullptr,
-											   nullptr,
-											   GetAssetCollCallback);
+	AssetSystem->FindAssetCollections(nullptr, nullptr, nullptr, PrototypeTypes, PrototypeTags, GroupIds, nullptr, nullptr, GetAssetCollCallback);
 }
 
 void SpaceSystem::GetSpaceThumbnailAsset(const AssetCollection& ThumbnailAssetCollection, AssetsResultCallback Callback)

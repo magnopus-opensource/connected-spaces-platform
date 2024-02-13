@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AnalyticsSystemTestHelpers.h"
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Analytics/AnalyticsSystemUtils.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -26,12 +28,12 @@
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_METRIC_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 {
-	csp::systems::AnalyticsSystem System;
+	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
 	// Create our test provider
 	TestAnalyticsProvider Provider;
 
-	System.RegisterProvider(&Provider);
+	AnalyticsSystem->RegisterProvider(&Provider);
 
 	// Create metric value
 	const csp::common::String TestMetricTag = "TestTag";
@@ -41,7 +43,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 	Event->AddInt("Value", TestMetricValue);
 
 	// Send metric
-	System.Log(Event);
+	AnalyticsSystem->Log(Event);
 
 	// Call tick to process analytics events
 	csp::CSPFoundation::Tick();
@@ -52,7 +54,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 	EXPECT_EQ(Metrics[0].GetTag(), TestMetricTag);
 	EXPECT_EQ(Metrics[0].GetInt("Value"), TestMetricValue);
 
-	System.DeregisterProvider(&Provider);
+	AnalyticsSystem->DeregisterProvider(&Provider);
 }
 #endif
 
@@ -60,12 +62,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_MULTIPLE_METRIC_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 {
-	csp::systems::AnalyticsSystem System;
+	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
 	// Create our test provider
 	TestAnalyticsProvider Provider;
 
-	System.RegisterProvider(&Provider);
+	AnalyticsSystem->RegisterProvider(&Provider);
 
 	// Create metric values
 	const csp::common::String TestMetricTag1 = "TestTag";
@@ -87,9 +89,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 	Event3->AddInt("Value", TestMetricValue3);
 
 	// Send metrics
-	System.Log(Event);
-	System.Log(Event2);
-	System.Log(Event3);
+	AnalyticsSystem->Log(Event);
+	AnalyticsSystem->Log(Event2);
+	AnalyticsSystem->Log(Event3);
 
 	// Call tick to process analytics events
 	csp::CSPFoundation::Tick();
@@ -107,7 +109,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 	EXPECT_EQ(Metrics[2].GetTag(), TestMetricTag3);
 	EXPECT_EQ(Metrics[2].GetInt("Value"), TestMetricValue3);
 
-	System.DeregisterProvider(&Provider);
+	AnalyticsSystem->DeregisterProvider(&Provider);
 }
 #endif
 
@@ -115,12 +117,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_DEREGISTER_PROVIDER_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 {
-	csp::systems::AnalyticsSystem System;
+	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
 	// Create our test provider
 	TestAnalyticsProvider Provider;
 
-	System.RegisterProvider(&Provider);
+	AnalyticsSystem->RegisterProvider(&Provider);
 
 	// Create metric value
 	const csp::common::String TestMetricTag = "TestTag";
@@ -129,10 +131,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 	csp::systems::AnalyticsEvent* Event = INIT_EVENT(TestMetricTag);
 	Event->AddInt("Value", TestMetricValue);
 
-	System.DeregisterProvider(&Provider);
+	AnalyticsSystem->DeregisterProvider(&Provider);
 
 	// Send metric
-	System.Log(Event);
+	AnalyticsSystem->Log(Event);
 
 	// Call tick to process analytics events
 	csp::CSPFoundation::Tick();
@@ -147,12 +149,12 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_MULTIPLE_THREADS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 {
-	csp::systems::AnalyticsSystem System;
+	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
 	// Create our test provider
 	TestAnalyticsProvider Provider;
 
-	System.RegisterProvider(&Provider);
+	AnalyticsSystem->RegisterProvider(&Provider);
 
 	const int ThreadCount = 5;
 	bool Start			  = false;
@@ -161,7 +163,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 
 	for (int i = 0; i < ThreadCount; i++)
 	{
-		Threads.push_back(std::thread {[&Start, &System]()
+		Threads.push_back(std::thread {[&Start, AnalyticsSystem]()
 									   {
 										   while (!Start)
 										   {
@@ -175,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 										   Event->AddInt("Value", TestMetricValue);
 
 										   // Send metric
-										   System.Log(Event);
+										   AnalyticsSystem->Log(Event);
 									   }});
 	}
 
@@ -195,7 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 
 	EXPECT_EQ(Metrics.size(), ThreadCount);
 
-	System.DeregisterProvider(&Provider);
+	AnalyticsSystem->DeregisterProvider(&Provider);
 }
 #endif
 

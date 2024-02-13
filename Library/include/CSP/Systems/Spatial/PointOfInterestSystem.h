@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -30,7 +31,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -38,17 +49,22 @@ namespace csp::systems
 
 class Space;
 class AssetCollection;
+class PointOfInterestInternalSystem;
 
 
 /// @ingroup Point of Interest System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Point of Interest.
 /// Offers methods for creating and deleting POIs.
-class CSP_API CSP_NO_DISPOSE PointOfInterestSystem : public SystemBase
+class CSP_API PointOfInterestSystem : public SystemBase
 {
+	CSP_START_IGNORE
+	/** @cond DO_NOT_DOCUMENT */
+	friend class PointOfInterestInternalSystem;
+	friend void csp::memory::Delete<PointOfInterestSystem>(PointOfInterestSystem* Ptr);
+	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~PointOfInterestSystem();
-
 	/** @name Asynchronous Calls
 	 *   These are methods that perform WebClient calls and therefore operate asynchronously and require a callback to be passed for a completion
 	 * result
@@ -128,6 +144,8 @@ protected:
 
 
 private:
+	~PointOfInterestSystem();
+
 	void DeletePOIInternal(const csp::common::String POIId, NullResultCallback Callback);
 
 	csp::services::ApiBase* POIApiPtr;

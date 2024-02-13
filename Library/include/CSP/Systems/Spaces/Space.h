@@ -299,9 +299,12 @@ class CSP_API SpaceMetadataResult : public csp::systems::ResultBase
 public:
 	const csp::common::Map<csp::common::String, csp::common::String>& GetMetadata() const;
 
+    CSP_NO_EXPORT
+    SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	SpaceMetadataResult(void*) {};
-	SpaceMetadataResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 	SpaceMetadataResult() {};
 
 	void SetMetadata(const csp::common::Map<csp::common::String, csp::common::String>& MetadataAssetCollection);

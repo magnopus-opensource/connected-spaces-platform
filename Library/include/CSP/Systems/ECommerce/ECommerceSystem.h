@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
+
 #include "CSP/Systems/ECommerce/ECommerce.h"
 #include "CSP/Systems/SystemBase.h"
 
 #include <CSP/Systems/SystemsResult.h>
+
 
 namespace csp::services
 {
 
 class ApiBase;
 
-}
+} // namespace csp::services
 
 
 namespace csp::web
@@ -32,7 +35,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -40,16 +53,16 @@ namespace csp::systems
 /// @ingroup ECommerce System
 /// @brief Public facing system that allows interfacing with CSP's concept of a ECommerce platform.
 /// Offers methods for utilising Ecommerce through CSP
-class CSP_API CSP_NO_DISPOSE ECommerceSystem : public SystemBase
+class CSP_API ECommerceSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<ECommerceSystem>(ECommerceSystem* Ptr);
 	/** @endcond */
-public:
-	ECommerceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient);
-	~ECommerceSystem();
+	CSP_END_IGNORE
 
+public:
 	/// @brief Get product information from a shopify store within a space
 	/// @param SpaceId csp::common::String : space id of product
 	/// @param ProductId csp::common::String : Product id of product
@@ -100,8 +113,11 @@ public:
 	CSP_ASYNC_RESULT void UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback);
 
 private:
+	ECommerceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+	CSP_NO_EXPORT ECommerceSystem(csp::web::WebClient* InWebClient);
+	~ECommerceSystem();
+
 	csp::services::ApiBase* ShopifyAPI;
 };
 
-void RemoveUrl(csp::common::String& Url);
 } // namespace csp::systems

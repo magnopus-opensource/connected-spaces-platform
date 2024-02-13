@@ -326,15 +326,18 @@ void ConversationSystem::GetMessagesFromConversation(const csp::common::String& 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);
 	};
 
+	Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::COMMENT};
+
 	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-	AssetSystem->GetAssetCollectionsByCriteria(nullptr,
-											   ConversationId,
-											   csp::systems::EAssetCollectionType::COMMENT,
-											   nullptr,
-											   nullptr,
-											   ResultsSkipNumber,
-											   ResultsMaxNumber,
-											   GetMessagesCallback);
+	AssetSystem->FindAssetCollections(nullptr,
+									  ConversationId,
+									  nullptr,
+									  PrototypeTypes,
+									  nullptr,
+									  nullptr,
+									  ResultsSkipNumber,
+									  ResultsMaxNumber,
+									  GetMessagesCallback);
 }
 
 void ConversationSystem::GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback)
@@ -578,15 +581,10 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 
 	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
+	Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::COMMENT};
+
 	// Retrieve first the messages from this conversation
-	AssetSystem->GetAssetCollectionsByCriteria(nullptr,
-											   ConversationId,
-											   csp::systems::EAssetCollectionType::COMMENT,
-											   nullptr,
-											   nullptr,
-											   nullptr,
-											   nullptr,
-											   GetMessagesCallback);
+	AssetSystem->FindAssetCollections(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, nullptr, nullptr, GetMessagesCallback);
 }
 
 void ConversationSystem::DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback)
