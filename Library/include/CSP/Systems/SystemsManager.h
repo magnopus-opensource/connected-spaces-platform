@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -50,14 +51,25 @@ namespace csp
 
 class CSPFoundation;
 
-}
+} // namespace csp
+
 
 namespace csp::web
 {
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -65,15 +77,16 @@ namespace csp::systems
 
 /// @ingroup Systems
 /// @brief Interface used to access each of the systems.
-class CSP_API CSP_NO_DISPOSE SystemsManager
+class CSP_API SystemsManager
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class csp::CSPFoundation;
+	friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~SystemsManager();
-
 	static SystemsManager& Get();
 
 	/// @brief Retrieves user system.
@@ -138,6 +151,7 @@ public:
 
 private:
 	SystemsManager();
+	~SystemsManager();
 
 	static void Instantiate();
 	static void Destroy();

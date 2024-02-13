@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "AnalyticsProvider.h"
@@ -25,22 +26,38 @@
 #include <thread>
 #include <vector>
 
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
+
+
 namespace csp::systems
 {
 
 class AnalyticsSystemImpl;
+
 
 /// @ingroup Analytics System
 /// @brief Public facing system that allows interfacing with an analytics provider.
 /// Offers methods for sending events to the provider
 /// Events are added to a queue to be processewd on a different thread
 /// If events are unable to be send to the provider, then they will be held in the queue
-class CSP_API CSP_NO_DISPOSE AnalyticsSystem
+class CSP_API AnalyticsSystem
 {
-public:
-	AnalyticsSystem();
-	~AnalyticsSystem();
+	CSP_START_IGNORE
+	/** @cond DO_NOT_DOCUMENT */
+	friend class SystemsManager;
+	friend void csp::memory::Delete<AnalyticsSystem>(AnalyticsSystem* Ptr);
+	/** @endcond */
+	CSP_END_IGNORE
 
+public:
 	CSP_START_IGNORE
 	AnalyticsSystem(const AnalyticsSystem&) = delete;
 	AnalyticsSystem(AnalyticsSystem&&)		= delete;
@@ -63,6 +80,9 @@ public:
 	CSP_END_IGNORE
 
 private:
+	AnalyticsSystem();
+	~AnalyticsSystem();
+
 	AnalyticsSystemImpl* Impl;
 };
 } // namespace csp::systems

@@ -17,6 +17,7 @@
 
 #include "Debug/Logging.h"
 
+#include <Poco/File.h>
 #include <Poco/MD5Engine.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
 #include <Poco/Net/Context.h>
@@ -478,9 +479,17 @@ void POCOWebClient::SetFileUploadContentFromFile(HttpPayload* Payload,
 												 const char* Version,
 												 const csp::common::String& MediaType)
 {
-	/// @note this must be newed as it is deleted by the HTMLForm
-	Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
-	SetFileUploadContent(Payload, Source, Version);
+	Poco::File* File = new Poco::File(FilePath);
+	if (File->exists())
+	{
+		/// @note this must be newed as it is deleted by the HTMLForm
+		Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
+		SetFileUploadContent(Payload, Source, Version);
+	}
+	else
+	{
+		CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
+	}
 }
 
 void POCOWebClient::SetFileUploadContentFromString(HttpPayload* Payload,

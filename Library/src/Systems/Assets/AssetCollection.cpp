@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/Assets/AssetCollection.h"
 
+#include "CSP/Systems/Log/LogSystem.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/PrototypeService/Dto.h"
 
@@ -93,12 +94,11 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 
 	if (Dto.HasGroupIds())
 	{
-		auto& GroupIds			 = Dto.GetGroupIds();
-		AssetCollection.SpaceIds = csp::common::Array<csp::common::String>(GroupIds.size());
+		auto& GroupIds = Dto.GetGroupIds();
 
-		for (int i = 0; i < GroupIds.size(); ++i)
+		if (GroupIds.size() > 0)
 		{
-			AssetCollection.SpaceIds[i] = GroupIds[i];
+			AssetCollection.SpaceId = GroupIds[0];
 		}
 	}
 
@@ -143,7 +143,7 @@ AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
 	Tags			  = Other.Tags;
 	PointOfInterestId = Other.PointOfInterestId;
 	ParentId		  = Other.ParentId;
-	SpaceIds		  = Other.SpaceIds;
+	SpaceId			  = Other.SpaceId;
 	CreatedBy		  = Other.CreatedBy;
 	CreatedAt		  = Other.CreatedAt;
 	UpdatedBy		  = Other.UpdatedBy;
@@ -241,7 +241,11 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
 	{
 		JsonDoc.Parse(JsonContent.c_str());
 
-		if (JsonDoc.HasMember("itemTotalCount"))
+		if (JsonDoc.IsArray())
+		{
+			ResultTotalCount = JsonDoc.GetArray().Size();
+		}
+		else if (JsonDoc.HasMember("itemTotalCount"))
 		{
 			rapidjson::Value& Val	 = JsonDoc["itemTotalCount"];
 			const auto TotalCountStr = csp::web::JsonObjectToString(Val);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -24,6 +25,7 @@
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
+
 
 namespace csp::services
 {
@@ -38,7 +40,17 @@ namespace csp::web
 
 class RemoteFileManager;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -46,15 +58,16 @@ namespace csp::systems
 
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
-class CSP_API CSP_NO_DISPOSE AssetSystem : public SystemBase
+class CSP_API AssetSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<AssetSystem>(AssetSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~AssetSystem();
-
 	/// @brief Creates an asset collection.
 	/// @param Space Space : optional space to associate the asset collection with
 	/// @param ParentAssetCollectionId csp::common::String : optional parent asset collection Id
@@ -76,6 +89,18 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
 
+	/// @brief Copies an array of asset collections to another space. Note that all source asset collections must belong to the same space.
+	/// @param SourceAssetCollections csp::common::Array<AssetCollection> : The array of asset collections to copy. They must all belong to the same
+	/// space.
+	/// @param DestSpaceId  const csp::common::String : The unique identifier of the space to copy these asset collections to.
+	/// @param CopyAsync const csp::common::Optional<bool> : Whether to instruct the services to perform the copy of the asset collections
+	/// asynchronously.
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections,
+													  const csp::common::String& DestSpaceId,
+													  bool CopyAsync,
+													  AssetCollectionsResultCallback Callback);
+
 	/// @brief Finds an asset collection by its Id.
 	/// @param AssetCollectionId csp::common::String : asset collection to delete
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
@@ -86,33 +111,28 @@ public:
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAssetCollectionByName(const csp::common::String& AssetCollectionName, AssetCollectionResultCallback Callback);
 
-	/// @brief Finds a collection of asset collections by their Ids.
-	/// @param AssetCollectionIds csp::common::Array<csp::common::String> : an array of Ids to search for
-	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAssetCollectionsByIds(const csp::common::Array<csp::common::String>& AssetCollectionIds,
-												   AssetCollectionsResultCallback Callback);
-
 	/// @brief Retrieves asset collections based on the specified search criteria.
 	/// Results pagination is supported through the use of ResultsSkipNumber and ResultsMaxNumber.
 	/// @param Space Space : optional space to get asset collections associated with it
 	/// @param AssetCollectionParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
 	/// @param AssetCollectionType EAssetCollectionType : type of the asset collection
-	/// @param AssetCollectionTags csp::common::Array<csp::common::String : optional array of strings representing asset collection tags
-	/// @param AssetCollectionNames csp::common::Optional<csp::common::Array<csp::common::String : optional array of strings representing asset
+	/// @param AssetCollectionTags csp::common::Array<csp::common::String> : optional array of strings representing asset collection tags
+	/// @param AssetCollectionNames csp::common::Optional<csp::common::Array<csp::common::String>> : optional array of strings representing asset
 	/// collection names
 	/// @param ResultsSkipNumber int : optional param representing the number of result entries that will be skipped from the result. For no skip pass
 	/// nullptr.
 	/// @param ResultsMaxNumber int : optional param representing the maximum number of result entries to be retrieved. For all available result
 	/// entries pass nullptr.
 	/// @param Callback AssetCollectionsResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAssetCollectionsByCriteria(const csp::common::Optional<csp::common::String>& SpaceId,
-														const csp::common::Optional<csp::common::String>& AssetCollectionParentId,
-														const csp::common::Optional<EAssetCollectionType>& AssetCollectionType,
-														const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionTags,
-														const csp::common::Optional<csp::common::Array<csp::common::String>>& AssetCollectionNames,
-														const csp::common::Optional<int>& ResultsSkipNumber,
-														const csp::common::Optional<int>& ResultsMaxNumber,
-														AssetCollectionsResultCallback Callback);
+	CSP_ASYNC_RESULT void FindAssetCollections(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+											   const csp::common::Optional<csp::common::String>& ParentId,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+											   const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+											   const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
+											   const csp::common::Optional<int>& ResultsSkipNumber,
+											   const csp::common::Optional<int>& ResultsMaxNumber,
+											   AssetCollectionsResultCallback Callback);
 
 	/// @brief Updates the Metadata field of an Asset Collection
 	/// @param AssetCollection AssetCollection : asset collection to be updated
@@ -231,10 +251,10 @@ public:
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
 
-
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
+	~AssetSystem();
 
 	csp::services::ApiBase* PrototypeAPI;
 	csp::services::ApiBase* AssetDetailAPI;

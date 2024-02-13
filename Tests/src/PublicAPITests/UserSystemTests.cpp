@@ -346,7 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInWithTokenTest)
 	csp::common::String LoginToken;
 	bool LoginTokenAvailable = false;
 
-	csp::systems::NewLoginTokenReceivedCallback LoginTokenReceivedCallback = [&](csp::systems::LoginTokenReceived& Result)
+	csp::systems::LoginTokenInfoResultCallback LoginTokenReceivedCallback = [&](csp::systems::LoginTokenInfoResult& Result)
 	{
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -628,20 +628,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	}
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, UserId, UniqueEmail, GeneratedTestAccountPassword);
 
-	// At this point, the user has been created but not verified the account via email.
-	// So, from this point onwards, attempting to set data for the user account should fail.
-	// But we should be able to get some of the user data.
-
-	// Verify that newsletter preference cannot be set
-	{
-		auto [Result] = AWAIT(SettingsSystem, GetNewsletterStatus, CreatedUserId);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-	}
-
-	// But that we can retrieve a lite profile
+	// At this point, the created account is already verified automatically because of the tenant used,
+	// so we can retrieve a lite profile
 	{
 		csp::common::Array<csp::common::String> Ids = {CreatedUserId};
 		auto [Result]								= AWAIT_PRE(UserSystem, GetProfilesByUserId, RequestPredicate, Ids);
@@ -1122,7 +1112,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 	auto [Result] = AWAIT_PRE(UserSystem, GetAgoraUserToken, RequestPredicate, Params);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-	EXPECT_FALSE(Result.GetUserToken().IsEmpty());
+	EXPECT_FALSE(Result.GetValue().IsEmpty());
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1247,6 +1237,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
 	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-	EXPECT_NE(Result.GetUrl(), "");
+	EXPECT_NE(Result.GetValue(), "");
 }
 #endif

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -22,6 +23,16 @@
 #include <functional>
 #include <string>
 #include <vector>
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -34,17 +45,19 @@ public:
 	virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
 
+
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
-class CSP_API CSP_NO_DISPOSE ScriptSystem
+class CSP_API ScriptSystem
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
 	friend class ScriptContext;
+	friend void csp::memory::Delete<ScriptSystem>(ScriptSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~ScriptSystem();
-
 	/// @brief Starts up the JavaScript runtime context.
 	void Initialise();
 	/// @brief Shuts down and deletes the JavaScript runtime context.
@@ -83,6 +96,7 @@ public:
 
 private:
 	ScriptSystem();
+	~ScriptSystem();
 
 	class ScriptRuntime* TheScriptRuntime;
 };

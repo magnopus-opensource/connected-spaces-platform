@@ -439,9 +439,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	LogIn(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	csp::common::Array<csp::common::String> SpaceIds(1);
+	csp::common::Array<csp::common::String> SpaceId(1);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-	SpaceIds[0] = Space.Id;
+	SpaceId[0] = Space.Id;
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -506,7 +506,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 							  SpacialValues,
 							  Tags,
 							  true,
-							  SpaceIds,
+							  SpaceId,
 							  nullptr,
 							  nullptr)
 						.Await(RequestPredicate);

@@ -49,6 +49,18 @@ public:
 	}
 
 	/// @ brief Constructs a DateTime from a date string.
+	///
+	/// The string parameter is expected to be of the ISO 8601 format YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01:00)
+	/// where:
+	/// YYYY = four-digit year
+	/// MM   = two-digit month (01=January, etc.)
+	/// DD   = two-digit day of month (01 through 31)
+	/// hh   = two digits of hour (00 through 23) (am/pm NOT allowed)
+	/// mm   = two digits of minute (00 through 59)
+	/// ss   = two digits of second (00 through 59)
+	/// s    = one or more digits representing a decimal fraction of a second
+	/// TZD  = time zone designator (Z or +hh:mm or -hh:mm)
+	///
 	/// @param DateString const csp::common::String& : Date string to constuct DateTime from.
 	explicit DateTime(const String& DateString);
 

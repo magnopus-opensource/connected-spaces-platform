@@ -80,14 +80,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, UserId, true);
+	auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, true);
 	EXPECT_EQ(SetNDATrue.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [GetNDAResult] = AWAIT(SettingsSystem, GetNDAStatus, UserId);
+	auto [GetNDAResult] = AWAIT(SettingsSystem, GetNDAStatus);
 	EXPECT_EQ(GetNDAResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetNDAResult.GetValue(), true);
 
-	auto [SetNDAFalse] = AWAIT(SettingsSystem, SetNDAStatus, UserId, false);
+	auto [SetNDAFalse] = AWAIT(SettingsSystem, SetNDAStatus, false);
 	EXPECT_EQ(SetNDAFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -107,14 +107,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, true);
+	auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, true);
 	EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [GetNewsletterResult] = AWAIT(SettingsSystem, GetNewsletterStatus, UserId);
+	auto [GetNewsletterResult] = AWAIT(SettingsSystem, GetNewsletterStatus);
 	EXPECT_EQ(GetNewsletterResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(GetNewsletterResult.GetValue(), true);
 
-	auto [SetNewsletterFalse] = AWAIT(SettingsSystem, SetNewsletterStatus, UserId, false);
+	auto [SetNewsletterFalse] = AWAIT(SettingsSystem, SetNewsletterStatus, false);
 	EXPECT_EQ(SetNewsletterFalse.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -134,16 +134,16 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, UserId, "RecentSpace");
+	auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, "RecentSpace");
 	EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [GetRecentSpaces] = AWAIT(SettingsSystem, GetRecentlyVisitedSpaces, UserId);
+	auto [GetRecentSpaces] = AWAIT(SettingsSystem, GetRecentlyVisitedSpaces);
 	EXPECT_EQ(GetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetRecentSpaces.GetValue();
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("RecentSpace"));
 
-	auto [ClearRecentSpaces] = AWAIT(SettingsSystem, ClearRecentlyVisitedSpaces, UserId);
+	auto [ClearRecentSpaces] = AWAIT(SettingsSystem, ClearRecentlyVisitedSpaces);
 	EXPECT_EQ(ClearRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -164,19 +164,19 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 	LogIn(UserSystem, UserId);
 
 	// Clear at start in case another test left something in the list
-	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, "BlockedSpace");
+	auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, "BlockedSpace");
 	EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
-	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces);
 	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
 	EXPECT_EQ(ReturnedStringArray.Size(), 1);
 	EXPECT_EQ(ReturnedStringArray[0].c_str(), std::string("BlockedSpace"));
 
-	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -197,7 +197,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	LogIn(UserSystem, UserId);
 	// Clear at start in case another test left something in the list
 	{
-		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
@@ -207,7 +207,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// check block spaces is empty
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -219,14 +219,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	// Add 1 blocked spaces
 	{
 
-		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace2Name);
+		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace2Name);
 
 		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -237,14 +237,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// Remove 1 blocked space
 	{
-		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, UserId, BlockedSpace2Name);
+		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, BlockedSpace2Name);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -255,32 +255,32 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// Clear all blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Clear at start in case another test left something in the list
 	{
-		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Add 2 blocked spaces
 	{
-		auto [Result1] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace1Name);
+		auto [Result1] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace1Name);
 
 		EXPECT_EQ(Result1.GetResultCode(), csp::systems::EResultCode::Success);
 
-		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpace2Name);
+		auto [Result2] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpace2Name);
 
 		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -291,14 +291,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// Remove 1 blocked space
 	{
-		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, UserId, BlockedSpace2Name);
+		auto [Result] = AWAIT(SettingsSystem, RemoveBlockedSpace, BlockedSpace2Name);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -310,7 +310,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// Clear all blocked spaces
 	{
-		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
@@ -333,7 +333,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 	LogIn(UserSystem, UserId);
 
 	// Clear at start in case another test left something in the list
-	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 	EXPECT_EQ(PreClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	constexpr int NUM_BLOCKED_SPACES = 10;
@@ -343,11 +343,11 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 		char BlockedSpaceName[256];
 		SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
 
-		auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, UserId, BlockedSpaceName);
+		auto [SetBlockedSpaces] = AWAIT(SettingsSystem, AddBlockedSpace, BlockedSpaceName);
 		EXPECT_EQ(SetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces, UserId);
+	auto [GetBlockedSpaces] = AWAIT(SettingsSystem, GetBlockedSpaces);
 	EXPECT_EQ(GetBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 	auto ReturnedStringArray = GetBlockedSpaces.GetValue();
 
@@ -362,7 +362,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 		EXPECT_EQ(ReturnedStringArray[NUM_BLOCKED_SPACES - SpaceIndex - 1].c_str(), std::string(BlockedSpaceName));
 	}
 
-	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces, UserId);
+	auto [ClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
 	EXPECT_EQ(ClearBlockedSpaces.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -390,10 +390,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		AvatarPortrait.FilePath			= FilePath.u8string().c_str();
 		AvatarPortrait.SetMimeType("image/png");
 
-		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, UserId, AvatarPortrait);
+		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
+		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
@@ -405,10 +405,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		AvatarPortrait.FilePath			= FilePath.u8string().c_str();
 		AvatarPortrait.SetMimeType("image/png");
 
-		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, UserId, AvatarPortrait);
+		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
+		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
@@ -446,10 +446,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 	AvatarPortraitThumbnail.SetMimeType("image/png");
 
 
-	auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, UserId, AvatarPortraitThumbnail);
+	auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, AvatarPortraitThumbnail);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	// get asset uri
-	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
+	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
 	csp::systems::Asset Asset;
 	Asset.FileName = "OKO.png";
 	Asset.Uri	   = GetAvatarPortraitResult.GetUri().c_str();
@@ -491,14 +491,14 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
 	// Set Avatar info
 	{
-		auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, UserId, Type, Identifier);
+		auto [Result] = AWAIT(SettingsSystem, SetAvatarInfo, Type, Identifier);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
 	// Get Avatar info
 	{
-		auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo, UserId);
+		auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAvatarType(), Type);

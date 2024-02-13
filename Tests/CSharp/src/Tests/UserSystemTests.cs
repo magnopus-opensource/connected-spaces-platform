@@ -449,11 +449,11 @@ namespace CSPEngine
                 Assert.AreEqual(createdProfile.Email, uniqueTestEmail);
             }
 
-            _ = LogIn(userSystem);
+            _ = LogIn(userSystem, uniqueTestEmail, GeneratedTestAccountPassword, pushCleanupFunction: false);
 
             // Verify that newsletter preference was set
             {
-                using var result = settingsSystem.GetNewsletterStatus(createdUserId).Result;
+                using var result = settingsSystem.GetNewsletterStatus().Result;
                 var resCode = result.GetResultCode();
                 var body = result.GetResponseBody();
 
@@ -488,6 +488,9 @@ namespace CSPEngine
                 Assert.AreEqual(fullProfile.DisplayName, testDisplayName);
                 Assert.AreEqual(fullProfile.Email, uniqueTestEmail);
             }
+
+            LogOut(userSystem);
+            _ = LogIn(userSystem);
 
             // Delete the created user
             {
@@ -834,7 +837,7 @@ namespace CSPEngine
             var result = userSystem.GetAgoraUserToken(tokenParams).Result;
 
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-            Assert.AreNotEqual(result.GetUserToken(), "");
+            Assert.AreNotEqual(result.GetValue(), "");
         }
 #endif
 
