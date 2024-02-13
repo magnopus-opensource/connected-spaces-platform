@@ -149,7 +149,7 @@ void SpaceEntity::SetName(const csp::common::String& Value)
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
@@ -180,7 +180,7 @@ void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
@@ -205,7 +205,7 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
@@ -230,7 +230,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
@@ -260,7 +260,7 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
@@ -280,7 +280,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
 							 "owner of. Entity name:",
-							 Name);
+							 Name.c_str());
 		return;
 	}
 
