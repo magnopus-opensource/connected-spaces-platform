@@ -83,7 +83,7 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 	if (!GetParent()->IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-							 GetParent()->GetName());
+							 GetParent()->GetName().c_str());
 		return;
 	}
 
