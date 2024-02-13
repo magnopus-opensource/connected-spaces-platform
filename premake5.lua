@@ -13,26 +13,37 @@ newoption {
     description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
 }
 
+newoption
+{
+    trigger     = "visionos",
+    description = "Generate the project for building for VisionOS."
+}
 
--- @RossB: We create separate workspaces/projects for iOS and MacOSX platforms
+-- We create separate workspaces/projects for Apple platforms
 premake.override(_G, "project", function(base, ...)
     local rval = base(...)
     local args = {...}
-    filter "system:ios"
-        filename(args[1] .. "_ios")
-    filter {}
+
+    if(CSP.IsVisionOSTarget()) then
+        filter "system:ios"
+            filename(args[1] .. "_visionos")
+        filter {}
+    else
+        filter "system:ios"
+            filename(args[1] .. "_ios")
+        filter {}
+    end
     return rval
 end)
 
 premake.override(_G, "workspace", function(base, ...)
     local rval = base(...)
     local args = {...}
-    filter "system:ios"
-        filename(args[1] .. "_ios")
+    filter "system:visionos"
+        filename(args[1] .. "_visionos")
     filter {}
     return rval
 end)
-
 
 solution( "ConnectedSpacesPlatform" )
     -- Build configurations

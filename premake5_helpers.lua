@@ -147,8 +147,12 @@ if not CSP then
         return (_OPTIONS["generate_wasm"] ~= nil)
     end
 
-    function CSP.IsTargettingMacOS()
-        return os.istarget("macosx") or os.istarget("ios")
+    function CSP.IsAppleTarget()
+        return os.istarget("macosx") or os.istarget("ios") or os.istarget("visionos")
+    end
+
+    function CSP.IsVisionOSTarget()
+        return os.istarget("ios") and _OPTIONS["visionos"] ~= nil
     end
 
     function CSP.IsGeneratingVS()
@@ -160,11 +164,11 @@ if not CSP then
     end
 
     function CSP.IsGeneratingCPPOnMac()
-        return CSP.IsTargettingMacOS() and CSP.IsGeneratingXCode()
+        return CSP.IsAppleTarget() and CSP.IsGeneratingXCode()
     end
 
     function CSP.IsGeneratingCSharpOnMac()
-        return CSP.IsTargettingMacOS() and CSP.IsGeneratingVS()
+        return CSP.IsAppleTarget() and CSP.IsGeneratingVS()
     end
     
     function CSP.HasCommandLineArgument(Argument)

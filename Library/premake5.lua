@@ -23,7 +23,7 @@ if not Project then
         -- Generate version
         cwd = os.getcwd()
 
-        if CSP.IsTargettingMacOS() then
+        if CSP.IsAppleTarget() then
             if not CSP.IsGeneratingVS() then
                 code = os.execute("python3 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
