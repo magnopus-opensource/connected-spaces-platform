@@ -43,23 +43,27 @@ public:
 	~OrganizationSystem();
 
 	/// @brief Callback that will be fired when an Organization is updated.
-	/// @param csp::Common::String : Id of the updated Organization.
+	/// Event will be received by All members of the Organization.
 	typedef std::function<void()> OrganizationUpdatedCallback;
 
 	/// @brief Callback that will be fired when an Organization deactivated.
+	/// Event will be received by All members of the Organization.
 	typedef std::function<void()> OrganizationDeactivatedCallback;
 
 	/// @brief Callback that will be fired when a new member joins an Organization.
+	/// Event will be received by member who joined Organization and the Organization Admin/Owner.
 	/// @param csp::Common::String : Id of the new member.
 	typedef std::function<void(csp::common::String)> MemberJoinedOrganizationCallback;
 
 	/// @brief Callback that will be fired when a member leaves an Organization.
+	/// Event will be received by member who left Organization and the Organization Admin/Owner.
 	/// @param csp::Common::String : Id of the member.
 	typedef std::function<void(csp::common::String)> MemberLeftOrganizationCallback;
 
 	/// @brief Callback that will be fired when a users role within the Organization changes.
+	/// Event will be received by member whose role/s changed and the Organization Admin/Owner.
 	/// @param csp::Common::String : Id of the User.
-	/// /// @param csp::common::Array<EOrganizationRole>)> : The users roles.
+	/// @param csp::common::Array<EOrganizationRole>)> : The users roles.
 	typedef std::function<void(csp::common::String, csp::common::Array<EOrganizationRole>)> UserRoleChangedCallback;
 
 	/// @brief Sets a callback to be executed when the Organization is updated.
@@ -184,6 +188,7 @@ private:
 	MemberLeftOrganizationCallback InternalMemberLeftOrganizationCallback;
 	UserRoleChangedCallback InternalUserRoleChangedCallback;
 
+	// todo: determine how we will be getting access to the MultiplayerConnection object.
 	void BindOnOrganizationUpdated();
 	void BindOnOrganizationDeactivated();
 	void BindOnMemberJoinedOrganization();
