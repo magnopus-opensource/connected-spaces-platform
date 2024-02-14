@@ -85,13 +85,8 @@ class CSP_API Organization
 public:
 	Organization() = default;
 	// Organization() : Id(""), OwnerId(""), CreatedAt(""), CreatedBy(""), Name(""), Description("") {};
-	// CSP_NO_EXPORT FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn);
 	Organization(const Organization& Other) = default;
 
-	/** @name Data Values
-	 *   An Organization contains some basic information that defines it, this is a 1:1 mapping to a UserService Organization
-	 *
-	 *   @{ */
 	csp::common::String Id;
 	csp::common::String OwnerId;
 	csp::common::String CreatedAt;
@@ -101,7 +96,6 @@ public:
 	csp::common::Array<OrganizationRoleInfo> Members;
 	// TierNames QuotaTier;
 	int32_t SpaceCount;
-	/** @} */
 };
 
 /// @ingroup Organization System
