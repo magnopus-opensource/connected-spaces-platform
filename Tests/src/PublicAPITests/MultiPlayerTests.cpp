@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
@@ -43,8 +44,10 @@
 #include <filesystem>
 #include <thread>
 
+
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
+
 
 namespace
 {
@@ -75,10 +78,12 @@ ReplicatedValue ObjectBoolProperty;
 ReplicatedValue ObjectIntProperty;
 ReplicatedValue ObjectStringProperty;
 
+
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
+
 
 void InitialiseTestingConnection()
 {
@@ -127,6 +132,7 @@ void SetRandomProperties(SpaceEntity* User)
 	EntitySystem->QueueEntityUpdate(User);
 }
 
+
 void OnConnect()
 {
 	csp::common::String UserName = "Player 1";
@@ -157,6 +163,7 @@ void OnConnect()
 							   });
 }
 
+
 void OnDisconnect(bool ok)
 {
 	EXPECT_TRUE(ok);
@@ -165,6 +172,7 @@ void OnDisconnect(bool ok)
 
 	IsDisconnected = true;
 }
+
 
 void OnUserCreated(SpaceEntity* InUser)
 {
@@ -273,6 +281,7 @@ void OnUserCreated(SpaceEntity* InUser)
 	SetRandomProperties(InUser);
 }
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 {
@@ -349,6 +358,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 {
@@ -417,6 +427,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_NIGHTLY_TESTS
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
@@ -495,6 +506,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITYREPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
@@ -595,6 +607,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_SELF_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
@@ -717,6 +730,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_AVATAR_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
@@ -1079,6 +1093,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_ADDCOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 {
@@ -1203,6 +1218,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
@@ -1440,6 +1456,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_NETWORKEVENT_MULTITYPE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 {
@@ -1565,6 +1582,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_MULTIPLAYER_INTERACTIVEMOVEMENT_TEST
 	#include <conio.h>
@@ -1757,6 +1775,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 }
 #endif
 
+
 #if RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
@@ -1866,7 +1885,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 #endif
 
 
-
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {
@@ -1970,6 +1988,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_SELECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 {
@@ -2057,6 +2076,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 }
 #endif
 
+
 // Derived type that allows us to access protected members of SpaceEntitySystem
 struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
 {
@@ -2067,6 +2087,7 @@ struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
 		Entities.Clear();
 	}
 };
+
 
 // Disabled by default as it can be slow
 #if RUN_MULTIPLAYER_MANYENTITIES_TEST
@@ -2154,6 +2175,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 	LogOut(UserSystem);
 }
 #endif
+
 
 #if RUN_MULTIPLAYER_BANNED_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, BannedTest)
@@ -2270,6 +2292,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, BannedTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INVALID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 {
@@ -2353,6 +2376,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 }
 #endif
 
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_FIND_COMPONENT_BY_ID_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 {
@@ -2427,6 +2451,107 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 
 	EXPECT_TRUE(FoundComponent != nullptr);
 	EXPECT_EQ(Component2->GetId(), FoundComponent->GetId());
+
+	// Disconnect from the SignalR server
+	auto [Error] = AWAIT(Connection, Disconnect);
+
+	ASSERT_EQ(Error, ErrorCode::None);
+
+	SpaceSystem->ExitSpace();
+
+	// Delete MultiplayerConnection
+	delete Connection;
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DISABLE_REPLICATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DisableReplicationTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Set up multiplayer connection
+	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
+	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Connect and initialise
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+
+		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
+
+	// Disable replication
+	EntitySystem->EnableReplication(false);
+
+	// Create avatar
+	const csp::common::String& UserName = "Player 1";
+	const SpaceTransform& UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	AvatarState UserAvatarState				  = AvatarState::Idle;
+	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
+	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
+	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+
+	EXPECT_NE(Avatar, nullptr);
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+	EXPECT_EQ(Avatar->GetName(), UserName);
+	EXPECT_EQ(Avatar->GetPosition(), UserTransform.Position);
+	EXPECT_EQ(Avatar->GetRotation(), UserTransform.Rotation);
+
+	auto& Components = *Avatar->GetComponents();
+
+	EXPECT_EQ(Components.Size(), 1);
+
+	auto* Component = Components[0];
+
+	EXPECT_EQ(Component->GetComponentType(), ComponentType::AvatarData);
+
+	// Verify the values of UserAvatarState and UserAvatarPlayMode
+	auto* AvatarComponent = dynamic_cast<AvatarSpaceComponent*>(Component);
+
+	EXPECT_NE(AvatarComponent, nullptr);
+	EXPECT_EQ(AvatarComponent->GetState(), UserAvatarState);
+	EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
+	EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
 
 	// Disconnect from the SignalR server
 	auto [Error] = AWAIT(Connection, Disconnect);

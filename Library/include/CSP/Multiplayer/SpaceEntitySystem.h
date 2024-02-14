@@ -106,6 +106,7 @@ public:
 									   AvatarPlayMode InAvatarPlayMode,
 									   EntityCreatedCallback Callback);
 
+	void EnableReplication(bool InValue);
 
 	/// @brief Creates a SpaceEntity of type Object, and relevant default values.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
@@ -386,6 +387,7 @@ private:
 	std::chrono::milliseconds EntityPatchRate;
 
 	bool EntityPatchRateLimitEnabled = true;
+	bool ReplicationEnabled			 = true;
 };
 
 } // namespace csp::multiplayer

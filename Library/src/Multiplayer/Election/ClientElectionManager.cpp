@@ -126,7 +126,7 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
 		CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "IsFirstClient=true");
 
 		// If there is just one avatar, then it should be us,
-		// So we we'll will assume the leadership role for now
+		// So we will assume the leadership role for now
 		// pending negotiation if/when other clients connect
 		IsFirstClient = true;
 	}

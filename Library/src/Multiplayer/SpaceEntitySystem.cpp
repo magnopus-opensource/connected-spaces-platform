@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 
 #include "CSP/Common/List.h"
@@ -24,6 +25,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
@@ -245,7 +247,10 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 		catch (const std::exception& e)
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
-			Callback(nullptr);
+
+			INVOKE_IF_NOT_NULL(Callback, nullptr);
+
+			return;
 		}
 
 		const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
@@ -266,6 +271,22 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 		AvatarComponent->SetAvatarPlayMode(InAvatarPlayMode);
 		AvatarComponent->SetUserId(UserSystem->GetLoginState().UserId);
 
+		if (!ReplicationEnabled)
+		{
+			Entities.Append(NewAvatar);
+			Avatars.Append(NewAvatar);
+			NewAvatar->ApplyLocalPatch(false);
+
+			if (ElectionManager != nullptr)
+			{
+				ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
+			}
+
+			INVOKE_IF_NOT_NULL(Callback, NewAvatar);
+
+			return;
+		}
+
 		SignalRMsgPackEntitySerialiser Serialiser;
 
 		NewAvatar->Serialise(Serialiser);
@@ -285,7 +306,10 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 			catch (const std::exception& e)
 			{
 				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", e.what());
-				Callback(nullptr);
+
+				INVOKE_IF_NOT_NULL(Callback, nullptr);
+
+				return;
 			}
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -298,11 +322,23 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 			{
 				ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
 			}
-			Callback(NewAvatar);
+
+			INVOKE_IF_NOT_NULL(Callback, NewAvatar);
 		};
 
 		Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
 	};
+
+	if (!ReplicationEnabled)
+	{
+		// Create a dummy ID response
+		const signalr::value FakeId((uint64_t) 1337);
+		const std::vector Arr {FakeId};
+		signalr::value Params(Arr);
+		LocalIDCallback(Params, nullptr);
+
+		return;
+	}
 
 	// ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
 	const signalr::value Param1((uint64_t) 1ULL);
@@ -310,6 +346,25 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 
 	const signalr::value Params(Arr);
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
+}
+
+void SpaceEntitySystem::EnableReplication(bool InValue)
+{
+	if (ReplicationEnabled == InValue)
+	{
+		return;
+	}
+
+	ReplicationEnabled = InValue;
+
+	if (ReplicationEnabled)
+	{
+		CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Entity replication enabled.");
+	}
+	else
+	{
+		CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Entity replication disabled.");
+	}
 }
 
 void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
@@ -576,6 +631,11 @@ void SpaceEntitySystem::BindOnObjectPatch()
 	Connection->On("OnObjectPatch",
 				   [this](const signalr::value& Params)
 				   {
+					   if (!ReplicationEnabled)
+					   {
+						   return;
+					   }
+
 					   std::scoped_lock EntitiesLocker(*EntitiesLock);
 
 					   // Params is an array of all params sent, so grab the first
@@ -1154,6 +1214,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 						PendingEntity->GetName().c_str());
 
 					it = PendingOutgoingUpdateUniqueSet->erase(it);
+
 					continue;
 				}
 
@@ -1163,10 +1224,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 				PendingEntities.Append(PendingEntity);
 
-				if (PendingEntity->EntityPatchSentCallback != nullptr)
-				{
-					PendingEntity->EntityPatchSentCallback(true);
-				}
+				INVOKE_IF_NOT_NULL(PendingEntity->EntityPatchSentCallback, true);
 
 				PendingEntity->TimeOfLastPatch = CurrentTime;
 				it							   = PendingOutgoingUpdateUniqueSet->erase(it);
@@ -1180,8 +1238,11 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		// Only send if there are patches in list
 		if (PendingEntities.Size() != 0)
 		{
-			// Send list of PendingEntities to chs
-			SendPatches(Connection, PendingEntities);
+			if (ReplicationEnabled)
+			{
+				// Send list of PendingEntities to chs
+				SendPatches(Connection, PendingEntities);
+			}
 
 			// Loop through and apply local patches from generated list
 			for (int i = 0; i < PendingEntities.Size(); ++i)
@@ -1193,7 +1254,8 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 	// removes
 	std::unordered_set<SpaceEntity*> RemovedEntities;
-	while (PendingRemoves->empty() == false)
+
+	while (!PendingRemoves->empty())
 	{
 		SpaceEntity* PendingRemoveEntity = PendingRemoves->front();
 
@@ -1203,32 +1265,33 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 			RemovePendingEntity(PendingRemoves->front());
 			RemovedEntities.emplace(PendingRemoveEntity);
 		}
+
 		PendingRemoves->pop_front();
 	}
 }
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-	if (!Entities.Contains(EntityToAdd))
-	{
-		Entities.Append(EntityToAdd);
-
-		switch (EntityToAdd->GetEntityType())
-		{
-			case SpaceEntityType::Avatar:
-				Avatars.Append(EntityToAdd);
-				OnAvatarAdd(EntityToAdd, Avatars);
-				break;
-
-			case SpaceEntityType::Object:
-				Objects.Append(EntityToAdd);
-				OnObjectAdd(EntityToAdd, Objects);
-				break;
-		}
-	}
-	else
+	if (Entities.Contains(EntityToAdd))
 	{
 		CSP_LOG_ERROR_MSG("Attempted to add a pending entity that we already have!");
+
+		return;
+	}
+
+	Entities.Append(EntityToAdd);
+
+	switch (EntityToAdd->GetEntityType())
+	{
+		case SpaceEntityType::Avatar:
+			Avatars.Append(EntityToAdd);
+			OnAvatarAdd(EntityToAdd, Avatars);
+			break;
+
+		case SpaceEntityType::Object:
+			Objects.Append(EntityToAdd);
+			OnObjectAdd(EntityToAdd, Objects);
+			break;
 	}
 }
 
