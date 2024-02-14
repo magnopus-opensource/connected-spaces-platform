@@ -28,6 +28,7 @@ namespace chs_users = csp::services::generated::userservice;
 namespace
 {
 
+// todo: Complete implementation once CHS have finished implementing the Organization endpoints to the User Service.
 void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::systems::Organization& Organization)
 {
 	// More fields will be added by CHS in the future.
@@ -36,6 +37,7 @@ void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::s
 	Organization.OwnerId = Dto.GetOrganizationOwnerId();
 }
 
+// todo: Implement once CHS have finished implementing the Organization endpoints to the User Service.
 void OrganizationInviteDtoToOrganizationRoleInfo()
 {
 }
@@ -74,7 +76,7 @@ void OrganizationRolesResult::OnResponse(const csp::services::ApiResponseBase* A
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	// CHS will be adding another Dto for this - OrganizationInviteDto
+	// todo: CHS will be adding another Dto for this - OrganizationInviteDto.
 	auto* OrganizationResponse			   = static_cast<chs_users::OrganizationDto*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
@@ -82,13 +84,7 @@ void OrganizationRolesResult::OnResponse(const csp::services::ApiResponseBase* A
 	{
 		// Build the Dto from the response Json
 		OrganizationResponse->FromJson(Response->GetPayload().GetContent());
-		// GroupResponse->FromJson(Response->GetPayload().GetContent());
-		// GroupDtoToSpace(*GroupResponse, Space);
-		//
-		// if (GroupResponse->HasGroupCode())
-		//{
-		//	SpaceCode = GroupResponse->GetGroupCode();
-		// }
+		// OrganizationDtoToOrganization(*OrganizationResponse, Organization);
 	}
 }
 
