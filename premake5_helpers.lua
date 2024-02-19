@@ -15,7 +15,11 @@ if not CSP then
 
     function CSP.UseStandardSettings()
         -- Build location
-        targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+        if not CSP.IsVisionOSTarget() then
+            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+        else
+            targetdir "%{prj.location}/Binaries/visionos/%{cfg.buildcfg}"
+        end
 
         -- Intermediate C++ files
         objdir "%{prj.location}/Intermediate"
