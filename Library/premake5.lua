@@ -206,7 +206,8 @@ if not Project then
             defines { 
                 "CSP_IOS",
                 "USE_STD_MALLOC=1",
-                "JS_STRICT_NAN_BOXING"
+                "JS_STRICT_NAN_BOXING",
+                "USE_STD_MALLOC=1"
             }
 
             externalincludedirs {
