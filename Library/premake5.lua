@@ -304,7 +304,7 @@ if not Project then
 			"tinyspline"
         }
 
-        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx" }
+        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx", "platforms:not ios" }
             links {
                 "mimalloc"
             }
