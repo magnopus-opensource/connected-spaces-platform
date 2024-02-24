@@ -33,5 +33,4 @@ then
 	fi
 fi
 
-./modules/premake/bin/release/premake5 xcode4 "$@"
-./modules/premake/bin/release/premake5 --os=macosx vs2019 "$@"
+./modules/premake/bin/release/premake5 --os=macosx xcode4 "$@"
