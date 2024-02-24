@@ -214,10 +214,6 @@ if not Project then
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/ios"
             }
 
-            libdirs {
-                "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
-            }
-
             links {
                 "ssl",            
                 "crypto"
@@ -313,6 +309,20 @@ if not Project then
                 "POCONetSSL_OpenSSL"
             }
         filter {}
+
+        if CSP.IsVisionOSTarget() then
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/VisionOS"
+                }
+            filter {}
+        else
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
+                }
+            filter {}
+        end
 
         -- Debug/Release config settings
         filter "configurations:*Debug*"
