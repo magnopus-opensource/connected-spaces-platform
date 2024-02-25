@@ -1,0 +1,14 @@
+{
+    "name": "ConnectedSpacesPlatform.Unity.Core",
+    "rootNamespace": "Csp",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
