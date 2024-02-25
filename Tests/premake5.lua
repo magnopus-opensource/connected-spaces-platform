@@ -21,7 +21,7 @@ if not Tests then
             "%{prj.location}/assets/**.*"
         }
         
-        sysincludedirs { 
+        externalincludedirs { 
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
         }   

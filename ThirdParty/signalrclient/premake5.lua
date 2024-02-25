@@ -19,7 +19,7 @@ function SignalRClient.AddProject()
     defines { "NO_SIGNALRCLIENT_EXPORTS", "USE_MSGPACK" }
     
     -- Source directories for this project
-    sysincludedirs { 
+    externalincludedirs { 
         "%{prj.location}/include",
         "%{prj.location}/src",
         "%{prj.location}/third_party_code/jsoncpp",
