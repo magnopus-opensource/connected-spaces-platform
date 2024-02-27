@@ -71,6 +71,11 @@ def add_args(arg_parser):
         default=config.default_artifact_paths.ios,
     )
     arg_group.add_argument(
+        "--visionos-artifact-root",
+        help="Enter the path relative to the git root for VisionOS artifacts.",
+        default=config.default_artifact_paths.visionos,
+    )
+    arg_group.add_argument(
         "--android-artifact-root",
         help="Enter the path relative to the git root for 32-bit Android artifacts.",
         default=config.default_artifact_paths.android,
@@ -90,7 +95,7 @@ def add_args(arg_parser):
     arg_parser.add_argument(
         "--platforms",
         nargs="+",
-        choices=["windows", "macosx", "ios", "android", "android64"],
+        choices=["windows", "macosx", "ios", "visionos", "android", "android64"],
         help="Enter the platforms to build the package for.",
         default=None,
     )
