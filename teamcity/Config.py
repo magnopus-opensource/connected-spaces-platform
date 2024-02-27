@@ -8,6 +8,7 @@ class DefaultArtifactPathsConfig:
     macosx: str
     ios: str
     visionos: str
+    visionos: str
     android: str
     android64: str
     wasm: str
@@ -19,6 +20,7 @@ class ArtifactsConfig:
     windows: List[str]
     macosx: List[str]
     ios: List[str]
+    visionos: List[str]
     visionos: List[str]
     android: List[str]
     android64: List[str]
