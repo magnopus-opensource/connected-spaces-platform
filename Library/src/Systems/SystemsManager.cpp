@@ -29,6 +29,7 @@
 #include "CSP/Systems/Spatial/AnchorSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
+#include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
@@ -128,6 +129,16 @@ QuotaSystem* SystemsManager::GetQuotaSystem()
 	return QuotaSystem;
 }
 
+csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem()
+{
+	return SpaceEntitySystem;
+}
+
+csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnection()
+{
+	return MultiplayerConnection;
+}
+
 SystemsManager::SystemsManager()
 	: WebClient(nullptr)
 	, UserSystem(nullptr)
@@ -145,6 +156,7 @@ SystemsManager::SystemsManager()
 	, EventTicketingSystem(nullptr)
 	, ECommerceSystem(nullptr)
 	, QuotaSystem(nullptr)
+	, SpaceEntitySystem(nullptr)
 {
 }
 
@@ -163,9 +175,13 @@ void SystemsManager::CreateSystems()
 #else
 	WebClient = CSP_NEW csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
+	ScriptSystem	      = CSP_NEW csp::systems::ScriptSystem();
 
-	AnalyticsSystem = CSP_NEW csp::systems::AnalyticsSystem();
+	ScriptSystem->Initialise();
 
+	//MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
+
+	AnalyticsSystem       = CSP_NEW csp::systems::AnalyticsSystem();
 	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
 	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
 	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
@@ -173,12 +189,12 @@ void SystemsManager::CreateSystems()
 	PointOfInterestSystem = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
 	SettingsSystem		  = CSP_NEW csp::systems::SettingsSystem(WebClient);
 	GraphQLSystem		  = CSP_NEW csp::systems::GraphQLSystem(WebClient);
-	ScriptSystem		  = CSP_NEW csp::systems::ScriptSystem();
 	VoipSystem			  = CSP_NEW csp::systems::VoipSystem();
 	MaintenanceSystem	  = CSP_NEW csp::systems::MaintenanceSystem(WebClient);
 	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
 	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
 	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
+	SpaceEntitySystem	  = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
 }
 
 void SystemsManager::DestroySystems()
@@ -200,6 +216,8 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(EventTicketingSystem);
 	CSP_DELETE(ECommerceSystem);
 	CSP_DELETE(QuotaSystem);
+	CSP_DELETE(SpaceEntitySystem);
+	CSP_DELETE(MultiplayerConnection);
 }
 
 void SystemsManager::Instantiate()

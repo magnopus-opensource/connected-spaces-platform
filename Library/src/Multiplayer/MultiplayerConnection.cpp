@@ -115,13 +115,12 @@ constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 
 /// @brief MultiplayerConnection
-MultiplayerConnection::MultiplayerConnection(csp::common::String InSpaceId)
+MultiplayerConnection::MultiplayerConnection()
 	: Connection(nullptr)
 	, WebSocketClient(nullptr)
 	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
 	, SpaceEntitySystemPtr(CSP_NEW SpaceEntitySystem(this))
 	, ClientId(0)
-	, SpaceId(InSpaceId)
 	, Connected(false)
 	, ConversationSystemPtr(CSP_NEW ConversationSystem(this))
 {
@@ -168,7 +167,6 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
 	SpaceEntitySystemPtr		   = InBoundConnection.SpaceEntitySystemPtr;
 	ConversationSystemPtr		   = InBoundConnection.ConversationSystemPtr;
 	ClientId					   = InBoundConnection.ClientId;
-	SpaceId						   = InBoundConnection.SpaceId;
 	DisconnectionCallback		   = InBoundConnection.DisconnectionCallback;
 	ConnectionCallback			   = InBoundConnection.ConnectionCallback;
 	NetworkInterruptionCallback	   = InBoundConnection.NetworkInterruptionCallback;
@@ -227,7 +225,6 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 
 			Connected = true;
 
-			// TODO: Check if this needs to be moved to V2 or deleted
 			DeleteOwnedEntities(
 				[this, Callback](ErrorCode Error)
 				{
@@ -248,24 +245,31 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 								return;
 							}
 
-							SetScopes(
-								[this, Callback](ErrorCode Error)
+                            Connection->SetDisconnected(
+								[this](const std::exception_ptr& Except)
 								{
-									if (Error != ErrorCode::None)
-									{
-										INVOKE_IF_NOT_NULL(Callback, Error);
+									std::string DisconnectMessage = "Connection Closed.";
 
-										return;
+									if (Except)
+									{
+										try
+										{
+											std::rethrow_exception(Except);
+										}
+										catch (const std::exception& e)
+										{
+											INVOKE_IF_NOT_NULL(NetworkInterruptionCallback, e.what());
+										}
 									}
 
-									StartListening(Callback);
+									CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
 								});
 						});
 				});
 		});
 }
 
-void MultiplayerConnection::InitialiseConnection(ErrorCodeCallbackHandler Callback)
+void MultiplayerConnection::InitialiseConnection(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)
 	{
@@ -274,28 +278,21 @@ void MultiplayerConnection::InitialiseConnection(ErrorCodeCallbackHandler Callba
 		return;
 	}
 
+    SetScopes(InSpaceId,
+			[this, Callback](ErrorCode Error)
+			{
+				if (Error != ErrorCode::None)
+				{
+					INVOKE_IF_NOT_NULL(Callback, Error);
+
+					return;
+				}
+
+				StartListening(Callback);
+			});
+
 	// TODO: Support getting errors from RetrieveAllEntities
 	SpaceEntitySystemPtr->RetrieveAllEntities();
-
-	Connection->SetDisconnected(
-		[this](const std::exception_ptr& Except)
-		{
-			std::string DisconnectMessage = "Connection Closed.";
-
-			if (Except)
-			{
-				try
-				{
-					std::rethrow_exception(Except);
-				}
-				catch (const std::exception& e)
-				{
-					INVOKE_IF_NOT_NULL(NetworkInterruptionCallback, e.what());
-				}
-			}
-
-			CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
-		});
 
 	INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
 }
@@ -604,7 +601,7 @@ void MultiplayerConnection::RequestClientId(ErrorCodeCallbackHandler Callback)
 	Connection->Invoke("GetClientId", signalr::value(signalr::value_type::array), LocalCallback);
 }
 
-void MultiplayerConnection::SetScopes(ErrorCodeCallbackHandler Callback)
+void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)
 	{
@@ -629,7 +626,7 @@ void MultiplayerConnection::SetScopes(ErrorCodeCallbackHandler Callback)
 	std::vector<signalr::value> ScopesVec;
 
 	// Set the scope using the Space Id
-	ScopesVec.push_back(signalr::value(SpaceId.c_str()));
+	ScopesVec.push_back(signalr::value(InSpaceId.c_str()));
 
 	std::vector<signalr::value> ParamsVec;
 	ParamsVec.push_back(ScopesVec);

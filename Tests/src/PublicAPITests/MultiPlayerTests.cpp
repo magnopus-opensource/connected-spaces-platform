@@ -505,6 +505,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -521,6 +522,27 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
+	{
+		bool Connected	 = false;
+		auto* Connection = new csp::multiplayer::MultiplayerConnection();
+		//Connection = CSP_NEW csp::multiplayer::MultiplayerConnection();
+
+		Connection->Connect(
+			[&Connected](ErrorCode ErrCode)
+			{
+				Connected = true;
+				ASSERT_EQ(ErrCode, ErrorCode::None);
+			});
+
+		while (!Connected)
+		{
+			std::this_thread::sleep_for(50ms);
+		}
+		//auto [Error] = AWAIT(Connection, Connect);
+
+		//ASSERT_EQ(Error, ErrorCode::None);
+	}
+
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -532,9 +554,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
@@ -543,11 +563,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	// Connect and initialise
 	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-
-		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
+		auto [Error] = AWAIT(Connection, InitialiseConnection, Space.Id);
 
 		ASSERT_EQ(Error, ErrorCode::None);
 	}

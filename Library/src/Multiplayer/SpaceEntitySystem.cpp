@@ -1062,11 +1062,6 @@ SpaceEntity* SpaceEntitySystem::GetObjectByIndex(const size_t ObjectIndex)
 	return Objects[ObjectIndex];
 }
 
-MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnection()
-{
-	return MultiplayerConnectionInst;
-}
-
 void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);

@@ -471,15 +471,21 @@ void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
 
 bool ClientElectionManager::IsConnected() const
 {
-	if (SpaceEntitySystemPtr->GetMultiplayerConnection() == nullptr)
-		return false;
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
+	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
-	return SpaceEntitySystemPtr->GetMultiplayerConnection()->Connected;
+	if (Connection == nullptr)
+	{
+		return false;
+	}
+
+	return Connection->Connected;
 }
 
 void ClientElectionManager::BindNetworkEvents()
 {
-	MultiplayerConnection* Connection = SpaceEntitySystemPtr->GetMultiplayerConnection();
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
+	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
 	Connection->ListenNetworkEvent(ClientElectionMessage,
 								   [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
@@ -496,7 +502,9 @@ void ClientElectionManager::BindNetworkEvents()
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-	MultiplayerConnection* Connection = SpaceEntitySystemPtr->GetMultiplayerConnection();
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
+	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
+
 	Connection->StopListenNetworkEvent(ClientElectionMessage);
 	Connection->StopListenNetworkEvent(RemoteRunScriptMessage);
 }

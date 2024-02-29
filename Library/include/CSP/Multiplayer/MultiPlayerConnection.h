@@ -75,7 +75,7 @@ public:
 	friend class ClientElectionEventHandler;
 	/** @endcond */
 
-	MultiplayerConnection(csp::common::String InSpaceId);
+	MultiplayerConnection();
 	~MultiplayerConnection();
 
 	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
@@ -114,7 +114,7 @@ public:
 
 	/// @brief Initialise the connection and get initial entity data from the server.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void InitialiseConnection(ErrorCodeCallbackHandler Callback);
+	CSP_ASYNC_RESULT void InitialiseConnection(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
@@ -206,7 +206,7 @@ private:
 
 	void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
 	void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
-	void SetScopes(ErrorCodeCallbackHandler Callback);
+	void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
 	void RequestClientId(ErrorCodeCallbackHandler Callback);
 
 	void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
@@ -221,8 +221,6 @@ private:
 	ConversationSystem* ConversationSystemPtr;
 
 	uint64_t ClientId;
-
-	csp::common::String SpaceId;
 
 	DisconnectionCallbackHandler DisconnectionCallback;
 	ConnectionCallbackHandler ConnectionCallback;
