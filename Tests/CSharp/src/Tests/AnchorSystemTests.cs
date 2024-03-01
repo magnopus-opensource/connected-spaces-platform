@@ -187,21 +187,15 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -240,21 +234,15 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -317,21 +305,15 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -432,21 +414,15 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -514,21 +490,15 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }

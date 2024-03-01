@@ -1,5 +1,3 @@
-#define RUN_ALL_UNIT_TESTS
-
 using System;
 using System.IO;
 using System.Threading;
