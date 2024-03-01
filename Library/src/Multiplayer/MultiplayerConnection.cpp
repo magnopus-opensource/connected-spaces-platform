@@ -119,7 +119,6 @@ MultiplayerConnection::MultiplayerConnection()
 	: Connection(nullptr)
 	, WebSocketClient(nullptr)
 	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
-	, SpaceEntitySystemPtr(CSP_NEW SpaceEntitySystem(this))
 	, ClientId(0)
 	, Connected(false)
 	, ConversationSystemPtr(CSP_NEW ConversationSystem(this))
@@ -135,16 +134,14 @@ MultiplayerConnection::~MultiplayerConnection()
 			const auto _Connection			  = Connection;
 			const auto _WebSocketClient		  = WebSocketClient;
 			const auto _NetworkEventManager	  = NetworkEventManager;
-			const auto _SpaceEntitySystemPtr  = SpaceEntitySystemPtr;
 			const auto _ConversationSystemPtr = ConversationSystemPtr;
 
 			DisconnectWithReason("MultiplayerConnection shutting down.",
-								 [_Connection, _WebSocketClient, _NetworkEventManager, _SpaceEntitySystemPtr, _ConversationSystemPtr](ErrorCode)
+								 [_Connection, _WebSocketClient, _NetworkEventManager, _ConversationSystemPtr](ErrorCode)
 								 {
 									 CSP_DELETE(_Connection);
 									 CSP_DELETE(_WebSocketClient);
 									 CSP_DELETE(_NetworkEventManager);
-									 CSP_DELETE(_SpaceEntitySystemPtr);
 									 CSP_DELETE(_ConversationSystemPtr);
 								 });
 		}
@@ -153,7 +150,6 @@ MultiplayerConnection::~MultiplayerConnection()
 			CSP_DELETE(Connection);
 			CSP_DELETE(WebSocketClient);
 			CSP_DELETE(NetworkEventManager);
-			CSP_DELETE(SpaceEntitySystemPtr);
 			CSP_DELETE(ConversationSystemPtr);
 		}
 	}
@@ -164,7 +160,6 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
 	Connection					   = InBoundConnection.Connection;
 	WebSocketClient				   = InBoundConnection.WebSocketClient;
 	NetworkEventManager			   = InBoundConnection.NetworkEventManager;
-	SpaceEntitySystemPtr		   = InBoundConnection.SpaceEntitySystemPtr;
 	ConversationSystemPtr		   = InBoundConnection.ConversationSystemPtr;
 	ClientId					   = InBoundConnection.ClientId;
 	DisconnectionCallback		   = InBoundConnection.DisconnectionCallback;
@@ -200,8 +195,8 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 															 KEEP_ALIVE_INTERVAL,
 															 std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 	NetworkEventManager->SetConnection(Connection);
-	SpaceEntitySystemPtr->SetConnection(Connection);
 	ConversationSystemPtr->SetConnection(Connection);
+	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
 
 	StartEventMessageListening();
 
@@ -264,37 +259,11 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 
 									CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
 								});
+
+                            StartListening(Callback);
 						});
 				});
 		});
-}
-
-void MultiplayerConnection::InitialiseConnection(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback)
-{
-	if (Connection == nullptr || !Connected)
-	{
-		INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
-
-		return;
-	}
-
-    SetScopes(InSpaceId,
-			[this, Callback](ErrorCode Error)
-			{
-				if (Error != ErrorCode::None)
-				{
-					INVOKE_IF_NOT_NULL(Callback, Error);
-
-					return;
-				}
-
-				StartListening(Callback);
-			});
-
-	// TODO: Support getting errors from RetrieveAllEntities
-	SpaceEntitySystemPtr->RetrieveAllEntities();
-
-	INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
 }
 
 void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
@@ -311,8 +280,6 @@ void MultiplayerConnection::Disconnect(ErrorCodeCallbackHandler Callback)
 
 void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback)
 {
-	Cleanup();
-
 	const ExceptionCallbackHandler StopHandler = [this, Callback, Reason](const std::exception_ptr& Except)
 	{
 		if (Except != nullptr)
@@ -481,43 +448,6 @@ void MultiplayerConnection::StartEventMessageListening()
 	};
 
 	Connection->On("OnEventMessage", LocalCallback);
-}
-
-void MultiplayerConnection::Cleanup()
-{
-	if (SpaceEntitySystemPtr == nullptr)
-	{
-		return;
-	}
-
-	SpaceEntitySystemPtr->LockEntityUpdate();
-
-	const auto NumEntities = SpaceEntitySystemPtr->GetNumEntities();
-
-	for (size_t i = 0; i < NumEntities; ++i)
-	{
-		SpaceEntity* Entity = SpaceEntitySystemPtr->GetEntityByIndex(i);
-
-		// We automatically invoke SignalR deletion for all transient entities that were owned by this local client
-		// as these are only ever valid for a single connected session
-		if (Entity->GetIsTransient() && Entity->GetOwnerId() == GetClientId())
-		{
-			SpaceEntitySystemPtr->DestroyEntity(Entity,
-												[](auto Ok)
-												{
-												});
-		}
-		// Otherwise we clear up all all locally represented entities
-		else
-		{
-			SpaceEntitySystemPtr->LocalDestroyEntity(Entity);
-		}
-	}
-
-	// Flush all pending adds/removes/updates
-	SpaceEntitySystemPtr->ProcessPendingEntityOperations();
-
-	SpaceEntitySystemPtr->UnlockEntityUpdate();
 }
 
 void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const
@@ -693,11 +623,6 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 uint64_t MultiplayerConnection::GetClientId() const
 {
 	return ClientId;
-}
-
-SpaceEntitySystem* MultiplayerConnection::GetSpaceEntitySystem() const
-{
-	return SpaceEntitySystemPtr;
 }
 
 ConversationSystem* MultiplayerConnection::GetConversationSystem() const

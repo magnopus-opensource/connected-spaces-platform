@@ -179,7 +179,7 @@ void SystemsManager::CreateSystems()
 
 	ScriptSystem->Initialise();
 
-	//MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
+	MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
 
 	AnalyticsSystem       = CSP_NEW csp::systems::AnalyticsSystem();
 	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);

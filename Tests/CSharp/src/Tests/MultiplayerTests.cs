@@ -1,3 +1,5 @@
+#define RUN_ALL_UNIT_TESTS
+
 using System;
 using System.IO;
 using System.Threading;
@@ -11,7 +13,6 @@ using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
 using static CSharpTests.TestHelper;
-
 
 namespace CSPEngine
 {
@@ -29,10 +30,6 @@ namespace CSPEngine
         static void Connect(Multiplayer.MultiplayerConnection connection, bool pushCleanupFunction = true)
         {
             var res = connection.Connect().Result;
-
-            Assert.AreEqual(Multiplayer.ErrorCode.None, res);
-
-            res = connection.InitialiseConnection().Result;
 
             Assert.AreEqual(Multiplayer.ErrorCode.None, res);
 
@@ -103,16 +100,6 @@ namespace CSPEngine
                 PushCleanupFunction(() => DeleteEntity(entitySystem, outEntity));
         }
 
-        public static Multiplayer.MultiplayerConnection CreateMultiplayerConnection(string spaceId, bool pushCleanupFunction = true)
-        {
-            var connection = new Multiplayer.MultiplayerConnection(spaceId);
-
-            if (pushCleanupFunction)
-                PushCleanupFunction(() => connection.Dispose());
-
-            return connection;
-        }
-
         static void OnEntityUpdate(object sender, (Multiplayer.SpaceEntity entity, Multiplayer.SpaceEntityUpdateFlags arg2, Common.Array<Multiplayer.ComponentUpdateInfo>) eventArgs)
         {
             var transform = eventArgs.entity.GetTransform();
@@ -138,8 +125,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
 
@@ -169,8 +157,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
 
@@ -213,8 +202,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
 
@@ -258,8 +248,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
 
@@ -334,8 +325,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, pushCleanupFunction: false);
 
-            var connection = CreateMultiplayerConnection(space.Id, false);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) =>
             {
@@ -359,15 +351,10 @@ namespace CSPEngine
             var entityID = entity.GetId();
 
             Disconnect(connection);
-            connection.Dispose();
 
             UserSystemTests.LogOut(userSystem);
 
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
-
-            // Connect
-            connection = CreateMultiplayerConnection(space.Id, pushCleanupFunction: false);
-            entitySystem = connection.GetSpaceEntitySystem();
 
             var resetEvent = new ManualResetEvent(false);
 
@@ -398,7 +385,6 @@ namespace CSPEngine
 
             DeleteEntity(entitySystem, otherUserEntity);
             Disconnect(connection);
-            connection.Dispose();
 
             UserSystemTests.LogOut(userSystem);
 
@@ -424,13 +410,15 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             var scriptSystemReady = new ManualResetEvent(false);
 
             entitySystem.OnEntityCreated += (s, e) => { };
-            entitySystem.OnScriptSystemReady += (s, e) => {
+            entitySystem.OnScriptSystemReady += (s, e) =>
+            {
                 Console.WriteLine("ScriptSystemReady called");
 
                 scriptSystemReady.Set();
@@ -519,8 +507,9 @@ namespace CSPEngine
             }
 
             {
-                using var connection = CreateMultiplayerConnection(space1.Id, false);
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var systemsManager = Systems.SystemsManager.Get();
+                var connection = systemsManager.GetMultiplayerConnection();
+                var entitySystem = systemsManager.GetSpaceEntitySystem();
 
                 entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -563,8 +552,9 @@ namespace CSPEngine
             }
 
             {
-                using var connection = CreateMultiplayerConnection(space2.Id, false);
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var systemsManager = Systems.SystemsManager.Get();
+                var connection = systemsManager.GetMultiplayerConnection();
+                var entitySystem = systemsManager.GetSpaceEntitySystem();
 
                 entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -613,8 +603,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -687,8 +678,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -728,8 +720,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -784,8 +777,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -855,8 +849,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -940,8 +935,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1020,8 +1016,9 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1252,8 +1249,9 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
             }
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1384,8 +1382,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1453,8 +1452,9 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             // Connect to the SignalR server
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1554,9 +1554,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Connect to the SignalR server
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1629,9 +1629,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Connect to the SignalR server
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1695,8 +1695,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1794,8 +1795,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -1919,8 +1921,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2024,8 +2027,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2095,8 +2099,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2155,8 +2160,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2226,8 +2232,9 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
             {
-                using var connection = CreateMultiplayerConnection(space.Id, false);
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var systemsManager = Systems.SystemsManager.Get();
+                var connection = systemsManager.GetMultiplayerConnection();
+                var entitySystem = systemsManager.GetSpaceEntitySystem();
 
                 entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2299,8 +2306,9 @@ namespace CSPEngine
             }
 
             {
-                using var connection = CreateMultiplayerConnection(space.Id, false);
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var systemsManager = Systems.SystemsManager.Get();
+                var connection = systemsManager.GetMultiplayerConnection();
+                var entitySystem = systemsManager.GetSpaceEntitySystem();
 
                 var testComplete = false;
 
@@ -2372,11 +2380,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-            
+
             Connect(connection);
 
             // A local avatar needs to be created in order for LeaderElection to initialise the script system
@@ -2444,8 +2453,9 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
 
@@ -2503,12 +2513,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Connect to the SignalR server
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             Connect(connection);
-            
+
             // Create object to represent the spline component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2545,11 +2555,12 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-            
+
             Connect(connection);
 
             // Create object to represent the fog
@@ -2632,9 +2643,10 @@ namespace CSPEngine
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2717,12 +2729,12 @@ namespace CSPEngine
             // Create space
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var connection = CreateMultiplayerConnection(space.Id);
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             // Connect
             Connect(connection);
-
-            var entitySystem = connection.GetSpaceEntitySystem();
 
             const int numClientInstances = 4;
 
@@ -2793,9 +2805,9 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            // Connect to the SignalR server
-            var connection = CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
@@ -2888,10 +2900,11 @@ namespace CSPEngine
             }
 
             
-            var connection = CreateMultiplayerConnection(space.Id);
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             // Enable Leader Election Feature flag
-            var entitySystem = connection.GetSpaceEntitySystem();
             if (EnableLeaderElection)
             {
                 entitySystem.EnableLeaderElection();
