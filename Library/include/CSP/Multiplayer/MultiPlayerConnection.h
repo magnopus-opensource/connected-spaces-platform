@@ -30,6 +30,7 @@
 
 namespace csp::systems
 {
+class SpaceSystem;
 class SystemsManager;
 }
 
