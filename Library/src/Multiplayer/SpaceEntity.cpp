@@ -148,7 +148,7 @@ void SpaceEntity::SetName(const csp::common::String& Value)
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
@@ -179,7 +179,7 @@ void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
@@ -204,7 +204,7 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
@@ -229,7 +229,7 @@ void SpaceEntity::SetScale(const csp::common::Vector3& Value)
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
@@ -259,7 +259,7 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
@@ -279,7 +279,7 @@ void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatf
 	if (!IsModifiable())
 	{
 		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
-							 "owner of. Entity name:",
+							 "owner of. Entity name: %s",
 							 Name.c_str());
 		return;
 	}
