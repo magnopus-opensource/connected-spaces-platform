@@ -184,7 +184,7 @@ if not CSP then
     end
 
     function CSP.IsAppleTarget()
-        return os.istarget("macosx") or os.istarget("ios") or os.istarget("visionos")
+        return os.istarget("macosx") or os.istarget("ios")
     end
 
     function CSP.IsVisionOSTarget()
