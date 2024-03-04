@@ -140,6 +140,7 @@ void CustomSpaceComponentScriptInterface::SetCustomProperty(const std::string& K
 	}
 
 	static_cast<CustomSpaceComponent*>(Component)->SetCustomProperty(Key.c_str(), SetValue);
+	SendPropertyUpdate();
 }
 
 
