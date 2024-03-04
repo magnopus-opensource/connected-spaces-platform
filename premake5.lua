@@ -6,50 +6,15 @@ include "Tests/CSharp/premake5.lua"
 include "Tests/Multiplayer/premake5.lua"
 include "Library/premake5.lua"
 
+-- The root premake script for CSP.
+-- Windows and Android builds require a Windows workstation.
+-- iOS, VisionOS and MacOS require a MacOS workstation.
 
 --Custom build options
 newoption {
     trigger     = "generate_wasm",
     description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
 }
-
-newoption
-{
-    trigger     = "visionos",
-    description = "Generate the project for building for VisionOS."
-}
-
--- We create separate workspaces/projects for Apple platforms
-premake.override(_G, "project", function(base, ...)
-    local rval = base(...)
-    local args = {...}
-
-    if(CSP.IsVisionOSTarget()) then
-        -- VisionOS builds are highly similar to iOS. Changing the target SDK for all build targets is all that is required.
-        filter "system:ios"
-            filename(args[1] .. "_visionos")
-        filter {}
-
-        xcodebuildsettings
-        {
-            ["SDKROOT"] = "xros"
-        }
-    else
-        filter "system:ios"
-            filename(args[1] .. "_ios")
-        filter {}
-    end
-    return rval
-end)
-
-premake.override(_G, "workspace", function(base, ...)
-    local rval = base(...)
-    local args = {...}
-    filter "system:visionos"
-        filename(args[1] .. "_visionos")
-    filter {}
-    return rval
-end)
 
 solution( "ConnectedSpacesPlatform" )
     -- Build configurations

@@ -31,4 +31,5 @@ then
 	fi
 fi
 
+# Premake does not yet support VisionOS. So we build for 'iOS' with a visionos argument. We then respond to that where necessary in the scripts.
 ./modules/premake/bin/release/premake5 --os=ios --visionos xcode4 "$@"
