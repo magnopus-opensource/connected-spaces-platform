@@ -3,14 +3,12 @@
 # DLLOnly - Generates a solution with only DLL-related build configurations
 python3 -m pip install -r teamcity/requirements.txt
 
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-XCODE_VERSION=$(softwareupdate --history | awk '/Command Line Tools for Xcode/ {print $6}' | tail -1)
-cd "${DIR}"
-
 git config core.hooksPath .githooks
 git config commit.template .githooks/commit-template.txt
 
-if [ ! -f ./modules/premake/README.md ]
+XCODE_VERSION=$(softwareupdate --history | awk '/Command Line Tools for Xcode/ {print $6}' | tail -1)
+
+if [ ! -f /modules/premake/README.md ]
 then
 	git submodule update --recursive
 fi
@@ -26,4 +24,5 @@ then
     cd ../../../..
 fi
 
-./modules/premake/bin/release/premake5 --os=macosx xcode4 "$@"
+# Premake does not yet support VisionOS. So we build for 'iOS' with a visionos argument. We then respond to that where necessary in the scripts.
+./modules/premake/bin/release/premake5 --os=ios --visionos xcode4 "$@"

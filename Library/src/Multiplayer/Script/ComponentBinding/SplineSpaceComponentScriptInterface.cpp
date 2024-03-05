@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+
 
 namespace csp::multiplayer
 {
@@ -27,7 +29,6 @@ csp::multiplayer::SplineSpaceComponentScriptInterface::SplineSpaceComponentScrip
 }
 
 ComponentScriptInterface::Vector3 SplineSpaceComponentScriptInterface::GetLocationAlongSpline(float NormalisedDistance)
-
 {
 	auto Result = static_cast<SplineSpaceComponent*>(Component)->GetLocationAlongSpline(NormalisedDistance);
 
@@ -40,13 +41,14 @@ std::vector<ComponentScriptInterface::Vector3> SplineSpaceComponentScriptInterfa
 
 	auto Result = static_cast<SplineSpaceComponent*>(Component)->GetWaypoints();
 
-	for (int i = 0; i < Result.Size() / 3; ++i)
+	for (int i = 0; i < Result.Size(); ++i)
 	{
 		ReturnList.push_back({Result[i].X, Result[i].Y, Result[i].Z});
 	}
 
 	return ReturnList;
 }
+
 void SplineSpaceComponentScriptInterface::SetWaypoints(std::vector<Vector3> Waypoints)
 {
 	csp::common::List<csp::common::Vector3> ConvertedList;
