@@ -18,7 +18,7 @@ function TinySpline.AddProject()
     }
     
     -- Source directories for this project
-    sysincludedirs { 
+    externalincludedirs { 
         "%{prj.location}/../../tinyspline/src"
     }
     

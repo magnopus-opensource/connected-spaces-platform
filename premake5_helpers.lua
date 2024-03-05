@@ -1,5 +1,37 @@
 #!lua
 
+-- Regarding VisionOS, as premake does not yet support the device, we support running premake targeting an iOS project with this argument set, and then make 
+-- the neccessary changes to target VisionOS, using a combination of premake overrides and conditionals (search for `IsVisionOSTarget`).
+newoption
+{
+    trigger     = "visionos",
+    description = "Generate the project for building for VisionOS. This option must be used in conjunction with a premake target system platform of iOS in order to generate VisionOS projects."
+}
+
+-- We create separate workspaces/projects for Apple platforms
+premake.override(_G, "project", function(base, ...)
+    local rval = base(...)
+    local args = {...}
+
+    if(CSP.IsVisionOSTarget()) then
+        -- VisionOS builds are highly similar to iOS. 
+        -- We ensure a separate xcodeworkspace is created, and that the appropriate VisionOS SDK is used.
+        filter "system:ios"
+            filename(args[1] .. "_visionos")
+        filter {}
+
+        xcodebuildsettings
+        {
+            ["SDKROOT"] = "xros"
+        }
+    else
+        filter "system:ios"
+            filename(args[1] .. "_ios")
+        filter {}
+    end
+    return rval
+end)
+
 if not CSP then
 	CSP = {}
 
@@ -15,7 +47,11 @@ if not CSP then
 
     function CSP.UseStandardSettings()
         -- Build location
-        targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+        if not CSP.IsVisionOSTarget() then
+            targetdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
+        else
+            targetdir "%{prj.location}/Binaries/visionos/%{cfg.buildcfg}"
+        end
 
         -- Intermediate C++ files
         objdir "%{prj.location}/Intermediate"
@@ -147,8 +183,12 @@ if not CSP then
         return (_OPTIONS["generate_wasm"] ~= nil)
     end
 
-    function CSP.IsTargettingMacOS()
+    function CSP.IsAppleTarget()
         return os.istarget("macosx") or os.istarget("ios")
+    end
+
+    function CSP.IsVisionOSTarget()
+        return os.istarget("ios") and _OPTIONS["visionos"] ~= nil
     end
 
     function CSP.IsGeneratingVS()
@@ -160,11 +200,11 @@ if not CSP then
     end
 
     function CSP.IsGeneratingCPPOnMac()
-        return CSP.IsTargettingMacOS() and CSP.IsGeneratingXCode()
+        return CSP.IsAppleTarget() and CSP.IsGeneratingXCode()
     end
 
     function CSP.IsGeneratingCSharpOnMac()
-        return CSP.IsTargettingMacOS() and CSP.IsGeneratingVS()
+        return CSP.IsAppleTarget() and CSP.IsGeneratingVS()
     end
     
     function CSP.HasCommandLineArgument(Argument)

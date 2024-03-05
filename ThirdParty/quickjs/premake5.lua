@@ -40,7 +40,7 @@ function QuickJS.AddProject()
     }
 
     -- Source directories for this project
-    sysincludedirs { 
+    externalincludedirs { 
         "%{prj.location}/include",
         "%{prj.location}/src",
     }
