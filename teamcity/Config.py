@@ -7,6 +7,7 @@ class DefaultArtifactPathsConfig:
     windows: str
     macosx: str
     ios: str
+    visionos: str
     android: str
     android64: str
     wasm: str
@@ -18,6 +19,7 @@ class ArtifactsConfig:
     windows: List[str]
     macosx: List[str]
     ios: List[str]
+    visionos: List[str]
     android: List[str]
     android64: List[str]
     wasm: List[str]
@@ -40,6 +42,7 @@ config = Config(
         windows="Library/Binaries/x64/ReleaseDLL",
         macosx="Library/Binaries/macosx/ReleaseDLL",
         ios="Library/Binaries/ios/ReleaseStatic",
+        visionos="Library/Binaries/visionos/ReleaseStatic",
         android="ARMv7/ReleaseDLL Android",
         android64="ARM64/ReleaseDLL Android",
         wasm="Library/Binaries/wasm/Release",
@@ -53,11 +56,14 @@ config = Config(
         ],
         macosx=[
             "libConnectedSpacesPlatform.dylib",
-            #"libConnectedSpacesPlatform_D.dylib"
         ],
         ios=[
             "libConnectedSpacesPlatform.a",
-            #"libConnectedSpacesPlatform_D.a",
+            "libcrypto.a",
+            "libssl.a"
+        ],
+        visionos=[
+            "libConnectedSpacesPlatform.a",
             "libcrypto.a",
             "libssl.a"
         ],

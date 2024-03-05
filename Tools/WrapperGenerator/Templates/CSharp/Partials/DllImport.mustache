@@ -1,5 +1,5 @@
 [DllImport(
-#if !UNITY_EDITOR && UNITY_IOS
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_VISIONOS)
     "__Internal"
 #elif DEBUG && !UNITY_EDITOR_OSX && !UNITY_STANDALONE_OSX
     "ConnectedSpacesPlatform_D"
