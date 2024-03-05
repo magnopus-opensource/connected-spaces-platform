@@ -156,6 +156,7 @@ SystemsManager::SystemsManager()
 	, EventTicketingSystem(nullptr)
 	, ECommerceSystem(nullptr)
 	, QuotaSystem(nullptr)
+	, MultiplayerConnection(nullptr)
 	, SpaceEntitySystem(nullptr)
 {
 }
