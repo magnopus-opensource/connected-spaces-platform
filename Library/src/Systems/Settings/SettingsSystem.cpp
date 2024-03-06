@@ -33,7 +33,7 @@
 #include <sstream>
 
 
-constexpr int MAX_RECENT_SPACES								= 10;
+constexpr int MAX_RECENT_SPACES								= 50;
 constexpr const char* AVATAR_PORTRAIT_ASSET_NAME			= "AVATAR_PORTRAIT_ASSET_";
 constexpr const char* AVATAR_PORTRAIT_ASSET_COLLECTION_NAME = "AVATAR_PORTRAIT_ASSET_COLLECTION_";
 
