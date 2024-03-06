@@ -55,6 +55,10 @@ class SignalRConnection;
 
 } // namespace csp::multiplayer
 
+namespace csp::systems
+{
+class SystemsManager;
+}
 
 
 /// @brief Namespace that encompasses everything in the multiplayer system
@@ -76,6 +80,7 @@ class CSP_API SpaceEntitySystem
 {
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
+	friend class csp::systems::SystemsManager;
 	friend class MultiplayerConnection;
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
@@ -187,10 +192,6 @@ public:
 	/// @param ObjectIndex size_t : The index of the object entity to get.
 	/// @return A pointer to the object entity with the given index.
 	SpaceEntity* GetObjectByIndex(const size_t ObjectIndex);
-
-	/// @brief Get the MultiplayerConnection object.
-	/// @return A pointer to the MultiplayerConnection object.
-	MultiplayerConnection* GetMultiplayerConnection();
 
 	/// @brief Add a new entity to the system.
 	///

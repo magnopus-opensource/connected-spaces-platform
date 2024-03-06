@@ -1,3 +1,4 @@
+#define RUN_ALL_UNIT_TESTS
 using System.Threading;
 
 using Common = Csp.Common;
@@ -53,21 +54,15 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-            var connection = new Multiplayer.MultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -312,8 +307,6 @@ namespace CSPEngine
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
-            connection.Dispose();
-
             spaceSystem.ExitSpace();
 
             UserSystemTests.LogOut(userSystem);
@@ -356,21 +349,15 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-            var connection = new Multiplayer.MultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -544,8 +531,6 @@ namespace CSPEngine
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
-            connection.Dispose();
-
             spaceSystem.ExitSpace();
 
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
@@ -576,21 +561,15 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-            var connection = new Multiplayer.MultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -656,8 +635,6 @@ namespace CSPEngine
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
-            connection.Dispose();
-
             spaceSystem.ExitSpace();
 
             SpaceSystemTests.DeleteSpace(spaceSystem, space);
@@ -691,21 +668,15 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-            var connection = new Multiplayer.MultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -799,8 +770,6 @@ namespace CSPEngine
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
-
-            connection.Dispose();
 
             spaceSystem.ExitSpace();
         }
@@ -1132,21 +1101,15 @@ namespace CSPEngine
                 Assert.AreEqual(resCode, Services.EResultCode.Success);
             }
 
-            var connection = new Multiplayer.MultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
                 var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var err = connection.InitialiseConnection().Result;
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
@@ -1293,8 +1256,6 @@ namespace CSPEngine
 
                 Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
-
-            connection.Dispose();
 
             spaceSystem.ExitSpace();
         }
