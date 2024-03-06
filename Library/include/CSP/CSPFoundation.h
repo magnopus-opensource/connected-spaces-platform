@@ -70,7 +70,7 @@ public:
 	/// @return bool : True for successful initialisation.
 	static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
 
-	/// @brief This should been used at the end of the of the application lifescyle.
+	/// @brief This should be used at the end of the application lifecycle.
 	/// Clears event queues and destroys foundation systems.
 	/// After shutdown, no other Foundation functions should be called until Initialise is called again.
 	/// @return bool : True for successful shutdown
