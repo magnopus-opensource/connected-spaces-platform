@@ -274,6 +274,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	auto UserSystem		 = SystemsManager.GetUserSystem();
 	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	csp::common::Array<TierFeatures> TierFeaturesArray = {TierFeatures::SpaceOwner,
 														  TierFeatures::ObjectCaptureUpload,
@@ -292,6 +293,12 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	// Log in
 	LogIn(UserSystem, UserId);
 
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
+
 	// Create space
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -303,18 +310,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	EXPECT_EQ(Result.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result.GetFeatureLimitInfo().Limit, 50);
-
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-
-		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -335,9 +330,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
 	SpaceSystem->ExitSpace();
-
-	// Delete MultiplayerConnection
-	delete Connection;
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

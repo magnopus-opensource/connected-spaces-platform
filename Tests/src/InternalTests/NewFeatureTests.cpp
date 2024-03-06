@@ -190,7 +190,6 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
 	auto DeviceId2 = csp::CSPFoundation::GetDeviceId();
 
 	ASSERT_EQ(DeviceId1, DeviceId2);
-	csp::CSPFoundation::Shutdown();
 }
 
 class MyCoolClass

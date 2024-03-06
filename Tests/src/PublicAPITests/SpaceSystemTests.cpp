@@ -1173,6 +1173,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	auto& SystemsManager = ::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	// Get alt account user ID
 	String AltUserId;
@@ -1208,6 +1209,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Ensure alt test account can join space
 	{
+		// Connect
+		{
+			auto [Error] = AWAIT(Connection, Connect);
+
+			ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+		}
+
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1773,6 +1781,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	auto& SystemsManager = ::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	const char* TestSpaceName			  = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	  = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1794,6 +1803,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	LogOut(UserSystem);
 	String AltUserId;
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -2087,6 +2103,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	auto& SystemsManager = ::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -2096,6 +2113,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
+
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
@@ -2135,6 +2160,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	auto& SystemsManager = ::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -2153,6 +2179,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	LogOut(UserSystem);
 
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
+
 
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
@@ -2177,6 +2211,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	auto& SystemsManager = ::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -2207,6 +2242,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	LogOut(UserSystem);
 
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
+	}
 
 	// Note the space is now out of date and does not have the new user in it's lists
 

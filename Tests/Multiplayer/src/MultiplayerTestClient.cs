@@ -177,7 +177,7 @@ namespace MultiplayerTestClient
 
             if (connection != null)
             {
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
                 if (entitySystem != null)
                 {
@@ -195,7 +195,7 @@ namespace MultiplayerTestClient
         {
             if (connection != null)
             {
-                var entitySystem = connection.GetSpaceEntitySystem();
+                var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
                 if (entitySystem != null)
                 {
@@ -231,12 +231,10 @@ namespace MultiplayerTestClient
 
         public void ConnectToSpace(string SpaceId)
         {
-            connection = new Csp.Multiplayer.MultiplayerConnection(SpaceId);
 
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
             var res = connection.Connect().Result;
-            res = connection.InitialiseConnection().Result;
             Log("Multiplayer connected");
 
             entitySystem.OnEntityCreated += (s, e) => { Log("OnEntityCreated"); };
@@ -250,7 +248,7 @@ namespace MultiplayerTestClient
 
         public void CreateAvatar(string avatarName, string avatarId)
         {
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
             var transform = new Multiplayer.SpaceTransform();
             var res = entitySystem.CreateAvatar(avatarName, transform, Multiplayer.AvatarState.Idle, avatarId, Multiplayer.AvatarPlayMode.Default).Result;
@@ -260,7 +258,7 @@ namespace MultiplayerTestClient
 
         public void DestroyAvatar()
         {
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
             entitySystem.DestroyEntity(avatar);
             avatar.Dispose();
         }
@@ -279,7 +277,7 @@ namespace MultiplayerTestClient
         {
             Log("Create Test Script");
 
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
             // we'll be using this in a few places below as part of the test, so we declare it upfront
             const string ScriptText = @"

@@ -768,7 +768,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
 	/// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-	if (!EntitySystem->GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
+		if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
 	{
 		std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 		std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
@@ -1066,9 +1066,9 @@ bool SpaceEntity::Deselect()
 
 bool SpaceEntity::IsModifiable()
 {
-    if (EntitySystem != nullptr && EntitySystem->GetMultiplayerConnection() != nullptr)
+	if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
     {
-	    return (OwnerId == EntitySystem->GetMultiplayerConnection()->GetClientId() || IsTransferable);
+		return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
     }
     else
     {

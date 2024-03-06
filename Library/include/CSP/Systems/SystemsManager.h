@@ -18,6 +18,8 @@
 
 #include "CSP/CSPCommon.h"
 
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
+
 #include <chrono>
 #include <functional>
 
@@ -70,7 +72,6 @@ template <typename T> void Delete(T* Ptr);
 CSP_END_IGNORE
 
 } // namespace csp::memory
-
 
 namespace csp::systems
 {
@@ -149,6 +150,10 @@ public:
 	/// @return QuotaSystem : pointer to the Quota system class
 	QuotaSystem* GetQuotaSystem();
 
+    csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
+
+    csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
+
 private:
 	SystemsManager();
 	~SystemsManager();
@@ -163,6 +168,8 @@ private:
 
 	csp::web::WebClient* WebClient;
 
+    csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
+	csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
 	UserSystem* UserSystem;
 	SpaceSystem* SpaceSystem;
 	AssetSystem* AssetSystem;
