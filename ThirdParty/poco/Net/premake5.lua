@@ -33,7 +33,7 @@ if not POCO.Net then
             "POCO_NET_NO_IPv6"
         }
             
-        sysincludedirs {
+        externalincludedirs {
             "%{prj.location}/include",
             "%{prj.location}/../Foundation/include"
         }

@@ -23,7 +23,7 @@ if not Project then
         -- Generate version
         cwd = os.getcwd()
 
-        if CSP.IsTargettingMacOS() then
+        if CSP.IsAppleTarget() then
             if not CSP.IsGeneratingVS() then
                 code = os.execute("python3 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
@@ -213,10 +213,6 @@ if not Project then
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/ios"
             }
 
-            libdirs {
-                "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
-            }
-
             links {
                 "ssl",            
                 "crypto"
@@ -303,7 +299,7 @@ if not Project then
 			"tinyspline"
         }
 
-        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx" }
+        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx", "platforms:not ios" }
             links {
                 "mimalloc"
             }
@@ -312,6 +308,20 @@ if not Project then
                 "POCONetSSL_OpenSSL"
             }
         filter {}
+
+        if CSP.IsVisionOSTarget() then
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/VisionOS"
+                }
+            filter {}
+        else
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
+                }
+            filter {}
+        end
 
         -- Debug/Release config settings
         filter "configurations:*Debug*"

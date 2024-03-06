@@ -41,7 +41,7 @@ if not POCO.Crypto then
             linkoptions { "-lm" } -- For gcc's math lib
             staticruntime("On")
 
-            sysincludedirs {
+            externalincludedirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/android"
             }
 

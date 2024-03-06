@@ -6,33 +6,15 @@ include "Tests/CSharp/premake5.lua"
 include "Tests/Multiplayer/premake5.lua"
 include "Library/premake5.lua"
 
+-- The root premake script for CSP.
+-- Windows and Android builds require a Windows workstation.
+-- iOS, VisionOS and MacOS require a MacOS workstation.
 
 --Custom build options
 newoption {
     trigger     = "generate_wasm",
     description = "Generate the project for building WebAssembly. This option should only be used with the gmake2 action"
 }
-
-
--- @RossB: We create separate workspaces/projects for iOS and MacOSX platforms
-premake.override(_G, "project", function(base, ...)
-    local rval = base(...)
-    local args = {...}
-    filter "system:ios"
-        filename(args[1] .. "_ios")
-    filter {}
-    return rval
-end)
-
-premake.override(_G, "workspace", function(base, ...)
-    local rval = base(...)
-    local args = {...}
-    filter "system:ios"
-        filename(args[1] .. "_ios")
-    filter {}
-    return rval
-end)
-
 
 solution( "ConnectedSpacesPlatform" )
     -- Build configurations

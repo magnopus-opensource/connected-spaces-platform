@@ -7,11 +7,7 @@ if not WrapperGenerator then
         local script_path = "Tools/WrapperGenerator/WrapperGenerator.py"
 
         if os.istarget("macosx") or os.istarget("ios") then
-            if _ACTION == "vs2019" then
-                return os.execute("python3 " .. script_path .. " --generate_csharp")
-            else
-                return os.execute("python3 " .. script_path)
-            end
+            return os.execute("python3 " .. script_path .. " --generate_csharp")
         elseif os.istarget("windows") then
             return os.execute("py " .. script_path .. " --generate_csharp --generate_typescript")
         else
