@@ -134,7 +134,49 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 							   }
 
-							   INVOKE_IF_NOT_NULL(Callback, InternalResult);
+							   auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+                               // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+                               // This hopefully will change in a future version when CHS support it.
+							   MultiplayerConnection->StopListening(
+								   [MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+								   {
+									   if (Error != csp::multiplayer::ErrorCode::None)
+									   {
+										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+										   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+										   return;
+									   }
+
+									   MultiplayerConnection->SetScopes(
+										   SpaceId,
+										   [MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+										   {
+											   if (Error != csp::multiplayer::ErrorCode::None)
+											   {
+												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+												   return;
+											   }
+
+											   MultiplayerConnection->StartListening(
+												   [InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+												   {
+													   if (Error != csp::multiplayer::ErrorCode::None)
+													   {
+														   CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
+																				Error);
+														   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+														   return;
+													   }
+
+													   // TODO: Support getting errors from RetrieveAllEntities
+													   csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
+
+													   INVOKE_IF_NOT_NULL(Callback, InternalResult);
+												   });
+										   });
+								   });
 						   });
 		}
 		else
@@ -164,7 +206,48 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 			}
 
-			INVOKE_IF_NOT_NULL(Callback, InternalResult);
+			auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+            // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+			// This hopefully will change in a future version when CHS support it.
+			MultiplayerConnection->StopListening(
+				[MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+				{
+					if (Error != csp::multiplayer::ErrorCode::None)
+					{
+						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+						return;
+					}
+
+					MultiplayerConnection->SetScopes(
+						SpaceId,
+						[MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+						{
+							if (Error != csp::multiplayer::ErrorCode::None)
+							{
+								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+								return;
+							}
+
+							MultiplayerConnection->StartListening(
+								[InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+								{
+									if (Error != csp::multiplayer::ErrorCode::None)
+									{
+										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s", Error);
+										INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+										return;
+									}
+
+									// TODO: Support getting errors from RetrieveAllEntities
+									csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
+
+									INVOKE_IF_NOT_NULL(Callback, InternalResult);
+								});
+						});
+				});
 		}
 	};
 
@@ -874,12 +957,12 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 	{
 		CSP_LOG_ERROR_MSG("GetSpaceMetadata called with empty SpaceId. Aborting call.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceMetadataResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceMetadataResult>());
 
 		return;
 	}
-	
-    AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
+
+	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback](const AssetCollectionResult& Result)
 	{
 		SpaceMetadataResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
@@ -1154,7 +1237,7 @@ void SpaceSystem::RemoveMetadata(const String& SpaceId, NullResultCallback Callb
 	{
 		CSP_LOG_ERROR_MSG("RemoveMetadata called with empty SpaceId. Aborting call.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
 		return;
 	}

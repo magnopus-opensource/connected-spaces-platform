@@ -207,6 +207,37 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 
 SpaceEntitySystem::~SpaceEntitySystem()
 {
+	LockEntityUpdate();
+
+	const auto NumEntities = GetNumEntities();
+
+	for (size_t i = 0; i < NumEntities; ++i)
+	{
+		SpaceEntity* Entity = GetEntityByIndex(i);
+
+		// We automatically invoke SignalR deletion for all transient entities that were owned by this local client
+		// as these are only ever valid for a single connected session
+		if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
+		{
+			DestroyEntity(Entity,
+												[](auto Ok)
+												{
+												});
+		}
+		// Otherwise we clear up all all locally represented entities
+		else
+		{
+			LocalDestroyEntity(Entity);
+		}
+	}
+
+    // Clear adds/removes, we don't want to add or remove if we're shutting down.
+    PendingAdds->clear();
+    PendingRemoves->clear();
+	PendingIncomingUpdates->clear();
+
+	UnlockEntityUpdate();
+
 	EntityScriptBinding::RemoveBinding(ScriptBinding);
 
 	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
@@ -1062,11 +1093,6 @@ SpaceEntity* SpaceEntitySystem::GetObjectByIndex(const size_t ObjectIndex)
 	return Objects[ObjectIndex];
 }
 
-MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnection()
-{
-	return MultiplayerConnectionInst;
-}
-
 void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -1308,8 +1334,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 		if (Destroy)
 		{
-			std::scoped_lock EntitiesLocker(*EntitiesLock);
-
 			// Deletion
 			for (int i = 0; i < Entities.Size(); ++i)
 			{
@@ -1341,8 +1365,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 		}
 		else
 		{
-			std::scoped_lock EntitiesLocker(*EntitiesLock);
-
 			bool EntityFound = false;
 
 			// Update

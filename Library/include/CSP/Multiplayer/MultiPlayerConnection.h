@@ -28,6 +28,20 @@
 #include <map>
 #include <vector>
 
+namespace csp::systems
+{
+class SpaceSystem;
+class SystemsManager;
+}
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -68,17 +82,14 @@ class CSP_API MultiplayerConnection
 {
 public:
 	/** @cond DO_NOT_DOCUMENT */
-	friend class SpaceEntitySystem;
 	friend class ConversationSystem;
+	friend class csp::systems::SpaceSystem;
+	friend class csp::systems::SystemsManager;
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class ClientElectionEventHandler;
+	friend void csp::memory::Delete<MultiplayerConnection>(MultiplayerConnection* Ptr);
 	/** @endcond */
-
-	MultiplayerConnection(csp::common::String InSpaceId);
-	~MultiplayerConnection();
-
-	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
 	// Simple callback that receives an error code.
 	typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
@@ -105,16 +116,13 @@ public:
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
 	/// @brief Start the connection and register to start receiving updates from the server.
+    /// Connect should be called after LogIn and before EnterSpace.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief End the multiplayer connection.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
-
-	/// @brief Initialise the connection and get initial entity data from the server.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void InitialiseConnection(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
@@ -172,10 +180,6 @@ public:
 	/// @return uint64_t the ClientID for this connection.
 	uint64_t GetClientId() const;
 
-	/// @brief Gets a pointer to the space entity system.
-	/// @return A pointer to the space entity system.
-	SpaceEntitySystem* GetSpaceEntitySystem() const;
-
 	/// @brief Gets a pointer to the conversation system.
 	/// @return A pointer to the conversation system.
 	ConversationSystem* GetConversationSystem() const;
@@ -196,6 +200,11 @@ public:
 	bool GetAllowSelfMessagingFlag() const;
 
 private:
+	MultiplayerConnection();
+	~MultiplayerConnection();
+
+	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
+
 	typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
 
 	void Start(ExceptionCallbackHandler Callback) const;
@@ -206,23 +215,19 @@ private:
 
 	void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
 	void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
-	void SetScopes(ErrorCodeCallbackHandler Callback);
+	void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
 	void RequestClientId(ErrorCodeCallbackHandler Callback);
 
 	void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
 
 	void StartEventMessageListening();
 
-	void Cleanup();
 	class csp::multiplayer::SignalRConnection* Connection;
 	class csp::multiplayer::IWebSocketClient* WebSocketClient;
 	class NetworkEventManagerImpl* NetworkEventManager;
-	SpaceEntitySystem* SpaceEntitySystemPtr;
 	ConversationSystem* ConversationSystemPtr;
 
 	uint64_t ClientId;
-
-	csp::common::String SpaceId;
 
 	DisconnectionCallbackHandler DisconnectionCallback;
 	ConnectionCallbackHandler ConnectionCallback;

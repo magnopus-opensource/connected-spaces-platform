@@ -74,7 +74,9 @@ public:
 	 *
 	 *   @{ */
 
-	/// @brief Enter a space.
+	/// @brief Enter a space if you have permission to, based on the Space settings. 
+    /// This includes setting scopes (and toggling event listening in order to set the scope). 
+    /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
 	/// @param Space Space : space to enter into
 	/// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
