@@ -36,7 +36,7 @@ namespace csp::multiplayer
 
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
 	: ComponentBase(ComponentType::Conversation, Parent)
-	, ConversationSystem(Parent->GetSpaceEntitySystem()->GetMultiplayerConnection()->GetConversationSystem())
+	, ConversationSystem(csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetConversationSystem())
 {
 	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)]	 = "";
 	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)]		 = true;

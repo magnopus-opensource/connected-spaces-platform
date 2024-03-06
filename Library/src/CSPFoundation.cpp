@@ -272,8 +272,6 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 
 	csp::systems::SystemsManager::Instantiate();
 
-	csp::systems::SystemsManager::Get().GetScriptSystem()->Initialise();
-
 	*DeviceId	  = LoadDeviceId().c_str();
 	IsInitialised = true;
 

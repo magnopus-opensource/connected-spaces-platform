@@ -53,6 +53,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -64,6 +66,13 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
+
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -72,25 +81,10 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-
-		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
@@ -115,7 +109,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -135,6 +128,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -146,6 +141,13 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
+
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -154,25 +156,10 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
-
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-
-		std::tie(Error) = AWAIT(Connection, InitialiseConnection);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
@@ -207,7 +194,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 

@@ -159,8 +159,6 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	}
 
 	CSP_DELETE(User);
-
-	csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeserialisationTest)
@@ -209,8 +207,6 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 
 	CSP_DELETE(DeserialisedUser);
 	CSP_DELETE(User);
-
-	csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSerialisationTest)
@@ -336,8 +332,6 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	}
 
 	CSP_DELETE(Object);
-
-	csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeserialisationTest)
@@ -385,8 +379,6 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 
 	CSP_DELETE(DeserialisedObject);
 	CSP_DELETE(Object);
-
-	csp::CSPFoundation::Shutdown();
 }
 
 #endif
