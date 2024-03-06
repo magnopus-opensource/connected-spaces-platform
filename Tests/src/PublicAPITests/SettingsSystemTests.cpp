@@ -29,6 +29,7 @@
 
 using namespace std::chrono_literals;
 
+#define RUN_SETTINGSSYSTEM_TESTS 1
 
 namespace
 {
@@ -393,7 +394,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
+		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
@@ -408,7 +409,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 		auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortrait, RequestPredicate, AvatarPortrait);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
+		auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
 		EXPECT_EQ(GetAvatarPortraitResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_TRUE(IsUriValid(GetAvatarPortraitResult.GetUri().c_str(), LocalFileName));
 	}
@@ -449,7 +450,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 	auto [Result] = AWAIT_PRE(SettingsSystem, UpdateAvatarPortraitWithBuffer, RequestPredicate, AvatarPortraitThumbnail);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	// get asset uri
-	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate);
+	auto [GetAvatarPortraitResult] = AWAIT_PRE(SettingsSystem, GetAvatarPortrait, RequestPredicate, UserId);
 	csp::systems::Asset Asset;
 	Asset.FileName = "OKO.png";
 	Asset.Uri	   = GetAvatarPortraitResult.GetUri().c_str();
