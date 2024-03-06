@@ -157,7 +157,7 @@ namespace CSPEngine
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
             }
             {
-                using var result = settingsSystem.GetAvatarPortrait().Result;
+                using var result = settingsSystem.GetAvatarPortrait(userId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
                 Assert.IsTrue(result.GetUri().Contains(localFileName));
@@ -193,7 +193,7 @@ namespace CSPEngine
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
-                using var resultGetThumbnail = settingsSystem.GetAvatarPortrait().Result;
+                using var resultGetThumbnail = settingsSystem.GetAvatarPortrait(userId).Result;
 
                 Assert.AreEqual(resultGetThumbnail.GetResultCode(), Systems.EResultCode.Success);
 

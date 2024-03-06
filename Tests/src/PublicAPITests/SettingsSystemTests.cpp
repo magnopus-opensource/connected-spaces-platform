@@ -29,8 +29,6 @@
 
 using namespace std::chrono_literals;
 
-#define RUN_SETTINGSSYSTEM_TESTS 1
-
 namespace
 {
 
