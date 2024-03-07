@@ -66,13 +66,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -138,8 +131,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 			EXPECT_EQ(Result, WayPoints[WayPoints.Size() - 1]);
 		}
 
-		AWAIT(Connection, Disconnect);
-
 		SpaceSystem->ExitSpace();
 	}
 
@@ -171,13 +162,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -224,8 +208,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 
 	// expect final waypoint to be the same
 	EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

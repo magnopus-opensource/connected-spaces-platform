@@ -32,6 +32,7 @@ namespace csp::systems
 {
 class SpaceSystem;
 class SystemsManager;
+class UserSystem;
 }
 
 namespace csp::memory
@@ -85,6 +86,7 @@ public:
 	friend class ConversationSystem;
 	friend class csp::systems::SpaceSystem;
 	friend class csp::systems::SystemsManager;
+	friend class csp::systems::UserSystem;
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class ClientElectionEventHandler;
@@ -115,14 +117,7 @@ public:
 	// Callback to receive access permission changes Data when a message is sent.
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
-	/// @brief Start the connection and register to start receiving updates from the server.
-    /// Connect should be called after LogIn and before EnterSpace.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
 
-	/// @brief End the multiplayer connection.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
@@ -206,6 +201,15 @@ private:
 	MultiplayerConnection(const MultiplayerConnection& InBoundConnection);
 
 	typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
+
+	/// @brief Start the connection and register to start receiving updates from the server.
+    /// Connect should be called after LogIn and before EnterSpace.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
+
+	/// @brief End the multiplayer connection.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
 
 	void Start(ExceptionCallbackHandler Callback) const;
 	void Stop(ExceptionCallbackHandler Callback) const;

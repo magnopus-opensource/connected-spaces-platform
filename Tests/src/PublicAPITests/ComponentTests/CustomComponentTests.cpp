@@ -92,13 +92,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -197,20 +190,11 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		AWAIT(Connection, Disconnect);
-
 		SpaceSystem->ExitSpace();
 	}
 
 	// Re-Enter space and verify contents
 	{
-		// Connect
-		{
-			auto [Error] = AWAIT(Connection, Connect);
-
-			ASSERT_EQ(Error, ErrorCode::None);
-		}
-
 		// Reload the space and verify the contents match
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -282,8 +266,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 				EXPECT_EQ(CustomComponent->HasCustomProperty("Boolean"), false);
 			}
 		}
-
-		AWAIT(Connection, Disconnect);
 
 		SpaceSystem->ExitSpace();
 	}

@@ -66,13 +66,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -108,8 +101,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -140,13 +131,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -192,8 +176,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

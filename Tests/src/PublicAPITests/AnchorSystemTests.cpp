@@ -245,13 +245,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
@@ -289,8 +282,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
@@ -325,13 +316,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -390,8 +374,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
@@ -425,13 +407,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
 
 	csp::systems::Space Space;
 	csp::common::Array<csp::common::String> SpaceId(1);
@@ -546,8 +521,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	CreatedAnchorIds[0] = Anchor.Id;
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
@@ -583,13 +556,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -654,8 +620,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	EXPECT_EQ(AnchorsFound, 2);
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 
@@ -758,13 +722,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
@@ -803,8 +760,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	// Cleanup
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

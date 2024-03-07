@@ -17,8 +17,6 @@
 
         public abstract void CreateMultiProcessTestScript();
         public abstract void SimulateLeaderLost();
-
-        public abstract void Disconnect();
         public abstract void Logout();
 
         public abstract void Close();

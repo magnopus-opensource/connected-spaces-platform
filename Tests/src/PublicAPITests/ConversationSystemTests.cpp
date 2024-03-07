@@ -99,13 +99,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 	// Log in
 	LogIn(UserSystem, DefaultTestUserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
 
 	// Create space
@@ -185,9 +178,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	// Disconnect signalR
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -219,13 +209,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	// Log in
 	LogIn(UserSystem, DefaultTestUserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -394,8 +377,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -428,13 +409,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -536,8 +510,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 	}
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	LogOut(UserSystem);
@@ -545,13 +517,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	// Log in with the second account
 	csp::common::String SecondTestUserId;
 	LogIn(UserSystem, SecondTestUserId, AlternativeLoginEmail, AlternativeLoginPassword);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -714,8 +679,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	LogOut(UserSystem);
@@ -761,13 +724,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -868,9 +824,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	// Cleanup
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -911,13 +864,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1028,9 +974,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	// Cleanup
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -1071,13 +1014,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1185,9 +1121,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 
 	EXPECT_TRUE(ConversationDeleteConversationcallbackCalled);
 
-	// Cleanup
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -1217,13 +1150,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1378,9 +1304,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 
 	EXPECT_TRUE(ConversationConversationInfocallbackCalled);
 
-	// Clean up
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -1408,13 +1331,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1539,9 +1455,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	}
 
 	EXPECT_TRUE(ConversationMessageInfoCallbackCalled);
-
-	// Clean up
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

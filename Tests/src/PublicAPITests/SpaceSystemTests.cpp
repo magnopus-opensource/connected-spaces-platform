@@ -1209,13 +1209,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Ensure alt test account can join space
 	{
-		// Connect
-		{
-			auto [Error] = AWAIT(Connection, Connect);
-
-			ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-		}
-
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1804,13 +1797,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	String AltUserId;
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 	ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -2114,13 +2100,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
@@ -2180,14 +2159,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
-
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
@@ -2243,15 +2214,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	// Note the space is now out of date and does not have the new user in it's lists
-
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 

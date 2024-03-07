@@ -73,13 +73,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -118,8 +111,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		PortalSpaceID = PortalComponent->GetSpaceId();
 
-		AWAIT(Connection, Disconnect);
-
 		SpaceSystem->ExitSpace();
 	}
 
@@ -128,13 +119,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 	*/
 
 	{
-		// Connect
-		{
-			auto [Error] = AWAIT(Connection, Connect);
-
-			ASSERT_EQ(Error, ErrorCode::None);
-		}
-
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -145,8 +129,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 			});
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-
-		AWAIT(Connection, Disconnect);
 
 		SpaceSystem->ExitSpace();
 	}
@@ -181,13 +163,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	auto FilePath = std::filesystem::absolute("assets/OKO.png");
 
@@ -244,8 +219,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
 	EXPECT_TRUE(HasThumbailResult);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -276,13 +249,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -341,9 +307,6 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Y, 5.5f);
 	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, 6.6f);
 	EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
-
-	// Cleanup
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

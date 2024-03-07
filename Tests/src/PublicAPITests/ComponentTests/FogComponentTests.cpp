@@ -68,13 +68,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -135,8 +128,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
 	EXPECT_TRUE(FogComponent->GetIsVolumetric());
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -167,13 +158,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -231,8 +215,6 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
 	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
 	EXPECT_TRUE(FogComponent->GetIsVolumetric());
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 
