@@ -193,13 +193,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            // Connect to multiplayer service
-            {
-                var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
             var objectName = "TestObject";
             MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);
 
@@ -239,13 +232,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            // Connect to multiplayer service
-            {
-                var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
 
             var objectName1 = "TestObject1";
             MultiplayerTests.CreateObject(entitySystem, objectName1, out var createdObject1, false);
@@ -310,13 +296,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            // Connect to multiplayer service
-            {
-                var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
 
             var objectName = "TestObject";
             MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -420,13 +399,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            // Connect to multiplayer service
-            {
-                var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
-
             var objectName1 = "TestObject1";
             MultiplayerTests.CreateObject(entitySystem, objectName1, out var createdObject1, false);
             var objectName2 = "TestObject2";
@@ -495,13 +467,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            // Connect to multiplayer service
-            {
-                var err = connection.Connect().Result;
-
-                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
-            }
 
             var objectName = "TestObject";
             MultiplayerTests.CreateObject(entitySystem, objectName, out var createdObject, false);

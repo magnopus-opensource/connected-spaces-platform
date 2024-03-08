@@ -492,8 +492,6 @@ namespace CSPEngine
 
                 portalSpaceId = portalComponent.GetSpaceId();
 
-                // Disconnect from the SignalR server
-                Disconnect(connection);
             }
 
             spaceSystem.ExitSpace();
@@ -964,8 +962,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the conversation
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -1197,8 +1193,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the conversation
             var objectName1 = "TestObject1";
             CreateObject(entitySystem, objectName1, out var createdObject1, false);
@@ -1330,8 +1324,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the audio
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -1399,8 +1391,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1502,8 +1492,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the audio component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -1577,8 +1565,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the audio component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -1642,8 +1628,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
@@ -1742,8 +1726,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the Collision component
             var objectName = "TestObject";
@@ -1869,8 +1851,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the audio
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -1975,8 +1955,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the image
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2047,8 +2025,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the spline component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2107,8 +2083,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the spline
             var objectName = "TestObject";
@@ -2180,8 +2154,6 @@ namespace CSPEngine
 
                 entitySystem.OnEntityCreated += (s, e) => { };
 
-                Connect(connection, false);
-
                 // Create object to represent the Custom Component
                 CreateObject(entitySystem, objectName, out var createdObject, false);
 
@@ -2243,8 +2215,6 @@ namespace CSPEngine
                 entitySystem.QueueEntityUpdate(createdObject);
                 entitySystem.ProcessPendingEntityOperations();
                 Thread.Sleep(3000);
-
-                Disconnect(connection);
             }
 
             {
@@ -2294,15 +2264,11 @@ namespace CSPEngine
                     testComplete = true;
                 };
 
-                Connect(connection, false);
-
                 // Wait until test complete
                 while (!testComplete)
                 {
                     Thread.Sleep(100);
                 }
-
-                Disconnect(connection);
             }
         }
 #endif
@@ -2327,8 +2293,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // A local avatar needs to be created in order for LeaderElection to initialise the script system
             CreateAvatar(entitySystem, "Player 1", "MyCoolAvatar", out var avatar);
@@ -2399,8 +2363,6 @@ namespace CSPEngine
             var connection = systemsManager.GetMultiplayerConnection();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
-            Connect(connection);
-
             bool gotEvent = false;
 
             //TODO: Create callback delegate for recieve event
@@ -2459,8 +2421,6 @@ namespace CSPEngine
             var connection = systemsManager.GetMultiplayerConnection();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
-            Connect(connection);
-
             // Create object to represent the spline component
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2502,8 +2462,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the fog
             var objectName = "TestObject";
@@ -2592,8 +2550,6 @@ namespace CSPEngine
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
-            Connect(connection);
-
             // Create object to represent the fog
             var objectName = "TestObject";
             CreateObject(entitySystem, objectName, out var createdObject, false);
@@ -2675,9 +2631,6 @@ namespace CSPEngine
             var connection = systemsManager.GetMultiplayerConnection();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
-            // Connect
-            Connect(connection);
-
             const int numClientInstances = 4;
 
             IMultiplayerTestClient[] clients = new IMultiplayerTestClient[numClientInstances];
@@ -2752,8 +2705,6 @@ namespace CSPEngine
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
-
-            Connect(connection);
 
             // Create object to represent the audio component
             var objectName = "TestObject";
