@@ -19,9 +19,9 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/SystemsResult.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::services
 {
@@ -85,7 +85,7 @@ enum class ConversationMessageType
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when a message is being retrieved
-class CSP_API MessageResult : public csp::services::ResultBase
+class CSP_API MessageResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -105,14 +105,11 @@ public:
 	/// @retrun The message info.
 	[[nodiscard]] const MessageInfo& GetMessageInfo() const;
 
-	/// @brief Creates an invalid MessageResult instance that can be used to notify the user of an error.
-	/// @return MessageResult : invalid MessageResult instance.
-	CSP_NO_EXPORT static MessageResult Invalid();
+	CSP_NO_EXPORT MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	explicit MessageResult(void*) {};
 	MessageResult() = default;
-	MessageResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection);
 
@@ -121,7 +118,7 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a collection of messages
-class CSP_API MessageCollectionResult : public csp::services::ResultBase
+class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -140,10 +137,6 @@ public:
 	/// @retrun Array of message info objects.
 	[[nodiscard]] const csp::common::Array<MessageInfo>& GetMessages() const;
 
-	/// @brief Creates an invalid MessageCollectionResult instance that can be used to notify the user of an error.
-	/// @return MessageCollectionResult : invalid MessageCollectionResult instance
-	CSP_NO_EXPORT static MessageCollectionResult Invalid();
-
 	/// @brief Retrieves the total number of messages in the conversation.
 	///
 	/// If the async operation was using pagination this count number represents the sum of how many messages exist in all pages.
@@ -152,10 +145,15 @@ public:
 	/// @return uint64_t : count number as described above.
 	[[nodiscard]] uint64_t GetTotalCount() const;
 
+	/// @brief Sets the value returned by `GetTotalCount()`
+	CSP_NO_EXPORT void SetTotalCount(uint64_t Value);
+
+	CSP_NO_EXPORT MessageCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	explicit MessageCollectionResult(void*) {};
 	explicit MessageCollectionResult(uint64_t ResultTotalCount) : ResultTotalCount(ResultTotalCount) {};
-	MessageCollectionResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections);
 
@@ -165,7 +163,7 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a conversation.
-class CSP_API ConversationResult : public csp::services::ResultBase
+class CSP_API ConversationResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ConversationSystem;
@@ -184,14 +182,11 @@ public:
 	/// @retrun The conversation info.
 	[[nodiscard]] const ConversationInfo& GetConversationInfo() const;
 
-	/// @brief Creates an invalid ConversationResult instance that can be used to notify the user of an error.
-	/// @return ConversationResult : invalid ConversationResult instance
-	CSP_NO_EXPORT static ConversationResult Invalid();
+	CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	explicit ConversationResult(void*) {};
 	ConversationResult() = default;
-	ConversationResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
 

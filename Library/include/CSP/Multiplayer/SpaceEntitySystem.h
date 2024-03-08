@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
@@ -26,18 +27,38 @@
 #include <mutex>
 #include <set>
 
+
 namespace signalr
 {
+
 class value;
-}
+
+} // namespace signalr
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
+
 
 namespace csp::multiplayer
 {
+
 class ClientElectionManager;
 
 class SignalRConnection;
 
 } // namespace csp::multiplayer
+
+namespace csp::systems
+{
+class SystemsManager;
+}
 
 
 /// @brief Namespace that encompasses everything in the multiplayer system
@@ -48,24 +69,27 @@ class MultiplayerConnection;
 class SpaceTransform;
 class SpaceEntity;
 
+
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
 /// This provides functions to create and manage multiple player avatars and other objects.
 /// It manages things like queueing updated entities and triggering tick events. Callbacks
 /// can be registered for certain events that occur within the entity system so clients can
 /// react appropriately.
-class CSP_API CSP_NO_DISPOSE SpaceEntitySystem
+class CSP_API SpaceEntitySystem
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
+	friend class csp::systems::SystemsManager;
 	friend class MultiplayerConnection;
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class EntityScript;
+	friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~SpaceEntitySystem();
-
 	// Callback used to provide a success/fail type of response.
 	typedef std::function<void(bool)> CallbackHandler;
 
@@ -132,15 +156,18 @@ public:
 
 	/// @brief Get the number of total entities in the system (both Avatars and Objects).
 	/// @return The total number of entities.
-	[[nodiscard]] size_t GetNumEntities() const;
+	[[nodiscard]]
+	size_t GetNumEntities() const;
 
 	/// @brief Get the number of total Avatars in the system.
 	/// @return The total number of Avatar entities.
-	[[nodiscard]] size_t GetNumAvatars() const;
+	[[nodiscard]]
+	size_t GetNumAvatars() const;
 
 	/// @brief Get the number of total Objects in the system.
 	/// @return The total number of object entities.
-	[[nodiscard]] size_t GetNumObjects() const;
+	[[nodiscard]]
+	size_t GetNumObjects() const;
 
 	/// @brief Get an Entity (Avatar or Object) by its index.
 	///
@@ -165,10 +192,6 @@ public:
 	/// @param ObjectIndex size_t : The index of the object entity to get.
 	/// @return A pointer to the object entity with the given index.
 	SpaceEntity* GetObjectByIndex(const size_t ObjectIndex);
-
-	/// @brief Get the MultiplayerConnection object.
-	/// @return A pointer to the MultiplayerConnection object.
-	MultiplayerConnection* GetMultiplayerConnection();
 
 	/// @brief Add a new entity to the system.
 	///
@@ -301,6 +324,7 @@ protected:
 
 private:
 	SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection);
+	~SpaceEntitySystem();
 
 	MultiplayerConnection* MultiplayerConnectionInst;
 	csp::multiplayer::SignalRConnection* Connection;

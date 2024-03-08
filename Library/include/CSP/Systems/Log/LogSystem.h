@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
 #include <functional>
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
+
 
 namespace csp::systems
 {
@@ -36,17 +48,19 @@ enum class LogLevel
 	All
 };
 
+
 /// @brief A Connected Spaces Platform level Logger for debugging or printing to console, also handles logging to a file.
 /// Contains a callback system that allows clients to react to specific logs or events.
-class CSP_API CSP_NO_DISPOSE LogSystem
+class CSP_API LogSystem
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<LogSystem>(LogSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~LogSystem();
-
 	typedef std::function<void(const csp::common::String&)> LogCallbackHandler;
 	typedef std::function<void(const csp::common::String&)> EventCallbackHandler;
 	typedef std::function<void(const csp::common::String&)> BeginMarkerCallbackHandler;
@@ -84,27 +98,27 @@ public:
 	/// @brief Log a message at a specific verbosity level.
 	/// @param Level The level to log this message at.
 	/// @param InMessage The message to be logged.
-	CSP_NO_EXPORT void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
+	void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage);
 	/// @brief Log an event.
 	/// @param InEvent The event to be logged.
-	CSP_NO_EXPORT void LogEvent(const csp::common::String& InEvent);
+	void LogEvent(const csp::common::String& InEvent);
 
 	/// @brief Specify a 'Marker' event which can be used to communicate a certain process occurring, usually for debugging.
-	CSP_NO_EXPORT void BeginMarker(const csp::common::String& InMarker);
+	void BeginMarker(const csp::common::String& InMarker);
 	/// @brief End a 'Marker' event.
-	CSP_NO_EXPORT void EndMarker();
+	void EndMarker();
 
 	/// @brief Clears all logging callbacks.
 	void ClearAllCallbacks();
 
 private:
 	LogSystem();
+	~LogSystem();
 
 	csp::systems::LogLevel SystemLevel = LogLevel::All;
 
 	void LogToFile(const csp::common::String& InMessage);
 
-private:
 	// Allocate internally to avoid warning C4251 'needs to have dll-interface to be used by clients'
 	struct LogCallbacks* Callbacks;
 };

@@ -1,5 +1,5 @@
 using Common = Csp.Common;
-using Services = Csp.Services;
+using Multiplayer = Csp.Multiplayer;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -43,7 +43,7 @@ namespace CSPEngine
                 .Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchor = result.GetAnchor();
             LogDebug($"Anchor Created (Id: {anchor.Id})");
@@ -86,7 +86,7 @@ namespace CSPEngine
                 .Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchor = result.GetAnchor();
             LogDebug($"Anchor Created (Id: {anchor.Id})");
@@ -115,7 +115,7 @@ namespace CSPEngine
             var result = anchorSystem.DeleteAnchors(_anchorIDs).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             foreach (var id in anchorIDs)
                 LogDebug($"Anchor Deleted (Id: {id})");
@@ -133,7 +133,7 @@ namespace CSPEngine
             var result = anchorSystem.CreateAnchorResolution(anchorId, successfullyResolved, resolveAttempted, resolveTime, tags).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             var anchorResolution = result.GetAnchorResolution();
 
@@ -187,23 +187,17 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var ok = connection.InitialiseConnection().Result;
-
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";
@@ -240,23 +234,17 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var ok = connection.InitialiseConnection().Result;
-
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName1 = "TestObject1";
@@ -317,23 +305,17 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var ok = connection.InitialiseConnection().Result;
-
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";
@@ -370,7 +352,7 @@ namespace CSPEngine
                 using var result = anchorSystem.GetAnchorsInArea(searchLocationOrigin, searchRadius, spacialKeys, spacialValues, tags, true, spaceIds, null, null).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 anchorCollection = result.GetAnchors();
             }
@@ -432,23 +414,17 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var ok = connection.InitialiseConnection().Result;
-
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName1 = "TestObject1";
@@ -471,7 +447,7 @@ namespace CSPEngine
                 using var result = anchorSystem.GetAnchorsInSpace(space.Id, null, null).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 anchorCollection = result.GetAnchors();
 
@@ -483,6 +459,7 @@ namespace CSPEngine
             for (uint idx = 0; idx < anchorCollection.Size(); ++idx)
             {
                 Assert.AreEqual(anchorCollection[idx].SpaceId, space.Id);
+
                 if (anchorCollection[idx].ThirdPartyAnchorId == anchor1.ThirdPartyAnchorId ||
                     anchorCollection[idx].ThirdPartyAnchorId == anchor2.ThirdPartyAnchorId)
                 {
@@ -513,23 +490,17 @@ namespace CSPEngine
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
-            var connection = MultiplayerTests.CreateMultiplayerConnection(space.Id);
-            var entitySystem = connection.GetSpaceEntitySystem();
+            var systemsManager = Systems.SystemsManager.Get();
+            var connection = systemsManager.GetMultiplayerConnection();
+            var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
 
             // Connect to multiplayer service
             {
-                var ok = connection.Connect().Result;
+                var err = connection.Connect().Result;
 
-                Assert.IsTrue(ok);
-            }
-
-            // Fetch all entities, etc.
-            {
-                var ok = connection.InitialiseConnection().Result;
-
-                Assert.IsTrue(ok);
+                Assert.AreEqual(Multiplayer.ErrorCode.None, err);
             }
 
             var objectName = "TestObject";

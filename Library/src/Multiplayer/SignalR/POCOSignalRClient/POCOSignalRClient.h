@@ -21,6 +21,7 @@
 #include <atomic>
 #include <mutex>
 #include <signalrclient/signalr_client_config.h>
+#include <signalrclient/hub_exception.h>
 #include <thread>
 
 

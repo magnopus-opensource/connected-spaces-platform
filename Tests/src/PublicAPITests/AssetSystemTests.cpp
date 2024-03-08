@@ -42,14 +42,14 @@ namespace
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
-bool RequestPredicateWithProgress(const csp::services::ResultBase& Result)
+bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-	if (Result.GetResultCode() == csp::services::EResultCode::InProgress)
+	if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 	{
 		PrintProgress(Result.GetRequestProgress());
 
@@ -79,7 +79,7 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem,
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::CreateAssetCollection, AssetSystem, SpaceId, ParentId, Name, nullptr, type, Tags)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAssetCollection = Result.GetAssetCollection();
 }
@@ -88,25 +88,29 @@ void DeleteAssetCollection(csp::systems::AssetSystem* AssetSystem, csp::systems:
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAssetCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void GetAssetCollections(csp::systems::AssetSystem* AssetSystem,
 						 csp::systems::Space& Space,
 						 csp::common::Array<csp::systems::AssetCollection>& OutAssetCollections)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionsByCriteria,
-							  AssetSystem,
-							  Space.Id,
-							  nullptr,
-							  csp::systems::EAssetCollectionType::DEFAULT,
-							  nullptr,
-							  nullptr,
-							  nullptr,
-							  nullptr)
-						.Await(RequestPredicate);
+	csp::common::Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::DEFAULT};
+	csp::common::Array<csp::common::String> GroupIds					  = {Space.Id};
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	auto [Result] = AWAIT_PRE(AssetSystem,
+							  FindAssetCollections,
+							  RequestPredicate,
+							  nullptr,
+							  nullptr,
+							  nullptr,
+							  PrototypeTypes,
+							  nullptr,
+							  GroupIds,
+							  nullptr,
+							  nullptr);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& AssetCollections = Result.GetAssetCollections();
 	OutAssetCollections			 = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
@@ -123,7 +127,7 @@ void GetAssetCollectionByName(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionByName, AssetSystem, AssetCollectionName).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAssetCollection = Result.GetAssetCollection();
 }
@@ -135,9 +139,10 @@ void GetAssetCollectionsByIds(csp::systems::AssetSystem* AssetSystem,
 {
 	EXPECT_FALSE(Ids.IsEmpty());
 
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionsByIds, AssetSystem, Ids).Await(RequestPredicate);
+	auto [Result]
+		= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, Ids, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& AssetCollections = Result.GetAssetCollections();
 	OutAssetCollections			 = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
@@ -164,7 +169,7 @@ void CreateAsset(csp::systems::AssetSystem* AssetSystem,
 							  csp::systems::EAssetType::MODEL)
 						.Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAsset = Result.GetAsset();
 }
@@ -177,7 +182,7 @@ void UploadAssetData(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutUri = Result.GetUri();
 }
@@ -190,7 +195,7 @@ void UploadAssetData(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutUri = Result.GetUri();
 }
@@ -202,7 +207,7 @@ void GetAssetById(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollectionId, AssetId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutAsset = Result.GetAsset();
 }
@@ -211,14 +216,14 @@ void DeleteAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetColl
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::DeleteAsset, AssetSystem, AssetCollection, Asset).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void UpdateAsset(csp::systems::AssetSystem* AssetSystem, csp::systems::AssetCollection& AssetCollection, csp::systems::Asset& Asset)
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Asset).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 void GetAssetsInCollection(csp::systems::AssetSystem* AssetSystem,
@@ -227,7 +232,7 @@ void GetAssetsInCollection(csp::systems::AssetSystem* AssetSystem,
 {
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetsInCollection, AssetSystem, AssetCollection).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& Assets = Result.GetAssets();
 	OutAssets		   = csp::common::Array<csp::systems::Asset>(Assets.Size());
@@ -246,7 +251,7 @@ void GetAssetsByCollectionIds(csp::systems::AssetSystem* AssetSystem,
 
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetsByCollectionIds, AssetSystem, Ids).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& Assets = Result.GetAssets();
 	OutAssets		   = csp::common::Array<csp::systems::Asset>(Assets.Size());
@@ -284,7 +289,7 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 		EXPECT_EQ(Tags[i], AssetCollection.Tags[i]);
 	}
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 
 	OutMetaData = ResultAssetCollection.GetMetadataImmutable();
@@ -306,10 +311,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -355,7 +360,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -371,7 +376,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 	GetAssetCollectionByName(AssetSystem, UniqueAssetCollectionName, AssetCollection);
 
 	EXPECT_EQ(AssetCollection.Name, UniqueAssetCollectionName);
-	EXPECT_TRUE(AssetCollection.SpaceIds.IsEmpty());
+	EXPECT_TRUE(AssetCollection.SpaceId.IsEmpty());
 
 	// Delete asset collection
 	DeleteAssetCollection(AssetSystem, NewAssetCollection);
@@ -396,13 +401,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -472,13 +477,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -539,10 +544,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -600,13 +605,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 	const char* TestExternalUri			  = "https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF-Binary/Duck.glb";
 	const char* TestExternalMimeType	  = "model/gltf-binary";
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
 	ThirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
@@ -643,7 +648,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAsset, AssetSystem, Assets[0]).Await(RequestPredicate);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Get assets
 	GetAssetsInCollection(AssetSystem, AssetCollection, Assets);
@@ -683,16 +688,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256], UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName1[256], UniqueAssetName2[256], UniqueAssetName3[256];
-	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
-	SPRINTF(UniqueAssetName3, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName, GetUniqueString().c_str());
+	SPRINTF(UniqueAssetName3, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -759,8 +764,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETCOLLECTIONS_BY_DIFFERENT_CRITERIA_TEST
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCriteriaTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_FINDASSETCOLLECTIONS_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 {
 	SetRandSeed();
 
@@ -774,16 +779,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName1[256];
-	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName1, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName2[256];
-	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName2, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName3[256];
-	SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName3, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -810,17 +815,21 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 						  AssetCollection2);
 	CreateAssetCollection(AssetSystem, Space.Id, AssetCollection1.Id, UniqueAssetCollectionName3, nullptr, nullptr, AssetCollection3);
 
+	// Search by space
 	{
-		// search by space
+		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
+
 		auto [Result]
-			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, nullptr, SpaceIds, nullptr, nullptr);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 4);
 	}
+
+	// Search by parentId
 	{
-		// search by parentId
 		auto [Result] = AWAIT_PRE(AssetSystem,
-								  GetAssetCollectionsByCriteria,
+								  FindAssetCollections,
 								  RequestPredicate,
 								  nullptr,
 								  AssetCollection1.Id,
@@ -828,51 +837,64 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 								  nullptr,
 								  nullptr,
 								  nullptr,
+								  nullptr,
 								  nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection3.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection3.Name);
 	}
+
+	// Search by Tag
 	{
-		// search by Tag
 		auto [Result]
-			= AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, nullptr, nullptr, nullptr, Tag, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+			= AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, Tag, nullptr, nullptr, nullptr);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Id, AssetCollection2.Id);
 		EXPECT_EQ(Result.GetAssetCollections()[0].Name, AssetCollection2.Name);
 	}
+
+	// Search by names and types
 	{
-		// search by names and types
 		csp::common::Array<csp::common::String> AssetNames = {UniqueAssetCollectionName1, UniqueAssetCollectionName2};
 
-		// search for Default types with these names
+		// Search for Default types with these names
+		csp::common::Array<csp::systems::EAssetCollectionType> SearchTypes = {csp::systems::EAssetCollectionType::DEFAULT};
+
 		auto [EmptyResult] = AWAIT_PRE(AssetSystem,
-									   GetAssetCollectionsByCriteria,
+									   FindAssetCollections,
 									   RequestPredicate,
 									   nullptr,
 									   nullptr,
-									   csp::systems::EAssetCollectionType::DEFAULT,
-									   nullptr,
 									   AssetNames,
+									   SearchTypes,
+									   nullptr,
+									   nullptr,
 									   nullptr,
 									   nullptr);
-		EXPECT_EQ(EmptyResult.GetResultCode(), csp::services::EResultCode::Success);
+
+		EXPECT_EQ(EmptyResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssetCollections().Size(), 0);
 
-		// next, search names and space thumbnail type
+		// Then search names and space thumbnail type
+		SearchTypes = {csp::systems::EAssetCollectionType::SPACE_THUMBNAIL};
+
 		auto [Result] = AWAIT_PRE(AssetSystem,
-								  GetAssetCollectionsByCriteria,
+								  FindAssetCollections,
 								  RequestPredicate,
 								  nullptr,
 								  nullptr,
-								  csp::systems::EAssetCollectionType::SPACE_THUMBNAIL,
-								  nullptr,
 								  AssetNames,
+								  SearchTypes,
+								  nullptr,
+								  nullptr,
 								  nullptr,
 								  nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 2);
 
 		bool FoundFirstAssetCollection = false, FoundSecondAssetCollection = false;
@@ -895,10 +917,14 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByDifferentCrite
 
 		EXPECT_EQ(FoundFirstAssetCollection && FoundSecondAssetCollection, true);
 	}
+
+	// Test Pagination
 	{
-		// Test Pagination,
-		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetCollectionsByCriteria, RequestPredicate, Space.Id, nullptr, nullptr, nullptr, nullptr, 1, 1);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		csp::common::Array<csp::common::String> SpaceIds = {Space.Id};
+
+		auto [Result] = AWAIT_PRE(AssetSystem, FindAssetCollections, RequestPredicate, nullptr, nullptr, nullptr, nullptr, nullptr, SpaceIds, 1, 1);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssetCollections().Size(), 1);
 	}
 
@@ -929,16 +955,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetName[256];
-	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetName[256];
-	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -960,7 +986,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 		// search by asset id
 		csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, AssetIds, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
@@ -969,7 +995,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 		// search by asset name
 		csp::common::Array<csp::common::String> AssetNames = {FirstAsset.Name};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, FirstAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, FirstAsset.Name);
@@ -980,13 +1006,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
 		csp::common::Array<csp::systems::EAssetType> AssetTypes = {csp::systems::EAssetType::VIDEO};
 		auto [EmptyResult] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
-		EXPECT_EQ(EmptyResult.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(EmptyResult.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(EmptyResult.GetAssets().Size(), 0);
 
 		// next to Model append Video too
 		AssetTypes	  = {csp::systems::EAssetType::VIDEO, csp::systems::EAssetType::MODEL};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, {AssetCollection.Id}, nullptr, AssetNames, AssetTypes);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 2);
 
 		bool FoundFirstAsset = false, FoundSecondAsset = false;
@@ -1040,19 +1066,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetCollectionName[256];
-	SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetCollectionName[256];
-	SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueFirstAssetName[256];
-	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	char UniqueSecondAssetName[256];
-	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1078,13 +1104,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	//	csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
 	//	csp::common::Array<csp::common::String> AssetCollIds;
 	//	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollIds, AssetIds, nullptr, nullptr);
-	//	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	//	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	//}
 	{
 		// search by both asset collection Ids at the same time
 		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 2);
 		const auto& RetrievedAssets = Result.GetAssets();
 
@@ -1110,7 +1136,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
 		csp::common::Array<csp::common::String> AssetIds			 = {SecondAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, AssetIds, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
 		EXPECT_EQ(Result.GetAssets()[0].Id, SecondAsset.Id);
 		EXPECT_EQ(Result.GetAssets()[0].Name, SecondAsset.Name);
@@ -1144,13 +1170,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1179,7 +1205,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Upload data
 	auto [UploadNoMimeResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadNoMimeResult.GetUri();
 
@@ -1198,9 +1224,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Upload data with MimeType
 	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(UploadResult.GetXErrorCode(), "");
+	EXPECT_EQ(UploadResult.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	Asset.Uri = UploadResult.GetUri();
 
@@ -1215,7 +1241,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1263,13 +1289,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1295,9 +1321,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	// Upload data
 	auto [Result] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
-	EXPECT_EQ(Result.GetXErrorCode(), "assetdetail_invalidfilecontents");
+	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::AssetInvalidFileContents);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -1326,10 +1352,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1354,7 +1380,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Upload data
 	auto [UploadNoMimeResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadNoMimeResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadNoMimeResult.GetUri();
 
@@ -1373,7 +1399,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Upload data with MimeType
 	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
 
-	EXPECT_EQ(UploadResult.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset.Uri = UploadResult.GetUri();
 
@@ -1388,7 +1414,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1434,13 +1460,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1483,7 +1509,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	// Get data
 	auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, Asset);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	size_t DownloadedAssetDataSize = Result.GetDataLength();
 	auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
@@ -1526,13 +1552,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1615,13 +1641,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1712,10 +1738,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1764,10 +1790,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET";
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
@@ -1804,7 +1830,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	{
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetDataSize, RequestPredicate, UpdatedAsset);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetValue(), AssetData.Length());
 	}
 
@@ -1834,13 +1860,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	csp::common::String ThirdPartyPackagedAssetIdentifier	   = "OKO interoperable assets Test";
 	csp::common::String ThirdPartyPackagedAssetIdentifierLocal = "OKO interoperable assets Test Local";
@@ -1910,6 +1936,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1917,17 +1945,24 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1936,27 +1971,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	// Setup Asset callback
 	bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2014,7 +2034,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	EXPECT_EQ(CallbackAssetId, Asset.Id);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -2035,16 +2054,25 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -2053,27 +2081,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	// Setup Asset callback
 	bool AssetDetailBlobChangedCallbackCalled = false;
@@ -2102,9 +2115,9 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
 										 {Param1, Param2, Param3, Param4, Param5},
 										 Connection->GetClientId(),
-										 [](bool ok)
+										 [](ErrorCode Error)
 										 {
-											 EXPECT_TRUE(ok);
+											 EXPECT_EQ(Error, ErrorCode::None);
 										 });
 
 	// Wait for message
@@ -2123,7 +2136,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -2144,12 +2156,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
-
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -2161,9 +2167,164 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
-		EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 		EXPECT_EQ(Result.GetHttpResultCode(), 403);
 	}
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* SpaceDescription		= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+	auto FilePath						= std::filesystem::absolute("assets/test.json");
+
+	char SourceSpaceName[256];
+	SPRINTF(SourceSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char DestSpaceName[256];
+	SPRINTF(DestSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::AssetCollection SourceAssetCollection;
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create 'source' space and asset collection
+	csp::systems::Space SourceSpace;
+	{
+		printf("Creating source space and asset collection.\n");
+
+		CreateSpace(SpaceSystem, SourceSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, SourceSpace);
+
+		char AssetCollectionName[256];
+		SPRINTF(AssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+		char AssetName[256];
+		SPRINTF(AssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+		// Create an asset collection that belongs to the source space with a single valid asset
+		CreateAssetCollection(AssetSystem, SourceSpace.Id, nullptr, AssetCollectionName, nullptr, nullptr, SourceAssetCollection);
+
+		// Create an asset that belongs to the source collection
+		csp::systems::Asset Asset;
+		CreateAsset(AssetSystem, SourceAssetCollection, AssetName, nullptr, nullptr, Asset);
+
+		// Upload data for the source asset we have created
+		csp::systems::FileAssetDataSource Source;
+		Source.FilePath = FilePath.u8string().c_str();
+		Source.SetMimeType("application/json");
+
+		printf("Uploading source asset data...\n");
+
+		csp::common::String Uri;
+		UploadAssetData(AssetSystem, SourceAssetCollection, Asset, Source, Uri);
+	}
+
+	// Create 'dest' space and invoke the copy
+	csp::systems::Space DestSpace;
+	csp::common::Array<csp::systems::AssetCollection> DestAssetCollections;
+	{
+		printf("Creating dest space and invoking the copy...\n");
+
+		CreateSpace(SpaceSystem, DestSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, DestSpace);
+
+		csp::common::Array<csp::systems::AssetCollection> SourceAssetCollections = {SourceAssetCollection};
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+		DestAssetCollections = Result.GetAssetCollections();
+	}
+
+	// Validate the copied asset collection and its data
+	{
+		printf("Validating the copied asset collection and its data...\n");
+
+		EXPECT_EQ(DestAssetCollections.Size(), 1);
+		EXPECT_NE(DestAssetCollections[0].Id, SourceAssetCollection.Id);
+		EXPECT_EQ(DestAssetCollections[0].SpaceId, DestSpace.Id);
+		EXPECT_EQ(DestAssetCollections[0].Type, SourceAssetCollection.Type);
+		EXPECT_EQ(DestAssetCollections[0].Tags.Size(), 1);
+		EXPECT_EQ(DestAssetCollections[0].Tags[0],
+				  csp::common::String("origin-") + SourceAssetCollection.Id); // we expect the services to automatically denote the origin asset
+
+		csp::common::Array<csp::systems::Asset> DestAssets;
+		GetAssetsInCollection(AssetSystem, DestAssetCollections[0], DestAssets);
+
+		EXPECT_EQ(DestAssets.Size(), 1);
+
+		// Get the copied data and compare it with our source
+		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicateWithProgress, DestAssets[0]);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+		size_t DownloadedAssetDataSize = Result.GetDataLength();
+		auto DownloadedAssetData	   = new uint8_t[DownloadedAssetDataSize];
+		memcpy(DownloadedAssetData, Result.GetData(), DownloadedAssetDataSize);
+
+		FILE* File		   = fopen(FilePath.string().c_str(), "rb");
+		uintmax_t FileSize = std::filesystem::file_size(FilePath);
+		auto* FileData	   = new unsigned char[FileSize];
+		fread(FileData, FileSize, 1, File);
+		fclose(File);
+
+		EXPECT_EQ(DownloadedAssetDataSize, FileSize);
+		EXPECT_EQ(memcmp(DownloadedAssetData, FileData, FileSize), 0);
+	}
+
+	// Validating that we must have at least one asset collection to copy
+	{
+		printf("Validating that we must have at least one asset collection to copy...\n");
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections;
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Validating we cannot perform a copy if the asset has no space ID
+	{
+		printf("Validating we cannot perform a copy if the asset has no space ID...\n");
+
+		csp::systems::AssetCollection NoSpaceIDAssetCollection;
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections = {NoSpaceIDAssetCollection};
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Validating we cannot perform a copy of assets that belong to different spaces
+	{
+		printf("Validating we cannot perform a copy of assets that belong to different spaces but still get the async response...\n");
+
+		csp::systems::AssetCollection FirstSpaceAssetCollection;
+		FirstSpaceAssetCollection.SpaceId = "123456";
+
+		csp::systems::AssetCollection SecondSpaceAssetCollection;
+		SecondSpaceAssetCollection.SpaceId = "456789";
+
+		const csp::common::Array<csp::systems::AssetCollection> AssetCollections = {FirstSpaceAssetCollection, SecondSpaceAssetCollection};
+		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, AssetCollections, DestSpace.Id, false);
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+	}
+
+	// Delete spaces
+	DeleteSpace(SpaceSystem, SourceSpace.Id);
+	DeleteSpace(SpaceSystem, DestSpace.Id);
 
 	// Log out
 	LogOut(UserSystem);

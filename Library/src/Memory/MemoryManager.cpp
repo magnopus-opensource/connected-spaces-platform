@@ -13,12 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "MemoryManager.h"
 
+#include "CSP/CSPCommon.h"
 #include "Memory.h"
+
 
 namespace csp::memory
 {
+
+#if defined(CSP_WINDOWS)
+	#pragma init_seg(lib)
+#else
+__attribute__((init_priority(101)))
+#endif
 
 MemoryManager::MultiThreadStandardAllocator MemoryManager::OlyDefaultAllocator;
 

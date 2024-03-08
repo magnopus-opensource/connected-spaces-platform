@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Services/DtoBase/DtoBase.h"
@@ -216,7 +216,7 @@ public:
 private:
 	ApiResponse<DtoType> ApiResp;
 	ResponseType ResponseObject;
-	class ResultBase* ResponseObjectPtr;
+	csp::systems::ResultBase* ResponseObjectPtr;
 	csp::web::EResponseCodes ValidResponse;
 	CallbackType Callback;
 };

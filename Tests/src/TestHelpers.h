@@ -16,7 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 
 #include <chrono>
@@ -105,14 +105,14 @@ public:
 template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
 {
 public:
-	ServiceResponseReceiver(csp::services::EResultCode InExpectedResult = csp::services::EResultCode::Success)
+	ServiceResponseReceiver(csp::systems::EResultCode InExpectedResult = csp::systems::EResultCode::Success)
 		: ExpectedResult(InExpectedResult), ResponseReceived(false)
 	{
 	}
 
 	void OnResult(const ResultType& InResult)
 	{
-		if (InResult.GetResultCode() == csp::services::EResultCode::InProgress)
+		if (InResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 			return;
 
 		EXPECT_TRUE(InResult.GetResultCode() == ExpectedResult);
@@ -135,7 +135,7 @@ public:
 	}
 
 private:
-	csp::services::EResultCode ExpectedResult;
+	csp::systems::EResultCode ExpectedResult;
 	std::atomic<bool> ResponseReceived;
 };
 
@@ -162,16 +162,18 @@ inline void SetRandSeed()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 }
-
-inline std::string GetUniqueHexString(int Length = 16)
+// This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
+inline std::string GetUniqueString(int Length = 16)
 {
 	std::string str;
+	const std::string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	const auto Epoch = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
-	for (int i = 0; i < Length; i++)
+	for (int i = 0; i < Length / 2; i++)
 	{
-		char hex[2];
-		SPRINTF(hex, "%x", rand() % 16);
-		str += hex;
+		int RandomNumber = rand();
+		str += Epoch[RandomNumber % Epoch.length()];
+		str += Characters[RandomNumber % Characters.length()];
 	}
 
 	return str;

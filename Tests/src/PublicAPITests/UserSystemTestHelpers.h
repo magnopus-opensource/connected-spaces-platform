@@ -33,15 +33,16 @@ void LoadTestAccountCredentials();
 
 void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
-		   const csp::common::String& Email				 = DefaultLoginEmail,
-		   const csp::common::String& Password			 = DefaultLoginPassword,
-		   bool AgeVerified								 = true,
-		   csp::services::EResultCode ExpectedResultCode = csp::services::EResultCode::Success,
-		   int ExpectedResultFailureCode				 = 0);
+		   const csp::common::String& Email								 = DefaultLoginEmail,
+		   const csp::common::String& Password							 = DefaultLoginPassword,
+		   bool AgeVerified												 = true,
+		   csp::systems::EResultCode ExpectedResultCode					 = csp::systems::EResultCode::Success,
+		   csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem,
 				  csp::common::String& OutUserId,
-				  csp::services::EResultCode ExpectedResult = csp::services::EResultCode::Success);
-void LogOut(csp::systems::UserSystem* UserSystem, csp::services::EResultCode ExpectedResultCode = csp::services::EResultCode::Success);
+				  csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
+
+void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);
 
 csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSystem, const csp::common::String& UserId);

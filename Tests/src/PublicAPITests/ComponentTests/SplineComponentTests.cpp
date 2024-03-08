@@ -39,9 +39,9 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -53,16 +53,25 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -77,27 +86,12 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-		// Set up multiplayer connection
-		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-		auto* EntitySystem = Connection->GetSpaceEntitySystem();
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		EntitySystem->SetEntityCreatedCallback(
 			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
-
-		// Connect and initialise
-		{
-			auto [Ok] = AWAIT(Connection, Connect);
-
-			EXPECT_TRUE(Ok);
-
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-			EXPECT_TRUE(Ok);
-		}
 
 		// Ensure we're in the first space
 		EXPECT_EQ(SpaceSystem->GetCurrentSpace().Id, Space.Id);
@@ -145,7 +139,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 		}
 
 		AWAIT(Connection, Disconnect);
-		delete Connection;
 
 		SpaceSystem->ExitSpace();
 	}
@@ -166,16 +159,25 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -183,27 +185,12 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	// Create object to represent the spline
 	csp::common::String ObjectName = "Object 1";
@@ -239,7 +226,6 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 

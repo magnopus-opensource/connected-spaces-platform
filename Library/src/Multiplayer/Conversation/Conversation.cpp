@@ -54,16 +54,9 @@ ConversationInfo::ConversationInfo(const ConversationInfo& ConversationData)
 	CameraPosition	= ConversationData.CameraPosition;
 }
 
-MessageResult MessageResult::Invalid()
-{
-	static MessageResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
 }
@@ -78,25 +71,24 @@ const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() co
 	return ConversationMessages;
 }
 
-MessageCollectionResult MessageCollectionResult::Invalid()
-{
-	static MessageCollectionResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
 uint64_t MessageCollectionResult::GetTotalCount() const
 {
 	return ResultTotalCount;
 }
 
+void MessageCollectionResult::SetTotalCount(uint64_t Value)
+{
+	ResultTotalCount = Value;
+}
+
 void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	ConversationMessages = csp::common::Array<MessageInfo>(MessagesAssetCollections.Size());
 
 	MessageInfo MsgInfo;
+
 	for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
 	{
 		MsgInfo					  = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
@@ -114,16 +106,9 @@ const ConversationInfo& ConversationResult::GetConversationInfo() const
 	return ConvoInfo;
 }
 
-ConversationResult ConversationResult::Invalid()
-{
-	static ConversationResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
 void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
 	ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
 }

@@ -17,7 +17,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::services
 {
@@ -197,7 +197,7 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
-class CSP_API ProductInfoResult : public csp::services::ResultBase
+class CSP_API ProductInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -224,7 +224,7 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Checkout Info.
-class CSP_API CheckoutInfoResult : public csp::services::ResultBase
+class CSP_API CheckoutInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -252,7 +252,7 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get a Cart.
-class CSP_API CartInfoResult : public csp::services::ResultBase
+class CSP_API CartInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class ECommerceSystem;
@@ -271,18 +271,17 @@ public:
 	/// @return ProductInfo : reference to the CartInfo
 	CartInfo& GetCartInfo();
 
-	CSP_NO_EXPORT static CartInfoResult Invalid();
+	CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
 	CartInfoResult(void*) {};
-	CartInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	CartInfo Cart;
 };
 
-class CSP_API AddShopifyStoreResult : public csp::services::ResultBase
+class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -303,7 +302,7 @@ private:
 	ShopifyStoreInfo Store;
 };
 
-class CSP_API ValidateShopifyStoreResult : public csp::services::ResultBase
+class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE

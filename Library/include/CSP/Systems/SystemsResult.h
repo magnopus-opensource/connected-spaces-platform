@@ -13,18 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::multiplayer
 {
+
 class ConversationSystem;
+
 }
+
 
 namespace csp::services
 {
@@ -39,8 +43,9 @@ CSP_END_IGNORE
 
 namespace csp::systems
 {
+
 /// @brief A result handler that is used to notify a user of an error.
-class CSP_API NullResult : public csp::services::ResultBase
+class CSP_API NullResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceSystem;
@@ -51,21 +56,20 @@ class CSP_API NullResult : public csp::services::ResultBase
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
+
 public:
-	/// @brief Creates an invalid NullResult instance that can be used to notify the user of an error.
-	/// @return NullResult : invalid NullResult instance
-	CSP_NO_EXPORT static NullResult Invalid();
+	CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 protected:
-	NullResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT NullResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+	CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 	NullResult() = default;
 	NullResult(void*) {};
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
-class CSP_API BooleanResult : public csp::services::ResultBase
+class CSP_API BooleanResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -79,20 +83,22 @@ class CSP_API BooleanResult : public csp::services::ResultBase
 
 public:
 	/// @brief A getter which returns the bool passed via the result.
-	[[nodiscard]] bool GetValue() const;
+	[[nodiscard]]
+	bool GetValue() const;
 
 private:
 	BooleanResult() = default;
 	BooleanResult(void*) {};
-	BooleanResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	BooleanResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(bool InValue);
 
 	bool Value = false;
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
-class CSP_API StringResult : public csp::services::ResultBase
+class CSP_API StringResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -106,24 +112,24 @@ class CSP_API StringResult : public csp::services::ResultBase
 
 public:
 	/// @brief A getter which returns the String passed via the result.
-	[[nodiscard]] const csp::common::String& GetValue() const;
+	[[nodiscard]]
+	const csp::common::String& GetValue() const;
 
-	/// @brief Creates an invalid StringResult instance that can be used to notify the user of an error.
-	/// @return StringResult : invalid StringResult instance
-	CSP_NO_EXPORT static StringResult Invalid();
+	CSP_NO_EXPORT StringResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-private:
+protected:
 	StringResult() = default;
 	StringResult(void*) {};
-	StringResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::String& InValue);
 
+private:
 	csp::common::String Value;
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
-class CSP_API StringArrayResult : public csp::services::ResultBase
+class CSP_API StringArrayResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SettingsSystem;
@@ -136,20 +142,22 @@ class CSP_API StringArrayResult : public csp::services::ResultBase
 
 public:
 	/// @brief A getter which returns the StringArray passed via the result.
-	[[nodiscard]] const csp::common::Array<csp::common::String>& GetValue() const;
+	[[nodiscard]]
+	const csp::common::Array<csp::common::String>& GetValue() const;
 
 private:
 	StringArrayResult() = default;
 	StringArrayResult(void*) {};
-	StringArrayResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	StringArrayResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(const csp::common::Array<csp::common::String>& InValue);
 
 	csp::common::Array<csp::common::String> Value;
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
-class CSP_API UInt64Result : public csp::services::ResultBase
+class CSP_API UInt64Result : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -162,21 +170,23 @@ class CSP_API UInt64Result : public csp::services::ResultBase
 
 public:
 	/// @brief A getter which returns the uint64_t passed via the result.
-	[[nodiscard]] uint64_t GetValue() const;
+	[[nodiscard]]
+	uint64_t GetValue() const;
 
 private:
 	UInt64Result() = default;
 	UInt64Result(void*) {};
-	UInt64Result(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	UInt64Result(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(uint64_t InValue);
 
 	uint64_t Value = 0UL;
 };
 
+
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
 /// passing a Map of Strings representing the HTTP Responses.
-class CSP_API HTTPHeadersResult : public csp::services::ResultBase
+class CSP_API HTTPHeadersResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -193,12 +203,13 @@ public:
 	CSP_NO_EXPORT void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
 	/// @brief A getter which returns the map of strings representing HTTP responses passed via the result.
-	[[nodiscard]] const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
+	[[nodiscard]]
+	const csp::common::Map<csp::common::String, csp::common::String>& GetValue() const;
 
 private:
 	HTTPHeadersResult() = default;
 	HTTPHeadersResult(void*) {};
-	HTTPHeadersResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
+	HTTPHeadersResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	csp::common::Map<csp::common::String, csp::common::String> Value;
 };

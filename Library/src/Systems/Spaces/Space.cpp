@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Spaces/Space.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
@@ -27,6 +28,7 @@
 
 
 using namespace csp;
+using namespace csp::common;
 
 namespace chs_users	  = csp::services::generated::userservice;
 namespace chs_spatial = csp::services::generated::spatialdataservice;
@@ -163,13 +165,6 @@ Array<Space>& SpacesResult::GetSpaces()
 const Array<Space>& SpacesResult::GetSpaces() const
 {
 	return Spaces;
-}
-
-SpacesResult SpacesResult::Invalid()
-{
-	static SpacesResult result(csp::services::EResultCode::Failed, 0);
-
-	return result;
 }
 
 void SpacesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
@@ -346,13 +341,6 @@ const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const
 const SpaceGeoLocation& SpaceGeoLocationResult::GetSpaceGeoLocation() const
 {
 	return GeoLocation;
-}
-
-SpaceGeoLocationResult SpaceGeoLocationResult::Invalid()
-{
-	static SpaceGeoLocationResult InvalidResult(csp::services::EResultCode::Failed, 0);
-
-	return InvalidResult;
 }
 
 void PointOfInterestDtoToSpaceGeoLocation(chs_spatial::PointOfInterestDto& Dto, SpaceGeoLocation& GeoLocation)

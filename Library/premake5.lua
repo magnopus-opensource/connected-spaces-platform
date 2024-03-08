@@ -23,7 +23,7 @@ if not Project then
         -- Generate version
         cwd = os.getcwd()
 
-        if CSP.IsTargettingMacOS() then
+        if CSP.IsAppleTarget() then
             if not CSP.IsGeneratingVS() then
                 code = os.execute("python3 " .. cwd .. "/Tools/VersionGenerator/VersionGenerator.py -ci=" .. tostring(CSP.IsRunningOnTeamCityAgent()))
 
@@ -49,8 +49,8 @@ if not Project then
         files {
             "%{wks.location}/Library/**.h",
             "%{wks.location}/Library/**.cpp",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.h",
-            "%{wks.location}/modules/olympus-foundation-chs/generated/**.cpp"
+            "%{wks.location}/modules/csp-services/generated/**.h",
+            "%{wks.location}/modules/csp-services/generated/**.cpp"
         }
         
         -- Exclude signalr clients as appropriate for specified configs
@@ -77,7 +77,7 @@ if not Project then
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
             "%{wks.location}/ThirdParty/atomic_queue/include",
-            "%{wks.location}/modules/olympus-foundation-chs/generated",
+            "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"
         }
 
@@ -213,10 +213,6 @@ if not Project then
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/ios"
             }
 
-            libdirs {
-                "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
-            }
-
             links {
                 "ssl",            
                 "crypto"
@@ -265,7 +261,8 @@ if not Project then
                     "'locateFile'," ..
                     "'mainScriptUrlOrBlob'," ..
                     "'wasmMemory'" ..
-                "]"
+                "]",
+                --"-sUSE_ES6_IMPORT_META=0"                                       -- disable use of import.meta as it is not yet supported everywhere
             }
 
             links {
@@ -302,7 +299,7 @@ if not Project then
 			"tinyspline"
         }
 
-        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx" }
+        filter { "platforms:not wasm", "platforms:not Android", "platforms:not macosx", "platforms:not ios" }
             links {
                 "mimalloc"
             }
@@ -311,6 +308,20 @@ if not Project then
                 "POCONetSSL_OpenSSL"
             }
         filter {}
+
+        if CSP.IsVisionOSTarget() then
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/VisionOS"
+                }
+            filter {}
+        else
+            filter "platforms:ios"
+                libdirs {
+                    "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/IOS"
+                }
+            filter {}
+        end
 
         -- Debug/Release config settings
         filter "configurations:*Debug*"

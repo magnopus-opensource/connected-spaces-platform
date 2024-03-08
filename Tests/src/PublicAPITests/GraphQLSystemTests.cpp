@@ -28,9 +28,9 @@ using namespace csp::systems;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 } // namespace
@@ -50,7 +50,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-MAGNOPUS";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	LogIn(UserSystem, UserId);
@@ -98,7 +98,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 
 	csp::common::String testQuery = "badQuery";
 	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
 }
@@ -117,7 +117,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 
 	csp::common::String testQuery = "badRequest";
 	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Failed);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
 }

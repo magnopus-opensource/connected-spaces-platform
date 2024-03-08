@@ -34,12 +34,6 @@ bool MaintenanceInfo::IsInsideWindow() const
 	return (csp::common::DateTime(StartDateTimestamp).GetTimePoint() <= TimeNow && csp::common::DateTime(EndDateTimestamp).GetTimePoint() >= TimeNow);
 }
 
-MaintenanceInfoResult MaintenanceInfoResult::Invalid()
-{
-	static MaintenanceInfoResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-	return result;
-}
-
 void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);

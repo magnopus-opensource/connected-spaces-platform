@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Common/Array.h"
@@ -71,6 +72,7 @@ public:
 
 	/// @brief Check if the access token for the login is expired.
 	/// @return Is the token expired.
+	[[nodiscard]]
 	bool RefreshNeeded() const;
 
 	ELoginState State;
@@ -97,16 +99,8 @@ public:
 };
 
 
-enum class ELoginStateResultFailureReason
-{
-	Unknown = -1,
-	None	= 0,
-	AgeNotVerified
-};
-
-
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public csp::services::ResultBase
+class CSP_API LoginStateResult : public ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -116,11 +110,8 @@ class CSP_API LoginStateResult : public csp::services::ResultBase
 	/** @endcond */
 
 public:
-	LoginState& GetLoginState();
+	[[nodiscard]]
 	const LoginState& GetLoginState() const;
-
-protected:
-	int ParseErrorCode(const csp::common::String& Value) override;
 
 private:
 	LoginStateResult();
@@ -132,66 +123,28 @@ private:
 };
 
 
-/// @brief Result structure for a logout state request.
-class CSP_API LogoutResult : public NullResult
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
-
-private:
-	LogoutResult();
-	LogoutResult(LoginState* InStatePtr);
-
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	LoginState* State;
-};
-
-
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenReceived : public csp::services::ResultBase
+class CSP_API LoginTokenInfoResult : public ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class UserSystem;
 	/** @endcond */
 
 public:
-	LoginTokenInfo& GetLoginTokenInfo();
+	[[nodiscard]]
 	const LoginTokenInfo& GetLoginTokenInfo() const;
 
 private:
-	LoginTokenReceived(void*) {};
-	LoginTokenReceived() {};
+	LoginTokenInfoResult() = default;
+	LoginTokenInfoResult(void*) {};
 
 	void FillLoginTokenInfo(const csp::common::String& AccessToken,
 							const csp::common::String& AuthTokenExpiry,
 							const csp::common::String& RefreshToken,
 							const csp::common::String& RefreshTokenExpiry);
 
-	LoginTokenInfo LoginTokenInfo;
-};
-
-
-/// @ingroup User System
-/// @brief @brief Data class used to contain information when a ping response is received
-class CSP_API PingResponseReceived : public csp::services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-private:
-	PingResponseReceived(void*) {};
-	PingResponseReceived() {};
+	LoginTokenInfo TokenInfo;
 };
 
 
@@ -200,8 +153,8 @@ class CSP_API AgoraUserTokenParams
 {
 public:
 	csp::common::String AgoraUserId;
-	int Lifespan;
 	csp::common::String ChannelName;
+	int Lifespan;
 	bool ReadOnly;
 	bool ShareAudio;
 	bool ShareVideo;
@@ -209,40 +162,7 @@ public:
 };
 
 
-/// @ingroup User System
-/// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public csp::services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-	const csp::common::String& GetUserToken() const;
-	const csp::common::String& GetUserToken();
-
-private:
-	AgoraUserTokenResult(void*) {};
-	AgoraUserTokenResult() = default;
-
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	csp::common::String UserToken;
-};
-
-
 typedef std::function<void(LoginStateResult& Result)> LoginStateResultCallback;
-typedef std::function<void(LogoutResult& Result)> LogoutResultCallback;
-
-typedef std::function<void(LoginTokenReceived& Result)> NewLoginTokenReceivedCallback;
-
-typedef std::function<void(PingResponseReceived& Result)> PingResponseReceivedCallback;
-
-typedef std::function<void(AgoraUserTokenResult& Result)> UserTokenResultCallback;
-
-
+typedef std::function<void(LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
 
 } // namespace csp::systems

@@ -25,7 +25,7 @@ namespace chs = csp::services::generated::trackingservice;
 namespace csp::systems
 {
 FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn)
-	: FeatureName(FeatureNameIn), TierName(TierNameIn), Limit(LimitIn), Period(PeriodIn), AllowReductions(AllowReductionsIn) {};
+	: FeatureName(FeatureNameIn), TierName(TierNameIn), Limit(LimitIn), Period(PeriodIn) {};
 
 const csp::common::Array<FeatureLimitInfo>& FeaturesLimitResult::GetFeaturesLimitInfo() const
 {
@@ -174,11 +174,6 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 		{
 			FeatureQuotaInfo.Period = static_cast<PeriodEnum>(FeatureQuotaResponse->GetPeriod()->GetValue());
 		}
-
-		if (FeatureQuotaResponse->HasAllowReductions())
-		{
-			FeatureQuotaInfo.AllowReductions = FeatureQuotaResponse->GetAllowReductions();
-		}
 	}
 }
 
@@ -221,11 +216,6 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 			{
 				FeaturesQuotaInfo[i].Period = static_cast<PeriodEnum>(QuotaArray[i].GetPeriod()->GetValue());
 			}
-
-			if (QuotaArray[i].HasAllowReductions())
-			{
-				FeaturesQuotaInfo[i].AllowReductions = QuotaArray[i].GetAllowReductions();
-			}
 		}
 	}
 }
@@ -241,6 +231,8 @@ const csp::common::String TierNameEnumToString(const TierNames& Value)
 			return "pro";
 		case TierNames::Enterprise:
 			return "enterprise";
+		case TierNames::Invalid:
+			return "Invalid";
 		default:
 		{
 			CSP_LOG_ERROR_FORMAT("Unknown quota tier encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
@@ -251,7 +243,7 @@ const csp::common::String TierNameEnumToString(const TierNames& Value)
 	}
 
 	// return a default/invalid value if no matching tier was found
-	return "";
+	return "Invalid";
 }
 
 const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
@@ -260,7 +252,6 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 	{
 		case TierFeatures::Agora:
 			return "Agora";
-			break;
 		case TierFeatures::Shopify:
 			return "Shopify";
 		case TierFeatures::TicketedSpace:
@@ -277,6 +268,8 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 			return "TotalUploadSizeInKilobytes";
 		case TierFeatures::SpaceOwner:
 			return "SpaceOwner";
+		case TierFeatures::Invalid:
+			return "Invalid";
 		default:
 		{
 			CSP_LOG_ERROR_FORMAT("Unknown quota feature encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
@@ -287,7 +280,7 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 	}
 
 	// return a default/invalid value if no matching feature was found
-	return "";
+	return "Invalid";
 }
 
 const TierNames StringToTierNameEnum(const csp::common::String& Value)
@@ -312,8 +305,8 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value)
 		return TierNames::Enterprise;
 	}
 
-	CSP_LOG_ERROR_FORMAT("QuotaSystem TierName not recognized: %s. Defaulting to basic tier.", Value.c_str());
-	return TierNames::Basic;
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierName not recognized: %s. Defaulting to Invalid.", Value.c_str());
+	return TierNames::Invalid;
 }
 
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
@@ -363,8 +356,8 @@ const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 		return TierFeatures::SpaceOwner;
 	}
 
-	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to SpaceOwner", Value.c_str());
-	return TierFeatures::SpaceOwner;
+	CSP_LOG_ERROR_FORMAT("QuotaSystem TierFeature not recognized: %s. Defaulting to Invalid", Value.c_str());
+	return TierFeatures::Invalid;
 }
 
 } // namespace csp::systems

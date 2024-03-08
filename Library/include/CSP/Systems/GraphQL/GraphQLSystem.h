@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Systems/GraphQL/GraphQL.h"
@@ -25,7 +26,7 @@ namespace csp::services
 
 class ApiBase;
 
-}
+} // namespace csp::services
 
 
 namespace csp::web
@@ -33,7 +34,17 @@ namespace csp::web
 
 class WebClient;
 
-}
+} // namespace csp::web
+
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
 
 
 namespace csp::systems
@@ -42,15 +53,16 @@ namespace csp::systems
 /// @ingroup GraphQL System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' GraphQL Server.
 /// Offers methods for sending and receiving GraphQL Queries.
-class CSP_API CSP_NO_DISPOSE GraphQLSystem : public SystemBase
+class CSP_API GraphQLSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<GraphQLSystem>(GraphQLSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~GraphQLSystem();
-
 	/// @brief Make a request to the Magnopus Connect Services' GraphQL Server, can contain a query, variables and operationName.
 	/// @param RequestBody csp::common::String : graphql request body, JSON encoded string of full graphql request,
 	/// can include a query, variables and operationName.
@@ -67,6 +79,7 @@ public:
 private:
 	GraphQLSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT GraphQLSystem(csp::web::WebClient* InWebClient);
+	~GraphQLSystem();
 
 	csp::services::ApiBase* GraphQLAPI;
 };

@@ -48,39 +48,9 @@ SpaceEntitySystem* EntitySystem;
 
 void OnUserCreated(SpaceEntity* InUser);
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
-}
-
-void OnConnect()
-{
-	csp::common::String UserName = "Player 1";
-	SpaceTransform UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	csp::common::String UserAvatarId = "MyCoolAvatar";
-
-	AvatarState UserState			  = AvatarState::Idle;
-	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-	EntitySystem->CreateAvatar(UserName,
-							   UserTransform,
-							   UserState,
-							   UserAvatarId,
-							   UserAvatarPlayMode,
-							   [](SpaceEntity* NewAvatar)
-							   {
-								   EXPECT_NE(NewAvatar, nullptr);
-
-								   std::cerr << "CreateAvatar Local Callback" << std::endl;
-
-								   EXPECT_EQ(NewAvatar->GetEntityType(), SpaceEntityType::Avatar);
-
-								   if (NewAvatar->GetEntityType() == SpaceEntityType::Avatar)
-								   {
-									   OnUserCreated(NewAvatar);
-								   }
-							   });
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 void OnUserCreated(SpaceEntity* InUser)
@@ -155,17 +125,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -173,27 +152,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	// we'll be using this in a few places below as part of the test, so we declare it upfront
 	const std::string ScriptText = R"xx(
@@ -236,7 +200,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 	}
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -256,17 +219,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -294,11 +266,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
@@ -309,18 +277,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	// Connect and initialise
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
+		OnUserCreated(Avatar);
 	}
-
-	OnConnect();
 
 	// we'll be using this in a few places below as part of the test, so we declare it upfront
 	const std::string ScriptText = R"xx(
@@ -378,7 +353,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 	}
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -399,17 +373,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -417,27 +400,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	csp::common::String UserName = "Player 1";
 	SpaceTransform UserTransform
@@ -494,7 +462,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 	EXPECT_EQ(ScriptComponent->GetComponentType(), ComponentType::ScriptData);
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -514,17 +481,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -532,27 +508,12 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	auto* EntitySystem = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
-
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
 
 	csp::common::String UserName = "Player 1";
 	SpaceTransform UserTransform
@@ -589,7 +550,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 	Avatar->GetScript()->Invoke();
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -609,16 +569,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -626,29 +595,32 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
+		OnUserCreated(Avatar);
 	}
-
-	OnConnect();
 
 	const std::string ScriptText = R"xx(
 		
@@ -697,7 +669,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -719,16 +690,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -736,29 +716,32 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
+		OnUserCreated(Avatar);
 	}
-
-	OnConnect();
 
 	const std::string ScriptText = R"xx(
 		
@@ -807,7 +790,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 	EntitySystem->ProcessPendingEntityOperations();
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -828,16 +810,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -865,33 +856,36 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
-
 	EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
 	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	OnConnect();
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+	{
+		OnUserCreated(Avatar);
+	}
 
 	const std::string ScriptText = R"xx(
 		
@@ -976,7 +970,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::One());
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -996,17 +989,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1014,29 +1016,32 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
+		OnUserCreated(Avatar);
 	}
-
-	OnConnect();
 
 	const std::string ScriptText = R"xx(
 
@@ -1074,7 +1079,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
 	// Delete MultiplayerConnection
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -1095,16 +1099,25 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1132,33 +1145,36 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
-	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
-	}
-
 	EntitySystem->SetEntityCreatedCallback(EntityCreatedCallback);
 	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	OnConnect();
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+	{
+		OnUserCreated(Avatar);
+	}
 
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
@@ -1211,7 +1227,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 	EXPECT_TRUE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
 
 	AWAIT(Connection, Disconnect);
-	delete Connection;
 
 	SpaceSystem->ExitSpace();
 
@@ -1231,17 +1246,26 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 
 	// Log in
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -1250,29 +1274,32 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-	// Set up multiplayer connection
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-	EntitySystem	 = Connection->GetSpaceEntitySystem();
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](csp::multiplayer::SpaceEntity* Entity)
 		{
 		});
 
-	// Connect and initialise
+	csp::common::String UserName = "Player 1";
+	SpaceTransform UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	csp::common::String UserAvatarId = "MyCoolAvatar";
+
+	AvatarState UserState			  = AvatarState::Idle;
+	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
+
+	std::cerr << "CreateAvatar Local Callback" << std::endl;
+
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
 	{
-		auto [Ok] = AWAIT(Connection, Connect);
-
-		EXPECT_TRUE(Ok);
-
-		std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-		EXPECT_TRUE(Ok);
+		OnUserCreated(Avatar);
 	}
-
-	OnConnect();
 
 	// Create space object
 	csp::common::String ObjectName = "Object 1";
@@ -1290,14 +1317,13 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
 	// Disconnect from the SignalR server
-	auto [Ok] = AWAIT(Connection, Disconnect);
+	auto [Error] = AWAIT(Connection, Disconnect);
 
-	EXPECT_TRUE(Ok);
+	ASSERT_EQ(Error, ErrorCode::None);
 
 	SpaceSystem->ExitSpace();
 
 	// Delete MultiplayerConnection
-	delete Connection;
 
 	// Log out
 	LogOut(UserSystem);
@@ -1320,7 +1346,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
 

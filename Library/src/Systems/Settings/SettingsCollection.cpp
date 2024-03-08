@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Settings/SettingsCollection.h"
 
 #include "Services/ApiBase/ApiBase.h"
@@ -53,6 +54,27 @@ void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::systems::
 
 namespace csp::systems
 {
+
+AvatarType AvatarInfoResult::GetAvatarType() const
+{
+	return Type;
+}
+
+const csp::common::Variant& AvatarInfoResult::GetAvatarIdentifier() const
+{
+	return Identifier;
+}
+
+void AvatarInfoResult::SetAvatarType(AvatarType InValue)
+{
+	Type = InValue;
+}
+
+void AvatarInfoResult::SetAvatarIdentifier(const csp::common::Variant& InValue)
+{
+	Identifier = InValue;
+}
+
 
 const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const
 {

@@ -128,7 +128,7 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 
 		auto Done = false;
 		Connection->DisconnectWithReason(Reason,
-										 [&Done](bool Ok)
+										 [&Done](ErrorCode Error)
 										 {
 											 Done = true;
 										 });
@@ -207,6 +207,37 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 
 SpaceEntitySystem::~SpaceEntitySystem()
 {
+	LockEntityUpdate();
+
+	const auto NumEntities = GetNumEntities();
+
+	for (size_t i = 0; i < NumEntities; ++i)
+	{
+		SpaceEntity* Entity = GetEntityByIndex(i);
+
+		// We automatically invoke SignalR deletion for all transient entities that were owned by this local client
+		// as these are only ever valid for a single connected session
+		if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
+		{
+			DestroyEntity(Entity,
+												[](auto Ok)
+												{
+												});
+		}
+		// Otherwise we clear up all all locally represented entities
+		else
+		{
+			LocalDestroyEntity(Entity);
+		}
+	}
+
+    // Clear adds/removes, we don't want to add or remove if we're shutting down.
+    PendingAdds->clear();
+    PendingRemoves->clear();
+	PendingIncomingUpdates->clear();
+
+	UnlockEntityUpdate();
+
 	EntityScriptBinding::RemoveBinding(ScriptBinding);
 
 	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
@@ -717,6 +748,14 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 		return;
 	}
 
+	// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
+	if (!EntityToUpdate->IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
+							 EntityToUpdate->GetName().c_str());
+		return;
+	}
+
 	// Note that calling Queue many times will be ignored by this emplace call, but may have performance impact in some situations.
 	// TODO: consider enabling clients to queue at sensible rates by exposing update rates/next update callbacks/timings.
 	PendingOutgoingUpdateUniqueSet->emplace(EntityToUpdate);
@@ -1054,11 +1093,6 @@ SpaceEntity* SpaceEntitySystem::GetObjectByIndex(const size_t ObjectIndex)
 	return Objects[ObjectIndex];
 }
 
-MultiplayerConnection* SpaceEntitySystem::GetMultiplayerConnection()
-{
-	return MultiplayerConnectionInst;
-}
-
 void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -1138,6 +1172,17 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 			if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
 			{
+				// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
+				if (!PendingEntity->IsModifiable())
+				{
+					CSP_LOG_ERROR_FORMAT(
+						"Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
+						PendingEntity->GetName().c_str());
+
+					it = PendingOutgoingUpdateUniqueSet->erase(it);
+					continue;
+				}
+
 				// since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
 				PendingEntity->OwnerId = MultiplayerConnectionInst->GetClientId();
 				ClaimScriptOwnership(PendingEntity);
@@ -1289,8 +1334,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 		if (Destroy)
 		{
-			std::scoped_lock EntitiesLocker(*EntitiesLock);
-
 			// Deletion
 			for (int i = 0; i < Entities.Size(); ++i)
 			{
@@ -1322,8 +1365,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 		}
 		else
 		{
-			std::scoped_lock EntitiesLocker(*EntitiesLock);
-
 			bool EntityFound = false;
 
 			// Update

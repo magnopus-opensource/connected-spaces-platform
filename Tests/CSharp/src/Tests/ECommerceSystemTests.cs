@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -69,7 +68,7 @@ namespace CSPEngine
 
             using var result = eCommerceSystem.GetProductInformation(details["SpaceId"], details["ProductId"]).Result;
             var resCode = result.GetResultCode();
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
 
             Assert.AreEqual(result.GetProductInfo().Id, ProductId);

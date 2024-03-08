@@ -18,13 +18,17 @@
 
 #include "CSP/Common/Array.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
+#include "CSP/Systems/WebService.h"
 
 
 namespace csp::services
 {
 
 class ApiResponseBase;
+
+CSP_START_IGNORE
+template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
+CSP_END_IGNORE
 
 } // namespace csp::services
 
@@ -45,18 +49,16 @@ public:
 
 /// @ingroup CSPFoundation
 /// @brief Data class used to contain information when a Response is received from Maintenance Window Server
-class CSP_API MaintenanceInfoResult : public csp::services::ResultBase
+class CSP_API MaintenanceInfoResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
 	friend class CSPFoundation;
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
 	CSP_END_IGNORE
 	/** @endcond */
-public:
-	MaintenanceInfoResult() {};
-	MaintenanceInfoResult(void*) {};
-	MaintenanceInfoResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
 
+public:
 	/// @brief Retrieves response data from the Maintenance Window Server
 	/// @return csp::common::Array<MaintenanceInfo> : return all maintenance information available in date order
 	[[nodiscard]] csp::common::Array<MaintenanceInfo>& GetMaintenanceInfoResponses();
@@ -77,13 +79,16 @@ public:
 	/// @return MaintenanceInfo : what the platform considers to be a default maintenance window
 	[[nodiscard]] const MaintenanceInfo& GetDefaultMaintenanceInfo() const;
 
-	/// @brief Returns an Invalid state MaintenanceInfoResult.
-	CSP_NO_EXPORT static MaintenanceInfoResult Invalid();
+	CSP_NO_EXPORT MaintenanceInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
+	MaintenanceInfoResult() {};
+	MaintenanceInfoResult(void*) {};
+
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 	csp::common::Array<MaintenanceInfo> MaintenanceInfoResponses;
 };
+
 
 typedef std::function<void(const MaintenanceInfoResult& Result)> MaintenanceInfoCallback;
 

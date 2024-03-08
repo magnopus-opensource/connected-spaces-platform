@@ -47,10 +47,10 @@ void SetClientUserAgentInfo()
 	csp::ClientUserAgent ClientHeaderInfo;
 	ClientHeaderInfo.CSPVersion = csp::CSPFoundation::GetBuildID();
 	ClientHeaderInfo.ClientSKU = "foundation-cPlusPlus-examples";
-	ClientHeaderInfo.ClientEnvironment = "DEV";
+	ClientHeaderInfo.ClientEnvironment = "oStage";
 	ClientHeaderInfo.ClientOS = "WIN64";
 	ClientHeaderInfo.ClientVersion = "1.0";
-	ClientHeaderInfo.CHSEnvironment = "ODEV";
+	ClientHeaderInfo.CHSEnvironment = "oStage";
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 }
@@ -76,14 +76,14 @@ void Signup()
 	UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false, true,
 				"", "", [&](const csp::systems::ProfileResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "\nSuccessfully signed up as " + Email << endl;
 			cout << "You should have received a verification email at " + Email << endl;
 			cout << "Please restart this application once verified" << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "\nSign up failed. Please double check if have an account already and restart this application. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -108,12 +108,12 @@ void Login()
 
 	UserSystem->Login("", Email.c_str(), Password.c_str(), true, [&](const csp::systems::LoginStateResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "Successfully logged in as " + Email << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Login failed. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -132,12 +132,12 @@ void Logout()
 
 	UserSystem->Logout([&](const csp::systems::LogoutResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "\nSuccessfully logged out" << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "\nLogout failed. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -171,7 +171,7 @@ void SearchSpaces()
 
 	QuerySystem->RunQuery(SpacesQuery, [&](csp::systems::GraphQLResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{			
 			json JsonData = json::parse(Result.GetResponse().c_str());
 			int TotalSpacesCount = JsonData["data"]["spaces"]["itemTotalCount"];
@@ -200,14 +200,14 @@ void CreateSpace()
 	
 	SpaceSystem->CreateSpace(SpaceName.c_str(), "", csp::systems::SpaceAttributes::Private, nullptr, TestMetadata, nullptr, [&CallbackPromise](const csp::systems::SpaceResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			string SpaceID = Result.GetSpace().Id.c_str();
 			string SpaceName = Result.GetSpace().Name.c_str();
 			cout << "Created a new space called " + SpaceName + " and ID: " + SpaceID << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Error: could not create the new space. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -265,11 +265,11 @@ void EnterSpace()
 
 	SpaceSystem->EnterSpace(CurrentSpaceId.c_str(), [&] (const csp::systems::NullResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "Entered space with ID: " + CurrentSpaceId << endl;
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Error: Could not enter space. " + Result.GetResponseBody()<< endl;
 		}
@@ -358,13 +358,13 @@ void CreateAssetCollection()
 									nullptr, csp::systems::EAssetCollectionType::DEFAULT, nullptr, 
 									[&](const csp::systems::AssetCollectionResult Result)
 	{
-		if(Result.GetResultCode() == csp::services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			AssetCollection = Result.GetAssetCollection();
 			cout << "Created a new Asset Collection called " + AssetCollection.Name + ".ID: " + AssetCollection.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Error: Could not create a new Asset Collection. " + Result.GetResponseBody()<< endl;
 		}
@@ -387,13 +387,13 @@ void CreateAsset()
 	AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr,
 							csp::systems::EAssetType::IMAGE, [&](const csp::systems::AssetResult Result)
 	{
-		if(Result.GetResultCode() == csp::services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			Asset = Result.GetAsset();
 			cout << "Created a new Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Error: Could not create a new Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -421,12 +421,12 @@ void UploadAsset()
 
 	AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&](const csp::systems::UriResult& Result)
 	{
-		if(Result.GetResultCode() == csp::services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "\nUploaded Test Asset from path: " + AssetDataSource.FilePath << endl;
 			CallbackPromise.set_value();
 		}
-		else if(Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if(Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "\nError: Could not upload Test Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -444,12 +444,12 @@ void DeleteAsset()
 	csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 	AssetSystem->DeleteAsset(AssetCollection, Asset, [&](const csp::systems::NullResult Result)
 	{
-		if(Result.GetResultCode() == csp::services::EResultCode::Success)
+		if(Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "\nDeleted Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "\nError: Could not delete Asset. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();
@@ -480,12 +480,12 @@ void DeleteSpace()
 
 	SpaceSystem->DeleteSpace(SpaceId.c_str(), [&](const csp::systems::NullResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			cout << "Deleted space with ID: " + SpaceId << endl;
 			CallbackPromise.set_value();
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+		else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			cout << "Error: could not delete the space. " + Result.GetResponseBody()<< endl;
 			CallbackPromise.set_value();

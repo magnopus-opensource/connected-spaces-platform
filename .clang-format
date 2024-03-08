@@ -18,6 +18,9 @@ AllowShortLambdasOnASingleLine: None
 AllowShortLoopsOnASingleLine: 'false'
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakAfterAttributes: Always
 BreakBeforeBraces: Allman
 ColumnLimit: '150'
 CompactNamespaces: 'false'
@@ -54,8 +57,5 @@ SpacesInSquareBrackets: 'false'
 Standard: Auto
 TabWidth: '4'
 UseTab: Always
-AllowAllParametersOfDeclarationOnNextLine : 'false'
-BinPackArguments: 'false'
-BinPackParameters: 'false'
 
 ...

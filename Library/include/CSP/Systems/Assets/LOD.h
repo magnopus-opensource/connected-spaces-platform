@@ -19,9 +19,9 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
-#include "CSP/Services/WebService.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/WebService.h"
 
 namespace csp::services
 {
@@ -58,7 +58,7 @@ public:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
-class CSP_API LODChainResult : public csp::services::ResultBase
+class CSP_API LODChainResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class AssetSystem;
@@ -72,12 +72,10 @@ public:
 	/// @brief Retreives the LODChain from the result.
 	const LODChain& GetLODChain() const;
 
-protected:
+	CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	LODChainResult(void*) {};
-	LODChainResult(csp::services::EResultCode ResCode, uint16_t HttpResCode) : csp::services::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT LODChainResult(const csp::services::ResultBase& InResult)
-		: csp::services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 	void SetLODChain(const LODChain& Chain);
 	void SetLODChain(LODChain&& Chain);

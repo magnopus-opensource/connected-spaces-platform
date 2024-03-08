@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /// @file AnimatedModelSpaceComponent.h
 /// @brief Definitions and support for animated models.
 
@@ -40,6 +41,7 @@ enum class AnimatedModelActions
 	Restart,
 	Num
 };
+
 
 /// @brief Enumerates the list of properties that can be replicated for an animated model component.
 enum class AnimatedModelPropertyKeys

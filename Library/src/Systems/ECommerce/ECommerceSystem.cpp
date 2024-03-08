@@ -13,17 +13,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
+#include "CallHelpers.h"
 #include "ECommerceSystemHelpers.h"
 #include "Services/aggregationservice/Api.h"
+#include "Systems/ResultHelpers.h"
+
 
 using namespace csp;
 
 namespace chs = csp::services::generated::aggregationservice;
 
+
+namespace
+{
+
+void RemoveUrl(csp::common::String& Url)
+{
+	if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos)
+	{
+		Url = Url.Split('/')[Url.Split('/').Size() - 1];
+	}
+	else if (std::string(Url.c_str()).find("?cart=") != std::string::npos)
+	{
+		Url = Url.Split('/')[Url.Split('/').Size() - 1].c_str();
+	}
+	else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos)
+	{
+		Url = Url.Split('/')[Url.Split('/').Size() - 1];
+	}
+}
+
+} // namespace
+
+
 namespace csp::systems
 {
+
 ECommerceSystem::ECommerceSystem() : SystemBase(), ShopifyAPI(nullptr)
 {
 }
@@ -40,7 +68,6 @@ ECommerceSystem::~ECommerceSystem()
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {
-
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
 			Callback,
@@ -120,11 +147,12 @@ void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
 {
-
 	if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
 	{
 		CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
-		Callback(CartInfoResult::Invalid());
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
+
 		return;
 	}
 
@@ -191,19 +219,4 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 		->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
 }
 
-void RemoveUrl(csp::common::String& Url)
-{
-	if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1];
-	}
-	else if (std::string(Url.c_str()).find("?cart=") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1].c_str();
-	}
-	else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1];
-	}
-}
 } // namespace csp::systems

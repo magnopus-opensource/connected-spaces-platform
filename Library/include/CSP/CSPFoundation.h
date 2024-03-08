@@ -70,7 +70,7 @@ public:
 	/// @return bool : True for successful initialisation.
 	static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
 
-	/// @brief This should been used at the end of the of the application lifescyle.
+	/// @brief This should be used at the end of the application lifecycle.
 	/// Clears event queues and destroys foundation systems.
 	/// After shutdown, no other Foundation functions should be called until Initialise is called again.
 	/// @return bool : True for successful shutdown
@@ -92,14 +92,6 @@ public:
 	/// Generated at project generation time using the lastest commit timestamp and hash.
 	/// @return const csp::common::String : Returns the build ID for the foundation build
 	static const csp::common::String& GetBuildID();
-
-	/// @brief Gets the EntitySystemVersion number.
-	/// This represents the system used to parse data for Entities,
-	/// and is used to prevent conflicting entity data versions from being used together where we cannot parse both.
-	/// This is currently unused.
-	/// @return int32_t : The system version number, a manually incremented counter that changes when significant breaking changes occur in the entity
-	/// parsing systems
-	static int32_t GetEntitySystemVersion();
 
 	/// @brief Unique identifier for the current device.
 	/// Used internally by certain user authentication endpoints.
@@ -140,8 +132,6 @@ private:
 	static csp::common::String* DeviceId;
 	static csp::common::String* ClientUserAgentString;
 	static csp::common::String* Tenant;
-
-	static const uint32_t EntitySystemVersion = 3;
 };
 
 

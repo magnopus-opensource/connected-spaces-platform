@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 using Multiplayer = Csp.Multiplayer;
 
@@ -24,26 +23,35 @@ namespace CSPEngine
             using var result = assetSystem.DeleteAssetCollection(assetCollection).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
-            LogDebug($"AssetCollection deleted (Id: { assetCollection.Id })");
+            LogDebug($"AssetCollection deleted (Id: {assetCollection.Id})");
 
             if (disposeFoundationResources)
                 assetCollection.Dispose();
         }
 
-        public static void CreateAssetCollection(Systems.AssetSystem assetSystem, Systems.Space? space, string parentId, string name, Systems.EAssetCollectionType? type, Common.Array<string>? tags, out Systems.AssetCollection assetCollection, bool disposeFoundationResources = true)
+        public static void CreateAssetCollection(
+            Systems.AssetSystem assetSystem,
+            Systems.Space? space,
+            string parentId,
+            string name,
+            Systems.EAssetCollectionType?
+            type, Common.Array<string>? tags,
+            out Systems.AssetCollection assetCollection,
+            bool disposeFoundationResources = true
+        )
         {
             var AssetCollectionType = type ?? Systems.EAssetCollectionType.DEFAULT;
 
             using var result = assetSystem.CreateAssetCollection(space?.Id, parentId, name, null, AssetCollectionType, tags).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assetCollection = result.GetAssetCollection();
 
-            LogDebug($"AssetCollection created (Id: { assetCollection.Id }, Name: { assetCollection.Name })");
+            LogDebug($"AssetCollection created (Id: {assetCollection.Id}, Name: {assetCollection.Name})");
 
             var outAssetCollection = assetCollection;
 
@@ -52,22 +60,65 @@ namespace CSPEngine
 
         static void GetAssetCollections(Systems.AssetSystem assetSystem, Systems.Space space, out Common.Array<Systems.AssetCollection> assetCollections)
         {
-            using var result = assetSystem.GetAssetCollectionsByCriteria(space.Id, null, Systems.EAssetCollectionType.DEFAULT, null, null, null, null).Result;
+            using var types = new Common.Array<Systems.EAssetCollectionType>(1);
+            types[0] = Systems.EAssetCollectionType.DEFAULT;
+
+            using var spaceIds = new Common.Array<string>(1);
+            spaceIds[0] = space.Id;
+
+            using var result = assetSystem.FindAssetCollections(null, null, null, types, null, spaceIds, null, null).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assetCollections = result.GetAssetCollections();
         }
 
-        static void GetAssetCollectionsByCriteria(Systems.AssetSystem assetSystem, Systems.Space space, string parentId, Systems.EAssetCollectionType? type, Common.Array<string>? tags, Common.Array<string>? names, int? ResultsSkipNumber, int? ResultsMaxNumber, out Common.Array<Systems.AssetCollection> assetCollections)
+        static Common.Array<Systems.AssetCollection> FindAssetCollections(
+            Systems.AssetSystem assetSystem,
+            string[]? ids = null,
+            string? parentId = null,
+            string[]? names = null,
+            Systems.EAssetCollectionType[]? types = null,
+            string[]? tags = null,
+            string[]? spaceIds = null,
+            int? resultsSkipNumber = null,
+            int? resultsMaxNumber = null
+        )
         {
-            using var result = assetSystem.GetAssetCollectionsByCriteria(space?.Id, parentId, type, tags, names, ResultsSkipNumber, ResultsMaxNumber).Result;
+            Common.Array<string> _ids = null;
+
+            if (ids != null)
+                _ids = ids.ToFoundationArray();
+
+            Common.Array<string> _names = null;
+
+            if (names != null)
+                _names = names.ToFoundationArray();
+
+            Common.Array<Systems.EAssetCollectionType> _types = null;
+
+            if (types != null)
+                _types = types.ToFoundationArray();
+
+            Common.Array<string> _tags = null;
+
+            if (tags != null)
+                _tags = tags.ToFoundationArray();
+
+            Common.Array<string> _spaceIds = null;
+
+            if (spaceIds != null)
+                _spaceIds = spaceIds.ToFoundationArray();
+
+            using var result = assetSystem.FindAssetCollections(_ids, parentId, _names, _types, _tags, _spaceIds, resultsSkipNumber, resultsMaxNumber).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            _ids?.Dispose();
 
-            assetCollections = result.GetAssetCollections();
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
+
+            return result.GetAssetCollections();
         }
 
         static void GetAssetCollectionByName(Systems.AssetSystem assetSystem, String assetCollectionName, out Systems.AssetCollection assetCollection)
@@ -75,23 +126,16 @@ namespace CSPEngine
             using var result = assetSystem.GetAssetCollectionByName(assetCollectionName).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assetCollection = result.GetAssetCollection();
         }
 
-        static void GetAssetCollectionsByIds(Systems.AssetSystem assetSystem, string[] ids, out Common.Array<Systems.AssetCollection> assetCollections)
+        static Common.Array<Systems.AssetCollection> GetAssetCollectionsByIds(Systems.AssetSystem assetSystem, string[] ids)
         {
             Assert.IsGreaterThan(ids.Length, 0);
 
-            var _ids = ids.ToFoundationArray();
-
-            using var result = assetSystem.GetAssetCollectionsByIds(_ids).Result;
-            var resCode = result.GetResultCode();
-
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
-
-            assetCollections = result.GetAssetCollections();
+            return FindAssetCollections(assetSystem, ids: ids);
         }
 
         static void DeleteAsset(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Systems.Asset asset, bool disposeFoundationResources = true)
@@ -99,24 +143,31 @@ namespace CSPEngine
             using var result = assetSystem.DeleteAsset(assetCollection, asset).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
-            LogDebug($"Asset deleted (Id: { asset.Id }, AssetCollection Id: { assetCollection.Id })");
+            LogDebug($"Asset deleted (Id: {asset.Id}, AssetCollection Id: {assetCollection.Id})");
 
             if (disposeFoundationResources)
                 asset.Dispose();
         }
 
-        public static void CreateAsset(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, string name, string? thirdPartyPackagedAssetIdentifier,Systems.EThirdPartyPlatform? thirdPartyPlatform, out Systems.Asset asset, bool disposeFoundationResources = true)
+        public static void CreateAsset(
+            Systems.AssetSystem assetSystem,
+            Systems.AssetCollection assetCollection,
+            string name,
+            string? thirdPartyPackagedAssetIdentifier,
+            Systems.EThirdPartyPlatform? thirdPartyPlatform,
+            out Systems.Asset asset,
+            bool disposeFoundationResources = true)
         {
-            using var result = assetSystem.CreateAsset(assetCollection, name, thirdPartyPackagedAssetIdentifier,thirdPartyPlatform, Systems.EAssetType.MODEL).Result;
+            using var result = assetSystem.CreateAsset(assetCollection, name, thirdPartyPackagedAssetIdentifier, thirdPartyPlatform, Systems.EAssetType.MODEL).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             asset = result.GetAsset();
 
-            LogDebug($"Asset created (Id: { asset.Id }, Name: { asset.Name })");
+            LogDebug($"Asset created (Id: {asset.Id}, Name: {asset.Name})");
 
             var outAsset = asset;
 
@@ -128,7 +179,7 @@ namespace CSPEngine
             using var result = assetSystem.GetAssetsInCollection(assetCollection).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assets = result.GetAssets();
         }
@@ -142,7 +193,7 @@ namespace CSPEngine
             using var result = assetSystem.GetAssetsByCollectionIds(_ids).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assets = result.GetAssets();
         }
@@ -156,7 +207,7 @@ namespace CSPEngine
             using var result = assetSystem.GetAssetsByCriteria(assetCollectionIds.ToFoundationArray(), _assetIds, _assetNames, assetTypes).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assets = result.GetAssets();
         }
@@ -166,7 +217,7 @@ namespace CSPEngine
             using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var updatedAssetCollection = result.GetAssetCollection();
 
@@ -185,7 +236,7 @@ namespace CSPEngine
             var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             uriOut = result.GetUri();
         }
@@ -235,7 +286,7 @@ namespace CSPEngine
             GetAssetCollectionByName(assetSystem, testAssetCollectionName, out var assetCollection);
 
             Assert.AreEqual(assetCollection.Name, testAssetCollectionName);
-            Assert.IsTrue(assetCollection.SpaceIds.IsEmpty());
+            Assert.IsTrue(assetCollection.SpaceId.Length > 0);
         }
 #endif
 
@@ -262,7 +313,7 @@ namespace CSPEngine
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName2, null, null, out var assetCollection2);
 
             // Get asset collections
-            GetAssetCollectionsByIds(assetSystem, new[] { assetCollection1.Id, assetCollection2.Id }, out var assetCollections);
+            var assetCollections = GetAssetCollectionsByIds(assetSystem, new[] { assetCollection1.Id, assetCollection2.Id });
 
             Assert.AreEqual(assetCollections.Size(), 2UL);
 
@@ -321,7 +372,7 @@ namespace CSPEngine
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
             Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
-            
+
             var inboundAsset = assets[0];
             inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
             Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
@@ -329,13 +380,13 @@ namespace CSPEngine
             Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
-            Assert.AreEqual(updatedAsset.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
             Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
             Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
-            
+
             // Clean up
             assets.Dispose();
         }
@@ -366,7 +417,7 @@ namespace CSPEngine
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
             Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
-            
+
             var inboundAsset = assets[0];
             inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
             Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
@@ -374,13 +425,13 @@ namespace CSPEngine
             Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
-            Assert.AreEqual(updatedAsset.GetResultCode(), Services.EResultCode.Success);
+            Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
             Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
             Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
-            
+
             // Clean up
             assets.Dispose();
         }
@@ -462,16 +513,16 @@ namespace CSPEngine
 
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            var Tags = new Common.Array<string>(1);
-            Tags[0] = space.Id;
+            var tags = new Common.Array<string>(1);
+            tags[0] = space.Id;
 
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, Systems.EAssetCollectionType.SPACE_THUMBNAIL, null, out var assetCollection1);
-            CreateAssetCollection(assetSystem, space, null, testAssetCollectionName2, Systems.EAssetCollectionType.SPACE_THUMBNAIL, Tags, out var assetCollection2);
+            CreateAssetCollection(assetSystem, space, null, testAssetCollectionName2, Systems.EAssetCollectionType.SPACE_THUMBNAIL, tags, out var assetCollection2);
             CreateAssetCollection(assetSystem, space, assetCollection1.Id, testAssetCollectionName3, null, null, out var assetCollection3);
 
             // Search by space
             {
-                GetAssetCollectionsByCriteria(assetSystem, space, null, null, null, null, null, null, out var assetCollections);
+                var assetCollections = FindAssetCollections(assetSystem, spaceIds: new[] { space.Id });
 
                 Assert.AreEqual(assetCollections.Size(), 4UL);
 
@@ -480,7 +531,7 @@ namespace CSPEngine
 
             // Search by parentId
             {
-                GetAssetCollectionsByCriteria(assetSystem, null, assetCollection1.Id, null, null, null, null, null, out var assetCollections);
+                var assetCollections = FindAssetCollections(assetSystem, ids: new[] { assetCollection1.Id });
 
                 Assert.AreEqual(assetCollections.Size(), 1UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection3.Id);
@@ -491,7 +542,7 @@ namespace CSPEngine
 
             // Search by tag
             {
-                GetAssetCollectionsByCriteria(assetSystem, null, null, null, Tags, null, null, null, out var assetCollections);
+                var assetCollections = FindAssetCollections(assetSystem, tags: new[] { space.Id });
 
                 Assert.AreEqual(assetCollections.Size(), 1UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection2.Id);
@@ -502,17 +553,13 @@ namespace CSPEngine
 
             // Search by names and types
             {
-                var names = new Common.Array<string>(2);
-                names[0] = testAssetCollectionName1;
-                names[1] = testAssetCollectionName2;
-
                 // Search for Default types with these names
-                GetAssetCollectionsByCriteria(assetSystem, null, null, Systems.EAssetCollectionType.DEFAULT, null, names, null, null, out var assetCollections1);
+                var assetCollections1 = FindAssetCollections(assetSystem, names: new[] { testAssetCollectionName1, testAssetCollectionName2 }, types: new[] { Systems.EAssetCollectionType.DEFAULT });
 
                 Assert.AreEqual(assetCollections1.Size(), 0UL);
 
                 // Search same names with Space thumbnail type 
-                GetAssetCollectionsByCriteria(assetSystem, null, null, Systems.EAssetCollectionType.SPACE_THUMBNAIL, null, names, null, null, out var assetCollections2);
+                var assetCollections2 = FindAssetCollections(assetSystem, names: new[] { testAssetCollectionName1, testAssetCollectionName2 }, types: new[] { Systems.EAssetCollectionType.SPACE_THUMBNAIL });
 
                 Assert.AreEqual(assetCollections2.Size(), 2UL);
 
@@ -541,7 +588,7 @@ namespace CSPEngine
 
             // Test pagination
             {
-                GetAssetCollectionsByCriteria(assetSystem, space, null, null, null, null, 1, 1, out var assetCollections);
+                var assetCollections = FindAssetCollections(assetSystem, spaceIds: new[] { space.Id }, resultsSkipNumber: 1, resultsMaxNumber: 1);
 
                 Assert.AreEqual(assetCollections.Size(), 1UL);
 
@@ -573,7 +620,7 @@ namespace CSPEngine
 
             // Search by asset id
             {
-                GetAssetsByCriteria(assetSystem, new[] {assetCollection.Id}, new[] { asset1.Id }, null, null, out var assets);
+                GetAssetsByCriteria(assetSystem, new[] { assetCollection.Id }, new[] { asset1.Id }, null, null, out var assets);
 
                 Assert.AreEqual(assets.Size(), 1UL);
                 Assert.AreEqual(assets[0].Id, asset1.Id);
@@ -584,7 +631,7 @@ namespace CSPEngine
 
             // Search by asset name
             {
-                GetAssetsByCriteria(assetSystem, new[] {assetCollection.Id}, null, new[] { asset1.Name }, null, out var assets);
+                GetAssetsByCriteria(assetSystem, new[] { assetCollection.Id }, null, new[] { asset1.Name }, null, out var assets);
 
                 Assert.AreEqual(assets.Size(), 1UL);
                 Assert.AreEqual(assets[0].Id, asset1.Id);
@@ -598,7 +645,7 @@ namespace CSPEngine
                 using var assetTypes1 = new Common.Array<Systems.EAssetType>(1);
                 assetTypes1[0] = Systems.EAssetType.VIDEO;
 
-                GetAssetsByCriteria(assetSystem, new[] {assetCollection.Id}, null, new[] { asset1.Name, asset2.Name }, assetTypes1, out var assets1);
+                GetAssetsByCriteria(assetSystem, new[] { assetCollection.Id }, null, new[] { asset1.Name, asset2.Name }, assetTypes1, out var assets1);
 
                 Assert.AreEqual(assets1.Size(), 0UL);
 
@@ -607,7 +654,7 @@ namespace CSPEngine
                 assetTypes2[0] = Systems.EAssetType.MODEL;
                 assetTypes2[1] = Systems.EAssetType.VIDEO;
 
-                GetAssetsByCriteria(assetSystem, new[] {assetCollection.Id}, null, new[] { asset1.Name, asset2.Name }, assetTypes2, out var assets2);
+                GetAssetsByCriteria(assetSystem, new[] { assetCollection.Id }, null, new[] { asset1.Name, asset2.Name }, assetTypes2, out var assets2);
 
                 Assert.AreEqual(assets2.Size(), 2UL);
 
@@ -665,7 +712,7 @@ namespace CSPEngine
             {
                 string[] emptyAssetCollectionIds = {};
                 using var result = assetSystem.GetAssetsByCriteria(emptyAssetCollectionIds.ToFoundationArray(), null, null, null).Result;
-                Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Failed);
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
             }
 
             // Search by both asset collection Ids at the same time
@@ -759,7 +806,7 @@ namespace CSPEngine
 
                 using var updatedAsset = result.GetAsset();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(updatedAsset.Name, testAssetName);
                 Assert.AreEqual(updatedAsset.Uri, testExternalUri);
                 Assert.AreEqual(updatedAsset.MimeType, testExternalMimetype);
@@ -806,7 +853,7 @@ namespace CSPEngine
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 asset.Uri = result.GetUri();
             }
@@ -824,11 +871,11 @@ namespace CSPEngine
             // Upload data
             {
                 assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
-                
+
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 asset.Uri = result.GetUri();
             }
@@ -847,7 +894,7 @@ namespace CSPEngine
                 using var result = assetSystem.DownloadAssetData(asset).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 downloadedData = new byte[result.GetDataLength()];
                 Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
@@ -891,7 +938,7 @@ namespace CSPEngine
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 asset.Uri = result.GetUri();
             }
@@ -909,11 +956,11 @@ namespace CSPEngine
             // Upload data
             {
                 assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
-                
+
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 asset.Uri = result.GetUri();
             }
@@ -932,7 +979,7 @@ namespace CSPEngine
                 using var result = assetSystem.DownloadAssetData(asset).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 downloadedData = new byte[result.GetDataLength()];
                 Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
@@ -986,11 +1033,11 @@ namespace CSPEngine
             // Upload data
             {
                 assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
-                
+
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 asset.Uri = result.GetUri();
             }
@@ -1004,7 +1051,7 @@ namespace CSPEngine
                 using var result = assetSystem.DownloadAssetData(asset).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 downloadedData = new byte[result.GetDataLength()];
                 Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
@@ -1051,7 +1098,7 @@ namespace CSPEngine
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 initialFileUri = result.GetUri();
             }
@@ -1065,7 +1112,7 @@ namespace CSPEngine
                 var resBody = result.GetResponseBody();
                 LogDebug(resBody);
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             }
 
@@ -1073,7 +1120,7 @@ namespace CSPEngine
                 using var result = assetSystem.GetAssetById(assetCollection.Id, asset.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var updatedAsset = result.GetAsset();
 
@@ -1115,11 +1162,11 @@ namespace CSPEngine
             // Upload data
             {
                 assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
-                
+
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 initialFileUri = result.GetUri();
             }
@@ -1136,7 +1183,7 @@ namespace CSPEngine
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 Assert.AreNotEqual(initialFileUri, result.GetUri());
             }
@@ -1145,7 +1192,7 @@ namespace CSPEngine
                 using var result = assetSystem.GetAssetById(assetCollection.Id, asset.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var updatedAsset = result.GetAsset();
 
@@ -1187,11 +1234,11 @@ namespace CSPEngine
             // Upload data
             {
                 assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
-                
+
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, source).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 initialFileUri = result.GetUri();
             }
@@ -1219,7 +1266,7 @@ namespace CSPEngine
                 using var result = assetSystem.UploadAssetData(assetCollection, asset, bufferSource).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 Assert.AreNotEqual(initialFileUri, result.GetUri());
 
@@ -1230,7 +1277,7 @@ namespace CSPEngine
                 using var result = assetSystem.GetAssetById(assetCollection.Id, asset.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 using var updatedAsset = result.GetAsset();
 
@@ -1311,7 +1358,7 @@ namespace CSPEngine
                 using var result = assetSystem.GetAssetById(assetCollection.Id, asset.Id).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
                 updatedAsset = result.GetAsset();
 
@@ -1323,7 +1370,7 @@ namespace CSPEngine
                 using var result = assetSystem.GetAssetDataSize(updatedAsset).Result;
                 var resCode = result.GetResultCode();
 
-                Assert.AreEqual(resCode, Services.EResultCode.Success);
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual((int)result.GetValue(), assetDataBytes.Length);
             }
 
@@ -1361,7 +1408,7 @@ namespace CSPEngine
             Assert.AreEqual(assets[0].Name, testAssetName);
             Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
             Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.NONE);
-            
+
             var inboundAsset = assets[0];
             inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
             Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
@@ -1374,12 +1421,121 @@ namespace CSPEngine
 
             // Get assets
             GetAssetsInCollection(assetSystem, assetCollection, out assets);
-            
+
             Assert.AreEqual(assets.Size(), 2UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
             Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifierAlphanumeric);
             Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNITY);
 
+        }
+#endif
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
+        [Test]
+        public static void CopyAssetCollectionTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out var assetSystem, out _, out _, out _, out _, out _, out _, out _);
+
+            string sourceSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
+            string destSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
+            string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+            string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
+            string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
+
+            var sourceAssetCollection = new Systems.AssetCollection();
+
+            // Log in
+            _ = UserSystemTests.LogIn(userSystem);
+
+            // Create 'source' space and asset collection
+            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            {
+                CreateAssetCollection(assetSystem, sourceSpace, null, testAssetCollectionName, null, null, out sourceAssetCollection);
+                CreateAsset(assetSystem, sourceAssetCollection, testAssetName, null, null, out var sourceAsset);
+
+                var fileSource = new Systems.FileAssetDataSource
+                {
+                    FilePath = Path.GetFullPath("assets/test.json")
+                };
+                fileSource.SetMimeType("application/json");
+
+                assetSystem.UploadAssetDataOnProgress += (s, e) => LogDebug($"Uploading asset... ({e.Progress}%)");
+                using var result = assetSystem.UploadAssetData(sourceAssetCollection, sourceAsset, fileSource).Result;
+                var resCode = result.GetResultCode();
+
+                Assert.AreEqual(resCode, Systems.EResultCode.Success);
+            }
+
+            // Create 'dest' space and invoke the copy
+            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            Common.Array<Systems.AssetCollection> destAssetCollections = null;
+
+            {
+                Common.Array<Systems.AssetCollection> sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
+                sourceAssetCollections[0] = sourceAssetCollection;
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(sourceAssetCollections, destSpace.Id, false).Result;
+                
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
+                destAssetCollections = result.GetAssetCollections();
+            }
+
+            // Validate the copied asset collection and its data
+	        {
+                Assert.AreEqual(destAssetCollections.Size(), 1UL);
+		        Assert.AreNotEqual(destAssetCollections[0].Id, sourceAssetCollection.Id);
+		        Assert.AreEqual(destAssetCollections[0].SpaceId, destSpace.Id);
+		        Assert.AreEqual(destAssetCollections[0].Type, sourceAssetCollection.Type);
+		        Assert.AreEqual(destAssetCollections[0].Tags.Size(), 1UL);
+
+                GetAssetsInCollection(assetSystem, destAssetCollections[0], out var destAssets);
+                Assert.AreEqual(destAssets.Size(), 1UL);
+
+                // Get the copied data and compare it with our source
+                using var result = assetSystem.DownloadAssetData(destAssets[0]).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
+
+                destAssets.Dispose();
+
+                byte[] downloadedData = new byte[result.GetDataLength()];
+                Marshal.Copy(result.GetData(), downloadedData, 0, (int)result.GetDataLength());
+
+                var fileData = File.ReadAllBytes(Path.GetFullPath("assets/test.json"));
+                Assert.IsTrue(downloadedData.SequenceEqual(fileData));
+            }
+
+            destAssetCollections.Dispose();
+
+            // Validating that we must have at least one asset collection to copy
+	        {
+		        using var sourceAssetCollections = new Common.Array<Systems.AssetCollection>(1);
+                using var result = assetSystem.CopyAssetCollectionsToSpace(sourceAssetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+	        }
+
+            // Validating we cannot perform a copy if the asset has no space ID
+            {
+                using var assetCollections = new Common.Array<Systems.AssetCollection>(1);
+                assetCollections[0] = new Systems.AssetCollection();
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(assetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+            }
+
+            // Validating we cannot perform a copy of assets that belong to different spaces
+            {
+                var firstSpaceAssetCollection = new Systems.AssetCollection();
+                firstSpaceAssetCollection.SpaceId = "123456";
+
+                var secondSpaceAssetCollection = new Systems.AssetCollection();
+                secondSpaceAssetCollection.SpaceId = "456789";
+
+                Common.Array<Systems.AssetCollection> assetCollections = new Common.Array<Systems.AssetCollection>(2);
+                assetCollections[0] = firstSpaceAssetCollection;
+                assetCollections[1] = secondSpaceAssetCollection;
+
+                using var result = assetSystem.CopyAssetCollectionsToSpace(assetCollections, destSpace.Id, false).Result;
+                Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Failed);
+            }
         }
 #endif
     }

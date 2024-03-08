@@ -13,15 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CallHelpers.h"
 #include "Services/ApiBase/ApiBase.h"
+#include "Systems/ResultHelpers.h"
 #include "Web/MaintenanceApi/MaintenanceApi.h"
 
 
-
 namespace chs = csp::systems::maintenanceservice;
+
 
 namespace csp::systems
 {
@@ -42,16 +45,21 @@ MaintenanceSystem::~MaintenanceSystem()
 
 void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
-	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [=](const MaintenanceInfoResult& Result)
+	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [Callback](const MaintenanceInfoResult& Result)
 	{
-		if (Result.GetResultCode() == csp::services::EResultCode::Success)
+		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			Callback(Result);
+			return;
 		}
-		else if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+
+		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
-			Callback(MaintenanceInfoResult::Invalid());
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaintenanceInfoResult>());
+
+			return;
 		}
+
+		INVOKE_IF_NOT_NULL(Callback, Result);
 	};
 
 	csp::services::ResponseHandlerPtr MaintenanceResponseHandler

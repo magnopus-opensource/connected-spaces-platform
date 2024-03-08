@@ -145,6 +145,14 @@ const csp::common::String& SpaceEntity::GetName() const
 
 void SpaceEntity::SetName(const csp::common::String& Value)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_ENTITYNAME);
@@ -168,6 +176,14 @@ const csp::common::Vector3& SpaceEntity::GetPosition() const
 
 void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_POSITION);
@@ -185,6 +201,14 @@ const csp::common::Vector4& SpaceEntity::GetRotation() const
 
 void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_ROTATION);
@@ -202,6 +226,14 @@ const csp::common::Vector3& SpaceEntity::GetScale() const
 
 void SpaceEntity::SetScale(const csp::common::Vector3& Value)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_SCALE);
@@ -224,6 +256,14 @@ const csp::common::String& SpaceEntity::GetThirdPartyRef() const
 
 void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYREF);
@@ -236,6 +276,14 @@ void SpaceEntity::SetThirdPartyRef(const csp::common::String& InThirdPartyRef)
 
 void SpaceEntity::SetThirdPartyPlatformType(const csp::systems::EThirdPartyPlatform InThirdPartyPlatformType)
 {
+	if (!IsModifiable())
+	{
+		CSP_LOG_ERROR_FORMAT("Entity is not modifiable, you can only modify entities that have transferable ownership, or which you already are the "
+							 "owner of. Entity name: %s",
+							 Name.c_str());
+		return;
+	}
+
 	std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 
 	DirtyProperties.Remove(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM);
@@ -720,7 +768,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
 	/// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-	if (!EntitySystem->GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
+		if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
 	{
 		std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 		std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
@@ -1014,6 +1062,18 @@ bool SpaceEntity::Deselect()
 {
 	std::scoped_lock EntitiesLocker(*EntityLock);
 	return EntitySystem->SetSelectionStateOfEntity(false, this);
+}
+
+bool SpaceEntity::IsModifiable()
+{
+	if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
+    {
+		return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
+    }
+    else
+    {
+        return true;
+    }
 }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)

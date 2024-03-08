@@ -1,5 +1,4 @@
 using Common = Csp.Common;
-using Services = Csp.Services;
 using Systems = Csp.Systems;
 
 using CSharpTests;
@@ -15,7 +14,7 @@ namespace CSPEngine
             using var result = poiSystem.DeletePOI(poi).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             LogDebug($"POI deleted (Id: {poi.Id}, Name: {poi.Name})");
 
@@ -40,7 +39,7 @@ namespace CSPEngine
             using var result = poiSystem.CreatePOI(poiTitle, poiDescription, uniquePOIName, tags, poiType, poiOwner, poiLocation, poiAssetCollection).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             poi = result.GetPointOfInterest();
             LogDebug($"POI created (Id: {poi.Id}, Name: {poi.Name})");
@@ -55,7 +54,7 @@ namespace CSPEngine
             using var result = assetSystem.GetAssetCollectionById(poi.AssetCollectionId).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             assetCollection = result.GetAssetCollection();
         }
@@ -63,7 +62,7 @@ namespace CSPEngine
         static bool AreTestAssetCollectionsEqual(Systems.AssetCollection lhs, Systems.AssetCollection rhs)
             => lhs.Id == rhs.Id
             && lhs.Name == rhs.Name
-            && lhs.SpaceIds[0] == rhs.SpaceIds[0];
+            && lhs.SpaceId == rhs.SpaceId;
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_CREATEPOI_TEST
@@ -120,7 +119,7 @@ namespace CSPEngine
             using var result = poiSystem.GetPOIsInArea(searchLocationOrigin, searchRadius).Result;
             var resCode = result.GetResultCode();
 
-            Assert.AreEqual(resCode, Services.EResultCode.Success);
+            Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
             using var poiCollection = result.GetPOIs();
 

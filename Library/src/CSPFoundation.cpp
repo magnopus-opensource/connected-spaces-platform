@@ -272,8 +272,6 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 
 	csp::systems::SystemsManager::Instantiate();
 
-	csp::systems::SystemsManager::Get().GetScriptSystem()->Initialise();
-
 	*DeviceId	  = LoadDeviceId().c_str();
 	IsInitialised = true;
 
@@ -348,11 +346,6 @@ const csp::common::String& CSPFoundation::GetBuildID()
 	static csp::common::String BuildID(CSP_FOUNDATION_BUILD_ID);
 
 	return BuildID;
-}
-
-int32_t CSPFoundation::GetEntitySystemVersion()
-{
-	return EntitySystemVersion;
 }
 
 const csp::common::String& CSPFoundation::GetDeviceId()

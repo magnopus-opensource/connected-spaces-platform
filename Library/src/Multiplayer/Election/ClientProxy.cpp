@@ -195,14 +195,14 @@ void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
 {
-	SpaceEntitySystem* EntitySystem	  = ElectionManagerPtr->GetSpaceEntitySystem();
-	MultiplayerConnection* Connection = EntitySystem->GetMultiplayerConnection();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
 	const int64_t MessageId = Eid++;
 
-	const csp::multiplayer::MultiplayerConnection::CallbackHandler SignalRCallback = [=](const bool& SignalRCallbackResult)
+	const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [](ErrorCode Error)
 	{
-		if (!SignalRCallbackResult)
+		if (Error != ErrorCode::None)
 		{
 			CSP_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
 		}
@@ -218,12 +218,12 @@ void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t C
 
 void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
 {
-	SpaceEntitySystem* EntitySystem	  = ElectionManagerPtr->GetSpaceEntitySystem();
-	MultiplayerConnection* Connection = EntitySystem->GetMultiplayerConnection();
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
+	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
-	const csp::multiplayer::MultiplayerConnection::CallbackHandler SignalRCallback = [=](const bool& SignalRCallbackResult)
+	const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [](ErrorCode Error)
 	{
-		if (!SignalRCallbackResult)
+		if (Error != ErrorCode::None)
 		{
 			CSP_LOG_ERROR_MSG("ClientProxy::SendEvent: SignalR connection: Error");
 		}

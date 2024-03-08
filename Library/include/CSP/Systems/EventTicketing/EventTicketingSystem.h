@@ -13,26 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Common/Optional.h"
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/SystemBase.h"
 
+
+namespace csp::memory
+{
+
+CSP_START_IGNORE
+template <typename T> void Delete(T* Ptr);
+CSP_END_IGNORE
+
+} // namespace csp::memory
+
+
 namespace csp::systems
 {
 
 /// @ingroup Event Ticketing System
 /// @brief System that allows creation and management of ticketed events for spaces.
-class CSP_API CSP_NO_DISPOSE EventTicketingSystem : public SystemBase
+class CSP_API EventTicketingSystem : public SystemBase
 {
+	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend void csp::memory::Delete<EventTicketingSystem>(EventTicketingSystem* Ptr);
 	/** @endcond */
+	CSP_END_IGNORE
 
 public:
-	~EventTicketingSystem();
-
 	/// @brief Creates a ticketed event for the given space.
 	/// @param SpaceId csp::common::String : ID of the space to create the event for.
 	/// @param Vendor csp::systems::EventTicketingVendor : Enum representing the vendor that the event is created with.
@@ -109,6 +122,7 @@ public:
 private:
 	EventTicketingSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT EventTicketingSystem(csp::web::WebClient* InWebClient);
+	~EventTicketingSystem();
 
 	csp::services::ApiBase* EventTicketingAPI;
 };

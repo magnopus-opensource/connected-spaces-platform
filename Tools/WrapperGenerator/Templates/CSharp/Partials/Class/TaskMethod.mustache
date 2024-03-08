@@ -22,7 +22,7 @@ static void {{ delegate.name }}Function(
 
     var task_result = {{# has_multiple_results }}({{/ has_multiple_results }}{{# results }}{{# type.is_pointer_or_reference }}new {{# type }}{{> Type }}{{/ type }}({{/ type.is_pointer_or_reference }}_{{ name }}{{# type.is_pointer_or_reference }}){{/ type.is_pointer_or_reference }}{{> Comma }}{{/ results }}{{# has_multiple_results }}){{/ has_multiple_results }};
     {{# results }}{{# type.is_result_base }}
-    if (task_result.GetResultCode() == Csp.Services.EResultCode.InProgress)
+    if (task_result.GetResultCode() == Csp.Systems.EResultCode.InProgress)
     {
         {{# is_async_result_with_progress }}
         _this.{{ delegate.method_name }}OnProgress?.Invoke(_this, new ProgressEventArgs(task_result.GetRequestProgress()));

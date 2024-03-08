@@ -91,18 +91,4 @@ const csp::common::Map<csp::common::String, csp::common::String>& HTTPHeadersRes
 	return Value;
 }
 
-NullResult NullResult::Invalid()
-{
-	static NullResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
-StringResult StringResult::Invalid()
-{
-	static StringResult InvalidResult(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-	InvalidResult.SetValue("");
-	return InvalidResult;
-}
-
 } // namespace csp::systems

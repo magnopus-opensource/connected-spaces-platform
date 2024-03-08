@@ -40,9 +40,9 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 
@@ -70,6 +70,8 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -81,14 +83,21 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	const csp::common::String ApplicationOrigin = "Application Origin 1";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueSpaceName2[256];
-	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
+
+	// Connect
+	{
+		auto [Error] = AWAIT(Connection, Connect);
+
+		ASSERT_EQ(Error, ErrorCode::None);
+	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -97,27 +106,12 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-		// Set up multiplayer connection
-		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-		auto* EntitySystem = Connection->GetSpaceEntitySystem();
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		EntitySystem->SetEntityCreatedCallback(
 			[](csp::multiplayer::SpaceEntity* Entity)
 			{
 			});
-
-		// Connect and initialise
-		{
-			auto [Ok] = AWAIT(Connection, Connect);
-
-			ASSERT_TRUE(Ok);
-
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-			ASSERT_TRUE(Ok);
-		}
 
 		// Create object to represent the Custom fields
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -204,21 +198,23 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->ProcessPendingEntityOperations();
 
 		AWAIT(Connection, Disconnect);
-		delete Connection;
 
 		SpaceSystem->ExitSpace();
 	}
 
 	// Re-Enter space and verify contents
 	{
+		// Connect
+		{
+			auto [Error] = AWAIT(Connection, Connect);
+
+			ASSERT_EQ(Error, ErrorCode::None);
+		}
+
 		// Reload the space and verify the contents match
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::services::EResultCode::Success);
-
-		// Set up multiplayer connection
-		auto* Connection   = new csp::multiplayer::MultiplayerConnection(Space.Id);
-		auto* EntitySystem = Connection->GetSpaceEntitySystem();
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		// Retrieve all entities
 		auto GotAllEntities = false;
@@ -233,17 +229,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 					LoadedObject   = Entity;
 				}
 			});
-
-		// Connect and initialise
-		{
-			auto [Ok] = AWAIT(Connection, Connect);
-
-			EXPECT_TRUE(Ok);
-
-			std::tie(Ok) = AWAIT(Connection, InitialiseConnection);
-
-			EXPECT_TRUE(Ok);
-		}
 
 		// Wait until loaded
 		while (!GotAllEntities)
@@ -299,7 +284,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		}
 
 		AWAIT(Connection, Disconnect);
-		delete Connection;
 
 		SpaceSystem->ExitSpace();
 	}

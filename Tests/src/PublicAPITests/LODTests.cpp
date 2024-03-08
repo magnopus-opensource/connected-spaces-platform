@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "AssetSystemTestHelpers.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -25,19 +26,20 @@
 #include <Awaitable.h>
 #include <filesystem>
 
+
 namespace
 {
 
-bool RequestPredicate(const csp::services::ResultBase& Result)
+bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
-	return Result.GetResultCode() != csp::services::EResultCode::InProgress;
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
 void GetLODChain(csp::systems::AssetSystem* AssetSystem, const csp::systems::AssetCollection& AssetCollection, csp::systems::LODChain& OutLODChain)
 {
-	auto [Result] = Awaitable(&csp::systems::AssetSystem::GetLODChain, AssetSystem, AssetCollection).Await(RequestPredicate);
+	auto [Result] = AWAIT_PRE(AssetSystem, GetLODChain, RequestPredicate, AssetCollection);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutLODChain = Result.GetLODChain();
 
@@ -49,16 +51,15 @@ void RegisterAssetToLODChain(csp::systems::AssetSystem* AssetSystem,
 							 csp::systems::Asset& Asset,
 							 int LODLevel)
 {
-	auto [Result]
-		= Awaitable(&csp::systems::AssetSystem::RegisterAssetToLODChain, AssetSystem, AssetCollection, Asset, LODLevel).Await(RequestPredicate);
+	auto [Result] = AWAIT_PRE(AssetSystem, RegisterAssetToLODChain, RequestPredicate, AssetCollection, Asset, LODLevel);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::services::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	Asset = Result.GetAsset();
 }
 
-
 } // namespace
+
 
 #if RUN_ALL_UNIT_TESTS || RUN_LOD_TESTS || RUN_LOD_GET_EMPTY_LODCHAIN_TEST
 CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
@@ -75,10 +76,10 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;
@@ -123,16 +124,16 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 	const char* TestAssetName2			= "OLY-UNITTEST-ASSET2-REWIND";
 
 	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	char UniqueAssetName1[256];
-	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName1, "%s-%s", TestAssetName1, GetUniqueString().c_str());
 
 	char UniqueAssetName2[256];
-	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueHexString().c_str());
+	SPRINTF(UniqueAssetName2, "%s-%s", TestAssetName2, GetUniqueString().c_str());
 
 	// Log in
 	csp::common::String UserId;

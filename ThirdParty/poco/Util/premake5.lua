@@ -32,7 +32,7 @@ if not POCO.Util then
             "POCO_UTIL_NO_XMLCONFIGURATION"
         }
             
-        sysincludedirs {
+        externalincludedirs {
             "%{prj.location}/include",
             "%{prj.location}/src",
             "%{prj.location}/../Foundation/include",

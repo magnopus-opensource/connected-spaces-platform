@@ -154,7 +154,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 
 	if (Dto.HasUri())
 	{
-		Asset.Uri = Dto.GetUri();
+		Asset.Uri = web::Uri::Encode(Dto.GetUri());
 	}
 
 	if (Dto.HasChecksum())
@@ -258,13 +258,6 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 }
 
 
-AssetsResult AssetsResult::Invalid()
-{
-	static AssetsResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
-}
-
 csp::common::Array<Asset>& AssetsResult::GetAssets()
 {
 	return Assets;
@@ -309,26 +302,14 @@ const csp::common::String& UriResult::GetUri() const
 	return Uri;
 }
 
-csp::common::String& UriResult::GetXErrorCode()
+void UriResult::SetUri(const csp::common::String& Value)
 {
-	return XCodeError;
-}
-
-const csp::common::String& UriResult::GetXErrorCode() const
-{
-	return XCodeError;
-}
-
-UriResult UriResult::Invalid()
-{
-	static UriResult result(csp::services::EResultCode::Failed, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseBadRequest));
-
-	return result;
+	Uri = Value;
 }
 
 UriResult::UriResult(const csp::common::String Uri) : Uri(Uri)
 {
-	SetResult(csp::services::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 }
 
 void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
@@ -337,11 +318,6 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 
 	const auto* Response = ApiResponse->GetResponse();
 	const auto& Headers	 = Response->GetPayload().GetHeaders();
-
-	if (Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
-	{
-		XCodeError = Headers.at("x-errorcode").c_str();
-	}
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
