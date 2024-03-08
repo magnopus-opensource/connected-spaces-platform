@@ -70,13 +70,6 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -142,9 +135,6 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 		ExternalLinkComponent->SetIsARVisible(IsARVisible);
 
 		EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
-
-		// Disconnect from the SignalR server
-		AWAIT(Connection, Disconnect);
 
 		SpaceSystem->ExitSpace();
 	}

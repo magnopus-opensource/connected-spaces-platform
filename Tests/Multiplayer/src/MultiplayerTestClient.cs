@@ -234,16 +234,7 @@ namespace MultiplayerTestClient
 
             var entitySystem = Systems.SystemsManager.Get().GetSpaceEntitySystem();
 
-            var res = connection.Connect().Result;
-            Log("Multiplayer connected");
-
             entitySystem.OnEntityCreated += (s, e) => { Log("OnEntityCreated"); };
-        }
-
-        public void Disconnect()
-        {
-            var res = connection.Disconnect().Result;
-            Log("Multiplayer disconnected");
         }
 
         public void CreateAvatar(string avatarName, string avatarId)

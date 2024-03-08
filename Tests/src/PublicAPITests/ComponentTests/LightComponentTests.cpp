@@ -71,13 +71,6 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -181,8 +174,6 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete asset
@@ -223,13 +214,6 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 
 	// Log in
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -274,9 +258,6 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 	LightSpaceComponentInstance->InvokeAction("TestAction", "TestParam");
 
 	EXPECT_TRUE(ActionCalled);
-
-	// Disconnect from the SignalR server
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

@@ -66,13 +66,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -145,8 +138,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	AudioComponent->SetVolume(0.f);
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
-	AWAIT(Connection, Disconnect);
-
 	SpaceSystem->ExitSpace();
 
 	// Delete space
@@ -177,13 +168,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-
-	// Connect
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
 
 	// Create space
 	csp::systems::Space Space;
@@ -282,8 +266,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	CreatedObject->GetScript()->Invoke();
 	EntitySystem->ProcessPendingEntityOperations();
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

@@ -65,13 +65,6 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
 
-	// Connect and initialise
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, ErrorCode::None);
-	}
-
 	// Create space
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -133,8 +126,6 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 	EXPECT_EQ(DefaultSphereRadius, 0.5f);
 	EXPECT_EQ(DefaultCapsuleHalfWidth, 0.5f);
 	EXPECT_EQ(DefaultCapsuleHalfHeight, 1.0f);
-
-	AWAIT(Connection, Disconnect);
 
 	SpaceSystem->ExitSpace();
 

@@ -293,12 +293,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	{
-		auto [Error] = AWAIT(Connection, Connect);
-
-		ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
-	}
-
 	// Create space
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -323,11 +317,6 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().FeatureName, TierFeatures::ScopeConcurrentUsers);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
-
-	// Disconnect from the SignalR server
-	auto [Error] = AWAIT(Connection, Disconnect);
-
-	ASSERT_EQ(Error, csp::multiplayer::ErrorCode::None);
 
 	SpaceSystem->ExitSpace();
 
