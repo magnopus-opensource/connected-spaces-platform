@@ -130,8 +130,9 @@ public:
 	/// @brief Retrieves the Avatar Portrait information associated with the space
 	/// If the user of the Avatar portrait associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
 	/// and the Uri field inside the UriResult will be empty
+    /// @param InUserID const csp::common::String : The id of the user we are seelomg to retrieve the portrait for
 	/// @param Callback UriResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAvatarPortrait(UriResultCallback Callback);
+	CSP_ASYNC_RESULT void GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback);
 
 	/// @brief Updates the Avatar Portrait image or adds one if it didn't have it previously using BufferAssetDataSource
 	/// @param NewAvatarPortrait csp::systems::BufferAssetDataSource : New Avatar Portrait information
@@ -163,7 +164,7 @@ private:
 
 	void AddAvatarPortrait(const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
 	void AddAvatarPortraitWithBuffer(const csp::systems::BufferAssetDataSource& ImageDataSource, NullResultCallback Callback);
-	void GetAvatarPortraitAssetCollection(AssetCollectionsResultCallback Callback);
+	void GetAvatarPortraitAssetCollection(const csp::common::String InUserID, AssetCollectionsResultCallback Callback);
 	void GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback);
 	void RemoveAvatarPortrait(NullResultCallback Callback);
 };

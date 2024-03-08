@@ -431,10 +431,12 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 		}
 	};
 
-	GetAvatarPortraitAssetCollection(AvatarPortraitAssetCollCallback);
+    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
+    const auto& UserId = UserSystem->GetLoginState().UserId;
+	GetAvatarPortraitAssetCollection(UserId, AvatarPortraitAssetCollCallback);
 }
 
-void SettingsSystem::GetAvatarPortrait(UriResultCallback Callback)
+void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback)
 {
 	AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
@@ -490,7 +492,7 @@ void SettingsSystem::GetAvatarPortrait(UriResultCallback Callback)
 		}
 	};
 
-	GetAvatarPortraitAssetCollection(AvatarPortraitAssetCollCallback);
+	GetAvatarPortraitAssetCollection(InUserID, AvatarPortraitAssetCollCallback);
 }
 
 void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource& NewAvatarPortrait, NullResultCallback Callback)
@@ -552,7 +554,9 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 		}
 	};
 
-	GetAvatarPortraitAssetCollection(ThumbnailAssetCollCallback);
+    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
+    const auto& UserId = UserSystem->GetLoginState().UserId;
+	GetAvatarPortraitAssetCollection(UserId, ThumbnailAssetCollCallback);
 }
 
 void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSource, NullResultCallback Callback)
@@ -725,13 +729,10 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 									   CreateAssetCollCallback);
 }
 
-void SettingsSystem::GetAvatarPortraitAssetCollection(AssetCollectionsResultCallback Callback)
+void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String InUserID, AssetCollectionsResultCallback Callback)
 {
 	auto& SystemsManager = SystemsManager::Get();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	const auto& UserId = UserSystem->GetLoginState().UserId;
 
 	AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
 	{
@@ -746,7 +747,7 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(AssetCollectionsResultCall
 		INVOKE_IF_NOT_NULL(Callback, AssetCollResult);
 	};
 
-	Array<String> AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + UserId};
+	Array<String> AvatarPortraitAssetCollectionName = {AVATAR_PORTRAIT_ASSET_COLLECTION_NAME + InUserID};
 
 	Array<String> PrototypeNames			   = {AvatarPortraitAssetCollectionName};
 	Array<EAssetCollectionType> PrototypeTypes = {EAssetCollectionType::DEFAULT};
@@ -864,7 +865,9 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 		}
 	};
 
-	GetAvatarPortraitAssetCollection(PortraitAvatarAssetCollCallback);
+    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
+    const auto& UserId = UserSystem->GetLoginState().UserId;
+	GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
 
 void SettingsSystem::SetAvatarInfo(AvatarType InType, const Variant& InIdentifier, NullResultCallback Callback)
