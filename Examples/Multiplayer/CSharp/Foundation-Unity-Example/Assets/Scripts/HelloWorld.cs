@@ -29,7 +29,7 @@ public class HelloWorld : MonoBehaviour
     private CspSystems.SpaceSystem spaceSystem;
     private CspSystems.GraphQLSystem graphQLSystem;
     private SpaceEntitySystem entitySystem;
-    private MultiplayerConnection connection;
+    //private MultiplayerConnection connection;
     private CancellationTokenSource cancellationTokenSource;
     private CspSystems.Space createdSpace;
 
@@ -376,12 +376,12 @@ public class HelloWorld : MonoBehaviour
         using CspSystems.NullResult enterResult = await spaceSystem.EnterSpace(space.Id);
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
-        await InitializeConnection(space.Id);
+        //await InitializeConnection(space.Id);
 
         StartTickLoop();
         Debug.Log("Connected to Multiplayer");
 
-        entitySystem = connection.GetSpaceEntitySystem();
+        entitySystem = CspSystems.SystemsManager.Get().GetSpaceEntitySystem();
         entitySystem.OnEntityCreated += OnEntityCreated;
 
         var entity = await SpawnLocalAvatar();
@@ -403,14 +403,14 @@ public class HelloWorld : MonoBehaviour
 
         await CleanupAvatars();
 
-        await connection.Disconnect();
-        connection.Dispose();
-        Debug.Log("Disconnected from Multiplayer");
-        await Task.Delay(100);
+        //await connection.Disconnect();
+        //connection.Dispose();
+
 
         spaceSystem.ExitSpace();
         Debug.Log("Exited Space");
-
+        Debug.Log("Disconnected from Multiplayer");
+        //await Task.Delay(100);
         await Task.Delay(100);
 
         enteredSpace = false;
@@ -434,6 +434,7 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Deleted Space {createdSpace.Name}");
     }
 
+    /*
     /// <summary>
     /// Initializes a connection to multiplayer.
     /// </summary>
@@ -448,7 +449,7 @@ public class HelloWorld : MonoBehaviour
         bool connectionInitialized = await connection.InitialiseConnection();
         Debug.Log($"Connection initialized: {connectionInitialized}");
     }
-
+*/
     #endregion
 
     // Creating an avatar, moving an avatar
