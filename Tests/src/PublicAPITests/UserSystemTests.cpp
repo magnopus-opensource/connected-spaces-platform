@@ -346,7 +346,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInWithTokenTest)
 	csp::common::String LoginToken;
 	bool LoginTokenAvailable = false;
 
-	csp::systems::LoginTokenInfoResultCallback LoginTokenReceivedCallback = [&](csp::systems::LoginTokenInfoResult& Result)
+	csp::systems::LoginTokenInfoResultCallback LoginTokenReceivedCallback = [&](const csp::systems::LoginTokenInfoResult& Result)
 	{
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
