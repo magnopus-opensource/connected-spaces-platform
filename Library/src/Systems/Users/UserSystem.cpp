@@ -133,28 +133,32 @@ void UserSystem::Login(const csp::common::String& UserName,
 			Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
 		}
 
-		LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
+		LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
 		{
 			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				NotifyRefreshTokenHasChanged();
 
-                csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-					= [Callback, &LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+				csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
+					= [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
 				{
 					if (ErrCode != csp::multiplayer::ErrorCode::None)
 					{
 						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+
+						Callback(LoginStateRes);
+						return;
 					}
-					
-                    Callback(LoginStateRes);
+
+					Callback(LoginStateRes);
 				};
 
-                auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
+				auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
 				MultiplayerConnection->Connect(ErrorCallback);
 			}
-			else
+			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
+				CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
 				Callback(LoginStateRes);
 			}
 		};
@@ -201,16 +205,19 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
 			Request->SetVerifiedAgeEighteen(*UserHasVerifiedAge);
 		}
 
-		LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
+		LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
 		{
 			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 				csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-					= [Callback, &LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+					= [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
 				{
 					if (ErrCode != csp::multiplayer::ErrorCode::None)
 					{
 						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+
+						Callback(LoginStateRes);
+						return;
 					}
 
 					Callback(LoginStateRes);
@@ -333,18 +340,21 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 		Callback(ErrorResult);
 	}
 
-		LoginStateResultCallback LoginStateResCallback = [=](LoginStateResult& LoginStateRes)
+	LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
 	{
 		if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 		{
 			NotifyRefreshTokenHasChanged();
 
 			csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-				= [Callback, &LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
+				= [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
 			{
 				if (ErrCode != csp::multiplayer::ErrorCode::None)
 				{
 					CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+
+					Callback(LoginStateRes);
+					return;
 				}
 
 				Callback(LoginStateRes);
@@ -411,29 +421,28 @@ void UserSystem::Logout(NullResultCallback Callback)
 	{
 		CurrentLoginState.State = ELoginState::LogoutRequested;
 
-        // disconnect MultiplayerConnection before logging out
-        csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-			= [Callback, this](csp::multiplayer::ErrorCode ErrCode)
+		// disconnect MultiplayerConnection before logging out
+		csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback = [Callback, this](csp::multiplayer::ErrorCode ErrCode)
 		{
 			if (ErrCode != csp::multiplayer::ErrorCode::None)
 			{
 				CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
 			}
 
-		    auto Request = std::make_shared<chs_user::LogoutRequest>();
-		    Request->SetUserId(CurrentLoginState.UserId);
-		    Request->SetDeviceId(CurrentLoginState.DeviceId);
+			auto Request = std::make_shared<chs_user::LogoutRequest>();
+			Request->SetUserId(CurrentLoginState.UserId);
+			Request->SetDeviceId(CurrentLoginState.DeviceId);
 
-		    csp::services::ResponseHandlerPtr ResponseHandler
-			    = AuthenticationAPI->CreateHandler<NullResultCallback, LogoutResult, LoginState, csp::services::NullDto>(
-				    Callback,
-				    &CurrentLoginState,
-				    csp::web::EResponseCodes::ResponseNoContent);
+			csp::services::ResponseHandlerPtr ResponseHandler
+				= AuthenticationAPI->CreateHandler<NullResultCallback, LogoutResult, LoginState, csp::services::NullDto>(
+					Callback,
+					&CurrentLoginState,
+					csp::web::EResponseCodes::ResponseNoContent);
 
-		    static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLogoutPost(Request, ResponseHandler);
+			static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLogoutPost(Request, ResponseHandler);
 		};
 
-        auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
+		auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
 		MultiplayerConnection->Disconnect(ErrorCallback);
 	}
 	else

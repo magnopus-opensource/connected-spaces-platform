@@ -162,7 +162,7 @@ public:
 };
 
 
-typedef std::function<void(LoginStateResult& Result)> LoginStateResultCallback;
-typedef std::function<void(LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
+typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;
+typedef std::function<void(const LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
 
 } // namespace csp::systems
