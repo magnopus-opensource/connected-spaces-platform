@@ -711,11 +711,13 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 	std::atomic_bool LogConfirmed	 = false;
 
 	LogSystem.SetLogCallback(
-		[&](csp::common::String InMessage)
+		[&LogConfirmed, Prefix](csp::common::String InMessage)
 		{
-			LogConfirmed = InMessage.Split(' ')[0] == Prefix;
-
-			std::cout << InMessage << std::endl;
+			if (InMessage.Split(' ')[0] == Prefix)
+			{
+				LogConfirmed = InMessage.Split(' ')[0] == Prefix;
+				std::cout << InMessage << std::endl;
+			}
 		});
 
 	csp::common::String UserId;
