@@ -158,7 +158,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 			}
 			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
-				CSP_LOG_ERROR_FORMAT("Login Failed. Reason: %s", LoginStateRes.GetFailureReason());
+				CSP_LOG_ERROR_FORMAT("Login Failed. Code: %i", LoginStateRes.GetHttpResultCode());
 				Callback(LoginStateRes);
 			}
 		};
