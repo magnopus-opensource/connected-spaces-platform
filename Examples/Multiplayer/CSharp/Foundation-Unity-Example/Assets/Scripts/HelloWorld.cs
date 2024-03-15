@@ -248,9 +248,17 @@ public class HelloWorld : MonoBehaviour
 
         using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password, true);
 
-        // Cache user ID for later use.
-        userId = loginResult.GetLoginState().UserId;
-        Debug.Log($"Logged in with Email {email}.");
+        if (loginResult.GetLoginState().State == CspSystems.ELoginState.LoggedIn)
+        {
+            // Cache user ID for later use.
+            userId = loginResult.GetLoginState().UserId;
+            Debug.Log($"Logged in with Email {email}.");
+        }
+        else
+        {
+            Debug.Log($"Failed to log in, State: {loginResult.GetLoginState().State}");
+            Debug.Log($"Failed to log in, Reason: {loginResult.GetFailureReason()}");
+        }
     }
 
     /// <summary>
@@ -376,12 +384,11 @@ public class HelloWorld : MonoBehaviour
         using CspSystems.NullResult enterResult = await spaceSystem.EnterSpace(space.Id);
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
-        await InitializeConnection(space.Id);
 
         StartTickLoop();
         Debug.Log("Connected to Multiplayer");
 
-        entitySystem = connection.GetSpaceEntitySystem();
+        entitySystem = CspSystems.SystemsManager.Get().GetSpaceEntitySystem();
         entitySystem.OnEntityCreated += OnEntityCreated;
 
         var entity = await SpawnLocalAvatar();
@@ -402,11 +409,6 @@ public class HelloWorld : MonoBehaviour
         entitySystem.OnEntityCreated -= OnEntityCreated;
 
         await CleanupAvatars();
-
-        await connection.Disconnect();
-        connection.Dispose();
-        Debug.Log("Disconnected from Multiplayer");
-        await Task.Delay(100);
 
         spaceSystem.ExitSpace();
         Debug.Log("Exited Space");
@@ -433,22 +435,6 @@ public class HelloWorld : MonoBehaviour
         await spaceSystem.DeleteSpace(createdSpace.Id);
         Debug.Log($"Deleted Space {createdSpace.Name}");
     }
-
-    /// <summary>
-    /// Initializes a connection to multiplayer.
-    /// </summary>
-    /// <param name="spaceId">The id of the space which is entered.</param>
-    /// <returns> Just the Task object to await. </returns>
-    private async Task InitializeConnection(string spaceId)
-    {
-        connection = new MultiplayerConnection(spaceId);
-        bool connected = await connection.Connect();
-        Debug.Log($"Connected: {connected}");
-
-        bool connectionInitialized = await connection.InitialiseConnection();
-        Debug.Log($"Connection initialized: {connectionInitialized}");
-    }
-
     #endregion
 
     // Creating an avatar, moving an avatar
