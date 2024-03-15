@@ -130,7 +130,7 @@ void WebClient::RefreshIfExpired()
 		RefreshNeeded = true;
 #endif
 
-		csp::systems::LoginStateResultCallback LoginStateResCallback = [this](csp::systems::LoginStateResult& LoginStateRes)
+		csp::systems::LoginStateResultCallback LoginStateResCallback = [this](const csp::systems::LoginStateResult& LoginStateRes)
 		{
 			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
