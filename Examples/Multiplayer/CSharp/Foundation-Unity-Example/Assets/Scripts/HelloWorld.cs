@@ -29,7 +29,6 @@ public class HelloWorld : MonoBehaviour
     private CspSystems.SpaceSystem spaceSystem;
     private CspSystems.GraphQLSystem graphQLSystem;
     private SpaceEntitySystem entitySystem;
-    //private MultiplayerConnection connection;
     private CancellationTokenSource cancellationTokenSource;
     private CspSystems.Space createdSpace;
 
@@ -77,6 +76,11 @@ public class HelloWorld : MonoBehaviour
         accountUI.OnEnterSpace -= EnterSpaceAsync;
         accountUI.OnCreateSpace -= CreateSpaceAsync;
         accountUI.OnDeleteSpace -= DeleteSpaceAsync;
+
+        if (createdSpace != null)
+        {
+            createdSpace.Dispose();
+        }
     }
 
     #endregion
@@ -105,6 +109,7 @@ public class HelloWorld : MonoBehaviour
         CSPFoundation.SetClientUserAgentInfo(userAgent);
         Debug.Log("Initialized CSP Foundation.");
 
+        userAgent.Dispose();
         cspHasStarted = true;
         InitializeSystems();
     }
@@ -156,6 +161,7 @@ public class HelloWorld : MonoBehaviour
         userSystem = CspSystems.SystemsManager.Get().GetUserSystem();
         spaceSystem = CspSystems.SystemsManager.Get().GetSpaceSystem();
         graphQLSystem = CspSystems.SystemsManager.Get().GetGraphQLSystem();
+        entitySystem = CspSystems.SystemsManager.Get().GetSpaceEntitySystem();
     }
 
     /// <summary>
@@ -231,7 +237,7 @@ public class HelloWorld : MonoBehaviour
 
         using CspSystems.ProfileResult result =
             await userSystem.CreateUser(null, null, email, password, false, true, null, null);
-        CspSystems.Profile profile = result.GetProfile();
+        using CspSystems.Profile profile = result.GetProfile();
 
         Debug.Log($"Created account with Email {profile.Email}. Please check your email to verify your account.");
     }
@@ -247,10 +253,18 @@ public class HelloWorld : MonoBehaviour
         Debug.Log($"Logging in with Email {email} ...");
 
         using CspSystems.LoginStateResult loginResult = await userSystem.Login(string.Empty, email, password, true);
-
-        // Cache user ID for later use.
-        userId = loginResult.GetLoginState().UserId;
-        Debug.Log($"Logged in with Email {email}.");
+        
+        if (loginResult.GetResultCode() == Csp.Systems.EResultCode.Success)
+        {
+            // Cache user ID for later use.
+            using var loginState = loginResult.GetLoginState();
+            userId = loginState.UserId;
+            Debug.Log($"Logged in with Email {email}.");
+        }
+        else
+        {
+            Debug.LogError($"Failed to log in.");
+        }
     }
 
     /// <summary>
@@ -323,7 +337,7 @@ public class HelloWorld : MonoBehaviour
 
         if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
         {
-            var space = spaceResult.GetSpace();
+            using var space = spaceResult.GetSpace();
             await EnterSpaceAsync(space);
         }
         else
@@ -374,17 +388,19 @@ public class HelloWorld : MonoBehaviour
     {
         await Task.Delay(100);
         using CspSystems.NullResult enterResult = await spaceSystem.EnterSpace(space.Id);
+        if (enterResult.GetResultCode() != CspSystems.EResultCode.Success)
+        {
+            Debug.LogError($"Failed {nameof(EnterSpaceAsync)}");
+            return;
+        }
         Debug.Log($"Joined Space {space.Name}");
         enteredSpace = true;
-        //await InitializeConnection(space.Id);
-
+        
         StartTickLoop();
-        Debug.Log("Connected to Multiplayer");
-
-        entitySystem = CspSystems.SystemsManager.Get().GetSpaceEntitySystem();
+        
         entitySystem.OnEntityCreated += OnEntityCreated;
 
-        var entity = await SpawnLocalAvatar();
+        await SpawnLocalAvatar();
 
         // Disable account UI.
         accountUI.gameObject.SetActive(false);
@@ -403,14 +419,8 @@ public class HelloWorld : MonoBehaviour
 
         await CleanupAvatars();
 
-        //await connection.Disconnect();
-        //connection.Dispose();
-
-
         spaceSystem.ExitSpace();
         Debug.Log("Exited Space");
-        Debug.Log("Disconnected from Multiplayer");
-        //await Task.Delay(100);
         await Task.Delay(100);
 
         enteredSpace = false;
@@ -433,23 +443,6 @@ public class HelloWorld : MonoBehaviour
         await spaceSystem.DeleteSpace(createdSpace.Id);
         Debug.Log($"Deleted Space {createdSpace.Name}");
     }
-
-    /*
-    /// <summary>
-    /// Initializes a connection to multiplayer.
-    /// </summary>
-    /// <param name="spaceId">The id of the space which is entered.</param>
-    /// <returns> Just the Task object to await. </returns>
-    private async Task InitializeConnection(string spaceId)
-    {
-        connection = new MultiplayerConnection(spaceId);
-        bool connected = await connection.Connect();
-        Debug.Log($"Connected: {connected}");
-
-        bool connectionInitialized = await connection.InitialiseConnection();
-        Debug.Log($"Connection initialized: {connectionInitialized}");
-    }
-*/
     #endregion
 
     // Creating an avatar, moving an avatar
@@ -461,9 +454,9 @@ public class HelloWorld : MonoBehaviour
     /// The avatar is used to represent the user in that space.
     /// </summary>
     /// <returns>SpaceEntity representing the avatar.</returns>
-    private async Task<SpaceEntity> SpawnLocalAvatar()
+    private async Task SpawnLocalAvatar()
     {
-        SpaceEntity entity = await entitySystem.CreateAvatar($"user-{userId}",
+        using SpaceEntity entity = await entitySystem.CreateAvatar($"user-{userId}",
             new SpaceTransform(CspCommon.Vector3.Zero(), CspCommon.Vector4.Identity(),
                 CspCommon.Vector3.One()), AvatarState.Idle, userId, AvatarPlayMode.Default);
 
@@ -471,7 +464,6 @@ public class HelloWorld : MonoBehaviour
         localPlayer.Initialize(entity);
 
         Debug.Log("Created avatar for local player.");
-        return entity;
     }
 
     private void OnEntityCreated(object sender, SpaceEntity spaceEntity)
@@ -519,9 +511,13 @@ public class HelloWorld : MonoBehaviour
     private void CreateRemoteAvatarGameObject(SpaceEntity spaceEntity)
     {
         // Get entity transform values.
-        Vector3 pos = spaceEntity.GetPosition().ToUnityVector().ToUnityPositionFromGLTF();
-        Quaternion rot = spaceEntity.GetRotation().ToUnityQuaternion().ToUnityRotationFromGLTF();
-        Vector3 scale = spaceEntity.GetScale().ToUnityVector().ToUnityScaleFromGLTF();
+        using var cspVectorPosition = spaceEntity.GetPosition();
+        using var cspQuatRotation = spaceEntity.GetRotation();
+        using var cspVectorScale = spaceEntity.GetScale();
+        
+        Vector3 pos = cspVectorPosition.ToUnityVector().ToUnityPositionFromGLTF();
+        Quaternion rot = cspQuatRotation.ToUnityQuaternion().ToUnityRotationFromGLTF();
+        Vector3 scale = cspVectorScale.ToUnityVector().ToUnityScaleFromGLTF();
 
         // Create remote 
         RemotePlayer remotePlayer = Instantiate(remotePlayerPrefab, pos, rot);
