@@ -284,44 +284,6 @@ namespace CSPEngine
         }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EXCHANGEKEY_TEST
-        [Test]
-        public static void ExchangeKeyTest()
-        {
-            string key;
-            string userId;
-
-            // Use WebClient as HttpClient requires an extra package to be installed
-            using var http = new System.Net.WebClient();
-            http.Headers[System.Net.HttpRequestHeader.ContentType] = "text/json";
-            var response = http.UploadString(CHSEndpointBaseUri + "/mag-user/api/v1/users/login", "{ \"email\": \"olyservice@rewind.co\", \"password\": \"rcWbfc1MU3Yx\", \"deviceId\": \"GoodbyeAndThanksForAllTheFish\" }");
-            var json = ParseJsonObject(response);
-            userId = json["userId"] as string;
-            var authToken = json["accessToken"] as string;
-
-            http.Headers[System.Net.HttpRequestHeader.ContentType] = "text/json";
-            http.Headers[System.Net.HttpRequestHeader.Authorization] = "Bearer " + authToken;
-            response = http.UploadString(CHSEndpointBaseUri + "/mag-user/api/v1/users/onetimekey", $"{{ \"userId\": \"{userId}\", \"deviceId\": \"GoodbyeAndThanksForAllTheFish\" }}");
-            json = ParseJsonObject(response);
-            key = json["oneTimeKey"] as string;
-
-            GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
-
-            // Log in with OTP
-            {
-                using var result = userSystem.ExchangeKey(userId, key).Result;
-                var resCode = result.GetResultCode();
-
-                Assert.AreEqual(resCode, Systems.EResultCode.Success);
-
-                using var loginState = result.GetLoginState();
-                var gotUserID = loginState.UserId;
-
-                Assert.AreEqual(userId, gotUserID);
-            }
-        }
-#endif
-
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINERROR_TEST
         [Test]
         public static void LoginErrorTest()

@@ -138,9 +138,9 @@ namespace CSPEngine
             return spaces;
         }
 
-        static void GetSpacesByAttributes(Systems.SpaceSystem spaceSystem, bool? isDiscoverable, bool? requiresInvitation, int? resultsSkipNo, int? resultsMaxNo, out Common.Array<Systems.BasicSpace> spaces)
+        static void GetSpacesByAttributes(Systems.SpaceSystem spaceSystem, bool? isDiscoverable, bool? isArchived, bool? requiresInvitation, int? resultsSkipNo, int? resultsMaxNo, out Common.Array<Systems.BasicSpace> spaces)
         {
-            using var result = spaceSystem.GetSpacesByAttributes(isDiscoverable, requiresInvitation, resultsSkipNo, resultsMaxNo).Result;
+            using var result = spaceSystem.GetSpacesByAttributes(isDiscoverable, isArchived, requiresInvitation, resultsSkipNo, resultsMaxNo).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
