@@ -109,11 +109,13 @@ void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace
 
 Array<BasicSpace> GetSpacesByAttributes(::SpaceSystem* SpaceSystem,
 										const Optional<bool>& IsDiscoverable,
+										const Optional<bool>& IsArchived,
 										const Optional<bool>& RequiresInvite,
 										const Optional<int>& ResultsSkipNo,
 										const Optional<int>& ResultsMaxNo)
 {
-	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
+	auto [Result]
+		= AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, IsArchived, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -803,7 +805,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 	LogInAsGuest(UserSystem, UserId);
 
 	// Get public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, false, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -866,7 +868,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 	}
 
 	// Get only the public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, false, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -924,7 +926,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 	}
 
 	// Get only the public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, false, true, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, false, false, true, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -983,7 +985,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
 	// Get private spaces paginated
 	{
-		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
+		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 

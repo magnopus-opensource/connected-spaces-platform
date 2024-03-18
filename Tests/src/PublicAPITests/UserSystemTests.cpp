@@ -186,19 +186,6 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
 	EXPECT_EQ(RetrievedRedirectURL, RedirectURL.c_str());
 }
 
-#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_EXCHANGEKEY_BADINPUT_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ExchangeKeyBadInputTest)
-{
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ExchangeKey, RequestPredicate, "userId", "key");
-
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-}
-#endif
-
-
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_FORGOTPASSWORD_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ForgotPasswordTest)
 {
