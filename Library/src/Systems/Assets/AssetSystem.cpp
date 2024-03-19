@@ -282,6 +282,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			std::nullopt,							// WriteAccessFilters
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
+			std::nullopt,							// shallowCopy
 			CopyAsync,								// asyncCall
 			ResponseHandler,						// ResponseHandler
 			csp::common::CancellationToken::Dummy() // CancellationToken
@@ -542,16 +543,17 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 PrototypeIds,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
+		->apiV1PrototypesAssetDetailsGet(std::nullopt, // Ids
+										 std::nullopt, // SupportedPlatforms
+										 std::nullopt, // AssetTypes
+										 std::nullopt, // Styles
+										 std::nullopt, // Names
+										 std::nullopt, // CreatedAfter
+										 PrototypeIds, // PrototypeIds
+										 std::nullopt, // PrototypeNames
+										 std::nullopt, // PrototypeParentNames
+										 std::nullopt, // Tags
+										 std::nullopt, // TagsAll
 										 ResponseHandler);
 }
 
@@ -640,6 +642,7 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds,
 										 std::nullopt,
 										 std::nullopt,
 										 std::nullopt,
+										 std::nullopt,
 										 ResponseHandler);
 }
 
@@ -673,6 +676,7 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 										 std::nullopt,
 										 std::nullopt,
 										 Ids,
+										 std::nullopt,
 										 std::nullopt,
 										 std::nullopt,
 										 std::nullopt,

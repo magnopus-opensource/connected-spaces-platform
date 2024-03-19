@@ -390,31 +390,6 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 	static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginSocialPost(Request, ResponseHandler);
 }
 
-void UserSystem::ExchangeKey(const csp::common::String& UserId, const csp::common::String& Key, LoginStateResultCallback Callback)
-{
-	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
-	{
-		CurrentLoginState.State = ELoginState::LoginRequested;
-
-		auto Request = std::make_shared<chs_user::ExchangeKeyRequest>();
-		Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
-		Request->SetUserId(UserId);
-		Request->SetKey(Key);
-
-		csp::services::ResponseHandlerPtr ResponseHandler
-			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs_user::AuthDto>(Callback,
-																														  &CurrentLoginState);
-
-		static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersKeyexchangePost(Request, ResponseHandler);
-	}
-	else
-	{
-		csp::systems::LoginStateResult BadResult;
-		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
-		Callback(BadResult);
-	}
-}
-
 void UserSystem::Logout(NullResultCallback Callback)
 {
 	if (CurrentLoginState.State == ELoginState::LoggedIn)

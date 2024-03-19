@@ -1,4 +1,3 @@
-#define RUN_ALL_UNIT_TESTS
 using System.Threading;
 
 using Common = Csp.Common;

@@ -136,8 +136,8 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 							   auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-                               // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
-                               // This hopefully will change in a future version when CHS support it.
+							   // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+							   // This hopefully will change in a future version when CHS support it.
 							   MultiplayerConnection->StopListening(
 								   [MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 								   {
@@ -208,7 +208,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 			auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-            // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+			// Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
 			// This hopefully will change in a future version when CHS support it.
 			MultiplayerConnection->StopListening(
 				[MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
@@ -607,12 +607,14 @@ void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 }
 
 void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
+										const Optional<bool>& InIsArchived,
 										const Optional<bool>& InRequiresInvite,
 										const Optional<int>& InResultsSkip,
 										const Optional<int>& InResultsMax,
 										BasicSpacesResultCallback Callback)
 {
 	auto IsDiscoverable				  = InIsDiscoverable.HasValue() ? *InIsDiscoverable : std::optional<bool>(std::nullopt);
+	auto IsArchived					  = InIsArchived.HasValue() ? *InIsArchived : std::optional<bool>(std::nullopt);
 	auto RequiresInvite				  = InRequiresInvite.HasValue() ? *InRequiresInvite : std::optional<bool>(std::nullopt);
 	auto ResultsSkip				  = InResultsSkip.HasValue() ? *InResultsSkip : std::optional<int32_t>(std::nullopt);
 	std::optional<int32_t> ResultsMax = InResultsMax.HasValue() ? std::min(MAX_SPACES_RESULTS, *InResultsMax) : MAX_SPACES_RESULTS;
@@ -635,6 +637,7 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
 															  IsDiscoverable,
 															  std::nullopt, // AutoModerator
 															  RequiresInvite,
+															  IsArchived,
 															  ResultsSkip,
 															  ResultsMax,
 															  ResponseHandler);

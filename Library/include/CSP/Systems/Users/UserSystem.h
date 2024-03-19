@@ -133,12 +133,6 @@ public:
 																  const csp::common::Optional<bool>& UserHasVerifiedAge,
 																  LoginStateResultCallback Callback);
 
-	/// @brief Log in to Magnopus Connected Services using the given one-time password/key.
-	/// @param UserId csp::common::String : the user Id
-	/// @param Key csp::common::String : the one-time key to exchange
-	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void ExchangeKey(const csp::common::String& UserId, const csp::common::String& Key, LoginStateResultCallback Callback);
-
 	/// @brief Logout from Magnopus Connected Services.
 	/// @param Callback NullResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void Logout(NullResultCallback Callback);
