@@ -206,7 +206,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 	LogIn(UserSystem, UserId);
 	auto Details = GetShopifyDetails();
 
-	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformationByVariantId, RequestPredicate, Details["SpaceId"], Details["VariantId"]);
+	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInfoCollectionByVariantIds, RequestPredicate, Details["SpaceId"], {Details["VariantId"]});
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_GT(Result.GetProducts().Size(), 0);

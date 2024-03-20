@@ -17,6 +17,7 @@
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
 #include "CallHelpers.h"
+#include "Common/Convert.h"
 #include "ECommerceSystemHelpers.h"
 #include "Services/aggregationservice/Api.h"
 #include "Systems/ResultHelpers.h"
@@ -79,9 +80,9 @@ void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsProductIdGet(SpaceId, ProductId, ResponseHandler);
 }
 
-void ECommerceSystem::GetProductInformationByVariantId(const common::String& SpaceId,
-													   const common::String& VariantId,
-													   ProductInfoCollectionResultCallback Callback)
+void ECommerceSystem::GetProductInfoCollectionByVariantIds(const common::String& SpaceId,
+														   const Array<common::String>& InVariantIds,
+														   ProductInfoCollectionResultCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<ProductInfoCollectionResultCallback,
@@ -89,7 +90,7 @@ void ECommerceSystem::GetProductInformationByVariantId(const common::String& Spa
 									void,
 									csp::services::DtoArray<chs::ShopifyProductDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	std::vector<String> VariantIds = {VariantId};
+	const std::vector<common::String> VariantIds = common::Convert(InVariantIds);
 
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsVariantsGet(SpaceId, VariantIds, ResponseHandler);
 }
