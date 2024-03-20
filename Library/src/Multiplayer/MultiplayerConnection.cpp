@@ -632,7 +632,14 @@ ConversationSystem* MultiplayerConnection::GetConversationSystem() const
 
 ConnectionState MultiplayerConnection::GetConnectionState() const
 {
-	return static_cast<ConnectionState>(Connection->GetConnectionState());
+	if (Connection != nullptr)
+	{
+		return static_cast<ConnectionState>(Connection->GetConnectionState());
+	}
+	else
+	{
+		return ConnectionState::Disconnected;
+	}
 }
 
 CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const bool InAllowSelfMessaging, ErrorCodeCallbackHandler Callback)
