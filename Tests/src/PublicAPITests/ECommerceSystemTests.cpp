@@ -157,6 +157,100 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 }
 #endif
 
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_BY_VARIANT_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
+{
+	/*Steps needed to be performed before running this test are:
+
+	1. Create a space (Add to Shopify Creds)
+	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
+		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
+		{
+			"storeName": "string",
+			"isEcommerceActive": true,
+			"privateAccessToken": "string"
+		}
+	3. Check Shopify has synced with your namespace
+		Endpoint: /api/v1/vendors/shopify/validate
+		{
+			"storeName": "string",
+			"privateAccessToken": "string"
+		}
+	4. Either use the default "Gift Card" product or update these test variables with a new product. (Add variant Id to Shopify Creds)
+	Now you can use this test!*/
+	SetRandSeed();
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	// This is an example from Shopify dev quickstart "Gift Card"
+	const csp::common::String ProductId				= "gid://shopify/Product/8566195847465";
+	const csp::common::String ProductTitle			= "Gift Card";
+	const csp::common::String ProductDescription	= "This is a gift card for the store";
+	const csp::common::String ImageMediaContentType = "IMAGE";
+	const csp::common::String ImageAlt				= "Gift card that shows text: Generated data gift card";
+	const csp::common::String ImageUrl				= "https://cdn.shopify.com/s/files/1/0813/7238/1481/products/gift_card.png?v=1692877145";
+	const int32_t ImageWidth						= 2881;
+	const int32_t ImageHeight						= 2881;
+	const int32_t VariantSize						= 1;
+	const int32_t MediaSize							= 1;
+	const int32_t OptionsSize						= 0;
+	const csp::common::String OptionsName			= "Denominations";
+	csp::common::Array<csp::common::String> VariantTitleAndOptionValue = {"$10", "$25", "$50", "$100"};
+	csp::common::Array<csp::common::String> VariantIds				   = {"gid://shopify/ProductVariant/46375586136361",
+																		  "gid://shopify/ProductVariant/46375586234665",
+																		  "gid://shopify/ProductVariant/46375586398505",
+																		  "gid://shopify/ProductVariant/46375586496809"};
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+	auto Details = GetShopifyDetails();
+
+	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformationByVariantId, RequestPredicate, Details["SpaceId"], Details["VariantId"]);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EXPECT_GT(Result.GetProducts().Size(), 0);
+	EXPECT_EQ(Result.GetProducts()[0].Id, ProductId);
+	EXPECT_EQ(Result.GetProducts()[0].Title, ProductTitle);
+	EXPECT_EQ(Result.GetProducts()[0].Description, ProductDescription);
+	EXPECT_EQ(Result.GetProducts()[0].Tags.Size(), 0);
+
+	EXPECT_EQ(Result.GetProducts()[0].Media.Size(), MediaSize);
+
+	for (int i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
+	{
+		EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, ImageMediaContentType);
+		EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, ImageUrl);
+		EXPECT_EQ(Result.GetProducts()[0].Media[i].Alt, ImageAlt);
+		EXPECT_EQ(Result.GetProducts()[0].Media[i].Width, ImageWidth);
+		EXPECT_EQ(Result.GetProducts()[0].Media[i].Height, ImageHeight);
+	}
+	EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), VariantSize);
+
+	for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
+	{
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Id, VariantIds[i]);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Title, VariantTitleAndOptionValue[i]);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].AvailableForSale, false);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.MediaContentType, "");
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Alt, ImageAlt);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Url, ImageUrl);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Width, ImageWidth);
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Height, ImageHeight);
+
+		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options.Size(), OptionsSize);
+
+		for (int n = 0; n < Result.GetProducts()[0].Variants[i].Options.Size(); ++n)
+		{
+			EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options[n].Name, OptionsName);
+			EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
+		}
+	}
+
+	LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 {
