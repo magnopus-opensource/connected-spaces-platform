@@ -69,7 +69,7 @@ public:
 	/// @param Callback ProductInfoResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback);
 
-	/// @brief Get product information from a shopify store within a space, by providing a VariantId
+	/// @brief Get product information from a shopify store within a space, by providing an array of VariantIds
 	/// @param SpaceId csp::common::String : space id of product
 	/// @param VariantIds csp::common::Array<csp::common::String> : Variant ids to search for
 	/// @param Callback ProductInfoCollectionResultCallback : callback containing collection of product info when asynchronous task finishes

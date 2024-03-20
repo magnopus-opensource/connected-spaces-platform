@@ -239,7 +239,7 @@ public:
 
 	/// @brief Retrieves the Product Info Array being stored.
 	/// @return csp::common::Array<ProductInfo> : reference to the ProductInfos
-	csp::common::Array<ProductInfo>& GetProductInfo();
+	csp::common::Array<ProductInfo>& GetProducts();
 
 private:
 	ProductInfoCollectionResult(void*) {};

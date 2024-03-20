@@ -402,7 +402,7 @@ const csp::common::Array<ProductInfo>& ProductInfoCollectionResult::GetProducts(
 	return Products;
 }
 
-csp::common::Array<ProductInfo>& ProductInfoCollectionResult::GetProductInfo()
+csp::common::Array<ProductInfo>& ProductInfoCollectionResult::GetProducts()
 {
 	return Products;
 }
