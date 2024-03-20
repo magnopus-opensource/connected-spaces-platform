@@ -25,12 +25,12 @@
 namespace csp::multiplayer
 {
 
-class VolumetricModelSpaceComponent;
+class GaussianSplatSpaceComponent;
 
-class VolumetricModelSpaceComponentScriptInterface : public ComponentScriptInterface
+class GaussianSplatSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	VolumetricModelSpaceComponentScriptInterface(VolumetricModelSpaceComponent* InComponent = nullptr);
+	GaussianSplatSpaceComponentScriptInterface(GaussianSplatSpaceComponent* InComponent = nullptr);
 
 	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
 	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
@@ -40,6 +40,7 @@ public:
 	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
 	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };
 
 } // namespace csp::multiplayer

@@ -40,7 +40,7 @@
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/VolumetricModelSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
@@ -446,15 +446,16 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, Rotation, "rotation")
 		.PROPERTY_GET_SET(FiducialMarkerSpaceComponent, IsVisible, "isVisible");
 
-	Module->class_<VolumetricModelSpaceComponentScriptInterface>("VolumetricModelSpaceComponent")
+	Module->class_<GaussianSplatSpaceComponentScriptInterface>("GaussianSplatSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, Position, "position")
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, Scale, "scale")
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, Rotation, "rotation")
-		.PROPERTY_GET_SET(VolumetricModelSpaceComponent, IsVisible, "isVisible");
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetId, "externalResourceAssetId")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, ExternalResourceAssetCollectionId, "externalResourceAssetCollectionId")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Scale, "scale")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -498,8 +499,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
 			"getFiducialMarkerComponents")
-		.fun<&EntityScriptInterface::GetComponentsOfType<VolumetricModelSpaceComponentScriptInterface, ComponentType::VolumetricModel>>(
-			"getVolumetricModelComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
+			"getGaussianSplatComponents")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")

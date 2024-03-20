@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/// @file VolumetricModelSpaceComponent.h
-/// @brief Definitions and support for volumetric models.
+/// @file GaussianSplatSpaceComponent.h
+/// @brief Definitions and support for Gaussian Splats.
 
 #pragma once
 
@@ -32,8 +32,8 @@
 namespace csp::multiplayer
 {
 
-/// @brief Enumerates the list of properties that can be replicated for a volumetric model component.
-enum class VolumetricModelPropertyKeys
+/// @brief Enumerates the list of properties that can be replicated for a Gaussian Splat component.
+enum class GaussianSplatPropertyKeys
 {
 	Name = 0,
 	ExternalResourceAssetId,
@@ -49,9 +49,12 @@ enum class VolumetricModelPropertyKeys
 };
 
 
-/// @ingroup VolumetricModelSpaceComponent
-/// @brief Data representation of an VolumetricModelSpaceComponent.
-class CSP_API VolumetricModelSpaceComponent : public ComponentBase,
+/// @ingroup GaussianSplatSpaceComponent
+/// @brief Data representation of a GaussianSplatSpaceComponent.
+/// Gaussian Splatting is a technique for real-time 3D reconstruction and rendering of an object or environment using images taken from multiple points of view.
+/// Rather than representing the object as a mesh of triangles, which has a surface but nothing inside, it is instead represented as a volume,
+/// comprising a point cloud of splats (like coloured dots), each of which has a position, colour (with alpha) and covariance (scale on 3 axis).
+class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
 											  public IExternalResourceComponent,
 											  public IShadowCasterComponent,
 											  public IThirdPartyComponentRef,
@@ -61,27 +64,27 @@ class CSP_API VolumetricModelSpaceComponent : public ComponentBase,
 
 {
 public:
-	/// @brief Constructs the volumetric model space component, and associates it with the specified Parent space entity.
+	/// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
 	/// @param Parent The Space entity that owns this component.
-	VolumetricModelSpaceComponent(SpaceEntity* Parent);
+	GaussianSplatSpaceComponent(SpaceEntity* Parent);
 
 	/// @brief Gets the ID of the asset associated with this component.
-	/// @note To retrieve this component's volumetric asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
 	/// @return The ID of the asset associated with this component.
 	const csp::common::String& GetExternalResourceAssetId() const override;
 
 	/// @brief Sets the ID of the asset associated with this component.
-	/// @note To retrieve this component's Volumetric asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
 	/// @param Value The ID of the asset associated with this component.
 	void SetExternalResourceAssetId(const csp::common::String& Value) override;
 
 	/// @brief Gets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's volumetric asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
 	/// @return The ID of the asset collection associated with this component.
 	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
 	/// @brief Sets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's Volumetric asset, both the Asset ID and the Asset Collection ID are required.
+	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
 	/// @param Value The ID of the asset collection associated with this component.
 	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 
