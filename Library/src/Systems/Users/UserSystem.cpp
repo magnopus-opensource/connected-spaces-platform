@@ -182,6 +182,8 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 {
 	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
 	{
+		CurrentLoginState.State = ELoginState::LoginRequested;
+
 		auto Request = std::make_shared<chs_user::RefreshRequest>();
 		Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
 		Request->SetUserId(UserId);
