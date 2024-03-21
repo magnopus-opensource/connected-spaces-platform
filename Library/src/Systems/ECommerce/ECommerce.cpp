@@ -26,9 +26,12 @@ namespace csp::systems
 
 void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, csp::systems::ProductInfo& ProductInfo)
 {
-	ProductInfo.Id		  = Dto.GetId();
-	ProductInfo.Title	  = Dto.GetTitle();
-	ProductInfo.CreatedAt = Dto.GetCreatedAt();
+	ProductInfo.Id	  = Dto.GetId();
+	ProductInfo.Title = Dto.GetTitle();
+	if (Dto.HasCreatedAt())
+	{
+		ProductInfo.CreatedAt = Dto.GetCreatedAt();
+	}
 
 	if (Dto.HasDescription())
 	{
@@ -44,7 +47,12 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 		{
 			ProductInfo.Variants[i].Id				 = VariantProductInformation[i]->GetId();
 			ProductInfo.Variants[i].Title			 = VariantProductInformation[i]->GetTitle();
-			ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
+
+			if (VariantProductInformation[i]->HasAvailableForSale())
+			{
+				ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
+			}
+
 			if (VariantProductInformation[i]->HasImage())
 			{
 				auto VariantProductImage = VariantProductInformation[i]->GetImage();
@@ -386,6 +394,39 @@ void ValidateShopifyStoreResult::OnResponse(const csp::services::ApiResponseBase
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
 		ValidateResult = (bool) Response->GetPayload().GetContent();
+	}
+}
+
+const csp::common::Array<ProductInfo>& ProductInfoCollectionResult::GetProducts() const
+{
+	return Products;
+}
+
+csp::common::Array<ProductInfo>& ProductInfoCollectionResult::GetProducts()
+{
+	return Products;
+}
+
+void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* ProductCollectionResponse		   = static_cast<csp::services::DtoArray<chs_aggregation::ShopifyProductDto>*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		ProductCollectionResponse->FromJson(Response->GetPayload().GetContent());
+
+		// Extract data from the response into our Products array
+		std::vector<chs_aggregation::ShopifyProductDto>& ProductsArray = ProductCollectionResponse->GetArray();
+		Products									  = csp::common::Array<csp::systems::ProductInfo>(ProductsArray.size());
+
+		for (size_t idx = 0; idx < ProductsArray.size(); ++idx)
+		{
+			ProductInfoDtoToProductInfo(ProductsArray[idx], Products[idx]);
+		}
 	}
 }
 
