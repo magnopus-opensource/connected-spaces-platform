@@ -282,7 +282,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -374,7 +374,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
@@ -521,7 +521,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	CreatedAnchorIds[0] = Anchor.Id;
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -621,7 +621,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
@@ -761,7 +761,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	DeleteSpace(SpaceSystem, Space.Id);
 
