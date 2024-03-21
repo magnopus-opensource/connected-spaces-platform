@@ -82,7 +82,7 @@ public:
 	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
 
 	/// @brief Exits the space and deregisters from the space scope.
-	void ExitSpace(NullResultCallback Callback);
+	CSP_ASYNC_RESULT void ExitSpace(NullResultCallback Callback);
 
 	/// @brief Get whether user is currently in a space.
 	/// @return Result of whether they are in a Space.
