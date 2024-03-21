@@ -282,7 +282,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 	LogOut(UserSystem);
 
 	// Log in
-	auto [Result] = AWAIT_PRE(UserSystem, RefreshSession, RequestPredicate, UserId, "badtoken");
+	auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId, "badtoken");
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::UserTokenRefreshFailed);
