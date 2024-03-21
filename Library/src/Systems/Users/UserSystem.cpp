@@ -223,6 +223,7 @@ void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::co
 	{
 		csp::systems::LoginStateResult BadResult;
 		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		BadResult.ResponseBody = "Already logged in!";
 		Callback(BadResult);
 	}
 }
