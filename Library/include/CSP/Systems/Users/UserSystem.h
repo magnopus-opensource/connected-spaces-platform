@@ -88,8 +88,9 @@ public:
 								const csp::common::Optional<bool>& UserHasVerifiedAge,
 								LoginStateResultCallback Callback);
 
-	/// @brief Resume a previous session for the associated user ID using a refresh token
+	/// @brief Update a refresh token for the given UserId. Extends time before a user needs to re-authenticate.
 	/// The refresh token can be obtained after registering a callback with `SetNewLoginTokenReceivedCallback` and logging in regularly.
+    /// Note, upon logging out, a refresh token is invalidated. Logging in again is required to obtain a new refresh token.
 	/// @param UserId csp::common::String : User ID for the previous session
 	/// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
 	/// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
