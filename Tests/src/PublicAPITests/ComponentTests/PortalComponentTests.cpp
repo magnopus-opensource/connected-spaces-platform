@@ -111,7 +111,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		PortalSpaceID = PortalComponent->GetSpaceId();
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	/*
@@ -130,7 +130,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Delete space
@@ -219,7 +219,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
 	EXPECT_TRUE(HasThumbailResult);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -308,7 +308,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, 6.6f);
 	EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
