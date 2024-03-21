@@ -81,8 +81,8 @@ public:
 	/// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
 
-	/// @brief Send exit current space event to EventSystem.
-	void ExitSpace();
+	/// @brief Exits the space and deregisters from the space scope.
+	void ExitSpace(NullResultCallback Callback);
 
 	/// @brief Get whether user is currently in a space.
 	/// @return Result of whether they are in a Space.

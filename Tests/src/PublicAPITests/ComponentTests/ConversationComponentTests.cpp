@@ -288,7 +288,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Delete space
@@ -436,7 +436,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Delete space
@@ -537,7 +537,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 		EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
 		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	};
 
 	// Delete space

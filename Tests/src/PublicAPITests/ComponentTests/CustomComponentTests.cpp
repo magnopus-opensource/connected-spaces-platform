@@ -190,7 +190,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Re-Enter space and verify contents
@@ -267,7 +267,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Delete space

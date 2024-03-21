@@ -254,7 +254,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 	GetSpace(SpaceId, GetSpaceCallback);
 }
 
-void SpaceSystem::ExitSpace()
+void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
 	CSP_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
 
@@ -263,20 +263,27 @@ void SpaceSystem::ExitSpace()
     if(MultiplayerConnection != nullptr)
     {
 		MultiplayerConnection->StopListening(
-		   [MultiplayerConnection](csp::multiplayer::ErrorCode Error)
+		   [MultiplayerConnection, Callback](csp::multiplayer::ErrorCode Error)
 		   {
 				if (Error != csp::multiplayer::ErrorCode::None)
 				{
 					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", Error);
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 				}
 				else
 				{
-					MultiplayerConnection->ResetScopes([](csp::multiplayer::ErrorCode Error)
+					MultiplayerConnection->ResetScopes([Callback](csp::multiplayer::ErrorCode Error)
 					{
 						if (Error != csp::multiplayer::ErrorCode::None)
 						{
 						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
+                            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						}
+                        else
+                        {
+                            const NullResult Result(csp::systems::EResultCode::Success, 200);
+	                        INVOKE_IF_NOT_NULL(Callback, Result);
+                        }
 				   });
 				}
 		   });
