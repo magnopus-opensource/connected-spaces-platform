@@ -220,7 +220,7 @@ private:
 	void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
 	void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
 
-	/// @brief Subscirbes the connected user to the specified space's scope.
+	/// @brief Subscribes the connected user to the specified space's scope.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
 
