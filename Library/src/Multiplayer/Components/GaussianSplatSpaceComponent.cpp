@@ -33,7 +33,6 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent) : 
 	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)]							  = csp::common::Vector3::One();
 	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)]						  = true;
 	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)]						  = true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ThirdPartyComponentRef)]			  = "";
 	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)]					  = true;
 
 	SetScriptInterface(CSP_NEW GaussianSplatSpaceComponentScriptInterface(this));
@@ -201,26 +200,6 @@ bool GaussianSplatSpaceComponent::GetIsARVisible() const
 void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
 {
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
-}
-
-
-const csp::common::String& GaussianSplatSpaceComponent::GetThirdPartyComponentRef() const
-{
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ThirdPartyComponentRef));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
-}
-
-void GaussianSplatSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
-{
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 

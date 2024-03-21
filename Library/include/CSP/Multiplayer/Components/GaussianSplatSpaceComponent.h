@@ -24,7 +24,6 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IExternalResourceComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IShadowCasterComponent.h"
-#include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
@@ -43,7 +42,6 @@ enum class GaussianSplatPropertyKeys
 	Scale,
 	IsVisible,
 	IsARVisible,
-	ThirdPartyComponentRef,
 	IsShadowCaster,
 	Num
 };
@@ -57,7 +55,6 @@ enum class GaussianSplatPropertyKeys
 class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
 											  public IExternalResourceComponent,
 											  public IShadowCasterComponent,
-											  public IThirdPartyComponentRef,
 											  public ITransformComponent,
 											  public IVisibleComponent
 
@@ -118,14 +115,6 @@ public:
 	bool GetIsARVisible() const override;
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
-	/// @}
-
-	/// \addtogroup IThirdPartyComponentRef
-	/// @{
-	/// @copydoc IThirdPartyComponentRef::GetThirdPartyComponentRef()
-	const csp::common::String& GetThirdPartyComponentRef() const override;
-	/// @copydoc IThirdPartyComponentRef::SetThirdPartyComponentRef()
-	void SetThirdPartyComponentRef(const csp::common::String& InValue) override;
 	/// @}
 
 	/// \addtogroup IShadowCasterComponent
