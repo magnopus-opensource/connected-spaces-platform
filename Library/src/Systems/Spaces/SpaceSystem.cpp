@@ -258,6 +258,30 @@ void SpaceSystem::ExitSpace()
 {
 	CSP_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
 
+    // As the user is exiting the space, we now clear all scopes that they are registered to.
+    auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    if(MultiplayerConnection != nullptr)
+    {
+		MultiplayerConnection->StopListening(
+		   [MultiplayerConnection](csp::multiplayer::ErrorCode Error)
+		   {
+				if (Error != csp::multiplayer::ErrorCode::None)
+				{
+					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", Error);
+				}
+				else
+				{
+					MultiplayerConnection->ResetScopes([](csp::multiplayer::ErrorCode Error)
+					{
+						if (Error != csp::multiplayer::ErrorCode::None)
+						{
+						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
+						}
+				   });
+				}
+		   });
+    }
+
 	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
 	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
 

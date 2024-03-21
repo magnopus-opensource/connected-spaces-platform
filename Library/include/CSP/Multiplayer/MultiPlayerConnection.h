@@ -219,7 +219,15 @@ private:
 
 	void InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const;
 	void DeleteOwnedEntities(ErrorCodeCallbackHandler Callback);
+
+	/// @brief Subscirbes the connected user to the specified space's scope.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
+
+	/// @brief Clears the connected user's subscription to their current set of scopes.
+	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    void ResetScopes(ErrorCodeCallbackHandler Callback);
+
 	void RequestClientId(ErrorCodeCallbackHandler Callback);
 
 	void DisconnectWithReason(const csp::common::String& Reason, ErrorCodeCallbackHandler Callback);
