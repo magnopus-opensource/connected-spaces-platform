@@ -42,7 +42,7 @@ oko_client_path = ""
 saved_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Saved'))
 binaries_relative_foundation_path = "/Library/Binaries"
 include_relative_foundation_path = "/Library/include"
-binaries_relative_client_path = "/Plugins/OKO/Binaries/ThirdParty/CSP"
+binaries_relative_client_path = "/Plugins/OKO/Binaries/ThirdParty/OlympusFoundation"
 include_relative_client_path = "/Plugins/OKO/Source/ThirdParty"
 saved_application_data = json.loads("{}")
 
@@ -264,7 +264,7 @@ class CopyFoundationToClientButton:
 
         include_client_path = self.oko_build_tool.client_path.path.get() + include_relative_client_path
         self.oko_build_tool.status_bar.update_status_text("Deleting content in " + include_client_path)
-        shutil.rmtree(include_client_path + "/CSP", ignore_errors=False, onerror=None)
+        shutil.rmtree(include_client_path + "/Olympus", ignore_errors=False, onerror=None)
 
         # Begin copying over the libs
         for i in range(len(paths_to_copy_to)):
