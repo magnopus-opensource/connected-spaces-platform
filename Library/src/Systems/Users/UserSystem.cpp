@@ -24,6 +24,7 @@
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Systems/Users/Authentication.h"
+#include <CallHelpers.h>
 
 
 namespace chs_user		  = csp::services::generated::userservice;
@@ -177,7 +178,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 	}
 }
 
-void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
+void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback)
 {
 	if (CurrentLoginState.State == ELoginState::LoggedOut || CurrentLoginState.State == ELoginState::Error)
 	{
@@ -225,6 +226,37 @@ void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::co
 		BadResult.SetResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
 		BadResult.ResponseBody = "Already logged in!";
 		Callback(BadResult);
+	}
+}
+
+void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback)
+{
+	if (CurrentLoginState.State == ELoginState::LoggedIn)
+	{
+		auto Request = std::make_shared<chs_user::RefreshRequest>();
+		Request->SetDeviceId(csp::CSPFoundation::GetDeviceId());
+		Request->SetUserId(UserId);
+		Request->SetRefreshToken(RefreshToken);
+
+		LoginStateResultCallback LoginStateResCallback = [=](const LoginStateResult& LoginStateRes)
+		{
+			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+			{
+				const NullResult Result(csp::systems::EResultCode::Success, 200);
+				INVOKE_IF_NOT_NULL(Callback, Result);
+			}
+			else
+			{
+				const NullResult Result(LoginStateRes.GetResultCode(), LoginStateRes.GetHttpResultCode());
+				INVOKE_IF_NOT_NULL(Callback, Result);
+            }
+		};
+		
+        csp::services::ResponseHandlerPtr ResponseHandler
+			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs_user::AuthDto>(LoginStateResCallback,
+																											  &CurrentLoginState);
+
+		static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
 	}
 }
 

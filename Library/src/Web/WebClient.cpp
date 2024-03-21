@@ -130,9 +130,9 @@ void WebClient::RefreshIfExpired()
 		RefreshNeeded = true;
 #endif
 
-		csp::systems::LoginStateResultCallback LoginStateResCallback = [this](const csp::systems::LoginStateResult& LoginStateRes)
+		csp::systems::NullResultCallback NullResCallback = [this](const csp::systems::NullResult& NullRes)
 		{
-			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
+			if (NullRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
 #ifdef CSP_WASM
 				WasmRequestsMutex.lock();
@@ -152,13 +152,13 @@ void WebClient::RefreshIfExpired()
 #endif
 				RefreshStarted = false;
 			}
-			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
+			else if (NullRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
 				assert(false && "User authentication token refresh failed!");
 			}
 		};
 
-		UserSystem->RefreshSession(UserSystem->GetLoginState().UserId, csp::web::HttpAuth::GetRefreshToken(), LoginStateResCallback);
+		UserSystem->RefreshSession(UserSystem->GetLoginState().UserId, csp::web::HttpAuth::GetRefreshToken(), NullResCallback);
 	}
 }
 

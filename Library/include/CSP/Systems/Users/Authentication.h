@@ -163,6 +163,7 @@ public:
 
 
 typedef std::function<void(const LoginStateResult& Result)> LoginStateResultCallback;
+typedef std::function<void(const NullResult& Result)> NullResultCallback;
 typedef std::function<void(const LoginTokenInfoResult& Result)> LoginTokenInfoResultCallback;
 
 } // namespace csp::systems
