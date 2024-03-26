@@ -734,7 +734,11 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 		}
 	}
 
-    // Clear adds/removes, we don't want to add or remove if we're shutting down.
+    Entities.Clear();
+    Objects.Clear();
+    Avatars.Clear();
+
+    // Clear adds/removes, we don't want to mutate if we're cleaning everything else.
     PendingAdds->clear();
     PendingRemoves->clear();
 	PendingIncomingUpdates->clear();

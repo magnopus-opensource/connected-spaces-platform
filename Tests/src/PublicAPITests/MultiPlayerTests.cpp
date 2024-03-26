@@ -1777,7 +1777,7 @@ struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
 };
 
 // Disabled by default as it can be slow
-#if RUN_MULTIPLAYER_MANYENTITIES_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST || 1
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 {
 	SetRandSeed();
@@ -1853,8 +1853,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 	}
 
 	EXPECT_EQ(EntitySystem->GetNumEntities(), NUM_ENTITIES_TO_CREATE);
+	// We created objects exclusively, so this should also be true.
+	EXPECT_EQ(EntitySystem->GetNumEntities(), EntitySystem->GetNumObjects());
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+	EXPECT_EQ(ExitResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Validate that leaving a space flushes CSP's view of all currently known entities.
+	EXPECT_EQ(EntitySystem->GetNumEntities(), 0);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
