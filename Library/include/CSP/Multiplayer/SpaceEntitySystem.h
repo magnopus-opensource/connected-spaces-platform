@@ -264,6 +264,11 @@ public:
 	/// It is highly advised not to call this function unless you know what you are doing.
 	void RetrieveAllEntities();
 
+	/// @brief Destroys the client's local view of all currently known entities.
+	///
+	/// They still reside on the server, however they will not be accessible in the client application.
+	void LocalDestroyAllEntities();
+
 	/// @brief Sets the selected state of an entity, if the operation is acceptable.
 	///
 	/// Criteria:
