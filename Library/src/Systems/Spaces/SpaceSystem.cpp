@@ -274,6 +274,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 				{
 					MultiplayerConnection->ResetScopes([Callback](csp::multiplayer::ErrorCode Error)
 					{
+						csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->LocalDestroyAllEntities();
 						if (Error != csp::multiplayer::ErrorCode::None)
 						{
 						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
