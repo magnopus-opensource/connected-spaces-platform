@@ -1773,11 +1773,13 @@ struct InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
 		std::scoped_lock<std::recursive_mutex> EntitiesLocker(*EntitiesLock);
 
 		Entities.Clear();
+		Objects.Clear();
+		Avatars.Clear();
 	}
 };
 
 // Disabled by default as it can be slow
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST || 1
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANYENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 {
 	SetRandSeed();
@@ -1814,6 +1816,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 		{
 		});
 
+	EXPECT_EQ(EntitySystem->GetNumEntities(), 0);
+	EXPECT_EQ(EntitySystem->GetNumObjects(), 0);
+
 	// Create a bunch of entities
 	constexpr size_t NUM_ENTITIES_TO_CREATE = 15;
 	constexpr char ENTITY_NAME_PREFIX[]		= "Object_";
@@ -1830,11 +1835,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 		EXPECT_NE(Object, nullptr);
 	}
 
+	EXPECT_EQ(EntitySystem->GetNumEntities(), NUM_ENTITIES_TO_CREATE);
+	EXPECT_EQ(EntitySystem->GetNumObjects(), NUM_ENTITIES_TO_CREATE);
+
 	EntitySystem->ProcessPendingEntityOperations();
 
 	// Clear all entities locally
 	auto InternalEntitySystem = static_cast<InternalSpaceEntitySystem*>(EntitySystem);
 	InternalEntitySystem->ClearEntities();
+
+	EXPECT_EQ(EntitySystem->GetNumEntities(), 0);
+	EXPECT_EQ(EntitySystem->GetNumObjects(), 0);
 
 	// Retrieve all entities and verify count
 	auto GotAllEntities = false;
@@ -1861,6 +1872,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
 	// Validate that leaving a space flushes CSP's view of all currently known entities.
 	EXPECT_EQ(EntitySystem->GetNumEntities(), 0);
+	EXPECT_EQ(EntitySystem->GetNumObjects(), 0);
+	EXPECT_EQ(EntitySystem->GetNumAvatars(), 0);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

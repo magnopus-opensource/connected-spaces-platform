@@ -325,6 +325,10 @@ protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
 	SpaceEntityList Entities;
+	SpaceEntityList Avatars;
+	SpaceEntityList Objects;
+	SpaceEntityList SelectedEntities;
+
 	std::recursive_mutex* EntitiesLock;
 
 private:
@@ -338,9 +342,6 @@ private:
 	using PatchMessageQueue = std::deque<signalr::value*>;
 	using SpaceEntitySet	= std::set<SpaceEntity*>;
 
-	SpaceEntityList Avatars;
-	SpaceEntityList Objects;
-	SpaceEntityList SelectedEntities;
 
 	EntityCreatedCallback SpaceEntityCreatedCallback;
 	CallbackHandler InitialEntitiesRetrievedCallback;
