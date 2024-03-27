@@ -176,9 +176,6 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
 	auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
 
-	CartUpdateInfo->SetSpaceId(CartInformation.SpaceId);
-	CartUpdateInfo->SetShopifyCartId(CartInformation.CartId);
-
 	if (!CartInformation.CartLines.IsEmpty())
 	{
 		auto CartLinesRemoval	= std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
