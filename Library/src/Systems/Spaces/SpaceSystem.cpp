@@ -659,19 +659,20 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<BasicSpacesResultCallback, BasicSpacesResult, void, csp::services::DtoArray<chs::GroupLiteDto>>(Callback, nullptr);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt, // Ids
-															  std::nullopt, // GroupTypes
-															  std::nullopt, // Names
-															  std::nullopt, // PartialName
-															  std::nullopt, // GroupOwnerIds
-															  std::nullopt, // ExcludeGroupOwnerIds
-															  std::nullopt, // Users
-															  IsDiscoverable,
-															  std::nullopt, // AutoModerator
-															  RequiresInvite,
-															  IsArchived,
-															  ResultsSkip,
-															  ResultsMax,
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt,     // Ids
+															  std::nullopt,     // GroupTypes
+															  std::nullopt,     // Names
+															  std::nullopt,     // PartialName
+															  std::nullopt,     // GroupOwnerIds
+															  std::nullopt,     // ExcludeGroupOwnerIds
+															  std::nullopt,     // Users
+															  IsDiscoverable,   // Discoverable
+															  std::nullopt,     // AutoModerator
+															  RequiresInvite,   // RequiresInvite
+															  IsArchived,       // Archived
+                                                              std::nullopt,     // OrganizationIds
+															  ResultsSkip,      // Skip
+															  ResultsMax,       // Limit
 															  ResponseHandler);
 }
 
