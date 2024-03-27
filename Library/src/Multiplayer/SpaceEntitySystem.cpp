@@ -207,36 +207,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 
 SpaceEntitySystem::~SpaceEntitySystem()
 {
-	LockEntityUpdate();
-
-	const auto NumEntities = GetNumEntities();
-
-	for (size_t i = 0; i < NumEntities; ++i)
-	{
-		SpaceEntity* Entity = GetEntityByIndex(i);
-
-		// We automatically invoke SignalR deletion for all transient entities that were owned by this local client
-		// as these are only ever valid for a single connected session
-		if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
-		{
-			DestroyEntity(Entity,
-												[](auto Ok)
-												{
-												});
-		}
-		// Otherwise we clear up all all locally represented entities
-		else
-		{
-			LocalDestroyEntity(Entity);
-		}
-	}
-
-    // Clear adds/removes, we don't want to add or remove if we're shutting down.
-    PendingAdds->clear();
-    PendingRemoves->clear();
-	PendingIncomingUpdates->clear();
-
-	UnlockEntityUpdate();
+	LocalDestroyAllEntities();
 
 	EntityScriptBinding::RemoveBinding(ScriptBinding);
 
@@ -735,6 +706,44 @@ void SpaceEntitySystem::RetrieveAllEntities()
 	}
 
 	GetEntitiesPaged(0, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(0)); // Get at most ENTITY_PAGE_LIMIT entities at a time
+}
+
+void SpaceEntitySystem::LocalDestroyAllEntities()
+{
+	LockEntityUpdate();
+
+	const auto NumEntities = GetNumEntities();
+
+	for (size_t i = 0; i < NumEntities; ++i)
+	{
+		SpaceEntity* Entity = GetEntityByIndex(i);
+
+		// We automatically invoke SignalR deletion for all transient entities that were owned by this local client
+		// as these are only ever valid for a single connected session
+		if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
+		{
+			DestroyEntity(Entity,
+			[](auto Ok)
+			{
+			});
+		}
+		// Otherwise we clear up all all locally represented entities
+		else
+		{
+			LocalDestroyEntity(Entity);
+		}
+	}
+
+    Entities.Clear();
+    Objects.Clear();
+    Avatars.Clear();
+
+    // Clear adds/removes, we don't want to mutate if we're cleaning everything else.
+    PendingAdds->clear();
+    PendingRemoves->clear();
+	PendingIncomingUpdates->clear();
+
+	UnlockEntityUpdate();
 }
 
 void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)

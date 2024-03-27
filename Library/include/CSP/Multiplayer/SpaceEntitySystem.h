@@ -264,6 +264,11 @@ public:
 	/// It is highly advised not to call this function unless you know what you are doing.
 	void RetrieveAllEntities();
 
+	/// @brief Destroys the client's local view of all currently known entities.
+	///
+	/// They still reside on the server, however they will not be accessible in the client application.
+	void LocalDestroyAllEntities();
+
 	/// @brief Sets the selected state of an entity, if the operation is acceptable.
 	///
 	/// Criteria:
@@ -320,6 +325,10 @@ protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
 	SpaceEntityList Entities;
+	SpaceEntityList Avatars;
+	SpaceEntityList Objects;
+	SpaceEntityList SelectedEntities;
+
 	std::recursive_mutex* EntitiesLock;
 
 private:
@@ -333,9 +342,6 @@ private:
 	using PatchMessageQueue = std::deque<signalr::value*>;
 	using SpaceEntitySet	= std::set<SpaceEntity*>;
 
-	SpaceEntityList Avatars;
-	SpaceEntityList Objects;
-	SpaceEntityList SelectedEntities;
 
 	EntityCreatedCallback SpaceEntityCreatedCallback;
 	CallbackHandler InitialEntitiesRetrievedCallback;

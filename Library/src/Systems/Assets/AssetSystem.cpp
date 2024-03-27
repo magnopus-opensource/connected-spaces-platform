@@ -280,6 +280,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			std::nullopt,							// PrototypeOwnerIds
 			std::nullopt,							// ReadAccessFilters
 			std::nullopt,							// WriteAccessFilters
+            std::nullopt,							// OrganizationIds
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
@@ -402,25 +403,26 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 																																		   nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
-		->apiV1PrototypesGet(PrototypeTags,
-							 std::nullopt,
-							 PrototypeIds,
-							 PrototypeNames,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 ParentPrototypeId,
-							 GroupIds,
-							 PrototypeTypes,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 std::nullopt,
-							 Skip,
-							 Limit,
-							 std::nullopt,
-							 std::nullopt,
+		->apiV1PrototypesGet(PrototypeTags,         // Tags
+							 std::nullopt,          // TagsAll
+							 PrototypeIds,          // Ids
+							 PrototypeNames,        // Names
+							 std::nullopt,          // PartialNames
+							 std::nullopt,          // ExcludedIds
+							 std::nullopt,          // PointOfInterestIds
+							 ParentPrototypeId,     // ParentId
+							 GroupIds,              // GroupIds
+							 PrototypeTypes,        // Types
+							 std::nullopt,          // HasGroup
+							 std::nullopt,          // CreatedBy
+							 std::nullopt,          // PrototypeOwnerIds
+							 std::nullopt,          // ReadAccessFilters
+							 std::nullopt,          // WriteAccessFilters
+                             std::nullopt,          // OrganizationIds
+							 Skip,                  // Skip
+							 Limit,                 // Limit
+							 std::nullopt,          // SortBy
+							 std::nullopt,          // SortDirection
 							 ResponseHandler);
 }
 
@@ -446,7 +448,6 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,
 {
 	auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
 	AssetInfo->SetName(Name);
-	AssetInfo->SetPrototypeId(AssetCollection.Id);
 	String InAddressableId;
 
 	if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue())
@@ -494,10 +495,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 {
 	auto AssetInfo = std::make_shared<chs::AssetDetailDto>();
 	AssetInfo->SetName(Asset.Name);
-	AssetInfo->SetId(Asset.Id);
-	AssetInfo->SetFileName(Asset.FileName);
 	AssetInfo->SetLanguageCode(Asset.LanguageCode);
-	AssetInfo->SetPrototypeId(Asset.AssetCollectionId);
 	AssetInfo->SetStyle(Convert(Asset.Styles));
 
 	// TODO: Move this to a separate function when we have some different values than DEFAULT
