@@ -591,14 +591,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 	UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, UpdatedAttributes, UpdatedBasicSpace);
 
 	EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedBasicSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedBasicSpace.Description, ""); // This should be empty because we elected to not give one when we invoked `UpdateSpace`.
 	EXPECT_EQ(UpdatedBasicSpace.Attributes, UpdatedAttributes);
 
 	::Space UpdatedSpace;
 	GetSpace(SpaceSystem, Space.Id, UpdatedSpace);
 
 	EXPECT_EQ(UpdatedSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedSpace.Description, ""); // This should remain cleared since not specifying a description in `UpdateSpace` is equivalent to clearing it.
 	EXPECT_EQ(UpdatedSpace.Attributes, UpdatedAttributes);
 
 	// Delete space

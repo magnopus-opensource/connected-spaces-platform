@@ -60,6 +60,7 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 	GroupInfo->SetDescription(Description);
 	GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
 	GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    GroupInfo->SetGroupType("space");
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -564,13 +565,20 @@ void SpaceSystem::UpdateSpace(const String& SpaceId,
 		LiteGroupInfo->SetDescription(*Description);
 	}
 
+    
+    bool IsDiscoverable = false;
+    bool RequiresInvite = true;
+
 	if (Attributes.HasValue())
 	{
-		LiteGroupInfo->SetDiscoverable(HasFlag(*Attributes, SpaceAttributes::IsDiscoverable));
-		LiteGroupInfo->SetRequiresInvite(HasFlag(*Attributes, SpaceAttributes::RequiresInvite));
-
-		LiteGroupInfo->SetAutoModerator(false);
+		IsDiscoverable = HasFlag(*Attributes, SpaceAttributes::IsDiscoverable);
+		RequiresInvite = HasFlag(*Attributes, SpaceAttributes::RequiresInvite);
 	}
+
+	// Note that these are required fields from a services point of view.
+	LiteGroupInfo->SetDiscoverable(IsDiscoverable);
+	LiteGroupInfo->SetRequiresInvite(RequiresInvite);
+	LiteGroupInfo->SetAutoModerator(false);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<BasicSpaceResultCallback, BasicSpaceResult, void, chs::GroupLiteDto>(Callback, nullptr);
