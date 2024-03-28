@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check branch
-        if: github.base_ref == 'main' && contains(github.head_ref, 'staging/')
+        if: github.base_ref == 'main' && !contains(github.head_ref, 'staging/')
         run: |
           echo "ERROR: You can only merge to main from branches matching `staging/*`."
           exit 1
