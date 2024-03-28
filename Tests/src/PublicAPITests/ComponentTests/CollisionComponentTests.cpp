@@ -127,7 +127,7 @@ CSP_PUBLIC_TEST(CSPEngine, CollisionTests, CollisionComponentTest)
 	EXPECT_EQ(DefaultCapsuleHalfWidth, 0.5f);
 	EXPECT_EQ(DefaultCapsuleHalfHeight, 1.0f);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

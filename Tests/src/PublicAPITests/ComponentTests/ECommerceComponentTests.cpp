@@ -101,7 +101,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -177,7 +177,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

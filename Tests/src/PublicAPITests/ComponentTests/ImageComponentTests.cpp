@@ -166,7 +166,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 	EXPECT_EQ(StoredImageSpaceComponent->GetIsARVisible(), false);
 	EXPECT_EQ(StoredImageSpaceComponent->GetIsEmissive(), true);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -252,7 +252,7 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 	EXPECT_EQ(ImageComponent->GetDisplayMode(), DisplayMode::DoubleSidedReversed);
 	EXPECT_EQ(ImageComponent->GetBillboardMode(), BillboardMode::Billboard);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

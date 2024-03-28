@@ -565,6 +565,32 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
 	Connection->Invoke("SetScopes", Params, LocalCallback);
 }
 
+void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
+{
+	if (Connection == nullptr || !Connected)
+	{
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
+
+		return;
+	}
+
+	std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+	{
+		if (Except != nullptr)
+		{
+			auto Error = ParseError(Except);
+			INVOKE_IF_NOT_NULL(Callback, Error);
+
+			return;
+		}
+
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+	};
+
+    std::vector<signalr::value> ParamsVec;
+	signalr::value Params = signalr::value(std::move(ParamsVec));
+	Connection->Invoke("ResetScopes", Params, LocalCallback);
+}
 
 void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
 {
@@ -632,7 +658,14 @@ ConversationSystem* MultiplayerConnection::GetConversationSystem() const
 
 ConnectionState MultiplayerConnection::GetConnectionState() const
 {
-	return static_cast<ConnectionState>(Connection->GetConnectionState());
+	if (Connection != nullptr)
+	{
+		return static_cast<ConnectionState>(Connection->GetConnectionState());
+	}
+	else
+	{
+		return ConnectionState::Disconnected;
+	}
 }
 
 CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const bool InAllowSelfMessaging, ErrorCodeCallbackHandler Callback)

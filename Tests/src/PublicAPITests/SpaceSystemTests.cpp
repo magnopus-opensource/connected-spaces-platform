@@ -591,14 +591,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 	UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, UpdatedAttributes, UpdatedBasicSpace);
 
 	EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedBasicSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedBasicSpace.Description, ""); // This should be empty because we elected to not give one when we invoked `UpdateSpace`.
 	EXPECT_EQ(UpdatedBasicSpace.Attributes, UpdatedAttributes);
 
 	::Space UpdatedSpace;
 	GetSpace(SpaceSystem, Space.Id, UpdatedSpace);
 
 	EXPECT_EQ(UpdatedSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedSpace.Description, ""); // This should remain cleared since not specifying a description in `UpdateSpace` is equivalent to clearing it.
 	EXPECT_EQ(UpdatedSpace.Attributes, UpdatedAttributes);
 
 	// Delete space
@@ -1215,7 +1215,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Log out and log in again using default test account
@@ -1812,13 +1812,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	ASSERT_EQ(RetrievedMetadata["site"], TestSpaceMetadata["site"]);
 
 	// Exit and re-enter space to verify its OK to always add self to public space
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Log back in with default user so space can be deleted
@@ -2110,7 +2110,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	LogOut(UserSystem);
@@ -2222,7 +2222,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	LogOut(UserSystem);
