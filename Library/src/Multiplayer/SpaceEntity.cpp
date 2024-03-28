@@ -35,6 +35,7 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
+#include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -993,6 +994,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::FiducialMarker:
 			Component = CSP_NEW FiducialMarkerSpaceComponent(this);
+			break;
+		case ComponentType::GaussianSplat:
+			Component = CSP_NEW GaussianSplatSpaceComponent(this);
 			break;
 		default:
 		{

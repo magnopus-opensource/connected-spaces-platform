@@ -136,7 +136,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 
 		EXPECT_EQ(ExternalLinkComponent->GetIsARVisible(), IsARVisible);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Delete space

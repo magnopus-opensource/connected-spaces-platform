@@ -2026,7 +2026,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_EQ(CallbackAssetId, Asset.Id);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2119,7 +2119,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2237,7 +2237,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	{
 		printf("Validating the copied asset collection and its data...\n");
 
-		EXPECT_EQ(DestAssetCollections.Size(), 1);
+		EXPECT_EQ(DestAssetCollections.Size(), 2);
 		EXPECT_NE(DestAssetCollections[0].Id, SourceAssetCollection.Id);
 		EXPECT_EQ(DestAssetCollections[0].SpaceId, DestSpace.Id);
 		EXPECT_EQ(DestAssetCollections[0].Type, SourceAssetCollection.Type);

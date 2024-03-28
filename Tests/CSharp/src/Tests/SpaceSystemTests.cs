@@ -138,9 +138,9 @@ namespace CSPEngine
             return spaces;
         }
 
-        static void GetSpacesByAttributes(Systems.SpaceSystem spaceSystem, bool? isDiscoverable, bool? requiresInvitation, int? resultsSkipNo, int? resultsMaxNo, out Common.Array<Systems.BasicSpace> spaces)
+        static void GetSpacesByAttributes(Systems.SpaceSystem spaceSystem, bool? isDiscoverable, bool? isArchived, bool? requiresInvitation, int? resultsSkipNo, int? resultsMaxNo, out Common.Array<Systems.BasicSpace> spaces)
         {
-            using var result = spaceSystem.GetSpacesByAttributes(isDiscoverable, requiresInvitation, resultsSkipNo, resultsMaxNo).Result;
+            using var result = spaceSystem.GetSpacesByAttributes(isDiscoverable, isArchived, requiresInvitation, resultsSkipNo, resultsMaxNo).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -652,7 +652,7 @@ namespace CSPEngine
             userSystem.TestLogOut();
             _ = userSystem.TestGuestLogIn();
 
-            GetSpacesByAttributes(spaceSystem, true, false, null, null, out var publicSpaces);
+            GetSpacesByAttributes(spaceSystem, true, false, false, null, null, out var publicSpaces);
 
             // Make sure that all returned spaces are public
             const ulong SpacesToCheckMaxNo = 50;  // rough limit on how many spaces we can check otherwise the URI that would get created inside GetSpacesByIds would be too long for CHS
@@ -690,7 +690,7 @@ namespace CSPEngine
             // Create space
             var space = CreateSpace(spaceSystem, testPublicSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null);
 
-            GetSpacesByAttributes(spaceSystem, true, false, null, null, out var publicSpaces);
+            GetSpacesByAttributes(spaceSystem, true, false, false, null, null, out var publicSpaces);
 
             Assert.IsGreaterOrEqualThan(publicSpaces.Size(), 1);
 
@@ -742,7 +742,7 @@ namespace CSPEngine
             // Create space
             var space = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
 
-            GetSpacesByAttributes(spaceSystem, false, true, null, null, out var privateSpaces);
+            GetSpacesByAttributes(spaceSystem, false, false, true, null, null, out var privateSpaces);
 
             Assert.IsTrue(privateSpaces.Size() >= 1);
 
@@ -800,7 +800,7 @@ namespace CSPEngine
 
             while (!privateSpaceFound)
             {
-                GetSpacesByAttributes(spaceSystem, false, true, skipPreviousResultsNo, resultsPerPage, out var resultSpaces);
+                GetSpacesByAttributes(spaceSystem, false, false, true, skipPreviousResultsNo, resultsPerPage, out var resultSpaces);
 
                 Assert.IsTrue(resultSpaces.Size() <= resultsPerPage);
 

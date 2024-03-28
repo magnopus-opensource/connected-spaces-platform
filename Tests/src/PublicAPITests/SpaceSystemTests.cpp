@@ -109,11 +109,13 @@ void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace
 
 Array<BasicSpace> GetSpacesByAttributes(::SpaceSystem* SpaceSystem,
 										const Optional<bool>& IsDiscoverable,
+										const Optional<bool>& IsArchived,
 										const Optional<bool>& RequiresInvite,
 										const Optional<int>& ResultsSkipNo,
 										const Optional<int>& ResultsMaxNo)
 {
-	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
+	auto [Result]
+		= AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, IsDiscoverable, IsArchived, RequiresInvite, ResultsSkipNo, ResultsMaxNo);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -589,14 +591,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 	UpdateSpace(SpaceSystem, Space.Id, nullptr, nullptr, UpdatedAttributes, UpdatedBasicSpace);
 
 	EXPECT_EQ(UpdatedBasicSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedBasicSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedBasicSpace.Description, ""); // This should be empty because we elected to not give one when we invoked `UpdateSpace`.
 	EXPECT_EQ(UpdatedBasicSpace.Attributes, UpdatedAttributes);
 
 	::Space UpdatedSpace;
 	GetSpace(SpaceSystem, Space.Id, UpdatedSpace);
 
 	EXPECT_EQ(UpdatedSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedSpace.Description, Space.Description);
+	EXPECT_EQ(UpdatedSpace.Description, ""); // This should remain cleared since not specifying a description in `UpdateSpace` is equivalent to clearing it.
 	EXPECT_EQ(UpdatedSpace.Attributes, UpdatedAttributes);
 
 	// Delete space
@@ -803,7 +805,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 	LogInAsGuest(UserSystem, UserId);
 
 	// Get public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, false, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -866,7 +868,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 	}
 
 	// Get only the public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, true, false, false, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -924,7 +926,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 	}
 
 	// Get only the public spaces
-	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, false, true, 0, static_cast<int>(SPACE_COUNT));
+	Array<BasicSpace> ResultSpaces = GetSpacesByAttributes(SpaceSystem, false, false, true, 0, static_cast<int>(SPACE_COUNT));
 
 	EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
@@ -983,7 +985,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
 	// Get private spaces paginated
 	{
-		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
+		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesByAttributes, RequestPredicate, false, false, true, 0, static_cast<int>(SPACE_COUNT / 2));
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1213,7 +1215,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Log out and log in again using default test account
@@ -1810,13 +1812,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	ASSERT_EQ(RetrievedMetadata["site"], TestSpaceMetadata["site"]);
 
 	// Exit and re-enter space to verify its OK to always add self to public space
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	// Log back in with default user so space can be deleted
@@ -2108,7 +2110,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	LogOut(UserSystem);
@@ -2220,7 +2222,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace();
+		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 	}
 
 	LogOut(UserSystem);

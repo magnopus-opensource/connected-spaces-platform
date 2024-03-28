@@ -56,7 +56,6 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 {
 	auto Request = std::make_shared<chs::SpaceEventDto>();
 
-	Request->SetSpaceId(SpaceId);
 	Request->SetVendorName(GetVendorNameString(Vendor));
 	Request->SetVendorEventId(VendorEventId);
 	Request->SetVendorEventUri(VendorEventUri);
@@ -118,7 +117,14 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 	const auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
-		->apiV1SpacesEventsGet(std::nullopt, std::nullopt, RequestSpaceIds, RequestSkip, RequestLimit, ResponseHandler);
+		->apiV1SpacesEventsGet(std::nullopt,    //VendorEventIds
+                               std::nullopt,    //VendorName
+                               RequestSpaceIds, //SpaceIds
+							   std::nullopt,    //UserIds
+							   std::nullopt,	//IsTicketingActive
+                               RequestSkip,     //Skip
+                               RequestLimit,    //Limit
+                               ResponseHandler);
 }
 
 void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,

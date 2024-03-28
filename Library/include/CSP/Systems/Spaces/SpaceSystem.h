@@ -81,8 +81,8 @@ public:
 	/// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
 
-	/// @brief Send exit current space event to EventSystem.
-	void ExitSpace();
+	/// @brief Exits the space and deregisters from the space scope.
+	CSP_ASYNC_RESULT void ExitSpace(NullResultCallback Callback);
 
 	/// @brief Get whether user is currently in a space.
 	/// @return Result of whether they are in a Space.
@@ -159,12 +159,14 @@ public:
 	/// @brief Retrieves basic space details for the spaces with the given attributes available to the logged in user.
 	/// Results pagination is supported through the use of ResultsSkip and ResultsMax.
 	/// @param IsDiscoverable csp::common::Optional<bool> : `true` or `false` to filter by IsDiscoverable attribute value.
-	/// @param IsDiscoverable csp::common::Optional<bool> : `true` or `false` to filter by RequiresInvite attribute value.
+	/// @param IsArchived csp::common::Optional<bool> : `true` or `false` to filter by IsArchived attribute value.
+	/// @param RequiresInvite csp::common::Optional<bool> : `true` or `false` to filter by RequiresInvite attribute value.
 	/// @param ResultsSkip csp::common::Optional<int> : number of result entries that will be skipped from the result. For no skip pass nullptr.
 	/// @param ResultsMax csp::common::Optional<int> : maximum number of result entries to be retrieved. For all available result entries pass
 	/// nullptr.
 	/// @param Callback SpacesResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetSpacesByAttributes(const csp::common::Optional<bool>& IsDiscoverable,
+												const csp::common::Optional<bool>& IsArchived,
 												const csp::common::Optional<bool>& RequiresInvite,
 												const csp::common::Optional<int>& ResultsSkip,
 												const csp::common::Optional<int>& ResultsMax,

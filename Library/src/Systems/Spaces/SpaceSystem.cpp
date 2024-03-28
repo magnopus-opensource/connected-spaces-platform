@@ -60,6 +60,7 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 	GroupInfo->SetDescription(Description);
 	GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
 	GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
+    GroupInfo->SetGroupType("space");
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -136,8 +137,8 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 							   auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-                               // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
-                               // This hopefully will change in a future version when CHS support it.
+							   // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+							   // This hopefully will change in a future version when CHS support it.
 							   MultiplayerConnection->StopListening(
 								   [MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 								   {
@@ -208,7 +209,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 			auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-            // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
+			// Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
 			// This hopefully will change in a future version when CHS support it.
 			MultiplayerConnection->StopListening(
 				[MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
@@ -254,9 +255,41 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 	GetSpace(SpaceId, GetSpaceCallback);
 }
 
-void SpaceSystem::ExitSpace()
+void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
 	CSP_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
+
+    // As the user is exiting the space, we now clear all scopes that they are registered to.
+    auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    if(MultiplayerConnection != nullptr)
+    {
+		MultiplayerConnection->StopListening(
+		   [MultiplayerConnection, Callback](csp::multiplayer::ErrorCode Error)
+		   {
+				if (Error != csp::multiplayer::ErrorCode::None)
+				{
+					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", Error);
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+				}
+				else
+				{
+					MultiplayerConnection->ResetScopes([Callback](csp::multiplayer::ErrorCode Error)
+					{
+						csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->LocalDestroyAllEntities();
+						if (Error != csp::multiplayer::ErrorCode::None)
+						{
+						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
+                            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+						}
+                        else
+                        {
+                            const NullResult Result(csp::systems::EResultCode::Success, 200);
+	                        INVOKE_IF_NOT_NULL(Callback, Result);
+                        }
+				   });
+				}
+		   });
+    }
 
 	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
 	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
@@ -532,13 +565,20 @@ void SpaceSystem::UpdateSpace(const String& SpaceId,
 		LiteGroupInfo->SetDescription(*Description);
 	}
 
+    
+    bool IsDiscoverable = false;
+    bool RequiresInvite = true;
+
 	if (Attributes.HasValue())
 	{
-		LiteGroupInfo->SetDiscoverable(HasFlag(*Attributes, SpaceAttributes::IsDiscoverable));
-		LiteGroupInfo->SetRequiresInvite(HasFlag(*Attributes, SpaceAttributes::RequiresInvite));
-
-		LiteGroupInfo->SetAutoModerator(false);
+		IsDiscoverable = HasFlag(*Attributes, SpaceAttributes::IsDiscoverable);
+		RequiresInvite = HasFlag(*Attributes, SpaceAttributes::RequiresInvite);
 	}
+
+	// Note that these are required fields from a services point of view.
+	LiteGroupInfo->SetDiscoverable(IsDiscoverable);
+	LiteGroupInfo->SetRequiresInvite(RequiresInvite);
+	LiteGroupInfo->SetAutoModerator(false);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<BasicSpaceResultCallback, BasicSpaceResult, void, chs::GroupLiteDto>(Callback, nullptr);
@@ -607,12 +647,14 @@ void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
 }
 
 void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
+										const Optional<bool>& InIsArchived,
 										const Optional<bool>& InRequiresInvite,
 										const Optional<int>& InResultsSkip,
 										const Optional<int>& InResultsMax,
 										BasicSpacesResultCallback Callback)
 {
 	auto IsDiscoverable				  = InIsDiscoverable.HasValue() ? *InIsDiscoverable : std::optional<bool>(std::nullopt);
+	auto IsArchived					  = InIsArchived.HasValue() ? *InIsArchived : std::optional<bool>(std::nullopt);
 	auto RequiresInvite				  = InRequiresInvite.HasValue() ? *InRequiresInvite : std::optional<bool>(std::nullopt);
 	auto ResultsSkip				  = InResultsSkip.HasValue() ? *InResultsSkip : std::optional<int32_t>(std::nullopt);
 	std::optional<int32_t> ResultsMax = InResultsMax.HasValue() ? std::min(MAX_SPACES_RESULTS, *InResultsMax) : MAX_SPACES_RESULTS;
@@ -625,18 +667,20 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<BasicSpacesResultCallback, BasicSpacesResult, void, csp::services::DtoArray<chs::GroupLiteDto>>(Callback, nullptr);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt, // Ids
-															  std::nullopt, // GroupTypes
-															  std::nullopt, // Names
-															  std::nullopt, // PartialName
-															  std::nullopt, // GroupOwnerIds
-															  std::nullopt, // ExcludeGroupOwnerIds
-															  std::nullopt, // Users
-															  IsDiscoverable,
-															  std::nullopt, // AutoModerator
-															  RequiresInvite,
-															  ResultsSkip,
-															  ResultsMax,
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt,     // Ids
+															  std::nullopt,     // GroupTypes
+															  std::nullopt,     // Names
+															  std::nullopt,     // PartialName
+															  std::nullopt,     // GroupOwnerIds
+															  std::nullopt,     // ExcludeGroupOwnerIds
+															  std::nullopt,     // Users
+															  IsDiscoverable,   // Discoverable
+															  std::nullopt,     // AutoModerator
+															  RequiresInvite,   // RequiresInvite
+															  IsArchived,       // Archived
+                                                              std::nullopt,     // OrganizationIds
+															  ResultsSkip,      // Skip
+															  ResultsMax,       // Limit
 															  ResponseHandler);
 }
 

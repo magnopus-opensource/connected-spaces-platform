@@ -57,6 +57,7 @@ class CSP_API UserSystem : public SystemBase
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
 	friend class LoginStateResult;
+	friend class csp::web::WebClient;
 	friend void csp::memory::Delete<UserSystem>(UserSystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -94,7 +95,7 @@ public:
 	/// @param RefreshToken csp::common::String : Refresh token to be used for refreshing the authentication token
 	/// @param Callback LoginStateResultCallback : Callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void
-		RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
+		LoginWithRefreshToken(const csp::common::String& UserId, const csp::common::String& RefreshToken, LoginStateResultCallback Callback);
 
 	/// @brief Log in to Magnopus Connected Services as a guest.
 	/// @param UserHasVerifiedAge csp::common::Optional<bool> : An optional bool to specify whether or not the user has verified that they are over 18
@@ -132,12 +133,6 @@ public:
 																  const csp::common::String& ThirdPartyStateId,
 																  const csp::common::Optional<bool>& UserHasVerifiedAge,
 																  LoginStateResultCallback Callback);
-
-	/// @brief Log in to Magnopus Connected Services using the given one-time password/key.
-	/// @param UserId csp::common::String : the user Id
-	/// @param Key csp::common::String : the one-time key to exchange
-	/// @param Callback LoginStateResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void ExchangeKey(const csp::common::String& UserId, const csp::common::String& Key, LoginStateResultCallback Callback);
 
 	/// @brief Logout from Magnopus Connected Services.
 	/// @param Callback NullResultCallback : callback to call when a response is received
@@ -262,6 +257,8 @@ private:
 
 	void NotifyRefreshTokenHasChanged();
 	void ResetAuthenticationState();
+
+    void RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback);
 
 	csp::services::ApiBase* AuthenticationAPI;
 	csp::services::ApiBase* ProfileAPI;

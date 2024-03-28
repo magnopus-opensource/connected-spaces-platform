@@ -138,7 +138,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	AudioComponent->SetVolume(0.f);
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -267,7 +267,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	EntitySystem->ProcessPendingEntityOperations();
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
-	SpaceSystem->ExitSpace();
+	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
