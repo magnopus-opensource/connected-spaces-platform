@@ -19,8 +19,8 @@ public class HelloWorld : MonoBehaviour
     [SerializeField] private LocalPlayer localPlayerPrefab;
     [SerializeField] private RemotePlayer remotePlayerPrefab;
 
-    private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string TenantKey = "CSP_HELLO_WORLD";
+    private const string endPointUri = "https://ogs-odev.magnoboard.com";
+    private const string TenantKey = "OKO";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
     private bool cspHasStarted;
