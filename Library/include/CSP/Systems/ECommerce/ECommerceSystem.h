@@ -110,11 +110,11 @@ public:
 	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
 	/// @param SpaceId csp::common::String : ID of the space the store links to.
 	/// @param IsEcommerceActive bool : Bool to set the ecommerce system status to.
-	/// @param Callback SetECommerceEnabledResultCallback : Callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void SetECommerceEnabledInSpace(const common::String& StoreName,
+	/// @param Callback SetECommerceActiveResultCallback : Callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void SetECommerceActiveInSpace(const common::String& StoreName,
 													 const common::String& SpaceId,
 													 const bool IsEcommerceActive,
-													 SetECommerceEnabledResultCallback Callback);
+													 SetECommerceActiveResultCallback Callback);
 
 	/// @brief Validates a shopify store given a store name and an access token.
 	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.

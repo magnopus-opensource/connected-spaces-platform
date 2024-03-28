@@ -146,7 +146,7 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
 }
 
-void ECommerceSystem::SetECommerceEnabledInSpace(const common::String& StoreName,
+void ECommerceSystem::SetECommerceActiveInSpace(const common::String& StoreName,
 												 const common::String& SpaceId,
 												 const bool IsEcommerceActive,
 												 SetECommerceEnabledResultCallback Callback)

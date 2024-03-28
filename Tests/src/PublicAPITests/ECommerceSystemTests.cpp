@@ -786,7 +786,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
 
 	{ // Enable Ecommerce
-		auto [EnableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceEnabledInSpace, RequestPredicate, StoreName, SpaceId, true);
+		auto [EnableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceActiveInSpace, RequestPredicate, StoreName, SpaceId, true);
 
 		EXPECT_EQ(EnableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -796,7 +796,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	}
 
 	{ // Disable Ecommerce
-		auto [DisableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceEnabledInSpace, RequestPredicate, StoreName, SpaceId, false);
+		auto [DisableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceActiveInSpace, RequestPredicate, StoreName, SpaceId, false);
 
 		EXPECT_EQ(DisableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
 
