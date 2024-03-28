@@ -785,6 +785,26 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	EXPECT_NE(ShopifyStore.StoreId, "");
 	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
 
+	{ // Enable Ecommerce
+		auto [EnableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceEnabledInSpace, RequestPredicate, StoreName, SpaceId, true);
+
+		EXPECT_EQ(EnableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+		auto EnableStore = EnableStoreResult.GetShopifyStoreInfo();
+
+		EXPECT_EQ(EnableStore.IsEcommerceActive, true);
+	}
+
+	{ // Disable Ecommerce
+		auto [DisableStoreResult] = AWAIT_PRE(ECommerceSystem, SetECommerceEnabledInSpace, RequestPredicate, StoreName, SpaceId, false);
+
+		EXPECT_EQ(DisableStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+		auto DisableStore = DisableStoreResult.GetShopifyStoreInfo();
+
+		EXPECT_EQ(DisableStore.IsEcommerceActive, false);
+	}
+
 	LogOut(UserSystem);
 }
 #endif

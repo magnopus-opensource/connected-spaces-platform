@@ -146,6 +146,24 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
 }
 
+void ECommerceSystem::SetECommerceEnabledInSpace(const common::String& StoreName,
+												 const common::String& SpaceId,
+												 const bool IsEcommerceActive,
+												 SetECommerceEnabledResultCallback Callback)
+{
+	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
+	ShopifyStorefrontInfo->SetStoreName(StoreName);
+	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<SetECommerceEnabledResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+}
+
 void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
 										   const common::String& PrivateAccessToken,
 										   ValidateShopifyStoreResultCallback Callback)
