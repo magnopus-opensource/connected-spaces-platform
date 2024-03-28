@@ -238,7 +238,7 @@ public class HelloWorld : MonoBehaviour
             Debug.Log($"Login state: {loginState.State}.");
             
             // Cache user ID for later use.
-            userId = loginResult.GetLoginState().UserId;
+            userId = loginState.UserId;
             Debug.Log($"Logged in with Email {email}.");
             var connectionState = CspSystems.SystemsManager.Get().GetMultiplayerConnection().GetConnectionState();
             Debug.Log($"Multiplayer Connection state: {connectionState} ");
