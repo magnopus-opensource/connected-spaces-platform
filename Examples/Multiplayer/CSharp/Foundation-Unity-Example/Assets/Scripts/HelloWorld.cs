@@ -19,8 +19,8 @@ public class HelloWorld : MonoBehaviour
     [SerializeField] private LocalPlayer localPlayerPrefab;
     [SerializeField] private RemotePlayer remotePlayerPrefab;
 
-    private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string TenantKey = "CSP_HELLO_WORLD";
+    private const string endPointUri = "https://ogs-odev.magnoboard.com";
+    private const string TenantKey = "OKO";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
     private bool cspHasStarted;
@@ -47,7 +47,7 @@ public class HelloWorld : MonoBehaviour
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
             ClientSKU = "csp-cSharp-examples",
-            ClientVersion = "0.0.3",
+            ClientVersion = "0.0.4",
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
@@ -220,9 +220,11 @@ public class HelloWorld : MonoBehaviour
     /// <param name="password"> Password of the new account. </param>
     private async void SignInAsync(string email, string password)
     {
-        await LoginAsync(email, password);
-        await SearchSpacesAsync();
-        await SearchSpacesUsingGraphQLAsync();
+        if (await LoginAsync(email, password))
+        {
+            await SearchSpacesAsync();
+            await SearchSpacesUsingGraphQLAsync();
+        }
     }
 
     /// <summary>
@@ -248,7 +250,7 @@ public class HelloWorld : MonoBehaviour
     /// <param name="email"> Email of the user. </param>
     /// <param name="password"> Password of the user. </param>
     /// <returns> Just the Task object to await.</returns>
-    private async Task LoginAsync(string email, string password)
+    private async Task<bool> LoginAsync(string email, string password)
     {
         Debug.Log($"Logging in with Email {email} ...");
 
@@ -258,12 +260,19 @@ public class HelloWorld : MonoBehaviour
         {
             // Cache user ID for later use.
             using var loginState = loginResult.GetLoginState();
+            Debug.Log($"Login state: {loginState.State}.");
+
             userId = loginState.UserId;
             Debug.Log($"Logged in with Email {email}.");
+
+            var connectionState = CspSystems.SystemsManager.Get().GetMultiplayerConnection().GetConnectionState();
+            Debug.Log($"Multiplayer Connection state: {connectionState} ");
+            return true;
         }
         else
         {
-            Debug.LogError($"Failed to log in.");
+            Debug.LogError($"Failed to log in. Reason: {loginResult.GetResponseBody()}");
+            return false;
         }
     }
 
@@ -387,18 +396,21 @@ public class HelloWorld : MonoBehaviour
     private async Task EnterSpaceAsync(CspSystems.Space space)
     {
         await Task.Delay(100);
+
+        entitySystem.OnEntityCreated += OnEntityCreated;
+
         using CspSystems.NullResult enterResult = await spaceSystem.EnterSpace(space.Id);
         if (enterResult.GetResultCode() != CspSystems.EResultCode.Success)
         {
-            Debug.LogError($"Failed {nameof(EnterSpaceAsync)}");
+            Debug.LogError($"Failed to enter space. Result code: {enterResult.GetResultCode()}. Aborting...");
+            entitySystem.OnEntityCreated -= OnEntityCreated;
             return;
         }
-        Debug.Log($"Joined Space {space.Name}");
+
+        Debug.Log($"Entered Space {space.Name}");
         enteredSpace = true;
         
         StartTickLoop();
-        
-        entitySystem.OnEntityCreated += OnEntityCreated;
 
         await SpawnLocalAvatar();
 
@@ -419,7 +431,7 @@ public class HelloWorld : MonoBehaviour
 
         await CleanupAvatars();
 
-        spaceSystem.ExitSpace();
+        await spaceSystem.ExitSpace();
         Debug.Log("Exited Space");
         await Task.Delay(100);
 
@@ -441,6 +453,7 @@ public class HelloWorld : MonoBehaviour
             return;
         Debug.Log($"Deleting Space {createdSpace.Name}");
         await spaceSystem.DeleteSpace(createdSpace.Id);
+
         Debug.Log($"Deleted Space {createdSpace.Name}");
     }
     #endregion
@@ -468,6 +481,7 @@ public class HelloWorld : MonoBehaviour
 
     private void OnEntityCreated(object sender, SpaceEntity spaceEntity)
     {
+        Debug.Log("OnEntityCreated triggered");
         SpaceEntityType entityType = spaceEntity.GetEntityType();
         if (entityType == SpaceEntityType.Avatar)
         {
