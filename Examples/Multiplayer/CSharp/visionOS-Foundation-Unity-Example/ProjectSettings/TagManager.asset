@@ -35,9 +35,12 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - XR Simulation
+  - PolySpatial
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: PolySpatialUI
+    uniqueID: 1316342547
     locked: 0
