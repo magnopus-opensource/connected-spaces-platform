@@ -356,6 +356,8 @@ typedef std::function<void(const CartInfoResult& Result)> CartInfoResultCallback
 
 typedef std::function<void(const AddShopifyStoreResult& Result)> AddShopifyStoreResultCallback;
 
+typedef std::function<void(const AddShopifyStoreResult& Result)> SetECommerceActiveResultCallback;
+
 typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
 
 } // namespace csp::systems
