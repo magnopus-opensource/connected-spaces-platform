@@ -455,7 +455,8 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Scale, "scale")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Rotation, "rotation")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
-		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible");
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
+		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)

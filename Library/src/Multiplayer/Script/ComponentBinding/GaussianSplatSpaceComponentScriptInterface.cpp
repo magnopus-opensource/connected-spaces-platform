@@ -42,4 +42,6 @@ DEFINE_SCRIPT_PROPERTY_VEC4(GaussianSplatSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_TYPE(GaussianSplatSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(GaussianSplatSpaceComponent, bool, bool, IsARVisible);
 
+DEFINE_SCRIPT_PROPERTY_VEC3(GaussianSplatSpaceComponent, Tint);
+
 } // namespace csp::multiplayer
