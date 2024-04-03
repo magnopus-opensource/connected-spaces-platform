@@ -127,11 +127,12 @@ public:
 	/// @}
 
 	/// @brief Gets the tint that should be globally applied to the Gaussian Splat associated with this component.
-	/// @return The global tint value, expected to be in RGB color space.
+	/// @return The global tint value, expected to be in RGB color space, with each value normalised between 0...1.
 	const csp::common::Vector3& GetTint() const;
 
 	/// @brief Sets the tint that should be globally applied to the Gaussian Splat.
-	/// @param Value The tint value, expected to be in RGB color space. Defaults to 1,1,1.
+	/// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
+    /// Defaults to 1,1,1.
 	void SetTint(const csp::common::Vector3& TintValue);
 };
 
