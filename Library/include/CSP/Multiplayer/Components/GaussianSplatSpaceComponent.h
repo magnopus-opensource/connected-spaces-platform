@@ -43,6 +43,7 @@ enum class GaussianSplatPropertyKeys
 	IsVisible,
 	IsARVisible,
 	IsShadowCaster,
+    Tint,
 	Num
 };
 
@@ -124,6 +125,14 @@ public:
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
 	void SetIsShadowCaster(bool Value) override;
 	/// @}
+
+	/// @brief Gets the tint that should be globally applied to the Gaussian Splat associated with this component.
+	/// @return The global tint value, expected to be in RGB color space.
+	const csp::common::Vector3& GetTint() const;
+
+	/// @brief Sets the tint that should be globally applied to the Gaussian Splat.
+	/// @param Value The tint value, expected to be in RGB color space. Defaults to 1,1,1.
+	void SetTint(const csp::common::Vector3& TintValue);
 };
 
 } // namespace csp::multiplayer
