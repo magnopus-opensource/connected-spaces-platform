@@ -43,8 +43,9 @@ public class RemotePlayer : MonoBehaviour
         if (isEntityUpdated)
         {
             isEntityUpdated = false;
-            UnityEngine.Vector3 updatedPos = Entity.GetPosition().ToUnityVector().ToUnityPositionFromGLTF();
-            UpdatePosition(updatedPos);
+            using var cspVectorPosition = Entity.GetPosition();
+            var newPosition = cspVectorPosition.ToUnityVector().ToUnityPositionFromGLTF();
+            UpdatePosition(newPosition);
         }
     }
 
