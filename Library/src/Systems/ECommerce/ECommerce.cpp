@@ -315,37 +315,6 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 }
 
-CurrencyInfo::CurrencyInfo()
-	: Amount(0.0)
-{
-}
-
-ProductMediaInfo::ProductMediaInfo()
-	: Width(0)
-	, Height(0)
-{
-}
-
-ProductVariantInfo::ProductVariantInfo()
-	: AvailableForSale(false)
-{
-}
-
-CartLine::CartLine()
-	: Quantity(0)
-{
-}
-
-CartInfo::CartInfo()
-	: TotalQuantity(0)
-{
-}
-
-ShopifyStoreInfo::ShopifyStoreInfo()
-	: IsEcommerceActive(false)
-{
-}
-
 const ProductInfo& ProductInfoResult::GetProductInfo() const
 {
 	return ProductInformation;
