@@ -37,6 +37,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 	{
 		ProductInfo.Description = Dto.GetDescription();
 	}
+    else
+    {
+	    CSP_LOG_ERROR_MSG("ShopifyProductDto missing Description");
+    }
 
 	if (Dto.HasVariants())
 	{
@@ -52,6 +56,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			{
 				ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
 			}
+            else
+            {
+	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing HasAvailableForSale");
+            }
 
 			if (VariantProductInformation[i]->HasImage())
 			{
@@ -82,6 +90,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].Media.Height = VariantProductImage->GetHeight();
 				}
 			}
+            else
+            {
+	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing Image");
+            }
 
 			if (Dto.GetVariants()[i]->HasSelectedOptions())
 			{
@@ -95,6 +107,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
 				}
 			}
+            else
+            {
+	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing SelectedOptions");
+            }
 
 			if (VariantProductInformation[i]->HasUnitPrice())
 			{
@@ -108,7 +124,14 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].UnitPrice.CurrencyCode = VariantProductInformation[i]->GetUnitPrice()->GetCurrencyCode();
 				}
 			}
+            else
+            {
+	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing UnitPrice");
+            }
 		}
+	}
+	{
+		CSP_LOG_ERROR_MSG("ShopifyProductDto missing Variants");
 	}
 
 	if (Dto.HasTags())
@@ -122,6 +145,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			ProductInfo.Tags[i] = TagsProductInformation[i];
 		}
 	}
+    else
+    {
+	    CSP_LOG_ERROR_MSG("ShopifyProductDto missing Tags");
+    }
 
 	if (Dto.HasMedia())
 	{
@@ -156,6 +183,9 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 				ProductInfo.Media[i].Height = MediaProductInformation[i]->GetHeight();
 			}
 		}
+	}
+	{
+		CSP_LOG_ERROR_MSG("ShopifyProductDto missing Media");
 	}
 }
 
@@ -285,6 +315,36 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 }
 
+CurrencyInfo::CurrencyInfo()
+	: Amount(0.0)
+{
+}
+
+ProductMediaInfo::ProductMediaInfo()
+	: Width(0)
+	, Height(0)
+{
+}
+
+ProductVariantInfo::ProductVariantInfo()
+	: AvailableForSale(false)
+{
+}
+
+CartLine::CartLine()
+	: Quantity(0)
+{
+}
+
+CartInfo::CartInfo()
+	: TotalQuantity(0)
+{
+}
+
+ShopifyStoreInfo::ShopifyStoreInfo()
+	: IsEcommerceActive(false)
+{
+}
 
 const ProductInfo& ProductInfoResult::GetProductInfo() const
 {

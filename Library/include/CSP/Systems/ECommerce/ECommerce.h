@@ -37,7 +37,7 @@ namespace csp::systems
 class CSP_API CurrencyInfo
 {
 public:
-	CurrencyInfo() = default;
+	CurrencyInfo();
 
 	/// @brief Currency Amount.
 	double Amount;
@@ -50,7 +50,7 @@ public:
 class CSP_API ProductMediaInfo
 {
 public:
-	ProductMediaInfo() = default;
+	ProductMediaInfo();
 
 	/// @brief Type of media content used.
 	csp::common::String MediaContentType;
@@ -69,7 +69,7 @@ public:
 class CSP_API VariantOptionInfo
 {
 public:
-	VariantOptionInfo() = default;
+	VariantOptionInfo();
 
 	/// @brief Id of the variant option.
 	csp::common::String Name;
@@ -82,7 +82,8 @@ public:
 class CSP_API ProductVariantInfo
 {
 public:
-	ProductVariantInfo() = default;
+	ProductVariantInfo();
+
 	/// @brief Id of the variant.
 	csp::common::String Id;
 	/// @brief Title of the variant.
@@ -105,7 +106,7 @@ public:
 class CSP_API ProductInfo
 {
 public:
-	ProductInfo() = default;
+	ProductInfo();
 
 	/// @brief Id of the product.
 	csp::common::String Id;
@@ -128,7 +129,7 @@ public:
 class CSP_API CheckoutInfo
 {
 public:
-	CheckoutInfo() = default;
+	CheckoutInfo();
 	/// @brief Url of the Store.
 	csp::common::String StoreUrl;
 	/// @brief Url of Checkout.
@@ -140,7 +141,7 @@ public:
 class CSP_API CartLine
 {
 public:
-	CartLine() : Quantity(0) {};
+	CartLine();
 
 	/// @brief ID of the line in the cart.
 	csp::common::String CartLineId;
@@ -157,7 +158,7 @@ public:
 class CSP_API CartInfo
 {
 public:
-	CartInfo() : TotalQuantity(0) {};
+	CartInfo();
 
 	/// @brief Space that the cart is associated with.
 	csp::common::String SpaceId;
@@ -177,7 +178,7 @@ public:
 class CSP_API ShopifyStoreInfo
 {
 public:
-	ShopifyStoreInfo() = default;
+	ShopifyStoreInfo();
 
 	/// @brief ID of the store.
 	csp::common::String StoreId;
