@@ -42,7 +42,7 @@ oko_client_path = ""
 saved_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Saved'))
 binaries_relative_foundation_path = "/Library/Binaries"
 include_relative_foundation_path = "/Library/include"
-binaries_relative_client_path = "/Plugins/OKO/Binaries/ThirdParty/OlympusFoundation"
+binaries_relative_client_path = "/Plugins/OKO/Binaries/ThirdParty/CSP"
 include_relative_client_path = "/Plugins/OKO/Source/ThirdParty"
 saved_application_data = json.loads("{}")
 
@@ -150,7 +150,7 @@ class CopyFoundationToClientButton:
             activeforeground='white',
             activebackground=color_button_active,
             bd=0,
-            text="COPY FOUNDATION LIBS TO CLIENT",
+            text="COPY CSP LIBS TO CLIENT",
             fg='white',
             font='Helvetica 8 bold',
             command=self.copy_foundation_to_client,
@@ -171,7 +171,7 @@ class CopyFoundationToClientButton:
 
         # Handle user error
         if not os.path.isdir(self.oko_build_tool.foundation_path.path.get()):
-            show_error("Please provide a valid path for your OKO Foundation workspace")
+            show_error("Please provide a valid path for your CSP workspace")
             return
         elif not os.path.isdir(self.oko_build_tool.client_path.path.get()):
             show_error("Please provide a valid path for your OKO Client workspace")
@@ -264,7 +264,7 @@ class CopyFoundationToClientButton:
 
         include_client_path = self.oko_build_tool.client_path.path.get() + include_relative_client_path
         self.oko_build_tool.status_bar.update_status_text("Deleting content in " + include_client_path)
-        shutil.rmtree(include_client_path + "/Olympus", ignore_errors=False, onerror=None)
+        shutil.rmtree(include_client_path + "/CSP", ignore_errors=False, onerror=None)
 
         # Begin copying over the libs
         for i in range(len(paths_to_copy_to)):
@@ -363,7 +363,7 @@ class OKOBuildTool(Frame):
             .pack(anchor='w')
         # Create both directory browsers
         self.foundation_path = PathBrowser(
-            "foundation_path", path_browsers_frame, "OKO Foundation workspace path:")
+            "foundation_path", path_browsers_frame, "CSP workspace path:")
         self.client_path = PathBrowser(
             "client_path", path_browsers_frame, "OKO Client workspace path:")
 

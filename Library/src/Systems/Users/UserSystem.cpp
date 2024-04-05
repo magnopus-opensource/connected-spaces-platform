@@ -468,12 +468,12 @@ void UserSystem::Logout(NullResultCallback Callback)
 	{
 		CurrentLoginState.State = ELoginState::LogoutRequested;
 
-		// disconnect MultiplayerConnection before logging out
+		// Disconnect MultiplayerConnection before logging out
 		csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback = [Callback, this](csp::multiplayer::ErrorCode ErrCode)
 		{
 			if (ErrCode != csp::multiplayer::ErrorCode::None)
 			{
-				CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+				CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %i", ErrCode); 
 			}
 
 			auto Request = std::make_shared<chs_user::LogoutRequest>();
