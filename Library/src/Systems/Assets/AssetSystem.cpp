@@ -78,6 +78,8 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
 		return "HolocapAudio";
 	else if (AssetType == systems::EAssetType::AUDIO)
 		return "Audio";
+    else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
+		return "GaussianSplat";
 	else
 	{
 		assert(false && "Unsupported Asset Type!");
