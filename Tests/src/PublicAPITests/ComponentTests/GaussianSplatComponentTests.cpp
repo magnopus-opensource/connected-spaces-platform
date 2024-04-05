@@ -38,7 +38,6 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-
 namespace
 {
 
@@ -46,8 +45,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
-
-#define RUN_GAUSSIAN_SPLAT_TESTS 0 // LOCAL TEST CODE
 
 #if RUN_ALL_UNIT_TESTS || RUN_GAUSSIAN_SPLAT_TESTS || RUN_GAUSSIAN_SPLAT_TEST
 CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
@@ -63,8 +60,6 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -106,12 +101,6 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	// Check component was created
 	auto& Components = *Object->GetComponents();
 	EXPECT_EQ(Components.Size(), 1);
-
-	char UniqueAssetCollectionName[256];
-	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
-
-	char UniqueAssetName[256];
-	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
 	EXPECT_EQ(GaussianSplatComponent->GetPosition(), csp::common::Vector3::Zero());
 	EXPECT_EQ(GaussianSplatComponent->GetRotation(), csp::common::Vector4::Identity());
