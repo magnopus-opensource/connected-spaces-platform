@@ -1133,11 +1133,9 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
 {
 	auto& CheckComponents							  = *GetComponents();
 	const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
+	ComponentBase* LocatedComponent					  = nullptr;
 
-	int i							= 0;
-	ComponentBase* LocatedComponent = nullptr;
-
-	for (i = 0; i < ComponentKeys->Size(); ++i)
+	for (int i = 0; i < ComponentKeys->Size(); ++i)
 	{
 		ComponentBase* Component = Components[ComponentKeys->operator[](i)];
 
@@ -1154,7 +1152,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
 	{
 		const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
 
-		for (i = 0; i < DirtyComponentKeys->Size(); ++i)
+		for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
 		{
 			const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
 
