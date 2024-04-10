@@ -27,6 +27,7 @@
 #include "CSP/Multiplayer/Components/ExternalLinkSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
+#include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
@@ -35,7 +36,6 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
-#include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -769,7 +769,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 {
 	/// If we're sending patches to ourselves, don't apply local patches, as we'll be directly deserialising the data instead.
-		if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
+	if (!csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetAllowSelfMessagingFlag())
 	{
 		std::scoped_lock<std::mutex> PropertiesLocker(*PropertiesLock);
 		std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
@@ -1071,13 +1071,13 @@ bool SpaceEntity::Deselect()
 bool SpaceEntity::IsModifiable()
 {
 	if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
-    {
+	{
 		return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
-    }
-    else
-    {
-        return true;
-    }
+	}
+	else
+	{
+		return true;
+	}
 }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)
@@ -1131,32 +1131,45 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents) const
 {
-	auto& CheckComponents = *GetComponents();
+	auto& CheckComponents							  = *GetComponents();
+	const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
 
-	for (int i = 0; i < Components.Size(); ++i)
+	int i							= 0;
+	ComponentBase* LocatedComponent = nullptr;
+
+	for (i = 0; i < ComponentKeys->Size(); ++i)
 	{
-		ComponentBase* Component = Components[i];
+		ComponentBase* Component = Components[ComponentKeys->operator[](i)];
 
-		if ((Component != nullptr) && (Component->GetComponentType() == Type))
+		if (Component->GetComponentType() == Type)
 		{
-			return Component;
+			LocatedComponent = Component;
+			break;
 		}
 	}
 
-	if (SearchDirtyComponents)
-	{
-		for (int i = 0; i < DirtyComponents.Size(); ++i)
-		{
-			DirtyComponent Component = DirtyComponents[i];
+	CSP_DELETE(ComponentKeys);
 
-			if (Component.Component->GetComponentType() == ComponentType::ScriptData)
+	if (LocatedComponent == nullptr && SearchDirtyComponents)
+	{
+		const csp::common::Array<uint16_t>* DirtyComponentKeys = DirtyComponents.Keys();
+
+		for (i = 0; i < DirtyComponentKeys->Size(); ++i)
+		{
+			const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
+
+			if (Component.Component->GetComponentType() == Type)
 			{
-				return Component.Component;
+				LocatedComponent = Component.Component;
+				break;
 			}
 		}
+
+		CSP_DELETE(DirtyComponentKeys);
 	}
 
-	return nullptr;
+
+	return LocatedComponent;
 }
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface()
