@@ -1158,7 +1158,7 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
 		{
 			const DirtyComponent& Component = DirtyComponents[DirtyComponentKeys->operator[](i)];
 
-			if (Component.Component->GetComponentType() == Type)
+			if (Component.UpdateType != ComponentUpdateType::Delete && Component.Component->GetComponentType() == Type)
 			{
 				LocatedComponent = Component.Component;
 				break;
