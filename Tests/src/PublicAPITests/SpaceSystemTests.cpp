@@ -2106,11 +2106,17 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	{
+		EXPECT_FALSE(SpaceSystem->IsInSpace());
+
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
+		EXPECT_TRUE(SpaceSystem->IsInSpace());
+
 		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+
+		EXPECT_FALSE(SpaceSystem->IsInSpace());
 	}
 
 	LogOut(UserSystem);
