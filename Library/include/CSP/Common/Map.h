@@ -148,7 +148,14 @@ public:
 	/// @return bool
 	bool HasKey(const TKey& Key) const
 	{
-		return Container->count(Key) > 0;
+		if (Container != nullptr)
+		{
+			return Container->count(Key) > 0;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/// @brief Returns a copy of all keys in this map.
