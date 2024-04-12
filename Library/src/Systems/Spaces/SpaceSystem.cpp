@@ -295,6 +295,8 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
 
 	csp::events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
+
+    CurrentSpace = Space();
 }
 
 bool SpaceSystem::IsInSpace()
