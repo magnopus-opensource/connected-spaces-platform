@@ -98,7 +98,7 @@ void LogIn(csp::systems::UserSystem* UserSystem,
 
 void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId, csp::systems::EResultCode ExpectedResult)
 {
-	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, nullptr).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::UserSystem::LoginAsGuest, UserSystem, true).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
