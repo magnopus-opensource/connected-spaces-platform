@@ -52,7 +52,7 @@ const Organization& OrganizationResult::GetOrganization() const
 	return Organization;
 }
 
-const OrganizationRoleInfo& OrganizationRolesResult::GetOrganizationRoleInfo() const
+const csp::common::Array<OrganizationRoleInfo>& OrganizationRolesResult::GetOrganizationRoleInfo() const
 {
 	return OrganizationRoleInfo;
 }

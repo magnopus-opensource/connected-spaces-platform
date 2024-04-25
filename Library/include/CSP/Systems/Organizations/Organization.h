@@ -133,15 +133,15 @@ class CSP_API OrganizationRolesResult : public csp::systems::ResultBase
 
 public:
 	/// @brief Retrieves the Organization Role Info result.
-	/// @return const OrganizationRoleInfo& : Organization Role Info object.
-	const OrganizationRoleInfo& GetOrganizationRoleInfo() const;
+	/// @return const common::Array<OrganizationRoleInfo>& : Array of Organization Role Info objects.
+	const csp::common::Array<OrganizationRoleInfo>& GetOrganizationRoleInfo() const;
 
 private:
 	OrganizationRolesResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	OrganizationRoleInfo OrganizationRoleInfo;
+    csp::common::Array<OrganizationRoleInfo> OrganizationRoleInfo;
 };
 
 /// @brief Callback Organization Result object.

@@ -46,6 +46,10 @@ csp::common::String DefaultLoginEmail;
 csp::common::String DefaultLoginPassword;
 csp::common::String AlternativeLoginEmail;
 csp::common::String AlternativeLoginPassword;
+csp::common::String AltUser1NonMemberEmail;
+csp::common::String AltUser1NonMemberPassword;
+csp::common::String AltUser2NonMemberEmail;
+csp::common::String AltUser2NonMemberPassword;
 
 
 void LoadTestAccountCredentials()
@@ -61,8 +65,12 @@ void LoadTestAccountCredentials()
 
 	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword;
 
+	// Organization test accounts
+	std::string _AltUser1NonMemberEmail, _AltUser1NonMemberPassword, _AltUser2NonMemberEmail, _AltUser2NonMemberPassword;
+
 	CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
 	CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
+	// Todo: Read in the new Organization account details
 
 	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty())
 	{
