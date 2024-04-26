@@ -22,6 +22,7 @@ PluginImporter:
         Exclude Win: 1
         Exclude Win64: {{ '0' if platform == 'windows' else '1' }}
         Exclude iOS: {{ '0' if platform == 'ios' else '1' }}
+        Exclude VisionOS: {{ '0' if platform == 'visionos' else '1' }}
   - first:
       Any: 
     second:
@@ -39,7 +40,7 @@ PluginImporter:
     {%- elif platform == 'macosx' %}
       enabled: 1
       settings:
-        CPU: x86_64
+        CPU: AnyCPU
         DefaultValueInitialized: true
         OS: OSX
     {%- else %}
@@ -105,6 +106,24 @@ PluginImporter:
       iPhone: iOS
     second:
     {%- if platform == 'ios' %}
+      enabled: 1
+      settings:
+        AddToEmbeddedBinaries: false
+        CPU: ARM64
+        CompileFlags: 
+        FrameworkDependencies: 
+    {%- else %}
+      enabled: 0
+      settings:
+        AddToEmbeddedBinaries: false
+        CPU: None
+        CompileFlags: 
+        FrameworkDependencies: 
+    {%- endif %}
+  - first:
+      VisionOS: VisionOS
+    second:
+    {%- if platform == 'visionos' %}
       enabled: 1
       settings:
         AddToEmbeddedBinaries: false

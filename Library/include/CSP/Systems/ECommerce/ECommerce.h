@@ -28,8 +28,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
-
 namespace csp::systems
 {
 /// @ingroup ECommerce System
@@ -37,7 +35,9 @@ namespace csp::systems
 class CSP_API CurrencyInfo
 {
 public:
-	CurrencyInfo() = default;
+	CurrencyInfo()
+    : Amount(0.0)
+	{}
 
 	/// @brief Currency Amount.
 	double Amount;
@@ -50,7 +50,10 @@ public:
 class CSP_API ProductMediaInfo
 {
 public:
-	ProductMediaInfo() = default;
+	ProductMediaInfo()
+    : Width(0)
+	, Height(0)
+	{}
 
 	/// @brief Type of media content used.
 	csp::common::String MediaContentType;
@@ -82,7 +85,10 @@ public:
 class CSP_API ProductVariantInfo
 {
 public:
-	ProductVariantInfo() = default;
+	ProductVariantInfo()
+    : AvailableForSale(false)
+	{}
+
 	/// @brief Id of the variant.
 	csp::common::String Id;
 	/// @brief Title of the variant.
@@ -129,6 +135,7 @@ class CSP_API CheckoutInfo
 {
 public:
 	CheckoutInfo() = default;
+
 	/// @brief Url of the Store.
 	csp::common::String StoreUrl;
 	/// @brief Url of Checkout.
@@ -140,7 +147,9 @@ public:
 class CSP_API CartLine
 {
 public:
-	CartLine() : Quantity(0) {};
+	CartLine()
+    : Quantity(0)
+	{}
 
 	/// @brief ID of the line in the cart.
 	csp::common::String CartLineId;
@@ -157,7 +166,9 @@ public:
 class CSP_API CartInfo
 {
 public:
-	CartInfo() : TotalQuantity(0) {};
+	CartInfo()
+    : TotalQuantity(0)
+	{}
 
 	/// @brief Space that the cart is associated with.
 	csp::common::String SpaceId;
@@ -177,7 +188,9 @@ public:
 class CSP_API ShopifyStoreInfo
 {
 public:
-	ShopifyStoreInfo() = default;
+	ShopifyStoreInfo()
+    : IsEcommerceActive(false)
+	{}
 
 	/// @brief ID of the store.
 	csp::common::String StoreId;
@@ -355,6 +368,8 @@ typedef std::function<void(const CheckoutInfoResult& Result)> CheckoutInfoResult
 typedef std::function<void(const CartInfoResult& Result)> CartInfoResultCallback;
 
 typedef std::function<void(const AddShopifyStoreResult& Result)> AddShopifyStoreResultCallback;
+
+typedef std::function<void(const AddShopifyStoreResult& Result)> SetECommerceActiveResultCallback;
 
 typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
 

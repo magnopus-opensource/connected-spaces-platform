@@ -423,12 +423,15 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 
 void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 {
-	if (Entity->EntityDestroyCallback != nullptr)
+	if (Entity != nullptr)
 	{
-		Entity->EntityDestroyCallback(true);
-	}
+		if (Entity->EntityDestroyCallback != nullptr)
+		{
+			Entity->EntityDestroyCallback(true);
+		}
 
-	RemoveEntity(Entity);
+		RemoveEntity(Entity);
+	}
 }
 
 SpaceEntity* SpaceEntitySystem::FindSpaceEntity(const csp::common::String& InName)

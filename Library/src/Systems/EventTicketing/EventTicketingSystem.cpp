@@ -56,7 +56,6 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 {
 	auto Request = std::make_shared<chs::SpaceEventDto>();
 
-	Request->SetSpaceId(SpaceId);
 	Request->SetVendorName(GetVendorNameString(Vendor));
 	Request->SetVendorEventId(VendorEventId);
 	Request->SetVendorEventUri(VendorEventUri);

@@ -146,6 +146,24 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
 }
 
+void ECommerceSystem::SetECommerceActiveInSpace(const common::String& StoreName,
+												 const common::String& SpaceId,
+												 const bool IsEcommerceActive,
+												 SetECommerceActiveResultCallback Callback)
+{
+	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
+	ShopifyStorefrontInfo->SetStoreName(StoreName);
+	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<SetECommerceActiveResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+}
+
 void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
 										   const common::String& PrivateAccessToken,
 										   ValidateShopifyStoreResultCallback Callback)
@@ -175,9 +193,6 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 	}
 
 	auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
-
-	CartUpdateInfo->SetSpaceId(CartInformation.SpaceId);
-	CartUpdateInfo->SetShopifyCartId(CartInformation.CartId);
 
 	if (!CartInformation.CartLines.IsEmpty())
 	{

@@ -59,7 +59,8 @@ enum class EAssetType
 	SCRIPT_LIBRARY,
 	HOLOCAP_VIDEO,
 	HOLOCAP_AUDIO,
-	AUDIO
+	AUDIO,
+    GAUSSIAN_SPLAT
 };
 
 enum class EAssetPlatform

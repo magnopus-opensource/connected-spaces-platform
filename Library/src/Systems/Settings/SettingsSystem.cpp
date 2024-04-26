@@ -72,8 +72,6 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
 	NewSettings.clear();
 	NewSettings.insert(std::make_pair(InKey, InValue));
 	InSettings->SetSettings(NewSettings);
-	InSettings->SetContext(InContext);
-	InSettings->SetUserId(UserId);
 
 	SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result)
 	{
