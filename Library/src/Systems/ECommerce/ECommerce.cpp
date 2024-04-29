@@ -37,10 +37,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 	{
 		ProductInfo.Description = Dto.GetDescription();
 	}
-    else
-    {
-	    CSP_LOG_ERROR_MSG("ShopifyProductDto missing Description");
-    }
+	else
+	{
+		CSP_LOG_ERROR_MSG("ShopifyProductDto missing Description");
+	}
 
 	if (Dto.HasVariants())
 	{
@@ -49,17 +49,17 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
 		for (int i = 0; i < VariantProductInformation.size(); ++i)
 		{
-			ProductInfo.Variants[i].Id				 = VariantProductInformation[i]->GetId();
-			ProductInfo.Variants[i].Title			 = VariantProductInformation[i]->GetTitle();
+			ProductInfo.Variants[i].Id	  = VariantProductInformation[i]->GetId();
+			ProductInfo.Variants[i].Title = VariantProductInformation[i]->GetTitle();
 
 			if (VariantProductInformation[i]->HasAvailableForSale())
 			{
 				ProductInfo.Variants[i].AvailableForSale = VariantProductInformation[i]->GetAvailableForSale();
 			}
-            else
-            {
-	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing HasAvailableForSale");
-            }
+			else
+			{
+				CSP_LOG_ERROR_MSG("ShopifyProductDto missing HasAvailableForSale");
+			}
 
 			if (VariantProductInformation[i]->HasImage())
 			{
@@ -90,10 +90,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].Media.Height = VariantProductImage->GetHeight();
 				}
 			}
-            else
-            {
-	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing Image");
-            }
+			else
+			{
+				CSP_LOG_ERROR_MSG("ShopifyProductDto missing Image");
+			}
 
 			if (Dto.GetVariants()[i]->HasSelectedOptions())
 			{
@@ -107,10 +107,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
 				}
 			}
-            else
-            {
-	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing SelectedOptions");
-            }
+			else
+			{
+				CSP_LOG_ERROR_MSG("ShopifyProductDto missing SelectedOptions");
+			}
 
 			if (VariantProductInformation[i]->HasUnitPrice())
 			{
@@ -124,10 +124,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 					ProductInfo.Variants[i].UnitPrice.CurrencyCode = VariantProductInformation[i]->GetUnitPrice()->GetCurrencyCode();
 				}
 			}
-            else
-            {
-	            CSP_LOG_ERROR_MSG("ShopifyProductDto missing UnitPrice");
-            }
+			else
+			{
+				CSP_LOG_ERROR_MSG("ShopifyProductDto missing UnitPrice");
+			}
 		}
 	}
 	{
@@ -145,10 +145,10 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			ProductInfo.Tags[i] = TagsProductInformation[i];
 		}
 	}
-    else
-    {
-	    CSP_LOG_ERROR_MSG("ShopifyProductDto missing Tags");
-    }
+	else
+	{
+		CSP_LOG_ERROR_MSG("ShopifyProductDto missing Tags");
+	}
 
 	if (Dto.HasMedia())
 	{
@@ -186,6 +186,175 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 	}
 	{
 		CSP_LOG_ERROR_MSG("ShopifyProductDto missing Media");
+	}
+}
+
+void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregation::ShopifyProductDto>& DtoArray,
+												  csp::common::Array<ProductInfo>& ProductInfoCollection)
+{
+	ProductInfoCollection = common::Array<csp::systems::ProductInfo>(ProductInfoCollection.Size());
+	int TotalVariantIndex = 0; // Count the total number of variants included in the product Dto's
+	
+	for (int DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
+	{
+		const chs_aggregation::ShopifyProductDto& Dto = DtoArray[DtoCount];
+
+		if (Dto.HasVariants()) // if there are no variants, we don't process the dto (shouldn't happen)
+		{
+			for (int VariantCount = 0; VariantCount < Dto.GetVariants().size(); VariantCount++) // Loop each variant in the product dto and store the info into the indexed output array
+			{
+				auto VariantProductInformation = Dto.GetVariants()[VariantCount];
+
+				ProductInfoCollection[TotalVariantIndex].Id = Dto.GetId();
+				ProductInfoCollection[TotalVariantIndex].Title = Dto.GetTitle();
+
+				if (Dto.HasCreatedAt())
+				{
+					ProductInfoCollection[TotalVariantIndex].CreatedAt = Dto.GetCreatedAt();
+				}
+
+				if (Dto.HasDescription())
+				{
+					ProductInfoCollection[TotalVariantIndex].Description = Dto.GetDescription();
+				}
+
+				// The output should only contain productinfo with single variants in, so we hardcode the index and size of the array here
+				ProductInfoCollection[TotalVariantIndex].Variants = common::Array<ProductVariantInfo>(1); 
+				ProductInfoCollection[TotalVariantIndex].Variants[0].Id = VariantProductInformation->GetId();
+				ProductInfoCollection[TotalVariantIndex].Variants[0].Title = VariantProductInformation->GetTitle();
+
+				if (VariantProductInformation->HasImage())
+				{
+					auto VariantProductImage = VariantProductInformation->GetImage();
+
+					if (VariantProductImage->HasMediaContentType())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Media.MediaContentType = VariantProductImage->GetMediaContentType();
+					}
+
+					if (VariantProductImage->HasAlt())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Media.Alt = VariantProductImage->GetAlt();
+					}
+
+					if (VariantProductImage->HasUrl())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Media.Url = VariantProductImage->GetUrl();
+					}
+
+					if (VariantProductImage->HasWidth())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Media.Width = VariantProductImage->GetWidth();
+					}
+
+					if (VariantProductImage->HasHeight())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Media.Height = VariantProductImage->GetHeight();
+					}
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Image");
+				}
+
+				if (VariantProductInformation->HasSelectedOptions())
+				{
+					auto VariantOptionInformation = VariantProductInformation->GetSelectedOptions();
+
+					ProductInfoCollection[TotalVariantIndex].Variants[0].Options = common::Array<VariantOptionInfo>(VariantOptionInformation.size());
+
+					for (int n = 0; n < VariantOptionInformation.size(); ++n)
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
+					}
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing SelectedOptions");
+				}
+
+				if (VariantProductInformation->HasUnitPrice())
+				{
+					if (VariantProductInformation->GetUnitPrice()->HasAmount())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].UnitPrice.Amount
+							= VariantProductInformation->GetUnitPrice()->GetAmount();
+					}
+
+					if (VariantProductInformation->GetUnitPrice()->HasCurrencyCode())
+					{
+						ProductInfoCollection[TotalVariantIndex].Variants[0].UnitPrice.CurrencyCode
+							= VariantProductInformation->GetUnitPrice()->GetCurrencyCode();
+					}
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing UnitPrice");
+				}
+
+				if (Dto.HasTags())
+				{
+					auto TagsProductInformation = Dto.GetTags();
+
+					ProductInfoCollection[TotalVariantIndex].Tags = common::Array<common::String>(TagsProductInformation.size());
+
+					for (int j = 0; j < TagsProductInformation.size(); ++j)
+					{
+						ProductInfoCollection[TotalVariantIndex].Tags[j] = TagsProductInformation[j];
+					}
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Tags");
+				}
+
+				if (Dto.HasMedia())
+				{
+					auto MediaProductInformation = Dto.GetMedia();
+
+					ProductInfoCollection[TotalVariantIndex].Media = common::Array<ProductMediaInfo>(MediaProductInformation.size());
+
+					for (int j = 0; j < MediaProductInformation.size(); ++j)
+					{
+						if (MediaProductInformation[j]->HasAlt())
+						{
+							ProductInfoCollection[TotalVariantIndex].Media[j].Alt = MediaProductInformation[j]->GetAlt();
+						}
+
+						if (MediaProductInformation[j]->HasUrl())
+						{
+							ProductInfoCollection[TotalVariantIndex].Media[j].Url = MediaProductInformation[j]->GetUrl();
+						}
+
+						if (MediaProductInformation[j]->HasMediaContentType())
+						{
+							ProductInfoCollection[TotalVariantIndex].Media[j].MediaContentType = MediaProductInformation[j]->GetMediaContentType();
+						}
+
+						if (MediaProductInformation[j]->HasWidth())
+						{
+							ProductInfoCollection[TotalVariantIndex].Media[j].Width = MediaProductInformation[j]->GetWidth();
+						}
+
+						if (MediaProductInformation[j]->HasHeight())
+						{
+							ProductInfoCollection[TotalVariantIndex].Media[j].Height = MediaProductInformation[j]->GetHeight();
+						}
+					}
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Media");
+				}
+
+                TotalVariantIndex++;
+			}
+		}
+		else
+		{
+			CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Variants");
+		}
 	}
 }
 
@@ -450,12 +619,17 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
 
 		// Extract data from the response into our Products array
 		std::vector<chs_aggregation::ShopifyProductDto>& ProductsArray = ProductCollectionResponse->GetArray();
-		Products									  = csp::common::Array<csp::systems::ProductInfo>(ProductsArray.size());
 
-		for (size_t idx = 0; idx < ProductsArray.size(); ++idx)
+        // Loop through products to count the variants, we want 1 output product per variant
+		int VariantCount = 0;
+		for (int DtoCount = 0; DtoCount < ProductsArray.size(); DtoCount++)
 		{
-			ProductInfoDtoToProductInfo(ProductsArray[idx], Products[idx]);
+			VariantCount += ProductsArray[DtoCount].GetVariants().size();
 		}
+
+		Products = csp::common::Array<csp::systems::ProductInfo>(VariantCount);
+
+		ProductInfoDtoToProductInfoVariantCollection(ProductsArray, Products);
 	}
 }
 

@@ -269,7 +269,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
 			std::nullopt,							// Tags
 			std::nullopt,							// TagsAll
-			AssetCollectionIds,						// const std::optional<std::vector<utility::string_t>>& Ids
+			AssetCollectionIds,					// const std::optional<std::vector<utility::string_t>>& Ids
 			std::nullopt,							// Names
 			std::nullopt,							// PartialNames
 			std::nullopt,							// ExcludedIds
@@ -286,7 +286,8 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
-			CopyAsync,								// asyncCall
+			CopyAsync,							// asyncCall
+            std::nullopt,                           // onBehalfOf
 			ResponseHandler,						// ResponseHandler
 			csp::common::CancellationToken::Dummy() // CancellationToken
 		);

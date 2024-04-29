@@ -72,18 +72,33 @@ void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceI
 
 void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceId,
 											   const csp::common::String& EventId,
-											   EventTicketingVendor Vendor,
-											   const csp::common::String& VendorEventId,
-											   const csp::common::String& VendorEventUri,
-											   bool IsTicketingActive,
+											   const csp::common::Optional<EventTicketingVendor>& Vendor,
+											   const csp::common::Optional<csp::common::String>& VendorEventId,
+											   const csp::common::Optional<csp::common::String>& VendorEventUri,
+											   const csp::common::Optional<bool>& IsTicketingActive,
 											   TicketedEventResultCallback Callback)
 {
 	auto Request = std::make_shared<chs::SpaceEventDto>();
 
-	Request->SetVendorName(GetVendorNameString(Vendor));
-	Request->SetVendorEventId(VendorEventId);
-	Request->SetVendorEventUri(VendorEventUri);
-	Request->SetIsTicketingActive(IsTicketingActive);
+	if (Vendor.HasValue())
+	{
+		Request->SetVendorName(GetVendorNameString(*Vendor));
+	}
+
+	if (VendorEventId.HasValue())
+	{
+		Request->SetVendorEventId(*VendorEventId);
+	}
+
+	if (VendorEventUri.HasValue())
+	{
+		Request->SetVendorEventUri(*VendorEventUri);
+	}
+
+	if (IsTicketingActive.HasValue())
+	{
+		Request->SetIsTicketingActive(*IsTicketingActive);
+	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= EventTicketingAPI->CreateHandler<TicketedEventResultCallback, TicketedEventResult, void, chs::SpaceEventDto>(
@@ -117,14 +132,14 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
 	const auto RequestLimit = Limit.HasValue() ? *Limit : std::optional<int>(std::nullopt);
 
 	static_cast<chs::TicketedSpaceApi*>(EventTicketingAPI)
-		->apiV1SpacesEventsGet(std::nullopt,    //VendorEventIds
-                               std::nullopt,    //VendorName
-                               RequestSpaceIds, //SpaceIds
-							   std::nullopt,    //UserIds
-							   std::nullopt,	//IsTicketingActive
-                               RequestSkip,     //Skip
-                               RequestLimit,    //Limit
-                               ResponseHandler);
+		->apiV1SpacesEventsGet(std::nullopt,	// VendorEventIds
+							   std::nullopt,	// VendorName
+							   RequestSpaceIds, // SpaceIds
+							   std::nullopt,	// UserIds
+							   std::nullopt,	// IsTicketingActive
+							   RequestSkip,		// Skip
+							   RequestLimit,	// Limit
+							   ResponseHandler);
 }
 
 void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,

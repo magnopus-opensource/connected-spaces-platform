@@ -67,17 +67,17 @@ public:
 	///
 	/// @param SpaceId csp::common::String : ID of the space the event belongs to.
 	/// @param EventId csp::common::String : ID of the Event to update.
-	/// @param Vendor csp::systems::EventTicketingVendor : Enum representing the vendor that the event is created with.
-	/// @param VendorEventId csp::common::String : Specifies the event ID in the vendors system.
-	/// @param VendorEventUri csp::common::String : Specifies the URI for the event in the vendors system.
-	/// @param IsTicketingActive bool : Specifies whether ticketing is currently active for this event.
+	/// @param Vendor csp::systems::EventTicketingVendor : Optional enum representing the vendor that the event should be updated with.
+	/// @param VendorEventId csp::common::String : Optional value to update the event ID in the vendors system with.
+	/// @param VendorEventUri csp::common::String : Optional value to update the URI for the event in the vendors system with.
+	/// @param IsTicketingActive bool : Optional value to update whether ticketing is currently active for this event.
 	/// @param Callback TicketedEventResultCallback : Callback providing the TicketedEvent once created.
 	CSP_ASYNC_RESULT void UpdateTicketedEvent(const csp::common::String& SpaceId,
 											  const csp::common::String& EventId,
-											  EventTicketingVendor Vendor,
-											  const csp::common::String& VendorEventId,
-											  const csp::common::String& VendorEventUri,
-											  bool IsTicketingActive,
+											  const csp::common::Optional<EventTicketingVendor>& Vendor,
+											  const csp::common::Optional<csp::common::String>& VendorEventId,
+											  const csp::common::Optional<csp::common::String>& VendorEventUri,
+											  const csp::common::Optional<bool>& IsTicketingActive,
 											  TicketedEventResultCallback Callback);
 
 	/// @brief Creates a ticketed event for the given space.
