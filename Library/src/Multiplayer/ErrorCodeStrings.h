@@ -20,7 +20,7 @@
 
 namespace csp::multiplayer
 {
-    static std::string ToString(csp::multiplayer::ErrorCode ErrorCode)
+    static inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
     {
         std::string ErrorCodeString;
         switch(ErrorCode)
