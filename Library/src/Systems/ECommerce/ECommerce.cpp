@@ -484,6 +484,61 @@ void ShopifyStoreDtoToShopifyStoreInfo(const chs_aggregation::ShopifyStorefrontD
 	}
 }
 
+void ShopifyStoreDtoArrayToShopifyStoreInfoArray(const std::vector<chs_aggregation::ShopifyStorefrontDto>& StoreDtos,
+												 csp::common::Array<csp::systems::ShopifyStoreInfo>& Stores)
+{
+	for (int i = 0; i < StoreDtos.size(); i++)
+	{
+		const chs_aggregation::ShopifyStorefrontDto& StoreDto = StoreDtos[i];
+		csp::systems::ShopifyStoreInfo& Store = Stores[i];
+
+		if (StoreDto.HasId())
+		{
+			Store.StoreId = StoreDto.GetId();
+		}
+		else
+		{
+			CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreId");
+		}
+
+		if (StoreDto.HasStoreName())
+		{
+			Store.StoreName = StoreDto.GetStoreName();
+		}
+		else
+		{
+			CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing StoreName");
+		}
+
+		if (StoreDto.HasSpaceOwnerId())
+		{
+			Store.SpaceOwnerId = StoreDto.GetSpaceOwnerId();
+		}
+		else
+		{
+			CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceOwnerId");
+		}
+
+		if (StoreDto.HasSpaceId())
+		{
+			Store.SpaceId = StoreDto.GetSpaceId();
+		}
+		else
+		{
+			CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing SpaceId");
+		}
+
+		if (StoreDto.HasIsEcommerceActive())
+		{
+			Store.IsEcommerceActive = StoreDto.GetIsEcommerceActive();
+		}
+		else
+		{
+			CSP_LOG_ERROR_MSG("ShopifyStorefrontDto missing IsEcommerceActive");
+		}
+	}
+}
+
 const ProductInfo& ProductInfoResult::GetProductInfo() const
 {
 	return ProductInformation;
@@ -633,4 +688,34 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
 	}
 }
 
+const csp::common::Array<ShopifyStoreInfo>& GetShopifyStoresResult::GetShopifyStores() const
+{
+	return Stores;
+}
+
+csp::common::Array<ShopifyStoreInfo>& GetShopifyStoresResult::GetShopifyStores()
+{
+	return Stores;
+}
+
+void GetShopifyStoresResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	auto* ShopifyStoresResponse			   = static_cast<csp::services::DtoArray<chs_aggregation::ShopifyStorefrontDto>*>(ApiResponse->GetDto());
+	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		// Build the Dto from the response Json
+		ShopifyStoresResponse->FromJson(Response->GetPayload().GetContent());
+
+		// Extract data from the response into our Stores array
+		std::vector<chs_aggregation::ShopifyStorefrontDto>& StoresArray = ShopifyStoresResponse->GetArray();
+
+        Stores = csp::common::Array<csp::systems::ShopifyStoreInfo>(StoresArray.size());
+
+        ShopifyStoreDtoArrayToShopifyStoreInfoArray(StoresArray, Stores);
+	}
+}
 } // namespace csp::systems

@@ -342,6 +342,31 @@ private:
 	ShopifyStoreInfo Store;
 };
 
+class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+    /// @brief Retrieves the ShopifyStoreInfo Array being stored.
+	/// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
+	const csp::common::Array<ShopifyStoreInfo>& GetShopifyStores() const;
+
+	/// @brief Retrieves the ShopifyStoreInfo Array being stored.
+	/// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
+	csp::common::Array<ShopifyStoreInfo>& GetShopifyStores();
+
+private:
+	GetShopifyStoresResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::Array<ShopifyStoreInfo> Stores;
+};
+
 class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
@@ -372,5 +397,8 @@ typedef std::function<void(const AddShopifyStoreResult& Result)> AddShopifyStore
 typedef std::function<void(const AddShopifyStoreResult& Result)> SetECommerceActiveResultCallback;
 
 typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
+
+typedef std::function<void(const GetShopifyStoresResult& Result)> GetShopifyStoresResultCallback;
+
 
 } // namespace csp::systems
