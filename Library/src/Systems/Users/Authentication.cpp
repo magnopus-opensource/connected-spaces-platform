@@ -26,6 +26,8 @@
 #include "Services/UserService/Dto.h"
 #include "Systems/Users/Authentication.h"
 
+#include "Common/Convert.h"
+
 
 using namespace csp;
 using namespace csp::common;
@@ -117,6 +119,7 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 			State->RefreshToken = AuthResponse->GetRefreshToken();
 			State->UserId		= AuthResponse->GetUserId();
 			State->DeviceId		= AuthResponse->GetDeviceId();
+            State->OrganizationIds = csp::common::Convert(AuthResponse->GetOrganizationIds());
 
 			const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
 			const DateTime CurrentTime(DateTime::UtcTimeNow());

@@ -24,6 +24,21 @@ extern csp::common::String DefaultLoginEmail;
 extern csp::common::String DefaultLoginPassword;
 extern csp::common::String AlternativeLoginEmail;
 extern csp::common::String AlternativeLoginPassword;
+// Organizations non-member
+extern csp::common::String AltUser1NonMemberEmail;
+extern csp::common::String AltUser1NonMemberPassword;
+extern csp::common::String AltUser2NonMemberEmail;
+extern csp::common::String AltUser2NonMemberPassword;
+// Organizations member
+extern csp::common::String AltUser1MemberEmail;
+extern csp::common::String AltUser1MemberPassword;
+extern csp::common::String AltUser2MemberEmail;
+extern csp::common::String AltUser2MemberPassword;
+// Organizations admin
+extern csp::common::String AltUser1AdminEmail;
+extern csp::common::String AltUser1AdminPassword;
+extern csp::common::String AltUser2AdminEmail;
+extern csp::common::String AltUser2AdminPassword;
 
 const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[]	 = "3R{d2}3C<x[J7=jU";
