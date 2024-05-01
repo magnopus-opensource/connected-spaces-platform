@@ -61,7 +61,7 @@ void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::s
 void OrganizationRoleDtoToOrganizationRole(const chs_users::OrganizationMember& Dto, csp::systems::OrganizationRoleInfo& OrganizationRoleInfo)
 {
 	OrganizationRoleInfo.UserId = Dto.GetUserId();
-    auto& UserOrgRoles = csp::common::Convert(Dto.GetRoles());
+    auto UserOrgRoles = csp::common::Convert(Dto.GetRoles());
     OrganizationRoleInfo.OrganizationRoles = csp::common::Array<systems::EOrganizationRole>(UserOrgRoles.Size());
 
 	for (int i = 0; i < UserOrgRoles.Size(); ++i)
