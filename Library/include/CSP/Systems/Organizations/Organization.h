@@ -84,7 +84,6 @@ class CSP_API Organization
 {
 public:
 	Organization() = default;
-	// Organization() : Id(""), OwnerId(""), CreatedAt(""), CreatedBy(""), Name(""), Description("") {};
 	Organization(const Organization& Other) = default;
 
 	csp::common::String Id;
@@ -94,7 +93,6 @@ public:
 	csp::common::String Name;
 	csp::common::String Description;
 	csp::common::Array<OrganizationRoleInfo> Members;
-	// TierNames QuotaTier;
 	int32_t SpaceCount;
 };
 
@@ -132,16 +130,22 @@ class CSP_API OrganizationRolesResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
+	CSP_NO_EXPORT OrganizationRolesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 	/// @brief Retrieves the Organization Role Info result.
 	/// @return const common::Array<OrganizationRoleInfo>& : Array of Organization Role Info objects.
 	const csp::common::Array<OrganizationRoleInfo>& GetOrganizationRoleInfo() const;
+
+protected:
+    CSP_NO_EXPORT OrganizationRolesResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 private:
 	OrganizationRolesResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-    csp::common::Array<OrganizationRoleInfo> OrganizationRoleInfo;
+    csp::common::Array<OrganizationRoleInfo> OrganizationRoleInfos;
 };
 
 /// @brief Callback Organization Result object.

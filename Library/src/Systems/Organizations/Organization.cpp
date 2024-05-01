@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/Organizations/Organization.h"
 
+#include "Common/Convert.h"
 #include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Api.h"
@@ -28,6 +29,26 @@ namespace chs_users = csp::services::generated::userservice;
 namespace
 {
 
+systems::EOrganizationRole OrganizationRoleStringToEnum(String Role)
+{
+	if (Role == "member")
+	{
+		return systems::EOrganizationRole::Member;
+	}
+    else if (Role == "admin")
+    {
+    	return systems::EOrganizationRole::Administrator;
+    }
+	else if (Role == "owner")
+	{
+		return systems::EOrganizationRole::Owner;
+	}
+	else
+	{
+		throw std::invalid_argument("Unimplemented role");
+	}
+}
+
 // todo: Complete implementation once CHS have finished implementing the Organization endpoints to the User Service.
 void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::systems::Organization& Organization)
 {
@@ -35,6 +56,18 @@ void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::s
 	Organization.Id		 = Dto.GetId();
 	Organization.Name	 = Dto.GetName();
 	Organization.OwnerId = Dto.GetOrganizationOwnerId();
+}
+
+void OrganizationRoleDtoToOrganizationRole(const chs_users::OrganizationMember& Dto, csp::systems::OrganizationRoleInfo& OrganizationRoleInfo)
+{
+	OrganizationRoleInfo.UserId = Dto.GetUserId();
+    auto& UserOrgRoles = csp::common::Convert(Dto.GetRoles());
+    OrganizationRoleInfo.OrganizationRoles = csp::common::Array<systems::EOrganizationRole>(UserOrgRoles.Size());
+
+	for (int i = 0; i < UserOrgRoles.Size(); ++i)
+	{
+		OrganizationRoleInfo.OrganizationRoles[i] = OrganizationRoleStringToEnum(UserOrgRoles[i]);
+	}
 }
 
 // todo: Implement once CHS have finished implementing the Organization endpoints to the User Service.
@@ -54,7 +87,7 @@ const Organization& OrganizationResult::GetOrganization() const
 
 const csp::common::Array<OrganizationRoleInfo>& OrganizationRolesResult::GetOrganizationRoleInfo() const
 {
-	return OrganizationRoleInfo;
+	return OrganizationRoleInfos;
 }
 
 void OrganizationResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
@@ -76,15 +109,20 @@ void OrganizationRolesResult::OnResponse(const csp::services::ApiResponseBase* A
 {
 	ResultBase::OnResponse(ApiResponse);
 
-	// todo: CHS will be adding another Dto for this - OrganizationInviteDto.
-	auto* OrganizationResponse			   = static_cast<chs_users::OrganizationDto*>(ApiResponse->GetDto());
+    auto* OrganizationResponse				   = static_cast<csp::services::DtoArray<chs_users::OrganizationMember>*>(ApiResponse->GetDto());
 	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
 		// Build the Dto from the response Json
 		OrganizationResponse->FromJson(Response->GetPayload().GetContent());
-		// OrganizationDtoToOrganization(*OrganizationResponse, Organization);
+        auto& RoleInfoArray = OrganizationResponse->GetArray();
+        OrganizationRoleInfos = csp::common::Array<OrganizationRoleInfo>(RoleInfoArray.size());
+
+		for (int i = 0; i < RoleInfoArray.size(); ++i)
+		{
+			OrganizationRoleDtoToOrganizationRole(RoleInfoArray[i], OrganizationRoleInfos[i]);
+		}
 	}
 }
 

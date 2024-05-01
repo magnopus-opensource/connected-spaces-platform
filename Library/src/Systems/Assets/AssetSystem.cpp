@@ -286,7 +286,8 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
-			CopyAsync,								// asyncCall
+			CopyAsync,							// asyncCall
+            std::nullopt,                        // onBehalfOf
 			ResponseHandler,						// ResponseHandler
 			csp::common::CancellationToken::Dummy() // CancellationToken
 		);

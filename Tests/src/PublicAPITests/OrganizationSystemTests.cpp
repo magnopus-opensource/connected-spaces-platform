@@ -25,6 +25,7 @@
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
+#include "Debug/Logging.h"
 
 #include "gtest/gtest.h"
 #include <algorithm>
@@ -46,16 +47,13 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 } // namespace
 
 
-
 void GetUsersRoles(::OrganizationSystem* OrganizationSystem, const csp::common::Array<csp::common::String>& UserIds, csp::common::Array<OrganizationRoleInfo>& OutOrganizationRoleInfo)
 {
 	auto [Result] = AWAIT_PRE(OrganizationSystem, GetUserRolesInOrganization, RequestPredicate, UserIds);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	const auto& OrganizationRoleInfo = Result.GetOrganizationRoleInfo();
-
-	OutOrganizationRoleInfo = OrganizationRoleInfo;
+	OutOrganizationRoleInfo = Result.GetOrganizationRoleInfo();
 }
 
 InviteOrganizationRoleCollection CreateOrganizationInvites()
@@ -76,15 +74,6 @@ InviteOrganizationRoleCollection CreateOrganizationInvites()
 	return OrganizationInvites;
 }
 
-/*
- *Test:
- *Invite user and confirm roles correct
- *Invite user without Member role and confirm they end up with the role
- *Invite user with only member role and confirm that this fails.
- *Bulk invite users and confirm roles correct
- *Bulk invite users without Member role and confirm they end up with the role
-*/
-
 #if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_INVITE_TO_ORGANIZATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 {
@@ -94,14 +83,12 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
 
-	// Get alt account user ID
-	// Todo: Will need to add use test credentials of new user without a role
-	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	// Get User Id of non-member user
+	String AltUser1NonMemberId;
+	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
 	LogOut(UserSystem);
 
-	// Log in
-	// Todo: Will need to add new test credentials
+	// Log in - default user needs to be an admin member of the organization
 	String DefaultUserId;
 	LogIn(UserSystem, DefaultUserId);
 
@@ -109,20 +96,22 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	csp::common::String EmailLinkUrl		= "https://dev.magnoverse.space";
 	csp::common::String SignupUrl			= "https://dev.magnoverse.space";
 
-	// Invite alt User to the Organization
-	// Todo: Will need to use new Org test credentials with Owner or Admin(?) role.
-	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AlternativeLoginEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+	// Invite non-member user to the Organization
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Confirm that alt user has correct roles in Organization
-	// Todo: Will need to use new Org test credentials
-	::csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
-	GetUsersRoles(OrganizationSystem, {AltUserId}, UserOrganizationRoleInfo);
+	// Confirm that non-member user now has the correct roles in Organization
+	csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
+	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
 
 	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 1);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 2);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[0], EOrganizationRole::Member);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[1], EOrganizationRole::Administrator);
+
+	// remove user from organization
+	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -138,37 +127,36 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
 
-	// Get alt account user ID
-	// Todo: Will need to add new test credentials
-	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	// Get User Id of non-member user
+	String AltUser1NonMemberId;
+	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
 	LogOut(UserSystem);
 
-	// Log in
-	// Todo: Will need to add use test credentials of new user without a role
+	// Log in - default user needs to be an admin member of the organization
 	String DefaultUserId;
 	LogIn(UserSystem, DefaultUserId);
 
-	// Member role has been omitted. All users must have member role so it will be automatically added.
+	// Member role has intentionally been omitted. All users must have member role and so CSP it will automatically add it
 	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Administrator};
 	csp::common::String EmailLinkUrl = "https://dev.magnoverse.space";
 	csp::common::String SignupUrl = "https://dev.magnoverse.space";
 
-	// Invite alt User to the Organization
-	// Todo: Will need to use new Org test credentials with Owner or Admin(?) role.
-	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AlternativeLoginEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+	// Invite non-member user to the Organization
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Confirm that alt user has correct roles in Organization
-	// Todo: Will need to use new Org test credentials
+	// Confirm that non-member user now has the correct roles in Organization, including member role
 	::csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
-	GetUsersRoles(OrganizationSystem, {AltUserId}, UserOrganizationRoleInfo);
+	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
 
 	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 1);
-	// Confirm that they have the Member role even though it was not specified.
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 2);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[0], EOrganizationRole::Member);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[1], EOrganizationRole::Administrator);
+
+	// remove user from organization
+	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -184,25 +172,17 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutP
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
 
-	// Get alt account user ID
-	// Todo: Will need to add use test credentials of new user without a role
-	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
-	LogOut(UserSystem);
+	// Log in as user with only a member role in the Organization
+	String MemberOnlyUser1Id;
+	LogIn(UserSystem, MemberOnlyUser1Id, AltUser1MemberEmail, AltUser1MemberPassword);
 
-	// Log in
-	// Todo: Will need to use test credentials of user who only has member role
-	String MemberOnlyUserId;
-	LogIn(UserSystem, MemberOnlyUserId);
-
-	// User who only has member role is trying to invite a user with Administrator role. This is not allowed.
+	// Define organization roles for the new user.
 	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Member, EOrganizationRole::Administrator};
 	csp::common::String EmailLinkUrl = "https://dev.magnoverse.space";
 	csp::common::String SignupUrl = "https://dev.magnoverse.space";
 
-	// A user with only the member role should not be able to invite other users with elevated permissions to the Organization.
-	// Todo: Will need to use new Org test credentials with Owner or Admin(?) role.
-	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AlternativeLoginEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	// A user with only the member role should not be able to invite other users to the Organization.
+	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// Log out
@@ -210,8 +190,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutP
 }
 #endif
 
-//#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_BULK_INVITE_TO_ORGANIZATION_TEST
-#if 1
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_BULK_INVITE_TO_ORGANIZATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest)
 {
 	SetRandSeed();
@@ -220,30 +199,27 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
 
-	// Log in
-	// Todo: Will need to add new test credentials
+	// Get User Id of non-member user 1
+	String AltUser1NonMemberId;
+	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
+	LogOut(UserSystem);
+
+	// Get User Id of non-member user 2
+	String AltUser2NonMemberId;
+	LogIn(UserSystem, AltUser2NonMemberId, AltUser2NonMemberEmail, AltUser2NonMemberPassword);
+	LogOut(UserSystem);
+
+	// Log in - default user needs to be an admin member of the organization
 	String DefaultUserId;
 	LogIn(UserSystem, DefaultUserId);
 
 	auto OrganizationInvites = CreateOrganizationInvites();
 
-	// Invite alt User to the Organization
-	// Todo: Will need to use new Org test credentials with Owner or Admin(?) role.
+	// Invite non-member users to the Organization
 	auto [Result] = AWAIT_PRE(OrganizationSystem, BulkInviteToOrganization, RequestPredicate, OrganizationInvites);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Get alt account user ID
-	// Todo: Will need to add new test credentials
-	String AltUser1NonMemberId;
-	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
-	LogOut(UserSystem);
-
-	String AltUser2NonMemberId;
-	LogIn(UserSystem, AltUser2NonMemberId, AltUser2NonMemberEmail, AltUser2NonMemberPassword);
-	LogOut(UserSystem);
-
-	// Confirm that alt user has correct roles in Organization
-	// Todo: Will need to use new Org test credentials
+	// Confirm that non-member users now have the correct roles in Organization
 	::csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
 	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId, AltUser2NonMemberId}, UserOrganizationRoleInfo);
 
@@ -252,6 +228,14 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[0], EOrganizationRole::Member);
 	EXPECT_EQ(UserOrganizationRoleInfo[1].OrganizationRoles.Size(), 1);
 	EXPECT_EQ(UserOrganizationRoleInfo[1].OrganizationRoles[0], EOrganizationRole::Member);
+
+	// remove user1 from organization
+	auto [RemoveUser1Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	EXPECT_EQ(RemoveUser1Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// remove user2 from organization
+	auto [RemoveUser2Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser2NonMemberId);
+	EXPECT_EQ(RemoveUser2Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);

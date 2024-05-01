@@ -43,20 +43,15 @@ public:
 	~OrganizationSystem();
 
 	
-
 	/// @brief Callback that will be fired when a new member joins an Organization.
 	/// Event will be received by member who joined Organization and the Organization Admin/Owner.
 	/// @param csp::Common::String : Id of the new member.
 	typedef std::function<void(csp::common::String)> MemberJoinedOrganizationCallback;
-
-	
-
+    
 	/// @brief Sets a callback to be executed when a member joins an Organization.
 	/// Only one callback may be registered, calling this function again will override whatever was previously set.
 	/// @param Callback MemberJoinedOrganizationCallback : the callback to execute.
 	CSP_EVENT void SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback);
-
-	
 
 	/// @brief Invites a given email to the User's Organization.
 	/// Only a User with an Admin or Owner Organization role can invite people to the organization. If the User does not have the required role their
@@ -88,23 +83,21 @@ public:
 	/// @param Callback OrganizationRolesResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void GetUserRolesInOrganization(const csp::common::Array<csp::common::String>& UserIds,
 													 OrganizationRolesResultCallback Callback);
-	
+
+    /// @brief Removes a User from the Organization.
+	/// Only a User with an Admin or Owner Organization role can remove other Users from the Organization. If the user does not have the required role
+	/// their call will be rejected. Anyone can remove themselves from an Organization.
+	/// @param UserId csp::common::String : Unique ID of User.
+	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void RemoveUserFromOrganization(const csp::common::String& UserId, NullResultCallback Callback);
 
 
 private:
 	OrganizationSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	CSP_NO_EXPORT OrganizationSystem(csp::web::WebClient* InWebClient);
 
-	//bool HasRole(EOrganizationRole RequiredRole);
-
-	// todo: Currently a MultiplayerConnection is tied to a Space but this is being refactored.
-	csp::multiplayer::SignalRConnection* Connection;
-
 	MemberJoinedOrganizationCallback InternalMemberJoinedOrganizationCallback;
 
 	csp::services::ApiBase* OrganizationApi;
-	//Organization CurrentOrganization;
-	//csp::common::String CurrentOrganizationId;
-	csp::common::Array<EOrganizationRole> CurrentOrganizationRoles;
 };
 } // namespace csp::systems
