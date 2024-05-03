@@ -129,27 +129,37 @@ OrganizationSystem::~OrganizationSystem()
 	CSP_DELETE(OrganizationApi);
 }
 
-void OrganizationSystem::InviteToOrganization(const csp::common::String& Email,
+void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+											  const csp::common::String& Email,
 											  const csp::common::Array<EOrganizationRole>& OrganizationRoles,
 											  const csp::common::Optional<csp::common::String>& EmailLinkUrl,
 											  const csp::common::Optional<csp::common::String>& SignupUrl,
 											  NullResultCallback Callback)
 {
-	const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+	csp::common::String SelectedOrganizationId;
 
-	if (CurrentOrganizationIds.Size() == 0)
+	if (OrganizationId.HasValue())
 	{
-		CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
-
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
-		return;
+		SelectedOrganizationId = *OrganizationId;
 	}
+	else
+	{
+		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
 
-	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-	const csp::common::String CurrentOrganizationId = CurrentOrganizationIds[0];
+		if (CurrentOrganizationIds.Size() == 0)
+		{
+			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+			return;
+		}
+
+		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
+		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
+		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
+		SelectedOrganizationId = CurrentOrganizationIds[0];
+	}
 
 	auto OrganizationInviteInfo = std::make_shared<chs::OrganizationInviteDto>();
 	OrganizationInviteInfo->SetEmail(Email);
@@ -184,7 +194,7 @@ void OrganizationSystem::InviteToOrganization(const csp::common::String& Email,
 																									   csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::OrganizationApi*>(OrganizationApi)
-		->apiV1OrganizationsOrganizationIdMembershipInvitesPost(CurrentOrganizationId,
+		->apiV1OrganizationsOrganizationIdMembershipInvitesPost(SelectedOrganizationId,
 																std::nullopt,
 																EmailLinkUrlParam,
 																SignupUrlParam,
@@ -192,23 +202,34 @@ void OrganizationSystem::InviteToOrganization(const csp::common::String& Email,
 																ResponseHandler);
 }
 
-void OrganizationSystem::BulkInviteToOrganization(const InviteOrganizationRoleCollection& InviteUsers, NullResultCallback Callback)
+void OrganizationSystem::BulkInviteToOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+												  const InviteOrganizationRoleCollection& InviteUsers,
+												  NullResultCallback Callback)
 {
-	const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+	csp::common::String SelectedOrganizationId;
 
-	if (CurrentOrganizationIds.Size() == 0)
+	if (OrganizationId.HasValue())
 	{
-		CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
-
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
-		return;
+		SelectedOrganizationId = *OrganizationId;
 	}
+	else
+	{
+		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
 
-	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-	const csp::common::String CurrentOrganizationId = CurrentOrganizationIds[0];
+		if (CurrentOrganizationIds.Size() == 0)
+		{
+			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+			return;
+		}
+
+		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
+		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
+		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
+		SelectedOrganizationId = CurrentOrganizationIds[0];
+	}
 
 	const std::vector<std::shared_ptr<chs::OrganizationInviteDto>> OrganizationInvites = GenerateOrganizationInvites(InviteUsers.InvitedUserRoles);
 
@@ -221,7 +242,7 @@ void OrganizationSystem::BulkInviteToOrganization(const InviteOrganizationRoleCo
 																									   csp::web::EResponseCodes::ResponseNoContent);
 
 	static_cast<chs::OrganizationApi*>(OrganizationApi)
-		->apiV1OrganizationsOrganizationIdMembershipInvitesBulkPost(CurrentOrganizationId,
+		->apiV1OrganizationsOrganizationIdMembershipInvitesBulkPost(SelectedOrganizationId,
 																	std::nullopt,
 																	EmailLinkUrlParam,
 																	SignupUrlParam,
@@ -229,23 +250,34 @@ void OrganizationSystem::BulkInviteToOrganization(const InviteOrganizationRoleCo
 																	ResponseHandler);
 }
 
-void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Array<csp::common::String>& UserIds, OrganizationRolesResultCallback Callback)
+void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+													const csp::common::Array<csp::common::String>& UserIds,
+													OrganizationRolesResultCallback Callback)
 {
-	const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+	csp::common::String SelectedOrganizationId;
 
-	if (CurrentOrganizationIds.Size() == 0)
+	if (OrganizationId.HasValue())
 	{
-		CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
-
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationRolesResult>());
-
-		return;
+		SelectedOrganizationId = *OrganizationId;
 	}
+	else
+	{
+		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
 
-	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-	const csp::common::String CurrentOrganizationId = CurrentOrganizationIds[0];
+		if (CurrentOrganizationIds.Size() == 0)
+		{
+			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationRolesResult>());
+
+			return;
+		}
+
+		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
+		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
+		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
+		SelectedOrganizationId = CurrentOrganizationIds[0];
+	}
 
 	std::vector<String> InternalUserIds;
 	InternalUserIds.reserve(UserIds.Size());
@@ -262,32 +294,43 @@ void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Array<csp
 				  nullptr);
 
 	static_cast<chs::OrganizationApi*>(OrganizationApi)
-		->apiV1OrganizationsOrganizationIdRolesGet(CurrentOrganizationId, InternalUserIds, ResponseHandler);
+		->apiV1OrganizationsOrganizationIdRolesGet(SelectedOrganizationId, InternalUserIds, ResponseHandler);
 }
 
-void OrganizationSystem::RemoveUserFromOrganization(const csp::common::String& UserId, NullResultCallback Callback)
+void OrganizationSystem::RemoveUserFromOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+													const csp::common::String& UserId,
+													NullResultCallback Callback)
 {
-	const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+	csp::common::String SelectedOrganizationId;
 
-	if (CurrentOrganizationIds.Size() == 0)
+	if (OrganizationId.HasValue())
 	{
-		CSP_LOG_ERROR_MSG("OrganizationSystem::RemoveUserFromOrganization failed: You do not belong to an Organization.");
-
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
-		return;
+		SelectedOrganizationId = *OrganizationId;
 	}
+	else
+	{
+		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
 
-	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-	const csp::common::String CurrentOrganizationId = CurrentOrganizationIds[0];
+		if (CurrentOrganizationIds.Size() == 0)
+		{
+			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+			return;
+		}
+
+		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
+		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
+		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
+		SelectedOrganizationId = CurrentOrganizationIds[0];
+	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= OrganizationApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback, nullptr);
 
 	static_cast<chs::OrganizationApi*>(OrganizationApi)
-		->apiV1OrganizationsOrganizationIdUsersUserIdDelete(CurrentOrganizationId, UserId, ResponseHandler);
+		->apiV1OrganizationsOrganizationIdUsersUserIdDelete(SelectedOrganizationId, UserId, ResponseHandler);
 }
 
 void OrganizationSystem::SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback)

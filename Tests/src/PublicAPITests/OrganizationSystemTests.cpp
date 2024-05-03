@@ -47,9 +47,9 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 } // namespace
 
 
-void GetUsersRoles(::OrganizationSystem* OrganizationSystem, const csp::common::Array<csp::common::String>& UserIds, csp::common::Array<OrganizationRoleInfo>& OutOrganizationRoleInfo)
+void GetUsersRoles(::OrganizationSystem* OrganizationSystem, const csp::common::Optional<csp::common::String>& OrganizationId, const csp::common::Array<csp::common::String>& UserIds, csp::common::Array<OrganizationRoleInfo>& OutOrganizationRoleInfo)
 {
-	auto [Result] = AWAIT_PRE(OrganizationSystem, GetUserRolesInOrganization, RequestPredicate, UserIds);
+	auto [Result] = AWAIT_PRE(OrganizationSystem, GetUserRolesInOrganization, RequestPredicate, OrganizationId, UserIds);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -97,12 +97,12 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	csp::common::String SignupUrl			= "https://dev.magnoverse.space";
 
 	// Invite non-member user to the Organization
-	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, nullptr, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
 	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Confirm that non-member user now has the correct roles in Organization
 	csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
-	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
+	GetUsersRoles(OrganizationSystem, nullptr, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
 
 	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 1);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 2);
@@ -110,7 +110,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[1], EOrganizationRole::Administrator);
 
 	// remove user from organization
-	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, nullptr, AltUser1NonMemberId);
 	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -118,7 +118,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_INVITE_TO_ORGANIZATION_WITHOUR_MEMBER_ROLE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_INVITE_TO_ORGANIZATION_WITHOUT_MEMBER_ROLE_TEST
 CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutMemberRoleTest)
 {
 	SetRandSeed();
@@ -142,12 +142,12 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	csp::common::String SignupUrl = "https://dev.magnoverse.space";
 
 	// Invite non-member user to the Organization
-	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, nullptr, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
 	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Confirm that non-member user now has the correct roles in Organization, including member role
 	::csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
-	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
+	GetUsersRoles(OrganizationSystem, nullptr, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
 
 	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 1);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 2);
@@ -155,7 +155,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[1], EOrganizationRole::Administrator);
 
 	// remove user from organization
-	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, nullptr, AltUser1NonMemberId);
 	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
@@ -182,8 +182,54 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutP
 	csp::common::String SignupUrl = "https://dev.magnoverse.space";
 
 	// A user with only the member role should not be able to invite other users to the Organization.
-	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, nullptr, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_INVITE_TO_SPECIFIED_ORGANIZATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToSpecifiedOrganizationTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	const char* Oko_Tests_OrganizationId = "661ea67b07a518c46909dc97";
+
+	// Get User Id of non-member user
+	String AltUser1NonMemberId;
+	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
+	LogOut(UserSystem);
+
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
+
+	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Member, EOrganizationRole::Administrator};
+	csp::common::String EmailLinkUrl		= "https://dev.magnoverse.space";
+	csp::common::String SignupUrl			= "https://dev.magnoverse.space";
+
+	// Invite non-member user to the Organization
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, Oko_Tests_OrganizationId, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Confirm that non-member user now has the correct roles in Organization
+	csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
+	GetUsersRoles(OrganizationSystem, Oko_Tests_OrganizationId, {AltUser1NonMemberId}, UserOrganizationRoleInfo);
+
+	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 1);
+	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 2);
+	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[0], EOrganizationRole::Member);
+	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles[1], EOrganizationRole::Administrator);
+
+	// remove user from organization
+	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, Oko_Tests_OrganizationId, AltUser1NonMemberId);
+	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
 	LogOut(UserSystem);
@@ -216,12 +262,12 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	auto OrganizationInvites = CreateOrganizationInvites();
 
 	// Invite non-member users to the Organization
-	auto [Result] = AWAIT_PRE(OrganizationSystem, BulkInviteToOrganization, RequestPredicate, OrganizationInvites);
+	auto [Result] = AWAIT_PRE(OrganizationSystem, BulkInviteToOrganization, RequestPredicate, nullptr, OrganizationInvites);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Confirm that non-member users now have the correct roles in Organization
 	::csp::common::Array<OrganizationRoleInfo> UserOrganizationRoleInfo;
-	GetUsersRoles(OrganizationSystem, {AltUser1NonMemberId, AltUser2NonMemberId}, UserOrganizationRoleInfo);
+	GetUsersRoles(OrganizationSystem, nullptr, {AltUser1NonMemberId, AltUser2NonMemberId}, UserOrganizationRoleInfo);
 
 	EXPECT_EQ(UserOrganizationRoleInfo.Size(), 2);
 	EXPECT_EQ(UserOrganizationRoleInfo[0].OrganizationRoles.Size(), 1);
@@ -230,11 +276,11 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	EXPECT_EQ(UserOrganizationRoleInfo[1].OrganizationRoles[0], EOrganizationRole::Member);
 
 	// remove user1 from organization
-	auto [RemoveUser1Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser1NonMemberId);
+	auto [RemoveUser1Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, nullptr, AltUser1NonMemberId);
 	EXPECT_EQ(RemoveUser1Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// remove user2 from organization
-	auto [RemoveUser2Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, AltUser2NonMemberId);
+	auto [RemoveUser2Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, nullptr, AltUser2NonMemberId);
 	EXPECT_EQ(RemoveUser2Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out
