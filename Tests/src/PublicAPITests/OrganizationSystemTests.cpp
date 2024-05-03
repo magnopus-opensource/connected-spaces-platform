@@ -199,8 +199,6 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToSpecifiedOrganizatio
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
 
-	const char* Oko_Tests_OrganizationId = "661ea67b07a518c46909dc97";
-
 	// Get User Id of non-member user
 	String AltUser1NonMemberId;
 	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
@@ -209,6 +207,13 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToSpecifiedOrganizatio
 	// Log in - user needs to be an admin member of the organization
 	String AdminUserId;
 	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
 
 	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Member, EOrganizationRole::Administrator};
 	csp::common::String EmailLinkUrl		= "https://dev.magnoverse.space";
@@ -230,6 +235,34 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToSpecifiedOrganizatio
 	// remove user from organization
 	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, Oko_Tests_OrganizationId, AltUser1NonMemberId);
 	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_INVITE_TO_INVALID_ORGANIZATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToInvalidOrganizationTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	const char* Invalid_Organization_Id = "invalid";
+
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
+
+	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Member, EOrganizationRole::Administrator};
+	csp::common::String EmailLinkUrl		= "https://dev.magnoverse.space";
+	csp::common::String SignupUrl			= "https://dev.magnoverse.space";
+
+	// Invite non-member user to the Organization
+	auto [Result] = AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, Invalid_Organization_Id, AltUser1NonMemberEmail, AltUserRoles, EmailLinkUrl, SignupUrl);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	// Log out
 	LogOut(UserSystem);
