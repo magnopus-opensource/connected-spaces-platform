@@ -19,6 +19,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "Multiplayer/ErrorCodeStrings.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
@@ -144,7 +145,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   {
 									   if (Error != csp::multiplayer::ErrorCode::None)
 									   {
-										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 										   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										   return;
 									   }
@@ -155,7 +156,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 										   {
 											   if (Error != csp::multiplayer::ErrorCode::None)
 											   {
-												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 												   return;
 											   }
@@ -166,7 +167,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 													   if (Error != csp::multiplayer::ErrorCode::None)
 													   {
 														   CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
-																				Error);
+																				csp::multiplayer::ErrorCodeToString(Error).c_str());
 														   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 														   return;
 													   }
@@ -216,7 +217,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				{
 					if (Error != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						return;
 					}
@@ -227,7 +228,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 						{
 							if (Error != csp::multiplayer::ErrorCode::None)
 							{
-								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
 							}
@@ -237,7 +238,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								{
 									if (Error != csp::multiplayer::ErrorCode::None)
 									{
-										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s", Error);
+										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 										INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										return;
 									}
@@ -268,7 +269,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 		   {
 				if (Error != csp::multiplayer::ErrorCode::None)
 				{
-					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", Error);
+					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 				}
 				else
@@ -278,7 +279,7 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 						csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->LocalDestroyAllEntities();
 						if (Error != csp::multiplayer::ErrorCode::None)
 						{
-						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
+						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
                             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						}
                         else
