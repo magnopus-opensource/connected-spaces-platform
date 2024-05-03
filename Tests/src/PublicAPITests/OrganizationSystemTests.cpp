@@ -88,9 +88,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
 	LogOut(UserSystem);
 
-	// Log in - default user needs to be an admin member of the organization
-	String DefaultUserId;
-	LogIn(UserSystem, DefaultUserId);
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
 
 	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Member, EOrganizationRole::Administrator};
 	csp::common::String EmailLinkUrl		= "https://dev.magnoverse.space";
@@ -132,9 +132,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	LogIn(UserSystem, AltUser1NonMemberId, AltUser1NonMemberEmail, AltUser1NonMemberPassword);
 	LogOut(UserSystem);
 
-	// Log in - default user needs to be an admin member of the organization
-	String DefaultUserId;
-	LogIn(UserSystem, DefaultUserId);
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
 
 	// Member role has intentionally been omitted. All users must have member role and so CSP it will automatically add it
 	csp::common::Array<EOrganizationRole> AltUserRoles{EOrganizationRole::Administrator};
@@ -209,9 +209,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	LogIn(UserSystem, AltUser2NonMemberId, AltUser2NonMemberEmail, AltUser2NonMemberPassword);
 	LogOut(UserSystem);
 
-	// Log in - default user needs to be an admin member of the organization
-	String DefaultUserId;
-	LogIn(UserSystem, DefaultUserId);
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
 
 	auto OrganizationInvites = CreateOrganizationInvites();
 
