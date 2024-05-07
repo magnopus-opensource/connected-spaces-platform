@@ -126,7 +126,7 @@ void ECommerceSystem::GetCart(const common::String& SpaceId, const common::Strin
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
 }
 
-void ECommerceSystem::GetShopifyStores(const common::String& UserId, GetShopifyStoresResultCallback Callback)
+void ECommerceSystem::GetShopifyStores(const common::String& UserId, const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<GetShopifyStoresResultCallback, GetShopifyStoresResult, void, csp::services::DtoArray<chs::ShopifyStorefrontDto>>(
@@ -134,8 +134,18 @@ void ECommerceSystem::GetShopifyStores(const common::String& UserId, GetShopifyS
 			nullptr,
 			csp::web::EResponseCodes::ResponseCreated);
 
+	std::optional<bool> ActiveParam;
+
+    if (IsActive.HasValue())
+	{
+		ActiveParam = *IsActive;
+	}
+
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)
-		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, std::nullopt, std::nullopt, std::nullopt, ResponseHandler);
+		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam,
+													   std::nullopt,
+													   std::nullopt,
+													   ResponseHandler);
 }
 
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName,

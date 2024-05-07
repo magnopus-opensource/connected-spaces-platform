@@ -96,8 +96,11 @@ public:
 
 	/// @brief Gets all shopify stores for the given user.
 	/// @param UserId csp::common::String : ID of the user to get all stores for.
+	/// @param IsActive csp::common::Optional<bool> : optional bool for filtering returned stores by active status.
 	/// @param Callback GetShopifyStoresResultCallback : Callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetShopifyStores(const common::String& UserId, GetShopifyStoresResultCallback Callback);
+	CSP_ASYNC_RESULT void GetShopifyStores(const common::String& UserId, 
+                                           const csp::common::Optional<bool>& IsActive, 
+                                           GetShopifyStoresResultCallback Callback);
 
 	/// @brief Adds a Shopify store to a space.
 	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.

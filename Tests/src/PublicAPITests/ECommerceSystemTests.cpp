@@ -849,7 +849,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	EXPECT_NE(ShopifyStore.StoreId, "");
 	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
 
-	auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, UserId);
+	auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, UserId, nullptr);
 
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreId, ShopifyStore.StoreId);
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceId, ShopifyStore.SpaceId);
