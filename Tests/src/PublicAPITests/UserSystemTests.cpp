@@ -46,6 +46,21 @@ csp::common::String DefaultLoginEmail;
 csp::common::String DefaultLoginPassword;
 csp::common::String AlternativeLoginEmail;
 csp::common::String AlternativeLoginPassword;
+// Organizations non-member
+csp::common::String AltUser1NonMemberEmail;
+csp::common::String AltUser1NonMemberPassword;
+csp::common::String AltUser2NonMemberEmail;
+csp::common::String AltUser2NonMemberPassword;
+// Organizations member
+csp::common::String AltUser1MemberEmail;
+csp::common::String AltUser1MemberPassword;
+csp::common::String AltUser2MemberEmail;
+csp::common::String AltUser2MemberPassword;
+// Organizations admin
+csp::common::String AltUser1AdminEmail;
+csp::common::String AltUser1AdminPassword;
+csp::common::String AltUser2AdminEmail;
+csp::common::String AltUser2AdminPassword;
 
 
 void LoadTestAccountCredentials()
@@ -53,7 +68,10 @@ void LoadTestAccountCredentials()
 	if (!std::filesystem::exists("test_account_creds.txt"))
 	{
 		LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
-				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>");
+				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<AlternativeNonMember1LoginEmail> <AlternativeNonMember1LoginPassword>\n<AlternativeNonMember2LoginEmail> "
+				 "<AlternativeNonMember2LoginPassword>\n<AlternativeMember1LoginEmail> <AlternativeMember1LoginPassword>\n<AlternativeMember2LoginEmail> "
+				 "<AlternativeMember2LoginPassword>\n<AlternativeAdmin1LoginEmail> <AlternativeAdmin1LoginPassword>\n<AlternativeAdmin2LoginEmail> "
+				 "<AlternativeAdmin2LoginPassword>");
 	}
 
 	std::ifstream CredsFile;
@@ -61,19 +79,50 @@ void LoadTestAccountCredentials()
 
 	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword;
 
+	// Organization non-member test accounts
+	std::string _AltUser1NonMemberEmail, _AltUser1NonMemberPassword, _AltUser2NonMemberEmail, _AltUser2NonMemberPassword;
+	// Organization member test accounts
+	std::string _AltUser1MemberEmail, _AltUser1MemberPassword, _AltUser2MemberEmail, _AltUser2MemberPassword;
+	// Organization admin test accounts
+	std::string _AltUser1AdminEmail, _AltUser1AdminPassword, _AltUser2AdminEmail, _AltUser2AdminPassword;
+
 	CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
 	CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
+	CredsFile >> _AltUser1NonMemberEmail >> _AltUser1NonMemberPassword;
+	CredsFile >> _AltUser2NonMemberEmail >> _AltUser2NonMemberPassword;
+	CredsFile >> _AltUser1MemberEmail >> _AltUser1MemberPassword;
+	CredsFile >> _AltUser2MemberEmail >> _AltUser2MemberPassword;
+	CredsFile >> _AltUser1AdminEmail >> _AltUser1AdminPassword;
+	CredsFile >> _AltUser2AdminEmail >> _AltUser2AdminPassword;
 
-	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty())
+	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
+		|| _AltUser1NonMemberEmail.empty() || _AltUser1NonMemberPassword.empty() || _AltUser2NonMemberEmail.empty() || _AltUser2NonMemberPassword.empty()
+		|| _AltUser1MemberEmail.empty() || _AltUser1MemberPassword.empty() || _AltUser2MemberEmail.empty() || _AltUser2MemberPassword.empty()
+		|| _AltUser1AdminEmail.empty() || _AltUser1AdminPassword.empty() || _AltUser2AdminEmail.empty() || _AltUser2AdminPassword.empty())
 	{
 		LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
-				 "<AlternativeLoginPassword>");
+				 "<AlternativeLoginPassword>\n<AlternativeNonMember1LoginEmail> <AlternativeNonMember1LoginPassword>\n<AlternativeNonMember2LoginEmail> "
+				 "<AlternativeNonMember2LoginPassword>\n<AlternativeMember1LoginEmail> <AlternativeMember1LoginPassword>\n<AlternativeMember2LoginEmail> "
+				 "<AlternativeMember2LoginPassword>\n<AlternativeAdmin1LoginEmail> <AlternativeAdmin1LoginPassword>\n<AlternativeAdmin2LoginEmail> "
+				 "<AlternativeAdmin2LoginPassword>");
 	}
 
 	DefaultLoginEmail		 = _DefaultLoginEmail.c_str();
 	DefaultLoginPassword	 = _DefaultLoginPassword.c_str();
 	AlternativeLoginEmail	 = _AlternativeLoginEmail.c_str();
 	AlternativeLoginPassword = _AlternativeLoginPassword.c_str();
+	AltUser1NonMemberEmail = _AltUser1NonMemberEmail.c_str();
+	AltUser1NonMemberPassword = _AltUser1NonMemberPassword.c_str();
+	AltUser2NonMemberEmail = _AltUser2NonMemberEmail.c_str();
+	AltUser2NonMemberPassword = _AltUser2NonMemberPassword.c_str();
+	AltUser1MemberEmail = _AltUser1MemberEmail.c_str();
+	AltUser1MemberPassword = _AltUser1MemberPassword.c_str();
+	AltUser2MemberEmail = _AltUser2MemberEmail.c_str();
+	AltUser2MemberPassword = _AltUser2MemberPassword.c_str();
+	AltUser1AdminEmail = _AltUser1AdminEmail.c_str();
+	AltUser1AdminPassword = _AltUser1AdminPassword.c_str();
+	AltUser2AdminEmail = _AltUser2AdminEmail.c_str();
+	AltUser2AdminPassword = _AltUser2AdminPassword.c_str();
 }
 
 void LogIn(csp::systems::UserSystem* UserSystem,

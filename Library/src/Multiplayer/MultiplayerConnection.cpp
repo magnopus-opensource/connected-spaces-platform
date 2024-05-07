@@ -434,6 +434,11 @@ void MultiplayerConnection::StartEventMessageListening()
 			Deserialiser.Parse(EventValues);
 			UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 		}
+        else if (EventType == "OrganizationMemberAdded")
+		{
+			CSP_LOG_MSG(systems::LogLevel::Log, "Custom deserialiser for OrganizationMemberAdded event not yet implemented.")
+            // todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
+		}
 		else
 		{
 			// For everything else, use the generic deserialiser
