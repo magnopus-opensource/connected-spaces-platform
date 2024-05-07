@@ -808,3 +808,54 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETSHOPIFYSTORES_TEST
+CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
+{
+	SetRandSeed();
+	/*Steps needed to be performed before running this test are:
+	*
+		1. Create a space (Add to Shopify Creds)
+		2. Create a Shopify Store on the Shopify site (Ensure it has at least 1 product)
+		3. Add `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
+		Now you can use this test!*/
+
+	auto& SystemsManager  = csp::systems::SystemsManager::Get();
+	auto* UserSystem	  = SystemsManager.GetUserSystem();
+	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
+
+	auto Details			= GetShopifyDetails();
+	auto SpaceId			= Details["SpaceId"];
+	auto StoreName			= Details["StoreName"];
+	auto PrivateAccessToken = Details["PrivateAccessToken"];
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
+
+	EXPECT_EQ(ValidateShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EXPECT_TRUE(ValidateShopifyStoreResult.ValidateResult);
+
+	auto [AddShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, AddShopifyStore, RequestPredicate, StoreName, SpaceId, false, PrivateAccessToken);
+
+	EXPECT_EQ(AddShopifyStoreResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	auto ShopifyStore = AddShopifyStoreResult.GetShopifyStoreInfo();
+
+	EXPECT_EQ(ShopifyStore.SpaceId, SpaceId);
+	EXPECT_EQ(ShopifyStore.IsEcommerceActive, false);
+	EXPECT_NE(ShopifyStore.StoreId, "");
+	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
+
+	auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, UserId, nullptr);
+
+	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreId, ShopifyStore.StoreId);
+	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceId, ShopifyStore.SpaceId);
+	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceOwnerId, ShopifyStore.SpaceOwnerId);
+	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreName, ShopifyStore.StoreName);
+
+	LogOut(UserSystem);
+}
+#endif
