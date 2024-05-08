@@ -52,10 +52,23 @@ systems::EOrganizationRole OrganizationRoleStringToEnum(String Role)
 // todo: Complete implementation once CHS have finished implementing the Organization endpoints to the User Service.
 void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::systems::Organization& Organization)
 {
-	// More fields will be added by CHS in the future.
 	Organization.Id		 = Dto.GetId();
+    Organization.CreatedAt = Dto.GetCreatedAt();
+    Organization.OwnerId = Dto.GetOrganizationOwnerId();
 	Organization.Name	 = Dto.GetName();
-	Organization.OwnerId = Dto.GetOrganizationOwnerId();
+    auto OrgMembers = csp::common::Convert(Dto.GetMembers());
+    Organization.Members = 	csp::common::Array<systems::OrganizationRoleInfo>(OrgMembers.Size());
+
+	for (int i = 0; i < OrgMembers.Size(); ++i)
+	{
+		Organization.Members[i].UserId = OrgMembers[i]->GetUserId();
+        Organization.Members[i].OrganizationRoles = csp::common::Array<systems::EOrganizationRole>(OrgMembers[i]->GetRoles().size());
+
+		for (int j = 0; j < OrgMembers[i]->GetRoles().size(); ++j)
+		{
+			Organization.Members[i].OrganizationRoles[j] = OrganizationRoleStringToEnum(OrgMembers[i]->GetRoles()[j]);
+		}
+	}
 }
 
 void OrganizationRoleDtoToOrganizationRole(const chs_users::OrganizationMember& Dto, csp::systems::OrganizationRoleInfo& OrganizationRoleInfo)

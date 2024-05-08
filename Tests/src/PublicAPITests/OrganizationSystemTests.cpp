@@ -479,12 +479,148 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
 	// belong to a single Organization so we just use the first one.
 	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
 	EXPECT_EQ(OrganizationIds.Size(), 1);
+
 	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
 
 	EXPECT_EQ(Space.OrganizationId, Oko_Tests_OrganizationId);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
+//
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_GET_ORGANIZATION_WITH_ID_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationWithIdTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
+
+	// Get the specified Organization.
+	auto [Result] = AWAIT_PRE(OrganizationSystem, GetOrganization, RequestPredicate, Oko_Tests_OrganizationId);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	const auto& Organization = Result.GetOrganization();
+
+	// Confirm Organization has the correct Id
+	EXPECT_EQ(Organization.Id, Oko_Tests_OrganizationId);
+	// If a member retrieves the Organization object it should contain info on all members
+	EXPECT_TRUE(Organization.Members.Size() > 0);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_GET_ORGANIZATION_WITH_NO_ID_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationWithNoIdTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, AltUser1AdminEmail, AltUser1AdminPassword);
+
+	// Get the Organization - by specifying no Id, we should retrieve the active organization.
+	auto [Result] = AWAIT_PRE(OrganizationSystem, GetOrganization, RequestPredicate, nullptr);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	const auto& Organization = Result.GetOrganization();
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
+
+	// Confirm Organization has the correct Id
+	EXPECT_EQ(Organization.Id, Oko_Tests_OrganizationId);
+	// If a member retrieves the Organization object it should contain info on all members
+	EXPECT_TRUE(Organization.Members.Size() > 0);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_GET_ORGANIZATION_WITH_INCORRECT_ROLE_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationWithIncorrectRoleTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	// Log in with an Organization member - The Organization members collection should only contain info on this user.
+	String AltUser1MemberId;
+	LogIn(UserSystem, AltUser1MemberId, AltUser1MemberEmail, AltUser1MemberPassword);
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
+
+	// Get the specified Organization.
+	auto [Result] = AWAIT_PRE(OrganizationSystem, GetOrganization, RequestPredicate, Oko_Tests_OrganizationId);
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	const auto& Organization = Result.GetOrganization();
+
+	// Confirm Organization has the correct Id
+	EXPECT_EQ(Organization.Id, Oko_Tests_OrganizationId);
+	// If a member retrieves the Organization object it should contain info on only 1 member (them)
+	EXPECT_EQ(Organization.Members.Size(), 1);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_GET_ORGANIZATION_ID_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationIdTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+
+	// Log in as a member of an organization
+	String AltUser1MemberId;
+	LogIn(UserSystem, AltUser1MemberId, AltUser1MemberEmail, AltUser1MemberPassword);
+
+	const auto RetrievedOrganizationId = OrganizationSystem->GetCurrentOrganizationId();
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& CurrentOrganizationId = OrganizationIds[0];
+
+	// The returned Organization Id should match the one returned by the User System
+	EXPECT_EQ(RetrievedOrganizationId, CurrentOrganizationId);
 
 	// Log out
 	LogOut(UserSystem);
