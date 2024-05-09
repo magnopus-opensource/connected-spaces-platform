@@ -16,6 +16,7 @@
 
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
+#include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "ECommerceSystemHelpers.h"
@@ -141,11 +142,13 @@ void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActi
 		ActiveParam = *IsActive;
 	}
 
-	auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
-	const uint64_t ClientId		= MultiplayerConnection->GetClientId();
+	auto& SystemsManager   = SystemsManager::Get();
+	const auto* UserSystem = SystemsManager.GetUserSystem();
+
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)
-		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(ClientId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
+		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
 }
 
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
