@@ -74,11 +74,11 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
 		const ComponentType ThisType = Type;
 
 		const auto& ComponentMap = *Entity->GetComponents();
-		const auto KeySet		 = ComponentMap.Keys();
+		const auto ComponentKeys = ComponentMap.Keys();
 
-		for (int i = 0; i < KeySet->Size(); ++i)
+		for (int i = 0; i < ComponentKeys->Size(); ++i)
 		{
-			ComponentBase* Component = ComponentMap[KeySet->operator[](i)];
+			ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
 			if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
 			{
@@ -86,7 +86,7 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
 			}
 		}
 
-		CSP_DELETE(KeySet);
+		CSP_DELETE(ComponentKeys);
 	}
 
 	return Components;
