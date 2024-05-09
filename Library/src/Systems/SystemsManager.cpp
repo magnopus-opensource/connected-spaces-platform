@@ -22,6 +22,7 @@
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
+#include "CSP/Systems/Organizations/OrganizationSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
@@ -129,6 +130,11 @@ QuotaSystem* SystemsManager::GetQuotaSystem()
 	return QuotaSystem;
 }
 
+OrganizationSystem* SystemsManager::GetOrganizationSystem()
+{
+	return OrganizationSystem;
+}
+
 csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem()
 {
 	return SpaceEntitySystem;
@@ -156,6 +162,7 @@ SystemsManager::SystemsManager()
 	, EventTicketingSystem(nullptr)
 	, ECommerceSystem(nullptr)
 	, QuotaSystem(nullptr)
+	, OrganizationSystem(nullptr)
 	, MultiplayerConnection(nullptr)
 	, SpaceEntitySystem(nullptr)
 {
@@ -195,6 +202,7 @@ void SystemsManager::CreateSystems()
 	EventTicketingSystem  = CSP_NEW csp::systems::EventTicketingSystem(WebClient);
 	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
 	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
+	OrganizationSystem	  = CSP_NEW csp::systems::OrganizationSystem(WebClient);
 	SpaceEntitySystem	  = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
 }
 
@@ -217,6 +225,7 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(EventTicketingSystem);
 	CSP_DELETE(ECommerceSystem);
 	CSP_DELETE(QuotaSystem);
+	CSP_DELETE(OrganizationSystem);
 	CSP_DELETE(SpaceEntitySystem);
 	CSP_DELETE(MultiplayerConnection);
 }

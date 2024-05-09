@@ -24,6 +24,7 @@
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Systems/Users/Authentication.h"
+#include "Multiplayer/ErrorCodeStrings.h"
 #include <CallHelpers.h>
 
 
@@ -145,7 +146,7 @@ void UserSystem::Login(const csp::common::String& UserName,
 				{
 					if (ErrCode != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
 						Callback(LoginStateRes);
 						return;
@@ -198,7 +199,7 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 				{
 					if (ErrCode != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
 						Callback(LoginStateRes);
 						return;
@@ -286,7 +287,7 @@ void UserSystem::LoginAsGuest(const csp::common::Optional<bool>& UserHasVerified
 				{
 					if (ErrCode != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
 						Callback(LoginStateRes);
 						return;
@@ -423,7 +424,7 @@ void UserSystem::LoginToThirdPartyAuthenticationProvider(const csp::common::Stri
 			{
 				if (ErrCode != csp::multiplayer::ErrorCode::None)
 				{
-					CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", ErrCode);
+					CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 
 					Callback(LoginStateRes);
 					return;
@@ -473,7 +474,7 @@ void UserSystem::Logout(NullResultCallback Callback)
 		{
 			if (ErrCode != csp::multiplayer::ErrorCode::None)
 			{
-				CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %i", ErrCode); 
+				CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str()); 
 			}
 
 			auto Request = std::make_shared<chs_user::LogoutRequest>();
