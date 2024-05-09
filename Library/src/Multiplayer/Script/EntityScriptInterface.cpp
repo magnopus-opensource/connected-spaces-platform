@@ -153,16 +153,19 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 	if (Entity)
 	{
 		const csp::common::Map<uint16_t, ComponentBase*>& ComponentMap = *Entity->GetComponents();
+		const auto ComponentKeys									   = ComponentMap.Keys();
 
-		for (int i = 0; i < ComponentMap.Size(); ++i)
+		for (int i = 0; i < ComponentKeys->Size(); ++i)
 		{
-			ComponentBase* Component = ComponentMap[i];
+			ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
 			if (Component->GetScriptInterface() != nullptr)
 			{
 				Components.push_back(Component->GetScriptInterface());
 			}
 		}
+
+		CSP_DELETE(ComponentKeys);
 	}
 
 	return Components;
