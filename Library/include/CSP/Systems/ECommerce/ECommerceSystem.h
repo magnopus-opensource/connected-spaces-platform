@@ -95,12 +95,9 @@ public:
 	CSP_ASYNC_RESULT void GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback);
 
 	/// @brief Gets all shopify stores for the given user.
-	/// @param UserId csp::common::String : ID of the user to get all stores for.
 	/// @param IsActive csp::common::Optional<bool> : optional bool for filtering returned stores by active status.
 	/// @param Callback GetShopifyStoresResultCallback : Callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetShopifyStores(const common::String& UserId, 
-                                           const csp::common::Optional<bool>& IsActive, 
-                                           GetShopifyStoresResultCallback Callback);
+	CSP_ASYNC_RESULT void GetShopifyStores(const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback);
 
 	/// @brief Adds a Shopify store to a space.
 	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.
@@ -120,9 +117,9 @@ public:
 	/// @param IsEcommerceActive bool : Bool to set the ecommerce system status to.
 	/// @param Callback SetECommerceActiveResultCallback : Callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void SetECommerceActiveInSpace(const common::String& StoreName,
-													 const common::String& SpaceId,
-													 const bool IsEcommerceActive,
-													 SetECommerceActiveResultCallback Callback);
+													const common::String& SpaceId,
+													const bool IsEcommerceActive,
+													SetECommerceActiveResultCallback Callback);
 
 	/// @brief Validates a shopify store given a store name and an access token.
 	/// @param StoreName csp::common::String : The store name (URL) to the Shopify store. Do not include the '.shopify.com' part of the url.

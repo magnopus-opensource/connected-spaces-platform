@@ -753,7 +753,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	*
 		1. Create a space (Add to Shopify Creds)
 		2. Create a Shopify Store on the Shopify site (Ensure it has at least 1 product)
-		3. Add `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
+		3. Connect the Shopify Store to the Space you created
+		4. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
 		Now you can use this test!*/
 
 	auto& SystemsManager  = csp::systems::SystemsManager::Get();
@@ -817,7 +818,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	*
 		1. Create a space (Add to Shopify Creds)
 		2. Create a Shopify Store on the Shopify site (Ensure it has at least 1 product)
-		3. Add `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
+		3. Connect the Shopify Store to the Space you created
+		3. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
 		Now you can use this test!*/
 
 	auto& SystemsManager  = csp::systems::SystemsManager::Get();
@@ -849,7 +851,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	EXPECT_NE(ShopifyStore.StoreId, "");
 	EXPECT_EQ(ShopifyStore.StoreName, StoreName);
 
-	auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, UserId, nullptr);
+	auto [GetShopifyStoresResult] = AWAIT_PRE(ECommerceSystem, GetShopifyStores, RequestPredicate, nullptr);
 
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreId, ShopifyStore.StoreId);
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].SpaceId, ShopifyStore.SpaceId);
