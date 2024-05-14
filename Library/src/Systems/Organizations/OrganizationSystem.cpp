@@ -169,9 +169,18 @@ const csp::common::String& OrganizationSystem::GetCurrentOrganizationId() const
 }
 
 void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
-											const csp::common::Optional<csp::common::String>& Name,
+											const csp::common::String& Name,
 											OrganizationResultCallback Callback)
 {
+	if (Name.IsEmpty())
+	{
+		CSP_LOG_WARN_MSG("A valid new Organization name must be specified.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
+
+        return;
+	}
+
 	csp::common::String SelectedOrganizationId;
 
 	if (OrganizationId.HasValue())
@@ -191,12 +200,12 @@ void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::com
 	}
 
 	auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
+	OrganizationInfo->SetName(Name);
 
-	// todo: Check that this is all that can be updated. If so this should not be optional and we should early out if nothing passed.
-	if (Name.HasValue())
-	{
-		OrganizationInfo->SetName(*Name);
-	}
+    auto* UserSystem = SystemsManager::Get().GetUserSystem();
+    const auto& UserId = UserSystem->GetLoginState().UserId;
+
+    OrganizationInfo->SetOrganizationOwnerId(UserId);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);

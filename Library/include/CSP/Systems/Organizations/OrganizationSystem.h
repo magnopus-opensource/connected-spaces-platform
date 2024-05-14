@@ -71,10 +71,10 @@ public:
 	/// their call will be rejected.
 	/// @param OrganizationId csp::common::Optional<csp::common::String> : Id of the Organization to update. If no Id is specified,
 	/// the Id of the Organization the user is currently authenticated against will be used.
-	/// @param Name csp::common::Optional<csp::common::String> : If a new name is provided it will be used to update the Organization name
+	/// @param Name csp::common::String : The new Organization name
 	/// @param Callback OrganizationResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void UpdateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
-											 const csp::common::Optional<csp::common::String>& Name,
+											 const csp::common::String& Name,
 											 OrganizationResultCallback Callback);
 
 	/// @brief Deactivates the specified Organization.

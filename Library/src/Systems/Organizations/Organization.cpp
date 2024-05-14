@@ -56,17 +56,19 @@ void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::s
     Organization.CreatedAt = Dto.GetCreatedAt();
     Organization.OwnerId = Dto.GetOrganizationOwnerId();
 	Organization.Name	 = Dto.GetName();
-    auto OrgMembers = csp::common::Convert(Dto.GetMembers());
-    Organization.Members = 	csp::common::Array<systems::OrganizationRoleInfo>(OrgMembers.Size());
+    // todo: guard against null for members
+    auto& OrgMembers = Dto.GetMembers();
+    Organization.Members = 	csp::common::Array<systems::OrganizationRoleInfo>(OrgMembers.size());
 
-	for (int i = 0; i < OrgMembers.Size(); ++i)
+	for (int i = 0; i < OrgMembers.size(); ++i)
 	{
 		Organization.Members[i].UserId = OrgMembers[i]->GetUserId();
-        Organization.Members[i].OrganizationRoles = csp::common::Array<systems::EOrganizationRole>(OrgMembers[i]->GetRoles().size());
+        auto& OrgMemberRoles = OrgMembers[i]->GetRoles();
+        Organization.Members[i].OrganizationRoles = csp::common::Array<systems::EOrganizationRole>(OrgMemberRoles.size());
 
-		for (int j = 0; j < OrgMembers[i]->GetRoles().size(); ++j)
+		for (int j = 0; j < OrgMemberRoles.size(); ++j)
 		{
-			Organization.Members[i].OrganizationRoles[j] = OrganizationRoleStringToEnum(OrgMembers[i]->GetRoles()[j]);
+			Organization.Members[i].OrganizationRoles[j] = OrganizationRoleStringToEnum(OrgMemberRoles[j]);
 		}
 	}
 }
