@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #pragma once
 
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
+
 
 namespace csp::multiplayer
 {
@@ -26,12 +28,14 @@ class IClientSelectionCriteria;
 class SpaceEntitySystem;
 class SpaceEntity;
 
+
 enum class ElectionState
 {
 	Idle,
 	Requested,
 	Electing,
 };
+
 
 class ClientElectionManager
 {

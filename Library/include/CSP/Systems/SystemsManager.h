@@ -44,6 +44,7 @@ class MaintenanceSystem;
 class EventTicketingSystem;
 class ECommerceSystem;
 class QuotaSystem;
+class OrganizationSystem;
 
 } // namespace csp::systems
 
@@ -150,6 +151,10 @@ public:
 	/// @return QuotaSystem : pointer to the Quota system class
 	QuotaSystem* GetQuotaSystem();
 
+	/// @brief Retrieves the Organization system.
+	/// @return OrganizationSystem : pointer to the Organization system class
+	OrganizationSystem* GetOrganizationSystem();
+
     csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
 
     csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
@@ -185,6 +190,7 @@ private:
 	EventTicketingSystem* EventTicketingSystem;
 	ECommerceSystem* ECommerceSystem;
 	QuotaSystem* QuotaSystem;
+	OrganizationSystem* OrganizationSystem;
 };
 
 } // namespace csp::systems

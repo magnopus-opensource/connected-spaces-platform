@@ -103,15 +103,18 @@ void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& 
 		ClientProxy* Client				= FindClientUsingAvatar(ClientAvatar);
 		SetLeader(Client);
 	}
-	else
-	{
-	}
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Number of clients=%d", Avatars.Size());
 }
 
 void ClientElectionManager::OnDisconnect()
 {
+	for (const auto& Client : Clients)
+	{
+		ClientProxy* Proxy = Client.second;
+		CSP_DELETE(Proxy);
+	}
+
 	UnBindNetworkEvents();
 }
 

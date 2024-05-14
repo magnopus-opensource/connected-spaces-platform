@@ -43,21 +43,22 @@ enum class GaussianSplatPropertyKeys
 	IsVisible,
 	IsARVisible,
 	IsShadowCaster,
-    Tint,
+	Tint,
 	Num
 };
 
 
 /// @ingroup GaussianSplatSpaceComponent
 /// @brief Data representation of a GaussianSplatSpaceComponent.
-/// Gaussian Splatting is a technique for real-time 3D reconstruction and rendering of an object or environment using images taken from multiple points of view.
-/// Rather than representing the object as a mesh of triangles, which has a surface but nothing inside, it is instead represented as a volume,
-/// comprising a point cloud of splats (like coloured dots), each of which has a position, colour (with alpha) and covariance (scale on 3 axis).
+/// Gaussian Splatting is a technique for real-time 3D reconstruction and rendering of an object or environment using images taken from multiple
+/// points of view. Rather than representing the object as a mesh of triangles, which has a surface but nothing inside, it is instead represented as a
+/// volume, comprising a point cloud of splats (like coloured dots), each of which has a position, colour (with alpha) and covariance (scale on 3
+/// axis).
 class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
-											  public IExternalResourceComponent,
-											  public IShadowCasterComponent,
-											  public ITransformComponent,
-											  public IVisibleComponent
+											public IExternalResourceComponent,
+											public IShadowCasterComponent,
+											public ITransformComponent,
+											public IVisibleComponent
 
 
 {
@@ -121,8 +122,10 @@ public:
 	/// \addtogroup IShadowCasterComponent
 	/// @{
 	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
+	[[deprecated]]
 	bool GetIsShadowCaster() const override;
 	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
+	[[deprecated]]
 	void SetIsShadowCaster(bool Value) override;
 	/// @}
 
@@ -132,7 +135,7 @@ public:
 
 	/// @brief Sets the tint that should be globally applied to the Gaussian Splat.
 	/// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
-    /// Defaults to 1,1,1.
+	/// Defaults to 1,1,1.
 	void SetTint(const csp::common::Vector3& TintValue);
 };
 

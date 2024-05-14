@@ -25,6 +25,7 @@
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
+#include "Multiplayer/ErrorCodeStrings.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
@@ -60,7 +61,7 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 	GroupInfo->SetDescription(Description);
 	GroupInfo->SetDiscoverable(HasFlag(Attributes, csp::systems::SpaceAttributes::IsDiscoverable));
 	GroupInfo->SetRequiresInvite(HasFlag(Attributes, csp::systems::SpaceAttributes::RequiresInvite));
-    GroupInfo->SetGroupType("space");
+	GroupInfo->SetGroupType("space");
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
@@ -135,38 +136,42 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 							   }
 
-							   auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+							   auto& SystemsManager = csp::systems::SystemsManager::Get();
+							   SystemsManager.GetSpaceEntitySystem()->Initialise();
+							   auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
 
 							   // Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
 							   // This hopefully will change in a future version when CHS support it.
 							   MultiplayerConnection->StopListening(
-								   [MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+								   [this, MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 								   {
 									   if (Error != csp::multiplayer::ErrorCode::None)
 									   {
-										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
+																csp::multiplayer::ErrorCodeToString(Error).c_str());
 										   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										   return;
 									   }
 
 									   MultiplayerConnection->SetScopes(
 										   SpaceId,
-										   [MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+										   [this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 										   {
 											   if (Error != csp::multiplayer::ErrorCode::None)
 											   {
-												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s",
+																		csp::multiplayer::ErrorCodeToString(Error).c_str());
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 												   return;
 											   }
 
 											   MultiplayerConnection->StartListening(
-												   [InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+												   [this, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 												   {
 													   if (Error != csp::multiplayer::ErrorCode::None)
 													   {
 														   CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
-																				Error);
+																				csp::multiplayer::ErrorCodeToString(Error).c_str());
 														   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 														   return;
 													   }
@@ -212,32 +217,37 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 			// Unfortunately we have to stop listening in order for our scope change to take effect, then start again once done.
 			// This hopefully will change in a future version when CHS support it.
 			MultiplayerConnection->StopListening(
-				[MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+				[this, MultiplayerConnection, SpaceId, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 				{
 					if (Error != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s", Error);
+						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
+											 csp::multiplayer::ErrorCodeToString(Error).c_str());
 						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						return;
 					}
 
 					MultiplayerConnection->SetScopes(
 						SpaceId,
-						[MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+						[this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 						{
 							if (Error != csp::multiplayer::ErrorCode::None)
 							{
-								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", Error);
+								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
 							}
 
+							auto& SystemsManager = csp::systems::SystemsManager::Get();
+							SystemsManager.GetSpaceEntitySystem()->Initialise();
+
 							MultiplayerConnection->StartListening(
-								[InternalResult, Callback](csp::multiplayer::ErrorCode Error)
+								[this, MultiplayerConnection, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
 								{
 									if (Error != csp::multiplayer::ErrorCode::None)
 									{
-										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s", Error);
+										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
+															 csp::multiplayer::ErrorCodeToString(Error).c_str());
 										INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										return;
 									}
@@ -259,44 +269,50 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 {
 	CSP_LOG_FORMAT(LogLevel::Log, "Exiting Space %s", CurrentSpace.Name.c_str());
 
-    // As the user is exiting the space, we now clear all scopes that they are registered to.
-    auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-    if(MultiplayerConnection != nullptr)
-    {
-		MultiplayerConnection->StopListening(
-		   [MultiplayerConnection, Callback](csp::multiplayer::ErrorCode Error)
-		   {
-				if (Error != csp::multiplayer::ErrorCode::None)
-				{
-					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s", Error);
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-				}
-				else
-				{
-					MultiplayerConnection->ResetScopes([Callback](csp::multiplayer::ErrorCode Error)
-					{
-						csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->LocalDestroyAllEntities();
-						if (Error != csp::multiplayer::ErrorCode::None)
-						{
-						    CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s", Error);
-                            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-						}
-                        else
-                        {
-                            const NullResult Result(csp::systems::EResultCode::Success, 200);
-	                        INVOKE_IF_NOT_NULL(Callback, Result);
-                        }
-				   });
-				}
-		   });
-    }
+	// As the user is exiting the space, we now clear all scopes that they are registered to.
+	auto& SystemsManager		= systems::SystemsManager::Get();
+	auto* MultiplayerConnection = SystemsManager.GetMultiplayerConnection();
 
-	csp::events::Event* ExitSpaceEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
+	if (MultiplayerConnection != nullptr)
+	{
+		csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->Shutdown();
+
+		MultiplayerConnection->StopListening(
+			[MultiplayerConnection, Callback](multiplayer::ErrorCode Error)
+			{
+				if (Error != multiplayer::ErrorCode::None)
+				{
+					CSP_LOG_ERROR_FORMAT("Error on exiting spaces, whilst stopping listening in order to clear scopes, ErrorCode: %s",
+										 multiplayer::ErrorCodeToString(Error).c_str());
+					INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+					return;
+				}
+
+				MultiplayerConnection->ResetScopes(
+					[Callback](multiplayer::ErrorCode Error)
+					{
+						if (Error != multiplayer::ErrorCode::None)
+						{
+							CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst clearing scopes, ErrorCode: %s",
+												 multiplayer::ErrorCodeToString(Error).c_str());
+							INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+							return;
+						}
+
+						const NullResult Result(EResultCode::Success, 200);
+						INVOKE_IF_NOT_NULL(Callback, Result);
+					});
+			});
+	}
+
+	events::Event* ExitSpaceEvent = events::EventSystem::Get().AllocateEvent(events::SPACESYSTEM_EXIT_SPACE_EVENT_ID);
 	ExitSpaceEvent->AddString("SpaceId", CurrentSpace.Id);
 
-	csp::events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
+	events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
 
-    CurrentSpace = Space();
+	CurrentSpace = Space();
 }
 
 bool SpaceSystem::IsInSpace()
@@ -567,9 +583,9 @@ void SpaceSystem::UpdateSpace(const String& SpaceId,
 		LiteGroupInfo->SetDescription(*Description);
 	}
 
-    
-    bool IsDiscoverable = false;
-    bool RequiresInvite = true;
+
+	bool IsDiscoverable = false;
+	bool RequiresInvite = true;
 
 	if (Attributes.HasValue())
 	{
@@ -669,20 +685,20 @@ void SpaceSystem::GetSpacesByAttributes(const Optional<bool>& InIsDiscoverable,
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= GroupAPI->CreateHandler<BasicSpacesResultCallback, BasicSpacesResult, void, csp::services::DtoArray<chs::GroupLiteDto>>(Callback, nullptr);
 
-	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt,     // Ids
-															  std::nullopt,     // GroupTypes
-															  std::nullopt,     // Names
-															  std::nullopt,     // PartialName
-															  std::nullopt,     // GroupOwnerIds
-															  std::nullopt,     // ExcludeGroupOwnerIds
-															  std::nullopt,     // Users
-															  IsDiscoverable,   // Discoverable
-															  std::nullopt,     // AutoModerator
-															  RequiresInvite,   // RequiresInvite
-															  IsArchived,       // Archived
-                                                              std::nullopt,     // OrganizationIds
-															  ResultsSkip,      // Skip
-															  ResultsMax,       // Limit
+	static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsLiteGet(std::nullopt,	  // Ids
+															  std::nullopt,	  // GroupTypes
+															  std::nullopt,	  // Names
+															  std::nullopt,	  // PartialName
+															  std::nullopt,	  // GroupOwnerIds
+															  std::nullopt,	  // ExcludeGroupOwnerIds
+															  std::nullopt,	  // Users
+															  IsDiscoverable, // Discoverable
+															  std::nullopt,	  // AutoModerator
+															  RequiresInvite, // RequiresInvite
+															  IsArchived,	  // Archived
+															  std::nullopt,	  // OrganizationIds
+															  ResultsSkip,	  // Skip
+															  ResultsMax,	  // Limit
 															  ResponseHandler);
 }
 

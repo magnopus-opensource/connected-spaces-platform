@@ -16,6 +16,7 @@
 
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 
+#include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "ECommerceSystemHelpers.h"
@@ -126,6 +127,30 @@ void ECommerceSystem::GetCart(const common::String& SpaceId, const common::Strin
 	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
 }
 
+void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ShopifyAPI->CreateHandler<GetShopifyStoresResultCallback, GetShopifyStoresResult, void, csp::services::DtoArray<chs::ShopifyStorefrontDto>>(
+			Callback,
+			nullptr,
+			csp::web::EResponseCodes::ResponseCreated);
+
+	std::optional<bool> ActiveParam;
+
+	if (IsActive.HasValue())
+	{
+		ActiveParam = *IsActive;
+	}
+
+	auto& SystemsManager   = SystemsManager::Get();
+	const auto* UserSystem = SystemsManager.GetUserSystem();
+
+	const auto& UserId = UserSystem->GetLoginState().UserId;
+
+	static_cast<chs::ShopifyApi*>(ShopifyAPI)
+		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
+}
+
 void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 									  const common::String& SpaceId,
 									  const bool IsEcommerceActive,
@@ -147,9 +172,9 @@ void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
 }
 
 void ECommerceSystem::SetECommerceActiveInSpace(const common::String& StoreName,
-												 const common::String& SpaceId,
-												 const bool IsEcommerceActive,
-												 SetECommerceActiveResultCallback Callback)
+												const common::String& SpaceId,
+												const bool IsEcommerceActive,
+												SetECommerceActiveResultCallback Callback)
 {
 	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
 	ShopifyStorefrontInfo->SetStoreName(StoreName);

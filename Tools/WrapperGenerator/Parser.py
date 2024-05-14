@@ -962,10 +962,11 @@ class Parser:
                         word = reader.next_word()
 
                         if word == '(': # Deprecated attribute has a string description
-                            # Read until closing parens
-                            deprecation_message = reader.next_word(delimiters=[')'])
-                            # Trim leading and trailing double quotes
-                            deprecation_message = deprecation_message[1:-1]
+                            if reader.peek_char() == '"':
+                                reader.skip_char()
+                                deprecation_message = reader.next_word(delimiters=['"'])
+                                reader.skip_char()
+                                
                             # Skip closing parens and brackets
                             reader.skip(3)  # ')]]'
                         elif word == ']':

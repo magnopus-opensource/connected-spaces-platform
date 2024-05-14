@@ -28,12 +28,15 @@
 #include <map>
 #include <vector>
 
+
 namespace csp::systems
 {
+
 class SpaceSystem;
 class SystemsManager;
 class UserSystem;
-}
+
+} // namespace csp::systems
 
 namespace csp::memory
 {
@@ -43,6 +46,7 @@ template <typename T> void Delete(T* Ptr);
 CSP_END_IGNORE
 
 } // namespace csp::memory
+
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
@@ -116,7 +120,6 @@ public:
 
 	// Callback to receive access permission changes Data when a message is sent.
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
-
 
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
@@ -203,13 +206,13 @@ private:
 	typedef std::function<void(std::exception_ptr)> ExceptionCallbackHandler;
 
 	/// @brief Start the connection and register to start receiving updates from the server.
-    /// Connect should be called after LogIn and before EnterSpace.
+	/// Connect should be called after LogIn and before EnterSpace.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void Connect(ErrorCodeCallbackHandler Callback);
+	void Connect(ErrorCodeCallbackHandler Callback);
 
 	/// @brief End the multiplayer connection.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void Disconnect(ErrorCodeCallbackHandler Callback);
+	void Disconnect(ErrorCodeCallbackHandler Callback);
 
 	void Start(ExceptionCallbackHandler Callback) const;
 	void Stop(ExceptionCallbackHandler Callback) const;
@@ -226,7 +229,7 @@ private:
 
 	/// @brief Clears the connected user's subscription to their current set of scopes.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-    void ResetScopes(ErrorCodeCallbackHandler Callback);
+	void ResetScopes(ErrorCodeCallbackHandler Callback);
 
 	void RequestClientId(ErrorCodeCallbackHandler Callback);
 
