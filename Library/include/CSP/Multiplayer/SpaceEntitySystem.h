@@ -46,28 +46,24 @@ CSP_END_IGNORE
 } // namespace csp::memory
 
 
-namespace csp::multiplayer
-{
-
-class ClientElectionManager;
-
-class SignalRConnection;
-
-} // namespace csp::multiplayer
-
 namespace csp::systems
 {
+
+class SpaceSystem;
 class SystemsManager;
-}
+
+} // namespace csp::systems
 
 
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
 
+class ClientElectionManager;
 class MultiplayerConnection;
-class SpaceTransform;
+class SignalRConnection;
 class SpaceEntity;
+class SpaceTransform;
 
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
@@ -81,6 +77,7 @@ class CSP_API SpaceEntitySystem
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class csp::systems::SystemsManager;
+	friend class csp::systems::SpaceSystem;
 	friend class MultiplayerConnection;
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
@@ -347,6 +344,9 @@ private:
 	CallbackHandler InitialEntitiesRetrievedCallback;
 	CallbackHandler ScriptSystemReadyCallback;
 
+	void Initialise();
+	void Shutdown();
+
 	void BindOnObjectMessage();
 	void BindOnObjectPatch();
 	void BindOnRequestToSendObject();
@@ -393,6 +393,8 @@ private:
 	std::chrono::milliseconds EntityPatchRate;
 
 	bool EntityPatchRateLimitEnabled = true;
+
+	bool IsInitialised = false;
 };
 
 } // namespace csp::multiplayer

@@ -197,25 +197,14 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, LastTickTime(std::chrono::system_clock::now())
 	, EntityPatchRate(90)
 {
-	EnableLeaderElection();
-
-	ScriptBinding = EntityScriptBinding::BindEntitySystem(this);
-
-	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-	csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
+	Initialise();
 }
 
 SpaceEntitySystem::~SpaceEntitySystem()
 {
-	LocalDestroyAllEntities();
+	Shutdown();
 
-	EntityScriptBinding::RemoveBinding(ScriptBinding);
-
-	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
-	csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 	CSP_DELETE(EventHandler);
-
-	CSP_DELETE(ElectionManager);
 
 	CSP_DELETE(TickEntitiesLock);
 	CSP_DELETE(EntitiesLock);
@@ -224,6 +213,41 @@ SpaceEntitySystem::~SpaceEntitySystem()
 	CSP_DELETE(PendingRemoves);
 	CSP_DELETE(PendingOutgoingUpdateUniqueSet);
 	CSP_DELETE(PendingIncomingUpdates);
+}
+
+void SpaceEntitySystem::Initialise()
+{
+	if (IsInitialised)
+	{
+		return;
+	}
+
+	EnableLeaderElection();
+
+	ScriptBinding = EntityScriptBinding::BindEntitySystem(this);
+
+	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+	csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
+
+	IsInitialised = true;
+}
+
+void SpaceEntitySystem::Shutdown()
+{
+	if (!IsInitialised)
+	{
+		return;
+	}
+
+	DisableLeaderElection();
+	LocalDestroyAllEntities();
+
+	EntityScriptBinding::RemoveBinding(ScriptBinding);
+
+	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
+	csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
+
+	IsInitialised = false;
 }
 
 void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
@@ -726,24 +750,26 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 		if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
 		{
 			DestroyEntity(Entity,
-			[](auto Ok)
-			{
-			});
+						  [](auto Ok)
+						  {
+						  });
 		}
 		// Otherwise we clear up all all locally represented entities
 		else
 		{
 			LocalDestroyEntity(Entity);
 		}
+
+		CSP_DELETE(Entity);
 	}
 
-    Entities.Clear();
-    Objects.Clear();
-    Avatars.Clear();
+	Entities.Clear();
+	Objects.Clear();
+	Avatars.Clear();
 
-    // Clear adds/removes, we don't want to mutate if we're cleaning everything else.
-    PendingAdds->clear();
-    PendingRemoves->clear();
+	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
+	PendingAdds->clear();
+	PendingRemoves->clear();
 	PendingIncomingUpdates->clear();
 
 	UnlockEntityUpdate();
