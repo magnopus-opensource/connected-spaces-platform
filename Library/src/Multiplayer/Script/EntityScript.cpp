@@ -41,8 +41,7 @@ EntityScript::EntityScript(SpaceEntity* InEntity, SpaceEntitySystem* InSpaceEnti
 
 EntityScript::~EntityScript()
 {
-	ScriptSystem->ClearModuleSource(Entity->GetName());
-	ScriptSystem->DestroyContext(Entity->GetId());
+	Shutdown();
 }
 
 bool EntityScript::Invoke()
