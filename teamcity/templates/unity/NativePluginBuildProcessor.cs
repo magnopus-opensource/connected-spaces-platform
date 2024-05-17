@@ -26,7 +26,21 @@ public class NativePluginBuildProcessor : IPreprocessBuildWithReport
             if (!importer.assetPath.Contains("ConnectedSpacesPlatform"))
                 continue;
 
-            importer.SetIncludeInBuildDelegate((_) => true);
+            // Only include appropriate CSP binary
+            var ext = Path.GetExtension(importer.assetPath);
+
+            // TODO: Remove this hack that always includes iOS and macOS binaries
+            // This was put in place because we currently only include release binaries due to debug binary sizes
+            if (report.summary.platform == BuildTarget.iOS || report.summary.platform == BuildTarget.StandaloneOSX)
+                importer.SetIncludeInBuildDelegate((_) => true);
+            else if (report.summary.options.HasFlag(BuildOptions.Development) && !importer.assetPath.EndsWith($"_D{ext}"))
+                importer.SetIncludeInBuildDelegate((_) => false);
+            else if ((!report.summary.options.HasFlag(BuildOptions.Development)) && importer.assetPath.EndsWith($"_D{ext}"))
+                importer.SetIncludeInBuildDelegate((_) => false);
+
+            // Fix symbol stripping for VisionOS
+            if (report.summary.platform == BuildTarget.VisionOS)
+                PlayerSettings.SetAdditionalIl2CppArgs("--linker-flags=\"-Wl,-force_load,libConnectedSpacesPlatform.a\"");
         }
 
         Debug.Log($"NativePluginBuildProcesser: Done {report.summary.platform}.");
