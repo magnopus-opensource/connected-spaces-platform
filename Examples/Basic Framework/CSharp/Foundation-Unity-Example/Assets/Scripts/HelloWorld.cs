@@ -14,13 +14,14 @@ using CspSystems = Csp.Systems;
 using CspAsset = Csp.Systems.Asset;
 using UnityEngine;
 using UnityEngine.Windows;
+using Csp.Systems;
 
 public class HelloWorld : MonoBehaviour
 {
     [SerializeField] private AccountUI accountUI;
 
-    private const string endPointUri = "https://ogs-ostage.magnoboard.com";
-    private const string TenantKey = "CSP_HELLO_WORLD";
+    private const string endPointUri = "https://ogs-odev.magnoboard.com";
+    private const string TenantKey = "OKO";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
     private readonly string exampleAssetName = "example.png";
@@ -372,6 +373,67 @@ public class HelloWorld : MonoBehaviour
         var entity = await CreateAvatar();
         MoveAvatar(entity);
         await CreateAndUploadAssetAsync(space.Id);
+
+        //
+
+        var eCommerceSystem = CspSystems.SystemsManager.Get().GetECommerceSystem();
+        var newCartInfoResult = await eCommerceSystem.CreateCart(space.Id);
+        var newCartInfo = newCartInfoResult.GetCartInfo();
+        
+        const string variantId = "gid://shopify/ProductVariant/46314311516433";
+        const int variantQuantity = 1;
+
+        var newCartLine = new CspSystems.CartLine();
+        newCartLine.CartLineId = string.Empty;
+        newCartLine.ProductVariantId = variantId;
+        newCartLine.Quantity = variantQuantity;
+
+        var cartLineCnt = Convert.ToInt32(newCartInfo.CartLines.Size());
+
+        bool productAlreadyInCart = false;
+
+        // Is it an existing product already in the cart? If so, update its quantity.
+        for (int i = 0; i < cartLineCnt; i++)
+        {
+            var cartLine = newCartInfo.CartLines[(ulong)i];
+            if (cartLine.ProductVariantId != variantId)
+            {
+                continue;
+            }
+
+            // Update the quantity of the existing product.
+            cartLine.Quantity = cartLine.Quantity + variantQuantity;
+            newCartInfo.CartLines[(ulong)i] = cartLine;
+            productAlreadyInCart = true;
+            break;
+        }
+
+        if (!productAlreadyInCart)
+        {
+
+            CartLine[] newCartLines = new CartLine[cartLineCnt + 1];
+            for (int i = 0; i < cartLineCnt; i++)
+            {
+                newCartLines[i] = newCartInfo.CartLines[(ulong)i];
+            }
+
+            newCartLines[cartLineCnt] = newCartLine;
+
+        }
+
+        var checkoutInfoResult = await eCommerceSystem.GetCheckoutInformation(space.Id, newCartInfo.CartId);
+
+        if (checkoutInfoResult.GetResultCode() != CspSystems.EResultCode.Success)
+        {
+            Debug.LogError($"Failed to get checkout information. Result code: {checkoutInfoResult.GetResultCode()}.");
+            return;
+        }
+
+        var checkoutInfo = checkoutInfoResult.GetCheckoutInfo();
+        var checkoutURL = checkoutInfo.CheckoutUrl;
+        var storeUrl = checkoutInfo.StoreUrl;
+
+        Debug.Log($"Retrieved CheckoutInto. CheckoutUrl: {checkoutURL}, StoreUrl: {storeUrl}");
     }
 
     private void EntityUpdate(object sender,
