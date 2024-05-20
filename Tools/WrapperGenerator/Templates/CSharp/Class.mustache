@@ -86,6 +86,7 @@
 {{/ is_operator_overload }}
 {{^ is_operator_overload }}
 {{^ is_event }}
+{{^ is_private }}
         {{> DllImport }}
 {{# is_constructor }}
         static extern NativePointer
@@ -190,6 +191,7 @@
 {{/ is_task }}
 {{/ is_destructor }}
 {{/ is_constructor }}
+{{/ is_private }}
 {{/ is_event }}
 {{/ is_operator_overload }}
 
