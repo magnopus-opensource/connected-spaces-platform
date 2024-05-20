@@ -418,7 +418,23 @@ public class HelloWorld : MonoBehaviour
             }
 
             newCartLines[cartLineCnt] = newCartLine;
+            newCartInfo.CartLines = ToCspArray(newCartLines);
+        }
 
+        var updatedCartInfoResult = await eCommerceSystem.UpdateCartInformation(newCartInfo);
+        if (updatedCartInfoResult.GetResultCode() != CspSystems.EResultCode.Success)
+        {
+            Debug.LogError($"Failed to update cart. Result code: {updatedCartInfoResult.GetResultCode()}.");
+            return;
+        }
+
+        var updatedCartInfo = updatedCartInfoResult.GetCartInfo();
+
+        var getCartResult = await eCommerceSystem.GetCart(space.Id, newCartInfo.CartId);
+        if (getCartResult.GetResultCode() != CspSystems.EResultCode.Success)
+        {
+            Debug.LogError($"Failed to get cart. Result code: {getCartResult.GetResultCode()}.");
+            return;
         }
 
         var checkoutInfoResult = await eCommerceSystem.GetCheckoutInformation(space.Id, newCartInfo.CartId);
