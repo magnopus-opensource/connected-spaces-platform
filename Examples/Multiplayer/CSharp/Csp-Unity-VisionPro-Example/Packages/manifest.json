@@ -1,0 +1,26 @@
+{
+  "scopedRegistries": [
+    {
+      "name": "npmjs",
+      "url": "https://registry.npmjs.org",
+      "scopes": [
+        "connected-spaces-platform"
+      ]
+    }
+  ],
+  "dependencies": {
+    "com.unity.ai.navigation": "1.1.5",
+    "com.unity.ide.rider": "3.0.28",
+    "com.unity.ide.visualstudio": "2.0.22",
+    "com.unity.ide.vscode": "1.2.5",
+    "com.unity.polyspatial.visionos": "1.1.6",
+    "com.unity.polyspatial.xr": "1.1.6",
+    "com.unity.ugui": "1.0.0",
+    "com.unity.xr.interaction.toolkit": "2.5.4",
+    "com.unity.xr.management": "4.4.1",
+    "com.unity.xr.visionos": "1.1.6",
+    "connected-spaces-platform.unity.core": "4.27.1",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.ui": "1.0.0"
+  }
+}
