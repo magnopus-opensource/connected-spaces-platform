@@ -51,7 +51,7 @@ public class HelloWorld : MonoBehaviour
             ClientEnvironment = "Stage",
             ClientOS = SystemInfo.operatingSystem,
             ClientSKU = "csp-unity-visionos-examples",
-            ClientVersion = "0.0.4",
+            ClientVersion = "0.0.1",
             CSPVersion = CSPFoundation.GetBuildID()
         };
 

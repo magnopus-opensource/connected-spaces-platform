@@ -1,3 +1,7 @@
+// ------------------------------------------------------------------
+// Copyright (c) Magnopus. All Rights Reserved.
+// ------------------------------------------------------------------
+
 using Csp.Multiplayer;
 using System;
 using UnityEngine;
