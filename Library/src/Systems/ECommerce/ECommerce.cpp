@@ -194,18 +194,19 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 {
 	ProductInfoCollection = common::Array<csp::systems::ProductInfo>(ProductInfoCollection.Size());
 	int TotalVariantIndex = 0; // Count the total number of variants included in the product Dto's
-	
+
 	for (int DtoCount = 0; DtoCount < DtoArray.size(); DtoCount++) // Loop all Dto's (products)
 	{
 		const chs_aggregation::ShopifyProductDto& Dto = DtoArray[DtoCount];
 
 		if (Dto.HasVariants()) // if there are no variants, we don't process the dto (shouldn't happen)
 		{
-			for (int VariantCount = 0; VariantCount < Dto.GetVariants().size(); VariantCount++) // Loop each variant in the product dto and store the info into the indexed output array
+			for (int VariantCount = 0; VariantCount < Dto.GetVariants().size();
+				 VariantCount++) // Loop each variant in the product dto and store the info into the indexed output array
 			{
 				auto VariantProductInformation = Dto.GetVariants()[VariantCount];
 
-				ProductInfoCollection[TotalVariantIndex].Id = Dto.GetId();
+				ProductInfoCollection[TotalVariantIndex].Id	   = Dto.GetId();
 				ProductInfoCollection[TotalVariantIndex].Title = Dto.GetTitle();
 
 				if (Dto.HasCreatedAt())
@@ -219,8 +220,8 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 				}
 
 				// The output should only contain productinfo with single variants in, so we hardcode the index and size of the array here
-				ProductInfoCollection[TotalVariantIndex].Variants = common::Array<ProductVariantInfo>(1); 
-				ProductInfoCollection[TotalVariantIndex].Variants[0].Id = VariantProductInformation->GetId();
+				ProductInfoCollection[TotalVariantIndex].Variants		   = common::Array<ProductVariantInfo>(1);
+				ProductInfoCollection[TotalVariantIndex].Variants[0].Id	   = VariantProductInformation->GetId();
 				ProductInfoCollection[TotalVariantIndex].Variants[0].Title = VariantProductInformation->GetTitle();
 
 				if (VariantProductInformation->HasImage())
@@ -265,7 +266,7 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 
 					for (int n = 0; n < VariantOptionInformation.size(); ++n)
 					{
-						ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Name = VariantOptionInformation[n]->GetOptionName();
+						ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Name  = VariantOptionInformation[n]->GetOptionName();
 						ProductInfoCollection[TotalVariantIndex].Variants[0].Options[n].Value = VariantOptionInformation[n]->GetOptionValue();
 					}
 				}
@@ -348,7 +349,7 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing Media");
 				}
 
-                TotalVariantIndex++;
+				TotalVariantIndex++;
 			}
 		}
 		else
@@ -490,7 +491,7 @@ void ShopifyStoreDtoArrayToShopifyStoreInfoArray(const std::vector<chs_aggregati
 	for (int i = 0; i < StoreDtos.size(); i++)
 	{
 		const chs_aggregation::ShopifyStorefrontDto& StoreDto = StoreDtos[i];
-		csp::systems::ShopifyStoreInfo& Store = Stores[i];
+		csp::systems::ShopifyStoreInfo& Store				  = Stores[i];
 
 		if (StoreDto.HasId())
 		{
@@ -583,8 +584,16 @@ void CheckoutInfoResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
 	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
 	{
 		CheckoutInformationResponse->FromJson(Response->GetPayload().GetContent());
-		CheckoutInformation.StoreUrl	= CheckoutInformationResponse->GetCheckoutUrl();
-		CheckoutInformation.CheckoutUrl = CheckoutInformationResponse->GetCheckoutUrl();
+
+		if (CheckoutInformationResponse->HasStoreUrl())
+		{
+			CheckoutInformation.StoreUrl = CheckoutInformationResponse->GetStoreUrl();
+		}
+
+		if (CheckoutInformationResponse->HasCheckoutUrl())
+		{
+			CheckoutInformation.CheckoutUrl = CheckoutInformationResponse->GetCheckoutUrl();
+		}
 	}
 }
 
@@ -675,7 +684,7 @@ void ProductInfoCollectionResult::OnResponse(const csp::services::ApiResponseBas
 		// Extract data from the response into our Products array
 		std::vector<chs_aggregation::ShopifyProductDto>& ProductsArray = ProductCollectionResponse->GetArray();
 
-        // Loop through products to count the variants, we want 1 output product per variant
+		// Loop through products to count the variants, we want 1 output product per variant
 		int VariantCount = 0;
 		for (int DtoCount = 0; DtoCount < ProductsArray.size(); DtoCount++)
 		{
@@ -713,9 +722,9 @@ void GetShopifyStoresResult::OnResponse(const csp::services::ApiResponseBase* Ap
 		// Extract data from the response into our Stores array
 		std::vector<chs_aggregation::ShopifyStorefrontDto>& StoresArray = ShopifyStoresResponse->GetArray();
 
-        Stores = csp::common::Array<csp::systems::ShopifyStoreInfo>(StoresArray.size());
+		Stores = csp::common::Array<csp::systems::ShopifyStoreInfo>(StoresArray.size());
 
-        ShopifyStoreDtoArrayToShopifyStoreInfoArray(StoresArray, Stores);
+		ShopifyStoreDtoArrayToShopifyStoreInfoArray(StoresArray, Stores);
 	}
 }
 } // namespace csp::systems
