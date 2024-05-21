@@ -52,9 +52,9 @@ public:
 	/// @param InBoolValue bool : In value
 	Variant(bool InBoolValue);
 
-	/// @brief Construct a Variant based on a float type.
-	/// @param InFloatValue float : In value
-	Variant(float InFloatValue);
+	/// @brief Construct a Variant based on a double-precision float type.
+	/// @param InFloatValue double : In value
+	Variant(double InFloatValue);
 
 	/// @brief Construct a Variant based on a Long (uint64_t) type.
 	/// @param InLongValue int64_t : In value
@@ -100,11 +100,11 @@ public:
 	/// @return bool
 	bool GetBool() const;
 
-	/// @brief Sets internal variant type as a float.
-	void SetFloat(float InValue);
-	/// @brief Gets internal variant type as a float.
-	/// @return float
-	float GetFloat() const;
+	/// @brief Sets internal variant type as a double-precision float.
+	void SetFloat(double InValue);
+	/// @brief Gets internal variant type as a double-precision float.
+	/// @return double
+	double GetFloat() const;
 
 	/// @brief Sets internal variant type as an int64_t.
 	void SetInt(int64_t InValue);
@@ -147,7 +147,7 @@ private:
 		~InternalValue();
 
 		bool Bool;
-		float Float;
+		double Float;
 		int64_t Int;
 		String String;
 		Vector3 Vector3;
