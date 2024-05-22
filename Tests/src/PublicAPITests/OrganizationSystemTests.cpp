@@ -436,3 +436,44 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_CREATE_ORGANISATION_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
+{
+	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
+	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+	EXPECT_TRUE(HasOrgAccountDetails);
+
+	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
+	auto OrgAdminUserPassword = OrgAccountDetails["OrgAdminLoginPassword"];
+
+	SetRandSeed();
+
+	auto& SystemsManager	 = ::SystemsManager::Get();
+	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
+	auto* SpaceSystem		 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	// Log in - user needs to be an admin member of the organization
+	String AdminUserId;
+	LogIn(UserSystem, AdminUserId, OrgAdminUserEmail, OrgAdminUserPassword);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	EXPECT_EQ(Space.OrganizationId, "661ea67b07a518c46909dc97");
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
