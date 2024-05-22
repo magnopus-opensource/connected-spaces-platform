@@ -467,14 +467,14 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in - user needs to be an admin member of the organization
-	String AdminUserId;
-	LogIn(UserSystem, AdminUserId, OrgAdminUserEmail, OrgAdminUserPassword);
+	// Log in
+	String UserId;
+	LogIn(UserSystem, UserId, OrgAdminUserEmail, OrgAdminUserPassword);
 
 	// Create space
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-	
+
 	// Get the Id of the Organization the user is authenticated against. Users can currently only
 	// belong to a single Organization so we just use the first one.
 	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
