@@ -52,14 +52,7 @@ AudioSpaceComponent::AudioSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 
 const csp::common::Vector3& AudioSpaceComponent::GetPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::Position));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(AudioPropertyKeys::Position));
 }
 
 void AudioSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -69,14 +62,7 @@ void AudioSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 
 AudioPlaybackState AudioSpaceComponent::GetPlaybackState() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<AudioPlaybackState>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return AudioPlaybackState::Pause;
+	return static_cast<AudioPlaybackState>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::PlaybackState)));
 }
 
 void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState Value)
@@ -86,14 +72,7 @@ void AudioSpaceComponent::SetPlaybackState(AudioPlaybackState Value)
 
 AudioType AudioSpaceComponent::GetAudioType() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<AudioType>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return AudioType::Global;
+	return static_cast<AudioType>(GetIntegerProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioType)));
 }
 
 void AudioSpaceComponent::SetAudioType(AudioType Value)
@@ -103,14 +82,7 @@ void AudioSpaceComponent::SetAudioType(AudioType Value)
 
 const csp::common::String& AudioSpaceComponent::GetAudioAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::AudioAssetId));
 }
 
 void AudioSpaceComponent::SetAudioAssetId(const csp::common::String& Value)
@@ -120,14 +92,7 @@ void AudioSpaceComponent::SetAudioAssetId(const csp::common::String& Value)
 
 const csp::common::String& AudioSpaceComponent::GetAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::AssetCollectionId));
 }
 
 void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -137,14 +102,7 @@ void AudioSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 
 float AudioSpaceComponent::GetAttenuationRadius() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::AttenuationRadius));
 }
 
 void AudioSpaceComponent::SetAttenuationRadius(float Value)
@@ -154,14 +112,7 @@ void AudioSpaceComponent::SetAttenuationRadius(float Value)
 
 bool AudioSpaceComponent::GetIsLoopPlayback() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsLoopPlayback));
 }
 
 void AudioSpaceComponent::SetIsLoopPlayback(bool Value)
@@ -171,14 +122,7 @@ void AudioSpaceComponent::SetIsLoopPlayback(bool Value)
 
 float AudioSpaceComponent::GetTimeSincePlay() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::TimeSincePlay));
 }
 
 void AudioSpaceComponent::SetTimeSincePlay(float Value)
@@ -188,14 +132,7 @@ void AudioSpaceComponent::SetTimeSincePlay(float Value)
 
 float AudioSpaceComponent::GetVolume() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume));
 }
 
 void AudioSpaceComponent::SetVolume(float Value)
@@ -212,14 +149,7 @@ void AudioSpaceComponent::SetVolume(float Value)
 
 bool AudioSpaceComponent::GetIsEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(AudioPropertyKeys::IsEnabled));
 }
 
 void AudioSpaceComponent::SetIsEnabled(bool InValue)
@@ -229,14 +159,7 @@ void AudioSpaceComponent::SetIsEnabled(bool InValue)
 
 const csp::common::String& AudioSpaceComponent::GetThirdPartyComponentRef() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AudioPropertyKeys::ThirdPartyComponentRef));
 }
 
 void AudioSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)

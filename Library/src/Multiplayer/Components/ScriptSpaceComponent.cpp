@@ -33,14 +33,7 @@ ScriptSpaceComponent::ScriptSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 
 const csp::common::String& ScriptSpaceComponent::GetScriptSource() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource));
 }
 
 void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
@@ -53,14 +46,7 @@ void ScriptSpaceComponent::SetScriptSource(const csp::common::String& Value)
 
 int64_t ScriptSpaceComponent::GetOwnerId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return RepVal.GetInt();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0;
+	return GetIntegerProperty(static_cast<uint32_t>(ScriptComponentPropertyKeys::OwnerId));
 }
 
 void ScriptSpaceComponent::SetOwnerId(int64_t OwnerId)
@@ -70,14 +56,7 @@ void ScriptSpaceComponent::SetOwnerId(int64_t OwnerId)
 
 ScriptScope ScriptSpaceComponent::GetScriptScope() const
 {
-	if (const auto& RepVal = GetProperty((uint32_t) ScriptComponentPropertyKeys::ScriptScope);
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<ScriptScope>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ScriptScope::Local;
+	return static_cast<ScriptScope>(GetIntegerProperty((uint32_t) ScriptComponentPropertyKeys::ScriptScope));
 }
 
 void ScriptSpaceComponent::SetScriptScope(ScriptScope Scope)

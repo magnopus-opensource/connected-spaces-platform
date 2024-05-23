@@ -44,16 +44,7 @@ GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent) : 
 
 const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAssetId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId));
 }
 
 void GaussianSplatSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
@@ -61,19 +52,9 @@ void GaussianSplatSpaceComponent::SetExternalResourceAssetId(const csp::common::
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId), Value);
 }
 
-
 const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId));
 }
 
 void GaussianSplatSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
@@ -81,21 +62,11 @@ void GaussianSplatSpaceComponent::SetExternalResourceAssetCollectionId(const csp
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position));
 }
 
 void GaussianSplatSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -103,19 +74,9 @@ void GaussianSplatSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& GaussianSplatSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation));
 }
 
 void GaussianSplatSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -123,26 +84,15 @@ void GaussianSplatSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale));
 }
 
 void GaussianSplatSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform GaussianSplatSpaceComponent::GetTransform() const
 {
@@ -161,21 +111,11 @@ void GaussianSplatSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 /* IVisibleComponent */
 
 bool GaussianSplatSpaceComponent::GetIsVisible() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible));
 }
 
 void GaussianSplatSpaceComponent::SetIsVisible(bool InValue)
@@ -183,19 +123,9 @@ void GaussianSplatSpaceComponent::SetIsVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible), InValue);
 }
 
-
 bool GaussianSplatSpaceComponent::GetIsARVisible() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible));
 }
 
 void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
@@ -203,18 +133,9 @@ void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
 }
 
-
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
 }
 
 void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
@@ -224,16 +145,7 @@ void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint));
 }
 
 void GaussianSplatSpaceComponent::SetTint(const csp::common::Vector3& TintValue)

@@ -61,19 +61,13 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
 {
 	csp::common::List<csp::common::Vector3> returnList;
 
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	const auto& RepVal = GetIntegerProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
+
+	for (int i = 0; i < RepVal; ++i)
 	{
-
-		for (int i = 0; i < RepVal.GetInt(); ++i)
-		{
-			returnList.Append(GetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i)).GetVector3());
-		}
-
-		return returnList;
+		returnList.Append(GetVector3Property(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i)));
 	}
 
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
 	return returnList;
 }
 

@@ -162,15 +162,7 @@ void ConversationSpaceComponent::DeleteMessage(const csp::common::String& Messag
 
 bool ConversationSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsVisible));
 }
 
 void ConversationSpaceComponent::SetIsVisible(const bool Value)
@@ -180,32 +172,14 @@ void ConversationSpaceComponent::SetIsVisible(const bool Value)
 
 bool ConversationSpaceComponent::GetIsActive() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive));
 }
-
 
 /* IPositionComponent */
 
 const csp::common::Vector3& ConversationSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::Position));
 }
 
 void ConversationSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -213,28 +187,17 @@ void ConversationSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Position), Value);
 }
 
-
 /* IRotationComponent */
 
 const csp::common::Vector4& ConversationSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(ConversationPropertyKeys::Rotation));
 }
 
 void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
 	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
-
 
 void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {
@@ -286,15 +249,7 @@ void ConversationSpaceComponent::SetTitle(const csp::common::String& Value)
 
 const csp::common::String& ConversationSpaceComponent::GetTitle() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
 }
 
 void ConversationSpaceComponent::SetDate(const csp::common::String& Value)
@@ -304,15 +259,7 @@ void ConversationSpaceComponent::SetDate(const csp::common::String& Value)
 
 const csp::common::String& ConversationSpaceComponent::GetDate() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date));
 }
 
 void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
@@ -322,15 +269,7 @@ void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
 
 const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return RepVal.GetInt();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return 0;
+	return GetIntegerProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
@@ -345,15 +284,7 @@ void ConversationSpaceComponent::RemoveConversationId()
 
 const csp::common::String& ConversationSpaceComponent::GetConversationId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationId));
 }
 
 } // namespace csp::multiplayer

@@ -53,16 +53,7 @@ CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent) : Componen
 
 const csp::common::Vector3& CollisionSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(CollisionPropertyKeys::Position));
 }
 
 void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -70,19 +61,9 @@ void CollisionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& CollisionSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(CollisionPropertyKeys::Rotation));
 }
 
 void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -90,26 +71,15 @@ void CollisionSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& CollisionSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(CollisionPropertyKeys::Scale));
 }
 
 void CollisionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(CollisionPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform CollisionSpaceComponent::GetTransform() const
 {
@@ -128,19 +98,9 @@ void CollisionSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 CollisionShape CollisionSpaceComponent::GetCollisionShape() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<CollisionShape>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return CollisionShape::Box;
+	return static_cast<CollisionShape>(GetIntegerProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionShape)));
 }
 
 void CollisionSpaceComponent::SetCollisionShape(CollisionShape collisionShape)
@@ -150,16 +110,7 @@ void CollisionSpaceComponent::SetCollisionShape(CollisionShape collisionShape)
 
 CollisionMode CollisionSpaceComponent::GetCollisionMode() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<CollisionMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return CollisionMode::Collision;
+	return static_cast<CollisionMode>(GetIntegerProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionMode)));
 }
 
 void CollisionSpaceComponent::SetCollisionMode(CollisionMode collisionMode)
@@ -169,16 +120,7 @@ void CollisionSpaceComponent::SetCollisionMode(CollisionMode collisionMode)
 
 const csp::common::String& CollisionSpaceComponent::GetCollisionAssetId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::CollisionAssetId));
 }
 
 void CollisionSpaceComponent::SetCollisionAssetId(const csp::common::String& Value)
@@ -188,16 +130,7 @@ void CollisionSpaceComponent::SetCollisionAssetId(const csp::common::String& Val
 
 const csp::common::String& CollisionSpaceComponent::GetAssetCollectionId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId));
 }
 
 void CollisionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -242,16 +175,7 @@ float CollisionSpaceComponent::GetDefaultCapsuleHalfHeight()
 
 const csp::common::String& CollisionSpaceComponent::GetThirdPartyComponentRef() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef));
 }
 
 void CollisionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
