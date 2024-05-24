@@ -41,14 +41,7 @@ FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(SpaceEntity* Parent) 
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetMarkerAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId));
 }
 
 void FiducialMarkerSpaceComponent::SetMarkerAssetId(const csp::common::String& Value)
@@ -58,14 +51,7 @@ void FiducialMarkerSpaceComponent::SetMarkerAssetId(const csp::common::String& V
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId));
 }
 
 void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -75,14 +61,7 @@ void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::Strin
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name));
 }
 
 void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
@@ -90,21 +69,11 @@ void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position));
 }
 
 void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -112,19 +81,9 @@ void FiducialMarkerSpaceComponent::SetPosition(const csp::common::Vector3& Value
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& FiducialMarkerSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation));
 }
 
 void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -132,26 +91,15 @@ void FiducialMarkerSpaceComponent::SetRotation(const csp::common::Vector4& Value
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& FiducialMarkerSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale));
 }
 
 void FiducialMarkerSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform FiducialMarkerSpaceComponent::GetTransform() const
 {
@@ -170,19 +118,11 @@ void FiducialMarkerSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 /* IVisibleComponent */
 
 bool FiducialMarkerSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsVisible));
 }
 
 void FiducialMarkerSpaceComponent::SetIsVisible(bool Value)
@@ -192,14 +132,7 @@ void FiducialMarkerSpaceComponent::SetIsVisible(bool Value)
 
 bool FiducialMarkerSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::IsARVisible));
 }
 
 void FiducialMarkerSpaceComponent::SetIsARVisible(bool Value)

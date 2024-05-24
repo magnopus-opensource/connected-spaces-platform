@@ -39,16 +39,7 @@ ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent) : Compon
 
 const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId));
 }
 
 void ReflectionSpaceComponent::SetReflectionAssetId(const csp::common::String& Value)
@@ -58,16 +49,7 @@ void ReflectionSpaceComponent::SetReflectionAssetId(const csp::common::String& V
 
 const csp::common::String& ReflectionSpaceComponent::GetAssetCollectionId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId));
 }
 
 void ReflectionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -77,16 +59,7 @@ void ReflectionSpaceComponent::SetAssetCollectionId(const csp::common::String& V
 
 const csp::common::String& ReflectionSpaceComponent::GetName() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name));
 }
 
 void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
@@ -94,21 +67,11 @@ void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name), Value);
 }
 
-
 /* IPositionComponent */
 
 const csp::common::Vector3& ReflectionSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Position));
 }
 
 void ReflectionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -116,21 +79,11 @@ void ReflectionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
 }
 
-
 /* IScaleComponent */
 
 const csp::common::Vector3& ReflectionSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Scale));
 }
 
 void ReflectionSpaceComponent::SetScale(const csp::common::Vector3& Value)
@@ -138,19 +91,9 @@ void ReflectionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
 }
 
-
 ReflectionShape ReflectionSpaceComponent::GetReflectionShape() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<ReflectionShape>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReflectionShape::UnitBox;
+	return static_cast<ReflectionShape>(GetIntegerProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)));
 }
 
 void ReflectionSpaceComponent::SetReflectionShape(ReflectionShape Value)
@@ -160,16 +103,7 @@ void ReflectionSpaceComponent::SetReflectionShape(ReflectionShape Value)
 
 const csp::common::String& ReflectionSpaceComponent::GetThirdPartyComponentRef() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef));
 }
 
 void ReflectionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)

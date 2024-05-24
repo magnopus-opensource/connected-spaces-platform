@@ -46,14 +46,7 @@ AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 
 const csp::common::String& AvatarSpaceComponent::GetAvatarId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarId));
 }
 
 void AvatarSpaceComponent::SetAvatarId(const csp::common::String& Value)
@@ -63,14 +56,7 @@ void AvatarSpaceComponent::SetAvatarId(const csp::common::String& Value)
 
 const csp::common::String& AvatarSpaceComponent::GetUserId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::UserId));
 }
 
 void AvatarSpaceComponent::SetUserId(const csp::common::String& Value)
@@ -80,14 +66,7 @@ void AvatarSpaceComponent::SetUserId(const csp::common::String& Value)
 
 AvatarState AvatarSpaceComponent::GetState() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::State));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<AvatarState>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return AvatarState::Idle;
+	return static_cast<AvatarState>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::State)));
 }
 
 void AvatarSpaceComponent::SetState(AvatarState Value)
@@ -97,14 +76,7 @@ void AvatarSpaceComponent::SetState(AvatarState Value)
 
 AvatarPlayMode AvatarSpaceComponent::GetAvatarPlayMode() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<AvatarPlayMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return AvatarPlayMode::Default;
+	return static_cast<AvatarPlayMode>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarPlayMode)));
 }
 
 void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
@@ -114,14 +86,7 @@ void AvatarSpaceComponent::SetAvatarPlayMode(AvatarPlayMode Value)
 
 const int64_t AvatarSpaceComponent::GetAvatarMeshIndex() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return RepVal.GetInt();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0;
+	return GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AvatarMeshIndex));
 }
 
 void AvatarSpaceComponent::SetAvatarMeshIndex(const int64_t Value)
@@ -131,14 +96,7 @@ void AvatarSpaceComponent::SetAvatarMeshIndex(const int64_t Value)
 
 const csp::common::String& AvatarSpaceComponent::GetAgoraUserId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::AgoraUserId));
 }
 
 void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& Value)
@@ -148,14 +106,7 @@ void AvatarSpaceComponent::SetAgoraUserId(const csp::common::String& Value)
 
 const csp::common::String& AvatarSpaceComponent::GetCustomAvatarUrl() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::CustomAvatarUrl));
 }
 
 void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
@@ -165,14 +116,7 @@ void AvatarSpaceComponent::SetCustomAvatarUrl(const csp::common::String& Value)
 
 const bool AvatarSpaceComponent::GetIsHandIKEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::IsHandIKEnabled));
 }
 
 void AvatarSpaceComponent::SetIsHandIKEnabled(bool Value)
@@ -182,14 +126,7 @@ void AvatarSpaceComponent::SetIsHandIKEnabled(bool Value)
 
 const csp::common::Vector3& AvatarSpaceComponent::GetTargetHandIKTargetLocation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::TargetHandIKTargetLocation));
 }
 
 void AvatarSpaceComponent::SetTargetHandIKTargetLocation(const csp::common::Vector3& Value)
@@ -199,14 +136,7 @@ void AvatarSpaceComponent::SetTargetHandIKTargetLocation(const csp::common::Vect
 
 const csp::common::Vector4& AvatarSpaceComponent::GetHandRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::HandRotation));
 }
 
 void AvatarSpaceComponent::SetHandRotation(const csp::common::Vector4& Value)
@@ -216,14 +146,7 @@ void AvatarSpaceComponent::SetHandRotation(const csp::common::Vector4& Value)
 
 const csp::common::Vector4& AvatarSpaceComponent::GetHeadRotation() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::HeadRotation));
 }
 
 void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& Value)
@@ -233,14 +156,7 @@ void AvatarSpaceComponent::SetHeadRotation(const csp::common::Vector4& Value)
 
 const float AvatarSpaceComponent::GetWalkRunBlendPercentage() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::WalkRunBlendPercentage));
 }
 
 void AvatarSpaceComponent::SetWalkRunBlendPercentage(float Value)
@@ -250,14 +166,7 @@ void AvatarSpaceComponent::SetWalkRunBlendPercentage(float Value)
 
 const float AvatarSpaceComponent::GetTorsoTwistAlpha() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::TorsoTwistAlpha));
 }
 
 void AvatarSpaceComponent::SetTorsoTwistAlpha(float Value)
@@ -267,14 +176,7 @@ void AvatarSpaceComponent::SetTorsoTwistAlpha(float Value)
 
 const csp::common::Vector3& csp::multiplayer::AvatarSpaceComponent::GetMovementDirection() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(AvatarComponentPropertyKeys::MovementDirection));
 }
 
 void csp::multiplayer::AvatarSpaceComponent::SetMovementDirection(const csp::common::Vector3& Value)
@@ -284,14 +186,7 @@ void csp::multiplayer::AvatarSpaceComponent::SetMovementDirection(const csp::com
 
 LocomotionModel AvatarSpaceComponent::GetLocomotionModel() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<LocomotionModel>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return LocomotionModel::Grounded;
+	return static_cast<LocomotionModel>(GetIntegerProperty(static_cast<uint32_t>(AvatarComponentPropertyKeys::LocomotionModel)));
 }
 
 void AvatarSpaceComponent::SetLocomotionModel(LocomotionModel Value)

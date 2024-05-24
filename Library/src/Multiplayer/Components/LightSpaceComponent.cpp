@@ -46,14 +46,7 @@ LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 
 LightType LightSpaceComponent::GetLightType() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightType));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<LightType>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return LightType::Directional;
+	return static_cast<LightType>(GetIntegerProperty(static_cast<uint32_t>(LightPropertyKeys::LightType)));
 }
 
 void LightSpaceComponent::SetLightType(LightType Value)
@@ -63,14 +56,7 @@ void LightSpaceComponent::SetLightType(LightType Value)
 
 const csp::common::Vector3& LightSpaceComponent::GetColor() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Color));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(LightPropertyKeys::Color));
 }
 
 void LightSpaceComponent::SetColor(const csp::common::Vector3& Value)
@@ -80,14 +66,7 @@ void LightSpaceComponent::SetColor(const csp::common::Vector3& Value)
 
 float LightSpaceComponent::GetIntensity() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Intensity));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::Intensity));
 }
 
 void LightSpaceComponent::SetIntensity(float Value)
@@ -97,14 +76,7 @@ void LightSpaceComponent::SetIntensity(float Value)
 
 float LightSpaceComponent::GetRange() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Range));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::Range));
 }
 
 void LightSpaceComponent::SetRange(float Value)
@@ -114,14 +86,7 @@ void LightSpaceComponent::SetRange(float Value)
 
 float LightSpaceComponent::GetInnerConeAngle() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::InnerConeAngle));
 }
 
 void LightSpaceComponent::SetInnerConeAngle(float Value)
@@ -131,14 +96,7 @@ void LightSpaceComponent::SetInnerConeAngle(float Value)
 
 float LightSpaceComponent::GetOuterConeAngle() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle));
 }
 
 void LightSpaceComponent::SetOuterConeAngle(float Value)
@@ -146,21 +104,11 @@ void LightSpaceComponent::SetOuterConeAngle(float Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::OuterConeAngle), Value);
 }
 
-
 /* IPositionComponent */
 
 const csp::common::Vector3& LightSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(LightPropertyKeys::Position));
 }
 
 void LightSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -168,21 +116,11 @@ void LightSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::Position), Value);
 }
 
-
 /* IRotationComponent */
 
 const csp::common::Vector4& LightSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(LightPropertyKeys::Rotation));
 }
 
 void LightSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -190,19 +128,11 @@ void LightSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::Rotation), Value);
 }
 
-
 /* IVisibleComponent */
 
 bool LightSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible));
 }
 
 void LightSpaceComponent::SetIsVisible(bool Value)
@@ -210,17 +140,9 @@ void LightSpaceComponent::SetIsVisible(bool Value)
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::IsVisible), Value);
 }
 
-
 bool LightSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(LightPropertyKeys::IsARVisible));
 }
 
 void LightSpaceComponent::SetIsARVisible(bool Value)
@@ -230,14 +152,7 @@ void LightSpaceComponent::SetIsARVisible(bool Value)
 
 const csp::common::String& LightSpaceComponent::GetLightCookieAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetId));
 }
 
 void LightSpaceComponent::SetLightCookieAssetId(const csp::common::String& Value)
@@ -247,14 +162,7 @@ void LightSpaceComponent::SetLightCookieAssetId(const csp::common::String& Value
 
 const csp::common::String& LightSpaceComponent::GetLightCookieAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieAssetCollectionId));
 }
 
 void LightSpaceComponent::SetLightCookieAssetCollectionId(const csp::common::String& Value)
@@ -264,14 +172,7 @@ void LightSpaceComponent::SetLightCookieAssetCollectionId(const csp::common::Str
 
 LightCookieType LightSpaceComponent::GetLightCookieType() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieType));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<LightCookieType>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return LightCookieType::NoCookie;
+	return static_cast<LightCookieType>(GetIntegerProperty(static_cast<uint32_t>(LightPropertyKeys::LightCookieType)));
 }
 
 void LightSpaceComponent::SetLightCookieType(LightCookieType Value)
@@ -281,14 +182,7 @@ void LightSpaceComponent::SetLightCookieType(LightCookieType Value)
 
 const csp::common::String& LightSpaceComponent::GetThirdPartyComponentRef() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(LightPropertyKeys::ThirdPartyComponentRef));
 }
 
 void LightSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
@@ -298,20 +192,12 @@ void LightSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& I
 
 LightShadowType LightSpaceComponent::GetLightShadowType() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<LightShadowType>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return LightShadowType::None;
+	return static_cast<LightShadowType>(GetIntegerProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType)));
 }
 
 void LightSpaceComponent::SetLightShadowType(LightShadowType Value)
 {
 	SetProperty(static_cast<uint32_t>(LightPropertyKeys::LightShadowType), static_cast<int64_t>(Value));
 }
-
 
 } // namespace csp::multiplayer

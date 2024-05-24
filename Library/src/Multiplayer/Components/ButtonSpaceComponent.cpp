@@ -39,14 +39,7 @@ ButtonSpaceComponent::ButtonSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 
 const csp::common::String& ButtonSpaceComponent::GetLabelText() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::LabelText));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ButtonPropertyKeys::LabelText));
 }
 
 void ButtonSpaceComponent::SetLabelText(const csp::common::String& Value)
@@ -56,14 +49,7 @@ void ButtonSpaceComponent::SetLabelText(const csp::common::String& Value)
 
 const csp::common::String& ButtonSpaceComponent::GetIconAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IconAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ButtonPropertyKeys::IconAssetId));
 }
 
 void ButtonSpaceComponent::SetIconAssetId(const csp::common::String& Value)
@@ -73,14 +59,7 @@ void ButtonSpaceComponent::SetIconAssetId(const csp::common::String& Value)
 
 const csp::common::String& ButtonSpaceComponent::GetAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ButtonPropertyKeys::AssetCollectionId));
 }
 
 void ButtonSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -88,21 +67,11 @@ void ButtonSpaceComponent::SetAssetCollectionId(const csp::common::String& Value
 	SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::AssetCollectionId), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& ButtonSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ButtonPropertyKeys::Position));
 }
 
 void ButtonSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -110,19 +79,9 @@ void ButtonSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& ButtonSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(ButtonPropertyKeys::Rotation));
 }
 
 void ButtonSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -130,26 +89,15 @@ void ButtonSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& ButtonSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ButtonPropertyKeys::Scale));
 }
 
 void ButtonSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ButtonPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform ButtonSpaceComponent::GetTransform() const
 {
@@ -168,19 +116,11 @@ void ButtonSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 /* IClickableComponent */
 
 bool ButtonSpaceComponent::GetIsEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled));
 }
 
 void ButtonSpaceComponent::SetIsEnabled(bool Value)
@@ -192,14 +132,7 @@ void ButtonSpaceComponent::SetIsEnabled(bool Value)
 
 bool ButtonSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsVisible));
 }
 
 void ButtonSpaceComponent::SetIsVisible(bool Value)
@@ -209,14 +142,7 @@ void ButtonSpaceComponent::SetIsVisible(bool Value)
 
 bool ButtonSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible));
 }
 
 void ButtonSpaceComponent::SetIsARVisible(bool Value)
