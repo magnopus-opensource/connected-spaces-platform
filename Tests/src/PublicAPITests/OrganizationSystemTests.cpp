@@ -105,6 +105,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -157,6 +158,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -210,6 +212,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutP
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -276,6 +279,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToSpecifiedOrganizatio
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -341,6 +345,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToInvalidOrganizationT
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -383,6 +388,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 {
 	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
 	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
 	EXPECT_TRUE(HasOrgAccountDetails);
 
 	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
@@ -431,6 +437,54 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	// remove user2 from organization
 	auto [RemoveUser2Result] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, nullptr, AltLoginId);
 	EXPECT_EQ(RemoveUser2Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_CREATE_ORGANISATION_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
+{
+	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
+	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
+	EXPECT_TRUE(HasOrgAccountDetails);
+
+	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
+	auto OrgAdminUserPassword = OrgAccountDetails["OrgAdminLoginPassword"];
+
+	SetRandSeed();
+
+	auto& SystemsManager	 = ::SystemsManager::Get();
+	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
+	auto* SpaceSystem		 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	// Log in
+	String UserId;
+	LogIn(UserSystem, UserId, OrgAdminUserEmail, OrgAdminUserPassword);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
+
+	EXPECT_EQ(Space.OrganizationId, Oko_Tests_OrganizationId);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);

@@ -127,6 +127,7 @@ public:
 	csp::common::Array<csp::common::String> UserIds;
 	csp::common::Array<csp::common::String> ModeratorIds;
 	csp::common::Array<csp::common::String> BannedUserIds;
+	csp::common::String OrganizationId;
 	/** @} */
 };
 
