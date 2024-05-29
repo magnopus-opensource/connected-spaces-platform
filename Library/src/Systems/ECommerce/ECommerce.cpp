@@ -128,6 +128,15 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 			{
 				CSP_LOG_ERROR_MSG("ShopifyProductDto missing UnitPrice");
 			}
+
+            if (VariantProductInformation[i]->HasQuantityAvailable())
+			{
+				ProductInfo.Variants[i].QuantityAvailable = VariantProductInformation[i]->GetQuantityAvailable();
+			}
+			else
+			{
+				CSP_LOG_ERROR_MSG("ShopifyProductDto missing QuantityAvailable");
+			}
 		}
 	}
 	{
@@ -292,6 +301,15 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 				else
 				{
 					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing UnitPrice");
+				}
+
+                if (VariantProductInformation->HasQuantityAvailable())
+				{
+					ProductInfoCollection[TotalVariantIndex].Variants[0].QuantityAvailable = VariantProductInformation->GetQuantityAvailable();
+				}
+				else
+				{
+					CSP_LOG_MSG(LogLevel::Log, "ShopifyProductDto missing QuantityAvailable");
 				}
 
 				if (Dto.HasTags())
