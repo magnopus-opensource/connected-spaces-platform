@@ -87,7 +87,7 @@ public:
 	bool GetIsBackgroundVisible() const;
 	/// @brief Sets the background visibility.
 	/// @param Value The background visibility.
-	void SetIsBackgroundVisible(float InValue);
+	void SetIsBackgroundVisible(bool InValue);
 
 	/// @brief Sets the Text Width.
 	/// @param Value The Text Width.
@@ -101,7 +101,7 @@ public:
 	float GetHeight() const;
 	/// @brief Sets the Text Height.
 	/// @param Value The Text Height.
-	void SetHeight(bool InValue);
+	void SetHeight(float InValue);
 
 	/// \addtogroup ITransformComponent
 	/// @{

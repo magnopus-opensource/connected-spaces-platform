@@ -79,7 +79,7 @@ bool TextSpaceComponent::GetIsBackgroundVisible() const
 	return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible));
 }
 
-void TextSpaceComponent::SetIsBackgroundVisible(float InValue)
+void TextSpaceComponent::SetIsBackgroundVisible(bool InValue)
 {
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible), InValue);
 }
@@ -99,7 +99,7 @@ float TextSpaceComponent::GetHeight() const
 	return GetFloatProperty(static_cast<uint32_t>(TextPropertyKeys::Height));
 }
 
-void TextSpaceComponent::SetHeight(bool InValue)
+void TextSpaceComponent::SetHeight(float InValue)
 {
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::Height), InValue);
 }
