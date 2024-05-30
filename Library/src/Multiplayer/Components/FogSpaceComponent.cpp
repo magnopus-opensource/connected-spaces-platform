@@ -45,14 +45,7 @@ FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent) : ComponentBase(Compon
 
 FogMode FogSpaceComponent::GetFogMode() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<FogMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return FogMode::Linear;
+	return static_cast<FogMode>(GetIntegerProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode)));
 }
 
 void FogSpaceComponent::SetFogMode(FogMode Value)
@@ -60,21 +53,11 @@ void FogSpaceComponent::SetFogMode(FogMode Value)
 	SetProperty(static_cast<uint32_t>(FogPropertyKeys::FogMode), static_cast<int64_t>(Value));
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& FogSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Position));
 }
 
 void FogSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -82,19 +65,9 @@ void FogSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(FogPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& FogSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(FogPropertyKeys::Rotation));
 }
 
 void FogSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -102,26 +75,15 @@ void FogSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(FogPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& FogSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Scale));
 }
 
 void FogSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(FogPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform FogSpaceComponent::GetTransform() const
 {
@@ -140,17 +102,9 @@ void FogSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 float FogSpaceComponent::GetStartDistance() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::StartDistance));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::StartDistance));
 }
 
 void FogSpaceComponent::SetStartDistance(float Value)
@@ -160,14 +114,7 @@ void FogSpaceComponent::SetStartDistance(float Value)
 
 float FogSpaceComponent::GetEndDistance() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::EndDistance));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::EndDistance));
 }
 
 void FogSpaceComponent::SetEndDistance(float Value)
@@ -177,14 +124,7 @@ void FogSpaceComponent::SetEndDistance(float Value)
 
 const csp::common::Vector3& FogSpaceComponent::GetColor() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::Color));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(FogPropertyKeys::Color));
 }
 
 void FogSpaceComponent::SetColor(const csp::common::Vector3& Value)
@@ -194,14 +134,7 @@ void FogSpaceComponent::SetColor(const csp::common::Vector3& Value)
 
 float FogSpaceComponent::GetDensity() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::Density));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::Density));
 }
 
 void FogSpaceComponent::SetDensity(float Value)
@@ -211,14 +144,7 @@ void FogSpaceComponent::SetDensity(float Value)
 
 float FogSpaceComponent::GetHeightFalloff() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::HeightFalloff));
 }
 
 void FogSpaceComponent::SetHeightFalloff(float Value)
@@ -228,14 +154,7 @@ void FogSpaceComponent::SetHeightFalloff(float Value)
 
 float FogSpaceComponent::GetMaxOpacity() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::MaxOpacity));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(FogPropertyKeys::MaxOpacity));
 }
 
 void FogSpaceComponent::SetMaxOpacity(float Value)
@@ -245,14 +164,7 @@ void FogSpaceComponent::SetMaxOpacity(float Value)
 
 bool FogSpaceComponent::GetIsVolumetric() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVolumetric));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVolumetric));
 }
 
 void FogSpaceComponent::SetIsVolumetric(bool Value)
@@ -264,14 +176,7 @@ void FogSpaceComponent::SetIsVolumetric(bool Value)
 
 bool FogSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsVisible));
 }
 
 void FogSpaceComponent::SetIsVisible(bool Value)
@@ -281,14 +186,7 @@ void FogSpaceComponent::SetIsVisible(bool Value)
 
 bool FogSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(FogPropertyKeys::IsARVisible));
 }
 
 void FogSpaceComponent::SetIsARVisible(bool Value)
@@ -298,14 +196,7 @@ void FogSpaceComponent::SetIsARVisible(bool Value)
 
 const csp::common::String& FogSpaceComponent::GetThirdPartyComponentRef() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef));
 }
 
 void FogSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)

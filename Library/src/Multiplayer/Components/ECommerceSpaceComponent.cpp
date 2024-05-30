@@ -37,16 +37,7 @@ ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent) : Componen
 
 const csp::common::Vector3& ECommerceSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ECommercePropertyKeys::Position));
 }
 
 void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -54,17 +45,9 @@ void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
 }
 
-
 csp::common::String ECommerceSpaceComponent::GetProductId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
 }
 
 void ECommerceSpaceComponent::SetProductId(csp::common::String Value)

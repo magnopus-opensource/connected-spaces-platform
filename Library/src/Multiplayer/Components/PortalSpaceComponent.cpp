@@ -36,14 +36,7 @@ csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent
 
 const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetSpaceId(const csp::common::String& Value)
@@ -58,21 +51,11 @@ void csp::multiplayer::PortalSpaceComponent::GetSpaceThumbnail(csp::systems::Uri
 	SpaceSystem->GetSpaceThumbnail(GetSpaceId(), Callback);
 }
 
-
 /* IPositionComponent */
 
 const csp::common::Vector3& csp::multiplayer::PortalSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -80,17 +63,9 @@ void csp::multiplayer::PortalSpaceComponent::SetPosition(const csp::common::Vect
 	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
 }
 
-
 float csp::multiplayer::PortalSpaceComponent::GetRadius() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius));
-		RepVal.GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetRadius(float Value)
@@ -100,14 +75,7 @@ void csp::multiplayer::PortalSpaceComponent::SetRadius(float Value)
 
 bool csp::multiplayer::PortalSpaceComponent::GetIsEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetIsEnabled(bool Value)

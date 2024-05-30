@@ -34,14 +34,7 @@ CustomSpaceComponent::CustomSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 
 const csp::common::String& CustomSpaceComponent::GetApplicationOrigin() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::ApplicationOrigin));
 }
 
 void CustomSpaceComponent::SetApplicationOrigin(const csp::common::String& Value)
@@ -152,14 +145,7 @@ void CustomSpaceComponent::AddKey(const csp::common::String& Value)
 
 void CustomSpaceComponent::RemoveKey(const csp::common::String& Key)
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
-
-	if (RepVal.GetReplicatedValueType() != ReplicatedValueType::String)
-	{
-		return;
-	}
-
-	const csp::common::String& CurrentKeys		   = RepVal.GetString();
+	const csp::common::String& CurrentKeys		   = GetStringProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 	csp::common::List<csp::common::String> KeyList = CurrentKeys.Split(',');
 	if (KeyList.Contains(Key))
 	{

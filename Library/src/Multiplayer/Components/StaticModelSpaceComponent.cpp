@@ -44,16 +44,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 
 const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId));
 }
 
 void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
@@ -61,19 +52,9 @@ void StaticModelSpaceComponent::SetExternalResourceAssetId(const csp::common::St
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId), Value);
 }
 
-
 const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId));
 }
 
 void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
@@ -81,21 +62,11 @@ void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& StaticModelSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(StaticModelPropertyKeys::Position));
 }
 
 void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -103,19 +74,9 @@ void StaticModelSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& StaticModelSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation));
 }
 
 void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -123,26 +84,15 @@ void StaticModelSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& StaticModelSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(StaticModelPropertyKeys::Scale));
 }
 
 void StaticModelSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform StaticModelSpaceComponent::GetTransform() const
 {
@@ -161,21 +111,11 @@ void StaticModelSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 /* IVisibleComponent */
 
 bool StaticModelSpaceComponent::GetIsVisible() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible));
 }
 
 void StaticModelSpaceComponent::SetIsVisible(bool InValue)
@@ -183,19 +123,9 @@ void StaticModelSpaceComponent::SetIsVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible), InValue);
 }
 
-
 bool StaticModelSpaceComponent::GetIsARVisible() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible));
 }
 
 void StaticModelSpaceComponent::SetIsARVisible(bool InValue)
@@ -203,19 +133,9 @@ void StaticModelSpaceComponent::SetIsARVisible(bool InValue)
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible), InValue);
 }
 
-
 const csp::common::String& StaticModelSpaceComponent::GetThirdPartyComponentRef() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef));
 }
 
 void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
@@ -223,18 +143,9 @@ void StaticModelSpaceComponent::SetThirdPartyComponentRef(const csp::common::Str
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
-
 bool StaticModelSpaceComponent::GetIsShadowCaster() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster));
 }
 
 void StaticModelSpaceComponent::SetIsShadowCaster(bool Value)

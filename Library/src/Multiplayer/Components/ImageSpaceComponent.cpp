@@ -43,14 +43,7 @@ ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 
 const csp::common::String& ImageSpaceComponent::GetImageAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId));
 }
 
 void ImageSpaceComponent::SetImageAssetId(const csp::common::String& Value)
@@ -60,14 +53,7 @@ void ImageSpaceComponent::SetImageAssetId(const csp::common::String& Value)
 
 const csp::common::String& ImageSpaceComponent::GetAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId));
 }
 
 void ImageSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -77,14 +63,7 @@ void ImageSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 
 const csp::common::String& ImageSpaceComponent::GetName() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::Name));
 }
 
 void ImageSpaceComponent::SetName(const csp::common::String& Value)
@@ -92,21 +71,11 @@ void ImageSpaceComponent::SetName(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& ImageSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ImagePropertyKeys::Position));
 }
 
 void ImageSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -114,19 +83,9 @@ void ImageSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& ImageSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(ImagePropertyKeys::Rotation));
 }
 
 void ImageSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -134,26 +93,15 @@ void ImageSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& ImageSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ImagePropertyKeys::Scale));
 }
 
 void ImageSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform ImageSpaceComponent::GetTransform() const
 {
@@ -172,17 +120,9 @@ void ImageSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 bool ImageSpaceComponent::GetIsEmissive() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsEmissive));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsEmissive));
 }
 
 void ImageSpaceComponent::SetIsEmissive(bool Value)
@@ -194,14 +134,7 @@ void ImageSpaceComponent::SetIsEmissive(bool Value)
 
 bool ImageSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsVisible));
 }
 
 void ImageSpaceComponent::SetIsVisible(bool Value)
@@ -211,14 +144,7 @@ void ImageSpaceComponent::SetIsVisible(bool Value)
 
 bool ImageSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ImagePropertyKeys::IsARVisible));
 }
 
 void ImageSpaceComponent::SetIsARVisible(bool Value)
@@ -228,14 +154,7 @@ void ImageSpaceComponent::SetIsARVisible(bool Value)
 
 BillboardMode ImageSpaceComponent::GetBillboardMode() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::BillboardMode));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<BillboardMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return BillboardMode::Off;
+	return static_cast<BillboardMode>(GetIntegerProperty(static_cast<uint32_t>(ImagePropertyKeys::BillboardMode)));
 }
 
 void ImageSpaceComponent::SetBillboardMode(BillboardMode Value)
@@ -245,14 +164,7 @@ void ImageSpaceComponent::SetBillboardMode(BillboardMode Value)
 
 DisplayMode ImageSpaceComponent::GetDisplayMode() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<DisplayMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return DisplayMode::SingleSided;
+	return static_cast<DisplayMode>(GetIntegerProperty(static_cast<uint32_t>(ImagePropertyKeys::DisplayMode)));
 }
 
 void ImageSpaceComponent::SetDisplayMode(DisplayMode Value)

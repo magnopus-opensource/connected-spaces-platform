@@ -70,6 +70,90 @@ const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 	return InvalidValue;
 }
 
+const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+	{
+		return RepVal.GetBool();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Boolean type");
+
+	return false;
+}
+
+const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+	{
+		return RepVal.GetInt();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Integer type");
+
+	return 0;
+}
+
+const float ComponentBase::GetFloatProperty(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
+	{
+		return RepVal.GetFloat();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Float type");
+
+	return 0.0f;
+}
+
+const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		return RepVal.GetString();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid String type");
+
+	return ReplicatedValue::GetDefaultString();
+}
+
+const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+	{
+		return RepVal.GetVector3();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector3 type");
+
+	return ReplicatedValue::GetDefaultVector3();
+}
+
+const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+	{
+		return RepVal.GetVector4();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector4 type");
+
+	return ReplicatedValue::GetDefaultVector4();
+}
+
 void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 {
 	if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
