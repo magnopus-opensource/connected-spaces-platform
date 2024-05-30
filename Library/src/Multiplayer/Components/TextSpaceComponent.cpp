@@ -176,14 +176,7 @@ void TextSpaceComponent::SetIsARVisible(bool Value)
 
 BillboardMode TextSpaceComponent::GetBillboardMode() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::BillboardMode));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<BillboardMode>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return BillboardMode::Off;
+	return static_cast<BillboardMode>(GetIntegerProperty(static_cast<uint32_t>(TextPropertyKeys::BillboardMode)));
 }
 
 void TextSpaceComponent::SetBillboardMode(BillboardMode Value)
