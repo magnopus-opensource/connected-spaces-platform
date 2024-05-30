@@ -34,7 +34,7 @@ TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(Comp
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible)] = true;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Width)]				 = 1.0f;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Height)]				 = 1.0f;
-	Properties[static_cast<uint32_t>(TextPropertyKeys::BillboardMode)]		 = static_cast<int64_t>(TextSpaceComponentBillboardMode::Off);
+	Properties[static_cast<uint32_t>(TextPropertyKeys::BillboardMode)]		 = static_cast<int64_t>(BillboardMode::Off);
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)]			 = false;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)]		 = false;
 
@@ -46,14 +46,7 @@ TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(Comp
 
 const csp::common::String& TextSpaceComponent::GetText() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Text));
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(TextPropertyKeys::Text));
 }
 
 void TextSpaceComponent::SetText(const csp::common::String& Value)
@@ -63,16 +56,7 @@ void TextSpaceComponent::SetText(const csp::common::String& Value)
 
 const csp::common::Vector3& TextSpaceComponent::GetTextColor() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::TextColor));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::TextColor));
 }
 
 void TextSpaceComponent::SetTextColor(const csp::common::Vector3& Value)
@@ -82,16 +66,7 @@ void TextSpaceComponent::SetTextColor(const csp::common::Vector3& Value)
 
 const csp::common::Vector3& TextSpaceComponent::GetBackgroundColor() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::BackgroundColor));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::BackgroundColor));
 }
 
 void TextSpaceComponent::SetBackgroundColor(const csp::common::Vector3& Value)
@@ -101,14 +76,7 @@ void TextSpaceComponent::SetBackgroundColor(const csp::common::Vector3& Value)
 
 bool TextSpaceComponent::GetIsBackgroundVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible));
 }
 
 void TextSpaceComponent::SetIsBackgroundVisible(float InValue)
@@ -118,14 +86,7 @@ void TextSpaceComponent::SetIsBackgroundVisible(float InValue)
 
 float TextSpaceComponent::GetWidth() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Width));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(TextPropertyKeys::Width));
 }
 
 void TextSpaceComponent::SetWidth(float InValue)
@@ -135,14 +96,7 @@ void TextSpaceComponent::SetWidth(float InValue)
 
 float TextSpaceComponent::GetHeight() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Height));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(TextPropertyKeys::Height));
 }
 
 void TextSpaceComponent::SetHeight(bool InValue)
@@ -152,16 +106,7 @@ void TextSpaceComponent::SetHeight(bool InValue)
 
 const csp::common::Vector3& TextSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::Position));
 }
 
 void TextSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -169,19 +114,9 @@ void TextSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& TextSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(TextPropertyKeys::Rotation));
 }
 
 void TextSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -189,26 +124,15 @@ void TextSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& TextSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(TextPropertyKeys::Scale));
 }
 
 void TextSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform TextSpaceComponent::GetTransform() const
 {
@@ -232,14 +156,7 @@ void TextSpaceComponent::SetTransform(const SpaceTransform& InValue)
 
 bool TextSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsVisible));
 }
 
 void TextSpaceComponent::SetIsVisible(bool Value)
@@ -249,14 +166,7 @@ void TextSpaceComponent::SetIsVisible(bool Value)
 
 bool TextSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible));
 }
 
 void TextSpaceComponent::SetIsARVisible(bool Value)
@@ -264,19 +174,19 @@ void TextSpaceComponent::SetIsARVisible(bool Value)
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::IsARVisible), Value);
 }
 
-TextSpaceComponentBillboardMode TextSpaceComponent::GetBillboardMode() const
+BillboardMode TextSpaceComponent::GetBillboardMode() const
 {
 	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(TextPropertyKeys::BillboardMode));
 		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
 	{
-		return static_cast<TextSpaceComponentBillboardMode>(RepVal.GetInt());
+		return static_cast<BillboardMode>(RepVal.GetInt());
 	}
 
 	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return TextSpaceComponentBillboardMode::Off;
+	return BillboardMode::Off;
 }
 
-void TextSpaceComponent::SetBillboardMode(TextSpaceComponentBillboardMode Value)
+void TextSpaceComponent::SetBillboardMode(BillboardMode Value)
 {
 	SetProperty(static_cast<uint32_t>(TextPropertyKeys::BillboardMode), static_cast<int64_t>(Value));
 }

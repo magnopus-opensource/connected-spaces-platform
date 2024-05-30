@@ -22,6 +22,7 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/BillBoardModeEnum.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
@@ -45,15 +46,6 @@ enum class TextPropertyKeys
 	IsVisible,
 	IsARVisible,
 	Num
-};
-
-
-/// @brief The billboard mode supported by this text space component.
-enum class TextSpaceComponentBillboardMode
-{
-	Off = 0,
-	Billboard,
-	YawLockedBillboard
 };
 
 
@@ -133,11 +125,11 @@ public:
 
 	/// @brief Gets the billboard mode used by this text component.
 	/// @return The billboard mode used by this text component.
-	TextSpaceComponentBillboardMode GetBillboardMode() const;
+	BillboardMode GetBillboardMode() const;
 
 	/// @brief Sets the billboard mode used by this text component.
 	/// @param billboardMode The billboard mode used by this text component.
-	void SetBillboardMode(TextSpaceComponentBillboardMode billboardMode);
+	void SetBillboardMode(BillboardMode billboardMode);
 
 	/// \addtogroup IVisibleComponent
 	/// @{
