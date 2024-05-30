@@ -29,13 +29,13 @@ TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(Comp
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Rotation)]			 = csp::common::Vector4 {0, 0, 0, 1};
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Scale)]				 = csp::common::Vector3::One();
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Text)]				 = "";
-	Properties[static_cast<uint32_t>(TextPropertyKeys::TextColor)]			 = csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(TextPropertyKeys::TextColor)]			 = csp::common::Vector3(1.0f, 1.0f, 1.0f);
 	Properties[static_cast<uint32_t>(TextPropertyKeys::BackgroundColor)]	 = csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsBackgroundVisible)] = true;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Width)]				 = 1.0f;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Height)]				 = 1.0f;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::BillboardMode)]		 = static_cast<int64_t>(BillboardMode::Off);
-	Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)]			 = false;
+	Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)]			 = true;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)]		 = false;
 
 	SetScriptInterface(CSP_NEW TextSpaceComponentScriptInterface(this));

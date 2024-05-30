@@ -67,19 +67,19 @@ public:
 	void SetText(const csp::common::String& Value);
 
 	/// @brief Gets the text color.
-	/// @return The text color.
+	/// @return The text color, expected to be in RGB color space, with each value normalised between 0...1.
 	const csp::common::Vector3& GetTextColor() const;
 
 	/// @brief Sets the text color.
-	/// @param Value The text color.
+	/// @param Value The text color, expected to be in RGB color space, with each value normalised between 0...1.
 	void SetTextColor(const csp::common::Vector3& Value);
 
-	/// @brief Gets the background color.
-	/// @return The background color.
+	/// @brief Gets the background color that should be globally applied text associated with this component.
+	/// @return The background color, expected to be in RGB color space, with each value normalised between 0...1.
 	const csp::common::Vector3& GetBackgroundColor() const;
 
 	/// @brief Sets the background color.
-	/// @param Value The background color.
+	/// @param Value The background color, expected to be in RGB color space, with each value normalised between 0...1.
 	void SetBackgroundColor(const csp::common::Vector3& Value);
 
 	/// @brief Sets the background visibility.
