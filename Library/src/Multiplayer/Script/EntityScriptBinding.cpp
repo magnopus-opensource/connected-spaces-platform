@@ -34,13 +34,14 @@
 #include "Multiplayer/Script/ComponentBinding/ExternalLinkSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
@@ -369,6 +370,22 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(ImageSpaceComponent, DisplayMode, "displayMode")
 		.PROPERTY_GET_SET(ImageSpaceComponent, IsEmissive, "isEmissive")
 		.PROPERTY_GET_SET(ImageSpaceComponent, IsVisible, "isVisible");
+
+	Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.PROPERTY_GET_SET(TextSpaceComponent, Text, "text")
+		.PROPERTY_GET_SET(TextSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(TextSpaceComponent, Scale, "scale")
+		.PROPERTY_GET_SET(TextSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(TextSpaceComponent, TextColor, "textColor")
+		.PROPERTY_GET_SET(TextSpaceComponent, BackgroundColor, "backgroundColor")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsBackgroundVisible, "isBackgroundVisible")
+		.PROPERTY_GET_SET(TextSpaceComponent, Width, "width")
+		.PROPERTY_GET_SET(TextSpaceComponent, Height, "height")
+		.PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible");
 
 	Module->class_<StaticModelSpaceComponentScriptInterface>("StaticModelSpaceComponent")
 		.constructor<>()
