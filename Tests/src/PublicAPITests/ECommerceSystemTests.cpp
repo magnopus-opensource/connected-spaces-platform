@@ -229,21 +229,24 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 
 	for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
 	{
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Id, VariantIds[i]);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Title, VariantTitleAndOptionValue[i]);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].AvailableForSale, false);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.MediaContentType, "");
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Alt, ImageAlt);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Url, ImageUrl);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Width, ImageWidth);
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Media.Height, ImageHeight);
+		auto& Variant = Result.GetProducts()[0].Variants[i];
+		EXPECT_EQ(Variant.Id, VariantIds[i]);
+		EXPECT_EQ(Variant.Title, VariantTitleAndOptionValue[i]);
+		EXPECT_EQ(Variant.AvailableForSale, false);
+		EXPECT_EQ(Variant.Media.MediaContentType, "");
+		EXPECT_EQ(Variant.Media.Alt, ImageAlt);
+		EXPECT_EQ(Variant.Media.Url, ImageUrl);
+		EXPECT_EQ(Variant.Media.Width, ImageWidth);
+		EXPECT_EQ(Variant.Media.Height, ImageHeight);
 
-		EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options.Size(), OptionsSize);
+		EXPECT_EQ(Variant.QuantityAvailable, 0);
 
-		for (int n = 0; n < Result.GetProducts()[0].Variants[i].Options.Size(); ++n)
+		EXPECT_EQ(Variant.Options.Size(), OptionsSize);
+
+		for (int n = 0; n < Variant.Options.Size(); ++n)
 		{
-			EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options[n].Name, OptionsName);
-			EXPECT_EQ(Result.GetProducts()[0].Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
+			EXPECT_EQ(Variant.Options[n].Name, OptionsName);
+			EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);
 		}
 	}
 
