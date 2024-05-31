@@ -114,7 +114,7 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 		}
 	}
 
-    if (Dto.HasOrganizationId())
+	if (Dto.HasOrganizationId())
 	{
 		Space.OrganizationId = Dto.GetOrganizationId();
 	}

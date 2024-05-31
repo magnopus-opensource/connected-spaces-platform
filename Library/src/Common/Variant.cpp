@@ -40,7 +40,7 @@ Variant::Variant(bool InValue) : ValueType(VariantType::Boolean)
 	Value.Bool = InValue;
 }
 
-Variant::Variant(float InValue) : ValueType(VariantType::Float)
+Variant::Variant(double InValue) : ValueType(VariantType::Float)
 {
 	Value.Float = InValue;
 }
@@ -190,13 +190,13 @@ bool Variant::GetBool() const
 	return Value.Bool;
 }
 
-void Variant::SetFloat(float InValue)
+void Variant::SetFloat(double InValue)
 {
 	ValueType	= VariantType::Float;
 	Value.Float = InValue;
 }
 
-float Variant::GetFloat() const
+double Variant::GetFloat() const
 {
 	assert(ValueType == VariantType::Float);
 	return Value.Float;
