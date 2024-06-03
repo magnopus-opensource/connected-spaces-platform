@@ -85,7 +85,7 @@ public:
 class CSP_API ProductVariantInfo
 {
 public:
-	ProductVariantInfo() : AvailableForSale(false), QuantityAvailable(0)
+	ProductVariantInfo() : AvailableForSale(false), AvailableStock(0)
 	{}
 
 	/// @brief Id of the variant.
@@ -103,7 +103,7 @@ public:
 	/// @brief Unit price for the variant
 	CurrencyInfo UnitPrice;
     /// @brief Quantity of variant available
-	int32_t QuantityAvailable;
+	int32_t AvailableStock;
 };
 
 

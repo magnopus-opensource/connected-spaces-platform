@@ -131,7 +131,7 @@ void ProductInfoDtoToProductInfo(const chs_aggregation::ShopifyProductDto& Dto, 
 
             if (VariantProductInformation[i]->HasQuantityAvailable())
 			{
-				ProductInfo.Variants[i].QuantityAvailable = VariantProductInformation[i]->GetQuantityAvailable();
+				ProductInfo.Variants[i].AvailableStock = VariantProductInformation[i]->GetQuantityAvailable();
 			}
 			else
 			{
@@ -305,7 +305,7 @@ void ProductInfoDtoToProductInfoVariantCollection(const std::vector<chs_aggregat
 
                 if (VariantProductInformation->HasQuantityAvailable())
 				{
-					ProductInfoCollection[TotalVariantIndex].Variants[0].QuantityAvailable = VariantProductInformation->GetQuantityAvailable();
+					ProductInfoCollection[TotalVariantIndex].Variants[0].AvailableStock = VariantProductInformation->GetQuantityAvailable();
 				}
 				else
 				{

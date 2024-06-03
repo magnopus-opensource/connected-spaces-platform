@@ -239,7 +239,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 		EXPECT_EQ(Variant.Media.Width, ImageWidth);
 		EXPECT_EQ(Variant.Media.Height, ImageHeight);
 
-		EXPECT_EQ(Variant.QuantityAvailable, 0);
+		EXPECT_EQ(Variant.AvailableStock, 0);
 
 		EXPECT_EQ(Variant.Options.Size(), OptionsSize);
 
