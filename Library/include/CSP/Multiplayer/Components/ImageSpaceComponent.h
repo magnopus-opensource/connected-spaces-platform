@@ -22,9 +22,9 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
+#include "CSP/Multiplayer/Components/BillBoardModeEnum.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
-
 
 namespace csp::multiplayer
 {
@@ -44,15 +44,6 @@ enum class ImagePropertyKeys
 	IsARVisible,
 	IsEmissive,
 	Num
-};
-
-
-/// @brief The billboard mode supported by this image space component.
-enum class BillboardMode
-{
-	Off = 0,
-	Billboard,
-	YawLockedBillboard
 };
 
 

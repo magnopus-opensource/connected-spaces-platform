@@ -26,15 +26,15 @@ namespace csp::multiplayer
 
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::GaussianSplat, Parent)
 {
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)]			    = "";
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)]     = "";
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Position)]						        = csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation)]						        = csp::common::Vector4::Identity();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)]							        = csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)]						        = true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)]						    = true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)]					    = true;
-    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)]					                = csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)]			= "";
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Position)]							= csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation)]							= csp::common::Vector4::Identity();
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)]								= csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)]							= true;
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)]						= true;
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)]					= true;
+	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)]								= csp::common::Vector3::One();
 
 	SetScriptInterface(CSP_NEW GaussianSplatSpaceComponentScriptInterface(this));
 }
