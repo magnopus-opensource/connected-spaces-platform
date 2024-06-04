@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <PublicAPITests/AssetSystemTestHelpers.h>
 
 
 using namespace csp::common;
@@ -483,6 +484,68 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
 
 	EXPECT_EQ(Space.OrganizationId, Oko_Tests_OrganizationId);
 
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_ORGANIZATIONID_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, OrganizationIdTest)
+{
+	auto OrgAccountDetails	  = GetOrganizationAccountDetails();
+	bool HasOrgAccountDetails = OrgAccountDetails.HasKey("OrgAdminLoginEmail") && OrgAccountDetails.HasKey("OrgAdminLoginPassword");
+
+	EXPECT_TRUE(HasOrgAccountDetails);
+
+	auto OrgAdminUserEmail	  = OrgAccountDetails["OrgAdminLoginEmail"];
+	auto OrgAdminUserPassword = OrgAccountDetails["OrgAdminLoginPassword"];
+
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	const char* TestSpaceName			  = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	  = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName	  = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	const char* TestAssetName			  = "OLY-UNITTEST-ASSET-REWIND";
+	const char* TestThirdPartyReferenceId = "OLY-UNITTEST-ASSET-THIRDPARTY";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId, OrgAdminUserEmail, OrgAdminUserPassword);
+
+	// Get the Id of the Organization the user is authenticated against. Users can currently only
+	// belong to a single Organization so we just use the first one.
+	auto OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+	EXPECT_EQ(OrganizationIds.Size(), 1);
+
+	auto& Oko_Tests_OrganizationId = OrganizationIds[0];
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	EXPECT_EQ(AssetCollection.OrganizationId, Oko_Tests_OrganizationId);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 

@@ -459,7 +459,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 }
 #endif
 
-
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_CREATEASSET_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 {

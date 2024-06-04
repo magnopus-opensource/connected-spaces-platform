@@ -111,6 +111,12 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 	{
 		AssetCollection.IsUnique = Dto.GetHighlander();
 	}
+
+    if (Dto.HasOrganizationId())
+	{
+		csp::common::String orgId = Dto.GetOrganizationId();
+		AssetCollection.OrganizationId = orgId;
+    }
 }
 
 } // namespace
