@@ -56,7 +56,7 @@ void OrganizationDtoToOrganization(const chs_users::OrganizationDto& Dto, csp::s
     Organization.CreatedAt = Dto.GetCreatedAt();
     Organization.OwnerId = Dto.GetOrganizationOwnerId();
 	Organization.Name	 = Dto.GetName();
-    // todo: guard against null for members
+    
     auto& OrgMembers = Dto.GetMembers();
     Organization.Members = 	csp::common::Array<systems::OrganizationRoleInfo>(OrgMembers.size());
 
