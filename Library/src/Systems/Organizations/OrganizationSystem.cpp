@@ -172,7 +172,7 @@ void OrganizationSystem::CreateOrganization(const csp::common::String& Organizat
 											const csp::common::String& OrganizationName,
 											OrganizationResultCallback Callback)
 {
-    auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
+	auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
 	OrganizationInfo->SetName(OrganizationName);
 	OrganizationInfo->SetOrganizationOwnerId(OrganizationOwnerId);
 

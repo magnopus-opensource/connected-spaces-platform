@@ -80,8 +80,8 @@ InviteOrganizationRoleCollection CreateOrganizationInvites(const String& EmailUs
 
 Profile CreateTestUser()
 {
-	auto& SystemsManager	 = ::SystemsManager::Get();
-	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	const char* TestUserName	= "CSP-TEST-NAME";
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
@@ -118,8 +118,8 @@ Profile CreateTestUser()
 
 void CleanupTestUser(const String& UserId)
 {
-	auto& SystemsManager	 = ::SystemsManager::Get();
-	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	// Delete the test user
 	auto [DeleteDefaultUserResult] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, UserId);
@@ -162,7 +162,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
@@ -183,8 +183,14 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationTest)
 	csp::common::String SignupUrl	 = "https://dev.magnoverse.space";
 
 	// Invite non-member user to the Organization
-	auto [InviteResult]
-		= AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, TestOrganization.Id, TestDefaultUserProfile.Email, AltUserRoles, EmailLinkUrl, SignupUrl);
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem,
+									InviteToOrganization,
+									RequestPredicate,
+									TestOrganization.Id,
+									TestDefaultUserProfile.Email,
+									AltUserRoles,
+									EmailLinkUrl,
+									SignupUrl);
 	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Confirm that non-member user now has the correct roles in Organization
@@ -228,7 +234,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
@@ -250,8 +256,14 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutM
 	csp::common::String SignupUrl	 = "https://dev.magnoverse.space";
 
 	// Invite non-member user to the Organization
-	auto [InviteResult]
-		= AWAIT_PRE(OrganizationSystem, InviteToOrganization, RequestPredicate, TestOrganization.Id, TestDefaultUserProfile.Email, AltUserRoles, EmailLinkUrl, SignupUrl);
+	auto [InviteResult] = AWAIT_PRE(OrganizationSystem,
+									InviteToOrganization,
+									RequestPredicate,
+									TestOrganization.Id,
+									TestDefaultUserProfile.Email,
+									AltUserRoles,
+									EmailLinkUrl,
+									SignupUrl);
 	EXPECT_EQ(InviteResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Confirm that non-member user now has the correct roles in Organization
@@ -295,9 +307,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToOrganizationWithoutP
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
-	Profile TestAltUserProfile = CreateTestUser();
+	Profile TestAltUserProfile	   = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
 	String SuperUserId;
@@ -384,7 +396,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, InviteToInvalidOrganizationT
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
@@ -445,9 +457,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, BulkInviteToOrganizationTest
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
-	Profile TestAltUserProfile = CreateTestUser();
+	Profile TestAltUserProfile	   = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
 	String SuperUserId;
@@ -577,9 +589,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationWithIdTest)
 {
 	SetRandSeed();
 
-	auto& SystemsManager = ::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+	auto& SystemsManager	 = ::SystemsManager::Get();
+	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
 	Profile TestAdminUserProfile = CreateTestUser();
 
@@ -635,9 +647,9 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationWithNoIdTest)
 {
 	SetRandSeed();
 
-	auto& SystemsManager = ::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* OrganizationSystem	 = SystemsManager.GetOrganizationSystem();
+	auto& SystemsManager	 = ::SystemsManager::Get();
+	auto* UserSystem		 = SystemsManager.GetUserSystem();
+	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
 	Profile TestAdminUserProfile = CreateTestUser();
 
@@ -697,7 +709,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationAsMemberTest)
 	auto* UserSystem		 = SystemsManager.GetUserSystem();
 	auto* OrganizationSystem = SystemsManager.GetOrganizationSystem();
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
@@ -755,7 +767,8 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationAsMemberTest)
 	EXPECT_EQ(Organization.Members.Size(), 2);
 
 	// remove default user from organization
-	auto [RemoveResult] = AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, Oko_Tests_OrganizationId, TestDefaultUserProfile.UserId);
+	auto [RemoveResult]
+		= AWAIT_PRE(OrganizationSystem, RemoveUserFromOrganization, RequestPredicate, Oko_Tests_OrganizationId, TestDefaultUserProfile.UserId);
 	EXPECT_EQ(RemoveResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Log out - Default Test user
@@ -777,16 +790,8 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, GetOrganizationAsMemberTest)
 }
 #endif
 
-/*
- * This is a manual test for confirming that the Update and Deactivate endpoints function correctly.
- * Only an account with elevated permissions can create Organizations, so this must be done manually.
- * To run this test please do the following:
- * 1. Authenticate via Swagger using an account with the appropriate privileges.
- * 2. Create a new Organization, setting your default account as the Organization Owner.
- * 3. Enable the test below locally and run it.
- */
-#if RUN_ORGANIZATIONSYSTEM_MANUAL_ORGANIZATION_CRUD_TEST
-CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, ManualOrganizationCRUDTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS || RUN_ORGANIZATIONSYSTEM_ORGANIZATION_CRUD_TEST
+CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, OrganizationCRUDTest)
 {
 	SetRandSeed();
 
@@ -799,7 +804,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, ManualOrganizationCRUDTest)
 	char UpdatedOrgName[256];
 	SPRINTF(UpdatedOrgName, "%s-%s", TestOrganizationName, GetUniqueString().c_str());
 
-	Profile TestAdminUserProfile = CreateTestUser();
+	Profile TestAdminUserProfile   = CreateTestUser();
 	Profile TestDefaultUserProfile = CreateTestUser();
 
 	// log in as super user - The super user has the required privileges to create an organization.
