@@ -24,6 +24,8 @@ extern csp::common::String DefaultLoginEmail;
 extern csp::common::String DefaultLoginPassword;
 extern csp::common::String AlternativeLoginEmail;
 extern csp::common::String AlternativeLoginPassword;
+extern csp::common::String SuperUserLoginEmail;
+extern csp::common::String SuperUserLoginPassword;
 
 const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.com";
 const char GeneratedTestAccountPassword[]	 = "3R{d2}3C<x[J7=jU";

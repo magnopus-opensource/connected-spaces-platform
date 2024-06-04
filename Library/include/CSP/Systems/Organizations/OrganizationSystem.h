@@ -66,6 +66,14 @@ public:
 	/// @return The Id of the Organization the User belongs to.
 	const csp::common::String& GetCurrentOrganizationId() const;
 
+    /// @brief Create a new Organization.
+	/// Only a User with Super User permissions can create an Organization.
+	/// If the user does not have the required permissions their call will be rejected.
+	/// @param OrganizationOwnerId csp::common::Optional<csp::common::String> : Id of the Organization owner.
+	/// @param OrganizationName csp::common::String : The Organization name
+	/// @param Callback OrganizationResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void CreateOrganization(const csp::common::String& OrganizationOwnerId, const csp::common::String& OrganizationName, OrganizationResultCallback Callback);
+
 	/// @brief Updates the name and/or the description of the specified Organization.
 	/// Only a User with an Admin or Owner Organization role can update an Organization. If the user does not have the required Organization role
 	/// their call will be rejected.

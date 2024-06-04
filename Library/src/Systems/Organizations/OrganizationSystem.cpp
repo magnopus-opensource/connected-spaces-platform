@@ -154,18 +154,32 @@ const csp::common::String& OrganizationSystem::GetCurrentOrganizationId() const
 	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
 	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
 	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
+	const auto* UserSystem		= csp::systems::SystemsManager::Get().GetUserSystem();
 	const auto& OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
 
-    if (OrganizationIds.Size() == 0)
+	if (OrganizationIds.Size() == 0)
 	{
 		CSP_LOG_ERROR_MSG("Unable to get current Orgaization Id, you do not belong to an Organization.");
 
-        static const String EmptyId = "";
-        return EmptyId;
+		static const String EmptyId = "";
+		return EmptyId;
 	}
 
 	return OrganizationIds[0];
+}
+
+void OrganizationSystem::CreateOrganization(const csp::common::String& OrganizationOwnerId,
+											const csp::common::String& OrganizationName,
+											OrganizationResultCallback Callback)
+{
+    auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
+	OrganizationInfo->SetName(OrganizationName);
+	OrganizationInfo->SetOrganizationOwnerId(OrganizationOwnerId);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);
+
+	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsPost(OrganizationInfo, ResponseHandler);
 }
 
 void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
@@ -176,9 +190,9 @@ void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::com
 	{
 		CSP_LOG_WARN_MSG("A valid new Organization name must be specified.");
 
-        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
 
-        return;
+		return;
 	}
 
 	csp::common::String SelectedOrganizationId;
@@ -202,10 +216,10 @@ void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::com
 	auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
 	OrganizationInfo->SetName(Name);
 
-    auto* UserSystem = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 
-    OrganizationInfo->SetOrganizationOwnerId(UserId);
+	OrganizationInfo->SetOrganizationOwnerId(UserId);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);
