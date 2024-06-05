@@ -232,34 +232,14 @@ void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::com
 		->apiV1OrganizationsOrganizationIdPut(SelectedOrganizationId, OrganizationInfo, ResponseHandler);
 }
 
-void OrganizationSystem::DeactivateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId, NullResultCallback Callback)
+void OrganizationSystem::DeactivateOrganization(const csp::common::String& OrganizationId, NullResultCallback Callback)
 {
-	csp::common::String SelectedOrganizationId;
-
-	if (OrganizationId.HasValue())
-	{
-		SelectedOrganizationId = *OrganizationId;
-	}
-	else
-	{
-		SelectedOrganizationId = GetCurrentOrganizationId();
-
-		if (SelectedOrganizationId.IsEmpty())
-		{
-            CSP_LOG_ERROR_MSG("Call to DeactivateOrganization failed. You do not belong to an Organization.");
-
-			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
-			return;
-		}
-	}
-
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= OrganizationApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																									   nullptr,
 																									   csp::web::EResponseCodes::ResponseNoContent);
 
-	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsOrganizationIdDelete(SelectedOrganizationId, ResponseHandler);
+	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsOrganizationIdDelete(OrganizationId, ResponseHandler);
 }
 
 void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,

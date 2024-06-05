@@ -54,7 +54,7 @@ public:
 	CSP_EVENT void SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback);
 
 	/// @brief Create a new Organization.
-	/// Only a User with Super User permissions can create an Organization.
+	/// Only a User with tenant admin permissions can create an Organization.
 	/// If the user does not have the required permissions their call will be rejected.
 	/// @param OrganizationOwnerId csp::common::Optional<csp::common::String> : Id of the Organization owner.
 	/// @param OrganizationName csp::common::String : The Organization name
@@ -77,7 +77,7 @@ public:
 	const csp::common::String& GetCurrentOrganizationId() const;
 
 	/// @brief Updates the name and/or the description of the specified Organization.
-	/// Only a User with an Admin or Owner Organization role can update an Organization. If the user does not have the required Organization role
+	/// Only a User with an Organization Owner role can update an Organization. If the user does not have the required Organization role
 	/// their call will be rejected.
 	/// @param OrganizationId csp::common::Optional<csp::common::String> : Id of the Organization to update. If no Id is specified,
 	/// the Id of the Organization the user is currently authenticated against will be used.
@@ -91,8 +91,7 @@ public:
 	/// This call performs a soft-delete of the Organization and will allow for Organization reactivation in the future.
 	/// Only A User with owner-level permissions can delete an Organization. If the user does not have the required role their call will be
 	/// rejected.
-	/// @param OrganizationId csp::common::Optional<csp::common::String> : Id of the Organization to deactivate. If no Id is specified,
-	/// the Id of the Organization the user is currently authenticated against will be used.
+	/// @param OrganizationId csp::common::String : Id of the Organization to deactivate.
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void DeactivateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId, NullResultCallback Callback);
 
