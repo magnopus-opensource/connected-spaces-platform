@@ -93,7 +93,7 @@ public:
 	/// rejected.
 	/// @param OrganizationId csp::common::String : Id of the Organization to deactivate.
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
-	CSP_ASYNC_RESULT void DeactivateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void DeactivateOrganization(const csp::common::String& OrganizationId, NullResultCallback Callback);
 
 	/// @brief Invites a given email to the User's Organization.
 	/// Only a User with an Admin or Owner Organization role can invite people to the organization. If the User does not have the required role their
