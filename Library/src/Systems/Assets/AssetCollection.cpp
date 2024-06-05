@@ -114,8 +114,7 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 
     if (Dto.HasOrganizationId())
 	{
-		csp::common::String orgId = Dto.GetOrganizationId();
-		AssetCollection.OrganizationId = orgId;
+		AssetCollection.OrganizationId = Dto.GetOrganizationId();
     }
 }
 
@@ -156,6 +155,7 @@ AssetCollection& AssetCollection::operator=(const AssetCollection& Other)
 	UpdatedAt		  = Other.UpdatedAt;
 	IsUnique		  = Other.IsUnique;
 	Version			  = Other.Version;
+	OrganizationId	  = Other.OrganizationId;
 
 	*Metadata = *Other.Metadata;
 
