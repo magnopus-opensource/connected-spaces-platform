@@ -91,7 +91,6 @@ public:
 	csp::common::String CreatedAt;
 	csp::common::String CreatedBy;
 	csp::common::String Name;
-	csp::common::String Description;
 	csp::common::Array<OrganizationRoleInfo> Members;
 	int32_t SpaceCount;
 };
@@ -107,6 +106,8 @@ class CSP_API OrganizationResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
+    CSP_NO_EXPORT OrganizationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 	/// @brief Retrieves the Organization result.
 	/// @return const Organization& : Organization object.
 	const Organization& GetOrganization() const;
