@@ -26,7 +26,7 @@ then
     then
         echo "Virtual evironment does not exist, creating now..."
         mkdir ./venv
-        python3 -m venv ./venvx
+        python3 -m venv ./venv
     fi
     
     echo "Activating virtual evironment."
