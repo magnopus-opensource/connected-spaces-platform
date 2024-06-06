@@ -169,6 +169,8 @@ public class HelloWorld : MonoBehaviour
                 ExitSpaceAsync();
             }
 
+            StopTickLoop();
+
             StopFoundation();
         }
     }
@@ -198,6 +200,8 @@ public class HelloWorld : MonoBehaviour
     {
         if(await LoginAsync(email, password))
         {
+            StartTickLoop();
+
             await SearchSpacesAsync();
             await SearchSpacesUsingGraphQLAsync();
         }
@@ -258,6 +262,8 @@ public class HelloWorld : MonoBehaviour
     /// <returns> Just the Task object to await.</returns>
     private async Task LogoutAsync()
     {
+        StopTickLoop();
+        
         Debug.Log("Logging out ...");
         await userSystem.Logout();
     }
@@ -367,8 +373,7 @@ public class HelloWorld : MonoBehaviour
         
         Debug.Log($"Entered Space {space.Name}");
         enteredSpace = true;
- 
-        StartTickLoop();
+
         var entity = await CreateAvatar();
         MoveAvatar(entity);
         await CreateAndUploadAssetAsync(space.Id);
@@ -388,7 +393,6 @@ public class HelloWorld : MonoBehaviour
     /// </summary>
     private async void ExitSpaceAsync()
     {
-        StopTickLoop();
         entitySystem.OnEntityCreated -= OnEntityCreated;
 
         await Task.Delay(100);
