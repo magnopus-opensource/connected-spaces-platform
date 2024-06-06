@@ -46,6 +46,8 @@ csp::common::String DefaultLoginEmail;
 csp::common::String DefaultLoginPassword;
 csp::common::String AlternativeLoginEmail;
 csp::common::String AlternativeLoginPassword;
+csp::common::String SuperUserLoginEmail;
+csp::common::String SuperUserLoginPassword;
 
 
 void LoadTestAccountCredentials()
@@ -53,27 +55,32 @@ void LoadTestAccountCredentials()
 	if (!std::filesystem::exists("test_account_creds.txt"))
 	{
 		LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
-				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>");
+				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
 	}
 
 	std::ifstream CredsFile;
 	CredsFile.open("test_account_creds.txt");
 
-	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword;
+	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword, _SuperUserLoginEmail,
+		_SuperUserLoginPassword;
 
 	CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
 	CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
+	CredsFile >> _SuperUserLoginEmail >> _SuperUserLoginPassword;
 
-	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty())
+	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
+		|| _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty())
 	{
 		LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
-				 "<AlternativeLoginPassword>");
+				 "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
 	}
 
 	DefaultLoginEmail		 = _DefaultLoginEmail.c_str();
 	DefaultLoginPassword	 = _DefaultLoginPassword.c_str();
 	AlternativeLoginEmail	 = _AlternativeLoginEmail.c_str();
 	AlternativeLoginPassword = _AlternativeLoginPassword.c_str();
+	SuperUserLoginEmail		 = _SuperUserLoginEmail.c_str();
+	SuperUserLoginPassword	 = _SuperUserLoginPassword.c_str();
 }
 
 void LogIn(csp::systems::UserSystem* UserSystem,
