@@ -53,6 +53,48 @@ public:
 	/// @param Callback MemberJoinedOrganizationCallback : the callback to execute.
 	CSP_EVENT void SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback);
 
+	/// @brief Create a new Organization.
+	/// Only a User with tenant admin permissions can create an Organization.
+	/// If the user does not have the required permissions their call will be rejected.
+	/// @param OrganizationOwnerId csp::common::Optional<csp::common::String> : Id of the Organization owner.
+	/// @param OrganizationName csp::common::String : The Organization name
+	/// @param Callback OrganizationResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void CreateOrganization(const csp::common::String& OrganizationOwnerId,
+											 const csp::common::String& OrganizationName,
+											 OrganizationResultCallback Callback);
+
+	/// @brief Retrieves Organization info for the specified Organization.
+	/// If this request is made by a User with an Owner or Admin Organization role, the resultant Organization object will contain an array of
+	/// OrganizationRoleInfo objects for each Organization member. If the request is made by a User who does not have the Owner or Admin role, the
+	/// resultant Organization object will contain an array with a single OrganizationRoleInfo object which represents them.
+	/// @param OrganizationId csp::common::Optional<csp::common::String> : Id of the Organization to retrieve information on. If no Id is specified,
+	/// the Id of the Organization the user is currently authenticated against will be used.
+	/// @param Callback OrganizationResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void GetOrganization(const csp::common::Optional<csp::common::String>& OrganizationId, OrganizationResultCallback Callback);
+
+	/// @brief Get the Id of the Organization the user is authenticated against.
+	/// @return The Id of the Organization the User belongs to.
+	const csp::common::String& GetCurrentOrganizationId() const;
+
+	/// @brief Updates the name and/or the description of the specified Organization.
+	/// Only a User with an Organization Owner role can update an Organization. If the user does not have the required Organization role
+	/// their call will be rejected.
+	/// @param OrganizationId csp::common::Optional<csp::common::String> : Id of the Organization to update. If no Id is specified,
+	/// the Id of the Organization the user is currently authenticated against will be used.
+	/// @param Name csp::common::String : The new Organization name
+	/// @param Callback OrganizationResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void UpdateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+											 const csp::common::String& Name,
+											 OrganizationResultCallback Callback);
+
+	/// @brief Deactivates the specified Organization.
+	/// This call performs a soft-delete of the Organization and will allow for Organization reactivation in the future.
+	/// Only A User with owner-level permissions can deactivate an Organization. If the user does not have the required role their call will be
+	/// rejected.
+	/// @param OrganizationId csp::common::String : Id of the Organization to deactivate.
+	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void DeactivateOrganization(const csp::common::String& OrganizationId, NullResultCallback Callback);
+
 	/// @brief Invites a given email to the User's Organization.
 	/// Only a User with an Admin or Owner Organization role can invite people to the organization. If the User does not have the required role their
 	/// call will be rejected.
