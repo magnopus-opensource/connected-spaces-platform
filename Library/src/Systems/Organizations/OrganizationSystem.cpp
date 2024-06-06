@@ -69,12 +69,6 @@ bool HasMemberRoleBeenDefined(const csp::common::Array<EOrganizationRole>& Organ
 	return IsRoleDefined;
 }
 
-const csp::common::Array<csp::common::String>& GetCurrentOrganizationIds()
-{
-	const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-	return UserSystem->GetLoginState().OrganizationIds;
-}
-
 std::vector<std::shared_ptr<chs::OrganizationInviteDto>>
 	GenerateOrganizationInvites(const common::Array<systems::InviteOrganizationRoleInfo>& InviteUsers)
 {
@@ -129,6 +123,125 @@ OrganizationSystem::~OrganizationSystem()
 	CSP_DELETE(OrganizationApi);
 }
 
+void OrganizationSystem::CreateOrganization(const csp::common::String& OrganizationOwnerId,
+											const csp::common::String& OrganizationName,
+											OrganizationResultCallback Callback)
+{
+	auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
+	OrganizationInfo->SetName(OrganizationName);
+	OrganizationInfo->SetOrganizationOwnerId(OrganizationOwnerId);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);
+
+	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsPost(OrganizationInfo, ResponseHandler);
+}
+
+void OrganizationSystem::GetOrganization(const csp::common::Optional<csp::common::String>& OrganizationId, OrganizationResultCallback Callback)
+{
+	csp::common::String SelectedOrganizationId;
+
+	if (OrganizationId.HasValue())
+	{
+		SelectedOrganizationId = *OrganizationId;
+	}
+	else
+	{
+		SelectedOrganizationId = GetCurrentOrganizationId();
+
+		if (SelectedOrganizationId.IsEmpty())
+		{
+            CSP_LOG_ERROR_MSG("Call to GetOrganization failed. You do not belong to an Organization.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
+
+			return;
+		}
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);
+
+	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsOrganizationIdGet(SelectedOrganizationId, ResponseHandler);
+}
+
+const csp::common::String& OrganizationSystem::GetCurrentOrganizationId() const
+{
+	// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
+	// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
+	// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
+	const auto* UserSystem		= csp::systems::SystemsManager::Get().GetUserSystem();
+	const auto& OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
+
+	if (OrganizationIds.Size() == 0)
+	{
+		CSP_LOG_ERROR_MSG("Unable to get current Orgaization Id, you do not belong to an Organization.");
+
+		static const String EmptyId = "";
+		return EmptyId;
+	}
+
+	return OrganizationIds[0];
+}
+
+void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
+											const csp::common::String& Name,
+											OrganizationResultCallback Callback)
+{
+	if (Name.IsEmpty())
+	{
+		CSP_LOG_WARN_MSG("A valid new Organization name must be specified.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
+
+		return;
+	}
+
+	csp::common::String SelectedOrganizationId;
+
+	if (OrganizationId.HasValue())
+	{
+		SelectedOrganizationId = *OrganizationId;
+	}
+	else
+	{
+		SelectedOrganizationId = GetCurrentOrganizationId();
+
+		if (SelectedOrganizationId.IsEmpty())
+		{
+            CSP_LOG_ERROR_MSG("Call to UpdateOrganization failed. No Organization has been updated as you do not belong to one.");
+
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
+
+			return;
+		}
+	}
+
+	auto OrganizationInfo = std::make_shared<chs::OrganizationDto>();
+	OrganizationInfo->SetName(Name);
+
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
+
+	OrganizationInfo->SetOrganizationOwnerId(UserId);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= OrganizationApi->CreateHandler<OrganizationResultCallback, OrganizationResult, void, chs::OrganizationDto>(Callback, nullptr);
+
+	static_cast<chs::OrganizationApi*>(OrganizationApi)
+		->apiV1OrganizationsOrganizationIdPut(SelectedOrganizationId, OrganizationInfo, ResponseHandler);
+}
+
+void OrganizationSystem::DeactivateOrganization(const csp::common::String& OrganizationId, NullResultCallback Callback)
+{
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= OrganizationApi->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
+																									   nullptr,
+																									   csp::web::EResponseCodes::ResponseNoContent);
+
+	static_cast<chs::OrganizationApi*>(OrganizationApi)->apiV1OrganizationsOrganizationIdDelete(OrganizationId, ResponseHandler);
+}
+
 void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::common::String>& OrganizationId,
 											  const csp::common::String& Email,
 											  const csp::common::Array<EOrganizationRole>& OrganizationRoles,
@@ -144,21 +257,16 @@ void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::c
 	}
 	else
 	{
-		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+		SelectedOrganizationId = GetCurrentOrganizationId();
 
-		if (CurrentOrganizationIds.Size() == 0)
+		if (SelectedOrganizationId.IsEmpty())
 		{
-			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+            CSP_LOG_ERROR_MSG("Call to InviteToOrganization failed. The specified user has not been invited as you do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
 			return;
 		}
-
-		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-		SelectedOrganizationId = CurrentOrganizationIds[0];
 	}
 
 	auto OrganizationInviteInfo = std::make_shared<chs::OrganizationInviteDto>();
@@ -214,21 +322,16 @@ void OrganizationSystem::BulkInviteToOrganization(const csp::common::Optional<cs
 	}
 	else
 	{
-		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+		SelectedOrganizationId = GetCurrentOrganizationId();
 
-		if (CurrentOrganizationIds.Size() == 0)
+		if (SelectedOrganizationId.IsEmpty())
 		{
-			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+            CSP_LOG_ERROR_MSG("Call to BulkInviteToOrganization failed. No-one has been invited as you do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
 			return;
 		}
-
-		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-		SelectedOrganizationId = CurrentOrganizationIds[0];
 	}
 
 	const std::vector<std::shared_ptr<chs::OrganizationInviteDto>> OrganizationInvites = GenerateOrganizationInvites(InviteUsers.InvitedUserRoles);
@@ -262,21 +365,16 @@ void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Optional<
 	}
 	else
 	{
-		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+		SelectedOrganizationId = GetCurrentOrganizationId();
 
-		if (CurrentOrganizationIds.Size() == 0)
+		if (SelectedOrganizationId.IsEmpty())
 		{
-			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+            CSP_LOG_ERROR_MSG("Call to GetUserRolesInOrganization failed. You do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationRolesResult>());
 
 			return;
 		}
-
-		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-		SelectedOrganizationId = CurrentOrganizationIds[0];
 	}
 
 	std::vector<String> InternalUserIds;
@@ -309,21 +407,16 @@ void OrganizationSystem::RemoveUserFromOrganization(const csp::common::Optional<
 	}
 	else
 	{
-		const csp::common::Array<csp::common::String>& CurrentOrganizationIds = GetCurrentOrganizationIds();
+		SelectedOrganizationId = GetCurrentOrganizationId();
 
-		if (CurrentOrganizationIds.Size() == 0)
+		if (SelectedOrganizationId.IsEmpty())
 		{
-			CSP_LOG_ERROR_MSG("OrganizationSystem::InviteToOrganization failed: You do not belong to an Organization.");
+            CSP_LOG_ERROR_MSG("Call to RemoveUserFromOrganization failed. You do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
 			return;
 		}
-
-		// todo: The AuthDto contains an array of Organization Ids but we have no way of knowing which one the user is authenticated against.
-		// Currently people can only belong to a single organization so we can hard code the index. Ticket OF-1291, outlines the work required to
-		// extract this information from the Bearer token claims, where the 'current' Organization Id is also captured.
-		SelectedOrganizationId = CurrentOrganizationIds[0];
 	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
