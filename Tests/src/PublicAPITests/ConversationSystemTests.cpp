@@ -78,7 +78,7 @@ csp::multiplayer::MessageInfo AddMessageToConversation(csp::multiplayer::Convers
 }
 
 } // namespace
-#if false //commenting out conversation system tests due to server problems
+
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATIONSYSTEM_TESTS || RUN_CONVERSATIONSYSTEM_CREATE_CONVERSATION_ID
 CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 {
@@ -275,14 +275,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		FirstMessageId	   = CreatedMessageInfo.Id;
 	}
 
+	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
 	LogOut(UserSystem);
 
 	// Log in with the second account
 	csp::common::String SecondTestUserId;
 	LogIn(UserSystem, SecondTestUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
-	// auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space, false);
-	// EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto SecondTestUserDisplayName = GetFullProfileByUserId(UserSystem, SecondTestUserId).DisplayName;
 
@@ -327,10 +329,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_FALSE(Message.UserDisplayName.IsEmpty());
 	}
 
+	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
 	LogOut(UserSystem);
 
 	// Log in again with the default user
 	LogIn(UserSystem, DefaultTestUserId);
+
+	auto [EnterResult3] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult3.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// check that the default user can retrieve both added messages
 	{
@@ -377,7 +385,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1462,5 +1470,4 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
-#endif
 #endif
