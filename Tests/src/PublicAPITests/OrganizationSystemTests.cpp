@@ -609,7 +609,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, OrganizationIdTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, TestAdminUserProfile.Email, GeneratedTestAccountPassword);
 
 	// Get the Id of the Organization the user is authenticated against. Users can currently only
 	// belong to a single Organization so we just use the first one.
