@@ -57,14 +57,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent) : Comp
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name));
 }
 
 void VideoPlayerSpaceComponent::SetName(const csp::common::String& Value)
@@ -74,14 +67,7 @@ void VideoPlayerSpaceComponent::SetName(const csp::common::String& Value)
 
 const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId));
 }
 
 void VideoPlayerSpaceComponent::SetVideoAssetId(const csp::common::String& Value)
@@ -91,14 +77,7 @@ void VideoPlayerSpaceComponent::SetVideoAssetId(const csp::common::String& Value
 
 const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetURL() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL));
 }
 
 void VideoPlayerSpaceComponent::SetVideoAssetURL(const csp::common::String& Value)
@@ -108,14 +87,7 @@ void VideoPlayerSpaceComponent::SetVideoAssetURL(const csp::common::String& Valu
 
 const csp::common::String& VideoPlayerSpaceComponent::GetAssetCollectionId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId));
 }
 
 void VideoPlayerSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
@@ -123,21 +95,11 @@ void VideoPlayerSpaceComponent::SetAssetCollectionId(const csp::common::String& 
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& VideoPlayerSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position));
 }
 
 void VideoPlayerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -145,19 +107,9 @@ void VideoPlayerSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& VideoPlayerSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation));
 }
 
 void VideoPlayerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -165,26 +117,15 @@ void VideoPlayerSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& VideoPlayerSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale));
 }
 
 void VideoPlayerSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform VideoPlayerSpaceComponent::GetTransform() const
 {
@@ -203,17 +144,9 @@ void VideoPlayerSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 bool VideoPlayerSpaceComponent::GetIsStateShared() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStateShared));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsStateShared));
 }
 
 void VideoPlayerSpaceComponent::SetIsStateShared(bool Value)
@@ -223,14 +156,7 @@ void VideoPlayerSpaceComponent::SetIsStateShared(bool Value)
 
 bool VideoPlayerSpaceComponent::GetIsAutoPlay() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoPlay));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoPlay));
 }
 
 void VideoPlayerSpaceComponent::SetIsAutoPlay(bool Value)
@@ -240,14 +166,7 @@ void VideoPlayerSpaceComponent::SetIsAutoPlay(bool Value)
 
 bool VideoPlayerSpaceComponent::GetIsLoopPlayback() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsLoopPlayback));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsLoopPlayback));
 }
 
 void VideoPlayerSpaceComponent::SetIsLoopPlayback(bool Value)
@@ -257,14 +176,7 @@ void VideoPlayerSpaceComponent::SetIsLoopPlayback(bool Value)
 
 bool VideoPlayerSpaceComponent::GetIsAutoResize() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoResize));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsAutoResize));
 }
 
 void VideoPlayerSpaceComponent::SetIsAutoResize(bool Value)
@@ -274,14 +186,7 @@ void VideoPlayerSpaceComponent::SetIsAutoResize(bool Value)
 
 VideoPlayerPlaybackState VideoPlayerSpaceComponent::GetPlaybackState() const
 {
-	if (const auto& RepVal = GetProperty((uint32_t) VideoPlayerPropertyKeys::PlaybackState);
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<VideoPlayerPlaybackState>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return VideoPlayerPlaybackState::Reset;
+	return static_cast<VideoPlayerPlaybackState>(GetIntegerProperty((uint32_t) VideoPlayerPropertyKeys::PlaybackState));
 }
 
 void VideoPlayerSpaceComponent::SetPlaybackState(VideoPlayerPlaybackState Value)
@@ -291,14 +196,7 @@ void VideoPlayerSpaceComponent::SetPlaybackState(VideoPlayerPlaybackState Value)
 
 float VideoPlayerSpaceComponent::GetCurrentPlayheadPosition() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::CurrentPlayheadPosition));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::CurrentPlayheadPosition));
 }
 
 void VideoPlayerSpaceComponent::SetCurrentPlayheadPosition(float Value)
@@ -308,14 +206,7 @@ void VideoPlayerSpaceComponent::SetCurrentPlayheadPosition(float Value)
 
 float VideoPlayerSpaceComponent::GetTimeSincePlay() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::TimeSincePlay));
 }
 
 void VideoPlayerSpaceComponent::SetTimeSincePlay(float Value)
@@ -325,14 +216,7 @@ void VideoPlayerSpaceComponent::SetTimeSincePlay(float Value)
 
 float VideoPlayerSpaceComponent::GetAttenuationRadius() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
-	{
-		return RepVal.GetFloat();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0.0f;
+	return GetFloatProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius));
 }
 
 void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
@@ -340,17 +224,9 @@ void VideoPlayerSpaceComponent::SetAttenuationRadius(float Value)
 	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::AttenuationRadius), Value);
 }
 
-
 VideoPlayerSourceType VideoPlayerSpaceComponent::GetVideoPlayerSourceType() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		return static_cast<VideoPlayerSourceType>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return VideoPlayerSourceType::AssetSource;
+	return static_cast<VideoPlayerSourceType>(GetIntegerProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoPlayerSourceType)));
 }
 
 void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType Value)
@@ -360,15 +236,7 @@ void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType V
 
 uint16_t VideoPlayerSpaceComponent::GetMeshComponentId() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
-	{
-		// Component IDs are always created as uint16_t so it is safe cast.
-		return static_cast<uint16_t>(RepVal.GetInt());
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return 0;
+	return GetIntegerProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId));
 }
 
 void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
@@ -390,14 +258,7 @@ void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
 
 bool VideoPlayerSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsVisible));
 }
 
 void VideoPlayerSpaceComponent::SetIsVisible(bool Value)
@@ -407,14 +268,7 @@ void VideoPlayerSpaceComponent::SetIsVisible(bool Value)
 
 bool VideoPlayerSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsARVisible));
 }
 
 void VideoPlayerSpaceComponent::SetIsARVisible(bool Value)
@@ -426,14 +280,7 @@ void VideoPlayerSpaceComponent::SetIsARVisible(bool Value)
 
 bool VideoPlayerSpaceComponent::GetIsEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled));
 }
 
 void VideoPlayerSpaceComponent::SetIsEnabled(bool Value)

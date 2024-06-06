@@ -41,14 +41,7 @@ ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(SpaceEntity* Parent) : Co
 
 const csp::common::String& ExternalLinkSpaceComponent::GetName() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name));
 }
 
 void ExternalLinkSpaceComponent::SetName(const csp::common::String& Value)
@@ -58,14 +51,7 @@ void ExternalLinkSpaceComponent::SetName(const csp::common::String& Value)
 
 const csp::common::String& ExternalLinkSpaceComponent::GetLinkUrl() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl));
 }
 
 void ExternalLinkSpaceComponent::SetLinkUrl(const csp::common::String& Value)
@@ -73,21 +59,11 @@ void ExternalLinkSpaceComponent::SetLinkUrl(const csp::common::String& Value)
 	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl), Value);
 }
 
-
 /* ITransformComponent */
 
 const csp::common::Vector3& ExternalLinkSpaceComponent::GetPosition() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Position));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ExternalLinkPropertyKeys::Position));
 }
 
 void ExternalLinkSpaceComponent::SetPosition(const csp::common::Vector3& Value)
@@ -95,19 +71,9 @@ void ExternalLinkSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Position), Value);
 }
 
-
 const csp::common::Vector4& ExternalLinkSpaceComponent::GetRotation() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
-	{
-		return RepVal.GetVector4();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector4();
+	return GetVector4Property(static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation));
 }
 
 void ExternalLinkSpaceComponent::SetRotation(const csp::common::Vector4& Value)
@@ -115,26 +81,15 @@ void ExternalLinkSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation), Value);
 }
 
-
 const csp::common::Vector3& ExternalLinkSpaceComponent::GetScale() const
 {
-	const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale));
-
-	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
-	{
-		return RepVal.GetVector3();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-
-	return ReplicatedValue::GetDefaultVector3();
+	return GetVector3Property(static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale));
 }
 
 void ExternalLinkSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
 	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale), Value);
 }
-
 
 SpaceTransform ExternalLinkSpaceComponent::GetTransform() const
 {
@@ -153,17 +108,9 @@ void ExternalLinkSpaceComponent::SetTransform(const SpaceTransform& InValue)
 	SetScale(InValue.Scale);
 }
 
-
 const csp::common::String& ExternalLinkSpaceComponent::GetDisplayText() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
-	{
-		return RepVal.GetString();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return ReplicatedValue::GetDefaultString();
+	return GetStringProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText));
 }
 
 void ExternalLinkSpaceComponent::SetDisplayText(const csp::common::String& Value)
@@ -175,14 +122,7 @@ void ExternalLinkSpaceComponent::SetDisplayText(const csp::common::String& Value
 
 bool ExternalLinkSpaceComponent::GetIsEnabled() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return false;
+	return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled));
 }
 
 void ExternalLinkSpaceComponent::SetIsEnabled(bool Value)
@@ -192,14 +132,7 @@ void ExternalLinkSpaceComponent::SetIsEnabled(bool Value)
 
 bool ExternalLinkSpaceComponent::GetIsVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return true;
+	return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible));
 }
 
 void ExternalLinkSpaceComponent::SetIsVisible(bool InValue)
@@ -209,14 +142,7 @@ void ExternalLinkSpaceComponent::SetIsVisible(bool InValue)
 
 bool ExternalLinkSpaceComponent::GetIsARVisible() const
 {
-	if (const auto& RepVal = GetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible));
-		RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
-	{
-		return RepVal.GetBool();
-	}
-
-	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not valid");
-	return true;
+	return GetBooleanProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible));
 }
 
 void ExternalLinkSpaceComponent::SetIsARVisible(bool InValue)

@@ -113,6 +113,11 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 			Space.BannedUserIds[i] = users[i];
 		}
 	}
+
+	if (Dto.HasOrganizationId())
+	{
+		Space.OrganizationId = Dto.GetOrganizationId();
+	}
 }
 
 } // namespace
