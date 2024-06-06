@@ -89,7 +89,7 @@ public:
 
 	/// @brief Deactivates the specified Organization.
 	/// This call performs a soft-delete of the Organization and will allow for Organization reactivation in the future.
-	/// Only A User with owner-level permissions can delete an Organization. If the user does not have the required role their call will be
+	/// Only A User with owner-level permissions can deactivate an Organization. If the user does not have the required role their call will be
 	/// rejected.
 	/// @param OrganizationId csp::common::String : Id of the Organization to deactivate.
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
