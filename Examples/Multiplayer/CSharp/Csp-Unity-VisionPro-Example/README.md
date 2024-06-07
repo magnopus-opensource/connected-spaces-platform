@@ -21,78 +21,76 @@ This example shows how to test out various multiplayer features: in editor, in t
 
 ## Run in Editor:
 
-Open the project on the visionPro platform
+Open the project on the visionPro platform.
 
-![Vision Pro Platform](./Images/howto_platform.png)
-<img src="./Images/howto_platform.png" />
+![Vision Pro Platform](./Documentation~/Images/howto_platform.png)
 
-Open the _Example_ Scene
+Open the _Example_ Scene.
 
-![Example Scene](./Images/howto_scene.png)
-
-<img src="./Images/howto_scene.png" />
+![Example Scene](./Documentation~/Images/howto_scene.png)
 
 Press the Play button to start the editor runtime.
 
+![Play](./Documentation~/Images/howto_play.png)
 
-Sign Up if you don't already have an account
+Sign Up if you don't already have an account.
 
-![Sign Up](./Images/howto_signup.png)
+![Sign Up](./Documentation~/Images/howto_signup.png)
 
 Confirm Email if so.
 
-![Email Confirm](./Images/howto_email.png)
+![Email Confirm](./Documentation~/Images/howto_email.png)
 
-Sign In with a confirmed, existing account
+Sign In with a confirmed, existing account.
 
-![Sign In](./Images/howto_signin.png)
+![Sign In](./Documentation~/Images/howto_signin.png)
 
-Create a Space if you don't have one already (Give it a name)
+Create a Space if you don't have one already (Give it a name).
 
-![Create Space](./Images/howto_space.png)
+![Create Space](./Documentation~/Images/howto_space.png)
 
 Enter an existing space. Move around using W/A/S/D, rotate using Q & E.
 
-![Enter Space](./Images/howto_enter.png)
+![Enter Space](./Documentation~/Images/howto_enter.png)
 
 (Optional) With another copy of the project, sign in using a different account and see the other player appear and move around in real-time.
 
-![Enter Space](./Images/howto_multiplayer.png)
+![Enter Space](./Documentation~/Images/howto_multiplayer.png)
 
 
 
 ## Run on visionOS Simulator:
 
-Build for VisionOS Simulator
+In Unity, build for the VisionOS Simulator (Target SDK).
 
-![Enter Space](./Images/howto_build_sim.png)
+![Enter Space](./Documentation~/Images/howto_build_sim.png)
 
-Run on VisionOS Simulator 1.1+
+Run on VisionOS Simulator 1.1+.
 
-![Enter Space](./Images/howto_run_sim.png)
+![Enter Space](./Documentation~/Images/howto_run_sim.png)
 
-With multiple users signed into space (eg one using Unity editor), the remote players can be seen moving around.
+With multiple users signed into a space (eg: one using the Unity editor), the remote players can be seen moving around.
 
-![Enter Space](./Images/howto_multiplayer_sim.png)
+![Enter Space](./Documentation~/Images/howto_multiplayer_sim.png)
 
 
 ## Run on visionOS Device:
 
-Build for VisionOS Device
+In Unity, build for VisionOS Device.
 
-![Enter Space](./Images/howto_build_device.png)
+![Enter Space](./Documentation~/Images/howto_build_device.png)
 
-Check that the signing for Device is set up properly using a valid profile / account
+Check that the signing for Device is set up properly using a valid profile / account.
 
-![Enter Space](./Images/howto_signing_device.png)
+![Signing](./Documentation~/Images/howto_sign_device.png)
 
-Run on VisionOS Device
+Run on visionOS Device.
 
-![Enter Space](./Images/howto_run_device.png)
+![Run](./Documentation~/Images/howto_run_device.png)
 
-With multiple users signed into space (eg one using Unity editor), the remote players can be seen moving around.
+With multiple users signed into a space (eg: one using the Unity editor), the remote players can be seen moving around.
 
-![Enter Space](./Images/howto_multiplayer_device.png)
+![Enter Space](./Documentation~/Images/howto_multiplayer_device.png)
 
 
 ## References:
