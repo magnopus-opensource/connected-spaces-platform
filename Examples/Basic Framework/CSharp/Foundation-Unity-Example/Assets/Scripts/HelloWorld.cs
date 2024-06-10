@@ -373,7 +373,6 @@ public class HelloWorld : MonoBehaviour
         
         Debug.Log($"Entered Space {space.Name}");
         enteredSpace = true;
-
         var entity = await CreateAvatar();
         MoveAvatar(entity);
         await CreateAndUploadAssetAsync(space.Id);
