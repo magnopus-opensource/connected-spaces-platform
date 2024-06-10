@@ -21,7 +21,7 @@ public class HelloWorld : MonoBehaviour
     [SerializeField] private LocalPlayer localPlayerPrefab;
     [SerializeField] private RemotePlayer remotePlayerPrefab;
     
-    [SerializeField] private TextMeshProUGUI titleTenentReplaceLabel;
+    [SerializeField] private TextMeshProUGUI[] titleTenentReplaceLabels;
 
     private const string endPointUri = "https://ogs-ostage.magnoboard.com";
     private const string TenantKey = "CSP_HELLO_WORLD";
@@ -55,10 +55,16 @@ public class HelloWorld : MonoBehaviour
             CSPVersion = CSPFoundation.GetBuildID()
         };
 
-        if (titleTenentReplaceLabel != null)
+        if (titleTenentReplaceLabels != null && titleTenentReplaceLabels.Length>0)
         {
-            string newText = titleTenentReplaceLabel.text.Replace("{TENANT}", TenantKey);
-            titleTenentReplaceLabel.text = newText;
+            foreach (var label in titleTenentReplaceLabels)
+            {
+                if (label != null)
+                {
+                    string newText = label.text.Replace("{TENANT}", TenantKey);
+                    label.text = newText;
+                }
+            }
         }
 
         Application.quitting += QuitCSPFoundation;
