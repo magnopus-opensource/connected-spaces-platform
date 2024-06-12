@@ -23,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Image, Parent)
+TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Text, Parent)
 {
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Position)]			 = csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(TextPropertyKeys::Rotation)]			 = csp::common::Vector4 {0, 0, 0, 1};
