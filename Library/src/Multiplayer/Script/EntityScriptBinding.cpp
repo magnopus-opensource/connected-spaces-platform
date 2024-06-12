@@ -474,6 +474,22 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsVisible, "isVisible")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
+
+	Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.PROPERTY_GET_SET(TextSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(TextSpaceComponent, Scale, "scale")
+		.PROPERTY_GET_SET(TextSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible")
+		.PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
+		.PROPERTY_GET_SET(TextSpaceComponent, Text, "text")
+		.PROPERTY_GET_SET(TextSpaceComponent, TextColor, "textColor")
+		.PROPERTY_GET_SET(TextSpaceComponent, BackgroundColor, "backgroundColor")
+		.PROPERTY_GET_SET(TextSpaceComponent, IsBackgroundVisible, "isBackgroundVisible")
+		.PROPERTY_GET_SET(TextSpaceComponent, Width, "width")
+		.PROPERTY_GET_SET(TextSpaceComponent, Height, "height");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -519,6 +535,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 			"getFiducialMarkerComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
 			"getGaussianSplatComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")

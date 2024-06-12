@@ -66,7 +66,8 @@ enum class ComponentType
 	Fog,
 	ECommerce,
 	FiducialMarker,
-	GaussianSplat
+	GaussianSplat,
+	Text
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
