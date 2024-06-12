@@ -4799,7 +4799,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sign In to OKO
+  m_text: Sign In to {TENANT}
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4826,8 +4826,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
-  m_fontSizeBase: 28
+  m_fontSize: 24
+  m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7369,7 +7369,9 @@ MonoBehaviour:
   inSpaceUI: {fileID: 782817197}
   localPlayerPrefab: {fileID: 9222911777140516767, guid: 131a7e65006979d429cf998f667ca671, type: 3}
   remotePlayerPrefab: {fileID: 2821002494043389318, guid: a8537f581c058b545b4bcf5af917b7ea, type: 3}
-  titleTenentReplaceLabel: {fileID: 1373627615}
+  titleTenentReplaceLabels:
+  - {fileID: 1373627615}
+  - {fileID: 818248328}
 --- !u!4 &1252946740
 Transform:
   m_ObjectHideFlags: 0
