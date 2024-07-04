@@ -278,7 +278,7 @@ namespace CSharpTests
 
         public static void InitialiseFoundationWithUserAgentInfo(string endpointRootURI)
         {
-            Csp.CSPFoundation.Initialise(endpointRootURI, "OKO_TESTS");
+            Csp.CSPFoundation.Initialise(endpointRootURI, "", "OKO_TESTS");
             var userAgentInfo = new Csp.ClientUserAgent
             {
                 CSPVersion  = Csp.CSPFoundation.GetVersion(),
