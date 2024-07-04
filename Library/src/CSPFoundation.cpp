@@ -236,7 +236,9 @@ csp::common::String* CSPFoundation::DeviceId			  = nullptr;
 csp::common::String* CSPFoundation::ClientUserAgentString = nullptr;
 csp::common::String* CSPFoundation::Tenant				  = nullptr;
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
+							   const csp::common::String& MaintainanceWindowURI,
+							   const csp::common::String& InTenant)
 {
 	if (IsInitialised)
 	{
@@ -271,6 +273,7 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	Endpoints->MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
 	Endpoints->AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
 	Endpoints->TrackingServiceURI	 = CSP_TEXT(TrackingServiceURI.c_str());
+	Endpoints->MaintainanceWindowURI = CSP_TEXT(MaintainanceWindowURI.c_str());
 
 	csp::systems::SystemsManager::Instantiate();
 
@@ -382,14 +385,13 @@ const csp::common::String& CSPFoundation::GetTenant()
 
 void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
 {
-	ClientUserAgentInfo->CSPVersion			   = CSP_TEXT(ClientUserAgentHeader.CSPVersion);
-	ClientUserAgentInfo->ClientOS			   = CSP_TEXT(ClientUserAgentHeader.ClientOS);
-	ClientUserAgentInfo->ClientSKU			   = CSP_TEXT(ClientUserAgentHeader.ClientSKU);
-	ClientUserAgentInfo->ClientVersion		   = CSP_TEXT(ClientUserAgentHeader.ClientVersion);
-	ClientUserAgentInfo->ClientEnvironment	   = CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
-	ClientUserAgentInfo->CHSEnvironment		   = CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
-	ClientUserAgentInfo->MaintainanceWindowURI = CSP_TEXT(ClientUserAgentHeader.MaintainanceWindowURI);
-	const char* ClientUserAgentHeaderFormat	   = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
+	ClientUserAgentInfo->CSPVersion			= CSP_TEXT(ClientUserAgentHeader.CSPVersion);
+	ClientUserAgentInfo->ClientOS			= CSP_TEXT(ClientUserAgentHeader.ClientOS);
+	ClientUserAgentInfo->ClientSKU			= CSP_TEXT(ClientUserAgentHeader.ClientSKU);
+	ClientUserAgentInfo->ClientVersion		= CSP_TEXT(ClientUserAgentHeader.ClientVersion);
+	ClientUserAgentInfo->ClientEnvironment	= CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
+	ClientUserAgentInfo->CHSEnvironment		= CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
+	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
 
 	*ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat,
 													   GetClientUserAgentInfo().ClientSKU.c_str(),

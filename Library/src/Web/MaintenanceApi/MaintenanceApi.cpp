@@ -31,7 +31,7 @@ MaintenanceApi::~MaintenanceApi()
 {
 }
 
-void MaintenanceApi::Query(csp::common::String MaintainanceURL,
+void MaintenanceApi::Query(const csp::common::String& MaintainanceURL,
 						   csp::services::ApiResponseHandlerBase* ResponseHandler,
 						   csp::common::CancellationToken& CancellationToken) const
 {

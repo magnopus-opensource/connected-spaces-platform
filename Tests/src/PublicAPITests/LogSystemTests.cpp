@@ -38,11 +38,8 @@ void LogMessageLevelTest(const csp::systems::LogLevel Level, const csp::common::
 	}
 }
 
-void LogFormatLevelTest(const csp::systems::LogLevel Level,
-						const csp::common::String& TestMsg,
-						const int& TestValue,
-						std::atomic_bool& LogConfirmed,
-						bool Expected)
+void LogFormatLevelTest(
+	const csp::systems::LogLevel Level, const csp::common::String& TestMsg, const int& TestValue, std::atomic_bool& LogConfirmed, bool Expected)
 {
 	LogConfirmed = false;
 	CSP_LOG_FORMAT(Level, TestMsg, TestValue);
@@ -59,7 +56,7 @@ void LogFormatLevelTest(const csp::systems::LogLevel Level,
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI, "");
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();

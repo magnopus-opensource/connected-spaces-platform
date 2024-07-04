@@ -31,13 +31,13 @@ namespace csp::systems
 
 MaintenanceSystem::MaintenanceSystem() : SystemBase(), MaintenanceAPI(nullptr)
 {
-	Running = true;
+	AllowMaintenanceInfoRequests = true;
 }
 
 MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	MaintenanceAPI = CSP_NEW chs::MaintenanceApi(InWebClient);
-	Running		   = true;
+	MaintenanceAPI				 = CSP_NEW chs::MaintenanceApi(InWebClient);
+	AllowMaintenanceInfoRequests = true;
 }
 
 MaintenanceSystem::~MaintenanceSystem()
@@ -47,7 +47,7 @@ MaintenanceSystem::~MaintenanceSystem()
 
 void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
-	if (Running == true)
+	if (AllowMaintenanceInfoRequests == true)
 	{
 		const MaintenanceInfoCallback GetMaintenanceInfoCallback = [this, Callback](const MaintenanceInfoResult& Result)
 		{
@@ -59,7 +59,7 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 			if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
 				MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
-				Running = false;
+				AllowMaintenanceInfoRequests = false;
 				INVOKE_IF_NOT_NULL(Callback, res);
 
 				return;
@@ -71,7 +71,7 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 			= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
 																														  nullptr);
 		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)
-			->Query(csp::CSPFoundation::GetClientUserAgentInfo().MaintainanceWindowURI, MaintenanceResponseHandler);
+			->Query(csp::CSPFoundation::GetEndpoints().MaintainanceWindowURI, MaintenanceResponseHandler);
 	}
 }
 
