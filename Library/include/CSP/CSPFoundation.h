@@ -55,6 +55,9 @@ public:
 
 	// @brief Magnopus services environment. e.g odev.
 	csp::common::String CHSEnvironment;
+
+	// @brief Maintainance Window Url.
+	csp::common::String MaintainanceWindowURI;
 };
 
 /// @brief Main entry point for interacting with Foundation.

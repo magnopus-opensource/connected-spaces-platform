@@ -31,11 +31,13 @@ namespace csp::systems
 
 MaintenanceSystem::MaintenanceSystem() : SystemBase(), MaintenanceAPI(nullptr)
 {
+	Running = true;
 }
 
 MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
 	MaintenanceAPI = CSP_NEW chs::MaintenanceApi(InWebClient);
+	Running		   = true;
 }
 
 MaintenanceSystem::~MaintenanceSystem()
@@ -45,27 +47,32 @@ MaintenanceSystem::~MaintenanceSystem()
 
 void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 {
-	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [Callback](const MaintenanceInfoResult& Result)
+	if (Running == true)
 	{
-		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+		const MaintenanceInfoCallback GetMaintenanceInfoCallback = [this, Callback](const MaintenanceInfoResult& Result)
 		{
-			return;
-		}
+			if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+			{
+				return;
+			}
 
-		if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
-		{
-			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaintenanceInfoResult>());
+			if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+			{
+				MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
+				Running = false;
+				INVOKE_IF_NOT_NULL(Callback, res);
 
-			return;
-		}
+				return;
+			}
 
-		INVOKE_IF_NOT_NULL(Callback, Result);
-	};
-
-	csp::services::ResponseHandlerPtr MaintenanceResponseHandler
-		= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
-																													  nullptr);
-	static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(csp::CSPFoundation::GetClientUserAgentInfo().CHSEnvironment, MaintenanceResponseHandler);
+			INVOKE_IF_NOT_NULL(Callback, Result);
+		};
+		csp::services::ResponseHandlerPtr MaintenanceResponseHandler
+			= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
+																														  nullptr);
+		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)
+			->Query(csp::CSPFoundation::GetClientUserAgentInfo().MaintainanceWindowURI, MaintenanceResponseHandler);
+	}
 }
 
 } // namespace csp::systems

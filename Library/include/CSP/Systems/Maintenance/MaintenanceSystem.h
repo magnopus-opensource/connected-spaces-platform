@@ -75,6 +75,7 @@ private:
 	~MaintenanceSystem();
 
 	csp::services::ApiBase* MaintenanceAPI;
+	bool Running;
 };
 
 } // namespace csp::systems
