@@ -56,7 +56,7 @@ void LogFormatLevelTest(
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI, "");
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
