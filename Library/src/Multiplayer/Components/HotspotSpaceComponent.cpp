@@ -23,7 +23,7 @@
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Hotspot, Parent), UniqueComponentId("")
+HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Hotspot, Parent)
 {
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)]			 = csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)]			 = csp::common::Vector4 {0, 0, 0, 1};
@@ -55,9 +55,9 @@ void HotspotSpaceComponent::SetHotspotType(HotspotType Value)
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::HotspotType), static_cast<int64_t>(Value));
 }
 
-const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId()
+const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId() const
 {
-	UniqueComponentId = std::to_string(Parent->GetId()).c_str();
+	static csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(Id).c_str();
 
