@@ -80,12 +80,12 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 		{
 		});
 
-	// Create object to represent the text
+	// Create object to represent the hotspot
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create text component
+	// Create hotspot component
 	auto* HotspotComponent = static_cast<HotspotSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Hotspot));
 
 	// Ensure defaults are set
@@ -99,14 +99,16 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	EXPECT_EQ(HotspotComponent->GetRotation().X, 0);
 	EXPECT_EQ(HotspotComponent->GetRotation().Y, 0);
 	EXPECT_EQ(HotspotComponent->GetRotation().Z, 0);
-	EXPECT_EQ(HotspotComponent->GetHotspotType(), HotspotType::DEFAULT);
+	EXPECT_EQ(HotspotComponent->GetHotspotType(), HotspotType::TeleportHotspot);
 	EXPECT_EQ(HotspotComponent->GetName(), "");
 
 	csp::common::String UniqueComponentId = std::to_string(CreatedObject->GetId()).c_str();
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(HotspotComponent->GetId()).c_str();
 
-	EXPECT_EQ(HotspotComponent->GetUniqueComponentId(), UniqueComponentId);
+	csp::common::String HotspotUniqueComponentId = HotspotComponent->GetUniqueComponentId();
+
+	EXPECT_EQ(HotspotUniqueComponentId, UniqueComponentId);
 
 	// Set new values
 
@@ -202,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 		hotspot.isVisible = false;
 		hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
 		hotspot.name = "HotspotName";
-		hotspot.hotspotType = 2;
+		hotspot.hotspotType = 1;
 
 		var id = hotspot.getUniqueComponentId();
 		if (!id)

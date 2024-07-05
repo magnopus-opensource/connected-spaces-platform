@@ -23,12 +23,12 @@
 namespace csp::multiplayer
 {
 
-HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Hotspot, Parent)
+HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Hotspot, Parent), UniqueComponentId("")
 {
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)]			 = csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)]			 = csp::common::Vector4 {0, 0, 0, 1};
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name)]				 = "";
-	Properties[static_cast<uint32_t>(HotspotPropertyKeys::HotspotType)]			 = static_cast<int64_t>(csp::multiplayer::HotspotType::DEFAULT);
+	Properties[static_cast<uint32_t>(HotspotPropertyKeys::HotspotType)]			 = static_cast<int64_t>(csp::multiplayer::HotspotType::TeleportHotspot);
     Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)]			 = true;
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible)]		     = true;
 
@@ -55,12 +55,12 @@ void HotspotSpaceComponent::SetHotspotType(HotspotType Value)
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::HotspotType), static_cast<int64_t>(Value));
 }
 
-const csp::common::String HotspotSpaceComponent::GetUniqueComponentId()
+const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId()
 {
-	csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
+	UniqueComponentId = std::to_string(Parent->GetId()).c_str();
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(Id).c_str();
-	
+
     return UniqueComponentId;
 }
 

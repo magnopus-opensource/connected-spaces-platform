@@ -32,8 +32,7 @@ namespace csp::multiplayer
 
 enum class HotspotType
 {
-	DEFAULT = 0,
-	TeleportHotspot,
+	TeleportHotspot = 0,
 	SpawnHotspot
 };
 
@@ -67,11 +66,17 @@ public:
 	/// @param Value The Name of this Hotspot.
 	void SetName(const csp::common::String& Value);
 
+    /// @brief Gets the HotspotType of this Hotspot.
     HotspotType GetHotspotType() const;
 
+    /// @brief Sets the HotspotType of this Hotspot.
+    /// @param Value The Type of the Hotspot.
     void SetHotspotType(HotspotType Value);
 
-    const csp::common::String GetUniqueComponentId();
+    /// @brief Gets a unique identifier for this component in the hierarchy.
+    /// @note This does not give a complete hierarchy path, only the entityId of the parent for the component.
+    /// @return A string composed of 'parentId:componentId'.
+    const csp::common::String& GetUniqueComponentId();
 
 	/// \addtogroup IPositionComponent
 	/// @{
@@ -100,6 +105,9 @@ public:
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
 	/// @}
+
+    protected:
+	csp::common::String UniqueComponentId;
 };
 
 } // namespace csp::multiplayer
