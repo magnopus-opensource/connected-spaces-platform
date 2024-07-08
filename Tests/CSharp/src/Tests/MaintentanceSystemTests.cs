@@ -14,7 +14,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
-            using var result = maintenanceSystem.GetMaintenanceInfo().Result;
+            using var result = maintenanceSystem.GetMaintenanceInfo("https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json").Result;
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
         }
@@ -26,7 +26,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
-            using var result = maintenanceSystem.GetMaintenanceInfo().Result;
+            using var result = maintenanceSystem.GetMaintenanceInfo("https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json").Result;
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             using var LatestMaintenanceInfo = result.GetLatestMaintenanceInfo();
@@ -40,7 +40,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out _, out _, out _, out _, out _, out _, out _, out var maintenanceSystem, out _, out _);
 
-            using var result = maintenanceSystem.GetMaintenanceInfo().Result;
+            using var result = maintenanceSystem.GetMaintenanceInfo("https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json").Result;
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
 
             using var latestMaintenanceInfo = result.GetLatestMaintenanceInfo();
