@@ -236,9 +236,7 @@ csp::common::String* CSPFoundation::DeviceId			  = nullptr;
 csp::common::String* CSPFoundation::ClientUserAgentString = nullptr;
 csp::common::String* CSPFoundation::Tenant				  = nullptr;
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
-							   const csp::common::String& MaintainanceWindowURI,
-							   const csp::common::String& InTenant)
+bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
 {
 	if (IsInitialised)
 	{
@@ -273,7 +271,6 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
 	Endpoints->MultiplayerServiceURI = CSP_TEXT(MultiplayerServiceURI.c_str());
 	Endpoints->AggregationServiceURI = CSP_TEXT(AggregationServiceURI.c_str());
 	Endpoints->TrackingServiceURI	 = CSP_TEXT(TrackingServiceURI.c_str());
-	Endpoints->MaintainanceWindowURI = CSP_TEXT(MaintainanceWindowURI.c_str());
 
 	csp::systems::SystemsManager::Instantiate();
 

@@ -45,7 +45,7 @@ MaintenanceSystem::~MaintenanceSystem()
 	CSP_DELETE(MaintenanceAPI);
 }
 
-void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
+void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintainanceURL, MaintenanceInfoCallback Callback)
 {
 	if (AllowMaintenanceInfoRequests == true)
 	{
@@ -70,8 +70,7 @@ void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback)
 		csp::services::ResponseHandlerPtr MaintenanceResponseHandler
 			= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
 																														  nullptr);
-		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)
-			->Query(csp::CSPFoundation::GetEndpoints().MaintainanceWindowURI, MaintenanceResponseHandler);
+		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(MaintainanceURL, MaintenanceResponseHandler);
 	}
 }
 

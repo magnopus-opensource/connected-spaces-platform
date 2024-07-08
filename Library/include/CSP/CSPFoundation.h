@@ -67,11 +67,9 @@ public:
 	/// systems required for foundation to operate.
 	/// @param EndpointRootURI csp::common::String : Root URI for service endpoints
 	/// @param Tenant csp::common::String : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants cannot
-	/// @param Maintainance Window Url.
 	/// interact with each other.
 	/// @return bool : True for successful initialisation.
-	static bool
-		Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& MaintainanceWindowURI, const csp::common::String& Tenant);
+	static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
 
 	/// @brief This should be used at the end of the application lifecycle.
 	/// Clears event queues and destroys foundation systems.

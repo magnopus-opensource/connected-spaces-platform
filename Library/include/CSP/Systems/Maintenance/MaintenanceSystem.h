@@ -21,6 +21,7 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
+#include <string>
 
 namespace csp::services
 {
@@ -67,7 +68,7 @@ class CSP_API MaintenanceSystem : public SystemBase
 public:
 	/// @brief Receives information on planned maintenances outages schedules for the future
 	/// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetMaintenanceInfo(MaintenanceInfoCallback Callback);
+	CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& MaintainanceURL, MaintenanceInfoCallback Callback);
 
 private:
 	MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

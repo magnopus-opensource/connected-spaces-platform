@@ -187,7 +187,7 @@ inline void LogFatal(std::string Message)
 
 inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
-	csp::CSPFoundation::Initialise(EndpointRootURI, "https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json", "OKO_TESTS");
+	csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS");
 
 	csp::ClientUserAgent ClientHeaderInfo;
 	ClientHeaderInfo.CSPVersion		   = csp::CSPFoundation::GetVersion();
