@@ -18,10 +18,10 @@
 
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
+#include "Debug/Logging.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/MaintenanceApi/MaintenanceApi.h"
-
 
 namespace chs = csp::systems::maintenanceservice;
 
@@ -60,6 +60,7 @@ void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& Maintainan
 			{
 				MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
 				AllowMaintenanceInfoRequests = false;
+				CSP_LOG_ERROR_MSG("Failed to Get Maintainance Information: Maintainance system disabled. Check Maintainance URL, and restart");
 				INVOKE_IF_NOT_NULL(Callback, res);
 
 				return;
