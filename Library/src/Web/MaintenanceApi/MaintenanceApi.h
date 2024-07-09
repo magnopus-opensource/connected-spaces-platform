@@ -43,7 +43,7 @@ public:
 	MaintenanceApi(csp::web::WebClient* InWebClient);
 	~MaintenanceApi();
 
-	void Query(const csp::common::String& MaintainanceUrl,
+	void Query(const csp::common::String& MaintenanceUrl,
 			   csp::services::ApiResponseHandlerBase* ResponseHandler,
 			   csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
