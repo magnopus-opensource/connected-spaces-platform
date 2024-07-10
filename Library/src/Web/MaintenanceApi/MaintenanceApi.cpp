@@ -31,14 +31,14 @@ MaintenanceApi::~MaintenanceApi()
 {
 }
 
-void MaintenanceApi::Query(const csp::common::String& MaintainanceURL,
+void MaintenanceApi::Query(const csp::common::String& MaintenanceURL,
 						   csp::services::ApiResponseHandlerBase* ResponseHandler,
 						   csp::common::CancellationToken& CancellationToken) const
 {
 
 
-	std::string MaintainanceURLLower = std::string(MaintainanceURL.c_str());
-	csp::web::Uri Uri				 = csp::web::Uri(MaintainanceURLLower.c_str());
+	std::string MaintenanceURLLower = std::string(MaintenanceURL.c_str());
+	csp::web::Uri Uri				= csp::web::Uri(MaintenanceURLLower.c_str());
 
 	csp::web::HttpPayload Payload;
 	Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));

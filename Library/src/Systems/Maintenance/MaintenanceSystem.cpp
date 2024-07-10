@@ -45,7 +45,7 @@ MaintenanceSystem::~MaintenanceSystem()
 	CSP_DELETE(MaintenanceAPI);
 }
 
-void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintainanceURL, MaintenanceInfoCallback Callback)
+void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback)
 {
 	if (AllowMaintenanceInfoRequests == true)
 	{
@@ -60,7 +60,7 @@ void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& Maintainan
 			{
 				MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
 				AllowMaintenanceInfoRequests = false;
-				CSP_LOG_ERROR_MSG("Failed to Get Maintainance Information: Maintainance system disabled. Check Maintainance URL, and restart");
+				CSP_LOG_ERROR_MSG("Failed to Get Maintenance Information: Maintenance system disabled. Check Maintenance URL, and restart");
 				INVOKE_IF_NOT_NULL(Callback, res);
 
 				return;
@@ -71,7 +71,7 @@ void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& Maintainan
 		csp::services::ResponseHandlerPtr MaintenanceResponseHandler
 			= MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(GetMaintenanceInfoCallback,
 																														  nullptr);
-		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(MaintainanceURL, MaintenanceResponseHandler);
+		static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(MaintenanceURL, MaintenanceResponseHandler);
 	}
 }
 
