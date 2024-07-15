@@ -99,7 +99,7 @@ void ECommerceSystem::GetProductInfoCollectionByVariantIds(const common::String&
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
 {
 	std::string CharacterCheck = CartId.c_str();
-    if (CharacterCheck.find("/") != std::string::npos && CharacterCheck.find(R"(\)") != std::string::npos)
+    if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
     {
 		CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
 
