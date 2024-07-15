@@ -282,6 +282,8 @@ public:
 	/// @return ProductInfo : reference to the CheckoutInfo
 	CheckoutInfo& GetCheckoutInfo();
 
+    CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+
 private:
 	CheckoutInfoResult(void*) {};
 
