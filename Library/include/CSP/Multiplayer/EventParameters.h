@@ -91,4 +91,24 @@ public:
 	csp::common::String UserId;
 };
 
+enum class ESequenceUpdateType
+{
+	Create,
+	Update,
+	Delete
+};
+
+class CSP_API SequenceChangedParams
+{
+public:
+	/// @brief The type of update to the sequence.
+	ESequenceUpdateType UpdateType;
+
+	/// @brief The key of the sequence which was updated.
+	csp::common::String Key;
+
+	/// @brief If the update type is "Update", this will be the new key.
+	csp::common::String NewKey;
+};
+
 } // namespace csp::multiplayer

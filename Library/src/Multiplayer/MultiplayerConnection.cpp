@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
@@ -27,7 +28,6 @@
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
-#include "CallHelpers.h"
 
 #ifdef CSP_WASM
 	#include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -240,7 +240,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 								return;
 							}
 
-                            Connection->SetDisconnected(
+							Connection->SetDisconnected(
 								[this](const std::exception_ptr& Except)
 								{
 									std::string DisconnectMessage = "Connection Closed.";
@@ -260,7 +260,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 									CSP_LOG_MSG(csp::systems::LogLevel::Log, DisconnectMessage.c_str());
 								});
 
-                            StartListening(Callback);
+							StartListening(Callback);
 						});
 				});
 		});
@@ -285,7 +285,7 @@ void MultiplayerConnection::DisconnectWithReason(const csp::common::String& Reas
 		if (Except != nullptr)
 		{
 			auto Error = ParseError(Except);
-            INVOKE_IF_NOT_NULL(Callback, Error);
+			INVOKE_IF_NOT_NULL(Callback, Error);
 
 			return;
 		}
@@ -368,6 +368,11 @@ void MultiplayerConnection::SetUserPermissionsChangedCallback(UserPermissionsCha
 	UserPermissionsChangedCallback = Callback;
 }
 
+void MultiplayerConnection::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
+{
+	SequenceChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)
@@ -434,10 +439,21 @@ void MultiplayerConnection::StartEventMessageListening()
 			Deserialiser.Parse(EventValues);
 			UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 		}
-        else if (EventType == "OrganizationMemberAdded")
+		else if (EventType == "OrganizationMemberAdded")
 		{
 			CSP_LOG_MSG(systems::LogLevel::Log, "Custom deserialiser for OrganizationMemberAdded event not yet implemented.")
-            // todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
+			// todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
+		}
+		else if (EventType == "SequenceChanged")
+		{
+			if (!SequenceChangedCallback)
+			{
+				return;
+			}
+
+			SequenceChangedEventDeserialiser Deserialiser;
+			Deserialiser.Parse(EventValues);
+			SequenceChangedCallback(Deserialiser.GetEventParams());
 		}
 		else
 		{
@@ -592,7 +608,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 		INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
 	};
 
-    std::vector<signalr::value> ParamsVec;
+	std::vector<signalr::value> ParamsVec;
 	signalr::value Params = signalr::value(std::move(ParamsVec));
 	Connection->Invoke("ResetScopes", Params, LocalCallback);
 }
@@ -695,7 +711,7 @@ CSP_ASYNC_RESULT void MultiplayerConnection::SetAllowSelfMessagingFlag(const boo
 
 		AllowSelfMessaging = InAllowSelfMessaging;
 
-        INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
 	};
 
 	CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling SetAllowSelfMessaging");

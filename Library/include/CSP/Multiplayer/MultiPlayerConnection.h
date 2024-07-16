@@ -121,6 +121,9 @@ public:
 	// Callback to receive access permission changes Data when a message is sent.
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
+	// Callback to for receiving sequence changes, contains a SequenceChangedParams with the details.
+	typedef std::function<void(const SequenceChangedParams&)> SequenceChangedCallbackHandler;
+
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
@@ -164,6 +167,10 @@ public:
 	/// @brief Sets a callback for an access control changed event.
 	/// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
 	CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
+
+	/// @brief Sets a callback for a sequence changed event.
+	/// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence that has been changed.
+	CSP_EVENT void SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback);
 
 	/// @brief Registers a callback to listen for the named event.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
@@ -250,6 +257,7 @@ private:
 	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 	ConversationSystemCallbackHandler ConversationSystemCallback;
 	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
+	SequenceChangedCallbackHandler SequenceChangedCallback;
 
 	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
 	//   change depending on which runtime is used.
