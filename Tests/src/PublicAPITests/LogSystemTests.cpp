@@ -38,11 +38,8 @@ void LogMessageLevelTest(const csp::systems::LogLevel Level, const csp::common::
 	}
 }
 
-void LogFormatLevelTest(const csp::systems::LogLevel Level,
-						const csp::common::String& TestMsg,
-						const int& TestValue,
-						std::atomic_bool& LogConfirmed,
-						bool Expected)
+void LogFormatLevelTest(
+	const csp::systems::LogLevel Level, const csp::common::String& TestMsg, const int& TestValue, std::atomic_bool& LogConfirmed, bool Expected)
 {
 	LogConfirmed = false;
 	CSP_LOG_FORMAT(Level, TestMsg, TestValue);
