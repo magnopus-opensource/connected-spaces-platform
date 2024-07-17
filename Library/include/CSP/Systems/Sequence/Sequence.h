@@ -20,7 +20,7 @@
 namespace csp::systems
 {
 /// @ingroup Sequence System
-/// @brief A basic class abstraction for asequence, including key, and reference variables, and items.
+/// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
 class CSP_API Sequence
 {
 public:

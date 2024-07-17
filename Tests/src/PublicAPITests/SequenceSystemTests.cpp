@@ -31,6 +31,22 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
+void WaitForCallback(bool& CallbackCalled)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (CallbackCalled == false && TestTime < 20)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+}
+
 } // namespace
 
 void CreateSequence(csp::systems::SequenceSystem* SequenceSystem,
@@ -174,8 +190,8 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
 	}
 }
 
-static constexpr const char* TestSpaceName		  = "OLY-UNITTEST-SPACE-REWIND";
-static constexpr const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+static constexpr const char* TestSpaceName		  = "CSP-UNITTEST-SPACE-MAG";
+static constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
@@ -192,8 +208,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 	LogIn(UserSystem, UserId);
 
 	// Create space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	char UniqueSpaceName[256];
 
@@ -203,7 +219,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -236,8 +252,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 	LogIn(UserSystem, UserId);
 
 	// Create space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	char UniqueSpaceName[256];
 
@@ -247,7 +263,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems;
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -259,6 +275,39 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create sequence
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+	const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
+
+	csp::systems::Sequence Sequence;
+	CreateSequence(SequenceSystem, UniqueSequenceName, "TesId", TestSequenceReferenceID, SequenceItems, Sequence);
+
+	// Delete sequence
+	DeleteSequences(SequenceSystem, {Sequence.Key});
 
 	// Log out
 	LogOut(UserSystem);
@@ -282,14 +331,14 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
 	// Create space
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -328,8 +377,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 	LogIn(UserSystem, UserId);
 
 	// Create space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	char UniqueSpaceName[256];
 
@@ -339,7 +388,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -378,8 +427,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 	LogIn(UserSystem, UserId);
 
 	// Create space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	char UniqueSpaceName[256];
 
@@ -390,7 +439,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -398,7 +447,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, Sequence);
 
 	// Rename sequence
-	const char* TestUpdatedSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND-UPDATED";
+	const char* TestUpdatedSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG-UPDATED";
 	char UniqueUpdatedSequenceName[256];
 	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
@@ -431,8 +480,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 	LogIn(UserSystem, UserId);
 
 	// Create space
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	char UniqueSpaceName[256];
 
@@ -442,7 +491,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 
 	// Create sequences
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -450,7 +499,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 	CreateSequence(SequenceSystem, UniqueSequenceName, "Group1", Space.Id, SequenceItems, Sequence);
 
 	csp::common::Array<csp::common::String> SequenceItems2 {"Hotspot4", "Hotspot5", "Hotspot6"};
-	const char* TestSequenceKey2 = "OLY-UNITTEST-SEQUENCE-REWIND2";
+	const char* TestSequenceKey2 = "CSP-UNITTEST-SEQUENCE-MAG2";
 	char UniqueSequenceName2[256];
 	SPRINTF(UniqueSequenceName2, "%s-%s", TestSequenceKey2, GetUniqueString().c_str());
 
@@ -508,22 +557,6 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 }
 #endif
 
-void WaitForCallback(bool& CallbackCalled)
-{
-	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (CallbackCalled == false && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-}
-
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_REGISTERSEQUENCEUPDATED_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 {
@@ -542,7 +575,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	// Create space
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
@@ -555,7 +588,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 
-	const char* TestSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND";
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
@@ -576,7 +609,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	EXPECT_TRUE(CallbackCalled);
 
 	// Rename sequence
-	const char* TestUpdatedSequenceKey = "OLY-UNITTEST-SEQUENCE-REWIND-UPDATED";
+	const char* TestUpdatedSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG-UPDATED";
 	char UniqueUpdatedSequenceName[256];
 	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 

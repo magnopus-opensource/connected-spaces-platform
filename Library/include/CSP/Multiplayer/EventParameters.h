@@ -107,7 +107,7 @@ public:
 	/// @brief The key of the sequence which was updated.
 	csp::common::String Key;
 
-	/// @brief If the update type is "Update", this will be the new key.
+	/// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
 	csp::common::String NewKey;
 };
 

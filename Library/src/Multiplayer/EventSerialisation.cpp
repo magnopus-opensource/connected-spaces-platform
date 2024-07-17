@@ -291,7 +291,8 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	EventParams.Key = EventData[1].GetString();
 
-	if (EventParams.UpdateType == ESequenceUpdateType::Update)
+	// Optional parameter for when a key is changed
+	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		EventParams.NewKey = EventData[2].GetString();
 	}

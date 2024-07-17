@@ -121,7 +121,7 @@ public:
 	// Callback to receive access permission changes Data when a message is sent.
 	typedef std::function<void(const UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
-	// Callback to for receiving sequence changes, contains a SequenceChangedParams with the details.
+	// Callback to receive sequence changes, contains a SequenceChangedParams with the details.
 	typedef std::function<void(const SequenceChangedParams&)> SequenceChangedCallbackHandler;
 
 
