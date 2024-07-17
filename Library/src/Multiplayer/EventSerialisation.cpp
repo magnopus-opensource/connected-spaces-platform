@@ -71,6 +71,7 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
 {
 	csp::multiplayer::ReplicatedValue ReplicatedValue;
 
+	// Prevents serialization crashes for optional values where the actual value is null.
 	if (Component.type() == signalr::value_type::null)
 	{
 		return ReplicatedValue;
