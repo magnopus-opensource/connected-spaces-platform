@@ -35,6 +35,7 @@
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
@@ -42,7 +43,6 @@
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
-#include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
@@ -476,7 +476,7 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
 
-    Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
+	Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
 		.fun<&HotspotSpaceComponentScriptInterface::GetUniqueComponentId>("getUniqueComponentId")
@@ -485,7 +485,8 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, Name, "name")
-		.PROPERTY_GET_SET(HotspotSpaceComponent, HotspotType, "hotspotType");
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
