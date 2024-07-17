@@ -67,7 +67,6 @@ void HotspotSpaceComponent::SetIsSpawnPoint(bool Value)
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint), Value);
 }
 
-
 const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId() const
 {
 	static csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
@@ -76,7 +75,6 @@ const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId() const
 
 	return UniqueComponentId;
 }
-
 
 /* IPositionComponent */
 
