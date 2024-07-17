@@ -485,7 +485,8 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, Name, "name")
-		.PROPERTY_GET_SET(HotspotSpaceComponent, HotspotType, "hotspotType");
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)

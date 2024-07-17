@@ -99,7 +99,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	EXPECT_EQ(HotspotComponent->GetRotation().X, 0);
 	EXPECT_EQ(HotspotComponent->GetRotation().Y, 0);
 	EXPECT_EQ(HotspotComponent->GetRotation().Z, 0);
-	EXPECT_EQ(HotspotComponent->GetHotspotType(), HotspotType::TeleportHotspot);
+	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), true);
+	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), false);
 	EXPECT_EQ(HotspotComponent->GetName(), "");
 
 	csp::common::String UniqueComponentId = std::to_string(CreatedObject->GetId()).c_str();
@@ -117,7 +118,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	HotspotComponent->SetIsVisible(false);
 	HotspotComponent->SetPosition(csp::common::Vector3::One());
 	HotspotComponent->SetRotation(csp::common::Vector4 {1, 1, 1, 1});
-	HotspotComponent->SetHotspotType(HotspotType::SpawnHotspot);
+	HotspotComponent->SetIsTeleportPoint(false);
+	HotspotComponent->SetIsSpawnPoint(true);
 	HotspotComponent->SetName("HotspotName");
 
 	// Ensure values are set correctly
@@ -130,7 +132,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().X, 1.0f);
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Y, 1.0f);
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Z, 1.0f);
-	EXPECT_EQ(HotspotComponent->GetHotspotType(), HotspotType::SpawnHotspot);
+	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), false);
+	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), true);
 	EXPECT_EQ(HotspotComponent->GetName(), "HotspotName");
 
 	SpaceSystem->ExitSpace(
@@ -204,7 +207,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 		hotspot.isVisible = false;
 		hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
 		hotspot.name = "HotspotName";
-		hotspot.hotspotType = 1;
+		hotspot.isSpawnPoint = true;
+		hotspot.isTeleportPoint = false;
 
 		var id = hotspot.getUniqueComponentId();
 		if (!id)
@@ -229,7 +233,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().X, 1.0f);
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Y, 1.0f);
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Z, 1.0f);
-	EXPECT_EQ(HotspotComponent->GetHotspotType(), HotspotType::SpawnHotspot);
+	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), true);
+	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), false);
 	EXPECT_EQ(HotspotComponent->GetName(), "HotspotName");
 
 	SpaceSystem->ExitSpace(

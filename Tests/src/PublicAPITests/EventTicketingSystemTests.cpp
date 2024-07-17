@@ -28,6 +28,13 @@
 
 using namespace csp::systems;
 
+// Dummy EventBrite-formatted data used throughout the tests.
+static const csp::common::String TestVendorEventId  = "123456789123";
+static const csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-test-event-tickets-123456789123";
+
+static const csp::common::String AlternativeTestVendorEventId  = "234567891234";
+static const csp::common::String AlternativeTestVendorEventUri = "https://www.eventbrite.com/e/csp-test-event-tickets-234567891234";
+
 namespace
 {
 
@@ -47,9 +54,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 	auto* UserSystem		   = SystemsManager.GetUserSystem();
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
-
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
@@ -97,9 +101,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -146,12 +147,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
-	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
-
-	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
-	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -169,8 +164,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 											RequestPredicate,
 											Space.Id,
 											csp::systems::EventTicketingVendor::Eventbrite,
-											TestVendorEventId1,
-											TestVendorEventUri1,
+											TestVendorEventId,
+											TestVendorEventUri,
 											true);
 
 	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
@@ -179,8 +174,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 
 	EXPECT_EQ(Event1.SpaceId, Space.Id);
 	EXPECT_EQ(Event1.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
-	EXPECT_EQ(Event1.VendorEventId, TestVendorEventId1);
-	EXPECT_EQ(Event1.VendorEventUri, TestVendorEventUri1);
+	EXPECT_EQ(Event1.VendorEventId, TestVendorEventId);
+	EXPECT_EQ(Event1.VendorEventUri, TestVendorEventUri);
 	EXPECT_TRUE(Event1.IsTicketingActive);
 
 	auto [TicketedEventResult2] = AWAIT_PRE(EventTicketingSystem,
@@ -188,8 +183,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 											RequestPredicate,
 											Space.Id,
 											csp::systems::EventTicketingVendor::Eventbrite,
-											TestVendorEventId2,
-											TestVendorEventUri2,
+											AlternativeTestVendorEventId,
+											AlternativeTestVendorEventUri,
 											false);
 
 	EXPECT_EQ(TicketedEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
@@ -198,8 +193,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 
 	EXPECT_EQ(Event2.SpaceId, Space.Id);
 	EXPECT_EQ(Event2.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
-	EXPECT_EQ(Event2.VendorEventId, TestVendorEventId2);
-	EXPECT_EQ(Event2.VendorEventUri, TestVendorEventUri2);
+	EXPECT_EQ(Event2.VendorEventId, AlternativeTestVendorEventId);
+	EXPECT_EQ(Event2.VendorEventUri, AlternativeTestVendorEventUri);
 	EXPECT_FALSE(Event2.IsTicketingActive);
 
 	EXPECT_NE(Event1.Id, Event2.Id);
@@ -219,11 +214,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
-	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
-	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
-	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -241,8 +231,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 									 RequestPredicate,
 									 Space.Id,
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 InitialVendorEventId,
-									 InitialVendorEventUri,
+									 TestVendorEventId,
+									 TestVendorEventUri,
 									 false);
 
 	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -251,8 +241,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 
 	EXPECT_EQ(CreatedEvent.SpaceId, Space.Id);
 	EXPECT_EQ(CreatedEvent.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
-	EXPECT_EQ(CreatedEvent.VendorEventId, InitialVendorEventId);
-	EXPECT_EQ(CreatedEvent.VendorEventUri, InitialVendorEventUri);
+	EXPECT_EQ(CreatedEvent.VendorEventId, TestVendorEventId);
+	EXPECT_EQ(CreatedEvent.VendorEventUri, TestVendorEventUri);
 	EXPECT_FALSE(CreatedEvent.IsTicketingActive);
 
 	auto [UpdatedResult] = AWAIT_PRE(EventTicketingSystem,
@@ -261,8 +251,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 									 Space.Id,
 									 CreatedEvent.Id,
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 UpdatedVendorEventId,
-									 UpdatedVendorEventUri,
+									 AlternativeTestVendorEventId,
+									 AlternativeTestVendorEventUri,
 									 true);
 
 	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -272,8 +262,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 	EXPECT_EQ(UpdatedEvent.Id, CreatedEvent.Id);
 	EXPECT_EQ(UpdatedEvent.SpaceId, Space.Id);
 	EXPECT_EQ(UpdatedEvent.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
-	EXPECT_EQ(UpdatedEvent.VendorEventId, UpdatedVendorEventId);
-	EXPECT_EQ(UpdatedEvent.VendorEventUri, UpdatedVendorEventUri);
+	EXPECT_EQ(UpdatedEvent.VendorEventId, AlternativeTestVendorEventId);
+	EXPECT_EQ(UpdatedEvent.VendorEventUri, AlternativeTestVendorEventUri);
 	EXPECT_TRUE(UpdatedEvent.IsTicketingActive);
 
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -291,11 +281,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
-	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
-	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
-	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -313,8 +298,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 									 RequestPredicate,
 									 Space.Id,
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 InitialVendorEventId,
-									 InitialVendorEventUri,
+									 TestVendorEventId,
+									 TestVendorEventUri,
 									 false);
 
 	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -327,8 +312,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 									 "12a345678b9cdd01ef23456a",
 									 CreatedEvent.Id,
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 UpdatedVendorEventId,
-									 UpdatedVendorEventUri,
+									 AlternativeTestVendorEventId,
+									 AlternativeTestVendorEventUri,
 									 true);
 
 	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Failed);
@@ -349,11 +334,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String InitialVendorEventId  = "InitialVendorEventId";
-	csp::common::String InitialVendorEventUri = "InitialVendorEventUri";
-	csp::common::String UpdatedVendorEventId  = "UpdatedVendorEventId";
-	csp::common::String UpdatedVendorEventUri = "UpdatedVendorEventUri";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -371,8 +351,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 									 RequestPredicate,
 									 Space.Id,
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 InitialVendorEventId,
-									 InitialVendorEventUri,
+									 TestVendorEventId,
+									 TestVendorEventUri,
 									 false);
 
 	EXPECT_EQ(CreatedResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -385,8 +365,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 									 Space.Id,
 									 "12a345678b9cdd01ef23456a",
 									 csp::systems::EventTicketingVendor::Eventbrite,
-									 UpdatedVendorEventId,
-									 UpdatedVendorEventUri,
+									 AlternativeTestVendorEventId,
+									 AlternativeTestVendorEventUri,
 									 true);
 
 	EXPECT_EQ(UpdatedResult.GetResultCode(), csp::systems::EResultCode::Failed);
@@ -406,9 +386,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 	auto* UserSystem		   = SystemsManager.GetUserSystem();
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
-
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
@@ -442,9 +419,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 	auto* UserSystem		   = SystemsManager.GetUserSystem();
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
-
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
@@ -498,9 +472,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -543,9 +514,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 	auto* UserSystem		   = SystemsManager.GetUserSystem();
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
-
-	csp::common::String TestVendorEventId  = "TestVendorEventId";
-	csp::common::String TestVendorEventUri = "TestVendorEventUri";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
@@ -599,12 +567,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
-	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
-
-	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
-	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -622,8 +584,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  RequestPredicate,
 										  Space.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId1,
-										  TestVendorEventUri1,
+										  TestVendorEventId,
+										  TestVendorEventUri,
 										  true);
 	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
@@ -633,8 +595,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  RequestPredicate,
 										  Space.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId2,
-										  TestVendorEventUri2,
+										  AlternativeTestVendorEventId,
+										  AlternativeTestVendorEventUri,
 										  false);
 	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
@@ -660,15 +622,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 
 		if (Event.Id == Event1.Id)
 		{
-			EXPECT_EQ(Event.VendorEventId, TestVendorEventId1);
-			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri1);
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri);
 			EXPECT_TRUE(Event.IsTicketingActive);
 			FoundFirst = true;
 		}
 		else if (Event.Id == Event2.Id)
 		{
-			EXPECT_EQ(Event.VendorEventId, TestVendorEventId2);
-			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri2);
+			EXPECT_EQ(Event.VendorEventId, AlternativeTestVendorEventId);
+			EXPECT_EQ(Event.VendorEventUri, AlternativeTestVendorEventUri);
 			EXPECT_FALSE(Event.IsTicketingActive);
 			FoundSecond = true;
 		}
@@ -697,12 +659,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
-	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
-
-	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
-	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -724,8 +680,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  RequestPredicate,
 										  Space1.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId1,
-										  TestVendorEventUri1,
+										  TestVendorEventId,
+										  TestVendorEventUri,
 										  true);
 	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
@@ -735,8 +691,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 										  RequestPredicate,
 										  Space2.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId2,
-										  TestVendorEventUri2,
+										  AlternativeTestVendorEventId,
+										  AlternativeTestVendorEventUri,
 										  false);
 	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
@@ -762,16 +718,16 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 		if (Event.Id == Event1.Id)
 		{
 			EXPECT_EQ(Event.SpaceId, Space1.Id);
-			EXPECT_EQ(Event.VendorEventId, TestVendorEventId1);
-			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri1);
+			EXPECT_EQ(Event.VendorEventId, TestVendorEventId);
+			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri);
 			EXPECT_TRUE(Event.IsTicketingActive);
 			FoundFirst = true;
 		}
 		else if (Event.Id == Event2.Id)
 		{
 			EXPECT_EQ(Event.SpaceId, Space2.Id);
-			EXPECT_EQ(Event.VendorEventId, TestVendorEventId2);
-			EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri2);
+			EXPECT_EQ(Event.VendorEventId, AlternativeTestVendorEventId);
+			EXPECT_EQ(Event.VendorEventUri, AlternativeTestVendorEventUri);
 			EXPECT_FALSE(Event.IsTicketingActive);
 			FoundSecond = true;
 		}
@@ -801,12 +757,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId1	= "TestVendorEventId1";
-	csp::common::String TestVendorEventUri1 = "TestVendorEventUri1";
-
-	csp::common::String TestVendorEventId2	= "TestVendorEventId2";
-	csp::common::String TestVendorEventUri2 = "TestVendorEventUri2";
-
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
 	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC";
 
@@ -824,8 +774,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 										  RequestPredicate,
 										  Space.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId1,
-										  TestVendorEventUri1,
+										  TestVendorEventId,
+										  TestVendorEventUri,
 										  true);
 	EXPECT_EQ(CreateEventResult1.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event1 = CreateEventResult1.GetTicketedEvent();
@@ -835,8 +785,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 										  RequestPredicate,
 										  Space.Id,
 										  csp::systems::EventTicketingVendor::Eventbrite,
-										  TestVendorEventId2,
-										  TestVendorEventUri2,
+										  AlternativeTestVendorEventId,
+										  AlternativeTestVendorEventUri,
 										  false);
 	EXPECT_EQ(CreateEventResult2.GetResultCode(), csp::systems::EResultCode::Success);
 	auto Event2 = CreateEventResult2.GetTicketedEvent();
@@ -1026,8 +976,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId  = "689249974227";
-	csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-testing-5-tickets-689249974227";
 	csp::common::String TestVendorTicketId = "7307631489";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";
@@ -1131,8 +1079,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	auto* SpaceSystem		   = SystemsManager.GetSpaceSystem();
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
-	csp::common::String TestVendorEventId  = "689257717387";
-	csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-testing-6-tickets-689257717387";
 	csp::common::String TestVendorTicketId = "7307701069";
 
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE";

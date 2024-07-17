@@ -30,19 +30,14 @@
 namespace csp::multiplayer
 {
 
-enum class HotspotType
-{
-	TeleportHotspot = 0,
-	SpawnHotspot
-};
-
 /// @brief Enumerates the list of properties that can be replicated for an Hotspot space component.
 enum class HotspotPropertyKeys
 {
 	Position,
 	Rotation,
 	Name,
-	HotspotType,
+	IsTeleportPoint,
+	IsSpawnPoint,
 	IsVisible,
 	IsARVisible,
 	Num
@@ -66,12 +61,19 @@ public:
 	/// @param Value The Name of this Hotspot.
 	void SetName(const csp::common::String& Value);
 
-	/// @brief Gets the HotspotType of this Hotspot.
-	HotspotType GetHotspotType() const;
+	/// @brief Gets the IsTeleportPoint of this Hotspot.
+	bool GetIsTeleportPoint() const;
 
-	/// @brief Sets the HotspotType of this Hotspot.
-	/// @param Value The Type of the Hotspot.
-	void SetHotspotType(HotspotType Value);
+	/// @brief Sets this Hotspot to be a teleport point.
+	/// @param InValue The teleport point state flag value.
+	void SetIsTeleportPoint(bool InValue);
+
+	/// @brief Gets the IsSpawnPoint of this Hotspot.
+	bool GetIsSpawnPoint() const;
+
+	/// @brief Sets this Hotspot to be a spawn point.
+	/// @param InValue The spawn point state flag value.
+	void SetIsSpawnPoint(bool InValue);
 
 	/// @brief Gets a unique identifier for this component in the hierarchy.
 	/// @note This does not give a complete hierarchy path, only the entityId of the parent for the component.
