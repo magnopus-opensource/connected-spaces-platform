@@ -51,7 +51,8 @@ class CSP_API SequenceSystem : public SystemBase
 	/** @endcond */
 	CSP_END_IGNORE
 public:
-	/// @brief
+	/// @brief Creates a new sequence. If a sequence already exists with this key, it will overwrite the current one. This call will fail if the user
+	/// isn't a creator of the space.
 	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
@@ -63,7 +64,7 @@ public:
 						const csp::common::Array<csp::common::String>& Items,
 						SequenceResultCallback Callback);
 
-	/// @brief
+	/// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
 	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference

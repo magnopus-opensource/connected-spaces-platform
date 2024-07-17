@@ -64,19 +64,22 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem,
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-	csp::systems::Sequence Sequence = Result.GetSequence();
-
-	EXPECT_EQ(Sequence.Key, SequenceKey);
-	EXPECT_EQ(Sequence.ReferenceType, ReferenceType);
-	EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
-	EXPECT_EQ(Sequence.Items.Size(), Items.Size());
-
-	for (int i = 0; i < Sequence.Items.Size(); ++i)
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
-		EXPECT_EQ(Sequence.Items[i], Items[i]);
-	}
+		csp::systems::Sequence Sequence = Result.GetSequence();
 
-	OutSequence = Sequence;
+		EXPECT_EQ(Sequence.Key, SequenceKey);
+		EXPECT_EQ(Sequence.ReferenceType, ReferenceType);
+		EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
+		EXPECT_EQ(Sequence.Items.Size(), Items.Size());
+
+		for (int i = 0; i < Sequence.Items.Size(); ++i)
+		{
+			EXPECT_EQ(Sequence.Items[i], Items[i]);
+		}
+
+		OutSequence = Sequence;
+	}
 }
 
 void DeleteSequences(csp::systems::SequenceSystem* SequenceSystem,
@@ -103,9 +106,12 @@ void GetSequence(csp::systems::SequenceSystem* SequenceSystem,
 
 	csp::systems::Sequence Sequence = Result.GetSequence();
 
-	EXPECT_EQ(Sequence.Key, SequenceKey);
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		EXPECT_EQ(Sequence.Key, SequenceKey);
 
-	OutSequence = Sequence;
+		OutSequence = Sequence;
+	}
 }
 
 void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem,
@@ -123,19 +129,22 @@ void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem,
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-	csp::systems::Sequence Sequence = Result.GetSequence();
-
-	EXPECT_EQ(Sequence.Key, SequenceKey);
-	EXPECT_EQ(Sequence.ReferenceType, ReferenceType);
-	EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
-	EXPECT_EQ(Sequence.Items.Size(), Items.Size());
-
-	for (int i = 0; i < Sequence.Items.Size(); ++i)
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
-		EXPECT_EQ(Sequence.Items[i], Items[i]);
-	}
+		csp::systems::Sequence Sequence = Result.GetSequence();
 
-	OutSequence = Sequence;
+		EXPECT_EQ(Sequence.Key, SequenceKey);
+		EXPECT_EQ(Sequence.ReferenceType, ReferenceType);
+		EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
+		EXPECT_EQ(Sequence.Items.Size(), Items.Size());
+
+		for (int i = 0; i < Sequence.Items.Size(); ++i)
+		{
+			EXPECT_EQ(Sequence.Items[i], Items[i]);
+		}
+
+		OutSequence = Sequence;
+	}
 }
 
 void RenameSequence(csp::systems::SequenceSystem* SequenceSystem,
@@ -150,11 +159,14 @@ void RenameSequence(csp::systems::SequenceSystem* SequenceSystem,
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-	csp::systems::Sequence Sequence = Result.GetSequence();
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		csp::systems::Sequence Sequence = Result.GetSequence();
 
-	EXPECT_EQ(Sequence.Key, NewSequenceKey);
+		EXPECT_EQ(Sequence.Key, NewSequenceKey);
 
-	OutSequence = Sequence;
+		OutSequence = Sequence;
+	}
 }
 
 void GetSequencesByCriteria(csp::systems::SequenceSystem* SequenceSystem,
@@ -660,4 +672,83 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	LogOut(UserSystem);
 }
 
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_SEQUENCE_PERMISSIONS_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create sequence
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence;
+	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, Sequence);
+
+	// Log out the user which created the sequence
+	LogOut(UserSystem);
+
+	// Login with another user
+	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword, true);
+
+	// Ensure we can still get the sequence from a space we are not an editor of
+	csp::systems::Sequence RetrievedSequence;
+	GetSequence(SequenceSystem, UniqueSequenceName, RetrievedSequence);
+
+	// Try and edit the sequence from a space we are not an editor of
+
+	// Update sequence
+	csp::common::Array<csp::common::String> UpdatedSequenceItems {"Hotspot4", "Hotspot5"};
+
+	csp::systems::Sequence UpdatedSequence;
+	UpdateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, UpdatedSequenceItems, UpdatedSequence, csp::systems::EResultCode::Failed);
+
+	// Rename sequence
+	const char* TestUpdatedSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG-UPDATED";
+	char UniqueUpdatedSequenceName[256];
+	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+
+	RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed);
+
+	// Delete sequence
+	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Failed);
+
+	// Log out
+	LogOut(UserSystem);
+
+	// Login again with the original user the cleanup
+	LogIn(UserSystem, UserId);
+
+	// Delete sequence
+	DeleteSequences(SequenceSystem, {Sequence.Key});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
 #endif
