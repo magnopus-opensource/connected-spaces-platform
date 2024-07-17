@@ -35,6 +35,7 @@
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
@@ -475,21 +476,16 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, IsARVisible, "isARVisible")
 		.PROPERTY_GET_SET(GaussianSplatSpaceComponent, Tint, "tint");
 
-	Module->class_<TextSpaceComponentScriptInterface>("TextSpaceComponent")
+	Module->class_<HotspotSpaceComponentScriptInterface>("HotspotSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
-		.PROPERTY_GET_SET(TextSpaceComponent, Position, "position")
-		.PROPERTY_GET_SET(TextSpaceComponent, Scale, "scale")
-		.PROPERTY_GET_SET(TextSpaceComponent, Rotation, "rotation")
-		.PROPERTY_GET_SET(TextSpaceComponent, IsVisible, "isVisible")
-		.PROPERTY_GET_SET(TextSpaceComponent, IsARVisible, "isARVisible")
-		.PROPERTY_GET_SET(TextSpaceComponent, BillboardMode, "billboardMode")
-		.PROPERTY_GET_SET(TextSpaceComponent, Text, "text")
-		.PROPERTY_GET_SET(TextSpaceComponent, TextColor, "textColor")
-		.PROPERTY_GET_SET(TextSpaceComponent, BackgroundColor, "backgroundColor")
-		.PROPERTY_GET_SET(TextSpaceComponent, IsBackgroundVisible, "isBackgroundVisible")
-		.PROPERTY_GET_SET(TextSpaceComponent, Width, "width")
-		.PROPERTY_GET_SET(TextSpaceComponent, Height, "height");
+		.fun<&HotspotSpaceComponentScriptInterface::GetUniqueComponentId>("getUniqueComponentId")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, Name, "name")
+		.PROPERTY_GET_SET(HotspotSpaceComponent, HotspotType, "hotspotType");
 }
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
@@ -536,6 +532,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<GaussianSplatSpaceComponentScriptInterface, ComponentType::GaussianSplat>>(
 			"getGaussianSplatComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")

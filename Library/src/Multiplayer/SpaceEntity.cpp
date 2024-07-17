@@ -28,6 +28,7 @@
 #include "CSP/Multiplayer/Components/FiducialMarkerSpaceComponent.h"
 #include "CSP/Multiplayer/Components/FogSpaceComponent.h"
 #include "CSP/Multiplayer/Components/GaussianSplatSpaceComponent.h"
+#include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
@@ -1001,6 +1002,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::Text:
 			Component = CSP_NEW TextSpaceComponent(this);
+			break;
+		case ComponentType::Hotspot:
+			Component = CSP_NEW HotspotSpaceComponent(this);
 			break;
 		default:
 		{

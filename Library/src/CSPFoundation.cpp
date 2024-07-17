@@ -43,19 +43,19 @@
 	#define LOAD_OWN_MODULE()				(void*) GetModuleHandleA(LIB_NAME)
 	#define GET_FUNCTION_ADDRESS(mod, name) (void*) GetProcAddress((HMODULE) (mod), name)
 #elif defined(CSP_ANDROID)
-	// For dlopen and dlsym
+// For dlopen and dlsym
 	#include <dlfcn.h>
-	// For fstat and mkdir
+// For fstat and mkdir
 	#include <sys/stat.h>
 
 	#define LOAD_OWN_MODULE()				dlopen(nullptr, RTLD_LAZY)
 	#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
 #elif defined(CSP_MACOSX) || defined(CSP_IOS)
-	// For dlopen and dlsym
+// For dlopen and dlsym
 	#include <dlfcn.h>
-	// For stat and mkdir
+// For stat and mkdir
 	#include <sys/stat.h>
-	// For PATH_MAX
+// For PATH_MAX
 	#include <sys/syslimits.h>
 
 	#define LOAD_OWN_MODULE()				dlopen(nullptr, RTLD_LAZY)
@@ -258,10 +258,12 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string MultiplayerServiceURI = RootURI + "/mag-multiplayer/hubs/v1/multiplayer";
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
-	Endpoints								= CSP_NEW EndpointURIs();
-	ClientUserAgentInfo						= CSP_NEW ClientUserAgent();
-	DeviceId								= CSP_NEW csp::common::String("");
-	ClientUserAgentString					= CSP_NEW csp::common::String("");
+
+
+	Endpoints			  = CSP_NEW EndpointURIs();
+	ClientUserAgentInfo	  = CSP_NEW ClientUserAgent();
+	DeviceId			  = CSP_NEW csp::common::String("");
+	ClientUserAgentString = CSP_NEW csp::common::String("");
 
 	Endpoints->UserServiceURI		 = CSP_TEXT(UserServiceURI.c_str());
 	Endpoints->PrototypeServiceURI	 = CSP_TEXT(PrototypeServiceURI.c_str());
@@ -380,13 +382,12 @@ const csp::common::String& CSPFoundation::GetTenant()
 
 void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
 {
-	ClientUserAgentInfo->CSPVersion		   = CSP_TEXT(ClientUserAgentHeader.CSPVersion);
-	ClientUserAgentInfo->ClientOS		   = CSP_TEXT(ClientUserAgentHeader.ClientOS);
-	ClientUserAgentInfo->ClientSKU		   = CSP_TEXT(ClientUserAgentHeader.ClientSKU);
-	ClientUserAgentInfo->ClientVersion	   = CSP_TEXT(ClientUserAgentHeader.ClientVersion);
-	ClientUserAgentInfo->ClientEnvironment = CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
-	ClientUserAgentInfo->CHSEnvironment	   = CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
-
+	ClientUserAgentInfo->CSPVersion			= CSP_TEXT(ClientUserAgentHeader.CSPVersion);
+	ClientUserAgentInfo->ClientOS			= CSP_TEXT(ClientUserAgentHeader.ClientOS);
+	ClientUserAgentInfo->ClientSKU			= CSP_TEXT(ClientUserAgentHeader.ClientSKU);
+	ClientUserAgentInfo->ClientVersion		= CSP_TEXT(ClientUserAgentHeader.ClientVersion);
+	ClientUserAgentInfo->ClientEnvironment	= CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
+	ClientUserAgentInfo->CHSEnvironment		= CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
 	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
 
 	*ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat,

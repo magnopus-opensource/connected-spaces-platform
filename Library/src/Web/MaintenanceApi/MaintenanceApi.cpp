@@ -31,28 +31,14 @@ MaintenanceApi::~MaintenanceApi()
 {
 }
 
-void MaintenanceApi::Query(csp::common::String CHSEnvironment,
+void MaintenanceApi::Query(const csp::common::String& MaintenanceURL,
 						   csp::services::ApiResponseHandlerBase* ResponseHandler,
 						   csp::common::CancellationToken& CancellationToken) const
 {
 
-	// S3 bucket URLS are case Sensitive so the CHS Environment name is set to lower case.
-	std::string CHSEnvironmentLower = std::string(CHSEnvironment.c_str());
-	std::transform(CHSEnvironmentLower.begin(), CHSEnvironmentLower.end(), CHSEnvironmentLower.begin(), ::tolower);
-	csp::web::Uri Uri;
 
-	// For Magnopus cloud hosted services, maintenance windows come from a different URL in production
-	if (CHSEnvironmentLower != "oprod")
-	{
-		Uri = csp::web::Uri(
-			csp::common::StringFormat("https://maintenance-windows.magnoboard.com/%s/maintenance-windows.json", CHSEnvironmentLower.c_str()).c_str());
-	}
-	else
-	{
-		Uri = csp::web::Uri(
-			csp::common::StringFormat("https://maintenance-windows.magnolympus.com/%s/maintenance-windows.json", CHSEnvironmentLower.c_str())
-				.c_str());
-	}
+	std::string MaintenanceURLLower = std::string(MaintenanceURL.c_str());
+	csp::web::Uri Uri				= csp::web::Uri(MaintenanceURLLower.c_str());
 
 	csp::web::HttpPayload Payload;
 	Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
