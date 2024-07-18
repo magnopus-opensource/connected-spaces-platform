@@ -547,7 +547,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	// so we can retrieve a lite profile
 	{
 		csp::common::Array<csp::common::String> Ids = {CreatedUserId};
-		auto [Result]								= AWAIT_PRE(UserSystem, GetProfilesByUserId, RequestPredicate, Ids);
+		auto [Result]								= AWAIT_PRE(UserSystem, GetBasicProfilesByUserId, RequestPredicate, Ids);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -676,7 +676,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 	// Retrieve the lite profile
 	{
 		csp::common::Array<csp::common::String> Ids = {CreatedUserId};
-		auto [Result]								= AWAIT_PRE(UserSystem, GetProfilesByUserId, RequestPredicate, Ids);
+		auto [Result]								= AWAIT_PRE(UserSystem, GetBasicProfilesByUserId, RequestPredicate, Ids);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
