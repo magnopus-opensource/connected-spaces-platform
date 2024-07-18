@@ -112,4 +112,18 @@ private:
 	UserPermissionsParams EventParams;
 };
 
+class SequenceChangedEventDeserialiser : public EventDeserialiser
+{
+public:
+	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	const SequenceChangedParams& GetEventParams() const
+	{
+		return EventParams;
+	}
+
+private:
+	SequenceChangedParams EventParams;
+};
+
 } // namespace csp::multiplayer
