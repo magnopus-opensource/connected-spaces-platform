@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
+#include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
@@ -30,7 +31,6 @@
 #include "CSP/Systems/Spatial/AnchorSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
-#include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
@@ -183,13 +183,13 @@ void SystemsManager::CreateSystems()
 #else
 	WebClient = CSP_NEW csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
-	ScriptSystem	      = CSP_NEW csp::systems::ScriptSystem();
+	ScriptSystem = CSP_NEW csp::systems::ScriptSystem();
 
 	ScriptSystem->Initialise();
 
 	MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
 
-	AnalyticsSystem       = CSP_NEW csp::systems::AnalyticsSystem();
+	AnalyticsSystem		  = CSP_NEW csp::systems::AnalyticsSystem();
 	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
 	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
 	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
@@ -208,26 +208,28 @@ void SystemsManager::CreateSystems()
 
 void SystemsManager::DestroySystems()
 {
-	CSP_DELETE(UserSystem);
-	CSP_DELETE(SpaceSystem);
-	CSP_DELETE(AssetSystem);
+	// Systems must be shut down in reverse order to CreateSystems() to ensure that any
+	// dependencies continue to exist until each system is successfully shut down.
+	CSP_DELETE(SpaceEntitySystem);
+	CSP_DELETE(OrganizationSystem);
+	CSP_DELETE(QuotaSystem);
+	CSP_DELETE(ECommerceSystem);
+	CSP_DELETE(EventTicketingSystem);
+	CSP_DELETE(MaintenanceSystem);
 	CSP_DELETE(VoipSystem);
+	CSP_DELETE(GraphQLSystem);
+	CSP_DELETE(SettingsSystem);
 	CSP_DELETE(PointOfInterestSystem);
 	CSP_DELETE(AnchorSystem);
-	CSP_DELETE(ScriptSystem);
-	CSP_DELETE(SettingsSystem);
-	CSP_DELETE(GraphQLSystem);
-
+	CSP_DELETE(AssetSystem);
 	CSP_DELETE(AnalyticsSystem);
+	CSP_DELETE(MultiplayerConnection);
+	CSP_DELETE(ScriptSystem);
+	CSP_DELETE(SpaceSystem);
+	CSP_DELETE(UserSystem);
+
 	CSP_DELETE(WebClient);
 	CSP_DELETE(LogSystem);
-	CSP_DELETE(MaintenanceSystem);
-	CSP_DELETE(EventTicketingSystem);
-	CSP_DELETE(ECommerceSystem);
-	CSP_DELETE(QuotaSystem);
-	CSP_DELETE(OrganizationSystem);
-	CSP_DELETE(SpaceEntitySystem);
-	CSP_DELETE(MultiplayerConnection);
 }
 
 void SystemsManager::Instantiate()
