@@ -21,10 +21,11 @@
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/UUIDGenerator.h"
+#include "Multiplayer/ErrorCodeStrings.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Systems/Users/Authentication.h"
-#include "Multiplayer/ErrorCodeStrings.h"
+
 #include <CallHelpers.h>
 
 
@@ -252,12 +253,12 @@ void UserSystem::RefreshSession(const csp::common::String& UserId, const csp::co
 			{
 				const NullResult Result(LoginStateRes.GetResultCode(), LoginStateRes.GetHttpResultCode());
 				INVOKE_IF_NOT_NULL(Callback, Result);
-            }
+			}
 		};
-		
-        csp::services::ResponseHandlerPtr ResponseHandler
+
+		csp::services::ResponseHandlerPtr ResponseHandler
 			= AuthenticationAPI->CreateHandler<LoginStateResultCallback, LoginStateResult, LoginState, chs_user::AuthDto>(LoginStateResCallback,
-																											  &CurrentLoginState);
+																														  &CurrentLoginState);
 
 		static_cast<chs_user::AuthenticationApi*>(AuthenticationAPI)->apiV1UsersRefreshPost(Request, ResponseHandler);
 	}
@@ -474,7 +475,7 @@ void UserSystem::Logout(NullResultCallback Callback)
 		{
 			if (ErrCode != csp::multiplayer::ErrorCode::None)
 			{
-				CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str()); 
+				CSP_LOG_ERROR_FORMAT("Error disconnecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
 			}
 
 			auto Request = std::make_shared<chs_user::LogoutRequest>();
@@ -677,6 +678,18 @@ void UserSystem::GetProfileByUserId(const csp::common::String& InUserId, Profile
 }
 
 void UserSystem::GetProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback)
+{
+	const std::vector<csp::common::String> UserIds(InUserIds.Data(), InUserIds.Data() + InUserIds.Size());
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= ProfileAPI->CreateHandler<BasicProfilesResultCallback, BasicProfilesResult, void, csp::services::DtoArray<chs_user::ProfileLiteDto> >(
+			Callback,
+			nullptr);
+
+	static_cast<chs_user::ProfileApi*>(ProfileAPI)->apiV1UsersLiteGet(UserIds, ResponseHandler);
+}
+
+void UserSystem::GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback)
 {
 	const std::vector<csp::common::String> UserIds(InUserIds.Data(), InUserIds.Data() + InUserIds.Size());
 
