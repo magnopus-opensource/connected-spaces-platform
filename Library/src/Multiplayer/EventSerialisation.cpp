@@ -71,6 +71,12 @@ csp::multiplayer::ReplicatedValue EventDeserialiser::ParseSignalRComponent(uint6
 {
 	csp::multiplayer::ReplicatedValue ReplicatedValue;
 
+	// Prevents serialization crashes for optional values where the actual value is null.
+	if (Component.type() == signalr::value_type::null)
+	{
+		return ReplicatedValue;
+	}
+
 	if (TypeId == csp::multiplayer::msgpack_typeids::ItemComponentData::NULLABLE_BOOL)
 	{
 		ReplicatedValue = Component.as_bool();
@@ -252,5 +258,43 @@ void UserPermissionsChangedEventDeserialiser::Parse(const std::vector<signalr::v
 			const std::vector<signalr::value>& UserIdComponent(Components.at(USER_ID).as_array());
 			EventParams.UserId = ParseSignalRComponent(UserIdComponent[0].as_uinteger(), UserIdComponent[1].as_array()[0]).GetString();
 		}
+	}
+}
+
+void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+{
+	EventDeserialiser::Parse(EventValues);
+
+	if (EventData.Size() != 3)
+	{
+		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Invalid arguments.");
+		return;
+	}
+
+	int64_t UpdateType = EventData[0].GetInt();
+
+	if (UpdateType == 0)
+	{
+		EventParams.UpdateType = ESequenceUpdateType::Create;
+	}
+	else if (UpdateType == 1)
+	{
+		EventParams.UpdateType = ESequenceUpdateType::Update;
+	}
+	else if (UpdateType == 2)
+	{
+		EventParams.UpdateType = ESequenceUpdateType::Delete;
+	}
+	else
+	{
+		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
+	}
+
+	EventParams.Key = EventData[1].GetString();
+
+	// Optional parameter for when a key is changed
+	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
+	{
+		EventParams.NewKey = EventData[2].GetString();
 	}
 }

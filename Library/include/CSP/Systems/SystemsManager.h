@@ -17,7 +17,6 @@
 #pragma once
 
 #include "CSP/CSPCommon.h"
-
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include <chrono>
@@ -45,6 +44,7 @@ class EventTicketingSystem;
 class ECommerceSystem;
 class QuotaSystem;
 class OrganizationSystem;
+class SequenceSystem;
 
 } // namespace csp::systems
 
@@ -155,9 +155,13 @@ public:
 	/// @return OrganizationSystem : pointer to the Organization system class
 	OrganizationSystem* GetOrganizationSystem();
 
-    csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
+	/// @brief Retrieves the Sequence system.
+	/// @return SequenceSystem : pointer to the Sequence system class
+	SequenceSystem* GetSequenceSystem();
 
-    csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
+	csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
+
+	csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
 
 private:
 	SystemsManager();
@@ -173,7 +177,7 @@ private:
 
 	csp::web::WebClient* WebClient;
 
-    csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
+	csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
 	csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
 	UserSystem* UserSystem;
 	SpaceSystem* SpaceSystem;
@@ -191,6 +195,7 @@ private:
 	ECommerceSystem* ECommerceSystem;
 	QuotaSystem* QuotaSystem;
 	OrganizationSystem* OrganizationSystem;
+	SequenceSystem* SequenceSystem;
 };
 
 } // namespace csp::systems

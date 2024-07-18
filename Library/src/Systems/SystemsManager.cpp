@@ -15,6 +15,7 @@
  */
 #include "CSP/Systems/SystemsManager.h"
 
+#include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
@@ -25,12 +26,12 @@
 #include "CSP/Systems/Organizations/OrganizationSystem.h"
 #include "CSP/Systems/Quota/QuotaSystem.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Spatial/AnchorSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/Systems/Voip/VoipSystem.h"
-#include "CSP/Multiplayer/MultiplayerConnection.h"
 #include "ECommerce/ECommerceSystemHelpers.h"
 #include "Memory/Memory.h"
 #include "Systems/Spatial/PointOfInterestInternalSystem.h"
@@ -135,6 +136,11 @@ OrganizationSystem* SystemsManager::GetOrganizationSystem()
 	return OrganizationSystem;
 }
 
+SequenceSystem* SystemsManager::GetSequenceSystem()
+{
+	return SequenceSystem;
+}
+
 csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem()
 {
 	return SpaceEntitySystem;
@@ -183,13 +189,13 @@ void SystemsManager::CreateSystems()
 #else
 	WebClient = CSP_NEW csp::web::POCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
-	ScriptSystem	      = CSP_NEW csp::systems::ScriptSystem();
+	ScriptSystem = CSP_NEW csp::systems::ScriptSystem();
 
 	ScriptSystem->Initialise();
 
 	MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
 
-	AnalyticsSystem       = CSP_NEW csp::systems::AnalyticsSystem();
+	AnalyticsSystem		  = CSP_NEW csp::systems::AnalyticsSystem();
 	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
 	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
 	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
@@ -203,6 +209,7 @@ void SystemsManager::CreateSystems()
 	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
 	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
 	OrganizationSystem	  = CSP_NEW csp::systems::OrganizationSystem(WebClient);
+	SequenceSystem		  = CSP_NEW csp::systems::SequenceSystem(WebClient);
 	SpaceEntitySystem	  = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
 }
 

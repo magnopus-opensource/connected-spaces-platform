@@ -43,19 +43,19 @@
 	#define LOAD_OWN_MODULE()				(void*) GetModuleHandleA(LIB_NAME)
 	#define GET_FUNCTION_ADDRESS(mod, name) (void*) GetProcAddress((HMODULE) (mod), name)
 #elif defined(CSP_ANDROID)
-	// For dlopen and dlsym
+// For dlopen and dlsym
 	#include <dlfcn.h>
-	// For fstat and mkdir
+// For fstat and mkdir
 	#include <sys/stat.h>
 
 	#define LOAD_OWN_MODULE()				dlopen(nullptr, RTLD_LAZY)
 	#define GET_FUNCTION_ADDRESS(mod, name) dlsym((mod), name)
 #elif defined(CSP_MACOSX) || defined(CSP_IOS)
-	// For dlopen and dlsym
+// For dlopen and dlsym
 	#include <dlfcn.h>
-	// For stat and mkdir
+// For stat and mkdir
 	#include <sys/stat.h>
-	// For PATH_MAX
+// For PATH_MAX
 	#include <sys/syslimits.h>
 
 	#define LOAD_OWN_MODULE()				dlopen(nullptr, RTLD_LAZY)

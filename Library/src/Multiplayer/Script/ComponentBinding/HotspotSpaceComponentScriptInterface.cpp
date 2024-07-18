@@ -35,7 +35,9 @@ DEFINE_SCRIPT_PROPERTY_VEC3(HotspotSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(HotspotSpaceComponent, Rotation);
 
 DEFINE_SCRIPT_PROPERTY_STRING(HotspotSpaceComponent, Name);
-DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, csp::multiplayer::HotspotType, int64_t, HotspotType);
+
+DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsTeleportPoint);
+DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsSpawnPoint);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(HotspotSpaceComponent, bool, bool, IsARVisible);
