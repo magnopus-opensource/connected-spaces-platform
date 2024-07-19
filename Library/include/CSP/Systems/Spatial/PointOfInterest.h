@@ -65,6 +65,7 @@ public:
 	csp::common::String Owner;
 	csp::systems::GeoLocation Location;
 	csp::common::String AssetCollectionId;
+    csp::common::String SpaceId;
 	/** @} */
 };
 

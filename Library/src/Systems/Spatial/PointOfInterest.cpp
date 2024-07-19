@@ -78,6 +78,11 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 		// TODO: Find out why we're using name instead of Id here
 		POI.AssetCollectionId = Dto.GetPrototypeName();
 	}
+
+    if(Dto.HasGroupId())
+    {
+	    POI.SpaceId = Dto.GetGroupId();
+    }
 }
 
 } // namespace

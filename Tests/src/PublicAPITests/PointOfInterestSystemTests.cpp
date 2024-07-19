@@ -334,3 +334,82 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_GET_SPACE_TEST || 1
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
+
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	const char* TestSpaceName			= "CSP-TEST-SPACE";
+	const char* TestSpaceDescription	= "CSP-TEST-SPACEDESC";
+	const char* TestAssetCollectionName = "CSP-TEST-ASSETCOLLECTION";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	csp::systems::GeoLocation SpaceGeolocation;
+
+	// Associate a geolocation with the space.
+	{
+		SpaceGeolocation.Latitude	= 1.1;
+		SpaceGeolocation.Longitude	= 2.2;
+
+		float SpaceOrientation = 90.0f;
+
+		csp::common::Array<csp::systems::GeoLocation> SpaceGeofence(4);
+
+		csp::systems::GeoLocation GeoFence0;
+		GeoFence0.Latitude	= 5.5;
+		GeoFence0.Longitude = 6.6;
+		SpaceGeofence[0]	= GeoFence0;
+		SpaceGeofence[3]	= GeoFence0;
+
+		csp::systems::GeoLocation GeoFence1;
+		GeoFence1.Latitude	= 7.7;
+		GeoFence1.Longitude = 8.8;
+		SpaceGeofence[1]	= GeoFence1;
+
+		csp::systems::GeoLocation GeoFence2;
+		GeoFence2.Latitude	= 9.9;
+		GeoFence2.Longitude = 10.0;
+		SpaceGeofence[2]	= GeoFence2;
+
+		auto [AddGeoResult] = AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SpaceGeolocation, SpaceOrientation, SpaceGeofence);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
+	}
+
+	// Test retriving the space via the POI system.
+	auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 100.0f);
+	EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
+	EXPECT_GE(POIs.Size(), 1);
+
+	// There may be more than one POI at this location, so we search for the one we have created and expect to find it.
+	bool FoundSpacePOI = false;
+	for(uint32_t i = 0; i < POIs.Size(); i++)
+	{
+		if(POIs[i].SpaceId == Space.Id)
+		{
+			FoundSpacePOI = true;
+			break;
+		}
+	}
+	EXPECT_TRUE(FoundSpacePOI);
+
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	LogOut(UserSystem);
+}
+#endif
