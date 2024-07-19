@@ -15,6 +15,7 @@
  */
 
 #include "CSP/Systems/Spatial/PointOfInterestSystem.h"
+#include "Systems/Spatial/PointOfInterestHelpers.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -88,9 +89,8 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
 		POIInfo->SetTags(DTOTags);
 	}
 
-	// TODO Move this to a separate function when we have some different values than DEFAULT
-	const auto DefaultPOIType = "Default";
-	POIInfo->SetType(DefaultPOIType);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+	POIInfo->SetType(TypeString);
 
 	POIInfo->SetOwner(Owner);
 
@@ -118,6 +118,7 @@ void PointOfInterestSystem::DeletePOI(const PointOfInterest& POI, NullResultCall
 
 void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation,
 										  const double AreaRadius,
+                                          const csp::common::Optional<EPointOfInterestType>& Type,
 										  POICollectionResultCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -126,9 +127,17 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
 			nullptr,
 			csp::web::EResponseCodes::ResponseOK);
 
+    // If the user has provided a type of POI to search for, prepare the corresponding search term string.
+    // Otherwise, leave the term as null, to search for all POI types.
+	std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
+	if (Type.HasValue())
+	{
+		TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
+	}
+
 	static_cast<chs::PointOfInterestApi*>(POIApiPtr)->apiV1PoiGet(std::nullopt,
 																  std::nullopt,
-																  std::nullopt,
+																  TypeOption,
 																  std::nullopt,
 																  std::nullopt,
 																  std::nullopt,
@@ -171,9 +180,8 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
 	uniqueName.Append(Site.SpaceId);
 	POIInfo->SetName(uniqueName);
 
-	// TODO Move this to a separate function when we have some different values than DEFAULT
-	const auto DefaultPOIType = "Default";
-	POIInfo->SetType(DefaultPOIType);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+	POIInfo->SetType(TypeString);
 
 	POIInfo->SetOwner(Site.SpaceId);
 
@@ -262,18 +270,18 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 {
 	auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-	const auto SpacePOIType = "OKOSpaceGeoLocation";
-	POIInfo->SetType(SpacePOIType);
+    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+	POIInfo->SetType(TypeString);
 
 	chs::LocalizedString POITitle;
-	POITitle.SetValue(SpacePOIType);
+	POITitle.SetValue(TypeString);
 	POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
 	std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
 	DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
 	POIInfo->SetTitle(DTOTitles);
 
 	// the POI Name needs to be unique
-	csp::common::String uniqueName = SpacePOIType;
+	csp::common::String uniqueName = TypeString;
 	uniqueName.Append("_");
 	uniqueName.Append(SpaceId);
 	POIInfo->SetName(uniqueName);
@@ -376,18 +384,18 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 {
 	auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-	const auto SpacePOIType = "OKOSpaceGeoLocation";
-	POIInfo->SetType(SpacePOIType);
+	const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+	POIInfo->SetType(TypeString);
 
 	chs::LocalizedString POITitle;
-	POITitle.SetValue(SpacePOIType);
+	POITitle.SetValue(TypeString);
 	POITitle.SetLanguageCode(ENGLISH_LANGUAGE_CODE);
 	std::vector<std::shared_ptr<chs::LocalizedString>> DTOTitles;
 	DTOTitles.push_back(std::make_shared<chs::LocalizedString>(POITitle));
 	POIInfo->SetTitle(DTOTitles);
 
 	// the POI Name needs to be unique
-	csp::common::String uniqueName = SpacePOIType;
+	csp::common::String uniqueName = TypeString;
 	uniqueName.Append("_");
 	uniqueName.Append(SpaceId);
 	POIInfo->SetName(uniqueName);

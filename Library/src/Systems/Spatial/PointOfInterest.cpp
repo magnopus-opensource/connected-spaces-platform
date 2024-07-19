@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Spatial/PointOfInterest.h"
+#include "Systems/Spatial/PointOfInterestHelpers.h"
 
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
@@ -49,15 +50,7 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 
 	if (Dto.HasType())
 	{
-		// TODO Move this to a separate function when we have some different values than DEFAULT
-        if(Dto.GetType() == "Default")
-        {
-			POI.Type = csp::systems::EPointOfInterestType::DEFAULT;
-        }
-        else if(Dto.GetType() == "OKOSpaceGeoLocation")
-        {
-	        POI.Type = csp::systems::EPointOfInterestType::SPACE;
-        }
+		POI.Type = csp::systems::PointOfInterestHelpers::StringToType(Dto.GetType());
 	}
 
 	if (Dto.HasTags())
@@ -103,8 +96,6 @@ namespace csp::systems
 PointOfInterest::PointOfInterest() : Type(EPointOfInterestType::DEFAULT)
 {
 }
-
-
 
 PointOfInterest& POIResult::GetPointOfInterest()
 {
