@@ -24,6 +24,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <thread>
+#include <random>
 
 inline const char* TESTS_CLIENT_SKU = "CPPTest";
 
@@ -162,6 +163,20 @@ inline void SetRandSeed()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 }
+
+inline double RandomUniformDouble()
+{
+	 std::uniform_real_distribution<double> UniformDouble;
+
+	// Seed using the current time.
+	std::mt19937_64 Rand;
+	auto CurrentTime		= std::chrono::high_resolution_clock::now();
+	auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
+	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
+	
+	return UniformDouble(Rand);
+}
+
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString(int Length = 16)
 {

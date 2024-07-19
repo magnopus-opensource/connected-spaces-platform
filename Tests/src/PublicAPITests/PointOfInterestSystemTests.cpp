@@ -335,8 +335,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_GET_SPACE_TEST || 1
-CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOITest)
+#if RUN_ALL_UNIT_TESTS || RUN_POISYSTEM_TESTS || RUN_POISYSTEM_QUERY_SPACE_POI_TEST || 1
+CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 {
 	SetRandSeed();
 
@@ -362,8 +362,10 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 
 	// Associate a geolocation with the space.
 	{
-		SpaceGeolocation.Latitude	= 1.1;
-		SpaceGeolocation.Longitude	= 2.2;
+		// Use a unfiform random value to get a latitude.
+		SpaceGeolocation.Latitude	= (RandomUniformDouble() * 2.0 - 1.0) * 90.0;
+		// Use a unfiform random value to get a longitude.
+		SpaceGeolocation.Longitude	= (RandomUniformDouble() * 2.0 - 1.0) * 180.0;
 
 		float SpaceOrientation = 90.0f;
 
@@ -386,11 +388,11 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 		SpaceGeofence[2]	= GeoFence2;
 
 		auto [AddGeoResult] = AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SpaceGeolocation, SpaceOrientation, SpaceGeofence);
-		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
+		EXPECT_EQ(AddGeoResult.GetResultCode(), csp::systems::EResultCode::Success); 
 	}
 
-	// Test retriving the space via the POI system.
-	auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 100.0f);
+	// Test retrieving the space via the POI system.
+	auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f);
 	EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
@@ -402,6 +404,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	{
 		if(POIs[i].SpaceId == Space.Id)
 		{
+			EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::SPACE);
 			FoundSpacePOI = true;
 			break;
 		}

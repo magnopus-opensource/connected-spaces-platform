@@ -50,7 +50,14 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 	if (Dto.HasType())
 	{
 		// TODO Move this to a separate function when we have some different values than DEFAULT
-		POI.Type = csp::systems::EPointOfInterestType::DEFAULT;
+        if(Dto.GetType() == "Default")
+        {
+			POI.Type = csp::systems::EPointOfInterestType::DEFAULT;
+        }
+        else if(Dto.GetType() == "OKOSpaceGeoLocation")
+        {
+	        POI.Type = csp::systems::EPointOfInterestType::SPACE;
+        }
 	}
 
 	if (Dto.HasTags())
@@ -64,7 +71,10 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 		}
 	}
 
-	POI.Owner = Dto.GetOwner();
+    if(Dto.HasOwner())
+    {
+		POI.Owner = Dto.GetOwner();
+    }
 
 	if (Dto.HasLocation())
 	{

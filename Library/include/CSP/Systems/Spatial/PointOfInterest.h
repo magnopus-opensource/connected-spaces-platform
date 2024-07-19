@@ -40,7 +40,8 @@ namespace csp::systems
 
 enum class EPointOfInterestType
 {
-	DEFAULT
+	DEFAULT,
+    SPACE
 };
 
 /// @ingroup Point Of Interest System

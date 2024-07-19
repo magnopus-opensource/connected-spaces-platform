@@ -120,9 +120,6 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
 										  const double AreaRadius,
 										  POICollectionResultCallback Callback)
 {
-	// TODO Move this to a separate function when we have some different values than DEFAULT
-	const auto DefaultPOIType = "Default";
-
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= POIApiPtr->CreateHandler<POICollectionResultCallback, POICollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
 			Callback,
@@ -131,7 +128,7 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
 
 	static_cast<chs::PointOfInterestApi*>(POIApiPtr)->apiV1PoiGet(std::nullopt,
 																  std::nullopt,
-																  DefaultPOIType,
+																  std::nullopt,
 																  std::nullopt,
 																  std::nullopt,
 																  std::nullopt,
@@ -211,9 +208,6 @@ void PointOfInterestSystem::DeleteSite(const Site& Site, NullResultCallback Call
 
 void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback)
 {
-	// TODO Move this to a separate function when we have some different values than DEFAULT
-	const auto DefaultPOIType = "Default";
-
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= POIApiPtr->CreateHandler<SitesCollectionResultCallback, SitesCollectionResult, void, csp::services::DtoArray<chs::PointOfInterestDto>>(
 			Callback,
@@ -224,7 +218,7 @@ void PointOfInterestSystem::GetSites(const csp::common::String& SpaceId, SitesCo
 
 	static_cast<chs::PointOfInterestApi*>(POIApiPtr)->apiV1PoiGet(std::nullopt,
 																  std::nullopt,
-																  DefaultPOIType,
+																  std::nullopt,
 																  std::nullopt,
 																  std::nullopt,
 																  std::nullopt,
