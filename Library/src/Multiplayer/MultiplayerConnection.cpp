@@ -131,27 +131,21 @@ MultiplayerConnection::~MultiplayerConnection()
 	{
 		if (Connected)
 		{
-			const auto _Connection			  = Connection;
-			const auto _WebSocketClient		  = WebSocketClient;
-			const auto _NetworkEventManager	  = NetworkEventManager;
-			const auto _ConversationSystemPtr = ConversationSystemPtr;
+			Poco::Event shutdownEvent;
 
 			DisconnectWithReason("MultiplayerConnection shutting down.",
-								 [_Connection, _WebSocketClient, _NetworkEventManager, _ConversationSystemPtr](ErrorCode)
+								 [&shutdownEvent](ErrorCode)
 								 {
-									 CSP_DELETE(_Connection);
-									 CSP_DELETE(_WebSocketClient);
-									 CSP_DELETE(_NetworkEventManager);
-									 CSP_DELETE(_ConversationSystemPtr);
+									 shutdownEvent.set();
 								 });
+
+			shutdownEvent.wait();
 		}
-		else
-		{
-			CSP_DELETE(Connection);
-			CSP_DELETE(WebSocketClient);
-			CSP_DELETE(NetworkEventManager);
-			CSP_DELETE(ConversationSystemPtr);
-		}
+
+		CSP_DELETE(Connection);
+		CSP_DELETE(WebSocketClient);
+		CSP_DELETE(NetworkEventManager);
+		CSP_DELETE(ConversationSystemPtr);
 	}
 }
 
