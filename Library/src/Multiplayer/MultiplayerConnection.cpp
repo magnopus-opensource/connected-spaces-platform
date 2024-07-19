@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <future>
 #include <iostream>
 #include <map>
 #include <thread>
@@ -131,15 +132,16 @@ MultiplayerConnection::~MultiplayerConnection()
 	{
 		if (Connected)
 		{
-			Poco::Event shutdownEvent;
+			std::promise<ErrorCode> shutdownPromise;
 
 			DisconnectWithReason("MultiplayerConnection shutting down.",
-								 [&shutdownEvent](ErrorCode)
+								 [&shutdownPromise](ErrorCode errorCode)
 								 {
-									 shutdownEvent.set();
+									 shutdownPromise.set_value(errorCode);
 								 });
 
-			shutdownEvent.wait();
+			auto shutdownFuture = shutdownPromise.get_future();
+			shutdownFuture.wait();
 		}
 
 		CSP_DELETE(Connection);
