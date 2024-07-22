@@ -26,7 +26,7 @@ namespace csp::multiplayer
 
 ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Reflection, Parent)
 {
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name)]					  = "";
+	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED)]		  = "";
 	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)]	  = "";
 	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)]	  = "";
 	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)]				  = csp::common::Vector3::Zero();
@@ -59,12 +59,12 @@ void ReflectionSpaceComponent::SetAssetCollectionId(const csp::common::String& V
 
 const csp::common::String& ReflectionSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED));
 }
 
 void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* IPositionComponent */

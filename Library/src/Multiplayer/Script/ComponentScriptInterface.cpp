@@ -64,6 +64,24 @@ int64_t ComponentScriptInterface::GetComponentType() const
 	return (int64_t) ComponentType::Invalid;
 }
 
+void ComponentScriptInterface::SetComponentName(std::string name)
+{
+	if (Component)
+	{
+		Component->SetComponentName(name.c_str());
+	}
+}
+
+std::string ComponentScriptInterface::GetComponentName() const
+{
+	if (Component)
+	{
+		return Component->GetComponentName();
+	}
+
+	return "";
+}
+
 void ComponentScriptInterface::SendPropertyUpdate()
 {
 	if (Component)

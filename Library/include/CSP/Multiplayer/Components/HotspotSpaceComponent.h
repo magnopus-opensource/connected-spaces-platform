@@ -35,7 +35,7 @@ enum class HotspotPropertyKeys
 {
 	Position,
 	Rotation,
-	Name,
+	Name_DEPRECATED,
 	IsTeleportPoint,
 	IsSpawnPoint,
 	IsVisible,
@@ -55,10 +55,12 @@ public:
 
 	/// @brief Gets the Name of the Hotspot.
 	/// @return The Name of the Hotspot.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 
 	/// @brief Sets the Name of this Hotspot.
 	/// @param Value The Name of this Hotspot.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Gets the IsTeleportPoint of this Hotspot.

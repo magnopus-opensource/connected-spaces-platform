@@ -139,6 +139,12 @@ public:
 	/// @param InActionParams csp::common::String : Parameters for the action that will be passed to the action handler callback.
 	void InvokeAction(const csp::common::String& InAction, const csp::common::String& InActionParams);
 
+	/// @brief Gets the name of the component.
+	const csp::common::String& GetComponentName() const;
+	/// @brief Sets the name for the component.
+	/// @param Value - The new name to assign to the componenent.
+	void SetComponentName(const csp::common::String& Value);
+
 protected:
 	ComponentBase();
 	ComponentBase(ComponentType Type, SpaceEntity* Parent);
@@ -173,6 +179,9 @@ protected:
 	ComponentScriptInterface* ScriptInterface;
 
 	csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
+
+private:
+	void InitialiseProperties();
 };
 
 } // namespace csp::multiplayer

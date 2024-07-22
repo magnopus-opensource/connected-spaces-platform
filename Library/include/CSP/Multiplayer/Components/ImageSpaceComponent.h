@@ -32,7 +32,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for an image space component.
 enum class ImagePropertyKeys
 {
-	Name,
+	Name_DEPRECATED,
 	ImageAssetId,
 	AssetCollectionId,
 	Position,
@@ -67,10 +67,12 @@ public:
 
 	/// @brief Gets the name of this image space component.
 	/// @return The name of this image space component.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 
 	/// @brief Sets the name of this image space component.
 	/// @param Value The name of this image space component.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Gets the ID of the image asset this image component refers to.
