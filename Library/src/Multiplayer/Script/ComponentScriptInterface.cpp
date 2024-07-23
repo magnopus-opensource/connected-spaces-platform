@@ -76,7 +76,7 @@ std::string ComponentScriptInterface::GetComponentName() const
 {
 	if (Component)
 	{
-		return Component->GetComponentName();
+		return Component->GetComponentName().c_str();
 	}
 
 	return "";
