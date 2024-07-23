@@ -116,7 +116,7 @@ namespace CSPEngine
             var searchRadius = 130000.0;
 
             // Get POIs
-            using var result = poiSystem.GetPOIsInArea(searchLocationOrigin, searchRadius).Result;
+            using var result = poiSystem.GetPOIsInArea(searchLocationOrigin, searchRadius, Csp.Systems.EPointOfInterestType.DEFAULT).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);

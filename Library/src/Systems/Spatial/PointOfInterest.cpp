@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "CSP/Systems/Spatial/PointOfInterest.h"
+#include "Systems/Spatial/PointOfInterestHelpers.h"
 
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
@@ -49,8 +50,7 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 
 	if (Dto.HasType())
 	{
-		// TODO Move this to a separate function when we have some different values than DEFAULT
-		POI.Type = csp::systems::EPointOfInterestType::DEFAULT;
+		POI.Type = csp::systems::PointOfInterestHelpers::StringToType(Dto.GetType());
 	}
 
 	if (Dto.HasTags())
@@ -64,7 +64,10 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 		}
 	}
 
-	POI.Owner = Dto.GetOwner();
+    if(Dto.HasOwner())
+    {
+		POI.Owner = Dto.GetOwner();
+    }
 
 	if (Dto.HasLocation())
 	{
@@ -78,6 +81,11 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 		// TODO: Find out why we're using name instead of Id here
 		POI.AssetCollectionId = Dto.GetPrototypeName();
 	}
+
+    if(Dto.HasGroupId())
+    {
+	    POI.SpaceId = Dto.GetGroupId();
+    }
 }
 
 } // namespace
@@ -88,8 +96,6 @@ namespace csp::systems
 PointOfInterest::PointOfInterest() : Type(EPointOfInterestType::DEFAULT)
 {
 }
-
-
 
 PointOfInterest& POIResult::GetPointOfInterest()
 {
