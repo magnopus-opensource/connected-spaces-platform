@@ -177,6 +177,14 @@ inline double RandomUniformDouble()
 	return UniformDouble(Rand);
 }
 
+inline double RandomRangeDouble(double Min, double Max)
+{
+	const double RandomUniform = RandomUniformDouble();
+	const double Range = Max - Min;
+
+	return (RandomUniform * Range) + Min;
+}
+
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
 inline std::string GetUniqueString(int Length = 16)
 {

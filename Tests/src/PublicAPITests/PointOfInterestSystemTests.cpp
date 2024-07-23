@@ -365,10 +365,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
 	// Create a space POI and a default POI.
 	{
-		// Use a unfiform random value to get a latitude.
-		SpaceGeolocation.Latitude	= (RandomUniformDouble() * 2.0 - 1.0) * 90.0;
-		// Use a unfiform random value to get a longitude.
-		SpaceGeolocation.Longitude	= (RandomUniformDouble() * 2.0 - 1.0) * 180.0;
+		SpaceGeolocation.Latitude	= RandomRangeDouble(-90.0f, 90.0f);
+		SpaceGeolocation.Longitude	= RandomRangeDouble(-180.0f, 180.0f);
 
 		float SpaceOrientation = 90.0f;
 
