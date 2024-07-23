@@ -249,7 +249,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	double SearchRadius			   = 130000;
 
 	auto [Result]
-		= Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius).Await(RequestPredicate);
+		= Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius, csp::systems::EPointOfInterestType::DEFAULT).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
