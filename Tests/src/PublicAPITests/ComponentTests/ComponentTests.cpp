@@ -245,12 +245,12 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
 		{
 		});
 
-	// Create object to represent the hotspot
+	// Create object to represent the custom
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create hotspot component
+	// Create custom component
 	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
 	// Create script component
 	auto* ScriptComponent = (ScriptSpaceComponent*) CreatedObject->AddComponent(ComponentType::ScriptData);
@@ -258,7 +258,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
 	EntitySystem->ProcessPendingEntityOperations();
 
 	// Setup script
-	std::string HotspotScriptText = R"xx(
+	std::string CustomScriptText = R"xx(
 	
 		var custom = ThisEntity.getCustomComponents()[0];
 		custom.name = "ComponentName";
@@ -266,7 +266,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
 
 	EXPECT_EQ(CustomComponent->GetComponentName(), "");
 
-	ScriptComponent->SetScriptSource(HotspotScriptText.c_str());
+	ScriptComponent->SetScriptSource(CustomScriptText.c_str());
 	CreatedObject->GetScript()->Invoke();
 	const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
 	EXPECT_FALSE(ScriptHasErrors);
