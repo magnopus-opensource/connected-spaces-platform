@@ -492,7 +492,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
 void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
-	const auto SpacePOIType = "OKOSpaceGeoLocation";
+    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
 
 	std::vector<csp::common::String> SpaceIds({SpaceId});
 
