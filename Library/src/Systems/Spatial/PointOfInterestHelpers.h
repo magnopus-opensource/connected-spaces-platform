@@ -43,7 +43,7 @@ public:
     		}
     		default:
     		{
-	            CSP_LOG_ERROR_MSG("Unkwnown POI type detected when attempting to derive it's string representation. The type string being returned will be empty.");
+	            CSP_LOG_ERROR_MSG("Unkwnown POI type detected when attempting to derive its string representation. The type string being returned will be empty.");
     			break;
     		}
 	    }
