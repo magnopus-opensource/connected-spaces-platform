@@ -271,17 +271,17 @@ void ComponentBase::InvokeAction(const csp::common::String& InAction, const csp:
 
 const csp::common::String& ComponentBase::GetComponentName() const
 {
-	return GetStringProperty(COMPONENT_KEY_VIEW_NAME);
+	return GetStringProperty(COMPONENT_KEY_NAME);
 }
 
 void ComponentBase::SetComponentName(const csp::common::String& Value)
 {
-	SetProperty(COMPONENT_KEY_VIEW_NAME, Value);
+	SetProperty(COMPONENT_KEY_NAME, Value);
 }
 
 void ComponentBase::InitialiseProperties()
 {
-	Properties[COMPONENT_KEY_VIEW_NAME] = "";
+	Properties[COMPONENT_KEY_NAME] = "";
 }
 
 } // namespace csp::multiplayer

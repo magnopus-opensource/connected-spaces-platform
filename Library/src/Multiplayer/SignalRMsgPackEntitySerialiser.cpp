@@ -253,7 +253,7 @@ void SignalRMsgPackEntitySerialiser::WriteProperty(uint64_t Id, const Replicated
 	}
 
 	// Place the data into the properties map to be converted into a correct SignalR formatted structure when we call EndComponent()
-	Properties[static_cast<uint32_t>(Id)] = std::make_pair(ValueType, NewValue);
+	Properties[static_cast<uint16_t>(Id)] = std::make_pair(ValueType, NewValue);
 }
 
 /// <summary>

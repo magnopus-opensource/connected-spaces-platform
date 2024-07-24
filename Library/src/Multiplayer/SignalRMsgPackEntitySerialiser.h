@@ -83,7 +83,7 @@ private:
 	std::vector<signalr::value> CurrentArray;
 	uint64_t CurrentComponentId;
 
-	std::map<uint32_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
+	std::map<uint16_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
 };
 
 
