@@ -75,11 +75,14 @@ private:
 };
 
 /// @brief Callback containing a sequence.
+/// @param Result SequenceResult : result class
 typedef std::function<void(const SequenceResult& Result)> SequenceResultCallback;
 
 /// @brief Callback containing array of sequences.
+/// @param Result SequenceResult : result class
 typedef std::function<void(const SequencesResult& Result)> SequencesResultCallback;
 
 /// @brief Callback containing array of sequences.
+/// @param Result SequenceResult : result class
 typedef std::function<void(const SequencesResult& Result)> SequenceUpdatedResultCallback;
 } // namespace csp::systems
