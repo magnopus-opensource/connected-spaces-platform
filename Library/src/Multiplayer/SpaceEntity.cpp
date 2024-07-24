@@ -84,6 +84,7 @@ SpaceEntity::SpaceEntity()
 	, PropertiesLock(CSP_NEW std::mutex)
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
+	, ParentId(0)
 	, ThirdPartyRef("")
 	, ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
 	, TimeOfLastPatch(0)
@@ -106,6 +107,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 	, PropertiesLock(CSP_NEW std::mutex)
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
+	, ParentId(0)
 	, ThirdPartyRef("")
 	, ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
 	, TimeOfLastPatch(0)
@@ -517,7 +519,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 		Serialiser.WriteBool(IsTransferable);	 // IsTransferable
 		Serialiser.WriteBool(IsPersistant);
 		Serialiser.WriteUInt64(OwnerId);
-		Serialiser.WriteNull(); // ParentId
+		Serialiser.WriteUInt64(ParentId); // ParentId
 
 		Serialiser.BeginComponents();
 		{
@@ -528,6 +530,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(SelectedId));
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(ThirdPartyPlatform));
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
+
 			assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
 			const csp::common::Array<uint16_t>& DirtyComponentKeys = *DirtyComponents.Keys();
@@ -557,7 +560,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 		IsTransferable = Deserialiser.ReadBool();
 		IsPersistant   = Deserialiser.ReadBool();
 		OwnerId		   = Deserialiser.ReadUInt64();
-		Deserialiser.Skip();
+		ParentId	   = Deserialiser.ReadUInt64();
 
 		assert(Id > 0);
 

@@ -279,11 +279,13 @@ public:
 
 	/// @brief Returns the selection state of the entity.
 	/// @return Selection state of the entity, Selected = True, Deselected = False.
-	[[nodiscard]] bool IsSelected() const;
+	[[nodiscard]]
+	bool IsSelected() const;
 
 	/// @brief Retrieve the ClientID for the Selecting Client.
 	/// @return The client ID of the selecting client. Deselected Entity = 0.
-	[[nodiscard]] uint64_t GetSelectingClientID() const;
+	[[nodiscard]]
+	uint64_t GetSelectingClientID() const;
 
 	/// @brief Select the Entity. Only works if the Entity is currently deselected.
 	/// @return True if selection occurred. False if not.
@@ -341,6 +343,7 @@ private:
 	bool IsTransferable;
 	bool IsPersistant;
 	uint64_t OwnerId;
+	uint64_t ParentId;
 	csp::common::String Name;
 	SpaceTransform Transform;
 	csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
