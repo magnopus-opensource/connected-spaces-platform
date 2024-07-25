@@ -51,10 +51,11 @@ class CSP_API SequenceSystem : public SystemBase
 	/** @endcond */
 	CSP_END_IGNORE
 public:
+	// Hotspot:[SpaceId]:[GroupName]
 	/// @brief Creates a new sequence. If a sequence already exists with this key, it will overwrite the current one.
 	/// This call will fail if the user isn't a creator of the space.
-	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
-	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
+	/// @param SequenceKey csp::common::String : The unique grouping name. Our naming convention is: Type:[SpaceId]:[GroupName]
+	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
@@ -65,8 +66,8 @@ public:
 										 SequenceResultCallback Callback);
 
 	/// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
-	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
-	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
+	/// @param SequenceKey csp::common::String : The unique grouping name. Our naming convention is: Type:[SpaceId]:[GroupName]
+	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
@@ -86,7 +87,7 @@ public:
 	/// @brief Finds sequences based on the given criteria
 	/// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to search for
 	/// @param SequenceKeys csp::common::Optional<csp::common::String> : An optional regex string for searching keys
-	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.). Must be used with ReferenceIds
+	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.). Must be used with ReferenceIds
 	/// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
 	/// @param Callback SequencesResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetSequencesByCriteria(const csp::common::Array<csp::common::String>& SequenceKeys,
