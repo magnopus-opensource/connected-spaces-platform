@@ -215,10 +215,14 @@ public:
 	/// @param Callback ProfileResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetProfileByUserId(const csp::common::String& InUserId, ProfileResultCallback Callback);
 
+
+	[[deprecated("Deprecated in favour of GetBasicProfilesByUserId")]]
+	CSP_ASYNC_RESULT void GetProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
+
 	/// @brief Get a list of minimal profiles (avatarId, personalityType, userName, and platform) by user IDs.
 	/// @param InUserIds csp::common::Array<csp::common::String> : an array of user IDs to search for users by
 	/// @param Callback BasicProfilesResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void GetProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
+	CSP_ASYNC_RESULT void GetBasicProfilesByUserId(const csp::common::Array<csp::common::String>& InUserIds, BasicProfilesResultCallback Callback);
 
 	/// @brief Ping Magnopus Connected Services
 	/// @param Callback NullResultCallback : callback to call when a response is received
@@ -258,7 +262,7 @@ private:
 	void NotifyRefreshTokenHasChanged();
 	void ResetAuthenticationState();
 
-    void RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback);
+	void RefreshSession(const csp::common::String& UserId, const csp::common::String& RefreshToken, NullResultCallback Callback);
 
 	csp::services::ApiBase* AuthenticationAPI;
 	csp::services::ApiBase* ProfileAPI;

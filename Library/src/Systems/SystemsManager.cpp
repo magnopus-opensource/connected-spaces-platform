@@ -215,26 +215,28 @@ void SystemsManager::CreateSystems()
 
 void SystemsManager::DestroySystems()
 {
-	CSP_DELETE(UserSystem);
-	CSP_DELETE(SpaceSystem);
-	CSP_DELETE(AssetSystem);
+	// Systems must be shut down in reverse order to CreateSystems() to ensure that any
+	// dependencies continue to exist until each system is successfully shut down.
+	CSP_DELETE(SpaceEntitySystem);
+	CSP_DELETE(OrganizationSystem);
+	CSP_DELETE(QuotaSystem);
+	CSP_DELETE(ECommerceSystem);
+	CSP_DELETE(EventTicketingSystem);
+	CSP_DELETE(MaintenanceSystem);
 	CSP_DELETE(VoipSystem);
+	CSP_DELETE(GraphQLSystem);
+	CSP_DELETE(SettingsSystem);
 	CSP_DELETE(PointOfInterestSystem);
 	CSP_DELETE(AnchorSystem);
-	CSP_DELETE(ScriptSystem);
-	CSP_DELETE(SettingsSystem);
-	CSP_DELETE(GraphQLSystem);
-
+	CSP_DELETE(AssetSystem);
 	CSP_DELETE(AnalyticsSystem);
+	CSP_DELETE(MultiplayerConnection);
+	CSP_DELETE(ScriptSystem);
+	CSP_DELETE(SpaceSystem);
+	CSP_DELETE(UserSystem);
+
 	CSP_DELETE(WebClient);
 	CSP_DELETE(LogSystem);
-	CSP_DELETE(MaintenanceSystem);
-	CSP_DELETE(EventTicketingSystem);
-	CSP_DELETE(ECommerceSystem);
-	CSP_DELETE(QuotaSystem);
-	CSP_DELETE(OrganizationSystem);
-	CSP_DELETE(SpaceEntitySystem);
-	CSP_DELETE(MultiplayerConnection);
 }
 
 void SystemsManager::Instantiate()

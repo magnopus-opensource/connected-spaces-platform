@@ -51,18 +51,18 @@ class CSP_API SequenceSystem : public SystemBase
 	/** @endcond */
 	CSP_END_IGNORE
 public:
-	/// @brief Creates a new sequence. If a sequence already exists with this key, it will overwrite the current one. This call will fail if the user
-	/// isn't a creator of the space.
+	/// @brief Creates a new sequence. If a sequence already exists with this key, it will overwrite the current one.
+	/// This call will fail if the user isn't a creator of the space.
 	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
-	void CreateSequence(const csp::common::String& SequenceKey,
-						const csp::common::String& ReferenceType,
-						const csp::common::String& ReferenceId,
-						const csp::common::Array<csp::common::String>& Items,
-						SequenceResultCallback Callback);
+	CSP_ASYNC_RESULT void CreateSequence(const csp::common::String& SequenceKey,
+										 const csp::common::String& ReferenceType,
+										 const csp::common::String& ReferenceId,
+										 const csp::common::Array<csp::common::String>& Items,
+										 SequenceResultCallback Callback);
 
 	/// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
 	/// @param SequenceKey csp::common::String : The unique grouping name. The suggested convention is: Type:[Id]
@@ -70,39 +70,40 @@ public:
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
-	void UpdateSequence(const csp::common::String& SequenceKey,
-						const csp::common::String& ReferenceType,
-						const csp::common::String& ReferenceId,
-						const csp::common::Array<csp::common::String>& Items,
-						SequenceResultCallback Callback);
+	CSP_ASYNC_RESULT void UpdateSequence(const csp::common::String& SequenceKey,
+										 const csp::common::String& ReferenceType,
+										 const csp::common::String& ReferenceId,
+										 const csp::common::Array<csp::common::String>& Items,
+										 SequenceResultCallback Callback);
 
 	/// @brief Renames a given sequence. This call will fail if the user isn't a creator of the space.
 	/// @param OldSequenceKey csp::common::String : The current sequence key name
 	/// @param NewSequenceKey csp::common::String : The new sequence key name
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
-	void RenameSequence(const csp::common::String& OldSequenceKey, const csp::common::String& NewSequenceKey, SequenceResultCallback Callback);
+	CSP_ASYNC_RESULT void
+		RenameSequence(const csp::common::String& OldSequenceKey, const csp::common::String& NewSequenceKey, SequenceResultCallback Callback);
 
 	/// @brief Finds sequences based on the given criteria
 	/// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to search for
 	/// @param SequenceKeys csp::common::Optional<csp::common::String> : An optional regex string for searching keys
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.). Must be used with ReferenceIds
-	/// @param ReferenceIds csp::common::Optional<csp::common::Array<csp::common::String>> : The ids of the reference. Must be used with ReferenceType
+	/// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
 	/// @param Callback SequencesResultCallback : callback to call when a response is received
-	void GetSequencesByCriteria(const csp::common::Optional<csp::common::Array<csp::common::String>>& SequenceKeys,
-								const csp::common::Optional<csp::common::String>& KeyRegex,
-								const csp::common::Optional<csp::common::String>& ReferenceType,
-								const csp::common::Optional<csp::common::Array<csp::common::String>>& ReferenceIds,
-								SequencesResultCallback Callback);
+	CSP_ASYNC_RESULT void GetSequencesByCriteria(const csp::common::Array<csp::common::String>& SequenceKeys,
+												 const csp::common::Optional<csp::common::String>& KeyRegex,
+												 const csp::common::Optional<csp::common::String>& ReferenceType,
+												 const csp::common::Array<csp::common::String>& ReferenceIds,
+												 SequencesResultCallback Callback);
 
 	/// @brief Gets a sequence by it's key
 	/// @param SequenceKey csp::common::String : The unique grouping name
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
-	void GetSequence(const csp::common::String& SequenceKey, SequenceResultCallback Callback);
+	CSP_ASYNC_RESULT void GetSequence(const csp::common::String& SequenceKey, SequenceResultCallback Callback);
 
 	/// @brief Deletes the given sequences. This call will fail if the user isn't a creator of the space
 	/// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to delete
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);
 
 private:
 	SequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

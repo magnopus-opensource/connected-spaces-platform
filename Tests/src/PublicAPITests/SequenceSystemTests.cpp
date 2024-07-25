@@ -170,10 +170,10 @@ void RenameSequence(csp::systems::SequenceSystem* SequenceSystem,
 }
 
 void GetSequencesByCriteria(csp::systems::SequenceSystem* SequenceSystem,
-							const csp::common::Optional<csp::common::Array<csp::common::String>>& SequenceKeys,
+							const csp::common::Array<csp::common::String>& SequenceKeys,
 							const csp::common::Optional<csp::common::String>& KeyRegex,
 							const csp::common::Optional<csp::common::String>& ReferenceType,
-							const csp::common::Optional<csp::common::Array<csp::common::String>>& ReferenceIds,
+							const csp::common::Array<csp::common::String>& ReferenceIds,
 							csp::common::Array<csp::systems::Sequence>& OutSequences,
 							csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 							csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
@@ -524,38 +524,38 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 	// Test Sequence key search
 
 	// Get the first sequence
-	GetSequencesByCriteria(SequenceSystem, {{Sequence.Key}}, nullptr, nullptr, nullptr, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {Sequence.Key}, nullptr, nullptr, {}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 1);
 	CompareSequences(RetrievedSequences[0], Sequence);
 
 	// Get the second sequence
-	GetSequencesByCriteria(SequenceSystem, {{Sequence2.Key}}, nullptr, nullptr, nullptr, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {Sequence2.Key}, nullptr, nullptr, {}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 1);
 	CompareSequences(RetrievedSequences[0], Sequence2);
 
 	// Try and get an invalid sequence
-	GetSequencesByCriteria(SequenceSystem, {{"Unknown Key"}}, nullptr, nullptr, nullptr, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {"Unknown Key"}, nullptr, nullptr, {}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 0);
 
 	// Test Regex search
-	GetSequencesByCriteria(SequenceSystem, nullptr, UniqueSequenceName2, nullptr, nullptr, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {}, UniqueSequenceName2, nullptr, {}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 1);
 	CompareSequences(RetrievedSequences[0], Sequence2);
 
 	// Test reference type and id search
 
 	// Get the first sequence
-	GetSequencesByCriteria(SequenceSystem, nullptr, nullptr, "Group1", {{Space.Id}}, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {}, nullptr, "Group1", {{Space.Id}}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 1);
 	CompareSequences(RetrievedSequences[0], Sequence);
 
 	// Get the second sequence
-	GetSequencesByCriteria(SequenceSystem, nullptr, nullptr, "Group2", {{Space.Id}}, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {}, nullptr, "Group2", {{Space.Id}}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 1);
 	CompareSequences(RetrievedSequences[0], Sequence2);
 
 	// Try and get an invalid sequence
-	GetSequencesByCriteria(SequenceSystem, nullptr, nullptr, "Group3", {{Space.Id}}, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {}, nullptr, "Group3", {{Space.Id}}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 0);
 
 	// Delete sequence
