@@ -96,12 +96,13 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeletePOI(const PointOfInterest& POI, NullResultCallback Callback);
 
-	/// @brief Retrieves an array with all the Points of Interest that are located inside the circular area defined by the parameters
-	/// @param OriginLocation csp::systems::GeoLocation : latitude and longitude coordinates of the circular area origin
-	/// @param AreaRadius double : radius of the circular area origin
-	/// @param Callback POICollectionResultCallback : callback when asynchronous task finishes
+	/// @brief Retrieves an array with all the Points of Interest that are located inside the circular area defined by the parameters..
+	/// @param OriginLocation csp::systems::GeoLocation : The latitude and longitude coordinates of origin of the search location.
+	/// @param AreaRadius double : The Radius of the circular area to search around the provided origin.
+	/// @param Type csp::common::Optional<EPointOfInterestType> : The type of POI to search for. If none is specified, all types will be included in the returned set.
+	/// @param Callback POICollectionResultCallback : callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void
-		GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius, POICollectionResultCallback Callback);
+		GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation, const double AreaRadius, const csp::common::Optional<EPointOfInterestType>& Type, POICollectionResultCallback Callback);
 	///@}
 
 protected:

@@ -545,6 +545,7 @@ class CSharpWrapperGenerator:
                         tag = comment[:comment_index]
 
                         if tag != "@param":
+                            error_in_file(m.header_file or "", -1, "Error in comment: " + comment)
                             error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
 
                         content = comment[comment_index + 1 :]

@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <future>
 #include <iostream>
 #include <map>
 #include <thread>
@@ -131,27 +132,22 @@ MultiplayerConnection::~MultiplayerConnection()
 	{
 		if (Connected)
 		{
-			const auto _Connection			  = Connection;
-			const auto _WebSocketClient		  = WebSocketClient;
-			const auto _NetworkEventManager	  = NetworkEventManager;
-			const auto _ConversationSystemPtr = ConversationSystemPtr;
+			std::promise<ErrorCode> shutdownPromise;
 
 			DisconnectWithReason("MultiplayerConnection shutting down.",
-								 [_Connection, _WebSocketClient, _NetworkEventManager, _ConversationSystemPtr](ErrorCode)
+								 [&shutdownPromise](ErrorCode errorCode)
 								 {
-									 CSP_DELETE(_Connection);
-									 CSP_DELETE(_WebSocketClient);
-									 CSP_DELETE(_NetworkEventManager);
-									 CSP_DELETE(_ConversationSystemPtr);
+									 shutdownPromise.set_value(errorCode);
 								 });
+
+			auto shutdownFuture = shutdownPromise.get_future();
+			shutdownFuture.wait();
 		}
-		else
-		{
-			CSP_DELETE(Connection);
-			CSP_DELETE(WebSocketClient);
-			CSP_DELETE(NetworkEventManager);
-			CSP_DELETE(ConversationSystemPtr);
-		}
+
+		CSP_DELETE(Connection);
+		CSP_DELETE(WebSocketClient);
+		CSP_DELETE(NetworkEventManager);
+		CSP_DELETE(ConversationSystemPtr);
 	}
 }
 
