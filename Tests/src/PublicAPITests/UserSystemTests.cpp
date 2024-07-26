@@ -690,34 +690,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 }
 #endif
 
-// commented out as the callback of it gets triggered loooong after the test has finished and this is causing a lot of random issues
-#if 0
-	#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CANCEL_LOGIN_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CancelLoginTest)
-{
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	csp::common::String UserId;
-
-	// Send log in request and then exit early
-	{
-		csp::systems::LoginStateResultCallback Callback = [](csp::systems::LoginStateResult& Result)
-		{
-			if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
-			{
-				return;
-			}
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-		};
-
-		UserSystem->Login("", DefaultLoginEmail, DefaultLoginPassword, Callback);
-	}
-}
-	#endif
-#endif
-
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_GET_SUPPORTED_PROVIDERS_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
 {

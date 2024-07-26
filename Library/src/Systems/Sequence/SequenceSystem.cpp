@@ -78,13 +78,13 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 		);
 }
 
-void SequenceSystem::GetSequencesByCriteria(const Optional<Array<String>>& InSequenceKeys,
+void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 											const Optional<String>& InKeyRegex,
 											const Optional<String>& InReferenceType,
-											const Optional<Array<String>>& InReferenceIds,
+											const Array<String>& InReferenceIds,
 											SequencesResultCallback Callback)
 {
-	if (InReferenceType.HasValue() && InReferenceIds.HasValue() == false || InReferenceIds.HasValue() && InReferenceType.HasValue() == false)
+	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || InReferenceIds.IsEmpty() && InReferenceType.HasValue())
 	{
 		CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
