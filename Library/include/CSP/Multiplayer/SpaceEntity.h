@@ -343,7 +343,7 @@ private:
 	bool IsTransferable;
 	bool IsPersistant;
 	uint64_t OwnerId;
-	uint64_t ParentId;
+	csp::common::Optional<uint64_t> ParentId;
 	csp::common::String Name;
 	SpaceTransform Transform;
 	csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
