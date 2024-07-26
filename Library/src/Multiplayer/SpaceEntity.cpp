@@ -519,7 +519,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 		Serialiser.WriteBool(IsTransferable);	 // IsTransferable
 		Serialiser.WriteBool(IsPersistant);
 		Serialiser.WriteUInt64(OwnerId);
-		Serialiser.WriteUInt64(ParentId); // ParentId
+		ParentId != 0 ? Serialiser.WriteUInt64(ParentId) : Serialiser.WriteNull(); // ParentId
 
 		Serialiser.BeginComponents();
 		{
@@ -560,7 +560,16 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 		IsTransferable = Deserialiser.ReadBool();
 		IsPersistant   = Deserialiser.ReadBool();
 		OwnerId		   = Deserialiser.ReadUInt64();
-		ParentId	   = Deserialiser.ReadUInt64();
+
+		if (Deserialiser.NextValueIsNull())
+		{
+			ParentId = 0;
+			Deserialiser.Skip();
+		}
+		else
+		{
+			ParentId = Deserialiser.ReadUInt64();
+		}
 
 		assert(Id > 0);
 
