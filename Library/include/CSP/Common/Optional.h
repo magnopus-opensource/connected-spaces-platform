@@ -192,11 +192,6 @@ public:
 			ValueDestructor(Value);
 		}
 
-		if (!Other.Value)
-		{
-			return *this;
-		}
-
 		Value = (T*) csp::memory::DllAlloc(sizeof(T));
 		new (Value) T(*Other.Value);
 
@@ -211,11 +206,6 @@ public:
 		if (Value)
 		{
 			ValueDestructor(Value);
-		}
-
-		if (!Other.Value)
-		{
-			return *this;
 		}
 
 		Value		= Other.Value;
