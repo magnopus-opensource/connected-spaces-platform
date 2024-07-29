@@ -190,7 +190,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Re-Enter space and verify contents
@@ -215,10 +218,19 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			});
 
 		// Wait until loaded
-		while (!GotAllEntities)
+		auto Start		 = std::chrono::steady_clock::now();
+		auto Current	 = std::chrono::steady_clock::now();
+		int64_t TestTime = 0;
+
+		while (!GotAllEntities && TestTime < 20)
 		{
-			std::this_thread::sleep_for(100ms);
+			std::this_thread::sleep_for(50ms);
+
+			Current	 = std::chrono::steady_clock::now();
+			TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
 		}
+
+		EXPECT_TRUE(GotAllEntities);
 
 		const auto& Components = *LoadedObject->GetComponents();
 
@@ -267,7 +279,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Delete space
