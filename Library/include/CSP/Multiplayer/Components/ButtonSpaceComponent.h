@@ -34,7 +34,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a button component.
 enum class ButtonPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	LabelText,
 	IconAssetId,
 	AssetCollectionId,

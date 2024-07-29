@@ -35,7 +35,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a static model component.
 enum class StaticModelPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	ExternalResourceAssetId,
 	ExternalResourceAssetCollectionId,
 	Position,
