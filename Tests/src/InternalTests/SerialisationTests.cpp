@@ -45,6 +45,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	User->OwnerId		 = 1337;
 	User->IsTransferable = false;
 	User->IsPersistant	 = false;
+	User->ParentId		 = 9999;
 
 	auto* AvatarComponent = (AvatarSpaceComponent*) User->AddComponent(ComponentType::AvatarData);
 
@@ -84,8 +85,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	EXPECT_TRUE(Array[2].is_bool() && !Array[2].as_bool()); // IsTransferable
 	EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
-	EXPECT_TRUE(Array[5].is_null());										   // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8); // Components
+	EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == *User->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8);		  // Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -173,6 +174,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	User->OwnerId		 = 1337;
 	User->IsTransferable = false;
 	User->IsPersistant	 = false;
+	User->ParentId		 = 9999;
 
 	auto* AvatarComponent = (AvatarSpaceComponent*) User->AddComponent(ComponentType::AvatarData);
 
@@ -192,6 +194,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	EXPECT_EQ(DeserialisedUser->Transform.Position, User->Transform.Position);
 	EXPECT_EQ(DeserialisedUser->Transform.Rotation, User->Transform.Rotation);
 	EXPECT_EQ(DeserialisedUser->OwnerId, User->OwnerId);
+	EXPECT_EQ(*DeserialisedUser->ParentId, *User->ParentId);
 
 	EXPECT_EQ(DeserialisedUser->Components.Size(), 1);
 
@@ -222,6 +225,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	Object->Name		   = "MyObject";
 	Object->Transform	   = {Vector3 {1.2f, 2.34f, 3.45f}, Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, Vector3 {1, 1, 1}};
 	Object->OwnerId		   = 42;
+	Object->ParentId	   = 9999;
 
 	auto Type										   = (ComponentType) ((int) ComponentType::Custom + 1);
 	Object->Components[COMPONENT_KEY_START_COMPONENTS] = CSP_NEW ComponentBase(Type, Object);
@@ -242,7 +246,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	 *     false,									-- IsTransferable
 	 *     true,									-- IsPersistant
 	 *     1337,									-- OwnerId
-	 *     null,									-- ParentId
+	 *     9999,									-- ParentId
 	 *     {										-- Components
 	 *       1: [ 6, [ <raw> ] ],					---- Properties
 	 *       2: [ 6, [ <raw> ] ],					---- Custom component
@@ -262,8 +266,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	EXPECT_TRUE(Array[2].is_bool() && Array[2].as_bool());				// IsTransferable
 	EXPECT_TRUE(Array[3].is_bool());									// IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == Object->OwnerId);
-	EXPECT_TRUE(Array[5].is_null());										   // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4); // Components
+	EXPECT_TRUE(Array[5].is_uinteger() && Array[5].as_uinteger() == *Object->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4);			// Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -351,6 +355,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	Object->Name		   = "MyObject";
 	Object->Transform	   = {Vector3 {1.2f, 2.34f, 3.45f}, Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, Vector3 {1, 1, 1}};
 	Object->OwnerId		   = 42;
+	Object->ParentId	   = 9999;
 
 	auto* NewComponent = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	NewComponent->SetExternalResourceAssetCollectionId("blah");
@@ -370,6 +375,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedObject->Transform.Rotation, Object->Transform.Rotation);
 	EXPECT_EQ(DeserialisedObject->Transform.Scale, Object->Transform.Scale);
 	EXPECT_EQ(DeserialisedObject->OwnerId, Object->OwnerId);
+	EXPECT_EQ(*DeserialisedObject->ParentId, *Object->ParentId);
 
 	EXPECT_EQ(DeserialisedObject->Components.Size(), 1);
 
