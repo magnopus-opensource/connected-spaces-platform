@@ -2066,4 +2066,287 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 }
 #endif
 
+void RunParentEntityReplicationTest(bool Local)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// If local is false, test DeserialiseFromPatch functionality
+	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
+
+	// Parents shouldn't be set yet
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
+
+	bool ChildEntityUpdated = false;
+
+	CreatedChildEntity->SetUpdateCallback(
+		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntityUpdated = true;
+			}
+		});
+
+	// Change Parent
+	CreatedChildEntity->SetParentEntity(CreatedParentEntity);
+
+	// Parents shouldn't be set until after replication
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
+
+	CreatedChildEntity->QueueUpdate();
+
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
+
+	// Check entity is parented correctly
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), CreatedParentEntity);
+	EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+	EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity);
+
+	// Remove parent
+	CreatedChildEntity->RemoveParentEntity();
+
+	// Reset test variables
+	ChildEntityUpdated		  = false;
+	WaitForTestTimeoutCountMs = 0;
+
+	CreatedChildEntity->QueueUpdate();
+
+	// Wait for update
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
+
+	// Check entity is unparented correctly
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 0);
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_ENTITY_REPLICATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityLocalReplicationTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
+	// for ParentId and ChildEntities
+	RunParentEntityReplicationTest(true);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_REPLICATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+	// for ParentId and ChildEntities
+	RunParentEntityReplicationTest(false);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_ENTER_SPACE_REPLICATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTest)
+{
+	// Tests the SpaceEntitySystem::OnAllEntitiesCreated
+	// for ParentId and ChildEntities
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+
+	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
+
+	uint64_t ParentEntityId = CreatedParentEntity->GetId();
+	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
+
+	// Parents shouldn't be set yet
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
+
+	bool ChildEntityUpdated = false;
+
+	CreatedChildEntity->SetUpdateCallback(
+		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntityUpdated = true;
+			}
+		});
+
+	// Change Parent
+	CreatedChildEntity->SetParentEntity(CreatedParentEntity);
+
+	CreatedChildEntity->QueueUpdate();
+
+	// Wait for update
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
+
+	// Exit Space
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Log out
+	LogOut(UserSystem);
+
+	// Log in again
+	LogIn(UserSystem, UserId);
+
+	// Enter space
+	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+	bool EntitiesCreated = false;
+
+	auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+	{
+		EntitiesCreated = true;
+		EXPECT_TRUE(Success);
+	};
+
+	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+	// Reset test variables
+	WaitForTestTimeoutCountMs = 0;
+
+	// Wait to recieve entities
+	while (!EntitiesCreated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(EntitiesCreated);
+
+	// Find our entities
+	SpaceEntity* RetrievedParentEntity = EntitySystem->FindSpaceEntityById(ParentEntityId);
+	EXPECT_TRUE(RetrievedParentEntity != nullptr);
+
+	SpaceEntity* RetrievedChildEntity = EntitySystem->FindSpaceEntityById(ChildEntityId);
+	EXPECT_TRUE(RetrievedChildEntity != nullptr);
+
+	// Check entity is parented correctly
+	EXPECT_EQ(RetrievedChildEntity->GetParentEntity(), RetrievedParentEntity);
+	EXPECT_EQ(RetrievedParentEntity->GetChildEntities()->Size(), 1);
+	EXPECT_EQ((*RetrievedParentEntity->GetChildEntities())[0], RetrievedChildEntity);
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+
 } // namespace

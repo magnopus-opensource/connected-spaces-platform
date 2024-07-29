@@ -90,6 +90,7 @@ enum SpaceEntityUpdateFlags
 	UPDATE_FLAGS_SELECTION_ID		  = 32,
 	UPDATE_FLAGS_THIRD_PARTY_REF	  = 64,
 	UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
+	UPDATE_FLAGS_PARENT				  = 256,
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -205,6 +206,13 @@ public:
 	/// @brief Get SpaceEntitySystem Object
 	/// @return SpaceEntitySystem
 	SpaceEntitySystem* GetSpaceEntitySystem();
+
+	void SetParentEntity(SpaceEntity* Parent);
+	void RemoveParentEntity();
+
+	SpaceEntity* GetParentEntity() const;
+
+	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
 
 	/// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
 	void QueueUpdate();
@@ -336,6 +344,10 @@ private:
 
 	ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
+	void AddChildEntitiy(SpaceEntity* ChildEntity);
+
+	bool ResolveEntityHierarchy();
+
 	SpaceEntitySystem* EntitySystem;
 
 	SpaceEntityType Type;
@@ -344,11 +356,16 @@ private:
 	bool IsPersistant;
 	uint64_t OwnerId;
 	csp::common::Optional<uint64_t> ParentId;
+	bool ShouldUpdateParent;
+
 	csp::common::String Name;
 	SpaceTransform Transform;
 	csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
 	csp::common::String ThirdPartyRef;
 	uint64_t SelectedId;
+
+	SpaceEntity* Parent;
+	csp::common::List<SpaceEntity*> ChildEntities;
 
 	UpdateCallback EntityUpdateCallback;
 	DestroyCallback EntityDestroyCallback;

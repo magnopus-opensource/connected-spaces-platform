@@ -779,7 +779,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
 	// If we have nothing to update, don't allow a patch to be sent.
 	if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
-		&& EntityToUpdate->TransientDeletionComponentIds.Size() == 0)
+		&& EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
 	{
 		// TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges', etc.
 		// CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -848,6 +848,21 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
+
+	// Resolve entity hierarchy
+	for (size_t i = 0; i < Entities.Size(); ++i)
+	{
+		SpaceEntity* Entity = Entities[i];
+
+		if (Entity->ParentId.HasValue())
+		{
+			SpaceEntity* ParentEntity = FindSpaceEntityById(*Entity->ParentId);
+			// Set the entities parent
+			Entity->Parent = ParentEntity;
+			// Set the parents child
+			ParentEntity->ChildEntities.Append(Entity);
+		}
+	}
 
 	// Register all scripts for import
 	for (size_t i = 0; i < Entities.Size(); ++i)
@@ -1368,7 +1383,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 		const uint64_t EntityID = Deserialiser.ReadUInt64();
 		const uint64_t OwnerID	= Deserialiser.ReadUInt64();
 		const bool Destroy		= Deserialiser.ReadBool();
-		Deserialiser.Skip(); // ParentId //TODO: Support this if required
 
 		if (Destroy)
 		{
