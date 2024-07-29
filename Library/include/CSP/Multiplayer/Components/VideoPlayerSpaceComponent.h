@@ -65,7 +65,7 @@ enum class VideoPlayerSourceType
 /// @brief Enumerates the list of properties that can be replicated for a video player component.
 enum class VideoPlayerPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	VideoAssetId,
 	VideoAssetURL,
 	AssetCollectionId,
@@ -100,10 +100,12 @@ public:
 
 	/// @brief Gets the name of this video player.
 	/// @return The name of this video player.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 
 	/// @brief Sets the name of this video player.
 	/// @param Value The name of this video player.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Gets the ID of the video asset associated with this video player.

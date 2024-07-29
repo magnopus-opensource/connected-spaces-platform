@@ -18,6 +18,7 @@
 #include "CSP/Common/List.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "ComponentBaseKeys.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
@@ -29,10 +30,12 @@ static const ReplicatedValue InvalidValue = ReplicatedValue();
 
 ComponentBase::ComponentBase() : Id(0), Type(ComponentType::Invalid), Parent(nullptr), ScriptInterface(nullptr)
 {
+	InitialiseProperties();
 }
 
 ComponentBase::ComponentBase(ComponentType Type, SpaceEntity* Parent) : Id(0), Type(Type), Parent(Parent), ScriptInterface(nullptr)
 {
+	InitialiseProperties();
 }
 
 ComponentBase::~ComponentBase()
@@ -264,6 +267,21 @@ void ComponentBase::InvokeAction(const csp::common::String& InAction, const csp:
 		EntityActionHandler ActionHandler = ActionMap[InAction.c_str()];
 		ActionHandler(this, InAction, InActionParams);
 	}
+}
+
+const csp::common::String& ComponentBase::GetComponentName() const
+{
+	return GetStringProperty(COMPONENT_KEY_NAME);
+}
+
+void ComponentBase::SetComponentName(const csp::common::String& Value)
+{
+	SetProperty(COMPONENT_KEY_NAME, Value);
+}
+
+void ComponentBase::InitialiseProperties()
+{
+	Properties[COMPONENT_KEY_NAME] = "";
 }
 
 } // namespace csp::multiplayer

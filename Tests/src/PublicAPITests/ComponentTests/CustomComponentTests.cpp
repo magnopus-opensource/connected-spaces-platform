@@ -88,6 +88,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	char UniqueSpaceName2[256];
 	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
+	// Current default properties:
+	// - ComponentName
+	const int DefaultComponentProps = 1;
+
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -167,16 +171,16 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 		// Key Size
 		{
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 7);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 7 + DefaultComponentProps);
 		}
 
 		// Remove Key
 		{
 			CustomComponent->RemoveCustomProperty("Boolean");
 
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 6 + DefaultComponentProps);
 		}
 
 		// List Check

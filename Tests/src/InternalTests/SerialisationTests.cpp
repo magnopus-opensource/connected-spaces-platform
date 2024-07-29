@@ -342,6 +342,10 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
+	// Current default properties:
+	// - ComponentName
+	const int DefaultComponentProps = 1;
+
 	SignalRMsgPackEntitySerialiser Serialiser;
 	auto Object			   = CSP_NEW SpaceEntity();
 	Object->Type		   = SpaceEntityType::Object;
@@ -379,7 +383,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 
 	EXPECT_EQ(DeserialisedComponent->GetComponentType(), ComponentType::StaticModel);
 
-	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1);
+	// -1 as Name_DEPRECATED was never in use
+	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1 + DefaultComponentProps);
 	EXPECT_EQ(DeserialisedComponent->GetExternalResourceAssetCollectionId(), "blah");
 	EXPECT_EQ(DeserialisedComponent->GetIsVisible(), true);
 

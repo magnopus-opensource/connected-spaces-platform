@@ -28,7 +28,7 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBas
 {
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)]		= csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)]		= csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name)]			= "";
+	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED)] = "";
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint)] = true;
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint)]	= false;
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)]		= true;
@@ -39,12 +39,12 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBas
 
 const csp::common::String& HotspotSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED));
 }
 
 void HotspotSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED), Value);
 }
 
 bool HotspotSpaceComponent::GetIsTeleportPoint() const

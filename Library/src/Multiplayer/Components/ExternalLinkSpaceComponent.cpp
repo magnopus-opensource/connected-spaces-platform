@@ -26,27 +26,27 @@ namespace csp::multiplayer
 
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::ExternalLink, Parent)
 {
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Name)]		 = "";
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl)]	 = "";
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Position)]	 = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation)]	 = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale)]		 = csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText)] = "";
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled)]	 = true;
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible)]	 = true;
-	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)] = true;
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED)] = "";
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::LinkUrl)]		 = "";
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Position)]		 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Rotation)]		 = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::Scale)]			 = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::DisplayText)]	 = "";
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsEnabled)]		 = true;
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsVisible)]		 = true;
+	Properties[static_cast<uint32_t>(ExternalLinkPropertyKeys::IsARVisible)]	 = true;
 
 	SetScriptInterface(CSP_NEW ExternalLinkSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED));
 }
 
 void ExternalLinkSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(ExternalLinkPropertyKeys::Name_DEPRECATED), Value);
 }
 
 const csp::common::String& ExternalLinkSpaceComponent::GetLinkUrl() const
