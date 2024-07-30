@@ -212,10 +212,12 @@ public:
 	/// @param Parent SpaceEntity The new parent of this entity.
 	void SetParentEntity(SpaceEntity* Parent);
 
-	/// @brief Gets the parenf of this entity.
+	/// @brief Gets the parent of this entity
 	/// @return SpaceEntity
 	SpaceEntity* GetParentEntity() const;
 
+	/// @brief Gets the children of this entity
+	/// @return csp::common::List<SpaceEntity>
 	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
 
 	/// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
