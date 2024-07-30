@@ -2151,7 +2151,7 @@ void RunParentEntityReplicationTest(bool Local)
 	EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity);
 
 	// Remove parent
-	CreatedChildEntity->RemoveParentEntity();
+	CreatedChildEntity->SetParentEntity(nullptr);
 
 	// Reset test variables
 	ChildEntityUpdated		  = false;

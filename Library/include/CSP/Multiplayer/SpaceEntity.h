@@ -207,9 +207,13 @@ public:
 	/// @return SpaceEntitySystem
 	SpaceEntitySystem* GetSpaceEntitySystem();
 
+	/// @brief Sets the parent for this entity. If null is passed, then this will remove the parent
+	/// QueueUpdate() should be called afterwards to enable changes to the parent.
+	/// @param Parent SpaceEntity The new parent of this entity.
 	void SetParentEntity(SpaceEntity* Parent);
-	void RemoveParentEntity();
 
+	/// @brief Gets the parenf of this entity.
+	/// @return SpaceEntity
 	SpaceEntity* GetParentEntity() const;
 
 	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
@@ -346,7 +350,7 @@ private:
 
 	void AddChildEntitiy(SpaceEntity* ChildEntity);
 
-	bool ResolveEntityHierarchy();
+	bool ResolveParentChildRelationship();
 
 	SpaceEntitySystem* EntitySystem;
 

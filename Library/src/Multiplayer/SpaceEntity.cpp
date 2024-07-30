@@ -321,13 +321,15 @@ SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 
 void SpaceEntity::SetParentEntity(SpaceEntity* InParent)
 {
-	ParentId		   = InParent->GetId();
-	ShouldUpdateParent = true;
-}
+	if (InParent != nullptr)
+	{
+		ParentId = InParent->GetId();
+	}
+	else
+	{
+		ParentId = nullptr;
+	}
 
-void SpaceEntity::RemoveParentEntity()
-{
-	ParentId		   = nullptr;
 	ShouldUpdateParent = true;
 }
 
@@ -673,29 +675,6 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 {
 	SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
 
-	if (ShouldUpdateParent)
-	{
-		uint32_t size = 0;
-		Deserialiser.EnterArray(size);
-		{
-			ShouldUpdateParent = Deserialiser.ReadBool();
-
-			if (Deserialiser.NextValueIsNull())
-			{
-				Deserialiser.Skip();
-			}
-			else
-			{
-				ParentId = Deserialiser.ReadUInt64();
-			}
-
-			UpdateFlags = SpaceEntityUpdateFlags(UpdateFlags | UPDATE_FLAGS_PARENT);
-		}
-		Deserialiser.LeaveArray();
-
-		ResolveEntityHierarchy();
-	}
-
 	std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
 
 	csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
@@ -824,6 +803,11 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 			}
 		}
 		Deserialiser.LeaveComponents();
+	}
+
+	if (ResolveParentChildRelationship())
+	{
+		UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
 	}
 
 	if (UpdateFlags != 0 && EntityUpdateCallback != nullptr)
@@ -969,7 +953,7 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 			CSP_DELETE(DirtyComponentKeys);
 		}
 
-		if (ResolveEntityHierarchy())
+		if (ResolveParentChildRelationship())
 		{
 			UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
 		}
@@ -1252,7 +1236,7 @@ void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity)
 	ChildEntities.Append(ChildEntity);
 }
 
-bool SpaceEntity::ResolveEntityHierarchy()
+bool SpaceEntity::ResolveParentChildRelationship()
 {
 	if (ShouldUpdateParent == false)
 	{
