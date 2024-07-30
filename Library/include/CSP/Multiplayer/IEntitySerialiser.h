@@ -162,6 +162,10 @@ public:
 	/// @return True if the next value is null, false otherwise.
 	virtual bool NextValueIsNull() = 0;
 
+	/// @brief Checks if the next value is an array.
+	/// @return True if the next value is null, false otherwise.
+	virtual bool NextValueIsArray() = 0;
+
 	/// @brief Puts the deserialiser into array processing mode to begin reading from an array.
 	/// @param OutLength uint32_t : A reference to variable to store the length of the array.
 	virtual void EnterArray(CSP_OUT uint32_t& OutLength) = 0;

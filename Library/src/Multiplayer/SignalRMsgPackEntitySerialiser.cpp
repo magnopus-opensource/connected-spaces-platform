@@ -546,6 +546,19 @@ bool SignalRMsgPackEntityDeserialiser::NextValueIsNull()
 	}
 }
 
+bool SignalRMsgPackEntityDeserialiser::NextValueIsArray()
+{
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+			return CurrentFieldIterator->is_array();
+		case SerialiserState::InArray:
+			return CurrentArrayIterator->is_array();
+		default:
+			throw std::runtime_error("NextValueIsArray() function not supported in current state!");
+	}
+}
+
 void SignalRMsgPackEntityDeserialiser::EnterArray(CSP_OUT uint32_t& OutLength)
 {
 	assert(CurrentState == SerialiserState::InEntity && "Entity not entered or array already entered!");

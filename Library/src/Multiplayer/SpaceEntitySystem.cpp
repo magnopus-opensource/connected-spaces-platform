@@ -1380,9 +1380,30 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 	Deserialiser.EnterEntity();
 	{
-		const uint64_t EntityID = Deserialiser.ReadUInt64();
-		const uint64_t OwnerID	= Deserialiser.ReadUInt64();
-		const bool Destroy		= Deserialiser.ReadBool();
+		const uint64_t EntityID					 = Deserialiser.ReadUInt64();
+		const uint64_t OwnerID					 = Deserialiser.ReadUInt64();
+		const bool Destroy						 = Deserialiser.ReadBool();
+		bool ShouldUpdateParent					 = false;
+		csp::common::Optional<uint64_t> ParentId = nullptr;
+
+		if (Deserialiser.NextValueIsArray())
+		{
+			uint32_t size = 0;
+			Deserialiser.EnterArray(size);
+			{
+				ShouldUpdateParent = Deserialiser.ReadBool();
+
+				if (Deserialiser.NextValueIsNull())
+				{
+					Deserialiser.Skip();
+				}
+				else
+				{
+					ParentId = Deserialiser.ReadUInt64();
+				}
+			}
+			Deserialiser.LeaveArray();
+		}
 
 		if (Destroy)
 		{
@@ -1424,7 +1445,9 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 			{
 				if (Entities[i]->GetId() == EntityID)
 				{
-					EntityFound = true;
+					EntityFound						= true;
+					Entities[i]->ShouldUpdateParent = ShouldUpdateParent;
+					Entities[i]->ParentId			= ParentId;
 					Entities[i]->DeserialiseFromPatch(Deserialiser);
 					Entities[i]->OwnerId = OwnerID;
 				}
