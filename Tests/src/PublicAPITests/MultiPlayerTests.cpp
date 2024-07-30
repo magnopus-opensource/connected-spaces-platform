@@ -2100,7 +2100,8 @@ void RunParentEntityReplicationTest(bool Local)
 
 	// Create Entities
 	csp::common::String ParentEntityName = "ParentEntity";
-	csp::common::String ChildEntityName	 = "ChildEntity";
+	csp::common::String ChildEntityName1 = "ChildEntity1";
+	csp::common::String ChildEntityName2 = "ChildEntity2";
 	SpaceTransform ObjectTransform
 		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
 
@@ -2110,68 +2111,161 @@ void RunParentEntityReplicationTest(bool Local)
 		});
 
 	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
-	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
+	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
+	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
 
 	// Parents shouldn't be set yet
 	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
-	bool ChildEntityUpdated = false;
+	bool ChildEntity1Updated = false;
+	bool ChildEntity2Updated = false;
 
-	CreatedChildEntity->SetUpdateCallback(
-		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+	CreatedChildEntity1->SetUpdateCallback(
+		[&ChildEntity1Updated,
+		 ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
 		{
-			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 			{
-				ChildEntityUpdated = true;
+				ChildEntity1Updated = true;
 			}
 		});
 
-	// Change Parent
-	CreatedChildEntity->SetParentEntity(CreatedParentEntity);
+	CreatedChildEntity2->SetUpdateCallback(
+		[&ChildEntity2Updated,
+		 ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntity2Updated = true;
+			}
+		});
 
-	// Parents shouldn't be set until after replication
-	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
-
-	CreatedChildEntity->QueueUpdate();
-
-	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	// Test setting the parent for the first child
 	{
-		EntitySystem->ProcessPendingEntityOperations();
-		std::this_thread::sleep_for(50ms);
-		WaitForTestTimeoutCountMs += 50;
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity1->SetParentEntity(CreatedParentEntity);
+
+		// Parents shouldn't be set until after replication
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		CreatedChildEntity1->QueueUpdate();
+
+		while (!ChildEntity1Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity1Updated);
+
+		// Check entity1 is parented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 	}
 
-	EXPECT_TRUE(ChildEntityUpdated);
-
-	// Check entity is parented correctly
-	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), CreatedParentEntity);
-	EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
-	EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity);
-
-	// Remove parent
-	CreatedChildEntity->SetParentEntity(nullptr);
-
-	// Reset test variables
-	ChildEntityUpdated		  = false;
-	WaitForTestTimeoutCountMs = 0;
-
-	CreatedChildEntity->QueueUpdate();
-
-	// Wait for update
-	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	// Test setting the parent for the second child
 	{
-		EntitySystem->ProcessPendingEntityOperations();
-		std::this_thread::sleep_for(50ms);
-		WaitForTestTimeoutCountMs += 50;
+		CreatedChildEntity2->SetParentEntity(CreatedParentEntity);
+
+		CreatedChildEntity2->QueueUpdate();
+
+		while (!ChildEntity2Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity2Updated);
+
+		// Check all entities are parented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 2);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[1], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 	}
 
-	EXPECT_TRUE(ChildEntityUpdated);
+	// Remove parent from first child
+	{
+		CreatedChildEntity1->SetParentEntity(nullptr);
 
-	// Check entity is unparented correctly
-	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 0);
+		// Reset test variables
+		ChildEntity1Updated		  = false;
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity1->QueueUpdate();
+
+		// Wait for update
+		while (!ChildEntity1Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity1Updated);
+
+		// Check entity is  unparented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
+
+	// Remove parent from second child
+	{
+		CreatedChildEntity2->SetParentEntity(nullptr);
+
+		// Reset test variables
+		ChildEntity2Updated		  = false;
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity2->QueueUpdate();
+
+		// Wait for update
+		while (!ChildEntity2Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity2Updated);
+
+		// Check entity is  unparented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
 
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
@@ -2234,7 +2328,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
 
 	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
@@ -2345,6 +2438,237 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 	// Log out
 	LogOut(UserSystem);
+}
+#endif
+
+void RunParentChildDeletionTest(bool Local)
+{
+	/* SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// If local is false, test DeserialiseFromPatch functionality
+	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName1 = "ChildEntity1";
+	csp::common::String ChildEntityName2 = "ChildEntity2";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
+	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
+
+	// Parents shouldn't be set yet
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+	bool ChildEntity1Updated = false;
+	bool ChildEntity2Updated = false;
+
+	CreatedChildEntity1->SetUpdateCallback(
+		[&ChildEntity1Updated,
+		 ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntity1Updated = true;
+			}
+		});
+
+	CreatedChildEntity2->SetUpdateCallback(
+		[&ChildEntity2Updated,
+		 ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntity2Updated = true;
+			}
+		});
+
+	// Test setting the parent for the first child
+	{
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity1->SetParentEntity(CreatedParentEntity);
+
+		// Parents shouldn't be set until after replication
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		CreatedChildEntity1->QueueUpdate();
+
+		while (!ChildEntity1Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity1Updated);
+
+		// Check entity1 is parented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
+
+	// Test setting the parent for the second child
+	{
+		CreatedChildEntity2->SetParentEntity(CreatedParentEntity);
+
+		CreatedChildEntity2->QueueUpdate();
+
+		while (!ChildEntity2Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity2Updated);
+
+		// Check all entities are parented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 2);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[1], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
+
+	// Remove parent from first child
+	{
+		CreatedChildEntity1->SetParentEntity(nullptr);
+
+		// Reset test variables
+		ChildEntity1Updated		  = false;
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity1->QueueUpdate();
+
+		// Wait for update
+		while (!ChildEntity1Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity1Updated);
+
+		// Check entity is  unparented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
+
+	// Remove parent from second child
+	{
+		CreatedChildEntity2->SetParentEntity(nullptr);
+
+		// Reset test variables
+		ChildEntity2Updated		  = false;
+		WaitForTestTimeoutCountMs = 0;
+
+		CreatedChildEntity2->QueueUpdate();
+
+		// Wait for update
+		while (!ChildEntity2Updated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(ChildEntity2Updated);
+
+		// Check entity is  unparented correctly
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+	}
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);*/
+}
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_CHILD_DELETION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildLocalDeletionTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
+	// for deletion of child and parent entities
+	RunParentChildDeletionTest(true);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_CHILD_DELETION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+	// for deletion of child and parent entities
+	RunParentChildDeletionTest(false);
 }
 #endif
 
