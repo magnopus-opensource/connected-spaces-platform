@@ -808,6 +808,19 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
 }
 
+bool SpaceEntitySystem::EntityExists(SpaceEntity* Entity)
+{
+	for (size_t i = 0; i < Entities.Size(); ++i)
+	{
+		if (Entities[i]->GetId() == Entity->GetId())
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void SpaceEntitySystem::TickEntities()
 {
 	ProcessPendingEntityOperations();
@@ -924,6 +937,20 @@ void SpaceEntitySystem::DetermineScriptOwners()
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
 		ClaimScriptOwnership(Entities[i]);
+	}
+}
+
+void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
+{
+	if (Deletion->GetParentEntity())
+	{
+		Deletion->GetParentEntity()->ChildEntities.RemoveItem(Deletion);
+	}
+
+	for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
+	{
+		Deletion->ChildEntities[i]->SetParentEntity(nullptr);
+		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
 }
 
@@ -1279,8 +1306,10 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		// we only want to remove an entity once, even though a client could have queued it for updates multiple times
 		if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
 		{
-			RemovePendingEntity(PendingRemoves->front());
 			RemovedEntities.emplace(PendingRemoveEntity);
+
+			ResolveParentChildForDeletion(PendingRemoveEntity);
+			RemovePendingEntity(PendingRemoves->front());
 		}
 		PendingRemoves->pop_front();
 	}
@@ -1288,7 +1317,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-	if (!Entities.Contains(EntityToAdd))
+	if (!EntityExists(EntityToAdd))
 	{
 		Entities.Append(EntityToAdd);
 
@@ -1432,6 +1461,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 						}
 					}
 
+					ResolveParentChildForDeletion(Entity);
 					LocalDestroyEntity(Entity);
 				}
 			}

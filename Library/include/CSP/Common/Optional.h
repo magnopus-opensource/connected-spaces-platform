@@ -192,8 +192,15 @@ public:
 			ValueDestructor(Value);
 		}
 
-		Value = (T*) csp::memory::DllAlloc(sizeof(T));
-		new (Value) T(*Other.Value);
+		if (Other.HasValue())
+		{
+			Value = (T*) csp::memory::DllAlloc(sizeof(T));
+			new (Value) T(*Other.Value);
+		}
+		else
+		{
+			Value = nullptr;
+		}
 
 		return *this;
 	}

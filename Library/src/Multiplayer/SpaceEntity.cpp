@@ -1261,7 +1261,8 @@ bool SpaceEntity::ResolveParentChildRelationship()
 		}
 		else
 		{
-			CSP_LOG_ERROR_MSG("SpaceEntity unable to find parent");
+			CSP_LOG_ERROR_FORMAT("SpaceEntity unable to find parent for entity: %s. Please report if this issue is encountered.",
+								 std::to_string(GetId()));
 		}
 	}
 	else
