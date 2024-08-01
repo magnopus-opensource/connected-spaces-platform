@@ -1273,6 +1273,10 @@ bool SpaceEntity::ResolveParentChildRelationship()
 			Parent->ChildEntities.RemoveItem(this);
 			Parent = nullptr;
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	ShouldUpdateParent = false;
