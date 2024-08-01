@@ -779,7 +779,7 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
 	// If we have nothing to update, don't allow a patch to be sent.
 	if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
-		&& EntityToUpdate->TransientDeletionComponentIds.Size() == 0)
+		&& EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
 	{
 		// TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges', etc.
 		// CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
@@ -849,6 +849,21 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
 
+	// Resolve entity hierarchy
+	for (size_t i = 0; i < Entities.Size(); ++i)
+	{
+		SpaceEntity* Entity = Entities[i];
+
+		if (Entity->ParentId.HasValue())
+		{
+			SpaceEntity* ParentEntity = FindSpaceEntityById(*Entity->ParentId);
+			// Set the entities parent
+			Entity->Parent = ParentEntity;
+			// Set the parents child
+			ParentEntity->ChildEntities.Append(Entity);
+		}
+	}
+
 	// Register all scripts for import
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
@@ -909,6 +924,20 @@ void SpaceEntitySystem::DetermineScriptOwners()
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
 		ClaimScriptOwnership(Entities[i]);
+	}
+}
+
+void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
+{
+	if (Deletion->GetParentEntity())
+	{
+		Deletion->GetParentEntity()->ChildEntities.RemoveItem(Deletion);
+	}
+
+	for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
+	{
+		Deletion->ChildEntities[i]->SetParentEntity(nullptr);
+		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
 }
 
@@ -1264,8 +1293,10 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		// we only want to remove an entity once, even though a client could have queued it for updates multiple times
 		if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
 		{
-			RemovePendingEntity(PendingRemoves->front());
 			RemovedEntities.emplace(PendingRemoveEntity);
+
+			ResolveParentChildForDeletion(PendingRemoveEntity);
+			RemovePendingEntity(PendingRemoves->front());
 		}
 		PendingRemoves->pop_front();
 	}
@@ -1273,7 +1304,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-	if (!Entities.Contains(EntityToAdd))
+	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
 
@@ -1365,10 +1396,30 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 	Deserialiser.EnterEntity();
 	{
-		const uint64_t EntityID = Deserialiser.ReadUInt64();
-		const uint64_t OwnerID	= Deserialiser.ReadUInt64();
-		const bool Destroy		= Deserialiser.ReadBool();
-		Deserialiser.Skip(); // ParentId //TODO: Support this if required
+		const uint64_t EntityID					 = Deserialiser.ReadUInt64();
+		const uint64_t OwnerID					 = Deserialiser.ReadUInt64();
+		const bool Destroy						 = Deserialiser.ReadBool();
+		bool ShouldUpdateParent					 = false;
+		csp::common::Optional<uint64_t> ParentId = nullptr;
+
+		if (Deserialiser.NextValueIsArray())
+		{
+			uint32_t size = 0;
+			Deserialiser.EnterArray(size);
+			{
+				ShouldUpdateParent = Deserialiser.ReadBool();
+
+				if (Deserialiser.NextValueIsNull())
+				{
+					Deserialiser.Skip();
+				}
+				else
+				{
+					ParentId = Deserialiser.ReadUInt64();
+				}
+			}
+			Deserialiser.LeaveArray();
+		}
 
 		if (Destroy)
 		{
@@ -1397,6 +1448,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 						}
 					}
 
+					ResolveParentChildForDeletion(Entity);
 					LocalDestroyEntity(Entity);
 				}
 			}
@@ -1410,7 +1462,9 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 			{
 				if (Entities[i]->GetId() == EntityID)
 				{
-					EntityFound = true;
+					EntityFound						= true;
+					Entities[i]->ShouldUpdateParent = ShouldUpdateParent;
+					Entities[i]->ParentId			= ParentId;
 					Entities[i]->DeserialiseFromPatch(Deserialiser);
 					Entities[i]->OwnerId = OwnerID;
 				}

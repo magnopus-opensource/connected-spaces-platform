@@ -365,6 +365,8 @@ private:
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();
 
+	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
+
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;
 	void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
