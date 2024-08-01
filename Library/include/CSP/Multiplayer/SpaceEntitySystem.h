@@ -356,7 +356,6 @@ private:
 	std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(int Skip);
 
 	void RemoveEntity(SpaceEntity* EntityToRemove);
-	bool EntityExists(SpaceEntity* Entity);
 
 	void AddPendingEntity(SpaceEntity* EntityToAdd);
 	void RemovePendingEntity(SpaceEntity* EntityToRemove);

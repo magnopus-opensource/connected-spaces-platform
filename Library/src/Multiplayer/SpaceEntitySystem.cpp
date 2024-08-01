@@ -808,19 +808,6 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
 }
 
-bool SpaceEntitySystem::EntityExists(SpaceEntity* Entity)
-{
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		if (Entities[i]->GetId() == Entity->GetId())
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
 void SpaceEntitySystem::TickEntities()
 {
 	ProcessPendingEntityOperations();
@@ -1317,7 +1304,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-	if (!EntityExists(EntityToAdd))
+	if (FindSpaceEntityById(*EntityToAdd->ParentId) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
 

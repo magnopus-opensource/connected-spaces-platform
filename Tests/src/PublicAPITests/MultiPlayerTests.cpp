@@ -2634,7 +2634,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		EXPECT_TRUE(DestroyCalled);
 
-		// Ensure parent and child is deleted
+		// Ensure parent is deleted and child is re-parented
 		EXPECT_EQ(EntitySystem->GetNumEntities(), 1);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
