@@ -1304,7 +1304,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-	if (FindSpaceEntityById(*EntityToAdd->ParentId) == nullptr)
+	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
 
