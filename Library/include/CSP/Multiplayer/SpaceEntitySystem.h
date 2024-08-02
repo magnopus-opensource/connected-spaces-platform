@@ -82,6 +82,7 @@ class CSP_API SpaceEntitySystem
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class EntityScript;
+	friend class SpaceEntity;
 	friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -318,6 +319,10 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
+	/// @brief Retrieves all entites that exist at the root level (do nto have a parent entity).
+	/// @return A list of root entities.
+	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
+
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -325,6 +330,7 @@ protected:
 	SpaceEntityList Avatars;
 	SpaceEntityList Objects;
 	SpaceEntityList SelectedEntities;
+	SpaceEntityList RootHierarchyEntities;
 
 	std::recursive_mutex* EntitiesLock;
 
@@ -366,6 +372,8 @@ private:
 	void DetermineScriptOwners();
 
 	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
+	void ResolveRootHierarchy(SpaceEntity* Entity);
+	bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;

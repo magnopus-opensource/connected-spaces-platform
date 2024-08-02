@@ -805,6 +805,8 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 		Deserialiser.LeaveComponents();
 	}
 
+	EntitySystem->ResolveRootHierarchy(this);
+
 	if (ResolveParentChildRelationship())
 	{
 		UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
@@ -952,6 +954,8 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 			TransientDeletionComponentIds.Clear();
 			CSP_DELETE(DirtyComponentKeys);
 		}
+
+		EntitySystem->ResolveRootHierarchy(this);
 
 		if (ResolveParentChildRelationship())
 		{

@@ -1989,6 +1989,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 		{
 		});
 
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
 	// Log out
 	LogOut(UserSystem);
 }
@@ -2061,6 +2064,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 		{
 		});
 
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
 	// Log out
 	LogOut(UserSystem);
 }
@@ -2119,6 +2125,8 @@ void RunParentEntityReplicationTest(bool Local)
 	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
+	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+
 	// Test setting the parent for the first child
 	{
 		bool ChildEntityUpdated = false;
@@ -2139,6 +2147,8 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 
@@ -2161,6 +2171,8 @@ void RunParentEntityReplicationTest(bool Local)
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 	}
 
 	// Test setting the parent for the second child
@@ -2204,6 +2216,8 @@ void RunParentEntityReplicationTest(bool Local)
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 	}
 
 	// Remove parent from first child
@@ -2247,6 +2261,8 @@ void RunParentEntityReplicationTest(bool Local)
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 	}
 
 	// Remove parent from second child
@@ -2289,6 +2305,8 @@ void RunParentEntityReplicationTest(bool Local)
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 	}
 
 	SpaceSystem->ExitSpace(
@@ -2376,6 +2394,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
 
+	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+
 	bool ChildEntityUpdated = false;
 
 	CreatedChildEntity->SetUpdateCallback(
@@ -2401,6 +2421,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	}
 
 	EXPECT_TRUE(ChildEntityUpdated);
+
+	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 
 	// Exit Space
 	SpaceSystem->ExitSpace(
@@ -2451,6 +2473,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	EXPECT_EQ(RetrievedChildEntity->GetParentEntity(), RetrievedParentEntity);
 	EXPECT_EQ(RetrievedParentEntity->GetChildEntities()->Size(), 1);
 	EXPECT_EQ((*RetrievedParentEntity->GetChildEntities())[0], RetrievedChildEntity);
+
+	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
@@ -2533,6 +2557,8 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 

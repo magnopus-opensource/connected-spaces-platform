@@ -389,6 +389,7 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
 
+			RootHierarchyEntities.Append(NewObject);
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
 			Callback(NewObject);
@@ -766,6 +767,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 	Entities.Clear();
 	Objects.Clear();
 	Avatars.Clear();
+	RootHierarchyEntities.Clear();
 
 	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
 	PendingAdds->clear();
@@ -806,6 +808,8 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 
 	// Remove from the unique set to indicate it could be queued again if needed.
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
+
+	RootHierarchyEntities.RemoveItem(EntityToRemove);
 }
 
 void SpaceEntitySystem::TickEntities()
@@ -861,6 +865,10 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 			Entity->Parent = ParentEntity;
 			// Set the parents child
 			ParentEntity->ChildEntities.Append(Entity);
+		}
+		else
+		{
+			RootHierarchyEntities.Append(Entity);
 		}
 	}
 
@@ -939,6 +947,36 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 		Deletion->ChildEntities[i]->SetParentEntity(nullptr);
 		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
+}
+
+void SpaceEntitySystem::ResolveRootHierarchy(SpaceEntity* Entity)
+{
+	if (Entity->ShouldUpdateParent == false)
+	{
+		return;
+	}
+
+	if (Entity->ParentId.HasValue())
+	{
+		RootHierarchyEntities.RemoveItem(Entity);
+	}
+	else
+	{
+		RootHierarchyEntities.Append(Entity);
+	}
+}
+
+bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
+{
+	for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+	{
+		if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
@@ -1077,6 +1115,11 @@ const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)
 {
 	EntityPatchRateLimitEnabled = Enabled;
+}
+
+const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const
+{
+	return &RootHierarchyEntities;
 }
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
@@ -1295,6 +1338,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		{
 			RemovedEntities.emplace(PendingRemoveEntity);
 
+			RootHierarchyEntities.RemoveItem(PendingRemoveEntity);
 			ResolveParentChildForDeletion(PendingRemoveEntity);
 			RemovePendingEntity(PendingRemoves->front());
 		}
@@ -1388,7 +1432,6 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
 		ElectionManager->OnObjectRemove(Object, Objects);
 	}
 }
-
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
