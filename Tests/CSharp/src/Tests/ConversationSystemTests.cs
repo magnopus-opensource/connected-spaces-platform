@@ -13,9 +13,9 @@ namespace CSPEngine
 {
     static class ConversationSystemTests
     {
-        public static Multiplayer.MessageInfo AddMessageToConversation(Multiplayer.ConversationSystem convSystem, string ConversationId, string SenderDisplayName, string Message)
+        public static Multiplayer.MessageInfo AddMessageToConversation(Multiplayer.ConversationSystem convSystem, string ConversationId, string Message)
         {
-            var result = convSystem.AddMessageToConversation(ConversationId, SenderDisplayName, Message).Result;
+            var result = convSystem.AddMessageToConversation(ConversationId, Message).Result;
 
             Assert.AreEqual(result.GetResultCode(), Services.EResultCode.Success);
 

@@ -39,38 +39,88 @@ namespace csp::multiplayer
 class AssetCollection;
 
 /// @ingroup Conversation System
-/// @brief Data representation of fields shared by MessageInfo and CovnersationInfo.
-class CSP_API BaseMessageInfo
+/// @brief Data representation of a message, whether it's the start of a conversation, or a message within one.
+class CSP_API MessageInfo
 {
 public:
 	csp::common::String ConversationId;
-	csp::common::String Timestamp;
-	csp::common::String UserID;
-	csp::common::String UserDisplayName;
+	bool IsConversation;
+	csp::common::String CreatedTimestamp;
+	csp::common::String EditedTimestamp;
+	csp::common::String UserId;
 	csp::common::String Message;
-	bool Edited;
-};
+	csp::common::String MessageId;
 
-/// @ingroup Conversation System
-/// @brief Data representation of a message.
-class CSP_API MessageInfo : public BaseMessageInfo
-{
-public:
-	csp::common::String Id;
-	explicit MessageInfo(void*) {};
-	MessageInfo() = default;
+	MessageInfo();
+	MessageInfo(const csp::common::String& ConversationId,
+				const bool IsConversation,
+				const csp::common::String& CreatedTimestamp,
+				const csp::common::String& EditedTimestamp,
+				const csp::common::String& UserId,
+				const csp::common::String& Message,
+				const csp::common::String& MessageId);
 	MessageInfo(const MessageInfo& MessageData);
 };
 
-/// @brief Data representation of a conversation.
-class CSP_API ConversationInfo : public BaseMessageInfo
+/// @ingroup Conversation System
+/// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
+class CSP_API AnnotationData
 {
 public:
-	bool Resolved;
-	SpaceTransform CameraPosition;
-	explicit ConversationInfo(void*) {};
-	ConversationInfo() = default;
-	ConversationInfo(const ConversationInfo& ConversationData);
+	AnnotationData();
+	AnnotationData(const csp::common::String& InAnnotationThumbnailId,
+				   const csp::common::String& InAnnotationId,
+				   const uint16_t InVerticalFov,
+				   const csp::common::Vector3& InAuthorCameraPosition,
+				   const csp::common::Vector4& InAuthorCameraRotation);
+	AnnotationData(const AnnotationData& InAnnotationData);
+
+	/// @brief Get the Annotation Thumbnail AssetCollection ID
+	/// @return a string representing the thumbnail AssetCollection ID
+	csp::common::String GetAnnotationThumbnailId();
+
+	/// @brief Get the Annotation AssetCollection ID
+	/// @return a string representing the annotation AssetCollection ID
+	csp::common::String GetAnnotationId();
+
+	/// @brief Get the vertical FOV
+	/// @return a uint16_t representing the vertical FOV
+	uint16_t GetVerticalFov();
+
+	/// @brief Get the AuthorCameraPosition
+	/// @return a Vector3 representing the AuthorCameraPosition
+	csp::common::Vector3 GetAuthorCameraPosition();
+
+	/// @brief Get the AuthorCameraRotation
+	/// @return a Vector4 representing the AuthorCameraRotation
+	csp::common::Vector4 GetAuthorCameraRotation();
+
+	/// @brief Set the AnnotationThumbnailId
+	/// @param InAnnotationThumbnailId
+	void SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId);
+
+	/// @brief Set the AnnotationId
+	/// @param InAnnotationId
+	void SetAnnotationId(const csp::common::String& InAnnotationId);
+
+	/// @brief Set the VerticalFov
+	/// @param InVerticalFov
+	void SetVerticalFov(const uint16_t InVerticalFov);
+
+	/// @brief Set the AuthorCameraPosition
+	/// @param InAuthorCameraPosition
+	void SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition);
+
+	/// @brief Set the AuthorCameraRotation
+	/// @param InAuthorCameraRotation
+	void SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation);
+
+private:
+	csp::common::String AnnotationThumbnailId;
+	csp::common::String AnnotationId;
+	uint16_t VerticalFov;
+	csp::common::Vector3 AuthorCameraPosition;
+	csp::common::Vector4 AuthorCameraRotation;
 };
 
 /// @brief Enum used to specify the type of a conversation system network event.
@@ -99,11 +149,13 @@ class CSP_API MessageResult : public csp::systems::ResultBase
 public:
 	/// @brief Gets the message info object from this result.
 	/// @retrun The message info.
-	[[nodiscard]] MessageInfo& GetMessageInfo();
+	[[nodiscard]]
+	MessageInfo& GetMessageInfo();
 
 	/// @brief Gets the message info object from this result.
 	/// @retrun The message info.
-	[[nodiscard]] const MessageInfo& GetMessageInfo() const;
+	[[nodiscard]]
+	const MessageInfo& GetMessageInfo() const;
 
 	CSP_NO_EXPORT MessageResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
@@ -131,11 +183,13 @@ class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 public:
 	/// @brief Gets the list of messages, as message info objects, from this result.
 	/// @retrun Array of message info objects.
-	[[nodiscard]] csp::common::Array<MessageInfo>& GetMessages();
+	[[nodiscard]]
+	csp::common::Array<MessageInfo>& GetMessages();
 
 	/// @brief Gets the list of messages, as message info objects, from this result.
 	/// @retrun Array of message info objects.
-	[[nodiscard]] const csp::common::Array<MessageInfo>& GetMessages() const;
+	[[nodiscard]]
+	const csp::common::Array<MessageInfo>& GetMessages() const;
 
 	/// @brief Retrieves the total number of messages in the conversation.
 	///
@@ -143,7 +197,8 @@ public:
 	/// If the async operation is not using pagination this count number will be equal to the ConversationMessages array size.
 	///
 	/// @return uint64_t : count number as described above.
-	[[nodiscard]] uint64_t GetTotalCount() const;
+	[[nodiscard]]
+	uint64_t GetTotalCount() const;
 
 	/// @brief Sets the value returned by `GetTotalCount()`
 	CSP_NO_EXPORT void SetTotalCount(uint64_t Value);
@@ -174,13 +229,15 @@ class CSP_API ConversationResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	/// @brief Gets the conversation info object from this result.
+	/// @brief Gets the message info object from this result.
 	/// @retrun The conversation info.
-	[[nodiscard]] ConversationInfo& GetConversationInfo();
+	[[nodiscard]]
+	MessageInfo& GetConversationInfo();
 
-	/// @brief Gets the conversation info object from this result.
+	/// @brief Gets the message info object from this result.
 	/// @retrun The conversation info.
-	[[nodiscard]] const ConversationInfo& GetConversationInfo() const;
+	[[nodiscard]]
+	const MessageInfo& GetConversationInfo() const;
 
 	CSP_NO_EXPORT ConversationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
@@ -190,7 +247,7 @@ private:
 
 	void FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection);
 
-	ConversationInfo ConvoInfo;
+	MessageInfo ConvoInfo;
 };
 
 // callback signatures

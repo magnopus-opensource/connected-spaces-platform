@@ -37,7 +37,6 @@ namespace csp::multiplayer
 {
 
 class MessageInfo;
-class ConversationInfo;
 
 class ConversationSystemHelpers
 {
@@ -46,8 +45,8 @@ public:
 	static String GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
 	static String GetUniqueMessageAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
 	static Map<String, String> GenerateMessageAssetCollectionMetadata(const MessageInfo& MessageData);
-	static Map<String, String> GenerateConversationAssetCollectionMetadata(const ConversationInfo& ConversationData);
-	static ConversationInfo GetConvosationInfoFromConvosationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection);
+	static Map<String, String> GenerateConversationAssetCollectionMetadata(const MessageInfo& ConversationData);
+	static MessageInfo GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection);
 	static MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection);
 	static String BoolToString(const bool value);
 	static bool StringToBool(const String& value);

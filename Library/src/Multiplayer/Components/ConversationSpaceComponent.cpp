@@ -114,26 +114,7 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 		return;
 	}
 
-	csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult)
-	{
-		if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
-		{
-			return;
-		}
-
-		if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
-		{
-			const MessageResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
-			INVOKE_IF_NOT_NULL(Callback, InternalResult);
-
-			return;
-		}
-
-		this->ConversationSystem->AddMessageToConversation(GetConversationId(), GetProfileResult.GetProfile().DisplayName, Message, Callback);
-	};
-
-	auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
-	UserSystem->GetProfileByUserId(UserSystem->GetLoginState().UserId, GetProfileCallback);
+	this->ConversationSystem->AddMessageToConversation(GetConversationId(), Message, Callback);
 }
 
 void ConversationSpaceComponent::GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback)
@@ -213,7 +194,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 	ConversationSystem->GetConversationInformation(GetConversationId(), Callback);
 }
 
-void ConversationSpaceComponent::SetConversationInfo(const ConversationInfo& ConversationData, ConversationResultCallback Callback)
+void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback)
 {
 	if (GetConversationId().IsEmpty())
 	{

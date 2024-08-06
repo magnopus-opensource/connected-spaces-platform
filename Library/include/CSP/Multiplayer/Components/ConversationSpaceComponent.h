@@ -97,7 +97,7 @@ public:
 	/// @brief Set Conversation Info
 	/// @param ConversationData ConversationInfo : Conversation Information
 	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void SetConversationInfo(const ConversationInfo& ConversationData, ConversationResultCallback Callback);
+	CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
 
 	/// @brief Get Message Info
 	/// @param MessageId csp::common::String : message Id
