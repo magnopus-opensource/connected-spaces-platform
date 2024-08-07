@@ -90,12 +90,12 @@ public:
 	/// @param Callback MessageCollectionResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAllMessages(MessageCollectionResultCallback Callback);
 
-	/// @brief Get Conversation Info
+	/// @brief Get Conversation MessageInfo
 	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback Callback);
 
-	/// @brief Set Conversation Info
-	/// @param ConversationData ConversationInfo : Conversation Information
+	/// @brief Set Conversation MessageInfo
+	/// @param ConversationData MessageInfo : MessageInfo class for conversation information
 	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
 

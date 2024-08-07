@@ -148,12 +148,12 @@ class CSP_API MessageResult : public csp::systems::ResultBase
 
 public:
 	/// @brief Gets the message info object from this result.
-	/// @retrun The message info.
+	/// @return The message info.
 	[[nodiscard]]
 	MessageInfo& GetMessageInfo();
 
 	/// @brief Gets the message info object from this result.
-	/// @retrun The message info.
+	/// @return The message info.
 	[[nodiscard]]
 	const MessageInfo& GetMessageInfo() const;
 
@@ -182,12 +182,12 @@ class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 
 public:
 	/// @brief Gets the list of messages, as message info objects, from this result.
-	/// @retrun Array of message info objects.
+	/// @return Array of message info objects.
 	[[nodiscard]]
 	csp::common::Array<MessageInfo>& GetMessages();
 
 	/// @brief Gets the list of messages, as message info objects, from this result.
-	/// @retrun Array of message info objects.
+	/// @return Array of message info objects.
 	[[nodiscard]]
 	const csp::common::Array<MessageInfo>& GetMessages() const;
 
@@ -230,12 +230,12 @@ class CSP_API ConversationResult : public csp::systems::ResultBase
 
 public:
 	/// @brief Gets the message info object from this result.
-	/// @retrun The conversation info.
+	/// @return The MessageInfo object representing conversation info.
 	[[nodiscard]]
 	MessageInfo& GetConversationInfo();
 
 	/// @brief Gets the message info object from this result.
-	/// @retrun The conversation info.
+	/// @return The MessageInfo object representing conversation info.
 	[[nodiscard]]
 	const MessageInfo& GetConversationInfo() const;
 
@@ -257,7 +257,7 @@ typedef std::function<void(const MessageResult& Result)> MessageResultCallback;
 // Callback providing a result object with a collection of message info objects.
 typedef std::function<void(const MessageCollectionResult& Result)> MessageCollectionResultCallback;
 
-// Callback providing a result object with a conversation info object.
+// Callback providing a result object with a message info object representing the conversation.
 typedef std::function<void(const ConversationResult& Result)> ConversationResultCallback;
 
 } // namespace csp::multiplayer
