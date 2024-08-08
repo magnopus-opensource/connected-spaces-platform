@@ -76,12 +76,12 @@ private:
 
 	csp::common::Array<HotSpotGroup> Groups;
 };
-} // namespace csp::systems
 
 /// @brief Callback containing array of Hotspots.
-/// @param Result SequenceResult : result class
+/// @param Result HotSpotGroupResult : result class
 typedef std::function<void(const csp::systems::HotSpotGroupResult& Result)> HotSpotGroupResultCallback;
 
 /// @brief Callback containing array of HotspotGroups.
-/// @param Result SequenceResult : result class
+/// @param Result HotSpotGroupsResult : result class
 typedef std::function<void(const csp::systems::HotSpotGroupsResult& Result)> HotSpotGroupsResultCallback;
+} // namespace csp::systems

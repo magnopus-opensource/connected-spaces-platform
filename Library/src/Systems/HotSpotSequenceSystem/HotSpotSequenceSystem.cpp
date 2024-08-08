@@ -35,7 +35,7 @@ void HotSpotSequenceSystem::CreateHotspotGroup(csp::common::String GroupName,
 											   HotSpotGroupResultCallback Callback)
 {
 	auto spaceID			= spaceSystem->GetCurrentSpace().Id;
-	csp::common::String key = GroupName + spaceID;
+	csp::common::String key = spaceID + ":" + GroupName;
 
 	auto CB = [Callback, key](SequenceResult result)
 	{
@@ -133,6 +133,11 @@ void HotSpotSequenceSystem::DeleteHotspotGroup(csp::common::String GroupName, Ho
 	sequenceSystem->DeleteSequences({key}, CB);
 }
 HotSpotSequenceSystem::~HotSpotSequenceSystem()
+{
+	spaceSystem	   = nullptr;
+	sequenceSystem = nullptr;
+}
+HotSpotSequenceSystem::HotSpotSequenceSystem()
 {
 	spaceSystem	   = nullptr;
 	sequenceSystem = nullptr;

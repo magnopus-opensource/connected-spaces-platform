@@ -46,7 +46,7 @@ class SequenceSystem;
 class SpaceSystem;
 /// @ingroup HotSpotSequenceSystem System
 /// @brief Public facing system that allows the management of groupings of hotspots in a space.
-///
+
 class CSP_API HotSpotSequenceSystem : public SystemBase
 {
 public:
@@ -90,9 +90,7 @@ public:
 	~HotSpotSequenceSystem();
 
 private:
-	HotSpotSequenceSystem()													   = delete;
-	HotSpotSequenceSystem(const HotSpotSequenceSystem& HotSpotSequenceSystem)  = delete;
-	HotSpotSequenceSystem(const HotSpotSequenceSystem&& HotSpotSequenceSystem) = delete;
+	HotSpotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	csp::systems::SequenceSystem* sequenceSystem;
 	csp::systems::SpaceSystem* spaceSystem;
 };
