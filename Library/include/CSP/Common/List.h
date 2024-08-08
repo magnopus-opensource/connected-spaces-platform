@@ -277,12 +277,11 @@ public:
 	/// @param Item const T& : Element to remove from the list
 	void RemoveItem(const T& Item)
 	{
-		for (auto i = CurrentSize - 1; i >= 0; --i)
+		for (size_t i = 0; i < CurrentSize; ++i)
 		{
 			if (ObjectArray[i] == Item)
 			{
 				Remove(i);
-
 				return;
 			}
 		}

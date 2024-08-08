@@ -82,6 +82,7 @@ class CSP_API SpaceEntitySystem
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class EntityScript;
+	friend class SpaceEntity;
 	friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -111,10 +112,14 @@ public:
 
 	/// @brief Creates a SpaceEntity of type Object, and relevant default values.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
+	/// @param InParent SpaceEntity : Optional parent SpaceEntity (pass null for no parent)
 	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
 	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
 	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
-	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName,
+									   SpaceEntity* InParent,
+									   const SpaceTransform& InSpaceTransform,
+									   EntityCreatedCallback Callback);
 
 	/// @brief Destroys both the remote view and the local view of the specified entity.
 	/// @param Entity SpaceEntity : The entity to be destroyed.
@@ -318,6 +323,10 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
+	/// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
+	/// @return A list of root entities.
+	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
+
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -325,6 +334,7 @@ protected:
 	SpaceEntityList Avatars;
 	SpaceEntityList Objects;
 	SpaceEntityList SelectedEntities;
+	SpaceEntityList RootHierarchyEntities;
 
 	std::recursive_mutex* EntitiesLock;
 
@@ -366,6 +376,8 @@ private:
 	void DetermineScriptOwners();
 
 	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
+	void ResolveRootHierarchy(SpaceEntity* Entity);
+	bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;

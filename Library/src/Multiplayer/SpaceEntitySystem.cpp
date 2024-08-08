@@ -338,9 +338,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
-void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void SpaceEntitySystem::CreateObject(const csp::common::String& InName,
+									 SpaceEntity* InParent,
+									 const SpaceTransform& InSpaceTransform,
+									 EntityCreatedCallback Callback)
 {
-	const std::function LocalIDCallback = [this, InName, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+	const std::function LocalIDCallback
+		= [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
 	{
 		try
 		{
@@ -355,14 +359,16 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 			Callback(nullptr);
 		}
 
-		auto* NewObject			  = CSP_NEW SpaceEntity(this);
-		NewObject->Type			  = SpaceEntityType::Object;
-		auto ID					  = ParseGenerateObjectIDsResult(Result);
-		NewObject->Id			  = ID;
-		NewObject->Name			  = InName;
-		NewObject->Transform	  = InSpaceTransform;
-		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
-		NewObject->IsTransferable = true;
+		auto* NewObject = CSP_NEW SpaceEntity(this);
+		NewObject->Type = SpaceEntityType::Object;
+		auto ID			= ParseGenerateObjectIDsResult(Result);
+		NewObject->Id	= ID;
+		NewObject->Name = InName;
+		NewObject->SetParentEntity(InParent);
+		NewObject->ShouldUpdateParent = true;
+		NewObject->Transform		  = InSpaceTransform;
+		NewObject->OwnerId			  = MultiplayerConnectionInst->GetClientId();
+		NewObject->IsTransferable	  = true;
 
 		SignalRMsgPackEntitySerialiser Serialiser;
 
@@ -388,6 +394,9 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 			}
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+			ResolveRootHierarchy(NewObject);
+			NewObject->ResolveParentChildRelationship();
 
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
@@ -766,6 +775,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 	Entities.Clear();
 	Objects.Clear();
 	Avatars.Clear();
+	RootHierarchyEntities.Clear();
 
 	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
 	PendingAdds->clear();
@@ -806,6 +816,8 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 
 	// Remove from the unique set to indicate it could be queued again if needed.
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
+
+	RootHierarchyEntities.RemoveItem(EntityToRemove);
 }
 
 void SpaceEntitySystem::TickEntities()
@@ -861,6 +873,10 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 			Entity->Parent = ParentEntity;
 			// Set the parents child
 			ParentEntity->ChildEntities.Append(Entity);
+		}
+		else
+		{
+			RootHierarchyEntities.Append(Entity);
 		}
 	}
 
@@ -939,6 +955,36 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 		Deletion->ChildEntities[i]->SetParentEntity(nullptr);
 		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
+}
+
+void SpaceEntitySystem::ResolveRootHierarchy(SpaceEntity* Entity)
+{
+	if (Entity->ShouldUpdateParent == false)
+	{
+		return;
+	}
+
+	if (Entity->ParentId.HasValue())
+	{
+		RootHierarchyEntities.RemoveItem(Entity);
+	}
+	else
+	{
+		RootHierarchyEntities.Append(Entity);
+	}
+}
+
+bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
+{
+	for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+	{
+		if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
@@ -1077,6 +1123,11 @@ const bool SpaceEntitySystem::GetEntityPatchRateLimitEnabled() const
 void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)
 {
 	EntityPatchRateLimitEnabled = Enabled;
+}
+
+const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const
+{
+	return &RootHierarchyEntities;
 }
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
@@ -1295,6 +1346,7 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		{
 			RemovedEntities.emplace(PendingRemoveEntity);
 
+			RootHierarchyEntities.RemoveItem(PendingRemoveEntity);
 			ResolveParentChildForDeletion(PendingRemoveEntity);
 			RemovePendingEntity(PendingRemoves->front());
 		}
@@ -1307,6 +1359,9 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
+
+		ResolveRootHierarchy(EntityToAdd);
+		EntityToAdd->ResolveParentChildRelationship();
 
 		switch (EntityToAdd->GetEntityType())
 		{
@@ -1388,7 +1443,6 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
 		ElectionManager->OnObjectRemove(Object, Objects);
 	}
 }
-
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
