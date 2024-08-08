@@ -112,10 +112,14 @@ public:
 
 	/// @brief Creates a SpaceEntity of type Object, and relevant default values.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
+	/// @param InParent SpaceEntity : Optional parent SpaceEntity (pass null for no parent)
 	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
 	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
 	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
-	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName,
+									   SpaceEntity* InParent,
+									   const SpaceTransform& InSpaceTransform,
+									   EntityCreatedCallback Callback);
 
 	/// @brief Destroys both the remote view and the local view of the specified entity.
 	/// @param Entity SpaceEntity : The entity to be destroyed.
@@ -319,7 +323,7 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
-	/// @brief Retrieves all entites that exist at the root level (do nto have a parent entity).
+	/// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
 	/// @return A list of root entities.
 	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 

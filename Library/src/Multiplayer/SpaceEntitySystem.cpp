@@ -338,9 +338,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
-void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+void SpaceEntitySystem::CreateObject(const csp::common::String& InName,
+									 SpaceEntity* InParent,
+									 const SpaceTransform& InSpaceTransform,
+									 EntityCreatedCallback Callback)
 {
-	const std::function LocalIDCallback = [this, InName, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+	const std::function LocalIDCallback
+		= [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
 	{
 		try
 		{
@@ -355,14 +359,16 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 			Callback(nullptr);
 		}
 
-		auto* NewObject			  = CSP_NEW SpaceEntity(this);
-		NewObject->Type			  = SpaceEntityType::Object;
-		auto ID					  = ParseGenerateObjectIDsResult(Result);
-		NewObject->Id			  = ID;
-		NewObject->Name			  = InName;
-		NewObject->Transform	  = InSpaceTransform;
-		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
-		NewObject->IsTransferable = true;
+		auto* NewObject = CSP_NEW SpaceEntity(this);
+		NewObject->Type = SpaceEntityType::Object;
+		auto ID			= ParseGenerateObjectIDsResult(Result);
+		NewObject->Id	= ID;
+		NewObject->Name = InName;
+		NewObject->SetParentEntity(InParent);
+		NewObject->ShouldUpdateParent = true;
+		NewObject->Transform		  = InSpaceTransform;
+		NewObject->OwnerId			  = MultiplayerConnectionInst->GetClientId();
+		NewObject->IsTransferable	  = true;
 
 		SignalRMsgPackEntitySerialiser Serialiser;
 
@@ -389,7 +395,9 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-			RootHierarchyEntities.Append(NewObject);
+			ResolveRootHierarchy(NewObject);
+			NewObject->ResolveParentChildRelationship();
+
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
 			Callback(NewObject);
@@ -1351,6 +1359,9 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
+
+		ResolveRootHierarchy(EntityToAdd);
+		EntityToAdd->ResolveParentChildRelationship();
 
 		switch (EntityToAdd->GetEntityType())
 		{

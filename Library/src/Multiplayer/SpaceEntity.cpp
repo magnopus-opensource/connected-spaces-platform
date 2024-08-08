@@ -321,16 +321,26 @@ SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 
 void SpaceEntity::SetParentEntity(SpaceEntity* InParent)
 {
-	if (InParent != nullptr)
+	bool Modified = false;
+
+	if (InParent != nullptr && (ParentId.HasValue() == false || InParent->GetId() != *ParentId))
 	{
+		// If a valid parent is set, and it is a different value from previous
 		ParentId = InParent->GetId();
+		Modified = true;
 	}
-	else
+	else if (InParent == nullptr && ParentId.HasValue())
 	{
+		// If null is passed and ParentId is currently set
 		ParentId = nullptr;
+		Modified = true;
 	}
 
-	ShouldUpdateParent = true;
+	if (Modified)
+	{
+		// Only set ShouldUpdateParent flag if the parent has changed value
+		ShouldUpdateParent = true;
+	}
 }
 
 SpaceEntity* SpaceEntity::GetParentEntity() const

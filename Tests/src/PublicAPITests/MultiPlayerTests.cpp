@@ -312,7 +312,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 		{
 		});
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	EXPECT_EQ(CreatedObject->GetName(), ObjectName);
 	EXPECT_EQ(CreatedObject->GetPosition(), ObjectTransform.Position);
@@ -584,7 +584,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 			{
 			});
 
-		auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		EXPECT_EQ(CreatedObject->GetName(), ObjectName);
 		EXPECT_EQ(CreatedObject->GetPosition(), ObjectTransform.Position);
@@ -926,7 +926,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 	SpaceTransform ObjectTransform
 		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	EXPECT_EQ(CreatedObject->GetName(), ObjectName);
 	EXPECT_EQ(CreatedObject->GetPosition(), ObjectTransform.Position);
@@ -987,7 +987,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	bool PatchPending = true;
 	Object->SetPatchSentCallback(
@@ -1099,7 +1099,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	bool PatchPending = true;
 	Object->SetPatchSentCallback(
@@ -1695,17 +1695,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 	auto* ImageComponent = (ImageSpaceComponent*) CreatedObject->AddComponent(ComponentType::Image);
 	CreatedObject->QueueUpdate();
 
 	// Create object 2
-	auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 	auto* ImageComponent2 = (ImageSpaceComponent*) CreatedObject2->AddComponent(ComponentType::Image);
 	CreatedObject2->QueueUpdate();
 
 	// Create object 3
-	auto [CreatedObject3] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject3] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 	auto* ImageComponent3 = (ImageSpaceComponent*) CreatedObject3->AddComponent(ComponentType::Image);
 	CreatedObject3->QueueUpdate();
 
@@ -1788,7 +1788,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 	SpaceTransform ObjectTransform
 		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	CreatedObject->Select();
 
@@ -1876,7 +1876,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 		csp::common::String Name = ENTITY_NAME_PREFIX;
 		Name.Append(std::to_string(i).c_str());
 
-		auto [Object] = AWAIT(EntitySystem, CreateObject, Name, Transform);
+		auto [Object] = AWAIT(EntitySystem, CreateObject, Name, nullptr, Transform);
 
 		EXPECT_NE(Object, nullptr);
 	}
@@ -1974,7 +1974,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 
@@ -2036,11 +2036,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 	// Create space object
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create second space object
 	csp::common::String ObjectName2 = "Object 2";
-	auto [SpaceEntity2]				= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
+	auto [SpaceEntity2]				= AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
 
 	auto Component1 = SpaceEntity->AddComponent(ComponentType::AnimatedModel);
 	auto Component2 = SpaceEntity2->AddComponent(ComponentType::AnimatedModel);
@@ -2116,11 +2116,10 @@ void RunParentEntityReplicationTest(bool Local)
 		{
 		});
 
-	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
-	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
-	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, nullptr, ObjectTransform);
+	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, nullptr, ObjectTransform);
+	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, nullptr, ObjectTransform);
 
-	// Parents shouldn't be set yet
 	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
@@ -2384,8 +2383,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 		{
 		});
 
-	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
-	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, nullptr, ObjectTransform);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, nullptr, ObjectTransform);
 
 	uint64_t ParentEntityId = CreatedParentEntity->GetId();
 	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
@@ -2533,9 +2532,9 @@ void RunParentChildDeletionTest(bool Local)
 		{
 		});
 
-	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
-	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
-	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, nullptr, ObjectTransform);
+	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, nullptr, ObjectTransform);
+	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, nullptr, ObjectTransform);
 
 	// Test setting the parent for the first child
 	{
@@ -2695,4 +2694,66 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_OBJECT_PARENT_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, nullptr, ObjectTransform);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, CreatedParentEntity, ObjectTransform);
+
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), CreatedParentEntity);
+
+	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
 } // namespace

@@ -230,8 +230,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 	auto* AnchorSystem	 = SystemsManager.GetAnchorSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -259,7 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -282,7 +282,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -300,8 +303,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	auto* AnchorSystem	 = SystemsManager.GetAnchorSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -332,9 +335,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
 	csp::common::String ObjectName1 = "Object 1";
-	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
+	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, nullptr, ObjectTransform);
 	csp::common::String ObjectName2 = "Object 2";
-	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
+	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection1;
 	CreateAssetCollection(AssetSystem,
@@ -374,7 +377,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	EXPECT_EQ(PostDeleteGetResult.GetResultCode(), csp::systems::EResultCode::Success);
 	EXPECT_EQ(PostDeleteGetResult.GetAnchors().Size(), 0);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
@@ -393,8 +399,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	auto* AnchorSystem	 = SystemsManager.GetAnchorSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -424,7 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -521,7 +527,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	CreatedAnchorIds[0] = Anchor.Id;
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -540,8 +549,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	auto* AnchorSystem	 = SystemsManager.GetAnchorSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -572,9 +581,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
 	csp::common::String ObjectName1 = "Object 1";
-	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
+	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, nullptr, ObjectTransform);
 	csp::common::String ObjectName2 = "Object 2";
-	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
+	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection1;
 	CreateAssetCollection(AssetSystem,
@@ -621,7 +630,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	DeleteAssetCollection(AssetSystem, AssetCollection1);
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
@@ -707,8 +719,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	auto* AnchorSystem	 = SystemsManager.GetAnchorSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -736,7 +748,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -761,7 +773,10 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	DeleteSpace(SpaceSystem, Space.Id);
 
