@@ -138,16 +138,18 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
 
 		EXPECT_EQ(ConversationComponent->GetTitle(), "");
-		EXPECT_EQ(ConversationComponent->GetDate(), "");
 		EXPECT_EQ(ConversationComponent->GetNumberOfReplies(), 0);
 
 		ConversationComponent->SetTitle("TestTitle");
-		ConversationComponent->SetDate("02-01-1972");
-		ConversationComponent->SetNumberOfReplies(2);
+		ConversationComponent->SetResolved(true);
+		csp::common::Vector3 NewCameraPosition(10, 100, 14);
+		ConversationComponent->SetConversationCameraPosition(NewCameraPosition);
 
 		EXPECT_EQ(ConversationComponent->GetTitle(), "TestTitle");
-		EXPECT_EQ(ConversationComponent->GetDate(), "02-01-1972");
-		EXPECT_EQ(ConversationComponent->GetNumberOfReplies(), 2);
+		EXPECT_EQ(ConversationComponent->GetResolved(), true);
+		EXPECT_EQ(ConversationComponent->GetConversationCameraPosition().X, NewCameraPosition.X);
+		EXPECT_EQ(ConversationComponent->GetConversationCameraPosition().Y, NewCameraPosition.Y);
+		EXPECT_EQ(ConversationComponent->GetConversationCameraPosition().Z, NewCameraPosition.Z);
 
 		csp::common::String ConversationId;
 		csp::common::String MessageId;
