@@ -58,7 +58,6 @@ public:
 	/// @param Message csp::common::String : The message to be stored.
 	/// @param Callback MessageResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void AddMessageToConversation(const csp::common::String& ConversationId,
-												   const csp::common::String& SenderDisplayName,
 												   const csp::common::String& Message,
 												   MessageResultCallback Callback);
 
@@ -84,7 +83,7 @@ public:
 	/// @param ConversationData ConversationInfo : Conversation Data.
 	/// @param Callback ConversationResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void SetConversationInformation(const csp::common::String& ConversationId,
-													 const ConversationInfo& ConversationData,
+													 const MessageInfo& ConversationData,
 													 ConversationResultCallback Callback);
 
 	/// @brief Retrieves one particular message.
@@ -137,7 +136,6 @@ private:
 	void StoreConversationMessage(const csp::common::String& ConversationId,
 								  const csp::systems::Space& Space,
 								  const csp::common::String& UserId,
-								  const csp::common::String& SenderDisplayName,
 								  const csp::common::String& Message,
 								  MessageResultCallback Callback) const;
 

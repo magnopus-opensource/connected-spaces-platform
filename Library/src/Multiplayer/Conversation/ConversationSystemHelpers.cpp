@@ -23,12 +23,10 @@
 
 constexpr const char* CONVERSATION_CONTAINER_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_CONVERSATION_CONTAINER";
 constexpr const char* MESSAGE_ASSET_COLLECTION_NAME_PREFIX				  = "ASSET_COLLECTION_MESSAGE";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_EDITED				  = "Edited";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_EDITED				  = "EditedTimestamp";
 
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME = "UserDisplayName";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE			  = "Message";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_RESOLVED		  = "Resolved";
-constexpr const char* ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM  = "CameraTransform";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE		   = "Message";
+constexpr const char* ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION = "IsConversation";
 
 
 namespace csp::multiplayer
@@ -49,9 +47,9 @@ String ConversationSystemHelpers::GetUniqueMessageAssetCollectionName(const Stri
 Map<String, String> ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(const MessageInfo& MessageData)
 {
 	Map<String, String> MetadataMap;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME] = MessageData.UserDisplayName;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE]			 = MessageData.Message;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED]			 = BoolToString(MessageData.Edited);
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE] = MessageData.Message;
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED]  = MessageData.EditedTimestamp;
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(MessageData.IsConversation);
 
 	return MetadataMap;
 }
@@ -59,22 +57,24 @@ Map<String, String> ConversationSystemHelpers::GenerateMessageAssetCollectionMet
 MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection)
 {
 	MessageInfo MsgInfo;
-	MsgInfo.Id			   = MessageAssetCollection.Id;
-	MsgInfo.ConversationId = MessageAssetCollection.ParentId;
-	MsgInfo.Timestamp	   = MessageAssetCollection.UpdatedAt;
-	MsgInfo.UserID		   = MessageAssetCollection.UpdatedBy;
+	MsgInfo.MessageId		 = MessageAssetCollection.Id;
+	MsgInfo.ConversationId	 = MessageAssetCollection.ParentId;
+	MsgInfo.EditedTimestamp	 = MessageAssetCollection.UpdatedAt;
+	MsgInfo.UserId			 = MessageAssetCollection.CreatedBy;
+	MsgInfo.CreatedTimestamp = MessageAssetCollection.CreatedAt;
+	MsgInfo.IsConversation	 = false;
 
 	const auto Metadata = MessageAssetCollection.GetMetadataImmutable();
 
-	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME))
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
 	{
-		MsgInfo.UserDisplayName = Metadata[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME];
+		MsgInfo.IsConversation = Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION];
 	}
 	else
 	{
-		CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+		CSP_LOG_WARN_MSG("No IsConversation MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
 						 "improvements: Default metadata has automatically been created for this space as a result. ");
-		MsgInfo.UserDisplayName = "";
+		MsgInfo.IsConversation = false;
 	}
 
 	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
@@ -90,48 +90,48 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 
 	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
 	{
-		MsgInfo.Edited = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED]);
+		MsgInfo.EditedTimestamp = Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED];
 	}
 	else
 	{
 		CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
 						 "improvements: Default metadata has automatically been created for this space as a result. ")
-		MsgInfo.Edited = false;
+		MsgInfo.EditedTimestamp = "";
 	}
 
 	return MsgInfo;
 }
 
-Map<String, String> ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(const ConversationInfo& ConversationData)
+Map<String, String> ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(const MessageInfo& ConversationData)
 {
 	Map<String, String> MetadataMap;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME] = ConversationData.UserDisplayName;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE]			 = ConversationData.Message;
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED]			 = BoolToString(ConversationData.Edited);
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_RESOLVED]			 = BoolToString(ConversationData.Resolved);
-	MetadataMap[ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM]	 = SpaceTransformToString(ConversationData.CameraPosition);
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_MESSAGE]		  = ConversationData.Message;
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_EDITED]		  = ConversationData.EditedTimestamp;
+	MetadataMap[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION] = BoolToString(ConversationData.IsConversation);
 	return MetadataMap;
 }
 
-ConversationInfo
-	ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
+MessageInfo
+	ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
-	ConversationInfo ConvoInfo;
-	ConvoInfo.ConversationId = ConversationAssetCollection.Id;
-	ConvoInfo.Timestamp		 = ConversationAssetCollection.UpdatedAt;
-	ConvoInfo.UserID		 = ConversationAssetCollection.UpdatedBy;
+	MessageInfo ConvoInfo;
+	ConvoInfo.ConversationId   = ConversationAssetCollection.Id;
+	ConvoInfo.EditedTimestamp  = ConversationAssetCollection.UpdatedAt;
+	ConvoInfo.UserId		   = ConversationAssetCollection.CreatedBy;
+	ConvoInfo.CreatedTimestamp = ConversationAssetCollection.CreatedAt;
+	ConvoInfo.IsConversation   = true;
 
 	const auto Metadata = ConversationAssetCollection.GetMetadataImmutable();
 
-	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME))
+	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
 	{
-		ConvoInfo.UserDisplayName = Metadata[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME];
+		ConvoInfo.IsConversation = Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION];
 	}
 	else
 	{
-		CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
+		CSP_LOG_WARN_MSG("No IsConversation MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
 						 "improvements: Default metadata has automatically been created for this space as a result. ");
-		ConvoInfo.UserDisplayName = "";
+		ConvoInfo.IsConversation = true;
 	}
 
 	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
@@ -147,35 +147,13 @@ ConversationInfo
 
 	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
 	{
-		ConvoInfo.Edited = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED]);
+		ConvoInfo.EditedTimestamp = Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED];
 	}
 	else
 	{
 		CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
 						 "improvements: Default metadata has automatically been created for this space as a result. ")
-		ConvoInfo.Edited = false;
-	}
-
-	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_RESOLVED))
-	{
-		ConvoInfo.Resolved = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_RESOLVED]);
-	}
-	else
-	{
-		CSP_LOG_WARN_MSG("No Resolved MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-						 "improvements: Default metadata has automatically been created for this space as a result. ");
-		ConvoInfo.Resolved = false;
-	}
-
-	if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM))
-	{
-		ConvoInfo.CameraPosition = StringToSpaceTransform(Metadata[ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM]);
-	}
-	else
-	{
-		CSP_LOG_WARN_MSG("No CameraPosition MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
-						 "improvements: Default metadata has automatically been created for this space as a result. ");
-		ConvoInfo.CameraPosition = SpaceTransform();
+		ConvoInfo.EditedTimestamp = "";
 	}
 
 	return ConvoInfo;

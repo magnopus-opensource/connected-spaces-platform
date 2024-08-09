@@ -68,10 +68,9 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 
 csp::multiplayer::MessageInfo AddMessageToConversation(csp::multiplayer::ConversationSystem* ConvSystem,
 													   const csp::common::String& ConversationId,
-													   const csp::common::String& SenderDisplayName,
 													   const csp::common::String& Message)
 {
-	auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, SenderDisplayName, Message);
+	auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, Message);
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	return Result.GetMessageInfo();
@@ -128,26 +127,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		EXPECT_EQ(Result.GetConversationInfo().ConversationId, ConversationId);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, DefaultTestUserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, DefaultTestUserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, DefaultTestUserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	const auto DefaultConversationMessage = "this is a message from the tests world";
@@ -155,15 +137,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 	csp::multiplayer::MessageInfo RetrievedMessageInfo;
 	csp::common::String FirstMessageId;
 
-	// Add message to Convosation
+	// Add message to Conversation
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, Result.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, Result.GetValue(), DefaultConversationMessage);
 		ConversationId	   = CreatedMessageInfo.ConversationId;
-		FirstMessageId	   = CreatedMessageInfo.Id;
+		FirstMessageId	   = CreatedMessageInfo.MessageId;
 		EXPECT_EQ(ConversationId, Result.GetValue());
 	}
 
-	// Get message From Convosation
+	// Get message From Conversation
 	{
 		auto [Result] = AWAIT_PRE(ConvSystem, GetMessagesFromConversation, RequestPredicate, ConversationId, 0, 1);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -208,7 +190,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
 	// Log in
 	LogIn(UserSystem, DefaultTestUserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -236,7 +217,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	csp::common::String FirstMessageId;
 	csp::common::String SecondMessageId;
 
-	const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
 	const auto DefaultConversationMessage = "this is a message from the tests world";
 	auto [ResultConvo]					  = AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
 	ConversationId						  = ResultConvo.GetValue();
@@ -247,32 +227,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, DefaultTestUserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, DefaultTestUserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultConversationMessage);
 		ConversationId	   = CreatedMessageInfo.ConversationId;
-		FirstMessageId	   = CreatedMessageInfo.Id;
+		FirstMessageId	   = CreatedMessageInfo.MessageId;
 	}
 
 	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -286,9 +249,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-	const auto SecondTestUserDisplayName = GetFullProfileByUserId(UserSystem, SecondTestUserId).DisplayName;
-
-	SecondMessageId = AddMessageToConversation(ConvSystem, ConversationId, SecondTestUserDisplayName, DefaultConversationMessage).Id;
+	SecondMessageId = AddMessageToConversation(ConvSystem, ConversationId, DefaultConversationMessage).MessageId;
 
 	// check that the second user can retrieve both added messages
 	{
@@ -296,8 +257,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		RetrievedMessageInfo = Result.GetMessageInfo();
-		EXPECT_EQ(RetrievedMessageInfo.Id, FirstMessageId);
-		EXPECT_EQ(RetrievedMessageInfo.UserID, DefaultTestUserId);
+		EXPECT_EQ(RetrievedMessageInfo.MessageId, FirstMessageId);
+		EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
 		EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
 		EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
 
@@ -305,11 +266,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
 		RetrievedMessageInfo = Result2.GetMessageInfo();
-		EXPECT_EQ(RetrievedMessageInfo.Id, SecondMessageId);
-		EXPECT_EQ(RetrievedMessageInfo.UserID, SecondTestUserId);
+		EXPECT_EQ(RetrievedMessageInfo.MessageId, SecondMessageId);
+		EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
 		EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
 		EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 	}
 
 	// check that the second user can retrieve the messages from the conversation using pagination
@@ -322,11 +282,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetTotalCount(), 2);
 
 		const auto Message = Messages[0];
-		EXPECT_FALSE(Message.Id.IsEmpty());
-		EXPECT_FALSE(Message.UserID.IsEmpty());
+		EXPECT_FALSE(Message.MessageId.IsEmpty());
+		EXPECT_FALSE(Message.UserId.IsEmpty());
 		EXPECT_EQ(Message.ConversationId, ConversationId);
 		EXPECT_EQ(Message.Message, DefaultConversationMessage);
-		EXPECT_FALSE(Message.UserDisplayName.IsEmpty());
 	}
 
 	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -346,21 +305,19 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 		RetrievedMessageInfo = Result.GetMessageInfo();
-		EXPECT_EQ(RetrievedMessageInfo.Id, FirstMessageId);
-		EXPECT_EQ(RetrievedMessageInfo.UserID, DefaultTestUserId);
+		EXPECT_EQ(RetrievedMessageInfo.MessageId, FirstMessageId);
+		EXPECT_EQ(RetrievedMessageInfo.UserId, DefaultTestUserId);
 		EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
 		EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
 
 		auto [Result2] = AWAIT_PRE(ConvSystem, GetMessage, RequestPredicate, SecondMessageId);
 		EXPECT_EQ(Result2.GetResultCode(), csp::systems::EResultCode::Success);
 
 		RetrievedMessageInfo = Result2.GetMessageInfo();
-		EXPECT_EQ(RetrievedMessageInfo.Id, SecondMessageId);
-		EXPECT_EQ(RetrievedMessageInfo.UserID, SecondTestUserId);
+		EXPECT_EQ(RetrievedMessageInfo.MessageId, SecondMessageId);
+		EXPECT_EQ(RetrievedMessageInfo.UserId, SecondTestUserId);
 		EXPECT_EQ(RetrievedMessageInfo.ConversationId, ConversationId);
 		EXPECT_EQ(RetrievedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(RetrievedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 	}
 
 	// check that the default user can retrieve the messages from the conversation using pagination
@@ -373,11 +330,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 		EXPECT_EQ(Result.GetTotalCount(), 2);
 
 		const auto Message = Messages[0];
-		EXPECT_FALSE(Message.Id.IsEmpty());
-		EXPECT_FALSE(Message.UserID.IsEmpty());
+		EXPECT_FALSE(Message.MessageId.IsEmpty());
+		EXPECT_FALSE(Message.UserId.IsEmpty());
 		EXPECT_EQ(Message.ConversationId, ConversationId);
 		EXPECT_EQ(Message.Message, DefaultConversationMessage);
-		EXPECT_FALSE(Message.UserDisplayName.IsEmpty());
 	}
 
 	{
@@ -416,7 +372,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
 	// Log in
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -444,7 +399,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	csp::common::String FirstMessageIdToBeDeleted;
 	csp::common::String SecondMessageIdToBeDeleted;
 
-	const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 	const auto DefaultConversationMessage = "this is a message from the tests world";
 
 	auto [ResultConvo]	= AWAIT_PRE(ConvSystem, CreateConversation, RequestPredicate, "TestMessage");
@@ -456,65 +410,45 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, FirstConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, ResultConvo.GetValue(), DefaultConversationMessage);
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, UserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
 
 		FirstConversationId = CreatedMessageInfo.ConversationId;
 
 		std::cerr << "Conversation created. Id: " << FirstConversationId.c_str() << std::endl;
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 	}
 
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultConversationMessage);
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, UserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
 		EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
 
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 
-		FirstMessageIdToBeDeleted = CreatedMessageInfo.Id;
+		FirstMessageIdToBeDeleted = CreatedMessageInfo.MessageId;
 	}
 
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultConversationMessage);
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, UserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, UserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, DefaultTestUserDisplayName);
 		EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
 
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << DefaultTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 	}
 
@@ -537,30 +471,26 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
 	ConvSystem = Connection->GetConversationSystem();
 
-	const auto SecondTestUserDisplayName = GetFullProfileByUserId(UserSystem, SecondTestUserId).DisplayName;
-
 	// Add messages to the previous conversation
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, SecondTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultConversationMessage);
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 		EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
 
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 	}
 
 	{
-		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, SecondTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo = AddMessageToConversation(ConvSystem, FirstConversationId, DefaultConversationMessage);
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 		EXPECT_EQ(CreatedMessageInfo.ConversationId, FirstConversationId);
 
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << FirstConversationId.c_str() << std::endl;
 	}
 
@@ -573,42 +503,24 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, SecondConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, SecondTestUserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, SecondTestUserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, SecondTestUserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	// Create a new conversation
 	{
-		CreatedMessageInfo	 = AddMessageToConversation(ConvSystem, ResultConvo2.GetValue(), SecondTestUserDisplayName, DefaultConversationMessage);
+		CreatedMessageInfo	 = AddMessageToConversation(ConvSystem, ResultConvo2.GetValue(), DefaultConversationMessage);
 		SecondConversationId = CreatedMessageInfo.ConversationId;
 
-		EXPECT_EQ(CreatedMessageInfo.UserID, SecondTestUserId);
+		EXPECT_EQ(CreatedMessageInfo.UserId, SecondTestUserId);
 		EXPECT_EQ(CreatedMessageInfo.Message, DefaultConversationMessage);
-		EXPECT_EQ(CreatedMessageInfo.UserDisplayName, SecondTestUserDisplayName);
 
 		std::cerr << "Conversation created. Id: " << SecondConversationId.c_str() << std::endl;
-		std::cerr << "Message with Id: " << CreatedMessageInfo.Id << " was added by " << SecondTestUserDisplayName
+		std::cerr << "Message with Id: " << CreatedMessageInfo.MessageId << " was added by User " << CreatedMessageInfo.UserId
 				  << " to conversation: Id: " << SecondConversationId.c_str() << std::endl;
 
-		SecondMessageIdToBeDeleted = CreatedMessageInfo.Id;
+		SecondMessageIdToBeDeleted = CreatedMessageInfo.MessageId;
 	}
 
 	// Retrieve all messages from first conversation
@@ -731,7 +643,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -774,30 +685,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 		auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
+		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test");
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 	}
@@ -871,7 +765,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -915,34 +808,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 		auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
+		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test");
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		MessageId = Result.GetMessageInfo().Id;
+		MessageId = Result.GetMessageInfo().MessageId;
 	}
 
 	{
@@ -1021,7 +897,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -1068,34 +943,17 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 		auto [Result] = AWAIT_PRE(ConversationSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test", "");
+		auto [Result] = AWAIT(ConversationSystem, AddMessageToConversation, ConversationId, "Test");
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		MessageId = Result.GetMessageInfo().Id;
+		MessageId = Result.GetMessageInfo().MessageId;
 	}
 
 	{
@@ -1157,7 +1015,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -1201,26 +1058,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	Connection->SetConversationSystemCallback(ConversationConversationInformationCallback);
@@ -1229,57 +1069,22 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	{
-		ConversationInfo NewData = ConversationInfo();
-		SpaceTransform CameraTransformValue
-			= SpaceTransform(csp::common::Vector3().One(), csp::common::Vector4().One(), csp::common::Vector3().One());
-		NewData.Resolved	   = true;
-		NewData.CameraPosition = CameraTransformValue;
+		MessageInfo NewData = MessageInfo();
 		NewData.Message		   = "TestMessage1";
+		NewData.IsConversation = true;
 
 		auto [Result] = AWAIT_PRE(ConvSystem, SetConversationInformation, RequestPredicate, ConversationId, NewData);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage1");
-		EXPECT_TRUE(Result.GetConversationInfo().Edited);
-		EXPECT_TRUE(Result.GetConversationInfo().Resolved);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, CameraTransformValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, CameraTransformValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, CameraTransformValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, CameraTransformValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, CameraTransformValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, CameraTransformValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, CameraTransformValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, CameraTransformValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, CameraTransformValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, CameraTransformValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
@@ -1338,7 +1143,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
 	csp::systems::Space Space;
@@ -1382,45 +1186,28 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetConversationInfo().UserID, UserId);
-		EXPECT_EQ(Result.GetConversationInfo().UserDisplayName, UserDisplayName);
+		EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
 		EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-		EXPECT_FALSE(Result.GetConversationInfo().Edited);
-		EXPECT_FALSE(Result.GetConversationInfo().Resolved);
-
-		SpaceTransform DefaultValue;
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.X, DefaultValue.Position.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Y, DefaultValue.Position.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Position.Z, DefaultValue.Position.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.W, DefaultValue.Rotation.W);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.X, DefaultValue.Rotation.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Y, DefaultValue.Rotation.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Rotation.Z, DefaultValue.Rotation.Z);
-
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.X, DefaultValue.Scale.X);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Y, DefaultValue.Scale.Y);
-		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
+		EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
 	}
 
 	Connection->SetConversationSystemCallback(ConversationMessageInformationCallback);
 
 	{
-		auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, "test", "test");
+		auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, "test");
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		MessageId = Result.GetMessageInfo().Id;
+		MessageId = Result.GetMessageInfo().MessageId;
 
-		EXPECT_EQ(Result.GetMessageInfo().Edited, false);
+		EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
 	}
 
 	{
 		auto [Result] = AWAIT_PRE(ConvSystem, GetMessageInformation, RequestPredicate, MessageId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetMessageInfo().Edited, false);
+		EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
 	}
 
 	{
@@ -1430,7 +1217,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 		auto [Result] = AWAIT_PRE(ConvSystem, SetMessageInformation, RequestPredicate, MessageId, NewData);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetMessageInfo().Edited, true);
+		EXPECT_EQ(Result.GetMessageInfo().EditedTimestamp, "");
 		EXPECT_EQ(Result.GetMessageInfo().Message, NewData.Message);
 	}
 

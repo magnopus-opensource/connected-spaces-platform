@@ -21,6 +21,82 @@
 namespace csp::multiplayer
 {
 
+AnnotationData::AnnotationData() : AnnotationThumbnailId(""), AnnotationId(""), VerticalFov(0), AuthorCameraPosition(), AuthorCameraRotation()
+{
+}
+
+AnnotationData::AnnotationData(const csp::common::String& InAnnotationThumbnailId,
+							   const csp::common::String& InAnnotationId,
+							   const uint16_t InVerticalFov,
+							   const csp::common::Vector3& InAuthorCameraPosition,
+							   const csp::common::Vector4& InAuthorCameraRotation)
+	: AnnotationThumbnailId(InAnnotationThumbnailId)
+	, AnnotationId(InAnnotationId)
+	, VerticalFov(InVerticalFov)
+	, AuthorCameraPosition(InAuthorCameraPosition)
+	, AuthorCameraRotation(InAuthorCameraRotation)
+{
+}
+
+AnnotationData::AnnotationData(const AnnotationData& InAnnotationData)
+	: AnnotationThumbnailId(InAnnotationData.AnnotationThumbnailId)
+	, AnnotationId(InAnnotationData.AnnotationId)
+	, VerticalFov(InAnnotationData.VerticalFov)
+	, AuthorCameraPosition(InAnnotationData.AuthorCameraPosition)
+	, AuthorCameraRotation(InAnnotationData.AuthorCameraRotation)
+{
+}
+
+csp::common::String AnnotationData::GetAnnotationThumbnailId()
+{
+	return AnnotationThumbnailId;
+}
+
+csp::common::String AnnotationData::GetAnnotationId()
+{
+	return AnnotationId;
+}
+
+uint16_t AnnotationData::GetVerticalFov()
+{
+	return VerticalFov;
+}
+
+csp::common::Vector3 AnnotationData::GetAuthorCameraPosition()
+{
+	return AuthorCameraPosition;
+}
+
+csp::common::Vector4 AnnotationData::GetAuthorCameraRotation()
+{
+	return AuthorCameraRotation;
+}
+
+void AnnotationData::SetAnnotationThumbnailId(const csp::common::String& InAnnotationThumbnailId)
+{
+	AnnotationThumbnailId = InAnnotationThumbnailId;
+}
+
+void AnnotationData::SetAnnotationId(const csp::common::String& InAnnotationId)
+{
+	AnnotationId = InAnnotationId;
+}
+
+void AnnotationData::SetVerticalFov(const uint16_t InVerticalFov)
+{
+	VerticalFov = InVerticalFov;
+}
+
+void AnnotationData::SetAuthorCameraPosition(const csp::common::Vector3& InAuthorCameraPosition)
+{
+	AuthorCameraPosition = InAuthorCameraPosition;
+}
+
+void AnnotationData::SetAuthorCameraRotation(const csp::common::Vector4& InAuthorCameraRotation)
+{
+	AuthorCameraRotation = InAuthorCameraRotation;
+}
+
 MessageInfo& MessageResult::GetMessageInfo()
 {
 	return MsgInfo;
@@ -31,27 +107,37 @@ const MessageInfo& MessageResult::GetMessageInfo() const
 	return MsgInfo;
 }
 
-MessageInfo::MessageInfo(const MessageInfo& MessageData)
+MessageInfo::MessageInfo()
+	: ConversationId(""), IsConversation(false), CreatedTimestamp(""), EditedTimestamp(""), UserId(""), Message(""), MessageId("")
 {
-	Id				= MessageData.Id;
-	ConversationId	= MessageData.ConversationId;
-	Timestamp		= MessageData.Timestamp;
-	UserID			= MessageData.UserID;
-	UserDisplayName = MessageData.UserDisplayName;
-	Message			= MessageData.Message;
-	Edited			= MessageData.Edited;
 }
 
-ConversationInfo::ConversationInfo(const ConversationInfo& ConversationData)
+MessageInfo::MessageInfo(const csp::common::String& ConversationId,
+						 const bool IsConversation,
+						 const csp::common::String& CreatedTimestamp,
+						 const csp::common::String& EditedTimestamp,
+						 const csp::common::String& UserId,
+						 const csp::common::String& Message,
+						 const csp::common::String& MessageId)
+	: ConversationId(ConversationId)
+	, IsConversation(IsConversation)
+	, CreatedTimestamp(CreatedTimestamp)
+	, EditedTimestamp(EditedTimestamp)
+	, UserId(UserId)
+	, Message(Message)
+	, MessageId(MessageId)
 {
-	ConversationId	= ConversationData.ConversationId;
-	Timestamp		= ConversationData.Timestamp;
-	UserID			= ConversationData.UserID;
-	UserDisplayName = ConversationData.UserDisplayName;
-	Message			= ConversationData.Message;
-	Edited			= ConversationData.Edited;
-	Resolved		= ConversationData.Resolved;
-	CameraPosition	= ConversationData.CameraPosition;
+}
+
+MessageInfo::MessageInfo(const MessageInfo& MessageData)
+	: ConversationId(MessageData.ConversationId)
+	, IsConversation(MessageData.IsConversation)
+	, CreatedTimestamp(MessageData.CreatedTimestamp)
+	, EditedTimestamp(MessageData.EditedTimestamp)
+	, UserId(MessageData.UserId)
+	, Message(MessageData.Message)
+	, MessageId(MessageData.MessageId)
+{
 }
 
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
@@ -96,12 +182,12 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 	}
 }
 
-ConversationInfo& ConversationResult::GetConversationInfo()
+MessageInfo& ConversationResult::GetConversationInfo()
 {
 	return ConvoInfo;
 }
 
-const ConversationInfo& ConversationResult::GetConversationInfo() const
+const MessageInfo& ConversationResult::GetConversationInfo() const
 {
 	return ConvoInfo;
 }
@@ -110,6 +196,6 @@ void ConversationResult::FillConversationInfo(const csp::systems::AssetCollectio
 {
 	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-	ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
+	ConvoInfo = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
 }
 } // namespace csp::multiplayer

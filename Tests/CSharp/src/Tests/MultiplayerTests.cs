@@ -1030,22 +1030,9 @@ namespace CSPEngine
                     using var resultInfo = conversationComponent.GetConversationInfo().Result;
 
                     Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
-                    Assert.IsFalse(resultInfo.GetConversationInfo().Resolved);
 
                     using var TestdefaultTransform = new Multiplayer.SpaceTransform();
 
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.X, TestdefaultTransform.Position.X);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Y, TestdefaultTransform.Position.Y);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Z, TestdefaultTransform.Position.Z);
-
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.W, TestdefaultTransform.Rotation.W);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.X, TestdefaultTransform.Rotation.X);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Y, TestdefaultTransform.Rotation.Y);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Z, TestdefaultTransform.Rotation.Z);
-
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                    Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
                     Assert.AreEqual(resultInfo.GetConversationInfo().Message, "TestMessage");
                 }
 
@@ -1056,47 +1043,18 @@ namespace CSPEngine
                 using var result = conversationComponent.GetConversationInfo().Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-                Assert.IsFalse(result.GetConversationInfo().Resolved);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
                 Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage");
             }
 
             {
-                using var newData = new Multiplayer.ConversationInfo();
+                using var newData = new Multiplayer.MessageInfo();
                 using var cameraTransformValue = new Multiplayer.SpaceTransform(Common.Vector3.One(), Common.Vector4.One(), Common.Vector3.One());
-                newData.Resolved = true;
-                newData.CameraPosition = cameraTransformValue;
+                
                 newData.Message = "TestMessage1";
 
                 using var result = conversationComponent.SetConversationInfo(newData).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-                Assert.IsTrue(result.GetConversationInfo().Resolved);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.X, cameraTransformValue.Position.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Y, cameraTransformValue.Position.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Position.Z, cameraTransformValue.Position.Z);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.W, cameraTransformValue.Rotation.W);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.X, cameraTransformValue.Rotation.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Y, cameraTransformValue.Rotation.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Rotation.Z, cameraTransformValue.Rotation.Z);
-
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.X, cameraTransformValue.Scale.X);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Y, cameraTransformValue.Scale.Y);
-                Assert.AreEqual(result.GetConversationInfo().CameraPosition.Scale.Z, cameraTransformValue.Scale.Z);
                 Assert.AreEqual(result.GetConversationInfo().Message, "TestMessage1");
             }
 
@@ -1106,9 +1064,9 @@ namespace CSPEngine
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
 
-                messageId = result.GetMessageInfo().Id;
+                messageId = result.GetMessageInfo().MessageId;
 
-                Assert.IsFalse(result.GetMessageInfo().Edited);
+                Assert.AreEqual(result.GetMessageInfo().EditedTimestamp, "");
             }
 
             {
@@ -1116,7 +1074,7 @@ namespace CSPEngine
                 var resCode = result.GetResultCode();
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
-                Assert.AreEqual(messageId, result.GetMessageInfo().Id);
+                Assert.AreEqual(messageId, result.GetMessageInfo().MessageId);
 
             }
 
@@ -1124,7 +1082,7 @@ namespace CSPEngine
                 using var result = conversationComponent.GetMessageInfo(messageId).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-                Assert.IsFalse(result.GetMessageInfo().Edited);
+                Assert.AreEqual(result.GetMessageInfo().EditedTimestamp, "");
             }
 
             {
@@ -1134,7 +1092,7 @@ namespace CSPEngine
                 using var result = conversationComponent.SetMessageInfo(messageId, newData).Result;
 
                 Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
-                Assert.IsTrue(result.GetMessageInfo().Edited);
+                Assert.AreEqual(result.GetMessageInfo().EditedTimestamp, "");
             }
 
             {
@@ -1143,7 +1101,7 @@ namespace CSPEngine
 
                 Assert.AreEqual(resCode, Systems.EResultCode.Success);
                 Assert.AreEqual(result.GetTotalCount().ToString(), "1");
-                Assert.AreEqual(messageId, result.GetMessages()[0].Id);
+                Assert.AreEqual(messageId, result.GetMessages()[0].MessageId);
             }
 
             {
@@ -1222,24 +1180,9 @@ namespace CSPEngine
 
                 Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
-                Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
-                Assert.AreEqual(resultInfo.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(resultInfo.GetConversationInfo().UserId, defaultTestUserId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().Message, "TestMessage");
-                Assert.IsFalse(resultInfo.GetConversationInfo().Edited);
-                Assert.IsFalse(resultInfo.GetConversationInfo().Resolved);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+                Assert.AreEqual(resultInfo.GetConversationInfo().EditedTimestamp, "");
             }
 
             {
@@ -1265,24 +1208,9 @@ namespace CSPEngine
 
                 Assert.AreEqual(resultInfo.GetResultCode(), Systems.EResultCode.Success);
                 Assert.AreEqual(resultInfo.GetConversationInfo().ConversationId, conversationId);
-                Assert.AreEqual(resultInfo.GetConversationInfo().UserID, defaultTestUserId);
-                Assert.AreEqual(resultInfo.GetConversationInfo().UserDisplayName, defaultTestUserDisplayName);
+                Assert.AreEqual(resultInfo.GetConversationInfo().UserId, defaultTestUserId);
                 Assert.AreEqual(resultInfo.GetConversationInfo().Message, "TestMessage");
-                Assert.IsFalse(resultInfo.GetConversationInfo().Edited);
-                Assert.IsFalse(resultInfo.GetConversationInfo().Resolved);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.X, defaultTransform.Position.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Y, defaultTransform.Position.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Position.Z, defaultTransform.Position.Z);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.W, defaultTransform.Rotation.W);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.X, defaultTransform.Rotation.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Y, defaultTransform.Rotation.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Rotation.Z, defaultTransform.Rotation.Z);
-
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.X, defaultTransform.Scale.X);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Y, defaultTransform.Scale.Y);
-                Assert.AreEqual(resultInfo.GetConversationInfo().CameraPosition.Scale.Z, defaultTransform.Scale.Z);
+                Assert.AreEqual(resultInfo.GetConversationInfo().EditedTimestamp, "");
             }
 
             {
