@@ -52,6 +52,27 @@ void HotSpotSequenceSystem::CreateHotspotGroup(csp::common::String GroupName,
 	sequenceSystem->CreateSequence(key, "GroupId", spaceID, HotspotIds, CB);
 }
 
+void HotSpotSequenceSystem::RenameHotspotGroup(csp::common::String GroupName, csp::common::String NewGroupName, HotSpotGroupResultCallback Callback)
+{
+	auto spaceID			   = spaceSystem->GetCurrentSpace().Id;
+	csp::common::String key	   = spaceID + ":" + GroupName;
+	csp::common::String newkey = spaceID + ":" + NewGroupName;
+
+	auto CB = [Callback, key](SequenceResult result)
+	{
+		auto data = result.GetSequence();
+		HotSpotGroup group;
+		group.Items = data.Items;
+		group.Name	= data.Key;
+		HotSpotGroupResult returnValue(result.GetResultCode(), result.GetHttpResultCode());
+		returnValue.setHotSpotGroup(group);
+		// convert SequenceResult To HotSpotGroupResultCallback
+		Callback(returnValue);
+	};
+
+	sequenceSystem->RenameSequence(key, newkey, CB);
+}
+
 void HotSpotSequenceSystem::UpdateHotspotGroup(csp::common::String GroupName,
 											   csp::common::Array<csp::common::String> HotspotIds,
 											   HotSpotGroupResultCallback Callback)

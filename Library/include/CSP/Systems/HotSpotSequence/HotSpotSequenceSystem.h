@@ -65,6 +65,11 @@ public:
 	CSP_ASYNC_RESULT void
 		CreateHotspotGroup(csp::common::String GroupName, csp::common::Array<csp::common::String> HotspotIds, HotSpotGroupResultCallback Callback);
 
+	/// @brief Rename a Hotspot group
+	/// @param CurrentGroupName csp::common::String : The unique grouping name
+	/// @param NewGroupName csp::common::String : The unique grouping name
+	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
+	CSP_ASYNC_RESULT void RenameHotspotGroup(csp::common::String GroupName, csp::common::String NewGroupName, HotSpotGroupResultCallback Callback);
 	/// @brief Update a Hotspot group
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
