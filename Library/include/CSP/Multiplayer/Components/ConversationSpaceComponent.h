@@ -46,8 +46,10 @@ enum class ConversationPropertyKeys
 	Position,
 	Rotation,
 	Title,
-	Date,
-	NumberOfReplies,
+	Date_DEPRECATED,
+	NumberOfReplies_DEPRECATED,
+    Resolved,
+    ConversationCameraPosition,
 	Num
 };
 
@@ -140,14 +142,20 @@ public:
 	void SetTitle(const csp::common::String& Value);
 	/// @brief Gets the Title of the conversation.
 	const csp::common::String& GetTitle() const;
-	/// @brief Sets the Date of the conversation.
-	/// @param Value - The new Date.
-	void SetDate(const csp::common::String& Value);
-	/// @brief Gets the Date of the conversation.
-	const csp::common::String& GetDate() const;
-	/// @brief Sets the Number Of Replies of the conversation.
-	/// @param Value - The new Number Of Replies.
-	void SetNumberOfReplies(const int64_t Value);
+
+    /// @brief Sets the resolved value for indicating that a conversation is resolved.
+    /// @param Value - The resolved state.
+    void SetResolved(bool Value);
+	/// @brief Gets the resolved value of the conversation.
+	bool GetResolved() const;
+
+    /// @brief Sets the value for the camera position used to view the conversation.
+    /// @param InValue The position for the camera.
+    void SetConversationCameraPosition(const csp::common::Vector3& InValue);
+	/// @brief Gets the value for the camera position of the conversation.
+	/// @return The camera view position.
+	const csp::common::Vector3& GetConversationCameraPosition() const;
+
 	/// @brief Gets the Number Of Replies of the conversation.
 	const int64_t GetNumberOfReplies() const;
 

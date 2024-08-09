@@ -38,14 +38,14 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
 	: ComponentBase(ComponentType::Conversation, Parent)
 	, ConversationSystem(csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetConversationSystem())
 {
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)]	 = "";
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)]		 = true;
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)]		 = true;
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Position)]		 = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Rotation)]		 = csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)]			 = "";
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Date)]			 = "";
-	Properties[static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies)] = static_cast<int64_t>(0);
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)]				= "";
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)]					= true;
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsVisible)]					= true;
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Position)]					= csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Rotation)]					= csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Title)]						= "";
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::Resolved)]					= false;
+	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition)] = csp::common::Vector3 {0, 0, 0};
 
 	SetScriptInterface(CSP_NEW ConversationSpaceComponentScriptInterface(this));
 }
@@ -233,24 +233,30 @@ const csp::common::String& ConversationSpaceComponent::GetTitle() const
 	return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Title));
 }
 
-void ConversationSpaceComponent::SetDate(const csp::common::String& Value)
+void ConversationSpaceComponent::SetResolved(bool Value)
 {
-	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date), Value);
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved), Value);
 }
 
-const csp::common::String& ConversationSpaceComponent::GetDate() const
+bool ConversationSpaceComponent::GetResolved() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ConversationPropertyKeys::Date));
+	return GetBooleanProperty(static_cast<uint32_t>(ConversationPropertyKeys::Resolved));
 }
 
-void ConversationSpaceComponent::SetNumberOfReplies(const int64_t Value)
+void ConversationSpaceComponent::SetConversationCameraPosition(const csp::common::Vector3& InValue)
 {
-	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies), Value);
+	SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition), InValue);
+}
+
+const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPosition() const
+{
+	return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
 }
 
 const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 {
-	return GetIntegerProperty(static_cast<uint32_t>(ConversationPropertyKeys::NumberOfReplies));
+	// TODO: Implement getNumberOfReplies - OF-1385
+	return 0;
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
