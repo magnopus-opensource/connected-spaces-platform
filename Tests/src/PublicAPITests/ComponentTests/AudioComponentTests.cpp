@@ -53,8 +53,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create audio component
 	auto* AudioComponent = static_cast<AudioSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Audio));
@@ -138,7 +138,10 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	AudioComponent->SetVolume(0.f);
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -156,8 +159,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -185,7 +188,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create audio component
 	auto* AudioComponent = (AudioSpaceComponent*) CreatedObject->AddComponent(ComponentType::Audio);
@@ -267,7 +270,10 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	EntitySystem->ProcessPendingEntityOperations();
 	EXPECT_EQ(AudioComponent->GetVolume(), 0.f);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

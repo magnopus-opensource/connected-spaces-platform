@@ -248,7 +248,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
 	// Create object to represent the custom
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create custom component
 	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);

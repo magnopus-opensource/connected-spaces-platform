@@ -83,7 +83,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 	// Create object to represent the text
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create text component
 	auto* TextComponent = static_cast<TextSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Text));
@@ -204,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 	// Create object to represent the text
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create text component
 	auto* TextComponent = (TextSpaceComponent*) CreatedObject->AddComponent(ComponentType::Text);

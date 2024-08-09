@@ -365,10 +365,9 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName,
 		NewObject->Id	= ID;
 		NewObject->Name = InName;
 		NewObject->SetParentEntity(InParent);
-		NewObject->ShouldUpdateParent = true;
-		NewObject->Transform		  = InSpaceTransform;
-		NewObject->OwnerId			  = MultiplayerConnectionInst->GetClientId();
-		NewObject->IsTransferable	  = true;
+		NewObject->Transform	  = InSpaceTransform;
+		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
+		NewObject->IsTransferable = true;
 
 		SignalRMsgPackEntitySerialiser Serialiser;
 
@@ -395,8 +394,7 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName,
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-			ResolveRootHierarchy(NewObject);
-			NewObject->ResolveParentChildRelationship();
+			ResolveEntityHierarchy(NewObject);
 
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
@@ -597,6 +595,7 @@ void SpaceEntitySystem::BindOnObjectMessage()
 					   auto& EntityMessage = Params.as_array()[0];
 
 					   SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
+					   ResolveEntityHierarchy(NewEntity);
 
 					   if (SpaceEntityCreatedCallback)
 					   {
@@ -957,21 +956,28 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 	}
 }
 
-void SpaceEntitySystem::ResolveRootHierarchy(SpaceEntity* Entity)
+void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
 {
-	if (Entity->ShouldUpdateParent == false)
-	{
-		return;
-	}
-
 	if (Entity->ParentId.HasValue())
 	{
-		RootHierarchyEntities.RemoveItem(Entity);
+		for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+		{
+			if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+			{
+				RootHierarchyEntities.Remove(i);
+				break;
+			}
+		}
 	}
 	else
 	{
-		RootHierarchyEntities.Append(Entity);
+		if (EntityIsInRootHierarchy(Entity) == false)
+		{
+			RootHierarchyEntities.Append(Entity);
+		}
 	}
+
+	Entity->ResolveParentChildRelationship();
 }
 
 bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
@@ -1346,8 +1352,6 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		{
 			RemovedEntities.emplace(PendingRemoveEntity);
 
-			RootHierarchyEntities.RemoveItem(PendingRemoveEntity);
-			ResolveParentChildForDeletion(PendingRemoveEntity);
 			RemovePendingEntity(PendingRemoves->front());
 		}
 		PendingRemoves->pop_front();
@@ -1359,9 +1363,6 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
-
-		ResolveRootHierarchy(EntityToAdd);
-		EntityToAdd->ResolveParentChildRelationship();
 
 		switch (EntityToAdd->GetEntityType())
 		{
@@ -1404,6 +1405,9 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 			assert(false && "Unhandled entity type encountered during its destruction!");
 			break;
 	}
+
+	RootHierarchyEntities.RemoveItem(EntityToRemove);
+	ResolveParentChildForDeletion(EntityToRemove);
 
 	Entities.RemoveItem(EntityToRemove);
 
@@ -1502,7 +1506,6 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 						}
 					}
 
-					ResolveParentChildForDeletion(Entity);
 					LocalDestroyEntity(Entity);
 				}
 			}

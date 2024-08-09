@@ -55,8 +55,8 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -90,7 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 
@@ -174,7 +174,10 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -199,8 +202,8 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -234,7 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 
@@ -259,7 +262,10 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 
 	EXPECT_TRUE(ActionCalled);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

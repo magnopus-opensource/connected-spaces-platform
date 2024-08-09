@@ -53,8 +53,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create ECommerce component
 	auto* ECommerceComponent = static_cast<ECommerceSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ECommerce));
@@ -101,7 +101,10 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -119,8 +122,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -148,7 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create ECommerce component
 	auto* ECommerceComponent = (ECommerceSpaceComponent*) CreatedObject->AddComponent(ComponentType::ECommerce);
@@ -177,7 +180,10 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
 	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

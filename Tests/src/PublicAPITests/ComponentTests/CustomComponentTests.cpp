@@ -112,7 +112,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 		// Create object to represent the Custom fields
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		// Create custom component
 		auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);

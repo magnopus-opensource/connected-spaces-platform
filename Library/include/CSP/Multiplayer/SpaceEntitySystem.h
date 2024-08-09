@@ -376,7 +376,7 @@ private:
 	void DetermineScriptOwners();
 
 	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
-	void ResolveRootHierarchy(SpaceEntity* Entity);
+	void ResolveEntityHierarchy(SpaceEntity* Entity);
 	bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);

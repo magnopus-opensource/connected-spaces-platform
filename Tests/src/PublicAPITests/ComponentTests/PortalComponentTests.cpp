@@ -103,7 +103,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 		// Create object to represent the portal
 		csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		// Create portal component
 		auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
@@ -111,7 +111,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		PortalSpaceID = PortalComponent->GetSpaceId();
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	/*
@@ -130,7 +133,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 
 		auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Delete space
@@ -185,7 +191,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 	// Create object to represent the portal
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create portal component
 	auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
@@ -219,7 +225,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
 
 	EXPECT_TRUE(HasThumbailResult);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -266,7 +275,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	// Create object to represent the portal
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create portal component
 	auto* PortalComponent = (PortalSpaceComponent*) CreatedObject->AddComponent(ComponentType::Portal);
@@ -308,7 +317,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(PortalComponent->GetPosition().Z, 6.6f);
 	EXPECT_FLOAT_EQ(PortalComponent->GetRadius(), 456.456f);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

@@ -352,7 +352,7 @@ private:
 
 	void AddChildEntitiy(SpaceEntity* ChildEntity);
 
-	bool ResolveParentChildRelationship();
+	void ResolveParentChildRelationship();
 
 	SpaceEntitySystem* EntitySystem;
 

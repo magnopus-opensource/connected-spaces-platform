@@ -178,7 +178,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 	{
 		const csp::common::String ObjectName  = "Object 1";
 		SpaceTransform ObjectTransform		  = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
 		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
@@ -192,7 +192,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 		EntitySystem->ProcessPendingEntityOperations();
 	}
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -314,7 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		AnimatedModelSpaceComponent* AnimatedModelComponent
 			= static_cast<AnimatedModelSpaceComponent*>(Object->AddComponent(ComponentType::AnimatedModel));
@@ -336,7 +339,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 		EXPECT_EQ(AnimatedModelComponent->GetPosition().Z, 10.f);
 	}
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -436,7 +442,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
 	EXPECT_EQ(ScriptComponent->GetComponentType(), ComponentType::ScriptData);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -515,7 +524,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 	Avatar->GetScript()->SetScriptSource(AvatarScriptText.c_str());
 	Avatar->GetScript()->Invoke();
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -597,7 +609,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create script
 	auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
@@ -625,7 +637,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 	// Ensure position is still set to 0
 	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::Zero());
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -709,7 +724,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create animated model component
 	auto* AnimatedComponent = static_cast<AnimatedModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
@@ -737,7 +752,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 	CreatedObject->QueueUpdate();
 	EntitySystem->ProcessPendingEntityOperations();
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -852,7 +870,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	bool PatchPending = true;
 	CreatedObject->SetPatchSentCallback(
@@ -908,7 +926,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
 	EXPECT_EQ(CreatedObject->GetPosition(), csp::common::Vector3::One());
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -991,7 +1012,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 	{
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
@@ -1007,7 +1028,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 		EXPECT_FALSE(ScriptHasErrors);
 	}
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1099,7 +1123,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Create audio component
 	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
@@ -1146,7 +1170,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 	EXPECT_EQ(CustomComponent->GetCustomProperty("Number").GetInt(), 100);
 	EXPECT_TRUE(CustomComponent->GetCustomProperty("NumberChanged").GetBool());
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1215,7 +1242,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	// Create space object
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	// Attempt to add 2 script components
 	auto Comp1 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
@@ -1227,7 +1254,10 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	// Only 1 script component should be on the object
 	EXPECT_EQ(SpaceEntity->GetComponents()->Size(), 1);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete MultiplayerConnection
 

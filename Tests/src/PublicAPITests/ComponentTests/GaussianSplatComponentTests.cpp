@@ -55,11 +55,11 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
@@ -88,7 +88,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 
@@ -131,7 +131,10 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	GaussianSplatComponent->SetTint(csp::common::Vector3(1.0f, 0.4f, 0.0f));
 	EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(1.0f, 0.4f, 0.0f));
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -149,8 +152,8 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -178,10 +181,10 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 	// Create object to represent the image
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 	auto* GaussianSplatComponent = (GaussianSplatSpaceComponent*) CreatedObject->AddComponent(ComponentType::GaussianSplat);
-	auto* ScriptComponent = (ScriptSpaceComponent*) CreatedObject->AddComponent(ComponentType::ScriptData);
+	auto* ScriptComponent		 = (ScriptSpaceComponent*) CreatedObject->AddComponent(ComponentType::ScriptData);
 
 	CreatedObject->QueueUpdate();
 	EntitySystem->ProcessPendingEntityOperations();
@@ -205,7 +208,10 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
 	EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(0.0f, 0.1f, 0.2f));
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

@@ -97,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		// Create object to represent the conversation
 		csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		// Create conversation component
 		auto* ConversationComponent = (ConversationSpaceComponent*) CreatedObject->AddComponent(ComponentType::Conversation);
@@ -288,7 +288,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Delete space
@@ -343,8 +346,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-		auto [CreatedObject1] = AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
-		auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
+		auto [CreatedObject1] = AWAIT(EntitySystem, CreateObject, ObjectName1, nullptr, ObjectTransform);
+		auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
 
 		// Create conversation component
 		auto* ConversationComponent1 = (ConversationSpaceComponent*) CreatedObject1->AddComponent(ComponentType::Conversation);
@@ -436,7 +439,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Delete space
@@ -485,7 +491,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 		// Create object to represent the conversation
 		csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
 
 		// Create conversation component
 		auto* ConversationComponent = (ConversationSpaceComponent*) CreatedObject->AddComponent(ComponentType::Conversation);
@@ -537,7 +543,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 		EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
 		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	};
 
 	// Delete space
