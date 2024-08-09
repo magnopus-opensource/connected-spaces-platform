@@ -46,8 +46,8 @@ enum class ConversationPropertyKeys
 	Position,
 	Rotation,
 	Title,
-	Date_REMOVED,
-	NumberOfReplies_REMOVED,
+	Date_DEPRECATED,
+	NumberOfReplies_DEPRECATED,
     Resolved,
     ConversationCameraPosition,
 	Num
