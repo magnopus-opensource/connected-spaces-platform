@@ -2773,7 +2773,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 
 
 // Manual hierarchy connection test for receiving objects from another client
-#if 1
+#if 0
 const csp::common::String SpaceId	= "66b5f151175b7f15fb1b3840";
 const csp::common::String SpaceName = "MV_HIERARCHY_TEST_SPACE2";
 

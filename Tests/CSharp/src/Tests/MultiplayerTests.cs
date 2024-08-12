@@ -64,7 +64,7 @@ namespace CSPEngine
         public static void CreateObject(Multiplayer.SpaceEntitySystem entitySystem, string name, out Multiplayer.SpaceEntity entity, bool pushCleanupFunction = true)
         {
             using var transform = new Multiplayer.SpaceTransform();
-            var res = entitySystem.CreateObject(name, transform).Result;
+            var res = entitySystem.CreateObject(name, null, transform).Result;
 
             Assert.IsTrue(res.PointerIsValid);
 
