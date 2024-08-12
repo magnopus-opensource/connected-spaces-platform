@@ -37,8 +37,8 @@ public:
 	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
 	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 	DECLARE_SCRIPT_PROPERTY(std::string, Title);
-	DECLARE_SCRIPT_PROPERTY(std::string, Date);
-	DECLARE_SCRIPT_PROPERTY(int64_t, NumberOfReplies);
+	DECLARE_SCRIPT_PROPERTY(bool, Resolved);
+	DECLARE_SCRIPT_PROPERTY(Vector3, ConversationCameraPosition);
 };
 
 } // namespace csp::multiplayer
