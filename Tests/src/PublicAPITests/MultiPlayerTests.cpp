@@ -2133,7 +2133,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity1->SetParentEntityId(CreatedParentEntity->GetId());
+		CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
 		// Parents shouldn't be set until after replication
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
@@ -2177,7 +2177,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity2->SetParentEntityId(CreatedParentEntity->GetId());
+		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
 
 		CreatedChildEntity2->QueueUpdate();
 
@@ -2220,7 +2220,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity1->SetParentEntityId(nullptr);
+		CreatedChildEntity1->SetParentId(nullptr);
 
 		CreatedChildEntity1->QueueUpdate();
 
@@ -2263,7 +2263,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity2->SetParentEntityId(nullptr);
+		CreatedChildEntity2->SetParentId(nullptr);
 
 		CreatedChildEntity2->QueueUpdate();
 
@@ -2388,7 +2388,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 		});
 
 	// Change Parent
-	CreatedChildEntity->SetParentEntityId(CreatedParentEntity->GetId());
+	CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
 
 	CreatedChildEntity->QueueUpdate();
 
@@ -2527,7 +2527,7 @@ void RunParentChildDeletionTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity1->SetParentEntityId(CreatedParentEntity->GetId());
+		CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
 		// Parents shouldn't be set until after replication
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
@@ -2560,7 +2560,7 @@ void RunParentChildDeletionTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity2->SetParentEntityId(CreatedParentEntity->GetId());
+		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
 
 		CreatedChildEntity2->QueueUpdate();
 

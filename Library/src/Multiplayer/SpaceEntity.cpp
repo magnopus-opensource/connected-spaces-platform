@@ -319,7 +319,7 @@ SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 	return EntitySystem;
 }
 
-void SpaceEntity::SetParentEntityId(const csp::common::Optional<uint64_t>& InParentId)
+void SpaceEntity::SetParentId(const csp::common::Optional<uint64_t>& InParentId)
 {
 	ParentId		   = InParentId;
 	ShouldUpdateParent = true;

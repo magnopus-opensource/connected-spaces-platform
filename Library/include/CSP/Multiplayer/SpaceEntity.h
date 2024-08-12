@@ -209,8 +209,8 @@ public:
 
 	/// @brief Sets the parent for this entity. If null is passed, then this will remove the parent
 	/// QueueUpdate() should be called afterwards to enable changes to the parent.
-	/// @param ParentId Optional<uint64_t> The new parent if of this entity.
-	void SetParentEntityId(const csp::common::Optional<uint64_t>& ParentId);
+	/// @param ParentId Optional<uint64_t> The new parent id of this entity.
+	void SetParentId(const csp::common::Optional<uint64_t>& ParentId);
 
 	/// @brief Gets the parent of this entity
 	/// @return SpaceEntity
