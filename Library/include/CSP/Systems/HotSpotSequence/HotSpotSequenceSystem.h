@@ -62,25 +62,28 @@ public:
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
 	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void
-		CreateHotspotGroup(csp::common::String GroupName, csp::common::Array<csp::common::String> HotspotIds, HotSpotGroupResultCallback Callback);
+	CSP_ASYNC_RESULT void CreateHotspotGroup(const csp::common::String&,
+											 const csp::common::Array<csp::common::String>& HotspotIds,
+											 HotSpotGroupResultCallback Callback);
 
 	/// @brief Rename a Hotspot group
 	/// @param CurrentGroupName csp::common::String : The unique grouping name
 	/// @param NewGroupName csp::common::String : The unique grouping name
 	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void RenameHotspotGroup(csp::common::String GroupName, csp::common::String NewGroupName, HotSpotGroupResultCallback Callback);
+	CSP_ASYNC_RESULT void
+		RenameHotspotGroup(const csp::common::String& GroupName, const csp::common::String& NewGroupName, HotSpotGroupResultCallback Callback);
 	/// @brief Update a Hotspot group
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
 	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void
-		UpdateHotspotGroup(csp::common::String GroupName, csp::common::Array<csp::common::String> HotspotIds, HotSpotGroupResultCallback Callback);
+	CSP_ASYNC_RESULT void UpdateHotspotGroup(const csp::common::String& GroupName,
+											 const csp::common::Array<csp::common::String>& HotspotIds,
+											 HotSpotGroupResultCallback Callback);
 
 	/// @brief Get a Hotspot group by name
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void GetHotspotGroup(csp::common::String GroupName, HotSpotGroupResultCallback Callback);
+	CSP_ASYNC_RESULT void GetHotspotGroup(const csp::common::String& GroupName, HotSpotGroupResultCallback Callback);
 
 
 	/// @brief Get all Hotspot groups for the current space and logged in user.
@@ -91,12 +94,12 @@ public:
 	/// @brief Get a Hotspot group by name
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param Callback HotSpotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void DeleteHotspotGroup(csp::common::String GroupName, HotSpotGroupResultCallback Callback);
+	CSP_ASYNC_RESULT void DeleteHotspotGroup(const csp::common::String& GroupName, HotSpotGroupResultCallback Callback);
 	~HotSpotSequenceSystem();
 
 private:
 	HotSpotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	csp::systems::SequenceSystem* sequenceSystem;
-	csp::systems::SpaceSystem* spaceSystem;
+	csp::systems::SequenceSystem* SequenceSystem;
+	csp::systems::SpaceSystem* SpaceSystem;
 };
 } // namespace csp::systems

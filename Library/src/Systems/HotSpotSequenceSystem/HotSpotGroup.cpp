@@ -25,11 +25,6 @@ const HotSpotGroup& csp::systems::HotSpotGroupResult::GetHotSpotGroup() const
 	return Group;
 }
 
-void HotSpotGroupResult::setHotSpotGroup(HotSpotGroup& group)
-{
-	Group = group;
-}
-
 void csp::systems::HotSpotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
@@ -39,10 +34,6 @@ void csp::systems::HotSpotGroupResult::OnResponse(const csp::services::ApiRespon
 const csp::common::Array<HotSpotGroup>& HotSpotGroupsResult::GetHotSpotGroups() const
 {
 	return Groups;
-}
-void HotSpotGroupsResult::setHotSpotGroups(csp::common::Array<HotSpotGroup>& groups)
-{
-	Groups = groups;
 }
 void HotSpotGroupsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {

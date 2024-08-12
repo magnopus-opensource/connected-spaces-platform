@@ -43,7 +43,8 @@ class CSP_API HotSpotGroupResult : public csp::systems::ResultBase
 
 public:
 	const HotSpotGroup& GetHotSpotGroup() const;
-	void setHotSpotGroup(HotSpotGroup& group);
+	CSP_NO_EXPORT HotSpotGroupResult(HotSpotGroup& group, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode), Group(group) {};
 	CSP_NO_EXPORT HotSpotGroupResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
@@ -66,7 +67,8 @@ class CSP_API HotSpotGroupsResult : public csp::systems::ResultBase
 
 public:
 	const csp::common::Array<HotSpotGroup>& GetHotSpotGroups() const;
-	void setHotSpotGroups(csp::common::Array<HotSpotGroup>& groups);
+	CSP_NO_EXPORT HotSpotGroupsResult(csp::common::Array<HotSpotGroup>& groups, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode), Groups(groups) {};
 	CSP_NO_EXPORT HotSpotGroupsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:

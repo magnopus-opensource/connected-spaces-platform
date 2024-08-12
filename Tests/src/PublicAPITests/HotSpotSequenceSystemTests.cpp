@@ -378,10 +378,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	csp::systems::HotSpotGroup HotSpotGroup;
 
 	CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotSpotGroup);
-	csp::common::String expectedName = SpaceSystem->GetCurrentSpace().Id + ":" + NewTestGroupName;
 
 	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotSpotGroup);
-	EXPECT_EQ(HotSpotGroup.Name, expectedName);
+	EXPECT_EQ(HotSpotGroup.Name, NewTestGroupName);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
@@ -631,9 +630,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
 
 	csp::systems::HotSpotGroup HotSpotGroup;
 	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotSpotGroup);
-	csp::common::String expectedName = SpaceSystem->GetCurrentSpace().Id + ":" + TestGroupName;
 
-	EXPECT_EQ(expectedName, HotSpotGroup.Name);
+	EXPECT_EQ(TestGroupName, HotSpotGroup.Name);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
