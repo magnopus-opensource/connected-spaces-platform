@@ -21,7 +21,7 @@
 #include "CSP/Systems/ECommerce/ECommerceSystem.h"
 #include "CSP/Systems/EventTicketing/EventTicketingSystem.h"
 #include "CSP/Systems/GraphQL/GraphQLSystem.h"
-#include "CSP/Systems/HotSpotSequence/HotSpotSequenceSystem.h"
+#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Maintenance/MaintenanceSystem.h"
 #include "CSP/Systems/Organizations/OrganizationSystem.h"
@@ -142,9 +142,9 @@ SequenceSystem* SystemsManager::GetSequenceSystem()
 	return SequenceSystem;
 }
 
-HotSpotSequenceSystem* SystemsManager::GetHotSpotSequenceSystem()
+HotspotSequenceSystem* SystemsManager::GetHotspotSequenceSystem()
 {
-	return HotSpotSequenceSystem;
+	return HotspotSequenceSystem;
 }
 
 csp::multiplayer::SpaceEntitySystem* SystemsManager::GetSpaceEntitySystem()
@@ -178,7 +178,7 @@ SystemsManager::SystemsManager()
 	, MultiplayerConnection(nullptr)
 	, SpaceEntitySystem(nullptr)
 	, SequenceSystem(nullptr)
-	, HotSpotSequenceSystem(nullptr)
+	, HotspotSequenceSystem(nullptr)
 {
 }
 
@@ -218,7 +218,7 @@ void SystemsManager::CreateSystems()
 	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
 	OrganizationSystem	  = CSP_NEW csp::systems::OrganizationSystem(WebClient);
 	SequenceSystem		  = CSP_NEW csp::systems::SequenceSystem(WebClient);
-	HotSpotSequenceSystem = CSP_NEW csp::systems::HotSpotSequenceSystem(SequenceSystem, SpaceSystem);
+	HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem);
 	SpaceEntitySystem	  = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
 }
 
@@ -243,7 +243,7 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(ScriptSystem);
 	CSP_DELETE(SpaceSystem);
 	CSP_DELETE(UserSystem);
-	CSP_DELETE(HotSpotSequenceSystem);
+	CSP_DELETE(HotspotSequenceSystem);
 
 	CSP_DELETE(WebClient);
 	CSP_DELETE(LogSystem);

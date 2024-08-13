@@ -45,7 +45,7 @@ class ECommerceSystem;
 class QuotaSystem;
 class OrganizationSystem;
 class SequenceSystem;
-class HotSpotSequenceSystem;
+class HotspotSequenceSystem;
 
 } // namespace csp::systems
 
@@ -160,9 +160,9 @@ public:
 	/// @return SequenceSystem : pointer to the Sequence system class
 	SequenceSystem* GetSequenceSystem();
 
-	/// @brief Retrieves the HotSpotSequenceSystem system.
-	/// @return HotSpotSequenceSystem : pointer to the HotSpotSequenceSystem system class
-	HotSpotSequenceSystem* GetHotSpotSequenceSystem();
+	/// @brief Retrieves the HotspotSequenceSystem system.
+	/// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
+	HotspotSequenceSystem* GetHotspotSequenceSystem();
 
 	csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
 
@@ -201,7 +201,7 @@ private:
 	QuotaSystem* QuotaSystem;
 	OrganizationSystem* OrganizationSystem;
 	SequenceSystem* SequenceSystem;
-	HotSpotSequenceSystem* HotSpotSequenceSystem;
+	HotspotSequenceSystem* HotspotSequenceSystem;
 };
 
 } // namespace csp::systems

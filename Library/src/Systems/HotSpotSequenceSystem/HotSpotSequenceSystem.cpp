@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "CSP/Systems/HotSpotSequence/HotSpotSequenceSystem.h"
+#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
-#include "CSP/Systems/HotSpotSequence/HotSpotGroup.h"
+#include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Debug/Logging.h"
@@ -53,34 +53,34 @@ csp::common::String CreateKey(const csp::common::String& Key, const csp::common:
 	return "Hotspots:" + SpaceId + ":" + Key;
 }
 } // namespace
-HotSpotSequenceSystem::HotSpotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem)
 {
 	this->SequenceSystem = SequenceSystem;
 	this->SpaceSystem	 = SpaceSystem;
 }
 
-void HotSpotSequenceSystem::CreateHotspotGroup(const csp::common::String& GroupName,
+void HotspotSequenceSystem::CreateHotspotGroup(const csp::common::String& GroupName,
 											   const csp::common::Array<csp::common::String>& HotspotIds,
-											   HotSpotGroupResultCallback Callback)
+											   HotspotGroupResultCallback Callback)
 {
 	auto CB = [Callback](SequenceResult Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			HotSpotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-			// convert SequenceResult To HotSpotGroupResultCallback
+			HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+			// convert SequenceResult To HotspotGroupResultCallback
 			Callback(ReturnValue);
 			return;
 		}
 
 		auto Data = Result.GetSequence();
-		HotSpotGroup Group;
+		HotspotGroup Group;
 		Group.Items = Data.Items;
 		Group.Name	= GetNameFromKey(Data.Key);
 
 
-		HotSpotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 
@@ -89,9 +89,9 @@ void HotSpotSequenceSystem::CreateHotspotGroup(const csp::common::String& GroupN
 	SequenceSystem->CreateSequence(Key, "GroupId", SpaceId, HotspotIds, CB);
 }
 
-void HotSpotSequenceSystem::RenameHotspotGroup(const csp::common::String& GroupName,
+void HotspotSequenceSystem::RenameHotspotGroup(const csp::common::String& GroupName,
 											   const csp::common::String& NewGroupName,
-											   HotSpotGroupResultCallback Callback)
+											   HotspotGroupResultCallback Callback)
 {
 
 
@@ -99,18 +99,18 @@ void HotSpotSequenceSystem::RenameHotspotGroup(const csp::common::String& GroupN
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			HotSpotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-			// convert SequenceResult To HotSpotGroupResultCallback
+			HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+			// convert SequenceResult To HotspotGroupResultCallback
 			Callback(ReturnValue);
 			return;
 		}
 		auto Data = Result.GetSequence();
-		HotSpotGroup Group;
+		HotspotGroup Group;
 		Group.Items = Data.Items;
 		Group.Name	= GetNameFromKey(Data.Key);
 
-		HotSpotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 	auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
@@ -119,25 +119,25 @@ void HotSpotSequenceSystem::RenameHotspotGroup(const csp::common::String& GroupN
 	SequenceSystem->RenameSequence(Key, NewKey, CB);
 }
 
-void HotSpotSequenceSystem::UpdateHotspotGroup(const csp::common::String& GroupName,
+void HotspotSequenceSystem::UpdateHotspotGroup(const csp::common::String& GroupName,
 											   const csp::common::Array<csp::common::String>& HotspotIds,
-											   HotSpotGroupResultCallback Callback)
+											   HotspotGroupResultCallback Callback)
 {
 	auto CB = [Callback](SequenceResult Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			HotSpotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-			// convert SequenceResult To HotSpotGroupResultCallback
+			HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+			// convert SequenceResult To HotspotGroupResultCallback
 			Callback(ReturnValue);
 			return;
 		}
 		auto Data = Result.GetSequence();
-		HotSpotGroup Group;
+		HotspotGroup Group;
 		Group.Items = Data.Items;
 		Group.Name	= GetNameFromKey(Data.Key);
-		HotSpotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 
@@ -146,23 +146,23 @@ void HotSpotSequenceSystem::UpdateHotspotGroup(const csp::common::String& GroupN
 	SequenceSystem->UpdateSequence(Key, "GroupId", SpaceId, HotspotIds, CB);
 }
 
-void HotSpotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName, HotSpotGroupResultCallback Callback)
+void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback)
 {
 	auto CB = [Callback](SequenceResult Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			HotSpotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-			// convert SequenceResult To HotSpotGroupResultCallback
+			HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+			// convert SequenceResult To HotspotGroupResultCallback
 			Callback(ReturnValue);
 			return;
 		}
 		auto Data = Result.GetSequence();
-		HotSpotGroup Group;
+		HotspotGroup Group;
 		Group.Items = Data.Items;
 		Group.Name	= GetNameFromKey(Data.Key);
-		HotSpotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 	auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
@@ -170,41 +170,41 @@ void HotSpotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
 	SequenceSystem->GetSequence(Key, CB);
 }
 
-void HotSpotSequenceSystem::GetHotspotGroups(HotSpotGroupsResultCallback Callback)
+void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callback)
 {
 	auto CB = [Callback](SequencesResult Result)
 	{
 		if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
 		{
-			HotSpotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
-			// convert SequenceResult To HotSpotGroupResultCallback
+			HotspotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
+			// convert SequenceResult To HotspotGroupResultCallback
 			Callback(ReturnValue);
 			return;
 		}
 		auto Data = Result.GetSequences();
 
-		csp::common::Array<HotSpotGroup> Groups(Data.Size());
+		csp::common::Array<HotspotGroup> Groups(Data.Size());
 
 		for (size_t i = 0; i < Data.Size(); i++)
 		{
 			Groups[i].Items = Data[i].Items;
 			Groups[i].Name	= GetNameFromKey(Data[i].Key);
 		}
-		HotSpotGroupsResult ReturnValue(Groups, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroupsResult ReturnValue(Groups, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 	auto SpaceId = SpaceSystem->GetCurrentSpace().Id;
 	SequenceSystem->GetSequencesByCriteria({}, SpaceId, "GroupId", {SpaceId}, CB);
 }
 
-void HotSpotSequenceSystem::DeleteHotspotGroup(const csp::common::String& GroupName, HotSpotGroupResultCallback Callback)
+void HotspotSequenceSystem::DeleteHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback)
 {
 	auto CB = [Callback](NullResult Result)
 	{
-		HotSpotGroup Group;
-		HotSpotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
-		// convert SequenceResult To HotSpotGroupResultCallback
+		HotspotGroup Group;
+		HotspotGroupResult ReturnValue(Group, Result.GetResultCode(), Result.GetHttpResultCode());
+		// convert SequenceResult To HotspotGroupResultCallback
 		Callback(ReturnValue);
 	};
 
@@ -212,12 +212,12 @@ void HotSpotSequenceSystem::DeleteHotspotGroup(const csp::common::String& GroupN
 	auto Key	 = CreateKey(GroupName, SpaceId);
 	SequenceSystem->DeleteSequences({Key}, CB);
 }
-HotSpotSequenceSystem::~HotSpotSequenceSystem()
+HotspotSequenceSystem::~HotspotSequenceSystem()
 {
 	SpaceSystem	   = nullptr;
 	SequenceSystem = nullptr;
 }
-HotSpotSequenceSystem::HotSpotSequenceSystem()
+HotspotSequenceSystem::HotspotSequenceSystem()
 {
 	SpaceSystem	   = nullptr;
 	SequenceSystem = nullptr;

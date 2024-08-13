@@ -21,9 +21,9 @@
 
 namespace csp::systems
 {
-/// @ingroup HotSpotSequence System
+/// @ingroup HotspotSequence System
 /// @brief A basic class abstraction for a Hot Spot Group, including name, and items within the group.
-class CSP_API HotSpotGroup
+class CSP_API HotspotGroup
 {
 public:
 	csp::common::String Name;
@@ -31,9 +31,9 @@ public:
 };
 
 
-/// @ingroup HotSpotSequence System
+/// @ingroup HotspotSequence System
 /// @brief Data class used to contain information when attempting to get a Hot Spot Group.
-class CSP_API HotSpotGroupResult : public csp::systems::ResultBase
+class CSP_API HotspotGroupResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -42,22 +42,22 @@ class CSP_API HotSpotGroupResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	const HotSpotGroup& GetHotSpotGroup() const;
-	CSP_NO_EXPORT HotSpotGroupResult(HotSpotGroup& group, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+	const HotspotGroup& GetHotspotGroup() const;
+	CSP_NO_EXPORT HotspotGroupResult(HotspotGroup& group, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 		: csp::systems::ResultBase(ResCode, HttpResCode), Group(group) {};
-	CSP_NO_EXPORT HotSpotGroupResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT HotspotGroupResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	HotSpotGroupResult(void*) {};
+	HotspotGroupResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	HotSpotGroup Group;
+	HotspotGroup Group;
 };
 
-/// @ingroup HotSpotSequence System
+/// @ingroup HotspotSequence System
 /// @brief Data class used to contain information when attempting to get a Hot Spot Group.
-class CSP_API HotSpotGroupsResult : public csp::systems::ResultBase
+class CSP_API HotspotGroupsResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	CSP_START_IGNORE
@@ -66,24 +66,24 @@ class CSP_API HotSpotGroupsResult : public csp::systems::ResultBase
 	/** @endcond */
 
 public:
-	const csp::common::Array<HotSpotGroup>& GetHotSpotGroups() const;
-	CSP_NO_EXPORT HotSpotGroupsResult(csp::common::Array<HotSpotGroup>& groups, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+	const csp::common::Array<HotspotGroup>& GetHotspotGroups() const;
+	CSP_NO_EXPORT HotspotGroupsResult(csp::common::Array<HotspotGroup>& groups, csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 		: csp::systems::ResultBase(ResCode, HttpResCode), Groups(groups) {};
-	CSP_NO_EXPORT HotSpotGroupsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT HotspotGroupsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	HotSpotGroupsResult(void*) {};
+	HotspotGroupsResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<HotSpotGroup> Groups;
+	csp::common::Array<HotspotGroup> Groups;
 };
 
 /// @brief Callback containing array of Hotspots.
-/// @param Result HotSpotGroupResult : result class
-typedef std::function<void(const csp::systems::HotSpotGroupResult& Result)> HotSpotGroupResultCallback;
+/// @param Result HotspotGroupResult : result class
+typedef std::function<void(const csp::systems::HotspotGroupResult& Result)> HotspotGroupResultCallback;
 
 /// @brief Callback containing array of HotspotGroups.
-/// @param Result HotSpotGroupsResult : result class
-typedef std::function<void(const csp::systems::HotSpotGroupsResult& Result)> HotSpotGroupsResultCallback;
+/// @param Result HotspotGroupsResult : result class
+typedef std::function<void(const csp::systems::HotspotGroupsResult& Result)> HotspotGroupsResultCallback;
 } // namespace csp::systems

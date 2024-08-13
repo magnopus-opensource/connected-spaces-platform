@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-#include "CSP/Systems/HotSpotSequence/HotSpotGroup.h"
+#include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 
 #include "Services/AggregationService/Api.h"
 
 namespace csp::systems
 {
-const HotSpotGroup& csp::systems::HotSpotGroupResult::GetHotSpotGroup() const
+const HotspotGroup& csp::systems::HotspotGroupResult::GetHotspotGroup() const
 {
 	return Group;
 }
 
-void csp::systems::HotSpotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void csp::systems::HotspotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 }
 
 
-const csp::common::Array<HotSpotGroup>& HotSpotGroupsResult::GetHotSpotGroups() const
+const csp::common::Array<HotspotGroup>& HotspotGroupsResult::GetHotspotGroups() const
 {
 	return Groups;
 }
-void HotSpotGroupsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void HotspotGroupsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
 }

@@ -16,7 +16,7 @@
 
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
-#include "CSP/Systems/HotSpotSequence/HotSpotSequenceSystem.h"
+#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "SpaceSystemTestHelpers.h"
@@ -51,22 +51,22 @@ void WaitForCallback(bool& CallbackCalled)
 
 } // namespace
 
-void CreateHotspotgroup(csp::systems::HotSpotSequenceSystem* HotspotSequenceSystem,
+void CreateHotspotgroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 						const csp::common::String& GroupName,
 						const csp::common::Array<csp::common::String>& Items,
-						csp::systems::HotSpotGroup& OutSequence,
+						csp::systems::HotspotGroup& OutSequence,
 						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
 	auto [Result]
-		= Awaitable(&csp::systems::HotSpotSequenceSystem::CreateHotspotGroup, HotspotSequenceSystem, GroupName, Items).Await(RequestPredicate);
+		= Awaitable(&csp::systems::HotspotSequenceSystem::CreateHotspotGroup, HotspotSequenceSystem, GroupName, Items).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
-		csp::systems::HotSpotGroup group = Result.GetHotSpotGroup();
+		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
 		EXPECT_EQ(group.Items.Size(), Items.Size());
 
@@ -79,50 +79,50 @@ void CreateHotspotgroup(csp::systems::HotSpotSequenceSystem* HotspotSequenceSyst
 	}
 }
 
-void DeleteHotspotGroup(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSystem,
+void DeleteHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 						const csp::common::String& GroupName,
 						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
-	auto [Result] = Awaitable(&csp::systems::HotSpotSequenceSystem::DeleteHotspotGroup, HotSpotSequenceSystem, GroupName).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::HotspotSequenceSystem::DeleteHotspotGroup, HotspotSequenceSystem, GroupName).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 }
 
-void GetHotpotGroup(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSystem,
+void GetHotpotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 					const csp::common::String& GroupName,
-					csp::systems::HotSpotGroup& Group,
+					csp::systems::HotspotGroup& Group,
 					csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
-	auto [Result] = Awaitable(&csp::systems::HotSpotSequenceSystem::GetHotspotGroup, HotSpotSequenceSystem, GroupName).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::HotspotSequenceSystem::GetHotspotGroup, HotspotSequenceSystem, GroupName).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
-	csp::systems::HotSpotGroup group = Result.GetHotSpotGroup();
+	csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 	if (Result.GetResultCode() == csp::systems::EResultCode::Success)
 	{
 		Group = group;
 	}
 }
 
-void UpdateHotspotGroup(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSystem,
+void UpdateHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 						const csp::common::String& GroupName,
 						const csp::common::Array<csp::common::String>& Items,
-						csp::systems::HotSpotGroup& HotSpotGroup,
+						csp::systems::HotspotGroup& HotspotGroup,
 						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
 	auto [Result]
-		= Awaitable(&csp::systems::HotSpotSequenceSystem::UpdateHotspotGroup, HotSpotSequenceSystem, GroupName, Items).Await(RequestPredicate);
+		= Awaitable(&csp::systems::HotspotSequenceSystem::UpdateHotspotGroup, HotspotSequenceSystem, GroupName, Items).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
-		csp::systems::HotSpotGroup group = Result.GetHotSpotGroup();
+		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
 		EXPECT_EQ(group.Items.Size(), Items.Size());
 
@@ -131,47 +131,47 @@ void UpdateHotspotGroup(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSyst
 			EXPECT_EQ(group.Items[i], Items[i]);
 		}
 
-		HotSpotGroup = group;
+		HotspotGroup = group;
 	}
 }
 
-void RenameHotspotGroup(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSystem,
+void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 						const csp::common::String& GroupName,
 						const csp::common::String& NewGroupName,
-						csp::systems::HotSpotGroup& HotSpotGroup,
+						csp::systems::HotspotGroup& HotspotGroup,
 						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
 	auto [Result]
-		= Awaitable(&csp::systems::HotSpotSequenceSystem::RenameHotspotGroup, HotSpotSequenceSystem, GroupName, NewGroupName).Await(RequestPredicate);
+		= Awaitable(&csp::systems::HotspotSequenceSystem::RenameHotspotGroup, HotspotSequenceSystem, GroupName, NewGroupName).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
-		csp::systems::HotSpotGroup group = Result.GetHotSpotGroup();
-		HotSpotGroup					 = group;
+		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
+		HotspotGroup					 = group;
 	}
 }
 
 
-void GetHotspotGroups(csp::systems::HotSpotSequenceSystem* HotSpotSequenceSystem,
+void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
 					  const csp::common::Array<csp::common::String>& GroupNames,
-					  csp::common::Array<csp::systems::HotSpotGroup>& Groups,
+					  csp::common::Array<csp::systems::HotspotGroup>& Groups,
 					  csp::systems::EResultCode ExpectedResultCode					= csp::systems::EResultCode::Success,
 					  csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
-	auto [Result] = Awaitable(&csp::systems::HotSpotSequenceSystem::GetHotspotGroups, HotSpotSequenceSystem).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::HotspotSequenceSystem::GetHotspotGroups, HotspotSequenceSystem).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-	csp::common::Array<csp::systems::HotSpotGroup> HotSpotGroups = Result.GetHotSpotGroups();
-	Groups														 = HotSpotGroups;
+	csp::common::Array<csp::systems::HotspotGroup> HotspotGroups = Result.GetHotspotGroups();
+	Groups														 = HotspotGroups;
 }
 
-void CompareGroups(const csp::systems::HotSpotGroup& S1, const csp::systems::HotSpotGroup& S2)
+void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::HotspotGroup& S2)
 {
 	EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
 	if (S1.Items.Size() == S2.Items.Size())
@@ -194,7 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -215,8 +215,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	csp::common::Array<csp::common::String> GroupItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
-	CreateHotspotgroup(HotspotSystem, TestGroupName, GroupItems, HotSpotGroup);
+	csp::systems::HotspotGroup HotspotGroup;
+	CreateHotspotgroup(HotspotSystem, TestGroupName, GroupItems, HotspotGroup);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
@@ -241,7 +241,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -260,14 +260,14 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
-	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotSpotGroup);
+	csp::systems::HotspotGroup HotspotGroup;
+	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotspotGroup);
 
 	// Get the group we just created
-	csp::systems::HotSpotGroup RetrievedHotSpotGroup;
-	GetHotpotGroup(HotspotSystem, TestGroupName, RetrievedHotSpotGroup);
+	csp::systems::HotspotGroup RetrievedHotspotGroup;
+	GetHotpotGroup(HotspotSystem, TestGroupName, RetrievedHotspotGroup);
 
-	CompareGroups(HotSpotGroup, RetrievedHotSpotGroup);
+	CompareGroups(HotspotGroup, RetrievedHotspotGroup);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
@@ -291,7 +291,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -316,17 +316,17 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 
 	const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup1;
-	csp::systems::HotSpotGroup HotSpotGroup2;
+	csp::systems::HotspotGroup HotspotGroup1;
+	csp::systems::HotspotGroup HotspotGroup2;
 
-	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotSpotGroup1);
+	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotspotGroup1);
 
-	csp::systems::HotSpotGroup expected;
-	expected.Name  = HotSpotGroup1.Name;
+	csp::systems::HotspotGroup expected;
+	expected.Name  = HotspotGroup1.Name;
 	expected.Items = {"Hotspot3"};
 
-	UpdateHotspotGroup(HotspotSystem, TestGroupName, NewItems, HotSpotGroup2);
-	CompareGroups(HotSpotGroup2, expected);
+	UpdateHotspotGroup(HotspotSystem, TestGroupName, NewItems, HotspotGroup2);
+	CompareGroups(HotspotGroup2, expected);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
@@ -350,7 +350,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -375,12 +375,12 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
 	const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
+	csp::systems::HotspotGroup HotspotGroup;
 
-	CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotSpotGroup);
+	CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
 
-	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotSpotGroup);
-	EXPECT_EQ(HotSpotGroup.Name, NewTestGroupName);
+	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
+	EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
@@ -404,7 +404,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -429,11 +429,11 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
 
 	const char* TestSequenceReferenceID = "CSP-UNITTEST-ReferenceID-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
+	csp::systems::HotspotGroup HotspotGroup;
 
 	csp::common::String expectedName = SpaceSystem->GetCurrentSpace().Id + ":" + NewTestGroupName;
 
-	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotSpotGroup, csp::systems::EResultCode::Failed);
+	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup, csp::systems::EResultCode::Failed);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
@@ -457,7 +457,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -474,10 +474,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
 	// Create hotspot group
 	csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
+	csp::systems::HotspotGroup HotspotGroup;
 
 	// Get the sequence we know does not exist
-	GetHotpotGroup(HotspotSystem, TestGroupName, HotSpotGroup, csp::systems::EResultCode::Failed);
+	GetHotpotGroup(HotspotSystem, TestGroupName, HotspotGroup, csp::systems::EResultCode::Failed);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
@@ -501,7 +501,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -525,16 +525,16 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
 	csp::common::String TestGroupName3 = "CSP-UNITTEST-SEQUENCE-MAG-3";
 
 
-	csp::systems::HotSpotGroup HotSpotGroup1;
-	csp::systems::HotSpotGroup HotSpotGroup2;
-	csp::systems::HotSpotGroup HotSpotGroup3;
+	csp::systems::HotspotGroup HotspotGroup1;
+	csp::systems::HotspotGroup HotspotGroup2;
+	csp::systems::HotspotGroup HotspotGroup3;
 
-	CreateHotspotgroup(HotspotSystem, TestGroupName1, SequenceItems1, HotSpotGroup1);
-	CreateHotspotgroup(HotspotSystem, TestGroupName2, SequenceItems2, HotSpotGroup2);
-	CreateHotspotgroup(HotspotSystem, TestGroupName3, SequenceItems3, HotSpotGroup3);
+	CreateHotspotgroup(HotspotSystem, TestGroupName1, SequenceItems1, HotspotGroup1);
+	CreateHotspotgroup(HotspotSystem, TestGroupName2, SequenceItems2, HotspotGroup2);
+	CreateHotspotgroup(HotspotSystem, TestGroupName3, SequenceItems3, HotspotGroup3);
 
-	csp::common::Array<csp::systems::HotSpotGroup> ExpectedGroups = {HotSpotGroup1, HotSpotGroup2, HotSpotGroup3};
-	csp::common::Array<csp::systems::HotSpotGroup> RetrievedGroups;
+	csp::common::Array<csp::systems::HotspotGroup> ExpectedGroups = {HotspotGroup1, HotspotGroup2, HotspotGroup3};
+	csp::common::Array<csp::systems::HotspotGroup> RetrievedGroups;
 	csp::common::Array<csp::common::String> SearchGroupNames = {TestGroupName1, TestGroupName2, TestGroupName3};
 	csp::common::Array<csp::common::String> ExpectedGroupNames
 		= {spaceID + ":" + TestGroupName1, spaceID + ":" + TestGroupName2, spaceID + ":" + TestGroupName3};
@@ -547,9 +547,9 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
 	}
 
 	// Delete sequence
-	DeleteHotspotGroup(HotspotSystem, HotSpotGroup1.Name);
-	DeleteHotspotGroup(HotspotSystem, HotSpotGroup2.Name);
-	DeleteHotspotGroup(HotspotSystem, HotSpotGroup3.Name);
+	DeleteHotspotGroup(HotspotSystem, HotspotGroup1.Name);
+	DeleteHotspotGroup(HotspotSystem, HotspotGroup2.Name);
+	DeleteHotspotGroup(HotspotSystem, HotspotGroup3.Name);
 	// Delete space
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
@@ -570,7 +570,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotNoGroupTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -610,7 +610,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* HotspotSystem	 = SystemsManager.GetHotSpotSequenceSystem();
+	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
 	// Log in
 	csp::common::String UserId;
@@ -628,10 +628,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
-	csp::systems::HotSpotGroup HotSpotGroup;
-	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotSpotGroup);
+	csp::systems::HotspotGroup HotspotGroup;
+	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotspotGroup);
 
-	EXPECT_EQ(TestGroupName, HotSpotGroup.Name);
+	EXPECT_EQ(TestGroupName, HotspotGroup.Name);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
