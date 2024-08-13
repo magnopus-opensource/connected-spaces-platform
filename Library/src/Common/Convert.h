@@ -59,8 +59,8 @@ template <typename T> Array<T> Convert(const std::vector<T>& In)
 	return Out;
 }
 /// @brief Converts std::Map to csp::common::Map.
-/// @param In const std::vector<T>&
-/// return Array<T>
+/// @param In const std::map<T1, T2>&
+/// return Map<T1,T2>
 template <typename T1, typename T2> Map<T1, T2> Convert(const std::map<T1, T2>& In)
 {
 	Map<T1, T2> Out;

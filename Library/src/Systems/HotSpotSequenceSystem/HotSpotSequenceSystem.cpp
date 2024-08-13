@@ -29,25 +29,6 @@ namespace csp::systems
 
 namespace
 {
-csp::common::String GetNameFromKey(const csp::common::String& Key)
-{
-	const std::regex Expression("^(?:[^:]*\:){2}([^:]*)");
-	std::smatch Match;
-	std::string SearchKey {Key.c_str()};
-	const bool Found = std::regex_search(SearchKey, Match, Expression);
-	if (Found == true)
-	{
-		std::string RT				= Match[1];
-		csp::common::String ReturnV = RT.c_str();
-		return ReturnV;
-	}
-	else
-	{
-		CSP_LOG_ERROR_FORMAT("Malformed hotspot Group Key: %s\n", Key);
-		return "";
-	}
-}
-
 csp::common::String CreateKey(const csp::common::String& Key, const csp::common::String& SpaceId)
 {
 	return "Hotspots:" + SpaceId + ":" + Key;
