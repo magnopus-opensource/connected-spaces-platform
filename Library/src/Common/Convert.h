@@ -58,7 +58,20 @@ template <typename T> Array<T> Convert(const std::vector<T>& In)
 
 	return Out;
 }
+/// @brief Converts std::Map to csp::common::Map.
+/// @param In const std::vector<T>&
+/// return Array<T>
+template <typename T1, typename T2> Map<T1, T2> Convert(const std::map<T1, T2>& In)
+{
+	Map<T1, T2> Out;
 
+	for (auto const& pair : In)
+	{
+		Out[pair.first] = pair.second;
+	}
+
+	return Out;
+}
 /// @brief Converts csp::common::Map to std::map.
 /// @param In const Map<T1, T2>&
 /// @return std::map<T1, T2>
@@ -66,16 +79,14 @@ template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& 
 {
 	std::map<T1, T2> Out;
 
-	if (In.HasValue())
-	{
-		auto* Keys = In->Keys();
 
-		for (auto idx = 0; idx < Keys->Size(); ++idx)
-		{
-			auto Key   = Keys->operator[](idx);
-			auto Value = In->operator[](Key);
-			Out.insert(std::pair<T1, T2>(Key, Value));
-		}
+	auto* Keys = In.Keys();
+
+	for (auto idx = 0; idx < Keys->Size(); ++idx)
+	{
+		auto Key   = (*Keys)[idx];
+		auto Value = In[Key];
+		Out.insert(std::pair<T1, T2>(Key, Value));
 	}
 
 	return Out;

@@ -57,11 +57,13 @@ public:
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
+	/// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void CreateSequence(const csp::common::String& SequenceKey,
 										 const csp::common::String& ReferenceType,
 										 const csp::common::String& ReferenceId,
 										 const csp::common::Array<csp::common::String>& Items,
+										 const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 										 SequenceResultCallback Callback);
 
 	/// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
@@ -69,11 +71,13 @@ public:
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
 	/// @param Items csp::common::Array<csp::common::String> : An ordered array of members
+	/// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void UpdateSequence(const csp::common::String& SequenceKey,
 										 const csp::common::String& ReferenceType,
 										 const csp::common::String& ReferenceId,
 										 const csp::common::Array<csp::common::String>& Items,
+										 const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 										 SequenceResultCallback Callback);
 
 	/// @brief Renames a given sequence. This call will fail if the user isn't a creator of the space.
@@ -88,11 +92,13 @@ public:
 	/// @param SequenceKeys csp::common::Optional<csp::common::String> : An optional regex string for searching keys
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId, SpaceId etc.). Must be used with ReferenceIds
 	/// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
+	/// @param MetaData csp::common::Map<csp::common::String, csp::common::String> : Any additional data relating to the Sequence
 	/// @param Callback SequencesResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetSequencesByCriteria(const csp::common::Array<csp::common::String>& SequenceKeys,
 												 const csp::common::Optional<csp::common::String>& KeyRegex,
 												 const csp::common::Optional<csp::common::String>& ReferenceType,
 												 const csp::common::Array<csp::common::String>& ReferenceIds,
+												 const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 												 SequencesResultCallback Callback);
 
 	/// @brief Gets a sequence by it's key

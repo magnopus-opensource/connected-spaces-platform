@@ -78,7 +78,7 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
 		return "HolocapAudio";
 	else if (AssetType == systems::EAssetType::AUDIO)
 		return "Audio";
-    else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
+	else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
 		return "GaussianSplat";
 	else
 	{
@@ -267,27 +267,28 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	// Use `GET /api/v1/prototypes` and only pass asset collection IDs
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
-			std::nullopt,							// Tags
-			std::nullopt,							// TagsAll
-			AssetCollectionIds,					// const std::optional<std::vector<utility::string_t>>& Ids
-			std::nullopt,							// Names
-			std::nullopt,							// PartialNames
-			std::nullopt,							// ExcludedIds
-			std::nullopt,							// PointOfInterestIds
-			std::nullopt,							// ParentId
-			std::nullopt,							// GroupIds
-			std::nullopt,							// Types
-			true,									// HasGroup
-			std::nullopt,							// CreatedBy
-			std::nullopt,							// PrototypeOwnerIds
-			std::nullopt,							// ReadAccessFilters
-			std::nullopt,							// WriteAccessFilters
-            std::nullopt,							// OrganizationIds
+			std::nullopt,		// Tags
+			std::nullopt,		// TagsAll
+			AssetCollectionIds, // const std::optional<std::vector<utility::string_t>>& Ids
+			std::nullopt,		// Names
+			std::nullopt,		// PartialNames
+			std::nullopt,		// ExcludedIds
+			std::nullopt,		// PointOfInterestIds
+			std::nullopt,		// ParentId
+			std::nullopt,		// GroupIds
+			std::nullopt,		// Types
+			true,				// HasGroup
+			std::nullopt,		// CreatedBy
+			std::nullopt,		// PrototypeOwnerIds
+			std::nullopt,		// ReadAccessFilters
+			std::nullopt,		// WriteAccessFilters
+			std::nullopt,		// OrganizationIds
+			std::nullopt,
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
-			CopyAsync,							// asyncCall
-            std::nullopt,                        // onBehalfOf
+			CopyAsync,								// asyncCall
+			std::nullopt,							// onBehalfOf
 			ResponseHandler,						// ResponseHandler
 			csp::common::CancellationToken::Dummy() // CancellationToken
 		);
@@ -406,26 +407,27 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 																																		   nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
-		->apiV1PrototypesGet(PrototypeTags,         // Tags
-							 std::nullopt,          // TagsAll
-							 PrototypeIds,          // Ids
-							 PrototypeNames,        // Names
-							 std::nullopt,          // PartialNames
-							 std::nullopt,          // ExcludedIds
-							 std::nullopt,          // PointOfInterestIds
-							 ParentPrototypeId,     // ParentId
-							 GroupIds,              // GroupIds
-							 PrototypeTypes,        // Types
-							 std::nullopt,          // HasGroup
-							 std::nullopt,          // CreatedBy
-							 std::nullopt,          // PrototypeOwnerIds
-							 std::nullopt,          // ReadAccessFilters
-							 std::nullopt,          // WriteAccessFilters
-                             std::nullopt,          // OrganizationIds
-							 Skip,                  // Skip
-							 Limit,                 // Limit
-							 std::nullopt,          // SortBy
-							 std::nullopt,          // SortDirection
+		->apiV1PrototypesGet(PrototypeTags,		// Tags
+							 std::nullopt,		// TagsAll
+							 PrototypeIds,		// Ids
+							 PrototypeNames,	// Names
+							 std::nullopt,		// PartialNames
+							 std::nullopt,		// ExcludedIds
+							 std::nullopt,		// PointOfInterestIds
+							 ParentPrototypeId, // ParentId
+							 GroupIds,			// GroupIds
+							 PrototypeTypes,	// Types
+							 std::nullopt,		// HasGroup
+							 std::nullopt,		// CreatedBy
+							 std::nullopt,		// PrototypeOwnerIds
+							 std::nullopt,		// ReadAccessFilters
+							 std::nullopt,		// WriteAccessFilters
+							 std::nullopt,		// OrganizationIds
+							 std::nullopt,
+							 Skip,		   // Skip
+							 Limit,		   // Limit
+							 std::nullopt, // SortBy
+							 std::nullopt, // SortDirection
 							 ResponseHandler);
 }
 

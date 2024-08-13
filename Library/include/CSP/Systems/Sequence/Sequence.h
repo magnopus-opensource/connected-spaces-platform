@@ -28,6 +28,7 @@ public:
 	csp::common::String ReferenceType;
 	csp::common::String ReferenceId;
 	csp::common::Array<csp::common::String> Items;
+	csp::common::Map<csp::common::String, csp::common::String> MetaData;
 };
 
 /// @ingroup Sequence System

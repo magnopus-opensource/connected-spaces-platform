@@ -72,9 +72,10 @@ public:
 	/// @param Callback HotspotGroupResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void
 		RenameHotspotGroup(const csp::common::String& GroupName, const csp::common::String& NewGroupName, HotspotGroupResultCallback Callback);
+
 	/// @brief Update a Hotspot group
 	/// @param GroupName csp::common::String : The unique grouping name
-	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
+	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to replace
 	/// @param Callback HotspotGroupResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void UpdateHotspotGroup(const csp::common::String& GroupName,
 											 const csp::common::Array<csp::common::String>& HotspotIds,
@@ -91,10 +92,10 @@ public:
 	CSP_ASYNC_RESULT void GetHotspotGroups(HotspotGroupsResultCallback Callback);
 
 
-	/// @brief Get a Hotspot group by name
+	/// @brief Delete a Hotspot group by name
 	/// @param GroupName csp::common::String : The unique grouping name
-	/// @param Callback HotspotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void DeleteHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback);
+	/// @param Callback NullResultCallback : callback to call when a response is received
+	CSP_ASYNC_RESULT void DeleteHotspotGroup(const csp::common::String& GroupName, NullResultCallback Callback);
 	~HotspotSequenceSystem();
 
 private:
