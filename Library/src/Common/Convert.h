@@ -79,7 +79,6 @@ template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& 
 {
 	std::map<T1, T2> Out;
 
-
 	auto* Keys = In.Keys();
 
 	for (auto idx = 0; idx < Keys->Size(); ++idx)
