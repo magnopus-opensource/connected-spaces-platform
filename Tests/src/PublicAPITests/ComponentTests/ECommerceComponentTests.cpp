@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create ECommerce component
 	auto* ECommerceComponent = static_cast<ECommerceSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ECommerce));
@@ -151,7 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 	// Create object to represent the ECommerce
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create ECommerce component
 	auto* ECommerceComponent = (ECommerceSpaceComponent*) CreatedObject->AddComponent(ComponentType::ECommerce);

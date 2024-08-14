@@ -90,7 +90,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 
@@ -237,7 +237,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	const csp::common::String ModelAssetId = "NotARealId";
 

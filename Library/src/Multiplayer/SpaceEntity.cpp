@@ -319,26 +319,21 @@ SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 	return EntitySystem;
 }
 
-void SpaceEntity::SetParentEntity(SpaceEntity* InParent)
+void SpaceEntity::SetParentId(uint64_t InParentId)
 {
-	bool Modified = false;
-
-	if (InParent != nullptr && (ParentId.HasValue() == false || InParent->GetId() != *ParentId))
+	// If the current parentid differs from the input
+	if (ParentId.HasValue() == false || InParentId != *ParentId)
 	{
-		// If a valid parent is set, and it is a different value from previous
-		ParentId = InParent->GetId();
-		Modified = true;
+		ParentId		   = InParentId;
+		ShouldUpdateParent = true;
 	}
-	else if (InParent == nullptr && ParentId.HasValue())
-	{
-		// If null is passed and ParentId is currently set
-		ParentId = nullptr;
-		Modified = true;
-	}
+}
 
-	if (Modified)
+void SpaceEntity::RemoveParentEntity()
+{
+	if (ParentId.HasValue())
 	{
-		// Only set ShouldUpdateParent flag if the parent has changed value
+		ParentId		   = nullptr;
 		ShouldUpdateParent = true;
 	}
 }
@@ -346,6 +341,11 @@ void SpaceEntity::SetParentEntity(SpaceEntity* InParent)
 SpaceEntity* SpaceEntity::GetParentEntity() const
 {
 	return Parent;
+}
+
+void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+	EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const

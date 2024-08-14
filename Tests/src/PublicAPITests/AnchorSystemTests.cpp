@@ -259,7 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -335,9 +335,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
 	csp::common::String ObjectName1 = "Object 1";
-	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, nullptr, ObjectTransform);
+	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
 	csp::common::String ObjectName2 = "Object 2";
-	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
+	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection1;
 	CreateAssetCollection(AssetSystem,
@@ -430,7 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,
@@ -581,9 +581,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
 	csp::common::String ObjectName1 = "Object 1";
-	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, nullptr, ObjectTransform);
+	auto [CreatedObject1]			= AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
 	csp::common::String ObjectName2 = "Object 2";
-	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, nullptr, ObjectTransform);
+	auto [CreatedObject2]			= AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection1;
 	CreateAssetCollection(AssetSystem,
@@ -748,7 +748,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 
 	csp::common::String ObjectName					 = "Object 1";
 	csp::multiplayer::SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]							 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem,

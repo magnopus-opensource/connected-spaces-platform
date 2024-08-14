@@ -82,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create audio component
 	auto* AudioComponent = static_cast<AudioSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Audio));
@@ -188,7 +188,7 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create audio component
 	auto* AudioComponent = (AudioSpaceComponent*) CreatedObject->AddComponent(ComponentType::Audio);

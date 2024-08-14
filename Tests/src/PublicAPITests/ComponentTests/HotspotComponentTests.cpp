@@ -83,7 +83,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	// Create object to represent the hotspot
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create hotspot component
 	auto* HotspotComponent = static_cast<HotspotSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Hotspot));
@@ -183,7 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 	// Create object to represent the hotspot
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create hotspot component
 	auto* HotspotComponent = (HotspotSpaceComponent*) CreatedObject->AddComponent(ComponentType::Hotspot);

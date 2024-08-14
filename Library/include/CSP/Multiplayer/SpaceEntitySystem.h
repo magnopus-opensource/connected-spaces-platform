@@ -112,14 +112,10 @@ public:
 
 	/// @brief Creates a SpaceEntity of type Object, and relevant default values.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
-	/// @param InParent SpaceEntity : Optional parent SpaceEntity (pass null for no parent)
 	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
 	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
 	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
-	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName,
-									   SpaceEntity* InParent,
-									   const SpaceTransform& InSpaceTransform,
-									   EntityCreatedCallback Callback);
+	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
 	/// @brief Destroys both the remote view and the local view of the specified entity.
 	/// @param Entity SpaceEntity : The entity to be destroyed.
@@ -388,6 +384,12 @@ private:
 	void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
 	void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
 	void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
+
+
+	void CreateObjectInternal(const csp::common::String& InName,
+							  csp::common::Optional<uint64_t> InParent,
+							  const SpaceTransform& InSpaceTransform,
+							  EntityCreatedCallback Callback);
 
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;

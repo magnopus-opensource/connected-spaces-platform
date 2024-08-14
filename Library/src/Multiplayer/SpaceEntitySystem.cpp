@@ -338,78 +338,9 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName,
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
-void SpaceEntitySystem::CreateObject(const csp::common::String& InName,
-									 SpaceEntity* InParent,
-									 const SpaceTransform& InSpaceTransform,
-									 EntityCreatedCallback Callback)
+void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
-	const std::function LocalIDCallback
-		= [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
-	{
-		try
-		{
-			if (Except)
-			{
-				std::rethrow_exception(Except);
-			}
-		}
-		catch (const std::exception& e)
-		{
-			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
-			Callback(nullptr);
-		}
-
-		auto* NewObject = CSP_NEW SpaceEntity(this);
-		NewObject->Type = SpaceEntityType::Object;
-		auto ID			= ParseGenerateObjectIDsResult(Result);
-		NewObject->Id	= ID;
-		NewObject->Name = InName;
-		NewObject->SetParentEntity(InParent);
-		NewObject->Transform	  = InSpaceTransform;
-		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
-		NewObject->IsTransferable = true;
-
-		SignalRMsgPackEntitySerialiser Serialiser;
-
-		NewObject->Serialise(Serialiser);
-		const auto SerialisedObject = Serialiser.Finalise();
-
-		const std::vector InvokeArguments = {SerialisedObject};
-
-		const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-			= [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
-		{
-			try
-			{
-				if (Except)
-				{
-					std::rethrow_exception(Except);
-				}
-			}
-			catch (const std::exception& e)
-			{
-				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
-				Callback(nullptr);
-			}
-
-			std::scoped_lock EntitiesLocker(*EntitiesLock);
-
-			ResolveEntityHierarchy(NewObject);
-
-			Entities.Append(NewObject);
-			Objects.Append(NewObject);
-			Callback(NewObject);
-		};
-
-		Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
-	};
-
-	// ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
-	const signalr::value Param1((uint64_t) 1ULL);
-	const std::vector Arr {Param1};
-
-	const signalr::value Params(Arr);
-	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
+	CreateObjectInternal(InName, nullptr, InSpaceTransform, Callback);
 }
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
@@ -951,7 +882,7 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 
 	for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
 	{
-		Deletion->ChildEntities[i]->SetParentEntity(nullptr);
+		Deletion->ChildEntities[i]->RemoveParentEntity();
 		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
 }
@@ -1446,6 +1377,84 @@ void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEnt
 	{
 		ElectionManager->OnObjectRemove(Object, Objects);
 	}
+}
+
+void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
+											 csp::common::Optional<uint64_t> InParent,
+											 const SpaceTransform& InSpaceTransform,
+											 EntityCreatedCallback Callback)
+{
+	const std::function LocalIDCallback
+		= [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+	{
+		try
+		{
+			if (Except)
+			{
+				std::rethrow_exception(Except);
+			}
+		}
+		catch (const std::exception& e)
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+			Callback(nullptr);
+		}
+
+		auto* NewObject			  = CSP_NEW SpaceEntity(this);
+		NewObject->Type			  = SpaceEntityType::Object;
+		auto ID					  = ParseGenerateObjectIDsResult(Result);
+		NewObject->Id			  = ID;
+		NewObject->Name			  = InName;
+		NewObject->Transform	  = InSpaceTransform;
+		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
+		NewObject->IsTransferable = true;
+
+		if (InParent.HasValue())
+		{
+			NewObject->SetParentId(*InParent);
+		}
+
+		SignalRMsgPackEntitySerialiser Serialiser;
+
+		NewObject->Serialise(Serialiser);
+		const auto SerialisedObject = Serialiser.Finalise();
+
+		const std::vector InvokeArguments = {SerialisedObject};
+
+		const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
+			= [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+		{
+			try
+			{
+				if (Except)
+				{
+					std::rethrow_exception(Except);
+				}
+			}
+			catch (const std::exception& e)
+			{
+				CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
+				Callback(nullptr);
+			}
+
+			std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+			ResolveEntityHierarchy(NewObject);
+
+			Entities.Append(NewObject);
+			Objects.Append(NewObject);
+			Callback(NewObject);
+		};
+
+		Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+	};
+
+	// ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
+	const signalr::value Param1((uint64_t) 1ULL);
+	const std::vector Arr {Param1};
+
+	const signalr::value Params(Arr);
+	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)

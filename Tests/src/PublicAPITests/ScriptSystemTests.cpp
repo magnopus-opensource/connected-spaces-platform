@@ -178,7 +178,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 	{
 		const csp::common::String ObjectName  = "Object 1";
 		SpaceTransform ObjectTransform		  = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+		auto [Object]						  = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
 		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
@@ -317,7 +317,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 		AnimatedModelSpaceComponent* AnimatedModelComponent
 			= static_cast<AnimatedModelSpaceComponent*>(Object->AddComponent(ComponentType::AnimatedModel));
@@ -609,7 +609,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create script
 	auto* ScriptComponent = static_cast<ScriptSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ScriptData));
@@ -724,7 +724,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create animated model component
 	auto* AnimatedComponent = static_cast<AnimatedModelSpaceComponent*>(CreatedObject->AddComponent(ComponentType::AnimatedModel));
@@ -870,7 +870,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 	const csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 
-	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	bool PatchPending = true;
 	CreatedObject->SetPatchSentCallback(
@@ -1012,7 +1012,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 	{
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
@@ -1123,7 +1123,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 	// Create object to represent the audio
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Create audio component
 	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
@@ -1242,7 +1242,7 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 	// Create space object
 	csp::common::String ObjectName = "Object 1";
 	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, nullptr, ObjectTransform);
+	auto [SpaceEntity]			   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
 	// Attempt to add 2 script components
 	auto Comp1 = SpaceEntity->AddComponent(csp::multiplayer::ComponentType::ScriptData);
