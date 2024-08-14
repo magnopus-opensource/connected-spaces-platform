@@ -68,6 +68,7 @@ void CreateHotspotgroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
 	{
 		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
+		EXPECT_EQ(group.Name, GroupName);
 		EXPECT_EQ(group.Items.Size(), Items.Size());
 
 		for (int i = 0; i < group.Items.Size(); ++i)
@@ -124,6 +125,7 @@ void UpdateHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
 	{
 		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
+		EXPECT_EQ(group.Name, GroupName);
 		EXPECT_EQ(group.Items.Size(), Items.Size());
 
 		for (int i = 0; i < group.Items.Size(); ++i)
@@ -151,7 +153,9 @@ void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
 		csp::systems::HotspotGroup group = Result.GetHotspotGroup();
-		HotspotGroup					 = group;
+		EXPECT_EQ(group.Name, NewGroupName);
+
+		HotspotGroup = group;
 	}
 }
 
@@ -173,6 +177,7 @@ void GetHotspotGroups(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem
 
 void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::HotspotGroup& S2)
 {
+	EXPECT_EQ(S1.Name, S2.Name);
 	EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
 	if (S1.Items.Size() == S2.Items.Size())
 	{
