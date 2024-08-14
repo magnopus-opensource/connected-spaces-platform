@@ -936,7 +936,7 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 
 	for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
 	{
-		Deletion->ChildEntities[i]->SetParentId(nullptr);
+		Deletion->ChildEntities[i]->RemoveParentEntity();
 		Deletion->ChildEntities[i]->Parent = nullptr;
 	}
 }

@@ -2220,7 +2220,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity1->SetParentId(nullptr);
+		CreatedChildEntity1->RemoveParentEntity();
 
 		CreatedChildEntity1->QueueUpdate();
 
@@ -2263,7 +2263,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		CreatedChildEntity2->SetParentId(nullptr);
+		CreatedChildEntity2->RemoveParentEntity();
 
 		CreatedChildEntity2->QueueUpdate();
 

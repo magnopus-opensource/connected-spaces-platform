@@ -207,10 +207,14 @@ public:
 	/// @return SpaceEntitySystem
 	SpaceEntitySystem* GetSpaceEntitySystem();
 
-	/// @brief Sets the parent for this entity. If null is passed, then this will remove the parent
+	/// @brief Sets the parent for this entity
 	/// QueueUpdate() should be called afterwards to enable changes to the parent.
-	/// @param ParentId Optional<uint64_t> The new parent id of this entity.
-	void SetParentId(const csp::common::Optional<uint64_t>& ParentId);
+	/// @param ParentId uint64_t The new parent id of this entity.
+	void SetParentId(uint64_t ParentId);
+
+	/// @brief Removes the parent entity
+	/// QueueUpdate() should be called afterwards to enable changes to the parent.
+	void RemoveParentEntity();
 
 	/// @brief Gets the parent of this entity
 	/// @return SpaceEntity
