@@ -26,7 +26,7 @@ namespace csp::multiplayer
 
 FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::FiducialMarker, Parent)
 {
-	Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name)]				 = "";
+	Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED)]	 = "";
 	Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::MarkerAssetId)]	 = "";
 	Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::AssetCollectionId)] = "";
 	Properties[static_cast<uint32_t>(FiducialMarkerPropertyKeys::Position)]			 = csp::common::Vector3::Zero();
@@ -61,12 +61,12 @@ void FiducialMarkerSpaceComponent::SetAssetCollectionId(const csp::common::Strin
 
 const csp::common::String& FiducialMarkerSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED));
 }
 
 void FiducialMarkerSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(FiducialMarkerPropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* ITransformComponent */

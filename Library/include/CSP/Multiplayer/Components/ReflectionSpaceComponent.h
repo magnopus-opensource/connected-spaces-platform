@@ -33,7 +33,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a reflection component.
 enum class ReflectionPropertyKeys
 {
-	Name,
+	Name_DEPRECATED,
 	ReflectionAssetId,
 	AssetCollectionId,
 	Position,
@@ -64,10 +64,12 @@ public:
 
 	/// @brief Get the name of the Reflection component.
 	/// @return csp::common::String specifying the component name.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 
 	/// @brief Set the name for the Reflection component.
 	/// @param Value const csp::common::String& : Name for the Reflection component.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Get the Asset Id for the Reflection texture asset.

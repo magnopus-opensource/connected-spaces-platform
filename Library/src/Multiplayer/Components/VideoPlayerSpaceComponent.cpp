@@ -31,7 +31,7 @@ namespace csp::multiplayer
 
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::VideoPlayer, Parent)
 {
-	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::Name)]					= "";
+	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED)]			= "";
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetId)]			= "";
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::VideoAssetURL)]			= "";
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::AssetCollectionId)]		= "";
@@ -57,12 +57,12 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent) : Comp
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED));
 }
 
 void VideoPlayerSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(VideoPlayerPropertyKeys::Name_DEPRECATED), Value);
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetVideoAssetId() const

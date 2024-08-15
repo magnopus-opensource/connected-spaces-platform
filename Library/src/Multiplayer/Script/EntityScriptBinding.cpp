@@ -484,7 +484,6 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(HotspotSpaceComponent, Rotation, "rotation")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
-		.PROPERTY_GET_SET(HotspotSpaceComponent, Name, "name")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
@@ -544,6 +543,7 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.constructor<>()
 		.property<&ComponentScriptInterface::GetComponentId>("id")
 		.property<&ComponentScriptInterface::GetComponentType>("type")
+		.property<&ComponentScriptInterface::GetComponentName, &ComponentScriptInterface::SetComponentName>("name")
 		.fun<&ComponentScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
 		.fun<&ComponentScriptInterface::InvokeAction>("invokeAction");
 
