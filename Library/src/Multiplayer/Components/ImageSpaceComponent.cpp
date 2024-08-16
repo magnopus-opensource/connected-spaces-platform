@@ -25,7 +25,7 @@ namespace csp::multiplayer
 
 ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Image, Parent)
 {
-	Properties[static_cast<uint32_t>(ImagePropertyKeys::Name)]				= "";
+	Properties[static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED)]	= "";
 	Properties[static_cast<uint32_t>(ImagePropertyKeys::ImageAssetId)]		= "";
 	Properties[static_cast<uint32_t>(ImagePropertyKeys::AssetCollectionId)] = "";
 	Properties[static_cast<uint32_t>(ImagePropertyKeys::Position)]			= csp::common::Vector3::Zero();
@@ -63,12 +63,12 @@ void ImageSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 
 const csp::common::String& ImageSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED));
 }
 
 void ImageSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(ImagePropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* ITransformComponent */

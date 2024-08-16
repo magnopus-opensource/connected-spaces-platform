@@ -43,6 +43,9 @@ public:
 	int64_t GetComponentId() const;
 	int64_t GetComponentType() const;
 
+	void SetComponentName(std::string name);
+	std::string GetComponentName() const;
+
 	void SendPropertyUpdate();
 
 protected:

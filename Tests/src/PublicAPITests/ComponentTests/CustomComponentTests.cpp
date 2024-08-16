@@ -88,6 +88,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	char UniqueSpaceName2[256];
 	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
+	// Current default properties:
+	// - ComponentName
+	const int DefaultComponentProps = 1;
+
 	// Log in
 	csp::common::String UserId;
 	LogIn(UserSystem, UserId);
@@ -167,16 +171,16 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 		// Key Size
 		{
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 7);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 7 + DefaultComponentProps);
 		}
 
 		// Remove Key
 		{
 			CustomComponent->RemoveCustomProperty("Boolean");
 
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 6 + DefaultComponentProps);
 		}
 
 		// List Check
@@ -190,7 +194,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Re-Enter space and verify contents
@@ -215,10 +222,19 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			});
 
 		// Wait until loaded
-		while (!GotAllEntities)
+		auto Start		 = std::chrono::steady_clock::now();
+		auto Current	 = std::chrono::steady_clock::now();
+		int64_t TestTime = 0;
+
+		while (!GotAllEntities && TestTime < 20)
 		{
-			std::this_thread::sleep_for(100ms);
+			std::this_thread::sleep_for(50ms);
+
+			Current	 = std::chrono::steady_clock::now();
+			TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
 		}
+
+		EXPECT_TRUE(GotAllEntities);
 
 		const auto& Components = *LoadedObject->GetComponents();
 
@@ -267,7 +283,10 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Delete space

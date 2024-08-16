@@ -28,14 +28,18 @@ namespace chs = csp::services::generated::aggregationservice;
 
 namespace
 {
-std::shared_ptr<chs::SequenceDto>
-	CreateSequenceDto(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items)
+std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey,
+													const String& ReferenceType,
+													const String& ReferenceId,
+													const Array<String>& Items,
+													const csp::common::Map<csp::common::String, csp::common::String>& MetaData)
 {
 	auto SequenceInfo = std::make_shared<chs::SequenceDto>();
 	SequenceInfo->SetKey(SequenceKey);
 	SequenceInfo->SetReferenceType(ReferenceType);
 	SequenceInfo->SetReferenceId(ReferenceId);
 	SequenceInfo->SetItems(Convert(Items));
+	SequenceInfo->SetMetadata(Convert(MetaData));
 
 	return SequenceInfo;
 }
@@ -44,10 +48,14 @@ std::shared_ptr<chs::SequenceDto>
 
 namespace csp::systems
 {
-void SequenceSystem::CreateSequence(
-	const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items, SequenceResultCallback Callback)
+void SequenceSystem::CreateSequence(const String& SequenceKey,
+									const String& ReferenceType,
+									const String& ReferenceId,
+									const Array<String>& Items,
+									const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
+									SequenceResultCallback Callback)
 {
-	const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items);
+	const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
@@ -59,10 +67,14 @@ void SequenceSystem::CreateSequence(
 		);
 }
 
-void SequenceSystem::UpdateSequence(
-	const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items, SequenceResultCallback Callback)
+void SequenceSystem::UpdateSequence(const String& SequenceKey,
+									const String& ReferenceType,
+									const String& ReferenceId,
+									const Array<String>& Items,
+									const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
+									SequenceResultCallback Callback)
 {
-	CreateSequence(SequenceKey, ReferenceType, ReferenceId, Items, Callback);
+	CreateSequence(SequenceKey, ReferenceType, ReferenceId, Items, MetaData, Callback);
 }
 
 void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& NewSequenceKey, SequenceResultCallback Callback)
@@ -82,9 +94,10 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 											const Optional<String>& InKeyRegex,
 											const Optional<String>& InReferenceType,
 											const Array<String>& InReferenceIds,
+											const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 											SequencesResultCallback Callback)
 {
-	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || InReferenceIds.IsEmpty() && InReferenceType.HasValue())
+	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
 	{
 		CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
@@ -104,6 +117,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 							KeyRegex,				   // Regex
 							ReferenceType,			   // ReferenceType
 							ReferenceIds,			   // ReferenceIds
+							std::nullopt,			   // MetaData
 							std::nullopt,			   // Skip
 							std::nullopt,			   // Limit
 							ResponseHandler,		   // ResponseHandler
