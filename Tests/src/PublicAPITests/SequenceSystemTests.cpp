@@ -266,6 +266,47 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCE_INVALIDKEY_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create sequence
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence;
+	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Failed);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_CREATESEQUENCENOITEMS_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 {
@@ -391,6 +432,46 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCE_INVALIDKEY_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create sequence
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+
+	csp::systems::Sequence RetrievedSequence;
+	GetSequence(SequenceSystem, UniqueSequenceName, RetrievedSequence, csp::systems::EResultCode::Failed);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_UPDATESEQUENCE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 {
@@ -434,6 +515,58 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 
 	// Delete sequence
 	DeleteSequences(SequenceSystem, {UpdatedSequence.Key});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_UPDATESEQUENCE_INVALIDKEY_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+	csp::common::Map<csp::common::String, csp::common::String> MetaData;
+
+	// Update sequence
+	csp::common::Array<csp::common::String> UpdatedSequenceItems {"Hotspot4", "Hotspot5"};
+
+	csp::systems::Sequence UpdatedSequence;
+	MetaData["Foo"] = "Bar";
+	UpdateSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   "GroupId",
+				   Space.Id,
+				   UpdatedSequenceItems,
+				   MetaData,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -487,6 +620,59 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 
 	// Delete sequence
 	DeleteSequences(SequenceSystem, {UpdatedSequence.Key});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_RENAMESEQUENCE_INVALIDKEY_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create sequence
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+
+	const char* TestSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence;
+	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
+
+	// Rename sequence
+	const char* TestUpdatedSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG-UPDATED";
+	char UniqueUpdatedSequenceName[256];
+	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+
+	csp::systems::Sequence UpdatedSequence;
+	RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed);
+
+	// Delete sequence
+	DeleteSequences(SequenceSystem, {UniqueSequenceName});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -579,6 +765,48 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 
 	// Delete sequence
 	DeleteSequences(SequenceSystem, {Sequence.Key, Sequence2.Key});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETSEQUENCEBYCRITERIA_INVALIDKEY_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKeyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Test searches
+	csp::common::Array<csp::systems::Sequence> RetrievedSequences;
+
+	// Test Sequence key search
+	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
+	char UniqueSequenceName[256];
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+	// Get the first sequence
+	GetSequencesByCriteria(SequenceSystem, {UniqueSequenceName}, nullptr, nullptr, {}, RetrievedSequences, csp::systems::EResultCode::Failed);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
