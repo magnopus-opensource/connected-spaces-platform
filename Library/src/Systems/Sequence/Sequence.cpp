@@ -33,6 +33,7 @@ void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Seque
 	Sequence.ReferenceType = Dto.GetReferenceType();
 	Sequence.ReferenceId   = Dto.GetReferenceId();
 	Sequence.Items		   = Convert(Dto.GetItems());
+	Sequence.MetaData	   = Convert(Dto.GetMetadata());
 }
 
 } // namespace
