@@ -82,6 +82,7 @@ class CSP_API SpaceEntitySystem
 	friend class SpaceEntityEventHandler;
 	friend class ClientElectionManager;
 	friend class EntityScript;
+	friend class SpaceEntity;
 	friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -318,6 +319,10 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
+	/// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
+	/// @return A list of root entities.
+	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
+
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -325,6 +330,7 @@ protected:
 	SpaceEntityList Avatars;
 	SpaceEntityList Objects;
 	SpaceEntityList SelectedEntities;
+	SpaceEntityList RootHierarchyEntities;
 
 	std::recursive_mutex* EntitiesLock;
 
@@ -365,6 +371,10 @@ private:
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();
 
+	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
+	void ResolveEntityHierarchy(SpaceEntity* Entity);
+	bool EntityIsInRootHierarchy(SpaceEntity* Entity);
+
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;
 	void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
@@ -374,6 +384,12 @@ private:
 	void OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars);
 	void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
 	void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
+
+
+	void CreateObjectInternal(const csp::common::String& InName,
+							  csp::common::Optional<uint64_t> InParent,
+							  const SpaceTransform& InSpaceTransform,
+							  EntityCreatedCallback Callback);
 
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;
