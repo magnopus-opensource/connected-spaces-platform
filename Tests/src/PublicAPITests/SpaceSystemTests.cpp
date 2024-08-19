@@ -598,7 +598,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 	GetSpace(SpaceSystem, Space.Id, UpdatedSpace);
 
 	EXPECT_EQ(UpdatedSpace.Name, Space.Name);
-	EXPECT_EQ(UpdatedSpace.Description, ""); // This should remain cleared since not specifying a description in `UpdateSpace` is equivalent to clearing it.
+	EXPECT_EQ(UpdatedSpace.Description,
+			  ""); // This should remain cleared since not specifying a description in `UpdateSpace` is equivalent to clearing it.
 	EXPECT_EQ(UpdatedSpace.Attributes, UpdatedAttributes);
 
 	// Delete space
@@ -1215,7 +1216,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Log out and log in again using default test account
@@ -1812,13 +1816,19 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	ASSERT_EQ(RetrievedMetadata["site"], TestSpaceMetadata["site"]);
 
 	// Exit and re-enter space to verify its OK to always add self to public space
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	// Log back in with default user so space can be deleted
@@ -2114,7 +2124,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 		EXPECT_TRUE(SpaceSystem->IsInSpace());
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 
 		EXPECT_FALSE(SpaceSystem->IsInSpace());
 	}
@@ -2228,7 +2241,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		SpaceSystem->ExitSpace(
+			[](const csp::systems::NullResult& Result)
+			{
+			});
 	}
 
 	LogOut(UserSystem);
@@ -2718,6 +2734,73 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	EXPECT_FALSE(GetDeletedGeoResult.HasSpaceGeoLocation());
 
 	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_DUPLICATESPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "CSP-TEST-SPACE";
+	const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	Array<InviteUserRoleInfo> UserRoles(1);
+	UserRoles[0].UserEmail = AlternativeLoginEmail;
+	UserRoles[0].UserRole  = SpaceUserRole::User;
+	InviteUserRoleInfoCollection InviteInfo;
+	InviteInfo.InviteUserRoleInfos = UserRoles;
+
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, Space);
+
+	// Log out and log in as alt user
+	LogOut(UserSystem);
+	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+
+	// Attempt to duplicate space
+	{
+		SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+		auto [Result] = AWAIT_PRE(SpaceSystem, DuplicateSpace, RequestPredicate, Space.Id, UniqueSpaceName, SpaceAttributes::Private, nullptr, true);
+
+		EXPECT_EQ(Result.GetResultCode(), EResultCode::Success);
+
+		const auto& NewSpace = Result.GetSpace();
+
+		EXPECT_NE(NewSpace.Id, Space.Id);
+		EXPECT_EQ(NewSpace.Name, UniqueSpaceName);
+		EXPECT_EQ(NewSpace.Description, Space.Description);
+		EXPECT_EQ(NewSpace.Attributes, SpaceAttributes::Private);
+		EXPECT_EQ(NewSpace.OwnerId, UserId);
+		EXPECT_NE(Space.OwnerId, UserId);
+
+		// Delete duplicated space
+		DeleteSpace(SpaceSystem, NewSpace.Id);
+	}
+
+	// Log out and log in as default user to clean up original space
+	LogOut(UserSystem);
+	LogIn(UserSystem, UserId);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
 	LogOut(UserSystem);
 }
 #endif
