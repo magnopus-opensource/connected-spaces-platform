@@ -321,19 +321,31 @@ SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 
 void SpaceEntity::SetParentId(uint64_t InParentId)
 {
-	ParentId		   = InParentId;
-	ShouldUpdateParent = true;
+	// If the current parentid differs from the input
+	if (ParentId.HasValue() == false || InParentId != *ParentId)
+	{
+		ParentId		   = InParentId;
+		ShouldUpdateParent = true;
+	}
 }
 
 void SpaceEntity::RemoveParentEntity()
 {
-	ParentId		   = nullptr;
-	ShouldUpdateParent = true;
+	if (ParentId.HasValue())
+	{
+		ParentId		   = nullptr;
+		ShouldUpdateParent = true;
+	}
 }
 
 SpaceEntity* SpaceEntity::GetParentEntity() const
 {
 	return Parent;
+}
+
+void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+	EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
 }
 
 const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const
@@ -803,9 +815,11 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 		Deserialiser.LeaveComponents();
 	}
 
-	if (ResolveParentChildRelationship())
+	if (ShouldUpdateParent)
 	{
-		UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+		EntitySystem->ResolveEntityHierarchy(this);
+		UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+		ShouldUpdateParent = false;
 	}
 
 	if (UpdateFlags != 0 && EntityUpdateCallback != nullptr)
@@ -951,9 +965,11 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 			CSP_DELETE(DirtyComponentKeys);
 		}
 
-		if (ResolveParentChildRelationship())
+		if (ShouldUpdateParent)
 		{
-			UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+			EntitySystem->ResolveEntityHierarchy(this);
+			UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+			ShouldUpdateParent = false;
 		}
 
 		if (InvokeUpdateCallback && EntityUpdateCallback != nullptr)
@@ -1234,13 +1250,8 @@ void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity)
 	ChildEntities.Append(ChildEntity);
 }
 
-bool SpaceEntity::ResolveParentChildRelationship()
+void SpaceEntity::ResolveParentChildRelationship()
 {
-	if (ShouldUpdateParent == false)
-	{
-		return false;
-	}
-
 	// Entity has been re-parented
 	if (ParentId.HasValue())
 	{
@@ -1261,7 +1272,7 @@ bool SpaceEntity::ResolveParentChildRelationship()
 		{
 			CSP_LOG_ERROR_FORMAT("SpaceEntity unable to find parent for entity: %s. Please report if this issue is encountered.",
 								 std::to_string(GetId()));
-			return false;
+			return;
 		}
 	}
 	else
@@ -1271,14 +1282,7 @@ bool SpaceEntity::ResolveParentChildRelationship()
 			Parent->ChildEntities.RemoveItem(this);
 			Parent = nullptr;
 		}
-		else
-		{
-			return false;
-		}
 	}
-
-	ShouldUpdateParent = false;
-	return true;
 }
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface()

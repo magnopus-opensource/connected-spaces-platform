@@ -123,6 +123,9 @@ public:
 	// General callback providing success/fail boolean.
 	typedef std::function<void(bool)> CallbackHandler;
 
+	// Callback that will provide a pointer to a SpaceEntity object.
+	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
+
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();
 
@@ -219,6 +222,14 @@ public:
 	/// @brief Gets the parent of this entity
 	/// @return SpaceEntity
 	SpaceEntity* GetParentEntity() const;
+
+	/// @brief Create a new entity with this entity as it's parent
+	/// @param InName csp::common::String : The name to give the new SpaceEntity.
+	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
+	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
+	CSP_ASYNC_RESULT void
+		CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
 
 	/// @brief Gets the children of this entity
 	/// @return csp::common::List<SpaceEntity>
@@ -356,7 +367,7 @@ private:
 
 	void AddChildEntitiy(SpaceEntity* ChildEntity);
 
-	bool ResolveParentChildRelationship();
+	void ResolveParentChildRelationship();
 
 	SpaceEntitySystem* EntitySystem;
 
