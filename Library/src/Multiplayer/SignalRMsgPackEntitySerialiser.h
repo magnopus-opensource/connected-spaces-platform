@@ -109,6 +109,7 @@ public:
 	csp::common::Vector3 ReadVector3() override;
 	csp::common::Vector4 ReadVector4() override;
 	bool NextValueIsNull() override;
+	bool NextValueIsArray() override;
 	void EnterComponents() override;
 	void LeaveComponents() override;
 	void EnterArray(CSP_OUT uint32_t& OutLength) override;

@@ -145,7 +145,10 @@ CSP_PUBLIC_TEST(CSPEngine, VideoTests, VideoPlayerComponentTest)
 	EXPECT_EQ(VideoComponent->GetMeshComponentId(), ModelComponent->GetId());
 	EXPECT_EQ(VideoComponent->GetIsEnabled(), false);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
