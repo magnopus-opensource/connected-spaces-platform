@@ -379,4 +379,15 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalNoValueOptionalTypeMov
 		FAIL();
 	}
 }
+
+CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalAssignNull)
+{
+	csp::common::Optional<uint64_t> OptionalInstance = 5;
+
+	EXPECT_EQ(*OptionalInstance, 5);
+
+	OptionalInstance = nullptr;
+
+	EXPECT_FALSE(OptionalInstance.HasValue());
+}
 #endif
