@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -122,7 +121,6 @@ MultiplayerConnection::MultiplayerConnection()
 	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
 	, ClientId(0)
 	, Connected(false)
-	, ConversationSystemPtr(CSP_NEW ConversationSystem(this))
 {
 }
 
@@ -147,7 +145,6 @@ MultiplayerConnection::~MultiplayerConnection()
 		CSP_DELETE(Connection);
 		CSP_DELETE(WebSocketClient);
 		CSP_DELETE(NetworkEventManager);
-		CSP_DELETE(ConversationSystemPtr);
 	}
 }
 
@@ -156,7 +153,6 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
 	Connection					   = InBoundConnection.Connection;
 	WebSocketClient				   = InBoundConnection.WebSocketClient;
 	NetworkEventManager			   = InBoundConnection.NetworkEventManager;
-	ConversationSystemPtr		   = InBoundConnection.ConversationSystemPtr;
 	ClientId					   = InBoundConnection.ClientId;
 	DisconnectionCallback		   = InBoundConnection.DisconnectionCallback;
 	ConnectionCallback			   = InBoundConnection.ConnectionCallback;
@@ -191,7 +187,6 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 															 KEEP_ALIVE_INTERVAL,
 															 std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 	NetworkEventManager->SetConnection(Connection);
-	ConversationSystemPtr->SetConnection(Connection);
 	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
 
 	StartEventMessageListening();
@@ -666,11 +661,6 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 uint64_t MultiplayerConnection::GetClientId() const
 {
 	return ClientId;
-}
-
-ConversationSystem* MultiplayerConnection::GetConversationSystem() const
-{
-	return ConversationSystemPtr;
 }
 
 ConnectionState MultiplayerConnection::GetConnectionState() const
