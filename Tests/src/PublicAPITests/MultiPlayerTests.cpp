@@ -270,6 +270,114 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 	SetRandomProperties(InUser, EntitySystem);
 }
 
+void CreateSequenceHierarchy(SpaceEntitySystem* EntitySystem,
+							 csp::common::Optional<uint64_t> ParentId,
+							 const csp::common::Array<uint64_t>& HierarchyItemIds,
+							 csp::multiplayer::SequenceHierarchy& OutSequenceHierarchy,
+							 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
+							 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+	auto [Result]
+		= Awaitable(&csp::multiplayer::SpaceEntitySystem::CreateSequenceHierarchy, EntitySystem, ParentId, HierarchyItemIds).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		const csp::multiplayer::SequenceHierarchy& SequenceHierarchy = Result.GetSequenceHierarchy();
+
+		EXPECT_EQ(SequenceHierarchy.HasParent(), ParentId.HasValue());
+
+		if (SequenceHierarchy.HasParent() && ParentId.HasValue())
+		{
+			EXPECT_EQ(SequenceHierarchy.ParentId, *ParentId);
+		}
+
+		EXPECT_EQ(SequenceHierarchy.Ids.Size(), HierarchyItemIds.Size());
+
+		for (int i = 0; i < SequenceHierarchy.Ids.Size(); ++i)
+		{
+			EXPECT_EQ(SequenceHierarchy.Ids[i], HierarchyItemIds[i]);
+		}
+
+		OutSequenceHierarchy = SequenceHierarchy;
+	}
+}
+
+void UpdateSequenceHierarchy(SpaceEntitySystem* EntitySystem,
+							 csp::common::Optional<uint64_t> ParentId,
+							 const csp::common::Array<uint64_t>& HierarchyItemIds,
+							 csp::multiplayer::SequenceHierarchy& OutSequenceHierarchy,
+							 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
+							 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+	auto [Result]
+		= Awaitable(&csp::multiplayer::SpaceEntitySystem::UpdateSequenceHierarchy, EntitySystem, ParentId, HierarchyItemIds).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		const csp::multiplayer::SequenceHierarchy& SequenceHierarchy = Result.GetSequenceHierarchy();
+
+		EXPECT_EQ(SequenceHierarchy.HasParent(), ParentId.HasValue());
+
+		if (SequenceHierarchy.HasParent() && ParentId.HasValue())
+		{
+			EXPECT_EQ(SequenceHierarchy.ParentId, *ParentId);
+		}
+
+		EXPECT_EQ(SequenceHierarchy.Ids.Size(), HierarchyItemIds.Size());
+
+		for (int i = 0; i < SequenceHierarchy.Ids.Size(); ++i)
+		{
+			EXPECT_EQ(SequenceHierarchy.Ids[i], HierarchyItemIds[i]);
+		}
+
+		OutSequenceHierarchy = SequenceHierarchy;
+	}
+}
+
+void DeleteSequenceHierarchy(SpaceEntitySystem* EntitySystem,
+							 csp::common::Optional<uint64_t> ParentId,
+							 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
+							 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+	auto [Result] = Awaitable(&csp::multiplayer::SpaceEntitySystem::DeleteSequenceHierarchy, EntitySystem, ParentId).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+}
+
+void GetSequenceHierarchy(SpaceEntitySystem* EntitySystem,
+						  csp::common::Optional<uint64_t> ParentId,
+						  csp::multiplayer::SequenceHierarchy& OutSequenceHierarchy,
+						  csp::systems::EResultCode ExpectedResultCode					= csp::systems::EResultCode::Success,
+						  csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+	auto [Result] = Awaitable(&csp::multiplayer::SpaceEntitySystem::GetSequenceHierarchy, EntitySystem, ParentId).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+
+	const csp::multiplayer::SequenceHierarchy& SequenceHierarchy = Result.GetSequenceHierarchy();
+
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		EXPECT_EQ(SequenceHierarchy.HasParent(), ParentId.HasValue());
+
+		if (SequenceHierarchy.HasParent() && ParentId.HasValue())
+		{
+			EXPECT_EQ(SequenceHierarchy.ParentId, *ParentId);
+		}
+
+		OutSequenceHierarchy = SequenceHierarchy;
+	}
+}
+} // namespace
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 {
@@ -2769,8 +2877,242 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 	LogOut(UserSystem);
 }
 #endif
-} // namespace
 
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_SEQUENCE_HIERARCHY_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateSequenceHierarchyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String EntityName1 = "Entity1";
+	csp::common::String EntityName2 = "Entity2";
+	csp::common::String EntityName3 = "Entity3";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [Entity1] = AWAIT(EntitySystem, CreateObject, EntityName1, ObjectTransform);
+	auto [Entity2] = AWAIT(EntitySystem, CreateObject, EntityName2, ObjectTransform);
+	auto [Entity3] = AWAIT(EntitySystem, CreateObject, EntityName3, ObjectTransform);
+
+	// Create root sequence hierarchy
+	{
+		SequenceHierarchy SequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, nullptr, {Entity1->GetId(), Entity2->GetId(), Entity3->GetId()}, SequenceHierarchy);
+		DeleteSequenceHierarchy(EntitySystem, nullptr);
+	}
+
+	// Create branch sequence hierarchy
+	{
+		SequenceHierarchy SequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity2->GetId(), Entity3->GetId()}, SequenceHierarchy);
+		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
+	}
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_UPDATE_SEQUENCE_HIERARCHY_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UpdateSequenceHierarchyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String EntityName1 = "Entity1";
+	csp::common::String EntityName2 = "Entity2";
+	csp::common::String EntityName3 = "Entity3";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [Entity1] = AWAIT(EntitySystem, CreateObject, EntityName1, ObjectTransform);
+	auto [Entity2] = AWAIT(EntitySystem, CreateObject, EntityName2, ObjectTransform);
+	auto [Entity3] = AWAIT(EntitySystem, CreateObject, EntityName3, ObjectTransform);
+
+	// Create root sequence hierarchy
+	{
+		SequenceHierarchy SequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, nullptr, {Entity1->GetId(), Entity2->GetId()}, SequenceHierarchy);
+
+		// Add a new id
+		UpdateSequenceHierarchy(EntitySystem, nullptr, {Entity1->GetId(), Entity2->GetId(), Entity3->GetId()}, SequenceHierarchy);
+		// Remove an id
+		UpdateSequenceHierarchy(EntitySystem, nullptr, {Entity2->GetId(), Entity3->GetId()}, SequenceHierarchy);
+
+		DeleteSequenceHierarchy(EntitySystem, nullptr);
+	}
+
+	// Create branch sequence hierarchy
+	{
+		SequenceHierarchy SequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity2->GetId()}, SequenceHierarchy);
+
+		// Add a new id
+		UpdateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity2->GetId(), Entity3->GetId()}, SequenceHierarchy);
+		// Remove an id
+		UpdateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity3->GetId()}, SequenceHierarchy);
+
+		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
+	}
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GET_SEQUENCE_HIERARCHY_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetSequenceHierarchyTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String EntityName1 = "Entity1";
+	csp::common::String EntityName2 = "Entity2";
+	csp::common::String EntityName3 = "Entity3";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [Entity1] = AWAIT(EntitySystem, CreateObject, EntityName1, ObjectTransform);
+	auto [Entity2] = AWAIT(EntitySystem, CreateObject, EntityName2, ObjectTransform);
+	auto [Entity3] = AWAIT(EntitySystem, CreateObject, EntityName3, ObjectTransform);
+
+	// Create root sequence hierarchy
+	{
+		SequenceHierarchy CreatedSequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, nullptr, {Entity1->GetId(), Entity2->GetId(), Entity3->GetId()}, CreatedSequenceHierarchy);
+
+		SequenceHierarchy RetreivedSequenceHierarchy;
+		GetSequenceHierarchy(EntitySystem, nullptr, RetreivedSequenceHierarchy);
+
+		DeleteSequenceHierarchy(EntitySystem, nullptr);
+	}
+
+	// Create branch sequence hierarchy
+	{
+		SequenceHierarchy CreatedSequenceHierarchy;
+		CreateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity2->GetId(), Entity3->GetId()}, CreatedSequenceHierarchy);
+
+		SequenceHierarchy RetreivedSequenceHierarchy;
+		GetSequenceHierarchy(EntitySystem, Entity1->GetId(), RetreivedSequenceHierarchy);
+
+		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
+	}
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
 
 // Manual hierarchy connection test for receiving objects from another client
 #if 0
@@ -2962,6 +3304,135 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualHierarchyMultipleConnectionTe
 		[](const csp::systems::NullResult& Result)
 		{
 		});
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_REGISTERSEQUENCEHIERARCHYUPDATED_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, RegisterSequenceHierarchyUpdatedTest)
+{
+
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+	auto [CreatedChildEntity]  = AWAIT(CreatedParentEntity, CreateChildEntity, ChildEntityName, ObjectTransform);
+
+	// Test creation at root
+	{
+		bool Called = false;
+
+		auto ChangedCallback = [&Called](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		{
+			Called = true;
+
+			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Create);
+			EXPECT_EQ(Params.ParentId, 0);
+			EXPECT_EQ(Params.IsRoot, true);
+		};
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
+
+		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, nullptr, {CreatedChildEntity->GetId()});
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
+	}
+
+	// Test creation with parent
+	{
+		uint64_t ParentId = CreatedParentEntity->GetId();
+		bool Called		  = false;
+
+		auto ChangedCallback = [&Called, ParentId](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		{
+			Called = true;
+
+			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Create);
+			EXPECT_EQ(Params.ParentId, ParentId);
+			EXPECT_EQ(Params.IsRoot, false);
+		};
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
+
+		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, ParentId, {});
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
+	}
+
+	// Check Callback is called with deleting
+	{
+		bool Called = false;
+
+		auto ChangedCallback = [&Called](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		{
+			Called = true;
+
+			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Delete);
+			EXPECT_EQ(Params.ParentId, 0);
+			EXPECT_EQ(Params.IsRoot, true);
+		};
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
+
+		DeleteSequenceHierarchy(EntitySystem, nullptr);
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
+	}
+
+	// Cleanup
+	DeleteSequenceHierarchy(EntitySystem, CreatedParentEntity->GetId());
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);

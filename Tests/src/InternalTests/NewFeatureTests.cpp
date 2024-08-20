@@ -23,6 +23,7 @@
 	#include "CSP/Common/String.h"
 	#include "Memory/Memory.h"
 	#include "Systems/Assets/LODHelpers.h"
+	#include "CSP/Multiplayer/SequenceHierarchy.h"
 
 	#include "TestHelpers.h"
 	#include "PublicTestBase.h"
@@ -386,6 +387,26 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ValidateNewLODLevelForChainTest)
 
 	Valid = csp::systems::ValidateNewLODLevelForChain(TestChain, 2);
 	EXPECT_FALSE(Valid);
+}
+
+CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateSequenceKeyTest)
+{
+	// Test root hierarchy using a null parent id
+	{
+		const csp::common::String SpaceId = "12345";
+		const csp::common::String Key	  = csp::multiplayer::CreateSequenceKey(nullptr, SpaceId);
+
+		EXPECT_TRUE(Key, "EntityHierarchy:" + SpaceId);
+	}
+
+	// Test branch hierarchy using a parent id
+	{
+		const uint64_t ParentId			  = 111;
+		const csp::common::String SpaceId = "12345";
+		const csp::common::String Key	  = csp::multiplayer::CreateSequenceKey(ParentId, SpaceId);
+
+		EXPECT_TRUE(Key, "EntityHierarchy:" + SpaceId + ":" + ParentId);
+	}
 }
 
 #endif

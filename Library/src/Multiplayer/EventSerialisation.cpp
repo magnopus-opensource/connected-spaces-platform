@@ -19,7 +19,55 @@
 #include "Debug/Logging.h"
 #include "Multiplayer/MultiplayerKeyConstants.h"
 
+#include <regex>
+
 using namespace csp::multiplayer;
+
+namespace
+{
+ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
+{
+	if (UpdateType == 0)
+	{
+		return ESequenceUpdateType::Create;
+	}
+	else if (UpdateType == 1)
+	{
+		return ESequenceUpdateType::Update;
+	}
+	else if (UpdateType == 2)
+	{
+		return ESequenceUpdateType::Delete;
+	}
+	else
+	{
+		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
+	}
+}
+
+csp::common::Optional<uint64_t> GetParentIdFromSequenceKey(const csp::common::String& SequenceKey)
+{
+	const std::string SequenceKeyString(SequenceKey.c_str());
+	// Match item after second ':' to get our parent id
+	const std::regex Expression("^(?:[^:]*\:){2}([^:]*)");
+	std::smatch Match;
+	const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
+
+	if (Found == false)
+	{
+		return nullptr;
+	}
+
+	std::string ParentIdString = Match[1];
+
+	if (ParentIdString.empty())
+	{
+		return nullptr;
+	}
+	return std::stoull(ParentIdString);
+}
+
+} // namespace
 
 EventDeserialiser::EventDeserialiser() : SenderClientId(0)
 {
@@ -273,22 +321,7 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	int64_t UpdateType = EventData[0].GetInt();
 
-	if (UpdateType == 0)
-	{
-		EventParams.UpdateType = ESequenceUpdateType::Create;
-	}
-	else if (UpdateType == 1)
-	{
-		EventParams.UpdateType = ESequenceUpdateType::Update;
-	}
-	else if (UpdateType == 2)
-	{
-		EventParams.UpdateType = ESequenceUpdateType::Delete;
-	}
-	else
-	{
-		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
-	}
+	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
 	EventParams.Key = EventData[1].GetString();
 
@@ -296,5 +329,33 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
 	{
 		EventParams.NewKey = EventData[2].GetString();
+	}
+}
+
+void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+{
+	EventDeserialiser::Parse(EventValues);
+
+	if (EventData.Size() != 3)
+	{
+		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Invalid arguments.");
+		return;
+	}
+
+	int64_t UpdateType	   = EventData[0].GetInt();
+	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
+
+	csp::common::String Key					 = EventData[1].GetString();
+	csp::common::Optional<uint64_t> ParentId = GetParentIdFromSequenceKey(Key);
+
+	if (ParentId.HasValue())
+	{
+		EventParams.IsRoot	 = false;
+		EventParams.ParentId = *ParentId;
+	}
+	else
+	{
+		EventParams.IsRoot	 = true;
+		EventParams.ParentId = 0;
 	}
 }

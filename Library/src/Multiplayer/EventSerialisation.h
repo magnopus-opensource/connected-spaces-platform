@@ -126,4 +126,18 @@ private:
 	SequenceChangedParams EventParams;
 };
 
+class SequenceHierarchyChangedEventDeserialiser : public EventDeserialiser
+{
+public:
+	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	const SequenceHierarchyChangedParams& GetEventParams() const
+	{
+		return EventParams;
+	}
+
+private:
+	SequenceHierarchyChangedParams EventParams;
+};
+
 } // namespace csp::multiplayer

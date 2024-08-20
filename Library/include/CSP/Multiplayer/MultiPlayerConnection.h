@@ -92,6 +92,7 @@ public:
 	friend class csp::systems::SystemsManager;
 	friend class csp::systems::UserSystem;
 	friend class SpaceEntityEventHandler;
+	friend class SpaceEntitySystem;
 	friend class ClientElectionManager;
 	friend class ClientElectionEventHandler;
 	friend void csp::memory::Delete<MultiplayerConnection>(MultiplayerConnection* Ptr);
@@ -123,7 +124,6 @@ public:
 
 	// Callback to receive sequence changes, contains a SequenceChangedParams with the details.
 	typedef std::function<void(const SequenceChangedParams&)> SequenceChangedCallbackHandler;
-
 
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
