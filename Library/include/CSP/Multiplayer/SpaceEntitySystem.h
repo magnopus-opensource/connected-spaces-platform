@@ -351,6 +351,10 @@ public:
 	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
 	CSP_ASYNC_RESULT void GetSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, SequenceHierarchyResultCallback Callback);
 
+	/// @brief Gets all hierarchies for a space
+	/// @param Callback SequenceHierarchiesResultCallback : A callback when the asynchronous task finishes.
+	CSP_ASYNC_RESULT void GetAllSequenceHierarchies(SequenceHierarchiesResultCallback Callback);
+
 	/// @brief Deletes an entity hierarchy for a given parent entity id. Pass null to delete the root hierarchy.
 	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to get the root hierarchy.
 	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.

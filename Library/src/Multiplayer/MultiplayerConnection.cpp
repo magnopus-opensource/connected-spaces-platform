@@ -442,20 +442,28 @@ void MultiplayerConnection::StartEventMessageListening()
 		}
 		else if (EventType == "SequenceChanged")
 		{
+			SequenceChangedEventDeserialiser SequenceDeserialiser;
+			SequenceDeserialiser.Parse(EventValues);
+
 			if (SequenceChangedCallback)
 			{
-				SequenceChangedEventDeserialiser Deserialiser;
-				Deserialiser.Parse(EventValues);
-				SequenceChangedCallback(Deserialiser.GetEventParams());
+				SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
 			}
 
 			auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
 
 			if (EntitySystem->SequenceHierarchyChangedCallback)
 			{
-				SequenceHierarchyChangedEventDeserialiser Deserialiser;
-				Deserialiser.Parse(EventValues);
-				EntitySystem->SequenceHierarchyChangedCallback(Deserialiser.GetEventParams());
+				// Only fire the SequenceHierarchy callback if its an EntityHierarchy sequence
+				csp::common::String Key			 = SequenceDeserialiser.GetEventParams().Key;
+				csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
+
+				if (SequenceType == "EntityHierarchy")
+				{
+					SequenceHierarchyChangedEventDeserialiser Deserialiser;
+					Deserialiser.Parse(EventValues);
+					EntitySystem->SequenceHierarchyChangedCallback(Deserialiser.GetEventParams());
+				}
 			}
 		}
 		else

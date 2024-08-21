@@ -7,12 +7,6 @@
 namespace csp::multiplayer
 {
 
-namespace
-{
-const csp::common::String SequenceTypeName = "EntityHierarchy";
-
-}
-
 const SequenceHierarchy& csp::multiplayer::SequenceHierarchyResult::GetSequenceHierarchy() const
 {
 	return SequenceHierarchy;
@@ -24,11 +18,11 @@ void SequenceHierarchyResult::OnResponse(const csp::services::ApiResponseBase* A
 
 common::String CreateSequenceKey(common::Optional<uint64_t> ParentId, const common::String& SpaceId)
 {
-	common::String Key = SequenceTypeName + ":" + SpaceId;
+	common::String Key = SequenceHierarchyName + ":" + SpaceId;
 
 	if (ParentId.HasValue())
 	{
-		Key += (std::string(":") + std::to_string(*ParentId)).c_str();
+		Key += ":" + systems::SequenceIdPrefix + std::to_string(*ParentId).c_str();
 	}
 
 	return Key;
@@ -52,5 +46,14 @@ void SequenceToSequenceHierarchy(const systems::Sequence& Sequence, SequenceHier
 bool SequenceHierarchy::HasParent() const
 {
 	return ParentId != 0;
+}
+
+const csp::common::Array<SequenceHierarchy>& SequenceHierarchiesResult::GetSequenceHierarchies() const
+{
+	return SequenceHierarchies;
+}
+
+void SequenceHierarchiesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
 }
 } // namespace csp::multiplayer

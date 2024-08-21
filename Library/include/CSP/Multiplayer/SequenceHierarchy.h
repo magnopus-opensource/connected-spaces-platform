@@ -57,6 +57,36 @@ private:
 	SequenceHierarchy SequenceHierarchy;
 };
 
+/// @ingroup Space Entity System
+/// @brief Data class used to contain information when attempting to get an array of sequence hierachies
+class CSP_API SequenceHierarchiesResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	friend class SpaceEntitySystem;
+
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Retreives the SequenceHierarchies from the result.
+	const csp::common::Array<SequenceHierarchy>& GetSequenceHierarchies() const;
+
+	CSP_NO_EXPORT SequenceHierarchiesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+		: csp::systems::ResultBase(ResCode, HttpResCode) {};
+
+private:
+	SequenceHierarchiesResult(void*) {};
+
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	csp::common::Array<SequenceHierarchy> SequenceHierarchies;
+};
+
+static inline const csp::common::String SequenceHierarchyName = "EntityHierarchy";
+
 typedef std::function<void(const SequenceHierarchyResult& Result)> SequenceHierarchyResultCallback;
+typedef std::function<void(const SequenceHierarchiesResult& Result)> SequenceHierarchiesResultCallback;
 
 } // namespace csp::multiplayer

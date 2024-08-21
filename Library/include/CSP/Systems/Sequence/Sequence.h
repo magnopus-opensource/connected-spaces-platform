@@ -19,6 +19,10 @@
 
 namespace csp::systems
 {
+
+// Prefix needed when storing multiplayer unsigned integer ids in keys
+static inline const csp::common::String SequenceIdPrefix = "m_Id_";
+
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
 class CSP_API Sequence

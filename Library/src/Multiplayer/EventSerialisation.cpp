@@ -45,29 +45,40 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
 	}
 }
 
-csp::common::Optional<uint64_t> GetParentIdFromSequenceKey(const csp::common::String& SequenceKey)
+std::string RemoveIdPrefix(const std::string& Id)
+{
+	if (Id.size() > 5)
+	{
+		return Id.substr(5);
+	}
+
+	return Id;
+}
+
+} // namespace
+
+csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::String& SequenceKey, int i)
 {
 	const std::string SequenceKeyString(SequenceKey.c_str());
 	// Match item after second ':' to get our parent id
-	const std::regex Expression("^(?:[^:]*\:){2}([^:]*)");
+	const std::regex Expression("^(?:[^:]*\:){" + std::to_string(i) + "}([^:]*)");
 	std::smatch Match;
 	const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 
 	if (Found == false)
 	{
-		return nullptr;
+		return "";
 	}
 
 	std::string ParentIdString = Match[1];
 
 	if (ParentIdString.empty())
 	{
-		return nullptr;
+		return "";
 	}
-	return std::stoull(ParentIdString);
-}
 
-} // namespace
+	return ParentIdString.c_str();
+}
 
 EventDeserialiser::EventDeserialiser() : SenderClientId(0)
 {
@@ -345,8 +356,15 @@ void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const st
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	csp::common::String Key					 = EventData[1].GetString();
-	csp::common::Optional<uint64_t> ParentId = GetParentIdFromSequenceKey(Key);
+	csp::common::String Key	   = EventData[1].GetString();
+	std::string ParentIdString = GetSequenceKeyIndex(Key, 2).c_str();
+	csp::common::Optional<uint64_t> ParentId;
+
+	if (ParentIdString.empty() == false)
+	{
+		ParentIdString = RemoveIdPrefix(ParentIdString);
+		ParentId	   = std::stoull(ParentIdString.c_str());
+	}
 
 	if (ParentId.HasValue())
 	{

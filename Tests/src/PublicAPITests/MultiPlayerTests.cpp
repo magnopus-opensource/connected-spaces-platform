@@ -376,6 +376,24 @@ void GetSequenceHierarchy(SpaceEntitySystem* EntitySystem,
 		OutSequenceHierarchy = SequenceHierarchy;
 	}
 }
+
+void GetAllSequenceHierarchies(SpaceEntitySystem* EntitySystem,
+							   csp::common::Array<csp::multiplayer::SequenceHierarchy>& OutSequenceHierarchies,
+							   csp::systems::EResultCode ExpectedResultCode					 = csp::systems::EResultCode::Success,
+							   csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+{
+	auto [Result] = Awaitable(&csp::multiplayer::SpaceEntitySystem::GetAllSequenceHierarchies, EntitySystem).Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+
+	const csp::common::Array<csp::multiplayer::SequenceHierarchy>& SequenceHierarchies = Result.GetSequenceHierarchies();
+
+	if (ExpectedResultCode == csp::systems::EResultCode::Success)
+	{
+		OutSequenceHierarchies = SequenceHierarchies;
+	}
+}
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_MANUAL_SIGNALRCONNECTION_TEST
@@ -3100,6 +3118,102 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetSequenceHierarchyTest)
 
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GET_SEQUENCE_HIERARCHY_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetAllSequenceHierarchiesTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities
+	csp::common::String EntityName1 = "Entity1";
+	csp::common::String EntityName2 = "Entity2";
+	csp::common::String EntityName3 = "Entity3";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [Entity1] = AWAIT(EntitySystem, CreateObject, EntityName1, ObjectTransform);
+	auto [Entity2] = AWAIT(EntitySystem, CreateObject, EntityName2, ObjectTransform);
+	auto [Entity3] = AWAIT(EntitySystem, CreateObject, EntityName3, ObjectTransform);
+
+	// Create root hierarchy
+	SequenceHierarchy CreatedRootSequenceHierarchy;
+	CreateSequenceHierarchy(EntitySystem, nullptr, {Entity1->GetId(), Entity2->GetId(), Entity3->GetId()}, CreatedRootSequenceHierarchy);
+
+	// Create branch hierarchy
+	SequenceHierarchy CreatedBranchSequenceHierarchy;
+	CreateSequenceHierarchy(EntitySystem, Entity1->GetId(), {Entity2->GetId(), Entity3->GetId()}, CreatedBranchSequenceHierarchy);
+
+	csp::common::Array<SequenceHierarchy> Hierarchies;
+	GetAllSequenceHierarchies(EntitySystem, Hierarchies);
+
+	EXPECT_EQ(Hierarchies.Size(), 2);
+
+	bool RootFound	 = false;
+	bool ParentFound = false;
+
+	for (size_t i = 0; i < Hierarchies.Size(); ++i)
+	{
+		if (Hierarchies[i].HasParent() == false)
+		{
+			RootFound = true;
+			EXPECT_EQ(Hierarchies[i].Ids.Size(), 3);
+		}
+		else
+		{
+			ParentFound = true;
+			EXPECT_EQ(Hierarchies[i].Ids.Size(), 2);
+			EXPECT_EQ(Hierarchies[i].ParentId, Entity1->GetId());
+		}
+	}
+
+	EXPECT_TRUE(RootFound);
+	EXPECT_TRUE(ParentFound);
+
+	// Cleanup
+	DeleteSequenceHierarchy(EntitySystem, nullptr);
+	DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
