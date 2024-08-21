@@ -234,8 +234,6 @@ void SpaceEntitySystem::Initialise()
 	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 	csp::events::EventSystem::Get().RegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
 
-	SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-
 	IsInitialised = true;
 }
 
@@ -1112,6 +1110,7 @@ void SpaceEntitySystem::CreateSequenceHierarchy(const common::Optional<uint64_t>
 		Callback(Result);
 	};
 
+	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
 	SequenceSystem->CreateSequence(Key, "GroupId", SpaceId, HierarchyItemStringIds, MetaData, CreateSequenceCallback);
 }
 
@@ -1136,32 +1135,34 @@ void SpaceEntitySystem::GetSequenceHierarchy(const csp::common::Optional<uint64_
 		Callback(Result);
 	};
 
+	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
 	SequenceSystem->GetSequence(Key, GetSequenceCallback);
 }
 
-void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchiesResultCallback Callback)
+void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionResultCallback Callback)
 {
 	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
 	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
 
 	auto GetSequencesCallback = [Callback](const systems::SequencesResult& GetSequenceResult)
 	{
-		SequenceHierarchiesResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
+		SequenceHierarchyCollectionResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
 
-		if (GetSequenceResult.GetResultCode() != systems::EResultCode::InProgress)
+		if (GetSequenceResult.GetResultCode() == systems::EResultCode::Success)
 		{
-			auto GetSequenceResultSequences = GetSequenceResult.GetSequences();
-			Result.SequenceHierarchies		= common::Array<SequenceHierarchy>(GetSequenceResultSequences.Size());
+			auto GetSequenceResultSequences	   = GetSequenceResult.GetSequences();
+			Result.SequenceHierarchyCollection = common::Array<SequenceHierarchy>(GetSequenceResultSequences.Size());
 
 			for (size_t i = 0; i < GetSequenceResultSequences.Size(); ++i)
 			{
-				SequenceToSequenceHierarchy(GetSequenceResultSequences[i], Result.SequenceHierarchies[i]);
+				SequenceToSequenceHierarchy(GetSequenceResultSequences[i], Result.SequenceHierarchyCollection[i]);
 			}
 		}
 
 		Callback(Result);
 	};
 
+	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
 	SequenceSystem->GetSequencesByCriteria({}, SequenceHierarchyName, "GroupId", {SpaceId}, {}, GetSequencesCallback);
 }
 
@@ -1176,6 +1177,7 @@ void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint
 		Callback(Result);
 	};
 
+	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
 	SequenceSystem->DeleteSequences({Key}, DeleteSequenceCallback);
 }
 

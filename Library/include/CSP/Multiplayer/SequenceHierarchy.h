@@ -12,9 +12,13 @@ class Sequence;
 namespace csp::multiplayer
 {
 
+/// @ingroup Space Entity System
+/// @brief Builds a key which is used in the underlying Sequence System.
 common::String CreateSequenceKey(csp::common::Optional<uint64_t> ParentId, const csp::common::String& SpaceId);
 
 /// @ingroup Space Entity System
+/// @brief Class which exposes data that is relevent to entity hierarchies, which comes from the underlying Sequence System.
+/// This allows users to manage the ordering of child entites within their parent.
 class CSP_API SequenceHierarchy
 {
 public:
@@ -28,6 +32,10 @@ public:
 	uint64_t ParentId = 0;
 };
 
+/// @brief Converts a sequence retrieved from the Sequence System to a SequenceHierarchy.
+/// This allows callers to have access to the relevent data from a Sequence.
+/// @param Sequence Sequence : The Sequence to convert.
+/// @param Hierarchy SequenceHierarchy : The Sequence Hierarchy to create.
 void SequenceToSequenceHierarchy(const systems::Sequence& Sequence, SequenceHierarchy& Hierarchy);
 
 /// @ingroup Space Entity System
@@ -59,7 +67,7 @@ private:
 
 /// @ingroup Space Entity System
 /// @brief Data class used to contain information when attempting to get an array of sequence hierachies
-class CSP_API SequenceHierarchiesResult : public csp::systems::ResultBase
+class CSP_API SequenceHierarchyCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceEntitySystem;
@@ -71,22 +79,24 @@ class CSP_API SequenceHierarchiesResult : public csp::systems::ResultBase
 
 public:
 	/// @brief Retreives the SequenceHierarchies from the result.
-	const csp::common::Array<SequenceHierarchy>& GetSequenceHierarchies() const;
+	const csp::common::Array<SequenceHierarchy>& GetSequenceHierarchyCollection() const;
 
-	CSP_NO_EXPORT SequenceHierarchiesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+	CSP_NO_EXPORT SequenceHierarchyCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 		: csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	SequenceHierarchiesResult(void*) {};
+	SequenceHierarchyCollectionResult(void*) {};
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<SequenceHierarchy> SequenceHierarchies;
+	csp::common::Array<SequenceHierarchy> SequenceHierarchyCollection;
 };
 
+CSP_START_IGNORE
 static inline const csp::common::String SequenceHierarchyName = "EntityHierarchy";
+CSP_END_IGNORE
 
 typedef std::function<void(const SequenceHierarchyResult& Result)> SequenceHierarchyResultCallback;
-typedef std::function<void(const SequenceHierarchiesResult& Result)> SequenceHierarchiesResultCallback;
+typedef std::function<void(const SequenceHierarchyCollectionResult& Result)> SequenceHierarchyCollectionResultCallback;
 
 } // namespace csp::multiplayer

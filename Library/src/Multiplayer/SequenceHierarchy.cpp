@@ -48,12 +48,12 @@ bool SequenceHierarchy::HasParent() const
 	return ParentId != 0;
 }
 
-const csp::common::Array<SequenceHierarchy>& SequenceHierarchiesResult::GetSequenceHierarchies() const
+const csp::common::Array<SequenceHierarchy>& SequenceHierarchyCollectionResult::GetSequenceHierarchyCollection() const
 {
-	return SequenceHierarchies;
+	return SequenceHierarchyCollection;
 }
 
-void SequenceHierarchiesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+void SequenceHierarchyCollectionResult ::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 }
 } // namespace csp::multiplayer
