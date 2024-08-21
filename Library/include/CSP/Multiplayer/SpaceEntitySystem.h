@@ -360,7 +360,8 @@ public:
 	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
 	CSP_ASYNC_RESULT void DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, csp::systems::NullResultCallback Callback);
 
-	// TODO: comment
+	/// @brief Sets a callback for a sequence  hierarchy changed event.
+	/// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence hierarchy that has been changed.
 	CSP_EVENT void SetSequenceHierarchyChangedCallback(SequenceHierarchyChangedCallbackHandler Callback);
 
 protected:
