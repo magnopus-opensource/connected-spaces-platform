@@ -4,6 +4,7 @@
 #include "CSP/Multiplayer/SequenceHierarchy.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/Sequence/Sequence.h"
 #include "Debug/Logging.h"
 #include "PublicTestBase.h"
 #include "SpaceSystemTestHelpers.h"
@@ -148,7 +149,7 @@ void GetAllSequenceHierarchies(SpaceEntitySystem* EntitySystem,
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_CREATE_SEQUENCE_KEY_TEST
-CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateSequenceKeyTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceKeyTest)
 {
 	// Test root hierarchy using a null parent id
 	{
@@ -164,13 +165,13 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, CreateSequenceKeyTest)
 		const csp::common::String SpaceId = "12345";
 		const csp::common::String Key	  = csp::multiplayer::CreateSequenceKey(ParentId, SpaceId);
 
-		EXPECT_EQ(Key, "EntityHierarchy:" + SpaceId + ":" + ParentId);
+		EXPECT_EQ(Key, "EntityHierarchy:" + SpaceId + ":" + csp::systems::SequenceIdPrefix + std::to_string(ParentId).c_str());
 	}
 }
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_CREATE_SEQUENCE_HIERARCHY_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateSequenceHierarchyTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceHierarchyTest)
 {
 	SetRandSeed();
 
@@ -242,7 +243,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateSequenceHierarchyTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_UPDATE_SEQUENCE_HIERARCHY_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UpdateSequenceHierarchyTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, UpdateSequenceHierarchyTest)
 {
 	SetRandSeed();
 
@@ -326,7 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UpdateSequenceHierarchyTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_GET_SEQUENCE_HIERARCHY_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetSequenceHierarchyTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetSequenceHierarchyTest)
 {
 	SetRandSeed();
 
@@ -406,7 +407,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetSequenceHierarchyTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_GET_SEQUENCE_HIERARCHY_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, GetAllSequenceHierarchiesTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetAllSequenceHierarchiesTest)
 {
 	SetRandSeed();
 
@@ -616,7 +617,7 @@ void SetupSpace()
 	LogOut(UserSystem);
 }
 
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualHierarchyMultipleConnectionTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, ManualHierarchyMultipleConnectionTest)
 {
 
 	SetRandSeed();
@@ -698,7 +699,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualHierarchyMultipleConnectionTe
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_SEQUENCE_HIERARCHY_TESTS || RUN_SEQUENCE_HIERARCHY_REGISTERSEQUENCE_HIERARCHYUPDATED_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, RegisterSequenceHierarchyUpdatedTest)
+CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpdatedTest)
 {
 
 	SetRandSeed();
