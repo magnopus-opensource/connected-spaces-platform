@@ -1853,4 +1853,42 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 	GetSpace(SpaceId, GetSpaceCallback);
 }
 
+void SpaceSystem::DuplicateSpace(const String& SpaceId,
+								 const String& NewName,
+								 SpaceAttributes NewAttributes,
+								 const Optional<Array<String>>& MemberGroupIds,
+								 bool ShallowCopy,
+								 SpaceResultCallback Callback)
+{
+	auto Request = std::make_shared<chsaggregation::DuplicateSpaceRequest>();
+	Request->SetSpaceId(SpaceId);
+	Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
+	Request->SetNewUniqueName(NewName);
+	Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
+	Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
+	Request->SetShallowCopy(ShallowCopy);
+
+	if (MemberGroupIds.HasValue())
+	{
+		std::vector<String> GroupIds;
+		GroupIds.reserve(MemberGroupIds->Size());
+
+		for (int i = 0; i < MemberGroupIds->Size(); ++i)
+		{
+			GroupIds.push_back(MemberGroupIds->operator[](i));
+		}
+
+		Request->SetMemberGroupIds(GroupIds);
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
+
+	static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDuplicatePost(SpaceId,		  // spaceId
+																					  false,		  // asyncCall
+																					  Request,		  // RequestBody
+																					  ResponseHandler // ResponseHandler
+	);
+}
+
 } // namespace csp::systems
