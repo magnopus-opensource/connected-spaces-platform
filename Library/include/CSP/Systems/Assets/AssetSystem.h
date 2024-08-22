@@ -90,7 +90,7 @@ public:
 	CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
 
 	/// @brief Deletes a given array of asset collections.
-	/// @param  Array<AssetCollection> AssetCollections : The array of asset collections to delete
+	/// @param AssetCollections csp::common::Array<AssetCollection> : The array of asset collections to delete
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& AssetCollections, NullResultCallback Callback);
 
