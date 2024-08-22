@@ -111,4 +111,17 @@ public:
 	csp::common::String NewKey;
 };
 
+class CSP_API SequenceHierarchyChangedParams
+{
+public:
+	/// @brief The type of update to the sequence.
+	ESequenceUpdateType UpdateType;
+
+	/// @brief The parent for the updated sequence hierarchy.
+	uint64_t ParentId;
+
+	/// @brief True if this is the root hierarchy.
+	bool IsRoot;
+};
+
 } // namespace csp::multiplayer
