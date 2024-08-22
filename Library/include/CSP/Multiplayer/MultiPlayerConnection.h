@@ -54,7 +54,6 @@ namespace csp::multiplayer
 
 class ReplicatedValue;
 class SpaceEntitySystem;
-class ConversationSystem;
 class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
@@ -87,7 +86,6 @@ class CSP_API MultiplayerConnection
 {
 public:
 	/** @cond DO_NOT_DOCUMENT */
-	friend class ConversationSystem;
 	friend class csp::systems::SpaceSystem;
 	friend class csp::systems::SystemsManager;
 	friend class csp::systems::UserSystem;
@@ -185,10 +183,6 @@ public:
 	/// @return uint64_t the ClientID for this connection.
 	uint64_t GetClientId() const;
 
-	/// @brief Gets a pointer to the conversation system.
-	/// @return A pointer to the conversation system.
-	ConversationSystem* GetConversationSystem() const;
-
 	/// @brief Gets the current connection state.
 	/// @return A ConnectionState enum value.
 	ConnectionState GetConnectionState() const;
@@ -247,7 +241,6 @@ private:
 	class csp::multiplayer::SignalRConnection* Connection;
 	class csp::multiplayer::IWebSocketClient* WebSocketClient;
 	class NetworkEventManagerImpl* NetworkEventManager;
-	ConversationSystem* ConversationSystemPtr;
 
 	uint64_t ClientId;
 

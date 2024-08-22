@@ -89,6 +89,11 @@ public:
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback);
 
+	/// @brief Deletes a given array of asset collections.
+	/// @param AssetCollections csp::common::Array<AssetCollection> : The array of asset collections to delete
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& AssetCollections, NullResultCallback Callback);
+
 	/// @brief Copies an array of asset collections to another space. Note that all source asset collections must belong to the same space.
 	/// @param SourceAssetCollections csp::common::Array<AssetCollection> : The array of asset collections to copy. They must all belong to the same
 	/// space.

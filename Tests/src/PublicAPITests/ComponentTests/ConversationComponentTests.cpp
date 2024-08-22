@@ -231,7 +231,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		}
 
 		{
-			auto [Result] = AWAIT(ConversationComponent, GetAllMessages);
+			auto [Result] = AWAIT(ConversationComponent, GetMessagesFromConversation, nullptr, nullptr);
 
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetTotalCount(), 2);
@@ -240,7 +240,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		}
 
 		{
-			auto [Result] = AWAIT(ConversationComponent, GetMessage, MessageId);
+			auto [Result] = AWAIT(ConversationComponent, GetMessageInfo, MessageId);
 
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 			EXPECT_EQ(Result.GetMessageInfo().MessageId, MessageId);
@@ -254,124 +254,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 		{
 			auto [Result] = AWAIT(ConversationComponent, DeleteConversation);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		}
-
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
-	}
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_MOVE_TEST
-CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
-
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	const char* TestSpaceName2		  = "OLY-UNITTEST-SPACE-REWIND-2";
-	const char* TestSpaceDescription2 = "OLY-UNITTEST-SPACEDESC-REWIND";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
-
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-
-	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-		EntitySystem->SetEntityCreatedCallback(
-			[](csp::multiplayer::SpaceEntity* Entity)
-			{
-			});
-
-		csp::common::String ObjectName1 = "Object 1";
-		csp::common::String ObjectName2 = "Object 2";
-
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-
-		auto [CreatedObject1] = AWAIT(EntitySystem, CreateObject, ObjectName1, ObjectTransform);
-		auto [CreatedObject2] = AWAIT(EntitySystem, CreateObject, ObjectName2, ObjectTransform);
-
-		// Create conversation component
-		auto* ConversationComponent1 = (ConversationSpaceComponent*) CreatedObject1->AddComponent(ComponentType::Conversation);
-		auto* ConversationComponent2 = (ConversationSpaceComponent*) CreatedObject2->AddComponent(ComponentType::Conversation);
-
-		csp::common::String ConversationId;
-		csp::common::String MessageId;
-
-		{
-			auto [Result] = AWAIT(ConversationComponent1, CreateConversation, "TestMessage");
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-			EXPECT_TRUE(Result.GetValue() != "");
-
-			ConversationId = Result.GetValue();
-		}
-
-		SpaceTransform DefaultTransform = SpaceTransform();
-
-		{
-			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-			EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-		}
-
-		{
-			auto Result = ConversationComponent2->MoveConversationFromComponent(*ConversationComponent1);
-
-			EXPECT_TRUE(Result);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent1, GetConversationInfo);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, GetConversationInfo);
-
-			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-			EXPECT_EQ(Result.GetConversationInfo().UserId, UserId);
-			EXPECT_EQ(Result.GetConversationInfo().Message, "TestMessage");
-			EXPECT_EQ(Result.GetConversationInfo().EditedTimestamp, "");
-		}
-
-		{
-			auto [Result] = AWAIT(ConversationComponent2, DeleteConversation);
 
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}

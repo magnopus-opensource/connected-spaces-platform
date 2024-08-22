@@ -28,7 +28,6 @@
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
-#include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include <optional>
@@ -48,8 +47,8 @@ enum class ConversationPropertyKeys
 	Title,
 	Date_DEPRECATED,
 	NumberOfReplies_DEPRECATED,
-    Resolved,
-    ConversationCameraPosition,
+	Resolved,
+	ConversationCameraPosition,
 	Num
 };
 
@@ -81,16 +80,17 @@ public:
 	/// @brief Deletes a particular message
 	/// @param MessageId csp::common::String : if of the message that will be deleted
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
+	CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, MessageResultCallback Callback);
 
-	/// @brief Retrieves one particular message
-	/// @param MessageId csp::common::String : id of the message to be retrieved
-	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback);
-
-	/// @brief Retrieves all messages in conversation
-	/// @param Callback MessageCollectionResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetAllMessages(MessageCollectionResultCallback Callback);
+	/// @brief Retrieves messages that are linked to the Conversation ID present in the component.
+	/// @param ResultsSkipNumber Optional<int> : Optional parameter representing the number of result entries that will be skipped from the result.
+	/// For no skip pass nullptr.
+	/// @param ResultsMaxNumber Optional<int> : Optional parameter representing the maximum number of result entries to be retrieved. For all
+	/// available result entries pass nullptr.
+	/// @param Callback MessageCollectionResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void GetMessagesFromConversation(const csp::common::Optional<int>& ResultsSkipNumber,
+													  const csp::common::Optional<int>& ResultsMaxNumber,
+													  MessageCollectionResultCallback Callback);
 
 	/// @brief Get Conversation MessageInfo
 	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
@@ -133,25 +133,21 @@ public:
 	bool GetIsActive() const;
 	void SetIsActive(bool Value);
 
-	/// @brief Moves the conversation associated with the other component to this one and remmove the association with the other component
-	/// @param OtherConversationComponent - The component to move the conversation from.
-	/// @return true if successful, false if there is already a conversation associated with this component
-	bool MoveConversationFromComponent(ConversationSpaceComponent& OtherConversationComponent);
 	/// @brief Sets the Title of the conversation.
 	/// @param Value - The new title.
 	void SetTitle(const csp::common::String& Value);
 	/// @brief Gets the Title of the conversation.
 	const csp::common::String& GetTitle() const;
 
-    /// @brief Sets the resolved value for indicating that a conversation is resolved.
-    /// @param Value - The resolved state.
-    void SetResolved(bool Value);
+	/// @brief Sets the resolved value for indicating that a conversation is resolved.
+	/// @param Value - The resolved state.
+	void SetResolved(bool Value);
 	/// @brief Gets the resolved value of the conversation.
 	bool GetResolved() const;
 
-    /// @brief Sets the value for the camera position used to view the conversation.
-    /// @param InValue The position for the camera.
-    void SetConversationCameraPosition(const csp::common::Vector3& InValue);
+	/// @brief Sets the value for the camera position used to view the conversation.
+	/// @param InValue The position for the camera.
+	void SetConversationCameraPosition(const csp::common::Vector3& InValue);
 	/// @brief Gets the value for the camera position of the conversation.
 	/// @return The camera view position.
 	const csp::common::Vector3& GetConversationCameraPosition() const;
@@ -160,10 +156,16 @@ public:
 	const int64_t GetNumberOfReplies() const;
 
 private:
-	ConversationSystem* ConversationSystem;
 	void SetConversationId(const csp::common::String& Value);
 	void RemoveConversationId();
 	const csp::common::String& GetConversationId() const;
+
+	void StoreConversationMessage(const csp::systems::Space& Space,
+								  const csp::common::String& UserId,
+								  const csp::common::String& Message,
+								  MessageResultCallback Callback) const;
+
+    void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 };
 
 } // namespace csp::multiplayer

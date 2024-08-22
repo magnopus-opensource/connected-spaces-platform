@@ -138,7 +138,6 @@ enum class ConversationMessageType
 class CSP_API MessageResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class ConversationSystem;
 	friend class ConversationSpaceComponent;
 
 	CSP_START_IGNORE
@@ -173,7 +172,7 @@ private:
 class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class ConversationSystem;
+	friend class ConversationSpaceComponent;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -221,7 +220,7 @@ private:
 class CSP_API ConversationResult : public csp::systems::ResultBase
 {
 	/** @cond DO_NOT_DOCUMENT */
-	friend class ConversationSystem;
+	friend class ConversationSpaceComponent;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

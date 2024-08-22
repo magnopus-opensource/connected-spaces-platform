@@ -78,7 +78,7 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
 		return "HolocapAudio";
 	else if (AssetType == systems::EAssetType::AUDIO)
 		return "Audio";
-    else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
+	else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
 		return "GaussianSplat";
 	else
 	{
@@ -215,6 +215,40 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
 }
 
+void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& SourceAssetCollectionIDs, NullResultCallback Callback)
+{
+	if (SourceAssetCollectionIDs.Size() == 0)
+	{
+		CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to delete.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+		return;
+	}
+
+	std::vector<csp::common::String> AssetCollectionIds;
+
+	for (size_t i = 0; i < SourceAssetCollectionIDs.Size(); ++i)
+	{
+		AssetCollectionIds.emplace_back(SourceAssetCollectionIDs[i].Id);
+	}
+
+	if (AssetCollectionIds.size() == 0)
+	{
+		CSP_LOG_MSG(LogLevel::Error, "No asset collections could be converted to to required format to delete.");
+
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+		return;
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
+			Callback,
+			nullptr);
+
+	static_cast<chs::PrototypeApi*>(PrototypeAPI)
+		->apiV1PrototypesDelete(AssetCollectionIds, ResponseHandler, csp::common::CancellationToken::Dummy());
+}
+
 void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections,
 											  const csp::common::String& DestSpaceId,
 											  bool CopyAsync,
@@ -269,7 +303,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
 			std::nullopt,							// Tags
 			std::nullopt,							// TagsAll
-			AssetCollectionIds,					// const std::optional<std::vector<utility::string_t>>& Ids
+			AssetCollectionIds,						// const std::optional<std::vector<utility::string_t>>& Ids
 			std::nullopt,							// Names
 			std::nullopt,							// PartialNames
 			std::nullopt,							// ExcludedIds
@@ -282,12 +316,12 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			std::nullopt,							// PrototypeOwnerIds
 			std::nullopt,							// ReadAccessFilters
 			std::nullopt,							// WriteAccessFilters
-            std::nullopt,							// OrganizationIds
+			std::nullopt,							// OrganizationIds
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
-			CopyAsync,							// asyncCall
-            std::nullopt,                        // onBehalfOf
+			CopyAsync,								// asyncCall
+			std::nullopt,							// onBehalfOf
 			ResponseHandler,						// ResponseHandler
 			csp::common::CancellationToken::Dummy() // CancellationToken
 		);
@@ -406,26 +440,26 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 																																		   nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
-		->apiV1PrototypesGet(PrototypeTags,         // Tags
-							 std::nullopt,          // TagsAll
-							 PrototypeIds,          // Ids
-							 PrototypeNames,        // Names
-							 std::nullopt,          // PartialNames
-							 std::nullopt,          // ExcludedIds
-							 std::nullopt,          // PointOfInterestIds
-							 ParentPrototypeId,     // ParentId
-							 GroupIds,              // GroupIds
-							 PrototypeTypes,        // Types
-							 std::nullopt,          // HasGroup
-							 std::nullopt,          // CreatedBy
-							 std::nullopt,          // PrototypeOwnerIds
-							 std::nullopt,          // ReadAccessFilters
-							 std::nullopt,          // WriteAccessFilters
-                             std::nullopt,          // OrganizationIds
-							 Skip,                  // Skip
-							 Limit,                 // Limit
-							 std::nullopt,          // SortBy
-							 std::nullopt,          // SortDirection
+		->apiV1PrototypesGet(PrototypeTags,		// Tags
+							 std::nullopt,		// TagsAll
+							 PrototypeIds,		// Ids
+							 PrototypeNames,	// Names
+							 std::nullopt,		// PartialNames
+							 std::nullopt,		// ExcludedIds
+							 std::nullopt,		// PointOfInterestIds
+							 ParentPrototypeId, // ParentId
+							 GroupIds,			// GroupIds
+							 PrototypeTypes,	// Types
+							 std::nullopt,		// HasGroup
+							 std::nullopt,		// CreatedBy
+							 std::nullopt,		// PrototypeOwnerIds
+							 std::nullopt,		// ReadAccessFilters
+							 std::nullopt,		// WriteAccessFilters
+							 std::nullopt,		// OrganizationIds
+							 Skip,				// Skip
+							 Limit,				// Limit
+							 std::nullopt,		// SortBy
+							 std::nullopt,		// SortDirection
 							 ResponseHandler);
 }
 
