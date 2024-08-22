@@ -37,8 +37,7 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
-	: ComponentBase(ComponentType::Conversation, Parent)
+csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Conversation, Parent)
 {
 	Properties[static_cast<uint32_t>(ConversationPropertyKeys::ConversationId)]				= "";
 	Properties[static_cast<uint32_t>(ConversationPropertyKeys::IsActive)]					= true;
@@ -186,8 +185,8 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 				return;
 			}
 
-			const csp::systems::NullResultCallback DeleteConversationAssetCollectionCallback
-				= [Callback](const csp::systems::NullResult& DeleteConversationAssetCollectionResult)
+			const csp::multiplayer::MessageResultCallback DeleteConversationAssetCollectionCallback
+				= [Callback](const csp::multiplayer::MessageResult& DeleteConversationAssetCollectionResult)
 			{
 				if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::InProgress)
 				{
@@ -213,7 +212,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 			csp::systems::AssetCollection ConversationAssetCollection;
 			ConversationAssetCollection.Id = ConversationId;
 
-			DeleteMessages({ConversationAssetCollection}, DeleteConversationAssetCollectionCallback);
+			DeleteMessage(ConversationId, DeleteConversationAssetCollectionCallback);
 		};
 
 		const csp::systems::NullResultCallback NullResultCallback
@@ -239,7 +238,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 													signalRCallback);
 		};
 
-		const auto& Messages = GetMessagesResult.GetAssetCollections();
+		auto Messages = GetMessagesResult.GetAssetCollections();
 		DeleteMessages(Messages, NullResultCallback);
 	};
 
@@ -495,7 +494,7 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
 		return;
 	}
 
-    	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
 	csp::systems::AssetCollectionResultCallback GetConversationCallback
 		= [Callback, ConversationId, ConversationData, AssetSystem, this](const csp::systems::AssetCollectionResult& GetConversationResult)
@@ -556,7 +555,7 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
 				INVOKE_IF_NOT_NULL(Callback, Result);
 			};
 
-            auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+			auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
 													{ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
 													signalRCallback);
@@ -774,13 +773,7 @@ void ConversationSpaceComponent::StoreConversationMessage(const csp::systems::Sp
 			return;
 		}
 
-		if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::Success)
-		{
-			MessageResult Result;
-			Result.FillMessageInfo(AddCommentResult.GetAssetCollection());
-			INVOKE_IF_NOT_NULL(Callback, Result);
-		}
-		else
+		if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::Failed)
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
 						   "The Comment asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
@@ -789,7 +782,13 @@ void ConversationSpaceComponent::StoreConversationMessage(const csp::systems::Sp
 
 			const MessageResult InternalResult(AddCommentResult.GetResultCode(), AddCommentResult.GetHttpResultCode());
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
+
+			return;
 		}
+
+		MessageResult Result;
+		Result.FillMessageInfo(AddCommentResult.GetAssetCollection());
+		INVOKE_IF_NOT_NULL(Callback, Result);
 	};
 
 	const auto AssetSystem				 = csp::systems::SystemsManager::Get().GetAssetSystem();
@@ -810,7 +809,7 @@ void ConversationSpaceComponent::StoreConversationMessage(const csp::systems::Sp
 									   AddCommentCallback);
 }
 
-void ConversationSpaceComponent::DeleteMessages(const csp::common::Array<csp::systems::AssetCollection>& Messages,
+void ConversationSpaceComponent::DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages,
 												csp::systems::NullResultCallback Callback)
 {
 	const auto MessagesCount = Messages.Size();
@@ -825,47 +824,7 @@ void ConversationSpaceComponent::DeleteMessages(const csp::common::Array<csp::sy
 
 	const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-	auto DeletionCounterDeleter = [](size_t* ptr)
-	{
-		CSP_DELETE(ptr);
-	};
-
-	std::shared_ptr<size_t> DeletionCounter(CSP_NEW size_t, DeletionCounterDeleter);
-	*DeletionCounter = 0;
-
-	for (auto idx = 0; idx < MessagesCount; ++idx)
-	{
-		const csp::systems::NullResultCallback DeleteCommentCallback = [=](const csp::systems::NullResult& DeleteCommentResult)
-		{
-			if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Success)
-			{
-				++*DeletionCounter;
-
-				if (*DeletionCounter == MessagesCount)
-				{
-					INVOKE_IF_NOT_NULL(Callback, DeleteCommentResult);
-				}
-			}
-			else if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Failed)
-			{
-
-				CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
-							   "Delete asset collection for message ID %s has failed. ResCode: %d, HttpResCode: %d",
-							   Messages[idx].Id.c_str(),
-							   static_cast<int>(DeleteCommentResult.GetResultCode()),
-							   DeleteCommentResult.GetHttpResultCode());
-
-				++*DeletionCounter;
-
-				if (*DeletionCounter == MessagesCount)
-				{
-					INVOKE_IF_NOT_NULL(Callback, DeleteCommentResult);
-				}
-			}
-		};
-
-		AssetSystem->DeleteAssetCollection(Messages[idx], DeleteCommentCallback);
-	}
+	AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
 }
 
 } // namespace csp::multiplayer

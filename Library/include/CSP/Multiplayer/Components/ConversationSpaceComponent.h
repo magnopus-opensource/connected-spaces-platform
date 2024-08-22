@@ -165,7 +165,7 @@ private:
 								  const csp::common::String& Message,
 								  MessageResultCallback Callback) const;
 
-    void DeleteMessages(const csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
+    void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 };
 
 } // namespace csp::multiplayer
