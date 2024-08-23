@@ -53,6 +53,14 @@ bool ValidateKey(const String& Key)
 	{
 		return false;
 	}
+	if (str.find(" ") != std::string::npos)
+	{
+		return false;
+	}
+	if (str.find("%") != std::string::npos)
+	{
+		return false;
+	}
 	return true;
 }
 
@@ -69,9 +77,7 @@ void SequenceSystem::CreateSequence(const String& SequenceKey,
 {
 	if (!ValidateKey(SequenceKey))
 	{
-		std::stringstream Ss;
-		Ss << "Cannot Create Sequence:  Key " << SequenceKey.c_str() << " contains invalid '/' characters";
-		CSP_LOG_ERROR_MSG({Ss.str().c_str()});
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot create Sequence. Key: %s contains invalid characters", SequenceKey.c_str());
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
 		return;
 	}
@@ -102,17 +108,12 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 {
 	if (!ValidateKey(OldSequenceKey))
 	{
-		std::stringstream Ss;
-		Ss << "Cannot rename Sequence:  Key " << OldSequenceKey.c_str() << " contains invalid '/' characters";
-		CSP_LOG_ERROR_MSG(Ss.str().c_str());
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot rename Sequence. Old Key: %s contains invalid characters", OldSequenceKey.c_str());
 		return;
 	}
 	if (!ValidateKey(NewSequenceKey))
 	{
-		std::stringstream Ss;
-		Ss << "Cannot rename Sequence:  Key " << NewSequenceKey.c_str() << " contains invalid '/' characters";
-		CSP_LOG_ERROR_MSG(Ss.str().c_str());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot create Sequence. New Key: %s contains invalid characters", NewSequenceKey.c_str());
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
 		return;
 	}
@@ -138,9 +139,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 	{
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
-			std::stringstream Ss;
-			Ss << "Cannot get Sequence:  Key " << InSequenceKeys[i].c_str() << " contains invalid '/' characters";
-			CSP_LOG_ERROR_MSG(Ss.str().c_str());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. New Key: %s contains invalid characters", InSequenceKeys[i].c_str());
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
 			return;
 		}
@@ -178,9 +177,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 {
 	if (!ValidateKey(SequenceKey))
 	{
-		std::stringstream Ss;
-		Ss << "Cannot get Sequence:  Key " << SequenceKey.c_str() << " contains invalid '/' characters";
-		CSP_LOG_ERROR_MSG(Ss.str().c_str());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. New Key: %s contains invalid characters", SequenceKey.c_str());
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
 		return;
 	}
@@ -200,9 +197,9 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 	{
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
-			std::stringstream Ss;
-			Ss << "Cannot delete Sequence:  Key " << InSequenceKeys[i].c_str() << " contains invalid '/' characters";
-			CSP_LOG_ERROR_MSG(Ss.str().c_str());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+						   "Cannot delete Sequence. New Key: %s contains invalid characters",
+						   InSequenceKeys[i].c_str());
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 			return;
 		}

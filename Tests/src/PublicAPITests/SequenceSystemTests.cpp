@@ -57,14 +57,15 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem,
 					csp::common::Map<csp::common::String, csp::common::String> MetaData,
 					csp::systems::Sequence& OutSequence,
 					csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
-					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+					uint16_t ExpectedHTTPResponseCode							  = 200)
 {
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::CreateSequence, SequenceSystem, SequenceKey, ReferenceType, ReferenceId, Items, MetaData)
 						.Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
-
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
 		csp::systems::Sequence Sequence = Result.GetSequence();
@@ -91,24 +92,28 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem,
 void DeleteSequences(csp::systems::SequenceSystem* SequenceSystem,
 					 const csp::common::Array<csp::common::String>& SequenceKeys,
 					 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
-					 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+					 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+					 uint16_t ExpectedHTTPResponseCode							   = 200)
 {
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::DeleteSequences, SequenceSystem, SequenceKeys).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 }
 
 void GetSequence(csp::systems::SequenceSystem* SequenceSystem,
 				 const csp::common::String& SequenceKey,
 				 csp::systems::Sequence& OutSequence,
 				 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
-				 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+				 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+				 uint16_t ExpectedHTTPResponseCode							   = 200)
 {
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::GetSequence, SequenceSystem, SequenceKey).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 
 	csp::systems::Sequence Sequence = Result.GetSequence();
 
@@ -128,13 +133,16 @@ void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem,
 					csp::common::Map<csp::common::String, csp::common::String> MetaData,
 					csp::systems::Sequence& OutSequence,
 					csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
-					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+					uint16_t ExpectedHTTPResponseCode							  = 200)
 {
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::UpdateSequence, SequenceSystem, SequenceKey, ReferenceType, ReferenceId, Items, MetaData)
 						.Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
+
 
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
@@ -163,12 +171,14 @@ void RenameSequence(csp::systems::SequenceSystem* SequenceSystem,
 					const csp::common::String& NewSequenceKey,
 					csp::systems::Sequence& OutSequence,
 					csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
-					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+					csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+					uint16_t ExpectedHTTPResponseCode							  = 200)
 {
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::RenameSequence, SequenceSystem, OldSequenceKey, NewSequenceKey).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 
 	if (ExpectedResultCode == csp::systems::EResultCode::Success)
 	{
@@ -187,7 +197,8 @@ void GetSequencesByCriteria(csp::systems::SequenceSystem* SequenceSystem,
 							const csp::common::Array<csp::common::String>& ReferenceIds,
 							csp::common::Array<csp::systems::Sequence>& OutSequences,
 							csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
-							csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
+							csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+							uint16_t ExpectedHTTPResponseCode							  = 200)
 {
 	csp::common::Map<csp::common::String, csp::common::String> MetaData;
 	auto [Result] = Awaitable(&csp::systems::SequenceSystem::GetSequencesByCriteria,
@@ -201,6 +212,7 @@ void GetSequencesByCriteria(csp::systems::SequenceSystem* SequenceSystem,
 
 	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 
 	csp::common::Array<csp::systems::Sequence> Sequences = Result.GetSequences();
 	OutSequences										 = Sequences;
@@ -253,10 +265,19 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
 	csp::systems::Sequence Sequence;
-	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence,
+				   csp::systems::EResultCode::Success,
+				   csp::systems::ERequestFailureReason::None,
+				   200);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key});
+	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -290,14 +311,51 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	// Create sequence
+	// Create sequence with / character
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
 	csp::systems::Sequence Sequence;
-	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence, csp::systems::EResultCode::Failed);
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// Create sequence with a space in the name
+	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
+	char UniqueSequenceNameSpace[256];
+	SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, GetUniqueString().c_str());
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceNameSpace,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// Create sequence with % in the name
+	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
+	char UniqueSequenceNameMod[256];
+	SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceNameMod,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -341,7 +399,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key});
+	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -377,7 +435,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
 	CreateSequence(SequenceSystem, UniqueSequenceName, "TesId", TestSequenceReferenceID, SequenceItems, {}, Sequence);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key});
+	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Log out
 	LogOut(UserSystem);
@@ -422,7 +480,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
 	CompareSequences(Sequence, RetrievedSequence);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key});
+	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -454,16 +512,43 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	// Create sequence
+
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+	// Get sequence with invalid / key
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
 	char UniqueSequenceName[256];
-	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
-
+	std::string Unique = GetUniqueString();
+	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, Unique.c_str());
 
 	csp::systems::Sequence RetrievedSequence;
-	GetSequence(SequenceSystem, UniqueSequenceName, RetrievedSequence, csp::systems::EResultCode::Failed);
+	GetSequence(SequenceSystem,
+				UniqueSequenceName,
+				RetrievedSequence,
+				csp::systems::EResultCode::Failed,
+				csp::systems::ERequestFailureReason::None,
+				0);
+	// get sequence with invalid space key
+	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
+	char UniqueSequenceNameSpace[256];
+	SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, Unique.c_str());
 
+	GetSequence(SequenceSystem,
+				UniqueSequenceNameSpace,
+				RetrievedSequence,
+				csp::systems::EResultCode::Failed,
+				csp::systems::ERequestFailureReason::None,
+				0);
+	// get sequence with invalid % key
+	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
+	char UniqueSequenceNameMod[256];
+	SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, Unique.c_str());
+
+	GetSequence(SequenceSystem,
+				UniqueSequenceNameMod,
+				RetrievedSequence,
+				csp::systems::EResultCode::Failed,
+				csp::systems::ERequestFailureReason::None,
+				0);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -514,7 +599,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 	UpdateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, UpdatedSequenceItems, MetaData, UpdatedSequence);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {UpdatedSequence.Key});
+	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -551,6 +636,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
+	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
+	char UniqueSequenceNameSpace[256];
+	SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, GetUniqueString().c_str());
+	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
+	char UniqueSequenceNameMod[256];
+	SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
 
 	csp::common::Map<csp::common::String, csp::common::String> MetaData;
 
@@ -559,6 +650,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 
 	csp::systems::Sequence UpdatedSequence;
 	MetaData["Foo"] = "Bar";
+	// Verify cannot update sequence with a key that contains /
 	UpdateSequence(SequenceSystem,
 				   UniqueSequenceName,
 				   "GroupId",
@@ -566,7 +658,31 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 				   UpdatedSequenceItems,
 				   MetaData,
 				   UpdatedSequence,
-				   csp::systems::EResultCode::Failed);
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// Verify cannot update sequence with a key that contains a space
+	UpdateSequence(SequenceSystem,
+				   UniqueSequenceNameSpace,
+				   "GroupId",
+				   Space.Id,
+				   UpdatedSequenceItems,
+				   MetaData,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// Verify cannot update sequence with a key that contains %
+	UpdateSequence(SequenceSystem,
+				   UniqueSequenceNameMod,
+				   "GroupId",
+				   Space.Id,
+				   UpdatedSequenceItems,
+				   MetaData,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -619,7 +735,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 	RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {UpdatedSequence.Key});
+	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -662,17 +778,51 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 
 	csp::systems::Sequence Sequence;
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
-
+	std::string UniqueString = GetUniqueString();
 	// Rename sequence
 	const char* TestUpdatedSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG-UPDATED";
 	char UniqueUpdatedSequenceName[256];
-	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
+	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, UniqueString.c_str());
+
+	const char* TestUpdatedSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG-UPDATED";
+	char UniqueUpdatedSequenceNameSpace[256];
+	SPRINTF(UniqueUpdatedSequenceNameSpace, "%s-%s", TestUpdatedSequenceKeySpace, UniqueString.c_str());
+
+	const char* TestUpdatedSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG-UPDATED";
+	char UniqueUpdatedSequenceNameMod[256];
+	SPRINTF(UniqueUpdatedSequenceNameMod, "%s-%s", TestUpdatedSequenceKeyMod, UniqueString.c_str());
 
 	csp::systems::Sequence UpdatedSequence;
-	RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed);
+
+	// sequence name with a / fails
+	RenameSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   UniqueUpdatedSequenceName,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// sequence name with a space fails
+	RenameSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   UniqueUpdatedSequenceNameSpace,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+	// sequence name with a % fails
+	RenameSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   UniqueUpdatedSequenceNameMod,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   0);
+
+
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {UniqueSequenceName});
+	DeleteSequences(SequenceSystem, {UniqueSequenceName}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -739,7 +889,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 	CompareSequences(RetrievedSequences[0], Sequence2);
 
 	// Try and get an invalid sequence
-	GetSequencesByCriteria(SequenceSystem, {"Unknown Key"}, nullptr, nullptr, {}, RetrievedSequences);
+	GetSequencesByCriteria(SequenceSystem, {"Unknown_Key"}, nullptr, nullptr, {}, RetrievedSequences);
 	EXPECT_EQ(RetrievedSequences.Size(), 0);
 
 	// Test Regex search
@@ -764,7 +914,11 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 	EXPECT_EQ(RetrievedSequences.Size(), 0);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key, Sequence2.Key});
+	DeleteSequences(SequenceSystem,
+					{Sequence.Key, Sequence2.Key},
+					csp::systems::EResultCode::Success,
+					csp::systems::ERequestFailureReason::None,
+					204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -805,8 +959,42 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
 	char UniqueSequenceName[256];
 	SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
-	// Get the first sequence
-	GetSequencesByCriteria(SequenceSystem, {UniqueSequenceName}, nullptr, nullptr, {}, RetrievedSequences, csp::systems::EResultCode::Failed);
+	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
+	char UniqueSequenceNameSpace[256];
+	SPRINTF(UniqueSequenceNameSpace, "%s-%s", TestSequenceKeySpace, GetUniqueString().c_str());
+	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
+	char UniqueSequenceNameMod[256];
+	SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+	// verify get fails when using a key name with a / character
+	GetSequencesByCriteria(SequenceSystem,
+						   {UniqueSequenceName},
+						   nullptr,
+						   nullptr,
+						   {},
+						   RetrievedSequences,
+						   csp::systems::EResultCode::Failed,
+						   csp::systems::ERequestFailureReason::None,
+						   0);
+	// verify get fails when using a key name with a space character
+	GetSequencesByCriteria(SequenceSystem,
+						   {UniqueSequenceNameSpace},
+						   nullptr,
+						   nullptr,
+						   {},
+						   RetrievedSequences,
+						   csp::systems::EResultCode::Failed,
+						   csp::systems::ERequestFailureReason::None,
+						   0);
+	// verify get fails when using a key name with a % character
+	GetSequencesByCriteria(SequenceSystem,
+						   {UniqueSequenceNameMod},
+						   nullptr,
+						   nullptr,
+						   {},
+						   RetrievedSequences,
+						   csp::systems::EResultCode::Failed,
+						   csp::systems::ERequestFailureReason::None,
+						   0);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -902,7 +1090,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	Connection->SetSequenceChangedCallback(DeleteCallback);
 	CallbackCalled = false;
 
-	DeleteSequences(SequenceSystem, {UpdatedSequence.Key});
+	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	WaitForCallback(CallbackCalled);
 	EXPECT_TRUE(CallbackCalled);
@@ -978,17 +1166,25 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 				   UpdatedSequenceItems,
 				   {},
 				   UpdatedSequence,
-				   csp::systems::EResultCode::Failed);
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   403);
 
 	// Rename sequence
 	const char* TestUpdatedSequenceKey = "CSP-UNITTEST-SEQUENCE-MAG-UPDATED";
 	char UniqueUpdatedSequenceName[256];
 	SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
-	RenameSequence(SequenceSystem, UniqueSequenceName, UniqueUpdatedSequenceName, UpdatedSequence, csp::systems::EResultCode::Failed);
+	RenameSequence(SequenceSystem,
+				   UniqueSequenceName,
+				   UniqueUpdatedSequenceName,
+				   UpdatedSequence,
+				   csp::systems::EResultCode::Failed,
+				   csp::systems::ERequestFailureReason::None,
+				   403);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Failed);
+	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Failed, csp::systems::ERequestFailureReason::None, 400);
 
 	// Log out
 	LogOut(UserSystem);
@@ -997,7 +1193,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 	LogIn(UserSystem, UserId);
 
 	// Delete sequence
-	DeleteSequences(SequenceSystem, {Sequence.Key});
+	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
