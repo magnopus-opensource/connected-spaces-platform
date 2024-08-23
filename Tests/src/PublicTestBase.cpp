@@ -15,6 +15,7 @@
  */
 #include "PublicTestBase.h"
 
+#include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -36,11 +37,19 @@ void PublicTestBase::SetUp()
 		});
 
 	csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+
+	auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+	AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 }
 
 void PublicTestBase::TearDown()
 {
 	::testing::Test::TearDown();
+
+	auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+
+	AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
 	if (!csp::CSPFoundation::GetIsInitialised())
 	{
