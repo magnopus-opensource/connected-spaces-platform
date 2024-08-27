@@ -21,7 +21,6 @@
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
-#include <sstream>
 
 using namespace csp;
 using namespace csp::common;
@@ -113,7 +112,7 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 	}
 	if (!ValidateKey(NewSequenceKey))
 	{
-		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot create Sequence. New Key: %s contains invalid characters", NewSequenceKey.c_str());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot rename Sequence. New Key: %s contains invalid characters", NewSequenceKey.c_str());
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
 		return;
 	}
@@ -139,7 +138,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 	{
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
-			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. New Key: %s contains invalid characters", InSequenceKeys[i].c_str());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. Key: %s contains invalid characters", InSequenceKeys[i].c_str());
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
 			return;
 		}
@@ -177,7 +176,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 {
 	if (!ValidateKey(SequenceKey))
 	{
-		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. New Key: %s contains invalid characters", SequenceKey.c_str());
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. Key: %s contains invalid characters", SequenceKey.c_str());
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
 		return;
 	}
@@ -197,9 +196,7 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 	{
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
-			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
-						   "Cannot delete Sequence. New Key: %s contains invalid characters",
-						   InSequenceKeys[i].c_str());
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot delete Sequence. Key: %s contains invalid characters", InSequenceKeys[i].c_str());
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 			return;
 		}
