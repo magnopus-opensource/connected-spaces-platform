@@ -50,6 +50,8 @@ class CSP_API SequenceResult : public csp::systems::ResultBase
 public:
 	const Sequence& GetSequence() const;
 	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
 	SequenceResult(void*) {};
@@ -74,6 +76,8 @@ public:
 	const csp::common::Array<Sequence>& GetSequences() const;
 
 	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
 	SequencesResult(void*) {};

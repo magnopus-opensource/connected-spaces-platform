@@ -77,7 +77,7 @@ void SequenceSystem::CreateSequence(const String& SequenceKey,
 	if (!ValidateKey(SequenceKey))
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot create Sequence. Key: %s contains invalid characters", SequenceKey.c_str());
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 
@@ -108,12 +108,13 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 	if (!ValidateKey(OldSequenceKey))
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot rename Sequence. Old Key: %s contains invalid characters", OldSequenceKey.c_str());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 	if (!ValidateKey(NewSequenceKey))
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot rename Sequence. New Key: %s contains invalid characters", NewSequenceKey.c_str());
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -139,7 +140,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. Key: %s contains invalid characters", InSequenceKeys[i].c_str());
-			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 			return;
 		}
 	}
@@ -147,7 +148,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
 	{
 		CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 
@@ -177,7 +178,7 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 	if (!ValidateKey(SequenceKey))
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot get Sequence. Key: %s contains invalid characters", SequenceKey.c_str());
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -197,7 +198,7 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 		if (!ValidateKey(InSequenceKeys[i]))
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Cannot delete Sequence. Key: %s contains invalid characters", InSequenceKeys[i].c_str());
-			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 			return;
 		}
 	}

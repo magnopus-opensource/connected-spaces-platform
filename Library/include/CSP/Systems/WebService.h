@@ -80,6 +80,7 @@ enum class ERequestFailureReason
 	ShopifyInvalidStoreName,
 	UserShopifyLimitReached,
 	UserTokenRefreshFailed,
+	InvalidSequenceKey,
 };
 
 
@@ -126,6 +127,7 @@ public:
 
 protected:
 	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
 
 	void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 

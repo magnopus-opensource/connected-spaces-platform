@@ -311,6 +311,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
+	// Any attempt to get a sequence with key containing an invalid character
+	// Space, / or % will result in a failure
 	// Create sequence with / character
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
@@ -326,7 +328,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 				   {},
 				   Sequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// Create sequence with a space in the name
 	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
@@ -340,7 +342,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 				   {},
 				   Sequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// Create sequence with % in the name
 	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
@@ -354,7 +356,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 				   {},
 				   Sequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 
 	// Delete space
@@ -514,6 +516,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 
 
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+
+	// Any attempt to get a sequence with key containing an invalid character
+	// Space, / or % will result in a failure
+
 	// Get sequence with invalid / key
 	const char* TestSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG";
 	char UniqueSequenceName[256];
@@ -525,7 +531,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 				UniqueSequenceName,
 				RetrievedSequence,
 				csp::systems::EResultCode::Failed,
-				csp::systems::ERequestFailureReason::None,
+				csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				0);
 	// get sequence with invalid space key
 	const char* TestSequenceKeySpace = "CSP-UNITTEST SEQUENCE-MAG";
@@ -536,7 +542,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 				UniqueSequenceNameSpace,
 				RetrievedSequence,
 				csp::systems::EResultCode::Failed,
-				csp::systems::ERequestFailureReason::None,
+				csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				0);
 	// get sequence with invalid % key
 	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
@@ -547,7 +553,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 				UniqueSequenceNameMod,
 				RetrievedSequence,
 				csp::systems::EResultCode::Failed,
-				csp::systems::ERequestFailureReason::None,
+				csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				0);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -648,6 +654,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 	// Update sequence
 	csp::common::Array<csp::common::String> UpdatedSequenceItems {"Hotspot4", "Hotspot5"};
 
+	// Any attempt to get a sequence with key containing an invalid character
+	// Space, / or % will result in a failure
 	csp::systems::Sequence UpdatedSequence;
 	MetaData["Foo"] = "Bar";
 	// Verify cannot update sequence with a key that contains /
@@ -659,7 +667,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 				   MetaData,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// Verify cannot update sequence with a key that contains a space
 	UpdateSequence(SequenceSystem,
@@ -670,7 +678,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 				   MetaData,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// Verify cannot update sequence with a key that contains %
 	UpdateSequence(SequenceSystem,
@@ -681,7 +689,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 				   MetaData,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 
 	// Delete space
@@ -779,6 +787,10 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 	csp::systems::Sequence Sequence;
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
 	std::string UniqueString = GetUniqueString();
+
+
+	// Any attempt to get a sequence with key containing an invalid character
+	// Space, / or % will result in a failure
 	// Rename sequence
 	const char* TestUpdatedSequenceKey = "CSP-UNITTEST/SEQUENCE-MAG-UPDATED";
 	char UniqueUpdatedSequenceName[256];
@@ -800,7 +812,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 				   UniqueUpdatedSequenceName,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// sequence name with a space fails
 	RenameSequence(SequenceSystem,
@@ -808,7 +820,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 				   UniqueUpdatedSequenceNameSpace,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 	// sequence name with a % fails
 	RenameSequence(SequenceSystem,
@@ -816,7 +828,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 				   UniqueUpdatedSequenceNameMod,
 				   UpdatedSequence,
 				   csp::systems::EResultCode::Failed,
-				   csp::systems::ERequestFailureReason::None,
+				   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 				   0);
 
 
@@ -965,6 +977,9 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 	const char* TestSequenceKeyMod = "CSP-UNITTEST%SEQUENCE-MAG";
 	char UniqueSequenceNameMod[256];
 	SPRINTF(UniqueSequenceNameMod, "%s-%s", TestSequenceKeyMod, GetUniqueString().c_str());
+
+	// Any attempt to get a sequence with key containing an invalid character
+	// Space, / or % will result in a failure
 	// verify get fails when using a key name with a / character
 	GetSequencesByCriteria(SequenceSystem,
 						   {UniqueSequenceName},
@@ -973,7 +988,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 						   {},
 						   RetrievedSequences,
 						   csp::systems::EResultCode::Failed,
-						   csp::systems::ERequestFailureReason::None,
+						   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 						   0);
 	// verify get fails when using a key name with a space character
 	GetSequencesByCriteria(SequenceSystem,
@@ -983,7 +998,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 						   {},
 						   RetrievedSequences,
 						   csp::systems::EResultCode::Failed,
-						   csp::systems::ERequestFailureReason::None,
+						   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 						   0);
 	// verify get fails when using a key name with a % character
 	GetSequencesByCriteria(SequenceSystem,
@@ -993,7 +1008,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 						   {},
 						   RetrievedSequences,
 						   csp::systems::EResultCode::Failed,
-						   csp::systems::ERequestFailureReason::None,
+						   csp::systems::ERequestFailureReason::InvalidSequenceKey,
 						   0);
 
 	// Delete space
