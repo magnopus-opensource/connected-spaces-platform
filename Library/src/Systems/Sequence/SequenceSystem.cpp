@@ -21,6 +21,7 @@
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
+
 using namespace csp;
 using namespace csp::common;
 
@@ -44,6 +45,24 @@ std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey,
 	return SequenceInfo;
 }
 
+bool ValidateKey(const String& Key)
+{
+	std::string str = Key.c_str();
+	if (str.find("/") != std::string::npos)
+	{
+		return false;
+	}
+	if (str.find(" ") != std::string::npos)
+	{
+		return false;
+	}
+	if (str.find("%") != std::string::npos)
+	{
+		return false;
+	}
+	return true;
+}
+
 } // namespace
 
 namespace csp::systems
@@ -55,6 +74,15 @@ void SequenceSystem::CreateSequence(const String& SequenceKey,
 									const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 									SequenceResultCallback Callback)
 {
+	if (!ValidateKey(SequenceKey))
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+					   "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+					   SequenceKey.c_str());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+		return;
+	}
+
 	const auto SequenceInfo = CreateSequenceDto(SequenceKey, ReferenceType, ReferenceId, Items, MetaData);
 
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -79,6 +107,22 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey,
 
 void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& NewSequenceKey, SequenceResultCallback Callback)
 {
+	if (!ValidateKey(OldSequenceKey))
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+					   "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+					   OldSequenceKey.c_str());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+		return;
+	}
+	if (!ValidateKey(NewSequenceKey))
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+					   "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+					   NewSequenceKey.c_str());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+		return;
+	}
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
@@ -97,10 +141,22 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 											const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 											SequencesResultCallback Callback)
 {
+	for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+	{
+		if (!ValidateKey(InSequenceKeys[i]))
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+						   "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+						   InSequenceKeys[i].c_str());
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+			return;
+		}
+	}
+
 	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
 	{
 		CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
 		return;
 	}
 
@@ -127,6 +183,14 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 
 void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallback Callback)
 {
+	if (!ValidateKey(SequenceKey))
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+					   "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+					   SequenceKey.c_str());
+		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+		return;
+	}
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
@@ -139,6 +203,17 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 
 void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullResultCallback Callback)
 {
+	for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+	{
+		if (!ValidateKey(InSequenceKeys[i]))
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+						   "Cannot delete Sequence. Key: %s contains invalid characters. Invalid characters are \" \", \"/\", \"%%\"",
+						   InSequenceKeys[i].c_str());
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
+			return;
+		}
+	}
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= SequenceAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,
 																								   nullptr,

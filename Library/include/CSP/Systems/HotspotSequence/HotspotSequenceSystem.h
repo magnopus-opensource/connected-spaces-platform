@@ -62,7 +62,7 @@ public:
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
 	/// @param Callback HotspotGroupResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void CreateHotspotGroup(const csp::common::String&,
+	CSP_ASYNC_RESULT void CreateHotspotGroup(const csp::common::String& GroupName,
 											 const csp::common::Array<csp::common::String>& HotspotIds,
 											 HotspotGroupResultCallback Callback);
 
