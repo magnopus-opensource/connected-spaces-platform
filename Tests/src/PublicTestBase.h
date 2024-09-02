@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 
 
-constexpr char* EndpointBaseURI = "https://ogs-odev-internal.magnoboard.com";
+constexpr char* EndpointBaseURI = "https://ogs.magnopus-dev.cloud";
 
 
 class PublicTestBase : public ::testing::Test
