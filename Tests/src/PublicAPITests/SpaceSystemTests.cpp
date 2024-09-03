@@ -277,7 +277,7 @@ void GetSpacesMetadata(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
 	// check that Uri starts with something valid
-	if (Uri.find("https://world-streaming.magnoboard.com/", 0) != 0)
+	if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0)
 	{
 		return false;
 	}

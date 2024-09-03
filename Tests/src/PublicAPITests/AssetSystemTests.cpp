@@ -2150,7 +2150,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 	// Attempt to download asset
 	{
 		csp::systems::Asset Asset;
-		Asset.Uri = "https://world-streaming.magnoboard.com/Odev/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
+		Asset.Uri = "https://world-streaming.magnopus-dev.cloud/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
 
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
