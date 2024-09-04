@@ -19,11 +19,11 @@ void SequenceHierarchyResult::OnResponse(const csp::services::ApiResponseBase* A
 
 common::String CreateSequenceKey(common::Optional<uint64_t> ParentId, const common::String& SpaceId)
 {
-	common::String Key = csp::multiplayer::GetSequenceHierarchyName() + ":" + SpaceId;
+	common::String Key = csp::multiplayer::SequenceConstants::GetHierarchyName() + ":" + SpaceId;
 
 	if (ParentId.HasValue())
 	{
-		Key += ":" + csp::multiplayer::GetSequenceIdPrefix() + std::to_string(*ParentId).c_str();
+		Key += ":" + csp::multiplayer::SequenceConstants::GetIdPrefix() + std::to_string(*ParentId).c_str();
 	}
 
 	return Key;

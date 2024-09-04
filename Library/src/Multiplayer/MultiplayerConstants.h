@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "CSP/Common/String.h"
 
 namespace csp::multiplayer
 {
@@ -98,18 +99,14 @@ enum ItemComponentData : uint64_t
 
 } // namespace msgpack_typeids
 
+class SequenceConstants
+{
+public:
 	// For uniquely identifying sequences which relate to a space entity hierarchy.
-	static csp::common::String GetSequenceHierarchyName()
-	{
-		const csp::common::String SequenceHierarchyName = "EntityHierarchy";
-		return SequenceHierarchyName;
-	}
+	static csp::common::String GetHierarchyName();
 
 	// Prefix needed when storing multiplayer unsigned integer ids in keys
-	static csp::common::String GetSequenceIdPrefix()
-	{
-		const csp::common::String SequenceIdPrefix = "m_Id_";
-		return SequenceIdPrefix;		
-	}
+	static csp::common::String GetIdPrefix();
+};
 
 } // namespace csp::multiplayer

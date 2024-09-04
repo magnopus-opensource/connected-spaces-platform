@@ -1163,7 +1163,7 @@ void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionRes
 	};
 
 	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequencesByCriteria({}, csp::multiplayer::GetSequenceHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
+	SequenceSystem->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
 }
 
 void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, systems::NullResultCallback Callback)
