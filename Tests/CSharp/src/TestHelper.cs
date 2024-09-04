@@ -13,7 +13,7 @@ namespace CSharpTests
 {
     static class TestHelper
     {
-        public static readonly string CHSEndpointBaseUri = "https://ogs.magnopus-dev.cloud";
+        public static readonly string CHSEndpointBaseUri = "https://ogs-internal.magnopus-dev.cloud";
         public static readonly Random Rand = new Random();
 
         static readonly Stack<Action> cleanupFunctions = new Stack<Action>();

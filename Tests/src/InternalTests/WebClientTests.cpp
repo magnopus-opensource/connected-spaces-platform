@@ -280,7 +280,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
 	{
-		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
+		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-internal.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
 		EXPECT_TRUE(WebClient != nullptr);
 
 		HttpPayload Payload;
@@ -607,7 +607,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 	LogIn(UserSystem, UserId);
 
 	HttpPayload Payload;
-	RunWebClientTest<RetryResponseReceiver>("https://ogs.magnopus-dev.cloud/mag-user/appsettings",
+	RunWebClientTest<RetryResponseReceiver>("https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings",
 											ERequestVerb::Get,
 											80,
 											Payload,
