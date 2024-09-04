@@ -33,8 +33,6 @@ enum ComponentKeys : uint64_t
 	ENTITY_SCALE	= 1003,
 };
 
-
-
 namespace msgpack_typeids
 {
 
@@ -98,6 +96,13 @@ enum ItemComponentData : uint64_t
 	STRING_DICTIONARY
 };
 
-}
+} // namespace msgpack_typeids
+
+	// For uniquely identifying sequences which relate to a space entity hierarchy.
+	static csp::common::String GetSequenceHierarchyName()
+	{
+		const csp::common::String SequenceHierarchyName = "EntityHierarchy";
+		return SequenceHierarchyName;
+	}
 
 } // namespace csp::multiplayer

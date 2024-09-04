@@ -17,7 +17,7 @@
 
 #include "CSP/Multiplayer/IEntitySerialiser.h"
 #include "Memory/Memory.h"
-#include "MultiplayerKeyConstants.h"
+#include "MultiplayerConstants.h"
 
 #include <msgpack/pack.hpp>
 #include <msgpack/sbuffer.hpp>
