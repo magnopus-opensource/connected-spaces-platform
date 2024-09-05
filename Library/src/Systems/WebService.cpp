@@ -18,46 +18,6 @@
 #include "Services/ApiBase/ApiBase.h"
 
 
-namespace
-{
-std::map<csp::common::String, csp::systems::ERequestFailureReason> XErrorCodeToFailureReason = {
-	{"join_onbehalfnotallowed", csp::systems::ERequestFailureReason::AddUserToSpaceDenied},
-	{"join_guestnotallowed", csp::systems::ERequestFailureReason::UserSpaceAccessDenied},
-	{"join_userbanned", csp::systems::ERequestFailureReason::UserSpaceBannedAccessDenied},
-	{"join_groupfull", csp::systems::ERequestFailureReason::UserSpaceFullAccessDenied},
-	{"join_groupinviteexpired", csp::systems::ERequestFailureReason::UserSpaceInviteExpired},
-	{"group_duplicatename", csp::systems::ERequestFailureReason::SpacePublicNameDuplicate},
-	{"group_spaceownerquota", csp::systems::ERequestFailureReason::UserMaxSpaceLimitReached},
-	{"user_accountlocked", csp::systems::ERequestFailureReason::UserAccountLocked},
-	{"user_emptypassword", csp::systems::ERequestFailureReason::UserMissingPassword},
-	{"user_emailnotconfirmed", csp::systems::ERequestFailureReason::UserUnverifiedEmail},
-	{"user_bannedfromgroup", csp::systems::ERequestFailureReason::UserBannedFromSpace},
-	{"user_emaildomainnotallowed", csp::systems::ERequestFailureReason::UserInvalidEmailDomain},
-	{"user_sociallogininvalid", csp::systems::ERequestFailureReason::UserInvalidThirdPartyAuth},
-	{"user_agenotverified", csp::systems::ERequestFailureReason::UserAgeNotVerified},
-	{"user_guestlogindisallowed", csp::systems::ERequestFailureReason::UserGuestLoginDisallowed},
-	{"user_tokenrefreshfailed", csp::systems::ERequestFailureReason::UserTokenRefreshFailed},
-	{"prototype_reservedkeysnotallowed", csp::systems::ERequestFailureReason::PrototypeReservedKeysNotAllowed},
-	{"assetdetail_invalidfilecontents", csp::systems::ERequestFailureReason::AssetInvalidFileContents},
-	{"assetdetail_invalidfiletype", csp::systems::ERequestFailureReason::AssetInvalidFileType},
-	{"assetdetail_audiovideoquota", csp::systems::ERequestFailureReason::AssetAudioVideoLimitReached},
-	{"assetdetail_objectcapturequota", csp::systems::ERequestFailureReason::AssetObjectCaptureLimitReached},
-	{"assetdetail_totaluploadsizeinkilobytes", csp::systems::ERequestFailureReason::AssetTotalUploadSizeLimitReached},
-	{"applyticket_unknownticketnumber", csp::systems::ERequestFailureReason::TicketUnknownNumber},
-	{"applyticket_emaildoesntmatch", csp::systems::ERequestFailureReason::TicketEmailMismatch},
-	{"vendoroauthexchange_failuretoexchangecode", csp::systems::ERequestFailureReason::TicketVendorOAuthFailure},
-	{"applyticket_invalidauthtoken", csp::systems::ERequestFailureReason::TicketOAuthTokenInvalid},
-	{"applyticket_alreadyapplied", csp::systems::ERequestFailureReason::TicketAlreadyApplied},
-	{"shopify_vendorconnectionbroken", csp::systems::ERequestFailureReason::ShopifyConnectionBroken},
-	{"shopify_invalidstorename", csp::systems::ERequestFailureReason::ShopifyInvalidStoreName},
-	{"agoraoperation_groupownerquota", csp::systems::ERequestFailureReason::UserAgoraLimitReached},
-	{"openaioperation_userquota", csp::systems::ERequestFailureReason::UserOpenAILimitReached},
-	{"ticketedspaces_userquota", csp::systems::ERequestFailureReason::UserTicketedSpacesLimitReached},
-	{"shopify_userquota", csp::systems::ERequestFailureReason::UserShopifyLimitReached},
-	{"scopes_concurrentusersquota", csp::systems::ERequestFailureReason::UserSpaceConcurrentUsersLimitReached},
-};
-}
-
 namespace csp::systems
 {
 systems::ResultBase::ResultBase() : FailureReason(ERequestFailureReason::None)
@@ -152,6 +112,43 @@ void ResultBase::SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCo
 
 ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Value)
 {
+	static const std::map<csp::common::String, csp::systems::ERequestFailureReason> XErrorCodeToFailureReason = {
+		{"join_onbehalfnotallowed", csp::systems::ERequestFailureReason::AddUserToSpaceDenied},
+		{"join_guestnotallowed", csp::systems::ERequestFailureReason::UserSpaceAccessDenied},
+		{"join_userbanned", csp::systems::ERequestFailureReason::UserSpaceBannedAccessDenied},
+		{"join_groupfull", csp::systems::ERequestFailureReason::UserSpaceFullAccessDenied},
+		{"join_groupinviteexpired", csp::systems::ERequestFailureReason::UserSpaceInviteExpired},
+		{"group_duplicatename", csp::systems::ERequestFailureReason::SpacePublicNameDuplicate},
+		{"group_spaceownerquota", csp::systems::ERequestFailureReason::UserMaxSpaceLimitReached},
+		{"user_accountlocked", csp::systems::ERequestFailureReason::UserAccountLocked},
+		{"user_emptypassword", csp::systems::ERequestFailureReason::UserMissingPassword},
+		{"user_emailnotconfirmed", csp::systems::ERequestFailureReason::UserUnverifiedEmail},
+		{"user_bannedfromgroup", csp::systems::ERequestFailureReason::UserBannedFromSpace},
+		{"user_emaildomainnotallowed", csp::systems::ERequestFailureReason::UserInvalidEmailDomain},
+		{"user_sociallogininvalid", csp::systems::ERequestFailureReason::UserInvalidThirdPartyAuth},
+		{"user_agenotverified", csp::systems::ERequestFailureReason::UserAgeNotVerified},
+		{"user_guestlogindisallowed", csp::systems::ERequestFailureReason::UserGuestLoginDisallowed},
+		{"user_tokenrefreshfailed", csp::systems::ERequestFailureReason::UserTokenRefreshFailed},
+		{"prototype_reservedkeysnotallowed", csp::systems::ERequestFailureReason::PrototypeReservedKeysNotAllowed},
+		{"assetdetail_invalidfilecontents", csp::systems::ERequestFailureReason::AssetInvalidFileContents},
+		{"assetdetail_invalidfiletype", csp::systems::ERequestFailureReason::AssetInvalidFileType},
+		{"assetdetail_audiovideoquota", csp::systems::ERequestFailureReason::AssetAudioVideoLimitReached},
+		{"assetdetail_objectcapturequota", csp::systems::ERequestFailureReason::AssetObjectCaptureLimitReached},
+		{"assetdetail_totaluploadsizeinkilobytes", csp::systems::ERequestFailureReason::AssetTotalUploadSizeLimitReached},
+		{"applyticket_unknownticketnumber", csp::systems::ERequestFailureReason::TicketUnknownNumber},
+		{"applyticket_emaildoesntmatch", csp::systems::ERequestFailureReason::TicketEmailMismatch},
+		{"vendoroauthexchange_failuretoexchangecode", csp::systems::ERequestFailureReason::TicketVendorOAuthFailure},
+		{"applyticket_invalidauthtoken", csp::systems::ERequestFailureReason::TicketOAuthTokenInvalid},
+		{"applyticket_alreadyapplied", csp::systems::ERequestFailureReason::TicketAlreadyApplied},
+		{"shopify_vendorconnectionbroken", csp::systems::ERequestFailureReason::ShopifyConnectionBroken},
+		{"shopify_invalidstorename", csp::systems::ERequestFailureReason::ShopifyInvalidStoreName},
+		{"agoraoperation_groupownerquota", csp::systems::ERequestFailureReason::UserAgoraLimitReached},
+		{"openaioperation_userquota", csp::systems::ERequestFailureReason::UserOpenAILimitReached},
+		{"ticketedspaces_userquota", csp::systems::ERequestFailureReason::UserTicketedSpacesLimitReached},
+		{"shopify_userquota", csp::systems::ERequestFailureReason::UserShopifyLimitReached},
+		{"scopes_concurrentusersquota", csp::systems::ERequestFailureReason::UserSpaceConcurrentUsersLimitReached},
+	};
+
 	if (XErrorCodeToFailureReason.find(Value) != XErrorCodeToFailureReason.end())
 	{
 		return XErrorCodeToFailureReason[Value];
