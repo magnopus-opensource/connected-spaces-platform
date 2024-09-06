@@ -19,7 +19,7 @@ namespace
 {
 
 int WaitForTestTimeoutCountMs;
-const int WaitForTestTimeoutLimit	= 20000;
+const int WaitForTestTimeoutLimit = 20000;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
@@ -752,6 +752,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 		{
+			csp::CSPFoundation::Tick();
 			std::this_thread::sleep_for(50ms);
 			WaitForTestTimeoutCountMs += 50;
 		}
@@ -781,6 +782,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 		{
+			csp::CSPFoundation::Tick();
 			std::this_thread::sleep_for(50ms);
 			WaitForTestTimeoutCountMs += 50;
 		}
