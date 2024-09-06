@@ -149,9 +149,10 @@ ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Valu
 		{"scopes_concurrentusersquota", csp::systems::ERequestFailureReason::UserSpaceConcurrentUsersLimitReached},
 	};
 
-	if (XErrorCodeToFailureReason.find(Value) != XErrorCodeToFailureReason.end())
+    const auto Reason = XErrorCodeToFailureReason.find(Value);
+	if (Reason != XErrorCodeToFailureReason.end())
 	{
-		return XErrorCodeToFailureReason[Value];
+		return Reason->second;
 	}
 
 	CSP_LOG_ERROR_FORMAT(
