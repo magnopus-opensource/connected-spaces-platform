@@ -17,6 +17,10 @@ using namespace csp::multiplayer;
 
 namespace
 {
+
+int WaitForTestTimeoutCountMs;
+const int WaitForTestTimeoutLimit	= 20000;
+
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
@@ -731,8 +735,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 	// Test creation at root
 	{
-		auto ChangedCallback = [](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		bool Called = false;
+
+		auto ChangedCallback = [&Called](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
 		{
+			Called = true;
+
 			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Create);
 			EXPECT_EQ(Params.ParentId, 0);
 			EXPECT_EQ(Params.IsRoot, true);
@@ -741,14 +749,27 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
 
 		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, nullptr, {CreatedChildEntity->GetId()});
+
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
 	}
 
 	// Test creation with parent
 	{
 		uint64_t ParentId = CreatedParentEntity->GetId();
+		bool Called		  = false;
 
-		auto ChangedCallback = [ParentId](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		auto ChangedCallback = [&Called, ParentId](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
 		{
+			Called = true;
+
 			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Create);
 			EXPECT_EQ(Params.ParentId, ParentId);
 			EXPECT_EQ(Params.IsRoot, false);
@@ -757,12 +778,26 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
 
 		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, ParentId, {});
+
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
 	}
 
 	// Check Callback is called with deleting
 	{
-		auto ChangedCallback = [](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
+		bool Called = false;
+
+		auto ChangedCallback = [&Called](const csp::multiplayer::SequenceHierarchyChangedParams& Params)
 		{
+			Called = true;
+
 			EXPECT_EQ(Params.UpdateType, ESequenceUpdateType::Delete);
 			EXPECT_EQ(Params.ParentId, 0);
 			EXPECT_EQ(Params.IsRoot, true);
@@ -771,6 +806,16 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 		EntitySystem->SetSequenceHierarchyChangedCallback(ChangedCallback);
 
 		DeleteSequenceHierarchy(EntitySystem, nullptr);
+
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
+		EXPECT_TRUE(Called);
+
+		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
 	}
 
 	// Cleanup
