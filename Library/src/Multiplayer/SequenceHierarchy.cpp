@@ -1,6 +1,7 @@
 #include "CSP/Multiplayer/SequenceHierarchy.h"
 
 #include "CSP/Systems/Sequence/Sequence.h"
+#include "Multiplayer/MultiplayerConstants.h"
 
 #include <string>
 
@@ -18,11 +19,11 @@ void SequenceHierarchyResult::OnResponse(const csp::services::ApiResponseBase* A
 
 common::String CreateSequenceKey(common::Optional<uint64_t> ParentId, const common::String& SpaceId)
 {
-	common::String Key = SequenceHierarchyName + ":" + SpaceId;
+	common::String Key = csp::multiplayer::SequenceConstants::GetHierarchyName() + ":" + SpaceId;
 
 	if (ParentId.HasValue())
 	{
-		Key += ":" + systems::SequenceIdPrefix + std::to_string(*ParentId).c_str();
+		Key += ":" + csp::multiplayer::SequenceConstants::GetIdPrefix() + std::to_string(*ParentId).c_str();
 	}
 
 	return Key;

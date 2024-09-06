@@ -31,7 +31,7 @@
 #include "Events/EventSystem.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
-#include "Multiplayer/MultiplayerKeyConstants.h"
+#include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
@@ -1163,7 +1163,7 @@ void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionRes
 	};
 
 	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequencesByCriteria({}, SequenceHierarchyName, "GroupId", {SpaceId}, {}, GetSequencesCallback);
+	SequenceSystem->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
 }
 
 void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, systems::NullResultCallback Callback)

@@ -92,10 +92,6 @@ private:
 	csp::common::Array<SequenceHierarchy> SequenceHierarchyCollection;
 };
 
-CSP_START_IGNORE
-static inline const csp::common::String SequenceHierarchyName = "EntityHierarchy";
-CSP_END_IGNORE
-
 typedef std::function<void(const SequenceHierarchyResult& Result)> SequenceHierarchyResultCallback;
 typedef std::function<void(const SequenceHierarchyCollectionResult& Result)> SequenceHierarchyCollectionResultCallback;
 

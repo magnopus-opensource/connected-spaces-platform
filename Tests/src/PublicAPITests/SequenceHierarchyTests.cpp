@@ -165,7 +165,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceKeyTest)
 		const csp::common::String SpaceId = "12345";
 		const csp::common::String Key	  = csp::multiplayer::CreateSequenceKey(ParentId, SpaceId);
 
-		EXPECT_EQ(Key, "EntityHierarchy:" + SpaceId + ":" + csp::systems::SequenceIdPrefix + std::to_string(ParentId).c_str());
+		EXPECT_EQ(Key, "EntityHierarchy:" + SpaceId + ":" + "m_Id_" + std::to_string(ParentId).c_str());
 	}
 }
 #endif
