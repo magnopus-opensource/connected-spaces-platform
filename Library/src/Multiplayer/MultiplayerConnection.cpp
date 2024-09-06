@@ -24,7 +24,7 @@
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
-#include "Multiplayer/MultiplayerKeyConstants.h"
+#include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"

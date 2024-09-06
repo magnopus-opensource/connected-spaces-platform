@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #pragma once
+#include "CSP/Common/String.h"
 
 namespace csp::multiplayer
 {
@@ -32,8 +33,6 @@ enum ComponentKeys : uint64_t
 	ENTITY_ROTATION = 1002,
 	ENTITY_SCALE	= 1003,
 };
-
-
 
 namespace msgpack_typeids
 {
@@ -98,6 +97,16 @@ enum ItemComponentData : uint64_t
 	STRING_DICTIONARY
 };
 
-}
+} // namespace msgpack_typeids
+
+class SequenceConstants
+{
+public:
+	// For uniquely identifying sequences which relate to a space entity hierarchy.
+	static csp::common::String GetHierarchyName();
+
+	// Prefix needed when storing multiplayer unsigned integer ids in keys
+	static csp::common::String GetIdPrefix();
+};
 
 } // namespace csp::multiplayer
