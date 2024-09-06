@@ -225,10 +225,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -276,10 +273,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -335,10 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -389,10 +380,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -442,10 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -486,10 +471,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -556,10 +538,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
 	DeleteHotspotGroup(HotspotSystem, HotspotGroup2.Name);
 	DeleteHotspotGroup(HotspotSystem, HotspotGroup3.Name);
 	// Delete space
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
@@ -594,10 +573,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotNoGroupTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
@@ -640,10 +616,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 

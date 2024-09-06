@@ -128,10 +128,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
 	EXPECT_TRUE(FogComponent->GetIsVolumetric());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -219,10 +216,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
 	EXPECT_TRUE(FogComponent->GetIsVolumetric());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

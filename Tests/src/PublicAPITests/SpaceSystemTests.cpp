@@ -1216,10 +1216,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 		ASSERT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Log out and log in again using default test account
@@ -1816,19 +1813,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	ASSERT_EQ(RetrievedMetadata["site"], TestSpaceMetadata["site"]);
 
 	// Exit and re-enter space to verify its OK to always add self to public space
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Log back in with default user so space can be deleted
@@ -2124,10 +2115,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 		EXPECT_TRUE(SpaceSystem->IsInSpace());
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 		EXPECT_FALSE(SpaceSystem->IsInSpace());
 	}
@@ -2241,10 +2229,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	LogOut(UserSystem);

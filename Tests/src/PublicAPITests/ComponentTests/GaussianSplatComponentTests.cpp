@@ -131,10 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	GaussianSplatComponent->SetTint(csp::common::Vector3(1.0f, 0.4f, 0.0f));
 	EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(1.0f, 0.4f, 0.0f));
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -208,10 +205,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
 	EXPECT_EQ(GaussianSplatComponent->GetTint(), csp::common::Vector3(0.0f, 0.1f, 0.2f));
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

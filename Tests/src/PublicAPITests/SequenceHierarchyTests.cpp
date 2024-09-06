@@ -229,10 +229,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -313,10 +310,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, UpdateSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -393,10 +387,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -489,10 +480,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetAllSequenceHierarchiesTest
 	DeleteSequenceHierarchy(EntitySystem, nullptr);
 	DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -688,10 +676,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, ManualHierarchyMultipleConnec
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 
 	// Exit Space
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Log out
 	LogOut(UserSystem);
@@ -814,10 +799,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 	// Cleanup
 	DeleteSequenceHierarchy(EntitySystem, CreatedParentEntity->GetId());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

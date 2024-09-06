@@ -174,10 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -262,10 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 
 	EXPECT_TRUE(ActionCalled);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
