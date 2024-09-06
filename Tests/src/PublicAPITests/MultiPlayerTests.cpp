@@ -2515,6 +2515,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 		{
+			csp::CSPFoundation::Tick();
 			EntitySystem->ProcessPendingEntityOperations();
 			std::this_thread::sleep_for(50ms);
 			WaitForTestTimeoutCountMs += 50;
