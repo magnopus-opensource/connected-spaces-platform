@@ -2104,18 +2104,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 										 });
 
 	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
+	WaitForCallback(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

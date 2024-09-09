@@ -109,7 +109,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 		const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
+		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s %s", RefreshedSpace.Name.c_str(), RefreshedSpace.Id.c_str());
 
 		const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
