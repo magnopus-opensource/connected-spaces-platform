@@ -2025,10 +2025,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_EQ(CallbackAssetId, Asset.Id);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2121,10 +2118,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

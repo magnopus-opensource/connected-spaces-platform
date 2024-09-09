@@ -373,10 +373,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 		{
 		});
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -436,10 +433,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 		WaitForTestTimeoutCountMs += 20;
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -523,10 +517,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	EXPECT_TRUE(IsTestComplete);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -629,10 +620,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 
 	auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -710,10 +698,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 	EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), UserAvatarPlayMode);
 	EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -792,10 +777,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 	EXPECT_EQ(AvatarComponent->GetAvatarPlayMode(), AvatarPlayMode::Creator);
 	EXPECT_EQ(AvatarComponent->GetLocomotionModel(), UserAvatarLocomotionModel);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -868,10 +850,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
 	EXPECT_EQ(AvatarComponent->GetMovementDirection(), csp::common::Vector3::One());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -938,10 +917,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 	EXPECT_EQ(CreatedObject->GetThirdPartyRef(), "");
 	EXPECT_EQ(CreatedObject->GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1050,10 +1026,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	EXPECT_EQ(RealImageComponent->GetImageAssetId(), ImageAssetId);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1159,10 +1132,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 	EXPECT_FALSE(RealComponents.HasKey(StaticModelComponentKey));
 	EXPECT_FALSE(RealComponents.HasKey(ImageComponentKey));
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1260,10 +1230,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 		WaitForTestTimeoutCountMs += 50;
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1373,10 +1340,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 		WaitForTestTimeoutCountMs += 50;
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1728,10 +1692,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 
 	csp::CSPFoundation::Tick();
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1801,10 +1762,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
 	EXPECT_FALSE(CreatedObject->IsSelected());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1987,10 +1945,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 	Object->QueueUpdate();
 	EntitySystem->ProcessPendingEntityOperations();
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2062,10 +2017,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 	EXPECT_TRUE(FoundComponent != nullptr);
 	EXPECT_EQ(Component2->GetId(), FoundComponent->GetId());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2316,10 +2268,7 @@ void RunParentEntityReplicationTest(bool Local)
 		auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2433,10 +2382,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 
 	// Exit Space
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Log out
 	LogOut(UserSystem);
@@ -2484,10 +2430,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2677,10 +2620,7 @@ void RunParentChildDeletionTest(bool Local)
 			auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 		}
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 		// Delete space
 		DeleteSpace(SpaceSystem, Space.Id);
@@ -2758,10 +2698,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

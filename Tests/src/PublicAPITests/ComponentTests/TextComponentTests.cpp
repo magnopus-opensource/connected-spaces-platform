@@ -154,10 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 	EXPECT_FLOAT_EQ(TextComponent->GetWidth(), 2.0f);
 	EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -265,10 +262,7 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 	EXPECT_FLOAT_EQ(TextComponent->GetWidth(), 2.0f);
 	EXPECT_EQ(TextComponent->GetIsBackgroundVisible(), false);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

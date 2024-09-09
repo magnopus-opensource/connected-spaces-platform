@@ -275,10 +275,7 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
 	// Ensure values are set correctly
 	EXPECT_EQ(CustomComponent->GetComponentName(), "ComponentName");
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

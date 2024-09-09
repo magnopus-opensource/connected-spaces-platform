@@ -1078,7 +1078,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
 	{
 		EXPECT_EQ(Params.Key, Sequence.Key);
-		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Rename);
 		EXPECT_EQ(Params.NewKey, std::string(UniqueUpdatedSequenceName).c_str());
 
 		CallbackCalled = true;
@@ -1110,10 +1110,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	WaitForCallback(CallbackCalled);
 	EXPECT_TRUE(CallbackCalled);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
