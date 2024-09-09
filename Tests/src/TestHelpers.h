@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 
