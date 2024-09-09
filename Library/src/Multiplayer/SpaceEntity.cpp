@@ -179,9 +179,24 @@ const SpaceTransform& SpaceEntity::GetTransform() const
 	return Transform;
 }
 
+const SpaceTransform& SpaceEntity::GetGlobalTransform() const
+{
+	if (Parent != nullptr)
+		return Parent->Transform + Transform;
+	return Transform;
+}
+
 const csp::common::Vector3& SpaceEntity::GetPosition() const
 {
 	return Transform.Position;
+}
+
+const csp::common::Vector3& SpaceEntity::GetGlobalPosition() const
+{
+	if (Parent != nullptr)
+		return Parent->GetTransform().Position + Transform.Position;
+	else
+		return Transform.Position;
 }
 
 void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
@@ -209,6 +224,14 @@ const csp::common::Vector4& SpaceEntity::GetRotation() const
 	return Transform.Rotation;
 }
 
+const csp::common::Vector4& SpaceEntity::GetGlobalRotation() const
+{
+	if (Parent != nullptr)
+		return Parent->Transform.Rotation + Transform.Rotation;
+	else
+		return Transform.Rotation;
+}
+
 void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
 	if (!IsModifiable())
@@ -231,6 +254,13 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 
 const csp::common::Vector3& SpaceEntity::GetScale() const
 {
+	return Transform.Scale;
+}
+
+const csp::common::Vector3& SpaceEntity::GetGlobalScale() const
+{
+	if (Parent != nullptr)
+		return Parent->Transform.Scale + Transform.Scale;
 	return Transform.Scale;
 }
 

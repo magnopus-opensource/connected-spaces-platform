@@ -25,3 +25,13 @@ csp::multiplayer::SpaceTransform::SpaceTransform(const csp::common::Vector3& Pos
 	: Position(Position), Rotation(Rotation), Scale(Scale)
 {
 }
+
+csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator+(const SpaceTransform& Transform)
+{
+	return SpaceTransform(Position + Transform.Position, Rotation + Transform.Rotation, Scale + Transform.Scale);
+}
+
+bool csp::multiplayer::SpaceTransform::operator==(const SpaceTransform& Transform) const
+{
+	return Position == Transform.Position && Rotation == Transform.Rotation && Scale == Transform.Scale;
+}

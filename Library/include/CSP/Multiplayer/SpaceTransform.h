@@ -34,6 +34,14 @@ public:
 	/// @param Scale csp::common::Vector3 : The scale value for the transform.
 	SpaceTransform(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation, const csp::common::Vector3& Scale);
 
+	/// @brief Basic Addition operator for adding one SpaceTransform to Another
+	/// @param SpaceTransform Transform
+	SpaceTransform operator+(const SpaceTransform& Transform);
+
+	/// @brief Equality operator
+	/// @param SpaceTransform Transform
+	bool operator==(const SpaceTransform& Transform) const;
+
 	/// @brief The position value for the transform.
 	csp::common::Vector3 Position;
 

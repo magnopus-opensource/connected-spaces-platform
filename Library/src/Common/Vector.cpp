@@ -44,6 +44,31 @@ const Vector3& Vector3::One()
 	return _One;
 }
 
+Vector3 Vector3::operator+(const Vector3& Other) const
+{
+	return Vector3(X + Other.X, Y + Other.Y, Z + Other.Y);
+}
+
+Vector3 Vector3::operator-(const Vector3& Other) const
+{
+	return Vector3(X - Other.X, Y - Other.Y, Z - Other.Y);
+}
+
+Vector3 Vector3::operator/(float Divisor) const
+{
+	return Vector3(X / Divisor, Y / Divisor, Z / Divisor);
+}
+
+Vector3 Vector3::operator*(const Vector3& Other) const
+{
+	return Vector3(X * Other.X, Y * Other.Y, Z * Other.Z);
+}
+
+Vector3 Vector3::operator*(float Scalar) const
+{
+	return Vector3(X * Scalar, Y * Scalar, Z * Scalar);
+}
+
 bool Vector3::operator==(const Vector3 Other) const
 {
 	return IsNearlyEqual(X, Other.X) && IsNearlyEqual(Y, Other.Y) && IsNearlyEqual(Z, Other.Z);
@@ -74,6 +99,31 @@ const Vector4& Vector4::Identity()
 	static Vector4 _Identity = {0, 0, 0, 1};
 
 	return _Identity;
+}
+
+Vector4 Vector4::operator+(const Vector4& Other) const
+{
+	return Vector4(X + Other.X, Y + Other.Y, Z + Other.Z, W + Other.W);
+}
+
+Vector4 Vector4::operator-(const Vector4& Other) const
+{
+	return Vector4(X - Other.X, Y - Other.Y, Z - Other.Z, W - Other.W);
+}
+
+Vector4 Vector4::operator/(float Divisor) const
+{
+	return Vector4(X / Divisor, Y / Divisor, Z / Divisor, W / Divisor);
+}
+
+Vector4 Vector4::operator*(const Vector4& Other) const
+{
+	return Vector4(X * Other.X, Y * Other.Y, Z * Other.Z, W * Other.W);
+}
+
+Vector4 Vector4::operator*(float Scalar) const
+{
+	return Vector4(X * Scalar, Y * Scalar, Z * Scalar, W * Scalar);
 }
 
 bool Vector4::operator==(const Vector4 Other) const
