@@ -164,6 +164,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 												   return;
 											   }
+											   else
+											   {
+												   CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
+											   }
 
 											   MultiplayerConnection->StartListening(
 												   [this, InternalResult, Callback](csp::multiplayer::ErrorCode Error)
@@ -236,6 +240,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
+							}
+							else
+							{
+								CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 							}
 
 							auto& SystemsManager = csp::systems::SystemsManager::Get();
