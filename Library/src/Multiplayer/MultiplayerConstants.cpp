@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "Multiplayer/MultiplayerConstants.h"
 
-
-template <typename T> const inline T MakeInvalid()
+namespace csp::multiplayer
 {
-	static T Instance(csp::systems::EResultCode::Failed, 0);
 
-	return Instance;
+csp::common::String SequenceConstants::GetHierarchyName()
+{
+	const csp::common::String SequenceHierarchyName = "EntityHierarchy";
+	return SequenceHierarchyName;
 }
 
-template <typename T> const inline T MakeInvalid(csp::systems::ERequestFailureReason Reason)
+csp::common::String SequenceConstants::GetIdPrefix()
 {
-	static T Instance(csp::systems::EResultCode::Failed, 0, Reason);
-
-	return Instance;
+	const csp::common::String SequenceIdPrefix = "m_Id_";
+	return SequenceIdPrefix;		
 }
+
+} // namespace csp::multiplayer

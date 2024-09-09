@@ -53,6 +53,7 @@ class CSP_API SequenceSystem : public SystemBase
 public:
 	// Hotspot:[SpaceId]:[GroupName]
 	/// @brief Creates a new sequence. If a sequence already exists with this key, it will overwrite the current one.
+	/// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// This call will fail if the user isn't a creator of the space.
 	/// @param SequenceKey csp::common::String : The unique grouping name. Our naming convention is: Type:[SpaceId]:[GroupName]
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.)
@@ -68,6 +69,7 @@ public:
 										 SequenceResultCallback Callback);
 
 	/// @brief Updates an existing sequence. This call will fail if the user isn't a creator of the space.
+	/// @note This call will fail if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// @param SequenceKey csp::common::String : The unique grouping name. Our naming convention is: Type:[SpaceId]:[GroupName]
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.)
 	/// @param ReferenceId csp::common::String : The id of the reference
@@ -82,6 +84,8 @@ public:
 										 SequenceResultCallback Callback);
 
 	/// @brief Renames a given sequence. This call will fail if the user isn't a creator of the space.
+	/// @note This call will fail (Reason InvalidSequenceKey) if the OldSequenceKey, or NewSequenceKey parameters contains invalid keys, such as
+	/// spaces, '/' or '%'
 	/// @param OldSequenceKey csp::common::String : The current sequence key name
 	/// @param NewSequenceKey csp::common::String : The new sequence key name
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
@@ -89,6 +93,7 @@ public:
 		RenameSequence(const csp::common::String& OldSequenceKey, const csp::common::String& NewSequenceKey, SequenceResultCallback Callback);
 
 	/// @brief Finds sequences based on the given criteria
+	/// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to search for
 	/// @param SequenceKeys csp::common::Optional<csp::common::String> : An optional regex string for searching keys
 	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.). Must be used with ReferenceIds
@@ -103,11 +108,13 @@ public:
 												 SequencesResultCallback Callback);
 
 	/// @brief Gets a sequence by it's key
+	/// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// @param SequenceKey csp::common::String : The unique grouping name
 	/// @param Callback SequenceResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void GetSequence(const csp::common::String& SequenceKey, SequenceResultCallback Callback);
 
 	/// @brief Deletes the given sequences. This call will fail if the user isn't a creator of the space
+	/// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// @param SequenceKeys csp::common::Array<csp::common::String> : An array of sequence keys to delete
 	/// @param Callback NullResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void DeleteSequences(const csp::common::Array<csp::common::String>& SequenceKeys, NullResultCallback Callback);

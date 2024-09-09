@@ -17,7 +17,6 @@
 #include "PublicAPITests/UserSystemTestHelpers.h"
 #include "TestHelpers.h"
 
-
 int main(int argc, char* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);
