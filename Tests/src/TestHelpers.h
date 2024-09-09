@@ -243,6 +243,6 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
 
 	if (CallbackCalled == false)
 	{
-		printf("Test timed out - Callback wasn't called");
+		printf("Test timed out - Callback wasn't called\n");
 	}
 }
