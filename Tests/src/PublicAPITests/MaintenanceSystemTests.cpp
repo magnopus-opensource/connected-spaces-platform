@@ -81,7 +81,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetMaintenanceInfoTest)
 	auto& SystemsManager	= SystemsManager::Get();
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json");
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 #endif
@@ -94,7 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, IsInsideMaintenanceWindowInfo
 	auto& SystemsManager	= SystemsManager::Get();
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json");
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -111,7 +111,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
 	auto& SystemsManager	= SystemsManager::Get();
 	auto* MaintenanceSystem = SystemsManager.GetMaintenanceSystem();
 
-	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnoboard.com/odev/maintenance-windows.json");
+	auto [Result] = AWAIT(MaintenanceSystem, GetMaintenanceInfo, "https://maintenance-windows.magnopus-dev.cloud/maintenance-windows.json");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
