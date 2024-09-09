@@ -2106,12 +2106,7 @@ void RunParentEntityReplicationTest(bool Local)
 
 		CreatedChildEntity1->QueueUpdate();
 
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 
 		EXPECT_TRUE(ChildEntityUpdated);
 
@@ -2147,15 +2142,7 @@ void RunParentEntityReplicationTest(bool Local)
 
 		CreatedChildEntity2->QueueUpdate();
 
-		// Reset test variables
-		WaitForTestTimeoutCountMs = 0;
-
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 
 		EXPECT_TRUE(ChildEntityUpdated);
 
@@ -2192,17 +2179,7 @@ void RunParentEntityReplicationTest(bool Local)
 
 		CreatedChildEntity1->QueueUpdate();
 
-		// Reset test variables
-		WaitForTestTimeoutCountMs = 0;
-
-		// Wait for update
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check entity is  unparented correctly
@@ -2237,17 +2214,7 @@ void RunParentEntityReplicationTest(bool Local)
 
 		CreatedChildEntity2->QueueUpdate();
 
-		// Reset test variables
-		WaitForTestTimeoutCountMs = 0;
-
-		// Wait for update
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check entity is  unparented correctly
@@ -2370,13 +2337,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	CreatedChildEntity->QueueUpdate();
 
 	// Wait for update
-	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-	{
-		EntitySystem->ProcessPendingEntityOperations();
-		std::this_thread::sleep_for(50ms);
-		WaitForTestTimeoutCountMs += 50;
-	}
-
+	WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 	EXPECT_TRUE(ChildEntityUpdated);
 
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
@@ -2404,16 +2365,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 
-	// Reset test variables
-	WaitForTestTimeoutCountMs = 0;
-
-	// Wait to recieve entities
-	while (!EntitiesCreated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-	{
-		std::this_thread::sleep_for(50ms);
-		WaitForTestTimeoutCountMs += 50;
-	}
-
+	WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
 	EXPECT_TRUE(EntitiesCreated);
 
 	// Find our entities
@@ -2513,13 +2465,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		CreatedChildEntity1->QueueUpdate();
 
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 	}
 
@@ -2541,13 +2487,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		CreatedChildEntity2->QueueUpdate();
 
-		while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 	}
 
@@ -2563,17 +2503,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		EntitySystem->DestroyEntity(CreatedChildEntity1, DestroyCb);
 
-		// Reset test variables
-		WaitForTestTimeoutCountMs = 0;
-
-		// Wait for update
-		while (!DestroyCalled && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
 		EXPECT_TRUE(DestroyCalled);
 
 		// Check entity is  unparented correctly
@@ -2598,17 +2528,7 @@ void RunParentChildDeletionTest(bool Local)
 
 		EntitySystem->DestroyEntity(CreatedParentEntity, DestroyCb);
 
-		// Reset test variables
-		WaitForTestTimeoutCountMs = 0;
-
-		// Wait for update
-		while (!DestroyCalled && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
-		{
-			EntitySystem->ProcessPendingEntityOperations();
-			std::this_thread::sleep_for(50ms);
-			WaitForTestTimeoutCountMs += 50;
-		}
-
+		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
 		EXPECT_TRUE(DestroyCalled);
 
 		// Ensure parent is deleted and child is re-parented

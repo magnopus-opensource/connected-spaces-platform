@@ -246,3 +246,26 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
 		printf("Test timed out - Callback wasn't called\n");
 	}
 }
+
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::SpaceEntitySystem* EntitySystem, int MaxTextTimeSeconds = 20)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	if (CallbackCalled == false)
+	{
+		printf("Test timed out - Callback wasn't called\n");
+	}
+}
