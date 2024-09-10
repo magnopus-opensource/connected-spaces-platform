@@ -5,6 +5,7 @@ on:
 
 jobs:
   check_branch:
+    if: github.repository == 'magnopus-opensource/connected-spaces-platform'
     runs-on: ubuntu-latest
     steps:
       - name: Check branch
