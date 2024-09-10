@@ -95,6 +95,7 @@ enum class ESequenceUpdateType
 {
 	Create,
 	Update,
+	Rename,
 	Delete
 };
 

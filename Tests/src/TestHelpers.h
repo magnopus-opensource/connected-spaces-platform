@@ -16,6 +16,7 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
 
@@ -23,8 +24,10 @@
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <thread>
 #include <random>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 inline const char* TESTS_CLIENT_SKU = "CPPTest";
 
@@ -166,21 +169,21 @@ inline void SetRandSeed()
 
 inline double RandomUniformDouble()
 {
-	 std::uniform_real_distribution<double> UniformDouble;
+	std::uniform_real_distribution<double> UniformDouble;
 
 	// Seed using the current time.
 	std::mt19937_64 Rand;
 	auto CurrentTime		= std::chrono::high_resolution_clock::now();
 	auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
 	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-	
+
 	return UniformDouble(Rand);
 }
 
 inline double RandomRangeDouble(double Min, double Max)
 {
 	const double RandomUniform = RandomUniformDouble();
-	const double Range = Max - Min;
+	const double Range		   = Max - Min;
 
 	return (RandomUniform * Range) + Min;
 }
@@ -221,4 +224,49 @@ inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& End
 	ClientHeaderInfo.CHSEnvironment	   = "oDev";
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+}
+
+
+inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	if (CallbackCalled == false)
+	{
+		printf("Test timed out - Callback wasn't called\n");
+	}
+}
+
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::SpaceEntitySystem* EntitySystem, int MaxTextTimeSeconds = 20)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	if (CallbackCalled == false)
+	{
+		printf("Test timed out - Callback wasn't called\n");
+	}
 }
