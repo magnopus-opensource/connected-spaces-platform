@@ -2383,7 +2383,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	csp::common::String ChildEntityName	 = "ChildEntity";
 	SpaceTransform ObjectTransformParent = {csp::common::Vector3 {1, 2, 3}, csp::common::Vector4 {4, 5, 6, 7}, csp::common::Vector3 {9, 8, 7}};
 	SpaceTransform ObjectTransformChild	 = {csp::common::Vector3 {1, 1, 1}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {1, 1, 1}};
-	// SpaceTransform ObjectTransformExpected = {csp::common::Vector3 {2, 3, 4}, csp::common::Vector4 {5, 6, 7, 8}, csp::common::Vector3 {10, 9, 8}};
 
 	SpaceTransform ObjectTransformExpected = ObjectTransformParent + ObjectTransformChild;
 

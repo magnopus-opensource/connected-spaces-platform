@@ -46,12 +46,12 @@ const Vector3& Vector3::One()
 
 Vector3 Vector3::operator+(const Vector3& Other) const
 {
-	return Vector3(X + Other.X, Y + Other.Y, Z + Other.Y);
+	return Vector3(X + Other.X, Y + Other.Y, Z + Other.Z);
 }
 
 Vector3 Vector3::operator-(const Vector3& Other) const
 {
-	return Vector3(X - Other.X, Y - Other.Y, Z - Other.Y);
+	return Vector3(X - Other.X, Y - Other.Y, Z - Other.Z);
 }
 
 Vector3 Vector3::operator/(float Divisor) const
