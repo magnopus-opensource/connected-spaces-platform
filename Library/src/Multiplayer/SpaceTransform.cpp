@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "CSP/Multiplayer/SpaceTransform.h"
+
+#include <glm/gtc/quaternion.hpp>
+
 
 csp::multiplayer::SpaceTransform::SpaceTransform() : Position(0.0f, 0.0f, 0.0f), Rotation(0.0f, 0.0f, 0.0f, 1.0f), Scale(1.0f, 1.0f, 1.0f)
 {
@@ -26,12 +30,18 @@ csp::multiplayer::SpaceTransform::SpaceTransform(const csp::common::Vector3& Pos
 {
 }
 
-csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator+(const SpaceTransform& Transform)
-{
-	return SpaceTransform(Position + Transform.Position, Rotation + Transform.Rotation, Scale + Transform.Scale);
-}
-
 bool csp::multiplayer::SpaceTransform::operator==(const SpaceTransform& Transform) const
 {
 	return Position == Transform.Position && Rotation == Transform.Rotation && Scale == Transform.Scale;
+}
+
+csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator*(const SpaceTransform& Transform) const
+{
+	glm::quat Orientation {Rotation.X, Rotation.Y, Rotation.Z, Rotation.W};
+	glm::quat OtherOrientation {Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z, Transform.Rotation.W};
+	glm::quat FinalOrientation = OtherOrientation * Orientation;
+	glm::normalize(FinalOrientation);
+	return SpaceTransform(Position + Transform.Position,
+						  {FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w},
+						  Scale * Transform.Scale);
 }

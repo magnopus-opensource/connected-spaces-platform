@@ -2297,10 +2297,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	// Create Entities
 	csp::common::String ParentEntityName = "ParentEntity";
 	csp::common::String ChildEntityName	 = "ChildEntity";
-	SpaceTransform ObjectTransformParent = {csp::common::Vector3 {1, 2, 3}, csp::common::Vector4 {4, 5, 6, 7}, csp::common::Vector3 {9, 8, 7}};
-	SpaceTransform ObjectTransformChild	 = {csp::common::Vector3 {1, 1, 1}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {1, 1, 1}};
 
-	SpaceTransform ObjectTransformExpected = ObjectTransformParent + ObjectTransformChild;
+	SpaceTransform ObjectTransformParent = {csp::common::Vector3 {1, 2, 3}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {2, 2, 2}};
+	SpaceTransform ObjectTransformChild	 = {csp::common::Vector3 {1, 1, 1}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {2, 3, 4}};
+
+	SpaceTransform ObjectTransformExpected = {csp::common::Vector3 {2, 3, 4}, csp::common::Vector4 {2, 2, 2, -2}, csp::common::Vector3 {4, 6, 8}};
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](SpaceEntity* Entity)
@@ -2338,11 +2339,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	}
 
 	EXPECT_TRUE(ChildEntityUpdated);
+	csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
+	csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
+	csp::common::Vector3 GlobalScale	= CreatedChildEntity->GetGlobalScale();
 
-	EXPECT_EQ(ObjectTransformExpected.Position, CreatedChildEntity->GetGlobalPosition());
-	EXPECT_EQ(ObjectTransformExpected.Rotation, CreatedChildEntity->GetGlobalRotation());
-	EXPECT_EQ(ObjectTransformExpected.Scale, CreatedChildEntity->GetGlobalScale());
-	EXPECT_EQ(ObjectTransformExpected, CreatedChildEntity->GetGlobalTransform());
+	EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation == GlobalRotation, true);
+	EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+	SpaceTransform ObjectTransformActual = CreatedChildEntity->GetGlobalTransform();
+	EXPECT_EQ(ObjectTransformActual == ObjectTransformExpected, true);
+
+	// EXPECT_TRUE(ObjectTransformExpected == ObjectTransformActual);
 
 
 	SpaceSystem->ExitSpace(

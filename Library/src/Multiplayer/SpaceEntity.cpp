@@ -49,6 +49,7 @@
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
+#include <glm/gtc/quaternion.hpp>
 #include <thread>
 
 
@@ -179,10 +180,10 @@ const SpaceTransform& SpaceEntity::GetTransform() const
 	return Transform;
 }
 
-const SpaceTransform& SpaceEntity::GetGlobalTransform() const
+SpaceTransform SpaceEntity::GetGlobalTransform() const
 {
 	if (Parent != nullptr)
-		return Parent->Transform + Transform;
+		return Parent->GetTransform() * Transform;
 	return Transform;
 }
 
@@ -191,7 +192,7 @@ const csp::common::Vector3& SpaceEntity::GetPosition() const
 	return Transform.Position;
 }
 
-const csp::common::Vector3& SpaceEntity::GetGlobalPosition() const
+csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
 {
 	if (Parent != nullptr)
 		return Parent->GetTransform().Position + Transform.Position;
@@ -224,10 +225,19 @@ const csp::common::Vector4& SpaceEntity::GetRotation() const
 	return Transform.Rotation;
 }
 
-const csp::common::Vector4& SpaceEntity::GetGlobalRotation() const
+csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
 {
 	if (Parent != nullptr)
-		return Parent->Transform.Rotation + Transform.Rotation;
+	{
+		glm::quat Orientation {Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z, Transform.Rotation.W};
+		glm::quat OtherOrientation {Parent->Transform.Rotation.X,
+									Parent->Transform.Rotation.Y,
+									Parent->Transform.Rotation.Z,
+									Parent->Transform.Rotation.W};
+
+		glm::quat FinalOrientation = OtherOrientation * Orientation;
+		return csp::common::Vector4 {FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w};
+	}
 	else
 		return Transform.Rotation;
 }
@@ -257,10 +267,10 @@ const csp::common::Vector3& SpaceEntity::GetScale() const
 	return Transform.Scale;
 }
 
-const csp::common::Vector3& SpaceEntity::GetGlobalScale() const
+csp::common::Vector3 SpaceEntity::GetGlobalScale() const
 {
 	if (Parent != nullptr)
-		return Parent->Transform.Scale + Transform.Scale;
+		return Parent->Transform.Scale * Transform.Scale;
 	return Transform.Scale;
 }
 
