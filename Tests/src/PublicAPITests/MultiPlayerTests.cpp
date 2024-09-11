@@ -38,7 +38,6 @@
 #include "gtest/gtest.h"
 #include <CSP/Multiplayer/Components/ImageSpaceComponent.h>
 #include <CSP/Multiplayer/Components/LightSpaceComponent.h>
-#include <atomic_queue/defs.h>
 #include <chrono>
 #include <filesystem>
 #include <thread>
