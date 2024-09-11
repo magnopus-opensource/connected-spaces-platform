@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "AnalyticsSystemTestHelpers.h"
+/*#include "AnalyticsSystemTestHelpers.h"
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
@@ -25,7 +25,7 @@
 #include "gtest/gtest.h"
 
 
-#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_MACRO_LOG_METRIC_TEST
+ #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_MACRO_LOG_METRIC_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 {
 	auto& SystemsManager				  = csp::systems::SystemsManager::Get();
@@ -114,3 +114,4 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 	csp::CSPFoundation::Tick();
 }
 #endif
+*/

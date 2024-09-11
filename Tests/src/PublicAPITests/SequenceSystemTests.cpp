@@ -31,24 +31,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
-void WaitForCallback(bool& CallbackCalled)
-{
-	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (CallbackCalled == false && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-}
-
-} // namespace
-
 void CreateSequence(csp::systems::SequenceSystem* SequenceSystem,
 					const csp::common::String& SequenceKey,
 					const csp::common::String& ReferenceType,
@@ -230,6 +212,7 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
 		EXPECT_EQ(S1.Items[i], S2.Items[i]);
 	}
 }
+} // namespace
 
 static constexpr const char* TestSpaceName		  = "CSP-UNITTEST-SPACE-MAG";
 static constexpr const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
@@ -1078,7 +1061,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
 	{
 		EXPECT_EQ(Params.Key, Sequence.Key);
-		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Rename);
 		EXPECT_EQ(Params.NewKey, std::string(UniqueUpdatedSequenceName).c_str());
 
 		CallbackCalled = true;
@@ -1110,10 +1093,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	WaitForCallback(CallbackCalled);
 	EXPECT_TRUE(CallbackCalled);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

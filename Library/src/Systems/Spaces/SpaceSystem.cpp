@@ -109,7 +109,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 		const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
+		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s %s", RefreshedSpace.Name.c_str(), RefreshedSpace.Id.c_str());
 
 		const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
@@ -163,6 +163,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 																		csp::multiplayer::ErrorCodeToString(Error).c_str());
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 												   return;
+											   }
+											   else
+											   {
+												   CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 											   }
 
 											   MultiplayerConnection->StartListening(
@@ -236,6 +240,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
+							}
+							else
+							{
+								CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 							}
 
 							auto& SystemsManager = csp::systems::SystemsManager::Get();

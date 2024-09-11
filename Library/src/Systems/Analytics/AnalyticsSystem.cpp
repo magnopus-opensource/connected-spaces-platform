@@ -20,7 +20,7 @@
 #include "Events/EventSystem.h"
 #include "Memory/Memory.h"
 
-#include <atomic_queue/atomic_queue.h>
+// #include <atomic_queue/atomic_queue.h>
 
 
 namespace csp::systems
@@ -39,7 +39,7 @@ public:
 
 	void OnEvent(const csp::events::Event& InEvent) override
 	{
-		std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
+		/* std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
 
 		if (Provider == nullptr)
 		{
@@ -52,15 +52,15 @@ public:
 			Provider->Log(Event);
 
 			DEINIT_EVENT(Event);
-		}
+		}*/
 	}
 
 	void Log(AnalyticsEvent* Event)
 	{
-		if (Provider)
+		/* if (Provider)
 		{
 			Queue.push(Event);
-		}
+		}*/
 	}
 
 	void RegisterProvider(IAnalyticsProvider* InProvider)
@@ -70,19 +70,19 @@ public:
 
 	void DeregisterProvider(IAnalyticsProvider* InProvider)
 	{
-		if (Provider == InProvider)
+		/* if (Provider == InProvider)
 		{
 			std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
 			Provider = nullptr;
-		}
+		}*/
 	}
 
 private:
-	using AnalyticsSystemQueue = atomic_queue::AtomicQueue<AnalyticsEvent*, AnalyticsSystem::QueueSize>;
+	// using AnalyticsSystemQueue = atomic_queue::AtomicQueue<AnalyticsEvent*, AnalyticsSystem::QueueSize>;
 
 	IAnalyticsProvider* Provider;
 	std::mutex ProviderMutex;
-	AnalyticsSystemQueue Queue;
+	// AnalyticsSystemQueue Queue;
 };
 
 
