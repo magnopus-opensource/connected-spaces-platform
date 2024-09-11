@@ -92,8 +92,6 @@ SpaceSystem::~SpaceSystem()
 
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
-	CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace");
-
 	SpaceResultCallback GetSpaceCallback = [Callback, SpaceId, this](const SpaceResult& GetSpaceResult)
 	{
 		if (GetSpaceResult.GetResultCode() == EResultCode::InProgress)
@@ -103,14 +101,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 		if (GetSpaceResult.GetResultCode() == EResultCode::Failed)
 		{
-			CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace fail");
 			NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
 			return;
 		}
-
-		CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace success");
 
 		const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
@@ -120,8 +115,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 		if (!HasFlag(RefreshedSpace.Attributes, SpaceAttributes::RequiresInvite))
 		{
-			CSP_LOG_MSG(csp::systems::LogLevel::Log, "!HasFlag");
-
 			AddUserToSpace(SpaceId,
 						   UserId,
 						   [Callback, SpaceId, GetSpaceResult, RefreshedSpace, this](const SpaceResult& Result)
@@ -131,23 +124,16 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   return;
 							   }
 
-							   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace");
-
 							   NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
 							   if (Result.GetResultCode() == EResultCode::Success)
 							   {
-								   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace success");
 								   CurrentSpace = RefreshedSpace;
 
 								   csp::events::Event* EnterSpaceEvent
 									   = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
 								   EnterSpaceEvent->AddString("SpaceId", SpaceId);
 								   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
-							   }
-							   else
-							   {
-								   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace fail!!!!");
 							   }
 
 							   auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -161,14 +147,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   {
 									   if (Error != csp::multiplayer::ErrorCode::None)
 									   {
-										   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening error");
 										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
 																csp::multiplayer::ErrorCodeToString(Error).c_str());
 										   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										   return;
 									   }
-
-									   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
 
 									   MultiplayerConnection->SetScopes(
 										   SpaceId,
@@ -176,7 +159,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 										   {
 											   if (Error != csp::multiplayer::ErrorCode::None)
 											   {
-												   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes error");
 												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s",
 																		csp::multiplayer::ErrorCodeToString(Error).c_str());
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
@@ -184,7 +166,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 											   }
 											   else
 											   {
-												   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes success");
+												   CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 											   }
 
 											   MultiplayerConnection->StartListening(
@@ -192,14 +174,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 												   {
 													   if (Error != csp::multiplayer::ErrorCode::None)
 													   {
-														   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
 														   CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
 																				csp::multiplayer::ErrorCodeToString(Error).c_str());
 														   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 														   return;
 													   }
-
-													   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
 													   // TODO: Support getting errors from RetrieveAllEntities
 													   csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
@@ -215,22 +194,16 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 			// First check if the user is the owner
 			bool EnterSuccess = RefreshedSpace.OwnerId == UserId;
 
-			CSP_LOG_MSG(csp::systems::LogLevel::Log, " EnterSuccess:");
-			CSP_LOG_MSG(csp::systems::LogLevel::Log, std::to_string(EnterSuccess).c_str());
-
 			// If the user is not the owner check are they a moderator
 			if (!EnterSuccess)
 			{
 				EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
-
-				CSP_LOG_MSG(csp::systems::LogLevel::Log, "ModeratorIds: fail");
 			}
 
 			// Finally check all users in the group
 			if (!EnterSuccess)
 			{
 				EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.UserIds);
-				CSP_LOG_MSG(csp::systems::LogLevel::Log, "UserIds: fail");
 			}
 
 			NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
@@ -242,10 +215,6 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				EnterSpaceEvent->AddString("SpaceId", SpaceId);
 				csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 			}
-			else
-			{
-				CSP_LOG_MSG(csp::systems::LogLevel::Log, "EnterSuccess fail");
-			}
 
 			auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -256,14 +225,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				{
 					if (Error != csp::multiplayer::ErrorCode::None)
 					{
-						CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 error");
 						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
 											 csp::multiplayer::ErrorCodeToString(Error).c_str());
 						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						return;
 					}
-
-					CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 success");
 
 					MultiplayerConnection->SetScopes(
 						SpaceId,
@@ -271,14 +237,13 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 						{
 							if (Error != csp::multiplayer::ErrorCode::None)
 							{
-								CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes2 fail");
 								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
 							}
 							else
 							{
-								CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes2 success");
+								CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 							}
 
 							auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -289,14 +254,11 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								{
 									if (Error != csp::multiplayer::ErrorCode::None)
 									{
-										CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
 										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
 															 csp::multiplayer::ErrorCodeToString(Error).c_str());
 										INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										return;
 									}
-
-									CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
 									// TODO: Support getting errors from RetrieveAllEntities
 									csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
