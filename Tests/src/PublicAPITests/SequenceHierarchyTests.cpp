@@ -19,7 +19,7 @@ namespace
 {
 
 int WaitForTestTimeoutCountMs;
-const int WaitForTestTimeoutLimit = 20000;
+const int WaitForTestTimeoutLimit	= 20000;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {

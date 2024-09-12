@@ -184,7 +184,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 											   }
 											   else
 											   {
-												   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes success");
+												   CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 											   }
 
 											   MultiplayerConnection->StartListening(
@@ -278,7 +278,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 							}
 							else
 							{
-								CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes2 success");
+								CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 							}
 
 							auto& SystemsManager = csp::systems::SystemsManager::Get();
