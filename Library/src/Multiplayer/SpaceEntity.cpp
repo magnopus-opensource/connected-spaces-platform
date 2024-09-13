@@ -62,6 +62,23 @@ using namespace std::chrono;
 namespace csp::multiplayer
 {
 
+glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
+{
+	glm::mat4 ParentTranslate
+		= glm::translate(glm::mat4(1.0f),
+						 glm::vec3(ParentSpaceTransform.Position.X, ParentSpaceTransform.Position.Y, ParentSpaceTransform.Position.Z));
+	glm::quat ParentOrientation {ParentSpaceTransform.Rotation.W,
+								 ParentSpaceTransform.Rotation.X,
+								 ParentSpaceTransform.Rotation.Y,
+								 ParentSpaceTransform.Rotation.Z};
+
+	glm::mat4 ParentRotation(ParentOrientation);
+	glm::mat4 ParentScale
+		= glm::scale(glm::mat4(1.0f), glm::vec3(ParentSpaceTransform.Scale.X, ParentSpaceTransform.Scale.Y, ParentSpaceTransform.Scale.Z));
+	glm::mat4 ParentTransform = ParentTranslate * ParentRotation * ParentScale;
+	return ParentTransform;
+}
+
 inline uint32_t CheckedUInt64ToUint32(uint64_t Value)
 {
 	assert(Value <= UINT32_MAX);
@@ -183,7 +200,13 @@ const SpaceTransform& SpaceEntity::GetTransform() const
 SpaceTransform SpaceEntity::GetGlobalTransform() const
 {
 	if (Parent != nullptr)
-		return Parent->GetTransform() * Transform;
+	{
+		SpaceTransform GlobalTransform;
+		GlobalTransform.Position = GetGlobalPosition();
+		GlobalTransform.Rotation = GetGlobalRotation();
+		GlobalTransform.Scale	 = GetGlobalScale();
+		return GlobalTransform;
+	}
 	return Transform;
 }
 
@@ -195,7 +218,13 @@ const csp::common::Vector3& SpaceEntity::GetPosition() const
 csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
 {
 	if (Parent != nullptr)
-		return Parent->GetTransform().Position + Transform.Position;
+	{
+		glm::mat4 ParentTransform = computeParentMat4(Parent->GetGlobalTransform());
+
+		glm::vec3 GlobalEntityPosition = ParentTransform * glm::vec4(Transform.Position.X, Transform.Position.Y, Transform.Position.Z, 1.0f);
+
+		return {GlobalEntityPosition.x, GlobalEntityPosition.y, GlobalEntityPosition.z};
+	}
 	else
 		return Transform.Position;
 }
@@ -229,13 +258,11 @@ csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
 {
 	if (Parent != nullptr)
 	{
-		glm::quat Orientation {Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z, Transform.Rotation.W};
-		glm::quat OtherOrientation {Parent->Transform.Rotation.X,
-									Parent->Transform.Rotation.Y,
-									Parent->Transform.Rotation.Z,
-									Parent->Transform.Rotation.W};
+		csp::common::Vector4 GlobalRotation = Parent->GetGlobalRotation();
+		glm::quat Orientation {Transform.Rotation.W, Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z};
+		glm::quat GlobalOrientation(GlobalRotation.W, GlobalRotation.X, GlobalRotation.Y, GlobalRotation.Z);
 
-		glm::quat FinalOrientation = OtherOrientation * Orientation;
+		glm::quat FinalOrientation = GlobalOrientation * Orientation;
 		return csp::common::Vector4 {FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w};
 	}
 	else
@@ -270,7 +297,7 @@ const csp::common::Vector3& SpaceEntity::GetScale() const
 csp::common::Vector3 SpaceEntity::GetGlobalScale() const
 {
 	if (Parent != nullptr)
-		return Parent->Transform.Scale * Transform.Scale;
+		return Parent->GetGlobalScale() * Transform.Scale;
 	return Transform.Scale;
 }
 

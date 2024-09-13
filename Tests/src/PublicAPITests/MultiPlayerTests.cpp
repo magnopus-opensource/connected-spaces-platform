@@ -2261,8 +2261,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_TRANSFORM_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_GLOBAL_POSITION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 {
 	// Tests the SpaceEntitySystem::OnAllEntitiesCreated
 	// for ParentId and ChildEntities
@@ -2293,14 +2293,13 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Create Entities
+	// Create Entities for testing heirarchy transforms
 	csp::common::String ParentEntityName = "ParentEntity";
 	csp::common::String ChildEntityName	 = "ChildEntity";
-
-	SpaceTransform ObjectTransformParent = {csp::common::Vector3 {1, 2, 3}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {2, 2, 2}};
-	SpaceTransform ObjectTransformChild	 = {csp::common::Vector3 {1, 1, 1}, csp::common::Vector4 {1, 1, 1, 1}, csp::common::Vector3 {2, 3, 4}};
-
-	SpaceTransform ObjectTransformExpected = {csp::common::Vector3 {2, 3, 4}, csp::common::Vector4 {2, 2, 2, -2}, csp::common::Vector3 {4, 6, 8}};
+	// create a parent child entity, where the parent is positioned at the position [1,1,1], and the child is position [1,0,0] relative to the parent
+	SpaceTransform ObjectTransformParent   = {csp::common::Vector3 {1, 1, 1}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {1, 1, 1}};
+	SpaceTransform ObjectTransformChild	   = {csp::common::Vector3 {1, 0, 0}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {1, 1, 1}};
+	SpaceTransform ObjectTransformExpected = {csp::common::Vector3 {2, 1, 1}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {1, 1, 1}};
 
 	EntitySystem->SetEntityCreatedCallback(
 		[](SpaceEntity* Entity)
@@ -2338,18 +2337,331 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	}
 
 	EXPECT_TRUE(ChildEntityUpdated);
+
+	// The expected outcome is that rotation and scale are unaffected, but the child is translated to position [2,1,1]
 	csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
 	csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
 	csp::common::Vector3 GlobalScale	= CreatedChildEntity->GetGlobalScale();
 
 	EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
-	EXPECT_EQ(ObjectTransformExpected.Rotation == GlobalRotation, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
+	// When performing quaternion operations, W can be negative, so no point checking
 	EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_ROTATION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
+{
+	// Tests the SpaceEntitySystem::OnAllEntitiesCreated
+	// for ParentId and ChildEntities
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities for testing heirarchy transforms
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+	// Parent has a position [0,0,0], and 1.507 radian (90 degree) rotation around the y axis
+	SpaceTransform ObjectTransformParent
+		= {csp::common::Vector3 {0, 0, 0}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {1, 1, 1}};
+	SpaceTransform ObjectTransformChild = {csp::common::Vector3 {1, 0, 0}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {1, 1, 1}};
+	SpaceTransform ObjectTransformExpected
+		= {csp::common::Vector3 {0, 0, 1}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
+
+	uint64_t ParentEntityId = CreatedParentEntity->GetId();
+	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
+
+	bool ChildEntityUpdated = false;
+
+	CreatedChildEntity->SetUpdateCallback(
+		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntityUpdated = true;
+			}
+		});
+
+	// Change Parent
+	CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
+
+	CreatedChildEntity->QueueUpdate();
+
+	// Wait for update
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
+
+	// expectation is that scale is unaffected, rotation is passed on from parent,
+	// and child is displaced to position [0, 0, 1], within floating point accuracy limits
+	csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
+	csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
+	csp::common::Vector3 GlobalScale	= CreatedChildEntity->GetGlobalScale();
+
+	EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
+	EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_SCALE_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
+{
+	// Tests the SpaceEntitySystem::OnAllEntitiesCreated
+	// for ParentId and ChildEntities
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities for testing heirarchy transforms
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+
+	// Create a parent, positioned at the origin, rotated 90 degrees, with a scale of -0.5 on x axis and 0.5 on Y/Z axes
+	// child created at a position of [1,0,0], no rotation, and scale of 1
+	SpaceTransform ObjectTransformParent
+		= {csp::common::Vector3 {0, 0, 0}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {-0.5f, 0.5f, 0.5f}};
+	SpaceTransform ObjectTransformChild = {csp::common::Vector3 {1, 0, 0}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {1, 1, 1}};
+
+	SpaceTransform ObjectTransformExpected
+		= {csp::common::Vector3 {0, 0, -0.5}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {-0.5f, 0.5f, 0.5f}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
+
+	uint64_t ParentEntityId = CreatedParentEntity->GetId();
+	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
+
+	bool ChildEntityUpdated = false;
+
+	CreatedChildEntity->SetUpdateCallback(
+		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntityUpdated = true;
+			}
+		});
+
+	// Change Parent
+	CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
+
+	CreatedChildEntity->QueueUpdate();
+
+	// Wait for update
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
+	// expectation is that the global data will have position [0,0,-0.5] (scaled by -0.5, then rotated 90 degrees from [1,0,0] around Y axis)
+	// rotation will be same as parent
+	// scale will now be [-0.5,0.5,0.5], same as parent
+	csp::common::Vector3 GlobalPosition = CreatedChildEntity->GetGlobalPosition();
+	csp::common::Vector4 GlobalRotation = CreatedChildEntity->GetGlobalRotation();
+	csp::common::Vector3 GlobalScale	= CreatedChildEntity->GetGlobalScale();
+
+	EXPECT_EQ(ObjectTransformExpected.Position == GlobalPosition, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.X == GlobalRotation.X, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Y == GlobalRotation.Y, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
+	EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
+
+	SpaceSystem->ExitSpace(
+		[](const csp::systems::NullResult& Result)
+		{
+		});
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_GLOBAL_TRANSFORM_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
+{
+	// Tests the SpaceEntitySystem::OnAllEntitiesCreated
+	// for ParentId and ChildEntities
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entities for testing heirarchy transforms
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName	 = "ChildEntity";
+	SpaceTransform ObjectTransformParent
+		= {csp::common::Vector3 {0, 0, 0}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {1, 1, 1}};
+	SpaceTransform ObjectTransformChild
+		= {csp::common::Vector3 {1, 0, 0}, csp::common::Vector4 {0, 0, 0, 1}, csp::common::Vector3 {0.5f, 0.5f, 0.5f}};
+	SpaceTransform ObjectTransformExpected
+		= {csp::common::Vector3 {0, 0, 1}, csp::common::Vector4 {0, -0.7071081, 0, 0.7071055}, csp::common::Vector3 {0.5f, 0.5f, 0.5f}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransformParent);
+	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransformChild);
+
+	uint64_t ParentEntityId = CreatedParentEntity->GetId();
+	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
+
+	bool ChildEntityUpdated = false;
+
+	CreatedChildEntity->SetUpdateCallback(
+		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+		{
+			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+			{
+				ChildEntityUpdated = true;
+			}
+		});
+
+	// Change Parent
+	CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
+
+	CreatedChildEntity->QueueUpdate();
+
+	// Wait for update
+	while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+		std::this_thread::sleep_for(50ms);
+		WaitForTestTimeoutCountMs += 50;
+	}
+
+	EXPECT_TRUE(ChildEntityUpdated);
 	SpaceTransform ObjectTransformActual = CreatedChildEntity->GetGlobalTransform();
-	EXPECT_EQ(ObjectTransformActual == ObjectTransformExpected, true);
 
-	// EXPECT_TRUE(ObjectTransformExpected == ObjectTransformActual);
-
+	EXPECT_EQ(ObjectTransformExpected.Position == ObjectTransformActual.Position, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.X == ObjectTransformActual.Rotation.X, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Y == ObjectTransformActual.Rotation.Y, true);
+	EXPECT_EQ(ObjectTransformExpected.Rotation.Z == ObjectTransformActual.Rotation.Z, true);
+	EXPECT_EQ(ObjectTransformExpected.Scale == ObjectTransformActual.Scale, true);
 
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
