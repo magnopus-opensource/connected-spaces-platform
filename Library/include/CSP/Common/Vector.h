@@ -47,6 +47,26 @@ public:
 	{
 	}
 
+	/// @brief Member by member addition with another Vector3
+	/// @param Vector3 Other
+	Vector3 operator+(const Vector3& Other) const;
+
+	/// @brief Subtracts another Vector3 from this one
+	/// @param Vector3 Other
+	Vector3 operator-(const Vector3& Other) const;
+
+	/// @brief Divides the Vector3 by divisor
+	/// @param float Divisor
+	Vector3 operator/(float Divisor) const;
+
+	/// @brief Member by member multiplication with another Vector3
+	/// @param Vector3 Other
+	Vector3 operator*(const Vector3& Other) const;
+
+	/// @brief Multiplies the Vector3 by a scalar
+	/// @param float Scalar
+	Vector3 operator*(float Scalar) const;
+
 	CSP_START_IGNORE
 	bool operator==(Vector3 Other) const;
 	bool operator!=(Vector3 Other) const;
@@ -86,6 +106,26 @@ public:
 	Vector4(float X, float Y, float Z, float W) : X(X), Y(Y), Z(Z), W(W)
 	{
 	}
+
+	/// @brief Member by member addition with another Vector4
+	/// @param Vector4 Other
+	Vector4 operator+(const Vector4& Other) const;
+
+	/// @brief Subtracts another Vector4 from this one
+	/// @param Vector4 Other
+	Vector4 operator-(const Vector4& Other) const;
+
+	/// @brief Divides the Vector4 by divisor
+	/// @param float Divisor
+	Vector4 operator/(float Divisor) const;
+
+	/// @brief Member by member multiplication with another Vector4
+	/// @param Vector4 Other
+	Vector4 operator*(const Vector4& Other) const;
+
+	/// @brief Multiplies the Vector4 by a scalar
+	/// @param float Scalar
+	Vector4 operator*(float Scalar) const;
 
 	CSP_START_IGNORE
 	bool operator==(Vector4 Other) const;
