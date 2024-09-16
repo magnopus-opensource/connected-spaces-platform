@@ -21,7 +21,6 @@
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
-
 using namespace csp;
 using namespace csp::common;
 
