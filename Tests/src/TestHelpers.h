@@ -176,7 +176,6 @@ inline double RandomUniformDouble()
 	auto CurrentTime		= std::chrono::high_resolution_clock::now();
 	auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
 	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-
 	return UniformDouble(Rand);
 }
 
