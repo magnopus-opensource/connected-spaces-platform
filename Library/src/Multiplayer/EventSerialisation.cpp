@@ -17,7 +17,7 @@
 #include "Multiplayer/EventSerialisation.h"
 
 #include "Debug/Logging.h"
-#include "Multiplayer/MultiplayerKeyConstants.h"
+#include "Multiplayer/MultiplayerConstants.h"
 
 #include <regex>
 
@@ -36,6 +36,10 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
 		return ESequenceUpdateType::Update;
 	}
 	else if (UpdateType == 2)
+	{
+		return ESequenceUpdateType::Rename;
+	}
+	else if (UpdateType == 3)
 	{
 		return ESequenceUpdateType::Delete;
 	}

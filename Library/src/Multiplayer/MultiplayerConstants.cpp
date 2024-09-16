@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#pragma once
 
-#include <gtest/gtest.h>
+#include "Multiplayer/MultiplayerConstants.h"
 
-
-constexpr char* EndpointBaseURI = "https://ogs-internal.magnopus-dev.cloud";
-
-
-class PublicTestBase : public ::testing::Test
+namespace csp::multiplayer
 {
-protected:
-	void SetUp() override;
-	void TearDown() override;
-};
+
+csp::common::String SequenceConstants::GetHierarchyName()
+{
+	const csp::common::String SequenceHierarchyName = "EntityHierarchy";
+	return SequenceHierarchyName;
+}
+
+csp::common::String SequenceConstants::GetIdPrefix()
+{
+	const csp::common::String SequenceIdPrefix = "m_Id_";
+	return SequenceIdPrefix;		
+}
+
+} // namespace csp::multiplayer

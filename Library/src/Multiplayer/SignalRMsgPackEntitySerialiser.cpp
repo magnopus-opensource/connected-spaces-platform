@@ -17,7 +17,7 @@
 
 #include "Memory/Memory.h"
 #include "Multiplayer/SpaceEntityKeys.h"
-#include "MultiplayerKeyConstants.h"
+#include "MultiplayerConstants.h"
 
 #include <Debug/Logging.h>
 #include <cassert>
