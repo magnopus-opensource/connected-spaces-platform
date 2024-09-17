@@ -194,10 +194,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Re-Enter space and verify contents
@@ -283,10 +280,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Delete space

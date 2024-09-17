@@ -18,7 +18,7 @@
 
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
-#include "Multiplayer/MultiplayerKeyConstants.h"
+#include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "CallHelpers.h"

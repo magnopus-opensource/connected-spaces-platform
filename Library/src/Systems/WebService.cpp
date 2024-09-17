@@ -69,6 +69,11 @@ ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
 {
 }
 
+ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+	: Result(ResCode), HttpResponseCode(HttpResCode), FailureReason(Reason)
+{
+}
+
 void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 {
 	if (ApiResponse)

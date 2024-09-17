@@ -55,8 +55,8 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -174,7 +174,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetRange(), Range);
 	EXPECT_EQ(StoredLightSpaceComponentInstance->GetIntensity(), Intensity);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -199,8 +199,8 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection					= SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem					= SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -259,7 +259,7 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
 
 	EXPECT_TRUE(ActionCalled);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

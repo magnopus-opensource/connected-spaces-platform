@@ -95,6 +95,7 @@ enum class ESequenceUpdateType
 {
 	Create,
 	Update,
+    Rename,
 	Delete
 };
 
@@ -109,6 +110,19 @@ public:
 
 	/// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
 	csp::common::String NewKey;
+};
+
+class CSP_API SequenceHierarchyChangedParams
+{
+public:
+	/// @brief The type of update to the sequence.
+	ESequenceUpdateType UpdateType;
+
+	/// @brief The parent for the updated sequence hierarchy.
+	uint64_t ParentId;
+
+	/// @brief True if this is the root hierarchy.
+	bool IsRoot;
 };
 
 } // namespace csp::multiplayer

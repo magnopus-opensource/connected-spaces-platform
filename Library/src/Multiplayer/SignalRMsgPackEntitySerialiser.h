@@ -17,7 +17,7 @@
 
 #include "CSP/Multiplayer/IEntitySerialiser.h"
 #include "Memory/Memory.h"
-#include "MultiplayerKeyConstants.h"
+#include "MultiplayerConstants.h"
 
 #include <msgpack/pack.hpp>
 #include <msgpack/sbuffer.hpp>
@@ -109,6 +109,7 @@ public:
 	csp::common::Vector3 ReadVector3() override;
 	csp::common::Vector4 ReadVector4() override;
 	bool NextValueIsNull() override;
+	bool NextValueIsArray() override;
 	void EnterComponents() override;
 	void LeaveComponents() override;
 	void EnterArray(CSP_OUT uint32_t& OutLength) override;

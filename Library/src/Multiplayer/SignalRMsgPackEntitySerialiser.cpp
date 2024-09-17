@@ -17,7 +17,7 @@
 
 #include "Memory/Memory.h"
 #include "Multiplayer/SpaceEntityKeys.h"
-#include "MultiplayerKeyConstants.h"
+#include "MultiplayerConstants.h"
 
 #include <Debug/Logging.h>
 #include <cassert>
@@ -84,9 +84,18 @@ void SignalRMsgPackEntitySerialiser::WriteInt64(int64_t Value)
 
 void SignalRMsgPackEntitySerialiser::WriteUInt64(uint64_t Value)
 {
-	assert(CurrentState == SerialiserState::InEntity && "WriteUInt64() function not supported in current state!");
 
-	Fields.push_back(signalr::value(Value));
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+			Fields.push_back(signalr::value(Value));
+			break;
+		case SerialiserState::InArray:
+			CurrentArray.push_back(signalr::value(Value));
+			break;
+		default:
+			throw std::runtime_error("WriteUInt64() function not supported in current state!");
+	}
 }
 
 void SignalRMsgPackEntitySerialiser::WriteString(const csp::common::String& Value)
@@ -434,6 +443,10 @@ uint64_t SignalRMsgPackEntityDeserialiser::ReadUInt64()
 			assert(PropertyObjectHandle.get().type == msgpack::type::object_type::POSITIVE_INTEGER);
 
 			return PropertyObjectHandle.get().via.u64;
+		case SerialiserState::InArray:
+			assert(CurrentArrayIterator->is_uinteger() && "Current array is not an unsigned integer!");
+
+			return (CurrentArrayIterator++)->as_uinteger();
 		default:
 			throw std::runtime_error("ReadUInt64() function not supported in current state!");
 	}
@@ -533,6 +546,19 @@ bool SignalRMsgPackEntityDeserialiser::NextValueIsNull()
 	}
 }
 
+bool SignalRMsgPackEntityDeserialiser::NextValueIsArray()
+{
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+			return CurrentFieldIterator->is_array();
+		case SerialiserState::InArray:
+			return CurrentArrayIterator->is_array();
+		default:
+			throw std::runtime_error("NextValueIsArray() function not supported in current state!");
+	}
+}
+
 void SignalRMsgPackEntityDeserialiser::EnterArray(CSP_OUT uint32_t& OutLength)
 {
 	assert(CurrentState == SerialiserState::InEntity && "Entity not entered or array already entered!");
@@ -551,6 +577,8 @@ void SignalRMsgPackEntityDeserialiser::LeaveArray()
 	CurrentState		 = SerialiserState::InEntity;
 	CurrentArrayIterator = CurrentArray->cend();
 	CurrentArray		 = nullptr;
+
+	CurrentFieldIterator++;
 }
 
 void SignalRMsgPackEntityDeserialiser::EnterComponents()
@@ -857,6 +885,9 @@ void SignalRMsgPackEntityDeserialiser::Skip()
 	{
 		case SerialiserState::InEntity:
 			++CurrentFieldIterator;
+			break;
+		case SerialiserState::InArray:
+			++CurrentArrayIterator;
 			break;
 		default:
 			throw std::runtime_error("Skip() function not supported in current state!");

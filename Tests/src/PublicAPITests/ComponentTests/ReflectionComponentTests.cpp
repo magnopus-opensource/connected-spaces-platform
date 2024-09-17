@@ -154,7 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
 	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionAssetId(), Asset.Id);
 	EXPECT_EQ(StoredReflectionSpaceComponent->GetReflectionShape(), ReflectionShape::UnitSphere);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

@@ -131,7 +131,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 			EXPECT_EQ(Result, WayPoints[WayPoints.Size() - 1]);
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Delete space
@@ -150,8 +150,8 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection				 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem				 = SystemsManager.GetSpaceEntitySystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -209,7 +209,7 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 	// expect final waypoint to be the same
 	EXPECT_EQ(SplineComponent->GetWaypoints()[0], WayPoints[0]);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

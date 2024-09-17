@@ -318,7 +318,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().ActivityCount, 0);
 	EXPECT_EQ(Result1.GetFeatureLimitInfo().Limit, 50);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

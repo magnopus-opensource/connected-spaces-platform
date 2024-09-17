@@ -26,6 +26,8 @@
 namespace csp::multiplayer
 {
 
+csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, int i);
+
 // Generic deserialiser for multiplayer events. It can be derived from and
 // its behaviour can be overridden if specialised handling is needed for
 // certain events.
@@ -124,6 +126,24 @@ public:
 
 private:
 	SequenceChangedParams EventParams;
+};
+
+/// A deserialiser for getting SequenceHierarchy data from an event:
+/// UpdateType - The update type for the Sequence Hierarchy: Created, Updated, Deleted
+/// ParentId - The parent id of the Sequence
+/// IsRoot - Whether this is the root hierarchy of the space
+class SequenceHierarchyChangedEventDeserialiser : public EventDeserialiser
+{
+public:
+	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	const SequenceHierarchyChangedParams& GetEventParams() const
+	{
+		return EventParams;
+	}
+
+private:
+	SequenceHierarchyChangedParams EventParams;
 };
 
 } // namespace csp::multiplayer

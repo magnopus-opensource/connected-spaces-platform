@@ -49,6 +49,7 @@
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
+#include <glm/gtc/quaternion.hpp>
 #include <thread>
 
 
@@ -60,6 +61,23 @@ using namespace std::chrono;
 
 namespace csp::multiplayer
 {
+
+glm::mat4 computeParentMat4(const SpaceTransform& ParentSpaceTransform)
+{
+	glm::mat4 ParentTranslate
+		= glm::translate(glm::mat4(1.0f),
+						 glm::vec3(ParentSpaceTransform.Position.X, ParentSpaceTransform.Position.Y, ParentSpaceTransform.Position.Z));
+	glm::quat ParentOrientation {ParentSpaceTransform.Rotation.W,
+								 ParentSpaceTransform.Rotation.X,
+								 ParentSpaceTransform.Rotation.Y,
+								 ParentSpaceTransform.Rotation.Z};
+
+	glm::mat4 ParentRotation(ParentOrientation);
+	glm::mat4 ParentScale
+		= glm::scale(glm::mat4(1.0f), glm::vec3(ParentSpaceTransform.Scale.X, ParentSpaceTransform.Scale.Y, ParentSpaceTransform.Scale.Z));
+	glm::mat4 ParentTransform = ParentTranslate * ParentRotation * ParentScale;
+	return ParentTransform;
+}
 
 inline uint32_t CheckedUInt64ToUint32(uint64_t Value)
 {
@@ -86,9 +104,11 @@ SpaceEntity::SpaceEntity()
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
 	, ParentId(nullptr)
+	, ShouldUpdateParent(false)
 	, ThirdPartyRef("")
 	, ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
 	, TimeOfLastPatch(0)
+	, Parent(nullptr)
 {
 }
 
@@ -109,9 +129,11 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
 	, ParentId(nullptr)
+	, ShouldUpdateParent(false)
 	, ThirdPartyRef("")
 	, ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
 	, TimeOfLastPatch(0)
+	, Parent(nullptr)
 {
 }
 
@@ -175,9 +197,36 @@ const SpaceTransform& SpaceEntity::GetTransform() const
 	return Transform;
 }
 
+SpaceTransform SpaceEntity::GetGlobalTransform() const
+{
+	if (Parent != nullptr)
+	{
+		SpaceTransform GlobalTransform;
+		GlobalTransform.Position = GetGlobalPosition();
+		GlobalTransform.Rotation = GetGlobalRotation();
+		GlobalTransform.Scale	 = GetGlobalScale();
+		return GlobalTransform;
+	}
+	return Transform;
+}
+
 const csp::common::Vector3& SpaceEntity::GetPosition() const
 {
 	return Transform.Position;
+}
+
+csp::common::Vector3 SpaceEntity::GetGlobalPosition() const
+{
+	if (Parent != nullptr)
+	{
+		glm::mat4 ParentTransform = computeParentMat4(Parent->GetGlobalTransform());
+
+		glm::vec3 GlobalEntityPosition = ParentTransform * glm::vec4(Transform.Position.X, Transform.Position.Y, Transform.Position.Z, 1.0f);
+
+		return {GlobalEntityPosition.x, GlobalEntityPosition.y, GlobalEntityPosition.z};
+	}
+	else
+		return Transform.Position;
 }
 
 void SpaceEntity::SetPosition(const csp::common::Vector3& Value)
@@ -205,6 +254,21 @@ const csp::common::Vector4& SpaceEntity::GetRotation() const
 	return Transform.Rotation;
 }
 
+csp::common::Vector4 SpaceEntity::GetGlobalRotation() const
+{
+	if (Parent != nullptr)
+	{
+		csp::common::Vector4 GlobalRotation = Parent->GetGlobalRotation();
+		glm::quat Orientation {Transform.Rotation.W, Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z};
+		glm::quat GlobalOrientation(GlobalRotation.W, GlobalRotation.X, GlobalRotation.Y, GlobalRotation.Z);
+
+		glm::quat FinalOrientation = GlobalOrientation * Orientation;
+		return csp::common::Vector4 {FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w};
+	}
+	else
+		return Transform.Rotation;
+}
+
 void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 {
 	if (!IsModifiable())
@@ -227,6 +291,13 @@ void SpaceEntity::SetRotation(const csp::common::Vector4& Value)
 
 const csp::common::Vector3& SpaceEntity::GetScale() const
 {
+	return Transform.Scale;
+}
+
+csp::common::Vector3 SpaceEntity::GetGlobalScale() const
+{
+	if (Parent != nullptr)
+		return Parent->GetGlobalScale() * Transform.Scale;
 	return Transform.Scale;
 }
 
@@ -313,6 +384,40 @@ SpaceEntityType SpaceEntity::GetEntityType() const
 SpaceEntitySystem* SpaceEntity::GetSpaceEntitySystem()
 {
 	return EntitySystem;
+}
+
+void SpaceEntity::SetParentId(uint64_t InParentId)
+{
+	// If the current parentid differs from the input
+	if (ParentId.HasValue() == false || InParentId != *ParentId)
+	{
+		ParentId		   = InParentId;
+		ShouldUpdateParent = true;
+	}
+}
+
+void SpaceEntity::RemoveParentEntity()
+{
+	if (ParentId.HasValue())
+	{
+		ParentId		   = nullptr;
+		ShouldUpdateParent = true;
+	}
+}
+
+SpaceEntity* SpaceEntity::GetParentEntity() const
+{
+	return Parent;
+}
+
+void SpaceEntity::CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
+{
+	EntitySystem->CreateObjectInternal(InName, GetId(), InSpaceTransform, Callback);
+}
+
+const csp::common::List<SpaceEntity*>* SpaceEntity::GetChildEntities() const
+{
+	return &ChildEntities;
 }
 
 void SpaceEntity::QueueUpdate()
@@ -439,8 +544,8 @@ void SpaceEntity::SerialisePatch(IEntitySerialiser& Serialiser) const
 		Serialiser.WriteBool(false); // Destroy
 		Serialiser.BeginArray();	 // ParentId
 		{
-			Serialiser.WriteBool(false);
-			Serialiser.WriteNull();
+			Serialiser.WriteBool(ShouldUpdateParent);
+			ParentId.HasValue() ? Serialiser.WriteUInt64(*ParentId) : Serialiser.WriteNull();
 		}
 		Serialiser.EndArray();
 
@@ -645,16 +750,18 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 
 void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 {
+	SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
+
 	std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+
+	csp::common::Array<ComponentUpdateInfo> ComponentUpdates(0);
 
 	if (!Deserialiser.NextValueIsNull()) // It is valid for entities to not have components
 	{
 		Deserialiser.EnterComponents();
 		{
 			auto RealComponentCount = Deserialiser.GetNumRealComponents();
-
-			SpaceEntityUpdateFlags UpdateFlags = SpaceEntityUpdateFlags(0);
-			csp::common::Array<ComponentUpdateInfo> ComponentUpdates(RealComponentCount);
+			ComponentUpdates		= csp::common::Array<ComponentUpdateInfo>(RealComponentCount);
 
 			uint16_t ComponentKey;
 			uint64_t _ComponentType;
@@ -771,13 +878,20 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 					Deserialiser.LeaveComponent();
 				}
 			}
-
-			if (EntityUpdateCallback != nullptr)
-			{
-				EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
-			}
 		}
 		Deserialiser.LeaveComponents();
+	}
+
+	if (ShouldUpdateParent)
+	{
+		EntitySystem->ResolveEntityHierarchy(this);
+		UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+		ShouldUpdateParent = false;
+	}
+
+	if (UpdateFlags != 0 && EntityUpdateCallback != nullptr)
+	{
+		EntityUpdateCallback(this, UpdateFlags, ComponentUpdates);
 	}
 }
 
@@ -916,6 +1030,13 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 
 			TransientDeletionComponentIds.Clear();
 			CSP_DELETE(DirtyComponentKeys);
+		}
+
+		if (ShouldUpdateParent)
+		{
+			EntitySystem->ResolveEntityHierarchy(this);
+			UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+			ShouldUpdateParent = false;
 		}
 
 		if (InvokeUpdateCallback && EntityUpdateCallback != nullptr)
@@ -1189,6 +1310,46 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
 
 
 	return LocatedComponent;
+}
+
+void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity)
+{
+	ChildEntities.Append(ChildEntity);
+}
+
+void SpaceEntity::ResolveParentChildRelationship()
+{
+	// Entity has been re-parented
+	if (ParentId.HasValue())
+	{
+		// Entity was previously parented to another object, so cleanup
+		if (Parent != nullptr)
+		{
+			Parent->ChildEntities.RemoveItem(this);
+		}
+
+		// Set our new parent
+		Parent = GetSpaceEntitySystem()->FindSpaceEntityById(*ParentId);
+
+		if (Parent != nullptr)
+		{
+			Parent->ChildEntities.Append(this);
+		}
+		else
+		{
+			CSP_LOG_ERROR_FORMAT("SpaceEntity unable to find parent for entity: %s. Please report if this issue is encountered.",
+								 std::to_string(GetId()));
+			return;
+		}
+	}
+	else
+	{
+		if (Parent != nullptr)
+		{
+			Parent->ChildEntities.RemoveItem(this);
+			Parent = nullptr;
+		}
+	}
 }
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface()

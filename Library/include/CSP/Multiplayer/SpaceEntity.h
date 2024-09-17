@@ -90,6 +90,7 @@ enum SpaceEntityUpdateFlags
 	UPDATE_FLAGS_SELECTION_ID		  = 32,
 	UPDATE_FLAGS_THIRD_PARTY_REF	  = 64,
 	UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
+	UPDATE_FLAGS_PARENT				  = 256,
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -121,6 +122,9 @@ public:
 
 	// General callback providing success/fail boolean.
 	typedef std::function<void(bool)> CallbackHandler;
+
+	// Callback that will provide a pointer to a SpaceEntity object.
+	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();
@@ -154,9 +158,17 @@ public:
 	/// @return SpaceTransform.
 	const SpaceTransform& GetTransform() const;
 
+	/// @brief Get the Global SpaceTransform of the SpaceEntity, derived from it's parent.
+	/// @return SpaceTransform.
+	SpaceTransform GetGlobalTransform() const;
+
 	/// @brief Get the position of the SpaceEntity, in world space.
 	/// @return Position.
 	const csp::common::Vector3& GetPosition() const;
+
+	/// @brief Get the Global position of the SpaceEntity, in world space, derived from it's parent.
+	/// @return Position.
+	csp::common::Vector3 GetGlobalPosition() const;
 
 	/// @brief Set the position of the SpaceEntity, in world space.
 	/// @param Value csp::common::Vector3 : The position to set.
@@ -166,6 +178,10 @@ public:
 	/// @return Rotation.
 	const csp::common::Vector4& GetRotation() const;
 
+	/// @brief Get the Global rotation of the SpaceEntity, derived from it's parent.
+	/// @return Rotation.
+	csp::common::Vector4 GetGlobalRotation() const;
+
 	/// @brief Set the rotation of the SpaceEntity.
 	/// @param Value csp::common::Vector4 : The rotation to set.
 	void SetRotation(const csp::common::Vector4& Value);
@@ -173,6 +189,10 @@ public:
 	/// @brief Get the scale of the SpaceEntity.
 	/// @return Scale.
 	const csp::common::Vector3& GetScale() const;
+
+	/// @brief Get the Global scale of the SpaceEntity, derived from it's parent.
+	/// @return Scale.
+	csp::common::Vector3 GetGlobalScale() const;
 
 	/// @brief Set the scale of the SpaceEntity.
 	/// @param Value csp::common::Vector3 : The scale to set.
@@ -205,6 +225,31 @@ public:
 	/// @brief Get SpaceEntitySystem Object
 	/// @return SpaceEntitySystem
 	SpaceEntitySystem* GetSpaceEntitySystem();
+
+	/// @brief Sets the parent for this entity
+	/// QueueUpdate() should be called afterwards to enable changes to the parent.
+	/// @param ParentId uint64_t The new parent id of this entity.
+	void SetParentId(uint64_t ParentId);
+
+	/// @brief Removes the parent entity
+	/// QueueUpdate() should be called afterwards to enable changes to the parent.
+	void RemoveParentEntity();
+
+	/// @brief Gets the parent of this entity
+	/// @return SpaceEntity
+	SpaceEntity* GetParentEntity() const;
+
+	/// @brief Create a new entity with this entity as it's parent
+	/// @param InName csp::common::String : The name to give the new SpaceEntity.
+	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
+	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
+	CSP_ASYNC_RESULT void
+		CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+
+	/// @brief Gets the children of this entity
+	/// @return csp::common::List<SpaceEntity>
+	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
 
 	/// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
 	void QueueUpdate();
@@ -336,6 +381,10 @@ private:
 
 	ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
+	void AddChildEntitiy(SpaceEntity* ChildEntity);
+
+	void ResolveParentChildRelationship();
+
 	SpaceEntitySystem* EntitySystem;
 
 	SpaceEntityType Type;
@@ -344,11 +393,16 @@ private:
 	bool IsPersistant;
 	uint64_t OwnerId;
 	csp::common::Optional<uint64_t> ParentId;
+	bool ShouldUpdateParent;
+
 	csp::common::String Name;
 	SpaceTransform Transform;
 	csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
 	csp::common::String ThirdPartyRef;
 	uint64_t SelectedId;
+
+	SpaceEntity* Parent;
+	csp::common::List<SpaceEntity*> ChildEntities;
 
 	UpdateCallback EntityUpdateCallback;
 	DestroyCallback EntityDestroyCallback;

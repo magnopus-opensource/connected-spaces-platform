@@ -88,11 +88,8 @@ public:
 			  typename T2,
 			  typename DT,
 			  typename std::enable_if_t<!std::is_same_v<STRIP(T2), STRIP(DT)> && std::is_base_of_v<STRIP(T2), STRIP(DT)>>* = nullptr>
-	Awaitable(void (ClassType::*Function)(T0, T1, T2, CallbackType),
-			  ClassType* Context,
-			  const STRIP(T0) & Arg0,
-			  const STRIP(T1) & Arg1,
-			  const DT& Arg2)
+	Awaitable(
+		void (ClassType::*Function)(T0, T1, T2, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1, const DT& Arg2)
 	{
 		Callback = [this](CallbackArgs... _Args)
 		{
@@ -109,11 +106,8 @@ public:
 			  typename T2,
 			  typename DT,
 			  typename std::enable_if_t<std::is_same_v<STRIP(T2), STRIP(DT)> || std::is_constructible_v<STRIP(T2), STRIP(DT)>>* = nullptr>
-	Awaitable(void (ClassType::*Function)(T0, T1, T2, CallbackType),
-			  ClassType* Context,
-			  const STRIP(T0) & Arg0,
-			  const STRIP(T1) & Arg1,
-			  const DT& Arg2)
+	Awaitable(
+		void (ClassType::*Function)(T0, T1, T2, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1, const DT& Arg2)
 	{
 		Callback = [this](CallbackArgs... _Args)
 		{
@@ -357,9 +351,9 @@ private:
 
 
 // Helper macro for awaiting an async function
-#define AWAIT(__instance_, __function_, ...) Awaitable(&std::remove_pointer_t<decltype(__instance_)>::__function_, __instance_, __VA_ARGS__).Await()
+#define AWAIT(__instance_, __function_, ...) Awaitable(&std::remove_pointer_t<decltype(__instance_)>::__function_, __instance_, ##__VA_ARGS__).Await()
 #define AWAIT_PRE(__instance_, __function_, __completion_predicate__, ...) \
-	Awaitable(&std::remove_pointer_t<decltype(__instance_)>::__function_, __instance_, __VA_ARGS__).Await(__completion_predicate__)
+	Awaitable(&std::remove_pointer_t<decltype(__instance_)>::__function_, __instance_, ##__VA_ARGS__).Await(__completion_predicate__)
 
 
 

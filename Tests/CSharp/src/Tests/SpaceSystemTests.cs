@@ -280,7 +280,7 @@ namespace CSPEngine
 
         static bool IsUriValid(string uri, string fileName)
         {
-            if (!uri.StartsWith("https://world-streaming.magnoboard.com/"))
+            if (!uri.StartsWith("https://world-streaming.magnopus-dev.cloud/"))
                 return false;
 
             var posLastSlash = uri.LastIndexOf('/');
@@ -2015,6 +2015,73 @@ namespace CSPEngine
             using var GetDeletedGeoResultAsPrimary = spaceSystem.GetSpaceGeoLocation(space.Id).Result;
             Assert.AreEqual(GetDeletedGeoResultAsPrimary.GetResultCode(), Systems.EResultCode.Success);
             Assert.IsFalse(GetDeletedGeoResultAsPrimary.HasSpaceGeoLocation());
+
+            DeleteSpace(spaceSystem, space);
+        }
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_DUPLICATESPACE_TEST
+        [Test]
+        public static void DuplicateSpaceTest()
+        {
+            GetFoundationSystems(out var userSystem, out var spaceSystem, out _, out _, out _, out _, out _, out _, out _, out _);
+
+            string testSpaceName = GenerateUniqueString("CSP-TEST-SPACE");
+            string testSpaceDescription = "CSP-TEST-SPACEDESC";
+
+            // Log in
+            var userId = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword, pushCleanupFunction: false);
+
+            // Create a space as the primary user
+
+            var userRoles = new Csp.Common.Array<Systems.InviteUserRoleInfo>(1);
+            userRoles[0] = new Systems.InviteUserRoleInfo
+            {
+                UserEmail = UserSystemTests.AlternativeLoginEmail,
+                UserRole = Systems.SpaceUserRole.User
+            };
+
+            var inviteInfo = new Systems.InviteUserRoleInfoCollection();
+            inviteInfo.InviteUserRoleInfos = userRoles;
+
+            var space = CreateSpace(spaceSystem,
+                                    testSpaceName,
+                                    testSpaceDescription,
+                                    Systems.SpaceAttributes.Private,
+                                    null,
+                                    inviteInfo,
+                                    null,
+                                    pushCleanupFunction: false);
+
+            // Log out and log back in as alt user
+            UserSystemTests.LogOut(userSystem);
+            var altUserId = userSystem.TestLogIn(UserSystemTests.AlternativeLoginEmail, UserSystemTests.AlternativeLoginPassword, pushCleanupFunction: false);
+
+            // Attempt to duplicate space
+
+            {
+                string testDuplicateSpaceName = GenerateUniqueString("CSP-TEST-SPACE");
+
+                using var duplicateSpaceResult = spaceSystem.DuplicateSpace(space.Id, testDuplicateSpaceName, Systems.SpaceAttributes.Private, null, true).Result;
+
+                Assert.AreEqual(duplicateSpaceResult.GetResultCode(), Systems.EResultCode.Success);
+
+                var newSpace = duplicateSpaceResult.GetSpace();
+
+                Assert.AreNotEqual(newSpace.Id, space.Id);
+                Assert.AreEqual(newSpace.Name, testDuplicateSpaceName);
+                Assert.AreEqual(newSpace.Description, space.Description);
+                Assert.AreEqual(newSpace.Attributes, Systems.SpaceAttributes.Private);
+                Assert.AreEqual(newSpace.OwnerId, altUserId);
+                Assert.AreNotEqual(newSpace.OwnerId, userId);
+
+                DeleteSpace(spaceSystem, newSpace);
+            }
+
+            // Log out and back in as default user to clean up
+
+            UserSystemTests.LogOut(userSystem);
+            _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword);
 
             DeleteSpace(spaceSystem, space);
         }

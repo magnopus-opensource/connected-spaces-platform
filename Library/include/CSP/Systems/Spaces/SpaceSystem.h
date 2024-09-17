@@ -74,9 +74,9 @@ public:
 	 *
 	 *   @{ */
 
-	/// @brief Enter a space if you have permission to, based on the Space settings. 
-    /// This includes setting scopes (and toggling event listening in order to set the scope). 
-    /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
+	/// @brief Enter a space if you have permission to, based on the Space settings.
+	/// This includes setting scopes (and toggling event listening in order to set the scope).
+	/// It also retrieves all entities in the space. Ensure Connect is called prior to this.
 	/// @param Space Space : space to enter into
 	/// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
@@ -333,6 +333,21 @@ public:
 	/// @param SpaceId csp::common::String : Id of the space to be udpated
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void DeleteSpaceGeoLocation(const csp::common::String& SpaceId, NullResultCallback Callback);
+
+	/// @brief Duplicate an existing space and assign it to the current user
+	/// @param SpaceId csp::common::String : Id of the space to duplicate.
+	/// @param NewName csp::common::String : A unique name for the duplicated space.
+	/// @param NewAttributes csp::systems::SpaceAttributes : Attributes to apply to the duplicated space.
+	/// @param MemberGroupIds csp::common::Array<csp::common::String> : An optional array of group (space) IDs to copy users from.
+	/// @param ShallowCopy bool : If true, the duplicated space will reference the assets of the original space. Otherwise, all assets will be
+	/// duplicated.
+	/// @param Callback NullResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void DuplicateSpace(const csp::common::String& SpaceId,
+										 const csp::common::String& NewName,
+										 SpaceAttributes NewAttributes,
+										 const csp::common::Optional<csp::common::Array<csp::common::String>>& MemberGroupIds,
+										 bool ShallowCopy,
+										 SpaceResultCallback Callback);
 
 	///@}
 
