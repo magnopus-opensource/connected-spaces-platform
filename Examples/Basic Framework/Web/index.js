@@ -18,7 +18,7 @@ import {
 } from "./node_modules/connected-spaces-platform.web/connectedspacesplatform.js";
 
 // Magnopus Services Endpoint to connect to.
-const ENDPOINT = "https://ogs-ostage.magnoboard.com";
+const ENDPOINT = "https://ogs.magnopus-stg.cloud";
 
 // Tenant defines the application scope.
 const TENANT = "FOUNDATION_HELLO_WORLD";
@@ -84,7 +84,7 @@ const runAllExamples = () => {
     );
     if (signupResult.getResultCode() === Systems.EResultCode.Success) {
       console.log(
-        "Signup successful, please check you email and re-run this example when verified."
+        "Signup successful, please check your email and re-run this example when verified."
       );
       return;
     }
