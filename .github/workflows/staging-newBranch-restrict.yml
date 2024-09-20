@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check staging head_ref
-        if: contains(github.base_ref, 'staging/') && github.head_ref == 'develop'
+        if: contains(github.base_ref, 'staging/') && github.head_ref != 'develop'
         run: |
           echo "ERROR: You can only create a `staging/*` branch from branches matching `develop`."
           exit 1
