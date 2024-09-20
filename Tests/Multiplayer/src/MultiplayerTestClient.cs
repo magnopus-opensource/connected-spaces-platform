@@ -24,7 +24,7 @@ namespace MultiplayerTestClient
 
     public class MultiplayerTestClient : IMultiplayerTestClient
     {
-        public static readonly string CHSEndpointBaseUri = "https://ogs-odev.magnoboard.com";
+        public static readonly string CHSEndpointBaseUri = "https://ogs.magnopus-dev.cloud";
 
         private NpHost nphost;
         private bool isRunning = false;

@@ -733,7 +733,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForGoogleTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://odev.magnoverse.space/oauth";
+	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
 	// Retrieve Authorise URL for Google
 	auto [ResGoogle] = AWAIT_PRE(UserSystem,
@@ -755,7 +755,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForDiscordTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://odev.magnoverse.space/oauth";
+	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
 	// Retrieve Authorise URL for Discord
 	auto [Result] = AWAIT_PRE(UserSystem,
@@ -776,7 +776,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAuthoriseURLForAppleTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://odev.magnoverse.space/oauth";
+	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
 	// Retrieve Authorise URL for Apple
 	auto [Result] = AWAIT_PRE(UserSystem,
@@ -800,7 +800,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://odev.magnoverse.space/oauth";
+	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
 	// Retrieve Authorise URL for Google
 	auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Google, RedirectURL);
@@ -854,7 +854,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	const auto RedirectURL = "https://odev.magnoverse.space/oauth";
+	const auto RedirectURL = "https://dev.magnoverse.space/oauth";
 
 	// Retrieve Authorise URL for Google
 	auto [Result] = AWAIT_PRE(UserSystem, GetThirdPartyProviderAuthoriseURL, RequestPredicate, csp::systems::EThirdPartyAuthenticationProviders::Discord, RedirectURL);

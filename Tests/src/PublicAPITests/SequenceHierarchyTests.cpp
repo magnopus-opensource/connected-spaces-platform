@@ -17,6 +17,10 @@ using namespace csp::multiplayer;
 
 namespace
 {
+
+int WaitForTestTimeoutCountMs;
+const int WaitForTestTimeoutLimit	= 20000;
+
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
@@ -229,10 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -313,10 +314,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, UpdateSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -393,10 +391,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetSequenceHierarchyTest)
 		DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 	}
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -489,10 +484,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetAllSequenceHierarchiesTest
 	DeleteSequenceHierarchy(EntitySystem, nullptr);
 	DeleteSequenceHierarchy(EntitySystem, Entity1->GetId());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -688,10 +680,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, ManualHierarchyMultipleConnec
 	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 
 	// Exit Space
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Log out
 	LogOut(UserSystem);
@@ -761,6 +750,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, nullptr, {CreatedChildEntity->GetId()});
 
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
 		EXPECT_TRUE(Called);
 
 		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
@@ -784,6 +779,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 		AWAIT_PRE(EntitySystem, CreateSequenceHierarchy, RequestPredicate, ParentId, {});
 
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
 		EXPECT_TRUE(Called);
 
 		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
@@ -806,6 +807,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 
 		DeleteSequenceHierarchy(EntitySystem, nullptr);
 
+		while (!Called && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+		{
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
+
 		EXPECT_TRUE(Called);
 
 		EntitySystem->SetSequenceHierarchyChangedCallback(nullptr);
@@ -814,10 +821,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 	// Cleanup
 	DeleteSequenceHierarchy(EntitySystem, CreatedParentEntity->GetId());
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
