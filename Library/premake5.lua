@@ -76,6 +76,7 @@ if not Project then
             "%{wks.location}/ThirdParty/rapidjson/include",
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
+            "%{wks.location}/ThirdParty/glm",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"

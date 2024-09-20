@@ -37,6 +37,10 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
 	}
 	else if (UpdateType == 2)
 	{
+		return ESequenceUpdateType::Rename;
+	}
+	else if (UpdateType == 3)
+	{
 		return ESequenceUpdateType::Delete;
 	}
 	else

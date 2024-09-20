@@ -2009,26 +2009,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	csp::common::String Uri;
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
-	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
+	WaitForCallback(AssetDetailBlobChangedCallbackCalled);
 
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_EQ(CallbackAssetId, Asset.Id);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2107,24 +2093,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 										 });
 
 	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
+	WaitForCallback(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2150,7 +2122,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 	// Attempt to download asset
 	{
 		csp::systems::Asset Asset;
-		Asset.Uri = "https://world-streaming.magnoboard.com/Odev/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
+		Asset.Uri = "https://world-streaming.magnopus-dev.cloud/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
 
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 

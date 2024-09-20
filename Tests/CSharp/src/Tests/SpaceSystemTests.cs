@@ -280,7 +280,7 @@ namespace CSPEngine
 
         static bool IsUriValid(string uri, string fileName)
         {
-            if (!uri.StartsWith("https://world-streaming.magnoboard.com/"))
+            if (!uri.StartsWith("https://world-streaming.magnopus-dev.cloud/"))
                 return false;
 
             var posLastSlash = uri.LastIndexOf('/');
