@@ -361,43 +361,7 @@ class CSharpWrapperGenerator:
 
                 m.is_task = m.is_async_result or m.is_async_result_with_progress
 
-                if getattr(m, "is_task", False) and m.doc_comments != None and len(m.doc_comments) > 0:
-                    assert m.parameters is not None
-
-                    param = m.parameters[-1]
-                    m.doc_comments = m.doc_comments[:-1]
-
-                    assert param.type.function_signature is not None
-
-                    if len(param.type.function_signature.doc_comments) > 0:
-                        comment = param.type.function_signature.doc_comments[-1]
-                        comment = comment.replace("<", "&lt;").replace(">", "&gt;")
-
-                        comment_index = comment.find(" ")
-                        tag = comment[:comment_index]
-
-                        if tag != "@param":
-                            error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
-
-                        content = comment[comment_index + 1 :]
-                        comment_index = content.find(" ")
-                        # var_name = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        comment_index = content.find(":")
-
-                        while content[comment_index + 1] == ":":
-                            comment_index = content.find(":", comment_index + 2)
-
-                        # var_type = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        if content[0].islower():
-                            content = content.capitalize()
-
-                        m.doc_comments.append(f"<returns>{content}</returns>")
-                    else:
-                        m.doc_comments.append("<returns>The result for the request</returns>")
+                self.rewrite_task_doc_comments(m)
 
                 if m.parameters is not None:
                     for p in m.parameters:
@@ -544,44 +508,7 @@ class CSharpWrapperGenerator:
 
                 m.is_task = m.is_async_result or m.is_async_result_with_progress
 
-                if m.is_task and m.doc_comments != None and len(m.doc_comments) > 0:
-                    assert m.parameters is not None
-
-                    param = m.parameters[-1]
-                    m.doc_comments = m.doc_comments[:-1]
-
-                    assert param.type.function_signature is not None
-
-                    if len(param.type.function_signature.doc_comments) > 0:
-                        comment = param.type.function_signature.doc_comments[-1]
-                        comment = comment.replace("<", "&lt;").replace(">", "&gt;")
-
-                        comment_index = comment.find(" ")
-                        tag = comment[:comment_index]
-
-                        if tag != "@param":
-                            error_in_file(m.header_file or "", -1, "Error in comment: " + comment)
-                            error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
-
-                        content = comment[comment_index + 1 :]
-                        comment_index = content.find(" ")
-                        # var_name = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        comment_index = content.find(":")
-
-                        while content[comment_index + 1] == ":":
-                            comment_index = content.find(":", comment_index + 2)
-
-                        # var_type = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        if content[0].islower():
-                            content = content.capitalize()
-
-                        m.doc_comments.append(f"<returns>{content}</returns>")
-                    else:
-                        m.doc_comments.append("<returns>The result for the request</returns>")
+                self.rewrite_task_doc_comments(m)
 
                 if m.parameters is not None:
                     for p in m.parameters:
@@ -687,6 +614,46 @@ class CSharpWrapperGenerator:
                     ),
                     file=f,
                 )
+
+    def rewrite_task_doc_comments(self, m):
+        if m.is_task and m.doc_comments != None and len(m.doc_comments) > 0:
+            assert m.parameters is not None
+
+            param = m.parameters[-1]
+            m.doc_comments = m.doc_comments[:-1]
+
+            assert param.type.function_signature is not None
+
+            if len(param.type.function_signature.doc_comments) > 0:
+                comment = param.type.function_signature.doc_comments[-1]
+                comment = comment.replace("<", "&lt;").replace(">", "&gt;")
+
+                comment_index = comment.find(" ")
+                tag = comment[:comment_index]
+
+                if tag != "@param":
+                    error_in_file(m.header_file or "", -1, "Error in comment: " + comment)
+                    error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
+
+                content = comment[comment_index + 1 :]
+                comment_index = content.find(" ")
+                        # var_name = content[:comment_index]
+                content = content[comment_index + 1 :].lstrip()
+
+                comment_index = content.find(":")
+
+                while content[comment_index + 1] == ":":
+                    comment_index = content.find(":", comment_index + 2)
+
+                        # var_type = content[:comment_index]
+                content = content[comment_index + 1 :].lstrip()
+
+                if content[0].islower():
+                    content = content.capitalize()
+
+                m.doc_comments.append(f"<returns>{content}</returns>")
+            else:
+                m.doc_comments.append("<returns>The result for the request</returns>")
 
     def render_templates(self, templates, templateclass_template) -> None:
         for t in templates.values():
