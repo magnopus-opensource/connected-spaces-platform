@@ -38,7 +38,7 @@ csp::systems::Asset Asset;
 
 bool StartupCSPFoundation()
 {
-    const csp::common::String EndpointRootURI = "https://ogs-ostage.magnoboard.com";
+    const csp::common::String EndpointRootURI = "https://ogs.magnopus-stg.cloud";
 	return csp::CSPFoundation::Initialise(EndpointRootURI, Tenant);
 }
 

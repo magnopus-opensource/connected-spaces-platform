@@ -23,7 +23,7 @@ public class HelloWorld : MonoBehaviour
     
     [SerializeField] private TextMeshProUGUI[] titleTenentReplaceLabels;
 
-    private const string endPointUri = "https://ogs-ostage.magnoboard.com";
+    private const string endPointUri = "https://ogs.magnopus-stg.cloud";
     private const string TenantKey = "CSP_HELLO_WORLD";
     private const string defaultSpaceSite = "Void";
     private const int TickDelayMilliseconds = 1000 / 60; //60fps
