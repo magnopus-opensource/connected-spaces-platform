@@ -91,6 +91,7 @@ enum SpaceEntityUpdateFlags
 	UPDATE_FLAGS_THIRD_PARTY_REF	  = 64,
 	UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
 	UPDATE_FLAGS_PARENT				  = 256,
+	UPDATE_FLAGS_INDEX				  = 512
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
@@ -226,30 +227,28 @@ public:
 	/// @return SpaceEntitySystem
 	SpaceEntitySystem* GetSpaceEntitySystem();
 
-	/// @brief Sets the parent for this entity
-	/// QueueUpdate() should be called afterwards to enable changes to the parent.
-	/// @param ParentId uint64_t The new parent id of this entity.
-	void SetParentId(uint64_t ParentId);
-
-	/// @brief Removes the parent entity
-	/// QueueUpdate() should be called afterwards to enable changes to the parent.
-	void RemoveParentEntity();
-
 	/// @brief Gets the parent of this entity
 	/// @return SpaceEntity
 	SpaceEntity* GetParentEntity() const;
 
-	/// @brief Create a new entity with this entity as it's parent
-	/// @param InName csp::common::String : The name to give the new SpaceEntity.
-	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
-	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
-	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
-	CSP_ASYNC_RESULT void
-		CreateChildEntity(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
-
 	/// @brief Gets the children of this entity
 	/// @return csp::common::List<SpaceEntity>
-	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
+	csp::common::List<SpaceEntity*> GetChildEntities() const;
+
+	/// @brief Adds an existing entity as a child of a specified parent.
+	/// QueueUpdate() should be called on the child afterwards to process changes
+	/// SpaceEntitySystem::SequenceHierarchyChangedCallback will be called in the following circumstances:
+	///     - The childs current, or new parent has children arranged in a user-defined order.
+	/// @param ChildId uint64_t : The child entity to reposition.
+	void AppendChild(int64_t ChildId);
+
+	/// @brief Sets a childs position in the hierarchy after the given previous entity.
+	/// If the given parent is different from the child entities current parent, the child entity will be re-parented.
+	/// QueueUpdate() should be called on the child afterwards to process changes
+	/// @param ChildId uint64_t : The child entity to reposition.
+	/// @param PreviousChildId Optional<uint64_t> : The child for the new entity to be inserted after.
+	/// If this isn't set, it will be inserted at the beggining.
+	void InsertChildAfter(uint64_t ChildId, csp::common::Optional<uint64_t> PreviousChildId);
 
 	/// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
 	void QueueUpdate();
@@ -382,8 +381,16 @@ private:
 	ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
 	void AddChildEntitiy(SpaceEntity* ChildEntity);
+	void RemoveChildEntity(SpaceEntity* ChildEntity);
 
-	void ResolveParentChildRelationship();
+	void SetParentId(uint64_t ParentId);
+	void RemoveParentEntity();
+
+	SpaceEntity* GetLastChild() const;
+
+	// Linked list properties for ordered hierarchies
+	void SetPrevEntityId(uint64_t Value);
+	void SetNextEntityId(uint64_t Value);
 
 	SpaceEntitySystem* EntitySystem;
 
@@ -392,7 +399,7 @@ private:
 	bool IsTransferable;
 	bool IsPersistant;
 	uint64_t OwnerId;
-	csp::common::Optional<uint64_t> ParentId;
+	uint64_t ParentId;
 	bool ShouldUpdateParent;
 
 	csp::common::String Name;
@@ -401,8 +408,11 @@ private:
 	csp::common::String ThirdPartyRef;
 	uint64_t SelectedId;
 
+	SpaceEntity* PrevEntity;
+	SpaceEntity* NextEntity;
+
 	SpaceEntity* Parent;
-	csp::common::List<SpaceEntity*> ChildEntities;
+	SpaceEntity* FirstChild;
 
 	UpdateCallback EntityUpdateCallback;
 	DestroyCallback EntityDestroyCallback;

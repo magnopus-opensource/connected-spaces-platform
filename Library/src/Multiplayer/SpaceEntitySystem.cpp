@@ -200,7 +200,7 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, EnableEntityTick(false)
 	, LastTickTime(std::chrono::system_clock::now())
 	, EntityPatchRate(90)
-	, SequenceHierarchyChangedCallback(nullptr)
+	, RootEntity(CSP_NEW SpaceEntity(this))
 {
 	Initialise();
 }
@@ -348,6 +348,14 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 	CreateObjectInternal(InName, nullptr, InSpaceTransform, Callback);
 }
 
+void SpaceEntitySystem::CreateChildEntity(const csp::common::String& InName,
+										  uint64_t InParentId,
+										  const SpaceTransform& InSpaceTransform,
+										  EntityCreatedCallback Callback)
+{
+	CreateObjectInternal(InName, InParentId, InSpaceTransform, Callback);
+}
+
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
 {
 	const std::function LocalCallback = [this, Callback](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
@@ -419,6 +427,11 @@ SpaceEntity* SpaceEntitySystem::FindSpaceEntity(const csp::common::String& InNam
 SpaceEntity* SpaceEntitySystem::FindSpaceEntityById(uint64_t EntityId)
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
+
+	if (EntityId == 0)
+	{
+		return RootEntity;
+	}
 
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
@@ -531,7 +544,8 @@ void SpaceEntitySystem::BindOnObjectMessage()
 					   auto& EntityMessage = Params.as_array()[0];
 
 					   SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
-					   ResolveEntityHierarchy(NewEntity);
+					   SpaceEntity* Parent	  = FindSpaceEntityById(NewEntity->ParentId);
+					   Parent->AddChildEntitiy(NewEntity);
 
 					   if (SpaceEntityCreatedCallback)
 					   {
@@ -710,7 +724,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 	Entities.Clear();
 	Objects.Clear();
 	Avatars.Clear();
-	RootHierarchyEntities.Clear();
+	CSP_DELETE(RootEntity);
 
 	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
 	PendingAdds->clear();
@@ -752,7 +766,7 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 	// Remove from the unique set to indicate it could be queued again if needed.
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
 
-	RootHierarchyEntities.RemoveItem(EntityToRemove);
+	ResolveParentChildForDeletion(EntityToRemove);
 }
 
 void SpaceEntitySystem::TickEntities()
@@ -801,18 +815,11 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	{
 		SpaceEntity* Entity = Entities[i];
 
-		if (Entity->ParentId.HasValue())
-		{
-			SpaceEntity* ParentEntity = FindSpaceEntityById(*Entity->ParentId);
-			// Set the entities parent
-			Entity->Parent = ParentEntity;
-			// Set the parents child
-			ParentEntity->ChildEntities.Append(Entity);
-		}
-		else
-		{
-			RootHierarchyEntities.Append(Entity);
-		}
+		SpaceEntity* ParentEntity = FindSpaceEntityById(Entity->ParentId);
+		// Set the entities parent
+		Entity->Parent = ParentEntity;
+		// Set the parents child
+		ParentEntity->ChildEntities.Append(Entity);
 	}
 
 	// Register all scripts for import
@@ -880,53 +887,15 @@ void SpaceEntitySystem::DetermineScriptOwners()
 
 void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
-	if (Deletion->GetParentEntity())
-	{
-		Deletion->GetParentEntity()->ChildEntities.RemoveItem(Deletion);
-	}
+	Deletion->GetParentEntity()->RemoveChildEntity(Deletion);
 
-	for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
-	{
-		Deletion->ChildEntities[i]->RemoveParentEntity();
-		Deletion->ChildEntities[i]->Parent = nullptr;
-	}
-}
+	SpaceEntityList& Children = Deletion->GetChildEntities();
 
-void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
-{
-	if (Entity->ParentId.HasValue())
+	for (size_t i = 0; i < Deletion->GetChildEntities().Size(); ++i)
 	{
-		for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
-		{
-			if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
-			{
-				RootHierarchyEntities.Remove(i);
-				break;
-			}
-		}
+		Children[i]->RemoveParentEntity();
+		Children[i]->Parent = nullptr;
 	}
-	else
-	{
-		if (EntityIsInRootHierarchy(Entity) == false)
-		{
-			RootHierarchyEntities.Append(Entity);
-		}
-	}
-
-	Entity->ResolveParentChildRelationship();
-}
-
-bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
-{
-	for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
-	{
-		if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
-		{
-			return true;
-		}
-	}
-
-	return false;
 }
 
 void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
@@ -1067,123 +1036,9 @@ void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)
 	EntityPatchRateLimitEnabled = Enabled;
 }
 
-const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const
+SpaceEntity* SpaceEntitySystem::GetRootEntity()
 {
-	return &RootHierarchyEntities;
-}
-
-void SpaceEntitySystem::CreateSequenceHierarchy(const common::Optional<uint64_t>& ParentId,
-												const common::Array<uint64_t>& HierarchyItemIds,
-												SequenceHierarchyResultCallback Callback)
-{
-	const auto* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	common::String SpaceId	= SpaceSystem->GetCurrentSpace().Id;
-	common::String Key		= CreateSequenceKey(ParentId, SpaceId);
-
-	// Convert uint64_t ids to strings
-	common::Array<common::String> HierarchyItemStringIds(HierarchyItemIds.Size());
-
-	for (size_t i = 0; i < HierarchyItemStringIds.Size(); ++i)
-	{
-		HierarchyItemStringIds[i] = std::to_string(HierarchyItemIds[i]).c_str();
-	}
-
-	common::Map<common::String, common::String> MetaData;
-
-	if (ParentId.HasValue())
-	{
-		MetaData["ParentId"] = (std::to_string(*ParentId)).c_str();
-	}
-
-	auto CreateSequenceCallback = [Callback](const systems::SequenceResult& CreateSequenceResult)
-	{
-		SequenceHierarchyResult Result(CreateSequenceResult.GetResultCode(), CreateSequenceResult.GetHttpResultCode());
-
-		if (CreateSequenceResult.GetResultCode() == systems::EResultCode::InProgress)
-		{
-			Callback(Result);
-			return;
-		}
-
-		SequenceToSequenceHierarchy(CreateSequenceResult.GetSequence(), Result.SequenceHierarchy);
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->CreateSequence(Key, "GroupId", SpaceId, HierarchyItemStringIds, MetaData, CreateSequenceCallback);
-}
-
-void SpaceEntitySystem::UpdateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												const common::Array<uint64_t>& HierarchyItemIds,
-												SequenceHierarchyResultCallback Callback)
-{
-	CreateSequenceHierarchy(ParentId, HierarchyItemIds, Callback);
-}
-
-void SpaceEntitySystem::GetSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, SequenceHierarchyResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-	const common::String Key	 = CreateSequenceKey(ParentId, SpaceId);
-
-	auto GetSequenceCallback = [Callback](const systems::SequenceResult& GetSequenceResult)
-	{
-		SequenceHierarchyResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
-		SequenceToSequenceHierarchy(GetSequenceResult.GetSequence(), Result.SequenceHierarchy);
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequence(Key, GetSequenceCallback);
-}
-
-void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-
-	auto GetSequencesCallback = [Callback](const systems::SequencesResult& GetSequenceResult)
-	{
-		SequenceHierarchyCollectionResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
-
-		if (GetSequenceResult.GetResultCode() == systems::EResultCode::Success)
-		{
-			auto GetSequenceResultSequences	   = GetSequenceResult.GetSequences();
-			Result.SequenceHierarchyCollection = common::Array<SequenceHierarchy>(GetSequenceResultSequences.Size());
-
-			for (size_t i = 0; i < GetSequenceResultSequences.Size(); ++i)
-			{
-				SequenceToSequenceHierarchy(GetSequenceResultSequences[i], Result.SequenceHierarchyCollection[i]);
-			}
-		}
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
-}
-
-void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, systems::NullResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-	const common::String Key	 = CreateSequenceKey(ParentId, SpaceId);
-
-	auto DeleteSequenceCallback = [Callback](const systems::NullResult& Result)
-	{
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->DeleteSequences({Key}, DeleteSequenceCallback);
-}
-
-void SpaceEntitySystem::SetSequenceHierarchyChangedCallback(SequenceHierarchyChangedCallbackHandler Callback)
-{
-	SequenceHierarchyChangedCallback = Callback;
+	return nullptr;
 }
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
@@ -1456,7 +1311,6 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 			break;
 	}
 
-	RootHierarchyEntities.RemoveItem(EntityToRemove);
 	ResolveParentChildForDeletion(EntityToRemove);
 
 	Entities.RemoveItem(EntityToRemove);
@@ -1558,7 +1412,8 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-			ResolveEntityHierarchy(NewObject);
+			SpaceEntity* Parent = FindSpaceEntityById(NewObject->ParentId);
+			Parent->AddChildEntitiy(NewObject);
 
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
@@ -1576,17 +1431,31 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
+csp::common::List<SpaceEntity*> SpaceEntitySystem::GetChildEntities(SpaceEntity* Parent) const
+{
+	csp::common::List<SpaceEntity*> Children;
+	SpaceEntity* Current = Parent->FirstChild;
+
+	while (Current)
+	{
+		Children.Append(Current);
+		Current = Current->NextEntity;
+	}
+
+	return Children;
+}
+
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
 	SignalRMsgPackEntityDeserialiser Deserialiser(*EntityMessage);
 
 	Deserialiser.EnterEntity();
 	{
-		const uint64_t EntityID					 = Deserialiser.ReadUInt64();
-		const uint64_t OwnerID					 = Deserialiser.ReadUInt64();
-		const bool Destroy						 = Deserialiser.ReadBool();
-		bool ShouldUpdateParent					 = false;
-		csp::common::Optional<uint64_t> ParentId = nullptr;
+		const uint64_t EntityID = Deserialiser.ReadUInt64();
+		const uint64_t OwnerID	= Deserialiser.ReadUInt64();
+		const bool Destroy		= Deserialiser.ReadBool();
+		bool ShouldUpdateParent = false;
+		uint64_t ParentId		= 0;
 
 		if (Deserialiser.NextValueIsArray())
 		{

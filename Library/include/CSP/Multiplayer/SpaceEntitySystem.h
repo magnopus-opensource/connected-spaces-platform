@@ -115,13 +115,27 @@ public:
 									   AvatarPlayMode InAvatarPlayMode,
 									   EntityCreatedCallback Callback);
 
-
 	/// @brief Creates a SpaceEntity of type Object, and relevant default values.
+	/// SpaceEntitySystem::SequenceHierarchyChangedCallback will be called in the following circumstances:
+	///     - This root has children arranged in a non-default order.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
 	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
 	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
 	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
 	CSP_ASYNC_RESULT void CreateObject(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback);
+
+	/// @brief Creates a SpaceEntity of type Object with a specified parent.
+	/// SpaceEntitySystem::SequenceHierarchyChangedCallback will be called in the following circumstances:
+	///     - The parent entity has children arranged in a user-defined order.
+	/// @param InName csp::common::String : The name to give the new SpaceEntity.
+	/// @param InParentId uint64_t : The parent entity of the new object.
+	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.
+	/// @param Callback EntityCreatedCallback : A callback that executes when the creation is complete,
+	/// which contains a pointer to the new SpaceEntity so that it can be used on the local client.
+	CSP_ASYNC_RESULT void CreateChildEntity(const csp::common::String& InName,
+											uint64_t InParentId,
+											const SpaceTransform& InSpaceTransform,
+											EntityCreatedCallback Callback);
 
 	/// @brief Destroys both the remote view and the local view of the specified entity.
 	/// @param Entity SpaceEntity : The entity to be destroyed.
@@ -325,44 +339,13 @@ public:
 	/// \endrst
 	void SetEntityPatchRateLimitEnabled(bool Enabled);
 
-	/// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
-	/// @return A list of root entities.
-	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
-
-	/// @brief Creates an entity hierarchy for a given parent entity id. Pass null to create a hiererchy for the root.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to create a hiererchy for the root.
-	/// @param HierarchyItemIds Array<uint64_t> : An array of entity ids.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void CreateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												  const csp::common::Array<uint64_t>& HierarchyItemIds,
-												  SequenceHierarchyResultCallback Callback);
-
-	/// @brief Updates an entity hierarchy for a given parent entity id. Pass null to update the root.
-	/// This will create a hierarchy if it doesnt exist.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to create a hiererchy for the root.
-	/// @param HierarchyItemIds Array<uint64_t> : An array of entity ids.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void UpdateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												  const csp::common::Array<uint64_t>& HierarchyItemIds,
-												  SequenceHierarchyResultCallback Callback);
-
-	/// @brief Gets an entity hierarchy for a given parent entity id. Pass null to get the root hierarchy.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to get the root hierarchy.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void GetSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, SequenceHierarchyResultCallback Callback);
-
-	/// @brief Gets all hierarchies for a space
-	/// @param Callback SequenceHierarchiesResultCallback : A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void GetAllSequenceHierarchies(SequenceHierarchyCollectionResultCallback Callback);
-
-	/// @brief Deletes an entity hierarchy for a given parent entity id. Pass null to delete the root hierarchy.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to get the root hierarchy.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, csp::systems::NullResultCallback Callback);
-
-	/// @brief Sets a callback for a sequence  hierarchy changed event.
-	/// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence hierarchy that has been changed.
-	CSP_EVENT void SetSequenceHierarchyChangedCallback(SequenceHierarchyChangedCallbackHandler Callback);
+	/// An unmanaged entity used for managing hierarchies.
+	/// Currently, the only functions that should be called on this are:
+	/// - AppendChild
+	/// - InsertChildAfter
+	/// - CreateChildEntity
+	/// - GetId
+	SpaceEntity* GetRootEntity();
 
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
@@ -371,7 +354,6 @@ protected:
 	SpaceEntityList Avatars;
 	SpaceEntityList Objects;
 	SpaceEntityList SelectedEntities;
-	SpaceEntityList RootHierarchyEntities;
 
 	std::recursive_mutex* EntitiesLock;
 
@@ -413,8 +395,6 @@ private:
 	void DetermineScriptOwners();
 
 	void ResolveParentChildForDeletion(SpaceEntity* Deletion);
-	void ResolveEntityHierarchy(SpaceEntity* Entity);
-	bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
 	void ClaimScriptOwnershipFromClient(uint64_t ClientId);
 	bool CheckIfWeShouldRunScriptsLocally() const;
@@ -426,11 +406,12 @@ private:
 	void OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Entities);
 	void OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Entities);
 
-
 	void CreateObjectInternal(const csp::common::String& InName,
 							  csp::common::Optional<uint64_t> InParent,
 							  const SpaceTransform& InSpaceTransform,
 							  EntityCreatedCallback Callback);
+
+	csp::common::List<SpaceEntity*> GetChildEntities(SpaceEntity* Parent) const;
 
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;
@@ -443,6 +424,8 @@ private:
 	SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
 	PatchMessageQueue* PendingIncomingUpdates;
 
+	SpaceEntity* RootEntity;
+
 	bool EnableEntityTick;
 	std::list<SpaceEntity*> TickUpdateEntities;
 
@@ -452,8 +435,6 @@ private:
 	bool EntityPatchRateLimitEnabled = true;
 
 	bool IsInitialised = false;
-
-	SequenceHierarchyChangedCallbackHandler SequenceHierarchyChangedCallback;
 };
 
 } // namespace csp::multiplayer
