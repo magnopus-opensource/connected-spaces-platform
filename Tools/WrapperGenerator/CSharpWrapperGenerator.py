@@ -38,7 +38,7 @@ class CSharpWrapperGenerator:
 
     def __translate_namespace(self, obj: Any) -> None:
         if obj.namespace == None:
-            setattr(obj, "translated_namespace", None)
+            obj.translated_namespace = None
 
             return
 
@@ -48,7 +48,7 @@ class CSharpWrapperGenerator:
             if namespaces[i] in self.__NAMESPACE_TRANSLATIONS:
                 namespaces[i] = self.__NAMESPACE_TRANSLATIONS[namespaces[i]]
 
-        setattr(obj, "translated_namespace", ".".join(namespaces))
+        obj.translated_namespace = ".".join(namespaces)
 
     def __translate_enum_base(self, obj: EnumMetadata) -> None:
         t = obj.base
@@ -70,7 +70,7 @@ class CSharpWrapperGenerator:
         t = obj.name
 
         if not hasattr(obj, "is_void_pointer"):
-            setattr(obj, "is_void_pointer", False)
+            obj.is_void_pointer = False
 
         if t == "int8_t":
             obj.name = "sbyte"
@@ -94,7 +94,7 @@ class CSharpWrapperGenerator:
         elif t == "String":
             obj.name = "string"
             obj.namespace = None
-            setattr(obj, "translated_namespace", None)
+            obj.translated_namespace = None
             obj.is_pointer = False
             obj.is_reference = False
             obj.is_pointer_or_reference = False
@@ -103,8 +103,8 @@ class CSharpWrapperGenerator:
             obj.is_pointer = False
             obj.is_reference = False
             obj.is_pointer_or_reference = False
-            setattr(obj, "is_void_pointer", True)
-            setattr(obj, "translated_namespace", None)
+            obj.is_void_pointer = True
+            obj.translated_namespace = None
 
     def __translate_comments(self, comments: List[str]) -> None:
         if comments is None:
@@ -239,7 +239,7 @@ class CSharpWrapperGenerator:
                 for st in surrounding_types:
                     subdir = f"{subdir}/{st}"
 
-            setattr(e, "surrounding_types", surrounding_types)
+            e.surrounding_types = surrounding_types
 
             for f in e.fields:
                 if f.doc_comments is not None:
@@ -270,7 +270,7 @@ class CSharpWrapperGenerator:
                 for st in surrounding_types:
                     subdir = f"{subdir}/{st}"
 
-            setattr(s, "surrounding_types", surrounding_types)
+            s.surrounding_types = surrounding_types
 
             Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
 
@@ -335,7 +335,7 @@ class CSharpWrapperGenerator:
                         for ta in m.return_type.template_arguments:
                             self.__translate_type(ta.type)
 
-                setattr(m, "is_task", m.is_async_result or m.is_async_result_with_progress)
+                m.is_task = m.is_async_result or m.is_async_result_with_progress
 
                 if getattr(m, "is_task", False) and m.doc_comments != None and len(m.doc_comments) > 0:
                     assert m.parameters is not None
@@ -393,14 +393,9 @@ class CSharpWrapperGenerator:
 
                         assert p.type.function_signature is not None
 
-                        setattr(m, "results", p.type.function_signature.parameters)
-                        setattr(
-                            m,
-                            "has_results",
-                            (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                        )
-                        setattr(m, "has_multiple_results", len(getattr(m, "results")) > 1)
+                        m.results = p.type.function_signature.parameters
+                        m.has_results = (p.type.function_signature.parameters is not None) and (len(p.type.function_signature.parameters) > 0)
+                        m.has_multiple_results = len(m.results) > 1
 
                         param_name = p.name[0].upper() + p.name[1:]
 
@@ -409,14 +404,9 @@ class CSharpWrapperGenerator:
                                 self.__translate_type(dp.type)
 
                                 full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                setattr(
-                                    dp.type,
-                                    "is_result_base",
-                                    full_type_name in classes
-                                    and self.__class_derives_from(
+                                dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
                                         classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    ),
-                                )
+                                    )
 
                         delegate = {
                             "name": f"{m.name}{param_name}Delegate",
@@ -429,8 +419,8 @@ class CSharpWrapperGenerator:
                         }
 
                         delegates.append(delegate)
-                        setattr(m, "delegate", delegate)
-                        setattr(p, "delegate", delegate)
+                        m.delegate = delegate
+                        p.delegate = delegate
 
                         if m.is_event:
                             event_name = ""
@@ -461,16 +451,16 @@ class CSharpWrapperGenerator:
                             }
 
                             events.append(event)
-                            setattr(m, "event", event)
+                            m.event = event
 
                         m.parameters.remove(p)
 
                         if len(m.parameters) > 0:
                             m.parameters[-1].is_last = True
 
-            setattr(i, "delegates", delegates)
-            setattr(i, "events", events)
-            setattr(i, "has_events", len(events) > 0)
+            i.delegates = delegates
+            i.events = events
+            i.has_events = len(events) > 0
 
             subdir = self.__get_file_output_directory(i)
 
@@ -478,7 +468,7 @@ class CSharpWrapperGenerator:
                 for st in surrounding_types:
                     subdir = f"{subdir}/{st}"
 
-            setattr(i, "surrounding_types", surrounding_types)
+            i.surrounding_types = surrounding_types
 
             Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
 
@@ -527,9 +517,9 @@ class CSharpWrapperGenerator:
                         for ta in m.return_type.template_arguments:
                             self.__translate_type(ta.type)
 
-                setattr(m, "is_task", m.is_async_result or m.is_async_result_with_progress)
+                m.is_task = m.is_async_result or m.is_async_result_with_progress
 
-                if getattr(m, "is_task", False) and m.doc_comments != None and len(m.doc_comments) > 0:
+                if m.is_task and m.doc_comments != None and len(m.doc_comments) > 0:
                     assert m.parameters is not None
 
                     param = m.parameters[-1]
@@ -583,14 +573,9 @@ class CSharpWrapperGenerator:
 
                         assert p.type.function_signature is not None
 
-                        setattr(m, "results", p.type.function_signature.parameters)
-                        setattr(
-                            m,
-                            "has_results",
-                            (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                        )
-                        setattr(m, "has_multiple_results", len(getattr(m, "results")) > 1)
+                        m.results = p.type.function_signature.parameters
+                        m.has_results = (p.type.function_signature.parameters is not None) and (len(p.type.function_signature.parameters) > 0)
+                        m.has_multiple_results = len(m.results) > 1
 
                         param_name = p.name[0].upper() + p.name[1:]
 
@@ -599,14 +584,9 @@ class CSharpWrapperGenerator:
                                 self.__translate_type(dp.type)
 
                                 full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                setattr(
-                                    dp.type,
-                                    "is_result_base",
-                                    full_type_name in classes
-                                    and self.__class_derives_from(
+                                dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
                                         classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    ),
-                                )
+                                    )
 
                         delegate = {
                             "name": f"{m.name}{param_name}Delegate",
@@ -620,7 +600,7 @@ class CSharpWrapperGenerator:
                         }
 
                         delegates.append(delegate)
-                        setattr(m, "delegate", delegate)
+                        m.delegate = delegate
 
                         if not m.is_async_result and not m.is_async_result_with_progress and not m.is_event:
                             continue
@@ -654,16 +634,16 @@ class CSharpWrapperGenerator:
                             }
 
                             events.append(event)
-                            setattr(m, "event", event)
+                            m.event = event
 
                         m.parameters.remove(p)
 
                         if len(m.parameters) > 0:
                             m.parameters[-1].is_last = True
 
-            setattr(c, "delegates", delegates)
-            setattr(c, "events", events)
-            setattr(c, "has_events", len(events) > 0)
+            c.delegates = delegates
+            c.events = events
+            c.has_events = len(events) > 0
 
             subdir = self.__get_file_output_directory(c)
 
@@ -671,7 +651,7 @@ class CSharpWrapperGenerator:
                 for st in surrounding_types:
                     subdir = f"{subdir}/{st}"
 
-            setattr(c, "surrounding_types", surrounding_types)
+            c.surrounding_types = surrounding_types
 
             Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
 
