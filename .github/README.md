@@ -70,9 +70,11 @@ Build instructions for each supported language are below.
 
 If you choose to use the Connected Spaces Platform in conjunction with Magnopus Cloud Services, you'll need a Tenant ID.
 
-For information on how to obtain one, head over here.
+Use this [form](https://ogs.magnopus-stg.cloud/mag-user/tenants/CreateTenant) to create a tenant in our staging environment. 
 
-- [Obtaining a Tenant ID](https://www.magnopus.com/csp/for-developers#tenant-id)
+If you are ready to use CSP in a live product, [reach out](https://www.magnopus.com/contact) to us to obtain a tenant in our production environment. 
+
+For more information about tenants and tenant IDs, visit our [FAQ.](https://www.magnopus.com/csp/faqs#tenant-IDs-faqs)
 
 ---
 
