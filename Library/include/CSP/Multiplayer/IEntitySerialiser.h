@@ -63,6 +63,10 @@ public:
 	/// @param Value csp::common::String : The value to write.
 	virtual void WriteString(const csp::common::String& Value) = 0;
 
+	/// @brief Write a vector2 field of the entity.
+	/// @param Value Vector2 : The value to write.
+	virtual void WriteVector2(const csp::common::Vector2& Value) = 0;
+
 	/// @brief Write a vector3 field of the entity.
 	/// @param Value Vector3 : The value to write.
 	virtual void WriteVector3(const csp::common::Vector3& Value) = 0;
@@ -149,6 +153,10 @@ public:
 	/// @brief Reads a string from the deserialiser.
 	/// @return The deserialised string.
 	virtual csp::common::String ReadString() = 0;
+
+	/// @brief Reads a vector2 from the deserialiser.
+	/// @return The deserialised vector2.
+	virtual csp::common::Vector2 ReadVector2() = 0;
 
 	/// @brief Reads a vector3 from the deserialiser.
 	/// @return The deserialised vector3.

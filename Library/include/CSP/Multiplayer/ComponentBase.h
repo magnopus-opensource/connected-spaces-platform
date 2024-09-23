@@ -68,7 +68,8 @@ enum class ComponentType
 	FiducialMarker,
 	GaussianSplat,
 	Text,
-	Hotspot
+	Hotspot,
+	CinematicCamera
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
@@ -154,6 +155,7 @@ protected:
 	const int64_t GetIntegerProperty(uint32_t Key) const;
 	const float GetFloatProperty(uint32_t Key) const;
 	const csp::common::String& GetStringProperty(uint32_t Key) const;
+	const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
 	const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
 	const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
 

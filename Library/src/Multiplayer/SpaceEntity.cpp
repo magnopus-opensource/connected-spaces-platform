@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
+#include "CSP/Multiplayer/Components/CinematicCameraSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CollisionSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
@@ -51,6 +52,7 @@
 #include <chrono>
 #include <glm/gtc/quaternion.hpp>
 #include <thread>
+
 
 
 using namespace std::chrono;
@@ -1127,6 +1129,9 @@ ComponentBase* SpaceEntity::InstantiateComponent(uint16_t Id, ComponentType Type
 			break;
 		case ComponentType::ECommerce:
 			Component = CSP_NEW ECommerceSpaceComponent(this);
+			break;
+		case ComponentType::CinematicCamera:
+			Component = CSP_NEW CinematicCameraSpaceComponent(this);
 			break;
 		case ComponentType::FiducialMarker:
 			Component = CSP_NEW FiducialMarkerSpaceComponent(this);

@@ -43,6 +43,30 @@
 		return (std::string)((COMP*) Component)->Get##NAME().c_str();        \
 	}
 
+#define DEFINE_SCRIPT_PROPERTY_VEC2(COMP, NAME)                                  \
+	ComponentScriptInterface::Vector2 COMP##ScriptInterface::Get##NAME() const   \
+	{                                                                            \
+		ComponentScriptInterface::Vector2 Vec = {0, 0};                          \
+                                                                                 \
+		if (Component)                                                           \
+		{                                                                        \
+			csp::common::Vector2 Value = ((COMP*) Component)->Get##NAME();       \
+                                                                                 \
+			Vec[0] = Value.X;                                                    \
+			Vec[1] = Value.Y;                                                    \
+		}                                                                        \
+                                                                                 \
+		return Vec;                                                              \
+	}                                                                            \
+                                                                                 \
+	void COMP##ScriptInterface::Set##NAME(ComponentScriptInterface::Vector2 Vec) \
+	{                                                                            \
+		csp::common::Vector2 Value(Vec[0], Vec[1]);                              \
+		((COMP*) Component)->Set##NAME(Value);                                   \
+                                                                                 \
+		SendPropertyUpdate();                                                    \
+	}
+
 #define DEFINE_SCRIPT_PROPERTY_VEC3(COMP, NAME)                                  \
 	ComponentScriptInterface::Vector3 COMP##ScriptInterface::Get##NAME() const   \
 	{                                                                            \

@@ -129,6 +129,20 @@ const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 	return ReplicatedValue::GetDefaultString();
 }
 
+const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+	{
+		return RepVal.GetVector2();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Vector2 type");
+
+	return ReplicatedValue::GetDefaultVector2();
+}
+
 const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) const
 {
 	const auto& RepVal = GetProperty(Key);
