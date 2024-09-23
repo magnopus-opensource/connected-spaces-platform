@@ -221,6 +221,44 @@ class CSharpWrapperGenerator:
         interface_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Interface.mustache")
         templateclass_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Template.mustache")
 
+        self.translate_functions(functions)
+
+        self.render_enums(enums, enum_template)
+        self.render_structs(structs, struct_template)
+        self.render_global_functions(functions, global_functions_template)
+        self.render_interfaces(classes, interfaces, interface_template)
+        self.render_classes(classes, class_template)
+        self.render_templates(templates, templateclass_template)
+
+        self.format_output()
+
+    def format_output(self):
+        """Format output with CSharpier"""
+        scriptDirectory = os.path.dirname(os.path.realpath(__file__))
+        subprocess.run(
+            f'"{ scriptDirectory }\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
+            shell=True,
+        )
+
+    def translate_functions(self, functions) -> None:
+        for f in functions.values():
+            self.__translate_comments(f.doc_comments)
+
+            if f.return_type != None:
+                self.__translate_type(f.return_type)
+
+            if f.parameters is not None:
+                for p in f.parameters:
+                    self.__translate_type(p.type)
+
+                    if p.type.is_function_signature:
+                        assert p.type.function_signature is not None
+
+                        if p.type.function_signature.parameters is not None:
+                            for fp in p.type.function_signature.parameters:
+                                self.__translate_type(fp.type)
+
+    def render_enums(self, enums, enum_template) -> None:
         for e in enums.values():
             surrounding_types = None
 
@@ -255,6 +293,7 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
+    def render_structs(self, structs, struct_template) -> None:
         for s in structs.values():
             surrounding_types = None
 
@@ -282,23 +321,7 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
-        for f in functions.values():
-            self.__translate_comments(f.doc_comments)
-
-            if f.return_type != None:
-                self.__translate_type(f.return_type)
-
-            if f.parameters is not None:
-                for p in f.parameters:
-                    self.__translate_type(p.type)
-
-                    if p.type.is_function_signature:
-                        assert p.type.function_signature is not None
-
-                        if p.type.function_signature.parameters is not None:
-                            for fp in p.type.function_signature.parameters:
-                                self.__translate_type(fp.type)
-
+    def render_global_functions(self, functions, global_functions_template) -> None:
         with open(f"{self.__OUTPUT_DIRECTORY}Csp.cs", "w") as f:
             print(
                 chevron.render(
@@ -310,6 +333,7 @@ class CSharpWrapperGenerator:
                 file=f,
             )
 
+    def render_interfaces(self, classes, interfaces, interface_template) -> None:
         for i in interfaces.values():
             surrounding_types = None
 
@@ -480,6 +504,7 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
+    def render_classes(self, classes, class_template) -> None:
         for c in classes.values():
             surrounding_types = None
 
@@ -663,6 +688,7 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
+    def render_templates(self, templates, templateclass_template) -> None:
         for t in templates.values():
             self.__translate_namespace(t.definition)
 
@@ -684,10 +710,3 @@ class CSharpWrapperGenerator:
                     ),
                     file=f,
                 )
-
-        # Format output with CSharpier
-        scriptDirectory = os.path.dirname(os.path.realpath(__file__))
-        subprocess.run(
-            f'"{ scriptDirectory }\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
-            shell=True,
-        )
