@@ -19,7 +19,6 @@
 
 namespace csp::systems
 {
-
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
 class CSP_API Sequence
@@ -50,7 +49,6 @@ public:
 
 private:
 	SequenceResult(void*) {};
-
 
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
