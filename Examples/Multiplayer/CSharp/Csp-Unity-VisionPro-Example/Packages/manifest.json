@@ -19,7 +19,7 @@
     "com.unity.xr.interaction.toolkit": "2.5.4",
     "com.unity.xr.management": "4.4.1",
     "com.unity.xr.visionos": "1.1.6",
-    "connected-spaces-platform.unity.core": "4.27.1",
+    "connected-spaces-platform.unity.core": "5.0.1",
     "com.unity.modules.physics": "1.0.0",
     "com.unity.modules.ui": "1.0.0"
   }

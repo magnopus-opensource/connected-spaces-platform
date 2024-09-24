@@ -177,10 +177,10 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-connected-spaces-platform.web@4.31.0:
-  version "4.31.0"
-  resolved "https://registry.yarnpkg.com/connected-spaces-platform.web/-/connected-spaces-platform.web-4.31.0.tgz#e781673dd9b4ec6b7764b04b8d011103cdcf15fd"
-  integrity sha512-NrHem70KfsxeIRsb0nXYUV2IxdHWWP8HfMEx2VhVAG7AoJr2Qr+9rUFzTCjqCgkRLMYK/jmnITsWDn2s+YMjiQ==
+connected-spaces-platform.web@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/connected-spaces-platform.web/-/connected-spaces-platform.web-5.1.0.tgz#638c94e6880580ea2fdce5951ffc6c882bdb55d0"
+  integrity sha512-VDmdmM4boqnv3x7FrKSrajlrhk22jSgS8IL8o2geO5bDOCKH+wqjM8I6SXSBOmtPJBDywHlor4p/uSb0+Snfag==
 
 content-disposition@0.5.2:
   version "0.5.2"
