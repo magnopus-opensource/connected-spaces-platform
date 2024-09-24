@@ -347,104 +347,7 @@ class CSharpWrapperGenerator:
             delegates = []
             events = []
 
-            for m in i.methods:
-                self.__translate_comments(m.doc_comments)
-
-                if m.return_type != None:
-                    self.__translate_type(m.return_type)
-
-                    if m.return_type.is_template:
-                        assert m.return_type.template_arguments is not None
-
-                        for ta in m.return_type.template_arguments:
-                            self.__translate_type(ta.type)
-
-                m.is_task = m.is_async_result or m.is_async_result_with_progress
-
-                self.rewrite_task_doc_comments(m)
-
-                if m.parameters is not None:
-                    for p in m.parameters:
-                        self.__translate_type(p.type)
-
-                        if p.type.is_template:
-                            assert p.type.template_arguments is not None
-
-                            for ta in p.type.template_arguments:
-                                self.__translate_type(ta.type)
-
-                        if not m.is_async_result and not m.is_async_result_with_progress and not m.is_event:
-                            continue
-
-                        if not p.type.is_function_signature:
-                            continue
-
-                        assert p.type.function_signature is not None
-
-                        m.results = p.type.function_signature.parameters
-                        m.has_results = (p.type.function_signature.parameters is not None) and (len(p.type.function_signature.parameters) > 0)
-                        m.has_multiple_results = len(m.results) > 1
-
-                        param_name = p.name[0].upper() + p.name[1:]
-
-                        if p.type.function_signature.parameters is not None:
-                            for dp in p.type.function_signature.parameters:
-                                self.__translate_type(dp.type)
-
-                                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
-                                        classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    )
-
-                        delegate = {
-                            "name": f"{m.name}{param_name}Delegate",
-                            "method_name": m.name,
-                            "return_type": p.type.function_signature.return_type,
-                            "parameters": deepcopy(p.type.function_signature.parameters),
-                            "has_parameters": (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                            "has_progress": m.is_async_result_with_progress,
-                        }
-
-                        delegates.append(delegate)
-                        m.delegate = delegate
-                        p.delegate = delegate
-
-                        if m.is_event:
-                            event_name = ""
-
-                            assert m.name is not None
-
-                            if m.name.startswith("Set") and m.name.endswith("Callback"):
-                                event_name = f"On{m.name[len('Set'):-len('Callback')]}"
-                            else:
-                                warning_in_file(
-                                    m.header_file,
-                                    m.start_line,
-                                    "Event functions should follow the naming pattern 'SetXCallback'.",
-                                )
-                                event_name = m.name
-
-                            event = {
-                                "name": event_name,
-                                "class_name": m.parent_class.name,
-                                "method_name": m.name,
-                                "unique_method_name": m.unique_name,
-                                "parameters": deepcopy(p.type.function_signature.parameters),
-                                "has_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 0),
-                                "has_multiple_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 1),
-                                "delegate": delegate,
-                            }
-
-                            events.append(event)
-                            m.event = event
-
-                        m.parameters.remove(p)
-
-                        if len(m.parameters) > 0:
-                            m.parameters[-1].is_last = True
+            self.rewrite_methods(i.methods, classes, delegates, events, True)
 
             i.delegates = delegates
             i.events = events
@@ -494,104 +397,7 @@ class CSharpWrapperGenerator:
                     for ta in f.type.template_arguments:
                         self.__translate_type(ta.type)
 
-            for m in c.methods:
-                self.__translate_comments(m.doc_comments)
-
-                if m.return_type != None:
-                    self.__translate_type(m.return_type)
-
-                    if m.return_type.is_template:
-                        assert m.return_type.template_arguments is not None
-
-                        for ta in m.return_type.template_arguments:
-                            self.__translate_type(ta.type)
-
-                m.is_task = m.is_async_result or m.is_async_result_with_progress
-
-                self.rewrite_task_doc_comments(m)
-
-                if m.parameters is not None:
-                    for p in m.parameters:
-                        self.__translate_type(p.type)
-
-                        if p.type.is_template:
-                            assert p.type.template_arguments is not None
-
-                            for ta in p.type.template_arguments:
-                                self.__translate_type(ta.type)
-
-                        if not p.type.is_function_signature:
-                            continue
-
-                        assert p.type.function_signature is not None
-
-                        m.results = p.type.function_signature.parameters
-                        m.has_results = (p.type.function_signature.parameters is not None) and (len(p.type.function_signature.parameters) > 0)
-                        m.has_multiple_results = len(m.results) > 1
-
-                        param_name = p.name[0].upper() + p.name[1:]
-
-                        if p.type.function_signature.parameters is not None:
-                            for dp in p.type.function_signature.parameters:
-                                self.__translate_type(dp.type)
-
-                                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
-                                        classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    )
-
-                        delegate = {
-                            "name": f"{m.name}{param_name}Delegate",
-                            "method_name": m.name,
-                            "return_type": p.type.function_signature.return_type,
-                            "parameters": deepcopy(p.type.function_signature.parameters),
-                            "has_parameters": (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                            "has_progress": m.is_async_result_with_progress,
-                            "include_managed": not (m.is_async_result or m.is_async_result_with_progress or m.is_event),
-                        }
-
-                        delegates.append(delegate)
-                        m.delegate = delegate
-
-                        if not m.is_async_result and not m.is_async_result_with_progress and not m.is_event:
-                            continue
-
-                        if m.is_event:
-                            event_name = ""
-
-                            assert m.name is not None
-
-                            if m.name.startswith("Set") and m.name.endswith("Callback"):
-                                event_name = f"On{m.name[len('Set'):-len('Callback')]}"
-                            else:
-                                warning_in_file(
-                                    m.header_file,
-                                    m.start_line,
-                                    "Event functions should follow the naming pattern 'SetXCallback'.",
-                                )
-                                event_name = m.name
-
-                            event = {
-                                "name": event_name,
-                                "class_name": m.parent_class.name,
-                                "method_name": m.name,
-                                "unique_method_name": m.unique_name,
-                                "parameters": deepcopy(p.type.function_signature.parameters),
-                                "has_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 0),
-                                "has_multiple_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 1),
-                                "delegate": delegate,
-                            }
-
-                            events.append(event)
-                            m.event = event
-
-                        m.parameters.remove(p)
-
-                        if len(m.parameters) > 0:
-                            m.parameters[-1].is_last = True
+            self.rewrite_methods(c.methods, classes, delegates, events)
 
             c.delegates = delegates
             c.events = events
@@ -614,6 +420,111 @@ class CSharpWrapperGenerator:
                     ),
                     file=f,
                 )
+
+    def rewrite_methods(self, methods, classes, delegates, events, is_interface=False):
+        for m in methods:
+            self.__translate_comments(m.doc_comments)
+
+            if m.return_type != None:
+                self.__translate_type(m.return_type)
+
+                if m.return_type.is_template:
+                    assert m.return_type.template_arguments is not None
+
+                    for ta in m.return_type.template_arguments:
+                        self.__translate_type(ta.type)
+
+            m.is_task = m.is_async_result or m.is_async_result_with_progress
+
+            self.rewrite_task_doc_comments(m)
+
+            if m.parameters is not None:
+                for p in m.parameters:
+                    self.__translate_type(p.type)
+
+                    if p.type.is_template:
+                        assert p.type.template_arguments is not None
+
+                        for ta in p.type.template_arguments:
+                            self.__translate_type(ta.type)
+
+                    is_regular_method = not (m.is_async_result or m.is_async_result_with_progress or m.is_event)
+                    if is_interface and is_regular_method:
+                        continue
+
+                    if not p.type.is_function_signature:
+                        continue
+
+                    assert p.type.function_signature is not None
+
+                    m.results = p.type.function_signature.parameters
+                    m.has_results = (p.type.function_signature.parameters is not None) and (len(p.type.function_signature.parameters) > 0)
+                    m.has_multiple_results = len(m.results) > 1
+
+                    param_name = p.name[0].upper() + p.name[1:]
+
+                    if p.type.function_signature.parameters is not None:
+                        for dp in p.type.function_signature.parameters:
+                            self.__translate_type(dp.type)
+
+                            full_type_name = f"{dp.type.namespace}::{dp.type.name}"
+                            dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
+                                        classes[full_type_name], "csp::systems", "ResultBase", classes
+                                    )
+
+                    delegate = {
+                            "name": f"{m.name}{param_name}Delegate",
+                            "method_name": m.name,
+                            "return_type": p.type.function_signature.return_type,
+                            "parameters": deepcopy(p.type.function_signature.parameters),
+                            "has_parameters": (p.type.function_signature.parameters is not None)
+                            and (len(p.type.function_signature.parameters) > 0),
+                            "has_progress": m.is_async_result_with_progress,
+                            "include_managed": is_regular_method,
+                        }
+
+                    delegates.append(delegate)
+                    m.delegate = delegate
+                    p.delegate = delegate
+
+                    if not is_interface and is_regular_method:
+                        continue
+
+                    if m.is_event:
+                        event_name = ""
+
+                        assert m.name is not None
+
+                        if m.name.startswith("Set") and m.name.endswith("Callback"):
+                            event_name = f"On{m.name[len('Set'):-len('Callback')]}"
+                        else:
+                            warning_in_file(
+                                    m.header_file,
+                                    m.start_line,
+                                    "Event functions should follow the naming pattern 'SetXCallback'.",
+                                )
+                            event_name = m.name
+
+                        event = {
+                                "name": event_name,
+                                "class_name": m.parent_class.name,
+                                "method_name": m.name,
+                                "unique_method_name": m.unique_name,
+                                "parameters": deepcopy(p.type.function_signature.parameters),
+                                "has_parameters": (p.type.function_signature.parameters is not None)
+                                and (len(p.type.function_signature.parameters) > 0),
+                                "has_multiple_parameters": (p.type.function_signature.parameters is not None)
+                                and (len(p.type.function_signature.parameters) > 1),
+                                "delegate": delegate,
+                            }
+
+                        events.append(event)
+                        m.event = event
+
+                    m.parameters.remove(p)
+
+                    if len(m.parameters) > 0:
+                        m.parameters[-1].is_last = True
 
     def rewrite_task_doc_comments(self, m):
         if m.is_task and m.doc_comments != None and len(m.doc_comments) > 0:
