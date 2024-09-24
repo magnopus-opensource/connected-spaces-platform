@@ -80,7 +80,7 @@ public:
 	csp::common::String RefreshToken;
 	csp::common::String UserId;
 	csp::common::String DeviceId;
-    csp::common::Array<csp::common::String> OrganizationIds;
+	csp::common::Array<csp::common::String> OrganizationIds;
 
 private:
 	void CopyStateFrom(const LoginState& OtherState);
@@ -149,11 +149,12 @@ private:
 };
 
 
-/// @brief Data structure for an Agora user token, giving userID, channel name and settings regarding sharing of audio/video/screenshare.
+/// @brief Data structure for an Agora user token, giving userID, referenceID, channel name and settings regarding sharing of audio/video/screenshare.
 class CSP_API AgoraUserTokenParams
 {
 public:
 	csp::common::String AgoraUserId;
+	csp::common::String ReferenceId;
 	csp::common::String ChannelName;
 	int Lifespan;
 	bool ReadOnly;

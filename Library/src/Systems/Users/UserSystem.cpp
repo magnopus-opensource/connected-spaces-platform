@@ -717,6 +717,7 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
 
 	std::map<csp::common::String, csp::common::String> Parameters;
 	Parameters["userId"]	  = Params.AgoraUserId;
+	Parameters["referenceId"] = Params.ReferenceId;
 	Parameters["lifespan"]	  = std::to_string(Params.Lifespan).c_str();
 	Parameters["channelName"] = Params.ChannelName;
 	Parameters["readOnly"]	  = BoolToApiString(Params.ReadOnly);
