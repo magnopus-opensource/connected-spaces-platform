@@ -153,13 +153,24 @@ private:
 class CSP_API AgoraUserTokenParams
 {
 public:
+	/// @brief The unique identifer for the user requesting the token.
 	csp::common::String AgoraUserId;
-	csp::common::String ReferenceId;
+
+	/// @brief The unique name for the Agora channel being joined. It can be set to any string combination. For group calls all users must reference
+	/// the same channelName.
 	csp::common::String ChannelName;
+	/// @brief The unique identfier for the space being joined. Only needs to be set if the channelName is not set to the space ID, so the appropriate
+	/// permissions can be requested.
+	csp::common::String ReferenceId;
+	/// @brief The amount of time the token is valid for in milliseconds
 	int Lifespan;
+	/// @brief If the token is ready only
 	bool ReadOnly;
+	/// @brief If the token is configured for sharing of audio
 	bool ShareAudio;
+	/// @brief If the token is configured for sharing of video
 	bool ShareVideo;
+	/// @brief If the token is configured for sharing of the user's screen
 	bool ShareScreen;
 };
 
