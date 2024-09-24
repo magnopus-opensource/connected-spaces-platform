@@ -6,6 +6,7 @@ on:
 
 jobs:
   test_job:
+    if: github.repository == 'magnopus-opensource/connected-spaces-platform'
     runs-on: ubuntu-latest
     steps:
       - name: Sync alerts to Jira issues
