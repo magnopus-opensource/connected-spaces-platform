@@ -189,6 +189,21 @@ class CSharpWrapperGenerator:
 
         return "/".join(out_path)
 
+    def __render_named_object(self, named_object, enum_template) -> None:
+        subdir = self.__get_file_output_directory(named_object)
+        if named_object.surrounding_types:
+            for st in named_object.surrounding_types:
+                subdir = f"{subdir}/{st}"
+
+        Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
+
+        with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{named_object.name}.cs", "w") as f:
+            f.write(
+                chevron.render(
+                    enum_template, {"data": named_object, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
+                )
+            )
+
     def generate(
         self,
         enums: Dict[str, EnumMetadata],
@@ -261,10 +276,10 @@ class CSharpWrapperGenerator:
 
     def render_enums(self, enum_template) -> None:
         for e in self.enums.values():
-            surrounding_types = None
+            e.surrounding_types = None
 
             if e.is_nested_type:
-                surrounding_types = e.namespace[e.namespace.find("::") + 2 :].split("::")
+                e.surrounding_types = e.namespace[e.namespace.find("::") + 2 :].split("::")
                 e.namespace = e.namespace[: e.namespace.find("::")]
 
             if e.doc_comments is not None:
@@ -272,55 +287,24 @@ class CSharpWrapperGenerator:
 
             self.__translate_namespace(e)
             self.__translate_enum_base(e)
-            subdir = self.__get_file_output_directory(e)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            e.surrounding_types = surrounding_types
 
             for f in e.fields:
                 if f.doc_comments is not None:
                     self.__translate_comments(f.doc_comments)
 
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{e.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        enum_template, {"data": e, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
+            self.__render_named_object(e, enum_template)
 
     def render_structs(self, struct_template) -> None:
         for s in self.structs.values():
-            surrounding_types = None
+            s.surrounding_types = None
 
             if s.is_nested_type:
-                surrounding_types = s.namespace[s.namespace.find("::") + 2 :].split("::")
+                s.surrounding_types = s.namespace[s.namespace.find("::") + 2 :].split("::")
                 s.namespace = s.namespace[: s.namespace.find("::")]
 
             self.__translate_comments(s.doc_comments)
             self.__translate_namespace(s)
-            subdir = self.__get_file_output_directory(s)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            s.surrounding_types = surrounding_types
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{s.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        struct_template, {"data": s, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
+            self.__render_named_object(s, struct_template)
 
     def render_global_functions(self, global_functions_template) -> None:
         with open(f"{self.__OUTPUT_DIRECTORY}Csp.cs", "w") as f:
@@ -336,10 +320,10 @@ class CSharpWrapperGenerator:
 
     def render_interfaces(self, interface_template) -> None:
         for i in self.interfaces.values():
-            surrounding_types = None
+            i.surrounding_types = None
 
             if i.is_nested_type:
-                surrounding_types = i.namespace[i.namespace.find("::") + 2 :].split("::")
+                i.surrounding_types = i.namespace[i.namespace.find("::") + 2 :].split("::")
                 i.namespace = i.namespace[: i.namespace.find("::")]
 
             self.__translate_comments(i.doc_comments)
@@ -354,30 +338,14 @@ class CSharpWrapperGenerator:
             i.events = events
             i.has_events = len(events) > 0
 
-            subdir = self.__get_file_output_directory(i)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            i.surrounding_types = surrounding_types
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{i.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        interface_template, {"data": i, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
+            self.__render_named_object(i, interface_template)
 
     def render_classes(self, class_template) -> None:
         for c in self.classes.values():
-            surrounding_types = None
+            c.surrounding_types = None
 
             if c.is_nested_type:
-                surrounding_types = c.namespace[c.namespace.find("::") + 2 :].split("::")
+                c.surrounding_types = c.namespace[c.namespace.find("::") + 2 :].split("::")
                 c.namespace = c.namespace[: c.namespace.find("::")]
 
             self.__translate_comments(c.doc_comments)
@@ -404,23 +372,7 @@ class CSharpWrapperGenerator:
             c.events = events
             c.has_events = len(events) > 0
 
-            subdir = self.__get_file_output_directory(c)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            c.surrounding_types = surrounding_types
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{c.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        class_template, {"data": c, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
+            self.__render_named_object(c, class_template)
 
     def rewrite_methods(self, methods, delegates, events, is_interface=False):
         for m in methods:
