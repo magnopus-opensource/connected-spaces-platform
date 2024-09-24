@@ -107,6 +107,7 @@ class CSharpWrapperGenerator:
             obj.translated_namespace = None
 
     def __translate_comments(self, comments: List[str]) -> None:
+        """Rewrite a list of comments from Javadoc-style to C# XML style"""
         if comments is None:
             return
 
@@ -198,12 +199,12 @@ class CSharpWrapperGenerator:
         interfaces: Dict[str, InterfaceMetadata],
     ) -> None:
         # Deepcopy all metadata so we don't modify the original data for any wrapper generator classes that get called after this one
-        enums = deepcopy(enums)
-        structs = deepcopy(structs)
-        functions = deepcopy(functions)
-        classes = deepcopy(classes)
-        templates = deepcopy(templates)
-        interfaces = deepcopy(interfaces)
+        self.enums = deepcopy(enums)
+        self.structs = deepcopy(structs)
+        self.functions = deepcopy(functions)
+        self.classes = deepcopy(classes)
+        self.templates = deepcopy(templates)
+        self.interfaces = deepcopy(interfaces)
 
         out_path = Path(self.__OUTPUT_DIRECTORY)
 
@@ -221,14 +222,14 @@ class CSharpWrapperGenerator:
         interface_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Interface.mustache")
         templateclass_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Template.mustache")
 
-        self.translate_functions(functions)
+        self.translate_functions(self.functions)
 
-        self.render_enums(enums, enum_template)
-        self.render_structs(structs, struct_template)
-        self.render_global_functions(functions, global_functions_template)
-        self.render_interfaces(classes, interfaces, interface_template)
-        self.render_classes(classes, class_template)
-        self.render_templates(templates, templateclass_template)
+        self.render_enums(enum_template)
+        self.render_structs(struct_template)
+        self.render_global_functions(global_functions_template)
+        self.render_interfaces(interface_template)
+        self.render_classes(class_template)
+        self.render_templates(templateclass_template)
 
         self.format_output()
 
@@ -258,8 +259,8 @@ class CSharpWrapperGenerator:
                             for fp in p.type.function_signature.parameters:
                                 self.__translate_type(fp.type)
 
-    def render_enums(self, enums, enum_template) -> None:
-        for e in enums.values():
+    def render_enums(self, enum_template) -> None:
+        for e in self.enums.values():
             surrounding_types = None
 
             if e.is_nested_type:
@@ -293,8 +294,8 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
-    def render_structs(self, structs, struct_template) -> None:
-        for s in structs.values():
+    def render_structs(self, struct_template) -> None:
+        for s in self.structs.values():
             surrounding_types = None
 
             if s.is_nested_type:
@@ -321,20 +322,20 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
-    def render_global_functions(self, functions, global_functions_template) -> None:
+    def render_global_functions(self, global_functions_template) -> None:
         with open(f"{self.__OUTPUT_DIRECTORY}Csp.cs", "w") as f:
             print(
                 chevron.render(
                     global_functions_template,
-                    {"data": list(functions.values()), "extra_data": config},
+                    {"data": list(self.functions.values()), "extra_data": config},
                     self.__PARTIALS_DIRECTORY,
                     warn=True,
                 ),
                 file=f,
             )
 
-    def render_interfaces(self, classes, interfaces, interface_template) -> None:
-        for i in interfaces.values():
+    def render_interfaces(self, interface_template) -> None:
+        for i in self.interfaces.values():
             surrounding_types = None
 
             if i.is_nested_type:
@@ -347,7 +348,7 @@ class CSharpWrapperGenerator:
             delegates = []
             events = []
 
-            self.rewrite_methods(i.methods, classes, delegates, events, True)
+            self.rewrite_methods(i.methods, delegates, events, True)
 
             i.delegates = delegates
             i.events = events
@@ -371,8 +372,8 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
-    def render_classes(self, classes, class_template) -> None:
-        for c in classes.values():
+    def render_classes(self, class_template) -> None:
+        for c in self.classes.values():
             surrounding_types = None
 
             if c.is_nested_type:
@@ -397,7 +398,7 @@ class CSharpWrapperGenerator:
                     for ta in f.type.template_arguments:
                         self.__translate_type(ta.type)
 
-            self.rewrite_methods(c.methods, classes, delegates, events)
+            self.rewrite_methods(c.methods, delegates, events)
 
             c.delegates = delegates
             c.events = events
@@ -421,7 +422,7 @@ class CSharpWrapperGenerator:
                     file=f,
                 )
 
-    def rewrite_methods(self, methods, classes, delegates, events, is_interface=False):
+    def rewrite_methods(self, methods, delegates, events, is_interface=False):
         for m in methods:
             self.__translate_comments(m.doc_comments)
 
@@ -468,8 +469,8 @@ class CSharpWrapperGenerator:
                             self.__translate_type(dp.type)
 
                             full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                            dp.type.is_result_base = full_type_name in classes and self.__class_derives_from(
-                                        classes[full_type_name], "csp::systems", "ResultBase", classes
+                            dp.type.is_result_base = full_type_name in self.classes and self.__class_derives_from(
+                                        self.classes[full_type_name], "csp::systems", "ResultBase", self.classes
                                     )
 
                     delegate = {
@@ -566,8 +567,8 @@ class CSharpWrapperGenerator:
             else:
                 m.doc_comments.append("<returns>The result for the request</returns>")
 
-    def render_templates(self, templates, templateclass_template) -> None:
-        for t in templates.values():
+    def render_templates(self, templateclass_template) -> None:
+        for t in self.templates.values():
             self.__translate_namespace(t.definition)
 
             for m in t.definition.methods:
