@@ -986,8 +986,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
 	csp::systems::AgoraUserTokenParams Params;
 	Params.AgoraUserId = UserId;
-	Params.ReferenceId = Space.Id;
 	Params.ChannelName = Space.Id;
+	Params.ReferenceId = Space.Id;
 	Params.Lifespan	   = 10000;
 	Params.ShareAudio  = true;
 	Params.ShareScreen = false;
