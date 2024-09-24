@@ -161,7 +161,7 @@ public:
 	csp::common::String ChannelName;
 
 	/// @brief The unique identfier for the space being joined. Only needs to be set if the channelName is not set to the space ID, so the appropriate
-	/// permissions can be requested.
+	/// permissions can be requested. It can be set to an empty string if not required.
 	csp::common::String ReferenceId;
 
 	/// @brief The amount of time the token is valid for in milliseconds
