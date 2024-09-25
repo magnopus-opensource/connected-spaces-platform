@@ -706,6 +706,7 @@ class CSharpWrapperGenerator:
                 )
 
         # Format output with CSharpier
+        # NOTE: This code will fail on OSX since it's not running using the `dotnet` command
         scriptDirectory = os.path.dirname(os.path.realpath(__file__))
         subprocess.run(
             f'"{ scriptDirectory }\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
