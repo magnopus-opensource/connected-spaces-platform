@@ -1,7 +1,2 @@
-connected-spaces-platform Pull Request
-
-**For the reviewer**
-
-* [ ] If required, are the changes covered by appropriate tests?
-* [ ] Are any public-facing API changes well documented?
-* [ ] Is the code easily readable and extensible and/or follow existing conventions?
+Please write a short description of what this change does and what problem it solves.
+For more information, see our [CONTRIBUTING](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/.github/CONTRIBUTING.md) page.
