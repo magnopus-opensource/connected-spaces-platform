@@ -270,10 +270,11 @@ class CSharpWrapperGenerator:
     def format_output(self):
         """Format output with CSharpier"""
         script_directory = os.path.dirname(os.path.realpath(__file__))
+        # TODO(OB-3780): This will fail with a warning on Mac since you can't run a .NET executable directly
         subprocess.run(
             f'"{script_directory}\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
             shell=True,
-            check=True,
+            check=False,  # When fixed, change this to check=True
         )
 
     def __translate_functions(self, functions) -> None:
