@@ -454,8 +454,7 @@ class CSharpWrapperGenerator:
                     for dp in p.type.function_signature.parameters:
                         self.__translate_type(dp.type)
 
-                        full_type_name = f"{
-                                dp.type.namespace}::{dp.type.name}"
+                        full_type_name = f"{dp.type.namespace}::{dp.type.name}"
                         dp.type.is_result_base = (
                                 full_type_name in self.classes
                                 and self.__class_derives_from(
