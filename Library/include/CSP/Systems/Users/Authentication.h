@@ -164,19 +164,19 @@ public:
 	/// permissions can be requested. It can be set to an empty string if not required.
 	csp::common::String ReferenceId;
 
-	/// @brief The amount of time the token is valid for in milliseconds
+	/// @brief The amount of time the token is valid for in milliseconds.
 	int Lifespan;
 
-	/// @brief If the token is ready only
+	/// @brief If the token is ready only.
 	bool ReadOnly;
 
-	/// @brief If the token is configured for sharing of audio
+	/// @brief If the token is configured for sharing of audio.
 	bool ShareAudio;
 
-	/// @brief If the token is configured for sharing of video
+	/// @brief If the token is configured for sharing of video.
 	bool ShareVideo;
 
-	/// @brief If the token is configured for sharing of the user's screen
+	/// @brief If the token is configured for sharing of the user's screen.
 	bool ShareScreen;
 };
 
