@@ -80,7 +80,7 @@ public:
 	csp::common::String RefreshToken;
 	csp::common::String UserId;
 	csp::common::String DeviceId;
-    csp::common::Array<csp::common::String> OrganizationIds;
+	csp::common::Array<csp::common::String> OrganizationIds;
 
 private:
 	void CopyStateFrom(const LoginState& OtherState);
@@ -149,16 +149,34 @@ private:
 };
 
 
-/// @brief Data structure for an Agora user token, giving userID, channel name and settings regarding sharing of audio/video/screenshare.
+/// @brief Data structure for an Agora user token, giving userID, referenceID, channel name and settings regarding sharing of audio/video/screenshare.
 class CSP_API AgoraUserTokenParams
 {
 public:
+	/// @brief The unique identifer for the user requesting the token.
 	csp::common::String AgoraUserId;
+
+	/// @brief The unique name for the Agora channel being joined. It can be set to any string combination. For group calls all users must reference
+	/// the same channelName.
 	csp::common::String ChannelName;
+
+	/// @brief The unique identfier for the space being joined. Only needs to be set if the channelName is not set to the space ID, so the appropriate
+	/// permissions can be requested. It can be set to an empty string if not required.
+	csp::common::String ReferenceId;
+
+	/// @brief The amount of time the token is valid for in milliseconds.
 	int Lifespan;
+
+	/// @brief If the token is ready only.
 	bool ReadOnly;
+
+	/// @brief If the token is configured for sharing of audio.
 	bool ShareAudio;
+
+	/// @brief If the token is configured for sharing of video.
 	bool ShareVideo;
+
+	/// @brief If the token is configured for sharing of the user's screen.
 	bool ShareScreen;
 };
 
