@@ -37,7 +37,7 @@ std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey,
 													const csp::common::Map<csp::common::String, csp::common::String>& MetaData)
 {
 	auto SequenceInfo = std::make_shared<chs::SequenceDto>();
-	SequenceInfo->SetKey(csp::common::Encode::URI(SequenceKey)); // We encoce the sequence key in order to allow keys to include reserved characters.
+	SequenceInfo->SetKey(csp::common::Encode::URI(SequenceKey)); // We encode the sequence key in order to allow keys to include reserved characters.
 	SequenceInfo->SetReferenceType(ReferenceType);
 	SequenceInfo->SetReferenceId(ReferenceId);
 	SequenceInfo->SetItems(Convert(Items));
