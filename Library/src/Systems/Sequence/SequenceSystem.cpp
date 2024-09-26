@@ -155,8 +155,15 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 		}
 
         // We URI-encode sequence keys to support reserved characters.
-        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i], true);
+        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
 	}
+
+    // Regexes may also include reserved characters which require encoding.
+    Optional<String> Regex;
+    if(InKeyRegex.HasValue())
+    {
+		Regex = csp::common::Encode::URI(*InKeyRegex);
+    }
 
 	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
 	{
@@ -166,7 +173,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 	}
 
 	std::optional<std::vector<String>> SequenceKeys = Convert(EncodedSequenceKeys);
-	std::optional<String> KeyRegex					= Convert(InKeyRegex);
+	std::optional<String> KeyRegex					= Convert(Regex);
 	std::optional<String> ReferenceType				= Convert(InReferenceType);
 	std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
 
