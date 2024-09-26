@@ -45,6 +45,14 @@ CSP_INTERNAL_TEST(CSPEngine, EncodeTests, EncodeURI)
 		csp::common::String DecodedString = csp::common::Decode::URI(EncodedString);
 		EXPECT_EQ(DecodedString, OriginalURL);
 	}
+
+	{
+		// Double encoding and double decoding should produce the same end-result.
+		const csp::common::String OriginalURL("abc defghij*zlmnopqrst#uvwxyz");
+		csp::common::String EncodedString = csp::common::Encode::URI(OriginalURL, true);
+		csp::common::String DecodedString = csp::common::Decode::URI(EncodedString, true);
+		EXPECT_EQ(DecodedString, OriginalURL);
+	}
 }
 
 #endif
