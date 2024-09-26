@@ -18,6 +18,7 @@
 
 #include "Debug/Logging.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Common/Encode.h"
 
 #include <regex>
 
@@ -338,12 +339,12 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	EventParams.Key = EventData[1].GetString();
+	EventParams.Key = csp::common::Decode::URI(EventData[1].GetString());
 
 	// Optional parameter for when a key is changed
 	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
 	{
-		EventParams.NewKey = EventData[2].GetString();
+		EventParams.NewKey = csp::common::Decode::URI(EventData[2].GetString());
 	}
 }
 
