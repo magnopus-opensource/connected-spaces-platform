@@ -21,7 +21,6 @@
 #include "Common/Encode.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
-#include "Poco/URI.h"
 
 using namespace csp;
 using namespace csp::common;
