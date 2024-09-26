@@ -915,6 +915,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 	EXPECT_EQ(CreatedObject->GetScale(), ObjectTransform.Scale);
 	EXPECT_EQ(CreatedObject->GetThirdPartyRef(), "");
 	EXPECT_EQ(CreatedObject->GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
+	EXPECT_EQ(CreatedObject->GetParentEntity(), EntitySystem->GetRootEntity());
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
@@ -2074,11 +2075,11 @@ void RunParentEntityReplicationTest(bool Local)
 	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
 	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
 
-	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+	EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), EntitySystem->GetRootEntity());
+	EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
-	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+	EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
 
 	// Test setting the parent for the first child
 	{
@@ -2094,14 +2095,14 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity1->GetId());
+		CreatedParentEntity->AppendChild(CreatedChildEntity1->GetId());
 
 		// Parents shouldn't be set until after replication
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 
@@ -2110,9 +2111,9 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check entity1 is parented correctly
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
 		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
 		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
@@ -2120,7 +2121,7 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 2);
 	}
 
 	// Test setting the parent for the second child
@@ -2137,7 +2138,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity2->GetId());
+		CreatedParentEntity->AppendChild(CreatedChildEntity2->GetId());
 
 		CreatedChildEntity2->QueueUpdate();
 
@@ -2146,18 +2147,17 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check all entities are parented correctly
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 
-		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 2);
 		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
 		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[1], CreatedChildEntity2);
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
 	}
 
 	// Remove parent from first child
@@ -2174,7 +2174,7 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		EntitySystem->MoveToRoot(CreatedChildEntity1->GetId());
+		EntitySystem->GetRootEntity()->AppendChild(CreatedChildEntity1->GetId());
 
 		CreatedChildEntity1->QueueUpdate();
 
@@ -2182,8 +2182,8 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check entity is  unparented correctly
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), EntitySystem->GetRootEntity());
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 
 		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
@@ -2192,7 +2192,7 @@ void RunParentEntityReplicationTest(bool Local)
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 2);
 	}
 
 	// Remove parent from second child
@@ -2209,23 +2209,23 @@ void RunParentEntityReplicationTest(bool Local)
 				}
 			});
 
-		EntitySystem->MoveToRoot(CreatedChildEntity2->GetId());
+		EntitySystem->GetRootEntity()->AppendChild(CreatedChildEntity2->GetId());
 		CreatedChildEntity2->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 
 		// Check entity is  unparented correctly
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
 		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 0);
 
 		EXPECT_EQ(CreatedChildEntity1->GetChildEntities()->Size(), 0);
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
 	}
 
 	if (!Local)
@@ -2254,7 +2254,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityLocalReplicationTest)
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_ENTITY_REPLICATION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityReplicationTest)
 {
-	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserialiseFromPatch functionality
 	// for ParentId and ChildEntities
 	RunParentEntityReplicationTest(false);
 }
@@ -2323,8 +2323,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 		});
 
 	// Change Parent
-	EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity->GetId());
-
+	CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
 	CreatedChildEntity->QueueUpdate();
 
 	// Wait for update
@@ -2348,7 +2347,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 	EXPECT_EQ(ObjectTransformExpected.Rotation.Z == GlobalRotation.Z, true);
 	// When performing quaternion operations, W can be negative, so no point checking
 	EXPECT_EQ(ObjectTransformExpected.Scale == GlobalScale, true);
-
 
 	SpaceSystem->ExitSpace(
 		[](const csp::systems::NullResult& Result)
@@ -2428,8 +2426,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 		});
 
 	// Change Parent
-	EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity->GetId());
-
+	CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
 	CreatedChildEntity->QueueUpdate();
 
 	// Wait for update
@@ -2536,8 +2533,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 		});
 
 	// Change Parent
-	EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity->GetId());
-
+	CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
 	CreatedChildEntity->QueueUpdate();
 
 	// Wait for update
@@ -2641,8 +2637,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 		});
 
 	// Change Parent
-	EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity->GetId());
-
+	CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
 	CreatedChildEntity->QueueUpdate();
 
 	// Wait for update
@@ -2689,119 +2684,134 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
-	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	uint64_t ParentEntityId = 0;
+	uint64_t ChildEntityId	= 0;
+	uint64_t ChildEntity2Id = 0;
 
-	// Enter space
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
-
-	// Create Entities
-	csp::common::String ParentEntityName = "ParentEntity";
-	csp::common::String ChildEntityName	 = "ChildEntity";
-	csp::common::String RootEntityName	 = "RootEntity";
-	SpaceTransform ObjectTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
-		{
-		});
-
-	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
-	auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
-	auto [CreatedRootEntity]   = AWAIT(EntitySystem, CreateObject, RootEntityName, ObjectTransform);
-
-	uint64_t ParentEntityId = CreatedParentEntity->GetId();
-	uint64_t ChildEntityId	= CreatedChildEntity->GetId();
-
-	// Parents shouldn't be set yet
-	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), nullptr);
-	EXPECT_EQ(CreatedRootEntity->GetParentEntity(), nullptr);
-
-	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
-
-	bool ChildEntityUpdated = false;
-
-	CreatedChildEntity->SetUpdateCallback(
-		[&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
-		{
-			if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
-			{
-				ChildEntityUpdated = true;
-			}
-		});
-
-	// Change Parent
-	EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity->GetId());
-
-	CreatedChildEntity->QueueUpdate();
-
-	// Wait for update
-	WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
-	EXPECT_TRUE(ChildEntityUpdated);
-
-	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
-
-	// Exit Space
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-	// Log out
-	LogOut(UserSystem);
-
-	// Log in again
-	LogIn(UserSystem, UserId);
-
-	// Enter space
-	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-	EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
-
-	bool EntitiesCreated = false;
-
-	auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
 	{
-		EntitiesCreated = true;
-		EXPECT_TRUE(Success);
-	};
+		// Log in
+		csp::common::String UserId;
+		LogIn(UserSystem, UserId);
 
-	EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+		// Create space
+		const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+		const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-	WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
-	EXPECT_TRUE(EntitiesCreated);
+		char UniqueSpaceName[256];
+		SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Find our entities
-	SpaceEntity* RetrievedParentEntity = EntitySystem->FindSpaceEntityById(ParentEntityId);
-	EXPECT_TRUE(RetrievedParentEntity != nullptr);
+		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 
-	SpaceEntity* RetrievedChildEntity = EntitySystem->FindSpaceEntityById(ChildEntityId);
-	EXPECT_TRUE(RetrievedChildEntity != nullptr);
+		// Enter space
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Check entity is parented correctly
-	EXPECT_EQ(RetrievedChildEntity->GetParentEntity(), RetrievedParentEntity);
-	EXPECT_EQ(RetrievedParentEntity->GetChildEntities()->Size(), 1);
-	EXPECT_EQ((*RetrievedParentEntity->GetChildEntities())[0], RetrievedChildEntity);
+		// Create Entities
+		csp::common::String ParentEntityName = "ParentEntity";
+		csp::common::String ChildEntityName	 = "ChildEntity";
+		csp::common::String RootEntityName	 = "RootEntity";
+		SpaceTransform ObjectTransform
+			= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
 
-	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+		EntitySystem->SetEntityCreatedCallback(
+			[](SpaceEntity* Entity)
+			{
+			});
 
-	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+		auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+		auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
+		auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, RootEntityName, ObjectTransform);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+		ParentEntityId = CreatedParentEntity->GetId();
+		ChildEntity2Id = CreatedChildEntity2->GetId();
+		ChildEntityId  = CreatedChildEntity->GetId();
 
-	// Log out
-	LogOut(UserSystem);
+		bool ChildEntityUpdated = false;
+
+		CreatedChildEntity->SetUpdateCallback(
+			[&ChildEntityUpdated,
+			 ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				{
+					ChildEntityUpdated = true;
+				}
+			});
+
+		// Add child to parent
+		CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
+		CreatedParentEntity->AppendChild(CreatedChildEntity2->GetId());
+		CreatedChildEntity->QueueUpdate();
+
+		// Wait for update
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
+		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
+
+		// Exit Space
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+		// Log out
+		LogOut(UserSystem);
+	}
+
+	{
+		// Log in again
+		csp::common::String UserId;
+		LogIn(UserSystem, UserId);
+
+		// Enter space
+		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+		bool EntitiesCreated = false;
+
+		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+		{
+			EntitiesCreated = true;
+			EXPECT_TRUE(Success);
+		};
+
+		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+		// Update
+		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+		EXPECT_TRUE(EntitiesCreated);
+
+		// Find our entities
+		SpaceEntity* RetrievedParentEntity = EntitySystem->FindSpaceEntityById(ParentEntityId);
+		EXPECT_TRUE(RetrievedParentEntity != nullptr);
+
+		SpaceEntity* RetrievedChildEntity = EntitySystem->FindSpaceEntityById(ChildEntityId);
+		EXPECT_TRUE(RetrievedChildEntity != nullptr);
+
+		SpaceEntity* RetrievedChildEntity2 = EntitySystem->FindSpaceEntityById(ChildEntity2Id);
+		EXPECT_TRUE(RetrievedChildEntity2 != nullptr);
+
+		// Check entity is parented correctly
+		// Ensure children are correct
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], RetrievedParentEntity);
+
+		EXPECT_EQ(RetrievedParentEntity->GetChildEntities()->Size(), 2);
+		EXPECT_EQ((*RetrievedParentEntity->GetChildEntities())[0], RetrievedChildEntity);
+		EXPECT_EQ((*RetrievedParentEntity->GetChildEntities())[1], RetrievedChildEntity2);
+
+		// Ensure parents are correct
+		EXPECT_EQ(RetrievedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(RetrievedChildEntity->GetParentEntity(), RetrievedParentEntity);
+		EXPECT_EQ(RetrievedChildEntity2->GetParentEntity(), RetrievedParentEntity);
+
+		AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+		// Delete space
+		DeleteSpace(SpaceSystem, Space.Id);
+
+		// Log out
+		LogOut(UserSystem);
+	}
 }
 #endif
 
@@ -2867,19 +2877,38 @@ void RunParentChildDeletionTest(bool Local)
 				}
 			});
 
-		EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity1->GetId());
+		CreatedParentEntity->AppendChild(CreatedChildEntity1->GetId());
 
-		// Parents shouldn't be set until after replication
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+		// Ensure parents are correct
+		// Updates shoulnt be made until after after replication
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedParentEntity);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[1], CreatedChildEntity1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[2], CreatedChildEntity2);
 
-		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+		// Ensure parents are correct
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
 		CreatedChildEntity1->QueueUpdate();
 
+		// Update
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		// Ensure children are correct
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 2);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedParentEntity);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[1], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+
+		// Ensure parents are correct
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 	}
 
 	// Test setting the parent for the second child
@@ -2896,12 +2925,25 @@ void RunParentChildDeletionTest(bool Local)
 				}
 			});
 
-		EntitySystem->AppendChild(CreatedParentEntity->GetId(), CreatedChildEntity2->GetId());
-
+		CreatedParentEntity->AppendChild(CreatedChildEntity2->GetId());
 		CreatedChildEntity2->QueueUpdate();
 
+		// Update
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		// Ensure children are correct
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 2);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[1], CreatedChildEntity2);
+
+		// Ensure parents are correct
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), CreatedParentEntity);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 	}
 
 	// Delete the first child
@@ -2916,17 +2958,34 @@ void RunParentChildDeletionTest(bool Local)
 
 		EntitySystem->DestroyEntity(CreatedChildEntity1, DestroyCb);
 
-		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
-		EXPECT_TRUE(DestroyCalled);
-
-		// Check entity is  unparented correctly
-		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+		// Check entity is unparented correctly
+		// This should happen before any updates are made
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedParentEntity);
 
 		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
 		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity2);
 
 		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
+
+		// Update
+		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
+		EXPECT_TRUE(DestroyCalled);
+
+		// Double check values are still correct after updating
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedParentEntity);
+
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*CreatedParentEntity->GetChildEntities())[0], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), EntitySystem->GetRootEntity());
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 	}
 
 	// Delete the parent
@@ -2941,12 +3000,20 @@ void RunParentChildDeletionTest(bool Local)
 
 		EntitySystem->DestroyEntity(CreatedParentEntity, DestroyCb);
 
+		// Update
 		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
 		EXPECT_TRUE(DestroyCalled);
 
 		// Ensure parent is deleted and child is re-parented
-		EXPECT_EQ(EntitySystem->GetNumEntities(), 1);
-		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+		SpaceEntity* FoundChildEntity2 = EntitySystem->FindSpaceEntityById(CreatedChildEntity2->GetId());
+		EXPECT_TRUE(FoundChildEntity2 != nullptr);
+
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ((*EntitySystem->GetRootEntity()->GetChildEntities())[0], CreatedChildEntity2);
+
+		EXPECT_EQ(CreatedChildEntity2->GetChildEntities()->Size(), 0);
+
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), EntitySystem->GetRootEntity());
 
 		if (!Local)
 		{
@@ -2975,7 +3042,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildLocalDeletionTest)
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_CHILD_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentChildDeletionTest)
 {
-	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserialiseFromPatch functionality
 	// for deletion of child and parent entities
 	RunParentChildDeletionTest(false);
 }
@@ -3029,7 +3096,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 	EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 	EXPECT_EQ(CreatedChildEntity->GetParentEntity(), CreatedParentEntity);
 
-	EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
+	EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

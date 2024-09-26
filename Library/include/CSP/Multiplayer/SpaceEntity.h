@@ -231,9 +231,10 @@ public:
 	/// @return SpaceEntity
 	SpaceEntity* GetParentEntity() const;
 
-	/// @brief Gets the children of this entity
+	/// @brief Generates an ordered list of child entities
+	// This copy should be disposed by the caller once it is no longer needed.
 	/// @return csp::common::List<SpaceEntity>
-	csp::common::List<SpaceEntity*> GetChildEntities() const;
+	const csp::common::List<SpaceEntity*>* GetChildEntities() const;
 
 	/// @brief Adds an existing entity as a child of a specified parent.
 	/// QueueUpdate() should be called on the child afterwards to process changes
@@ -242,13 +243,12 @@ public:
 	/// @param ChildId uint64_t : The child entity to reposition.
 	void AppendChild(int64_t ChildId);
 
-	/// @brief Sets a childs position in the hierarchy after the given previous entity.
+	/// @brief Sets a childs position in the hierarchy before the given next entity.
 	/// If the given parent is different from the child entities current parent, the child entity will be re-parented.
 	/// QueueUpdate() should be called on the child afterwards to process changes
 	/// @param ChildId uint64_t : The child entity to reposition.
-	/// @param PreviousChildId Optional<uint64_t> : The child for the new entity to be inserted after.
-	/// If this isn't set, it will be inserted at the beggining.
-	void InsertChildAfter(uint64_t ChildId, csp::common::Optional<uint64_t> PreviousChildId);
+	/// @param NextChildId uint64_t : The child for the new entity to be inserted before.
+	void InsertChildBefore(uint64_t ChildId, uint64_t NextChildId);
 
 	/// @brief Queues an update which will be executed on next Tick() or ProcessPendingEntityOperations(). Not a blocking or async function.
 	void QueueUpdate();
@@ -380,16 +380,28 @@ private:
 
 	ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
+	// Adds a child entity to the end of the linked list using an entities NextEntity
 	void AddChildEntitiy(SpaceEntity* ChildEntity);
+
+	// Adds a child entity to the linked list before the given NextEntityId
+	void AddChildEntitiyBefore(SpaceEntity* ChildEntity, uint64_t NextEntityId);
+	//  Called by previous AddChildEntitiy functions
+	void AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* NextEntity);
+
+	// Removes a child from the linked list and updates affected nodes
 	void RemoveChildEntity(SpaceEntity* ChildEntity);
+
+	bool HasChild(uint64_t ChildId) const;
+
+	// Remove entity from current list and inserts it into its new position.
+	// This function assumes that the ParentId nad NextEntityId are set correctly.
+	void UpdateEntityPosition();
+	void RebuildEntityList();
 
 	void SetParentId(uint64_t ParentId);
 	void RemoveParentEntity();
 
 	SpaceEntity* GetLastChild() const;
-
-	// Linked list properties for ordered hierarchies
-	void SetPrevEntityId(uint64_t Value);
 	void SetNextEntityId(uint64_t Value);
 
 	SpaceEntitySystem* EntitySystem;
@@ -408,11 +420,19 @@ private:
 	csp::common::String ThirdPartyRef;
 	uint64_t SelectedId;
 
+	// Hierarchy properties
 	SpaceEntity* PrevEntity;
 	SpaceEntity* NextEntity;
-
 	SpaceEntity* Parent;
 	SpaceEntity* FirstChild;
+
+	csp::common::List<SpaceEntity*> ChildEntities;
+
+	// This value is always set when an entity is created.
+	// Can only be null when first encountered in OnAllEntitiesCreated, if this entity
+	// is from a space that hasnt used the entity hierarchy feature before.
+	// This should never be null after this step, so can be safely used without checking validity.
+	csp::common::Optional<uint64_t> NextEntityId;
 
 	UpdateCallback EntityUpdateCallback;
 	DestroyCallback EntityDestroyCallback;

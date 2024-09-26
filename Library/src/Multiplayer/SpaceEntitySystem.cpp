@@ -218,6 +218,7 @@ SpaceEntitySystem::~SpaceEntitySystem()
 	CSP_DELETE(PendingRemoves);
 	CSP_DELETE(PendingOutgoingUpdateUniqueSet);
 	CSP_DELETE(PendingIncomingUpdates);
+	CSP_DELETE(RootEntity);
 }
 
 void SpaceEntitySystem::Initialise()
@@ -544,8 +545,6 @@ void SpaceEntitySystem::BindOnObjectMessage()
 					   auto& EntityMessage = Params.as_array()[0];
 
 					   SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
-					   SpaceEntity* Parent	  = FindSpaceEntityById(NewEntity->ParentId);
-					   Parent->AddChildEntitiy(NewEntity);
 
 					   if (SpaceEntityCreatedCallback)
 					   {
@@ -724,7 +723,9 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 	Entities.Clear();
 	Objects.Clear();
 	Avatars.Clear();
-	CSP_DELETE(RootEntity);
+
+	// Dont destroy the root entity until we destroy the system
+	RootEntity->FirstChild = nullptr;
 
 	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
 	PendingAdds->clear();
@@ -810,16 +811,75 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
 
+	csp::common::List<SpaceEntity*> InvalidEntities;
+
 	// Resolve entity hierarchy
+	for (size_t i = 0; i < Entities.Size(); ++i)
+	{
+		SpaceEntity* Entity		  = Entities[i];
+		SpaceEntity* ParentEntity = FindSpaceEntityById(Entity->ParentId);
+
+		if (Entity->NextEntityId.HasValue() == false)
+		{
+			// Linked list hasn't been setup for this entity.
+			InvalidEntities.Append(Entity);
+			break;
+		}
+
+		if (ParentEntity)
+		{
+			Entity->Parent = ParentEntity;
+		}
+		else
+		{
+			CSP_LOG_ERROR_FORMAT("Unable to find parent id: %s for entity: %s. Moving to root",
+								 std::to_string(Entity->ParentId).c_str(),
+								 std::to_string(Entity->GetId()).c_str());
+
+			InvalidEntities.Append(Entity);
+			break;
+		}
+
+		/* if (*Entity->NextEntityId != 0)
+		{
+			SpaceEntity* NextEntity = FindSpaceEntityById(*Entity->NextEntityId);
+
+			if (NextEntity == nullptr)
+			{
+				CSP_LOG_ERROR_FORMAT("Unable to find next entity id: %s for entity: %s. Moving to root",
+									 std::to_string(*Entity->NextEntityId).c_str(),
+									 std::to_string(Entity->GetId()).c_str());
+
+				InvalidEntities.Append(Entity);
+				break;
+			}
+
+			Entity->NextEntity	   = NextEntity;
+			NextEntity->PrevEntity = Entity;
+		}*/
+	}
+
+	// Parent invalid entities to the end of the root
+	for (size_t i = 0; i < InvalidEntities.Size(); ++i)
+	{
+		SpaceEntity* Entity = InvalidEntities[i];
+
+		Entity->ParentId	 = 0;
+		Entity->NextEntityId = 0;
+		Entity->UpdateEntityPosition();
+	}
+
+	// Set parent entities FirstChild
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
 		SpaceEntity* Entity = Entities[i];
 
-		SpaceEntity* ParentEntity = FindSpaceEntityById(Entity->ParentId);
-		// Set the entities parent
-		Entity->Parent = ParentEntity;
-		// Set the parents child
-		ParentEntity->ChildEntities.Append(Entity);
+		if (Entity->PrevEntity == nullptr)
+		{
+			// There is no previous entity in the list,
+			// so assume this is the first
+			Entity->Parent->FirstChild = Entity;
+		}
 	}
 
 	// Register all scripts for import
@@ -889,12 +949,13 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
 	Deletion->GetParentEntity()->RemoveChildEntity(Deletion);
 
-	SpaceEntityList& Children = Deletion->GetChildEntities();
+	const SpaceEntityList* Children = Deletion->GetChildEntities();
 
-	for (size_t i = 0; i < Deletion->GetChildEntities().Size(); ++i)
+	for (size_t i = 0; i < Children->Size(); ++i)
 	{
-		Children[i]->RemoveParentEntity();
-		Children[i]->Parent = nullptr;
+		(*Children)[i]->ParentId	 = 0;
+		(*Children)[i]->NextEntityId = 0;
+		(*Children)[i]->UpdateEntityPosition();
 	}
 }
 
@@ -1038,7 +1099,7 @@ void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)
 
 SpaceEntity* SpaceEntitySystem::GetRootEntity()
 {
-	return nullptr;
+	return RootEntity;
 }
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
@@ -1269,6 +1330,24 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	{
 		Entities.Append(EntityToAdd);
 
+		// Hierarchy needs to be resolved here instead of AddPendingEntity, otherwise,
+		// ProcessPendingEntityOperations will crash when all objects are received due
+		// to the hierarchy not being resolved.
+		SpaceEntity* Parent = FindSpaceEntityById(EntityToAdd->ParentId);
+
+		if (Parent)
+		{
+			if (Parent->HasChild(EntityToAdd->GetId()) == false)
+			{
+				EntityToAdd->UpdateEntityPosition();
+			}
+		}
+		else
+		{
+			// TODO: log
+		}
+
+
 		switch (EntityToAdd->GetEntityType())
 		{
 			case SpaceEntityType::Avatar:
@@ -1381,6 +1460,7 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 		NewObject->Transform	  = InSpaceTransform;
 		NewObject->OwnerId		  = MultiplayerConnectionInst->GetClientId();
 		NewObject->IsTransferable = true;
+		NewObject->NextEntityId	  = 0;
 
 		if (InParent.HasValue())
 		{
@@ -1413,10 +1493,22 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 			std::scoped_lock EntitiesLocker(*EntitiesLock);
 
 			SpaceEntity* Parent = FindSpaceEntityById(NewObject->ParentId);
-			Parent->AddChildEntitiy(NewObject);
+
+			if (Parent != nullptr)
+			{
+				if (Parent->HasChild(NewObject->GetId()) == false)
+				{
+					Parent->AddChildEntitiy(NewObject);
+				}
+			}
+			else
+			{
+				// TODO: error
+			}
 
 			Entities.Append(NewObject);
 			Objects.Append(NewObject);
+
 			Callback(NewObject);
 		};
 
@@ -1429,20 +1521,6 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 
 	const signalr::value Params(Arr);
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
-}
-
-csp::common::List<SpaceEntity*> SpaceEntitySystem::GetChildEntities(SpaceEntity* Parent) const
-{
-	csp::common::List<SpaceEntity*> Children;
-	SpaceEntity* Current = Parent->FirstChild;
-
-	while (Current)
-	{
-		Children.Append(Current);
-		Current = Current->NextEntity;
-	}
-
-	return Children;
 }
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)

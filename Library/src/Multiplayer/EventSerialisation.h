@@ -128,22 +128,4 @@ private:
 	SequenceChangedParams EventParams;
 };
 
-/// A deserialiser for getting SequenceHierarchy data from an event:
-/// UpdateType - The update type for the Sequence Hierarchy: Created, Updated, Deleted
-/// ParentId - The parent id of the Sequence
-/// IsRoot - Whether this is the root hierarchy of the space
-class SequenceHierarchyChangedEventDeserialiser : public EventDeserialiser
-{
-public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
-
-	const SequenceHierarchyChangedParams& GetEventParams() const
-	{
-		return EventParams;
-	}
-
-private:
-	SequenceHierarchyChangedParams EventParams;
-};
-
 } // namespace csp::multiplayer

@@ -85,8 +85,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	EXPECT_TRUE(Array[2].is_bool() && !Array[2].as_bool()); // IsTransferable
 	EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
-	EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == *User->ParentId); // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8);		  // Components
+	EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == User->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8);		 // Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -194,7 +194,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	EXPECT_EQ(DeserialisedUser->Transform.Position, User->Transform.Position);
 	EXPECT_EQ(DeserialisedUser->Transform.Rotation, User->Transform.Rotation);
 	EXPECT_EQ(DeserialisedUser->OwnerId, User->OwnerId);
-	EXPECT_EQ(*DeserialisedUser->ParentId, *User->ParentId);
+	EXPECT_EQ(DeserialisedUser->ParentId, User->ParentId);
 
 	EXPECT_EQ(DeserialisedUser->Components.Size(), 1);
 
@@ -266,8 +266,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	EXPECT_TRUE(Array[2].is_bool() && Array[2].as_bool());				// IsTransferable
 	EXPECT_TRUE(Array[3].is_bool());									// IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == Object->OwnerId);
-	EXPECT_TRUE(Array[5].is_uinteger() && Array[5].as_uinteger() == *Object->ParentId); // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4);			// Components
+	EXPECT_TRUE(Array[5].is_uinteger() && Array[5].as_uinteger() == Object->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4);		   // Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -375,7 +375,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedObject->Transform.Rotation, Object->Transform.Rotation);
 	EXPECT_EQ(DeserialisedObject->Transform.Scale, Object->Transform.Scale);
 	EXPECT_EQ(DeserialisedObject->OwnerId, Object->OwnerId);
-	EXPECT_EQ(*DeserialisedObject->ParentId, *Object->ParentId);
+	EXPECT_EQ(DeserialisedObject->ParentId, Object->ParentId);
 
 	EXPECT_EQ(DeserialisedObject->Components.Size(), 1);
 

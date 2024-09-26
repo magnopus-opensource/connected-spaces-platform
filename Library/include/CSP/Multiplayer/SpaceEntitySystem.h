@@ -411,8 +411,6 @@ private:
 							  const SpaceTransform& InSpaceTransform,
 							  EntityCreatedCallback Callback);
 
-	csp::common::List<SpaceEntity*> GetChildEntities(SpaceEntity* Parent) const;
-
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;
 	class ClientElectionManager* ElectionManager;

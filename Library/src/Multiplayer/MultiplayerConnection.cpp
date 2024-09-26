@@ -440,32 +440,6 @@ void MultiplayerConnection::StartEventMessageListening()
 			CSP_LOG_MSG(systems::LogLevel::Log, "Custom deserialiser for OrganizationMemberAdded event not yet implemented.")
 			// todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
 		}
-		else if (EventType == "SequenceChanged")
-		{
-			SequenceChangedEventDeserialiser SequenceDeserialiser;
-			SequenceDeserialiser.Parse(EventValues);
-
-			if (SequenceChangedCallback)
-			{
-				SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
-			}
-
-			auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
-
-			if (EntitySystem->SequenceHierarchyChangedCallback)
-			{
-				// Only fire the SequenceHierarchy callback if its an EntityHierarchy sequence
-				csp::common::String Key			 = SequenceDeserialiser.GetEventParams().Key;
-				csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
-
-				if (SequenceType == "EntityHierarchy")
-				{
-					SequenceHierarchyChangedEventDeserialiser Deserialiser;
-					Deserialiser.Parse(EventValues);
-					EntitySystem->SequenceHierarchyChangedCallback(Deserialiser.GetEventParams());
-				}
-			}
-		}
 		else
 		{
 			// For everything else, use the generic deserialiser
