@@ -15,7 +15,6 @@
  */
 
 #include "Common/Encode.h"
-#include "Poco/URI.h"
 
 namespace csp::common
 {
