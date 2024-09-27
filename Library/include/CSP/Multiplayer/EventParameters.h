@@ -125,4 +125,13 @@ public:
 	bool IsRoot;
 };
 
+class CSP_API SequenceHotspotChangedParams
+{
+public:
+	/// @brief The type of update to the sequence.
+	ESequenceUpdateType UpdateType;
+
+    // TODO
+};
+
 } // namespace csp::multiplayer

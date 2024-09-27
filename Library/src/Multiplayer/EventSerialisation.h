@@ -146,4 +146,20 @@ private:
 	SequenceHierarchyChangedParams EventParams;
 };
 
+/// A deserialiser for getting SequenceHotspot data from an event:
+/// TODO!!
+class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
+{
+public:
+	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	const SequenceHotspotChangedParams& GetEventParams() const
+	{
+		return EventParams;
+	}
+
+private:
+	SequenceHotspotChangedParams EventParams;
+};
+
 } // namespace csp::multiplayer

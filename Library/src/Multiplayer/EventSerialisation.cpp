@@ -385,3 +385,20 @@ void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const st
 		EventParams.ParentId = 0;
 	}
 }
+
+void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
+{
+	EventDeserialiser::Parse(EventValues);
+
+    // TODO
+	//if (EventData.Size() != 3)
+	//{
+	//	CSP_LOG_ERROR_MSG("SequenceChangedEvent - Invalid arguments.");
+	//	return;
+	//}
+
+	int64_t UpdateType	   = EventData[0].GetInt();
+	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
+
+    // TODO
+}
