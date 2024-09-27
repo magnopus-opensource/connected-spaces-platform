@@ -469,7 +469,7 @@ void MultiplayerConnection::StartEventMessageListening()
                 	EntitySystem->SequenceHierarchyChangedCallback(HierarchyDeserialiser.GetEventParams());
                 }
             }
-            else if(SequenceType == "Hotspot")
+            else if(SequenceType == "Hotspots")
             {
 	            if(HotspotSequenceChangedCallback)
 	            {
