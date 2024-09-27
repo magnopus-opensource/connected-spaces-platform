@@ -151,6 +151,20 @@ public:
 	/// @return The default string.
 	CSP_NO_EXPORT static const csp::common::String& GetDefaultString();
 
+	/// @brief Set a Vector2 value for this replicated value from a csp::common::Vector2, will overwrite and previous value.
+	void SetVector2(const csp::common::Vector2& InValue);
+
+	/// @brief Get a csp::common::Vector2 value from this replicated value, will assert if not a csp::common::Vector2 type.
+	///
+	/// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
+	///
+	/// @return csp::common::Vector2
+	const csp::common::Vector2& GetVector2() const;
+
+	/// @brief Get a generic default Vector2.
+	/// @return The default Vector2.
+	CSP_NO_EXPORT static const csp::common::Vector2& GetDefaultVector2();
+
 	/// @brief Set a Vector3 value for this replicated value from a csp::common::Vector3, will overwrite and previous value.
 	void SetVector3(const csp::common::Vector3& InValue);
 
