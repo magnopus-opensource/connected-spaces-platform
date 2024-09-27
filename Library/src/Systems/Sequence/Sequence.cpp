@@ -18,6 +18,7 @@
 
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "Common/Convert.h"
+#include "Common/Encode.h"
 #include "Services/AggregationService/Api.h"
 
 using namespace csp;
@@ -29,7 +30,7 @@ namespace
 {
 void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Sequence)
 {
-	Sequence.Key		   = Dto.GetKey();
+	Sequence.Key		   = csp::common::Decode::URI(Dto.GetKey());
 	Sequence.ReferenceType = Dto.GetReferenceType();
 	Sequence.ReferenceId   = Dto.GetReferenceId();
 	Sequence.Items		   = Convert(Dto.GetItems());

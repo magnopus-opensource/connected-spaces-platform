@@ -18,6 +18,7 @@
 
 #include "Debug/Logging.h"
 #include "Multiplayer/MultiplayerConstants.h"
+#include "Common/Encode.h"
 
 #include <regex>
 
@@ -338,12 +339,13 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	EventParams.Key = EventData[1].GetString();
+	EventParams.Key = csp::common::Decode::URI(EventData[1].GetString());
 
 	// Optional parameter for when a key is changed
 	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
 	{
-		EventParams.NewKey = EventData[2].GetString();
+        // Sequence keys are URI encoded to support reserved characters.
+		EventParams.NewKey = csp::common::Decode::URI(EventData[2].GetString());
 	}
 }
 
@@ -360,7 +362,9 @@ void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const st
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	csp::common::String Key	   = EventData[1].GetString();
+    // Sequence keys are URI encoded to support reserved characters.
+	csp::common::String Key	   = csp::common::Decode::URI(EventData[1].GetString());
+
 	std::string ParentIdString = GetSequenceKeyIndex(Key, 2).c_str();
 	csp::common::Optional<uint64_t> ParentId;
 
