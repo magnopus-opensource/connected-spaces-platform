@@ -406,29 +406,22 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	bool CallbackCalled = false;
 	bool ReceivedRenameCallback = false;
 	auto* Connection = SystemsManager.GetMultiplayerConnection();
-	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &ReceivedRenameCallback, &Space, &NewTestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
 	{
 		// When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
 		// The second is an update, as CSP will also update the group's metadata to reflect the new name.
 		if(ReceivedRenameCallback == false)
 		{
 			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Rename);
-
-			// For the rename event, the old hotspot name being replaced is expected.
-			EXPECT_EQ(Params.HotspotGroupName, OldTestGroupName);
-
 			ReceivedRenameCallback = true;
 		}
 		else
 		{
 			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
-
-			// For the update event, the new name is expected.
-			EXPECT_EQ(Params.HotspotGroupName, NewTestGroupName);
-
 			CallbackCalled = true; // Both the rename and update callbacks have now fired. That's all the expected events.
 		}
 
+		EXPECT_EQ(Params.HotspotGroupName, NewTestGroupName);
 		EXPECT_EQ(Params.SpaceId, Space.Id);
 	});
 
