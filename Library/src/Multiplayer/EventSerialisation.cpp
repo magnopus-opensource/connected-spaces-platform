@@ -30,26 +30,34 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
 {
     ESequenceUpdateType SequenceUpdateType = ESequenceUpdateType::Invalid;
 
-	if (UpdateType == 0)
-	{
-		SequenceUpdateType = ESequenceUpdateType::Create;
-	}
-	else if (UpdateType == 1)
-	{
-		SequenceUpdateType = ESequenceUpdateType::Update;
-	}
-	else if (UpdateType == 2)
-	{
-		SequenceUpdateType = ESequenceUpdateType::Rename;
-	}
-	else if (UpdateType == 3)
-	{
-		SequenceUpdateType = ESequenceUpdateType::Delete;
-	}
-	else
-	{
-		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
-	}
+    switch(UpdateType)
+    {
+    	case 0:
+    	{
+            SequenceUpdateType = ESequenceUpdateType::Create;
+    		break;
+    	}
+        case 1:
+    	{
+            SequenceUpdateType = ESequenceUpdateType::Update;
+    		break;
+    	}
+        case 2:
+    	{
+            SequenceUpdateType = ESequenceUpdateType::Rename;
+    		break;
+    	}
+        case 3:
+    	{
+            SequenceUpdateType = ESequenceUpdateType::Delete;
+    		break;
+    	}
+    	default:
+    	{
+            CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
+    		break;
+    	}
+    }
 
     return SequenceUpdateType;
 }
@@ -72,12 +80,12 @@ csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValu
 
 } // namespace
 
-csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::String& SequenceKey, int i)
+csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index)
 {
 	const std::string SequenceKeyString(SequenceKey.c_str());
 	// Match item after second ':' to get our parent Id.
     // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
-	const std::regex Expression("^(?:[^:]*\:){" + std::to_string(i) + "}([^:]*)");
+	const std::regex Expression("^(?:[^:]*\:){" + std::to_string(Index) + "}([^:]*)");
 	std::smatch Match;
 	const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 
@@ -407,22 +415,18 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-    // See CreateKey in HotspotSequenceSystem
-	const csp::common::String Key = DecodeSequenceKey(EventData[1]);
+    const csp::common::String Key = DecodeSequenceKey(EventData[1]);
     EventParams.SpaceId = GetSequenceKeyIndex(Key, 1);
+    EventParams.Name = GetSequenceKeyIndex(Key, 2);
     
-    if (EventParams.UpdateType != ESequenceUpdateType::Rename)
-	{
-		EventParams.HotspotGroupName = GetSequenceKeyIndex(Key, 2);
-	}
-    else
+    if (EventParams.UpdateType == ESequenceUpdateType::Rename)
 	{
         // When a key is changed (renamed) then we get an additional parameter describing the new key.
-        // The usual event data describing the name in this instance will describe the _old_ name.
+        // The usual event data describing the name in this instance will describe the _old_ key.
 		if(EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
 		{
             const csp::common::String NewKey = DecodeSequenceKey(EventData[2]);
-			EventParams.HotspotGroupName = GetSequenceKeyIndex(NewKey, 2);
+			EventParams.NewName = GetSequenceKeyIndex(NewKey, 2);
 		}
         else
         {

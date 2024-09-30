@@ -135,8 +135,11 @@ public:
     /// @brief The unique identifier of the space that this hotspot sequence belongs to.
 	csp::common::String SpaceId;
 
-    /// @brief The name of the hotspot group that has been changed.
-	csp::common::String HotspotGroupName;
+	/// @brief The name of the hotspot group that has been changed.
+	csp::common::String Name;
+
+	/// @brief If a hotspot sequence is renamed, this will be the new name.
+	csp::common::String NewName;
 };
 
 } // namespace csp::multiplayer

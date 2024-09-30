@@ -26,7 +26,7 @@
 namespace csp::multiplayer
 {
 
-csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, int i);
+csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
 // Generic deserialiser for multiplayer events. It can be derived from and
 // its behaviour can be overridden if specialised handling is needed for
@@ -129,7 +129,7 @@ private:
 };
 
 /// A deserialiser for getting SequenceHierarchy data from an event:
-/// UpdateType - The update type for the Sequence Hierarchy: Created, Updated, Deleted
+/// UpdateType - The update type for the Sequence Hierarchy: Create, Update, Rename, Delete
 /// ParentId - The parent id of the Sequence
 /// IsRoot - Whether this is the root hierarchy of the space
 class SequenceHierarchyChangedEventDeserialiser : public EventDeserialiser
@@ -147,7 +147,10 @@ private:
 };
 
 /// A deserialiser for getting SequenceHotspot data from an event:
-/// TODO!!
+/// UpdateType - The update type for the Sequence Hierarchy: Create, Update, Rename, Delete
+/// SpaceId - The unique identifer of the space this hotspot sequence relates to.
+/// Name - The name of the hotspot which has been changed.
+/// NewName - In the case of renames, describes the new name of the sequence.
 class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
 {
 public:

@@ -461,7 +461,7 @@ void MultiplayerConnection::StartEventMessageListening()
             const csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
             if (SequenceType == "EntityHierarchy")
             {
-				auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
+                auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
                 if(EntitySystem->SequenceHierarchyChangedCallback)
                 {
 	                SequenceHierarchyChangedEventDeserialiser HierarchyDeserialiser;
