@@ -125,6 +125,9 @@ public:
 	// Callback to receive sequence changes, contains a SequenceChangedParams with the details.
 	typedef std::function<void(const SequenceChangedParams&)> SequenceChangedCallbackHandler;
 
+	// Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
+	typedef std::function<void(const SequenceHotspotChangedParams&)> HotspotSequenceChangedCallbackHandler;
+
 	/// @brief Sends a network event by EventName to all currently connected clients.
 	/// @param EventName csp::common::String : The identifying name for the event.
 	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
@@ -171,6 +174,10 @@ public:
 	/// @brief Sets a callback for a sequence changed event.
 	/// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence that has been changed.
 	CSP_EVENT void SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback);
+
+	/// @brief Sets a callback to be fired when a hotspot sequence is changed.
+	/// @param Callback HotspotSequenceChangedCallbackHandler: Callback to receive data for the hotspot sequence that has been changed.
+	CSP_EVENT void SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback);
 
 	/// @brief Registers a callback to listen for the named event.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
@@ -257,7 +264,9 @@ private:
 	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 	ConversationSystemCallbackHandler ConversationSystemCallback;
 	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
+
 	SequenceChangedCallbackHandler SequenceChangedCallback;
+    HotspotSequenceChangedCallbackHandler HotspotSequenceChangedCallback;
 
 	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
 	//   change depending on which runtime is used.

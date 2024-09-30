@@ -28,6 +28,7 @@
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
@@ -47,6 +48,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
+
 
 namespace csp::multiplayer
 {
@@ -359,6 +361,23 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(FogSpaceComponent, MaxOpacity, "maxOpacity")
 		.PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric");
 
+	Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.fun<&CinematicCameraSpaceComponentScriptInterface::GetFov>("getFov")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, FocalLength, "focalLength")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, AspectRatio, "aspectRatio")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, SensorSize, "sensorSize")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, NearClip, "nearClip")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, FarClip, "farClip")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Iso, "iso")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, ShutterSpeed, "shutterSpeed")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Aperture, "aperture")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
+
+
 	Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
@@ -526,6 +545,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>>(
+			"getCinematicCameraComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
 			"getFiducialMarkerComponents")
