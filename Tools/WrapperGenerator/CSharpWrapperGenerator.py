@@ -85,39 +85,40 @@ class CSharpWrapperGenerator:
         if not hasattr(obj, "is_void_pointer"):
             obj.is_void_pointer = False
 
-        if t == "int8_t":
-            obj.name = "sbyte"
-        elif t == "uint8_t" or t == "unsigned char":
-            obj.name = "byte"
-        elif t == "int16_t":
-            obj.name = "short"
-        elif t == "uint16_t":
-            obj.name = "ushort"
-        elif t == "int32_t" or t == "long":
-            obj.name = "int"
-        elif t == "uint32_t" or t == "unsigned int" or t == "unsigned long":
-            obj.name = "uint"
-        elif t == "int64_t" or t == "long long" or t == "long int":
-            obj.name = "long"
-        elif t == "uint64_t" or t == "unsigned long long" or t == "unsigned long int":
-            obj.name = "ulong"
-        elif t == "size_t":
-            # Assume 64-bit only for now
-            obj.name = "ulong"
-        elif t == "String":
-            obj.name = "string"
-            obj.namespace = None
-            obj.translated_namespace = None
-            obj.is_pointer = False
-            obj.is_reference = False
-            obj.is_pointer_or_reference = False
-        elif (t == "void" or t == "char") and obj.is_pointer:
-            obj.name = "IntPtr"
-            obj.is_pointer = False
-            obj.is_reference = False
-            obj.is_pointer_or_reference = False
-            obj.is_void_pointer = True
-            obj.translated_namespace = None
+        match t:
+            case "int8_t":
+                obj.name = "sbyte"
+            case "uint8_t" | "unsigned char":
+                obj.name = "byte"
+            case "int16_t":
+                obj.name = "short"
+            case "uint16_t":
+                obj.name = "ushort"
+            case "int32_t" | "long":
+                obj.name = "int"
+            case "uint32_t" | "unsigned int" | "unsigned long":
+                obj.name = "uint"
+            case "int64_t" | "long long" | "long int":
+                obj.name = "long"
+            case "uint64_t" | "unsigned long long" | "unsigned long int":
+                obj.name = "ulong"
+            case "size_t":
+                # Assume 64-bit only for now
+                obj.name = "ulong"
+            case "String":
+                obj.name = "string"
+                obj.namespace = None
+                obj.translated_namespace = None
+                obj.is_pointer = False
+                obj.is_reference = False
+                obj.is_pointer_or_reference = False
+            case "void" | "char" if obj.is_pointer:
+                obj.name = "IntPtr"
+                obj.is_pointer = False
+                obj.is_reference = False
+                obj.is_pointer_or_reference = False
+                obj.is_void_pointer = True
+                obj.translated_namespace = None
 
     def __translate_comments(self, comments: List[str]) -> None:
         """Rewrite a list of comments from Javadoc-style to C# XML style"""
