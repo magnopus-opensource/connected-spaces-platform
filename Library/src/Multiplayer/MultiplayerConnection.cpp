@@ -369,6 +369,11 @@ void MultiplayerConnection::SetSequenceChangedCallback(SequenceChangedCallbackHa
 	SequenceChangedCallback = Callback;
 }
 
+void MultiplayerConnection::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback)
+{
+	HotspotSequenceChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)
@@ -450,21 +455,29 @@ void MultiplayerConnection::StartEventMessageListening()
 				SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
 			}
 
-			auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
-
-			if (EntitySystem->SequenceHierarchyChangedCallback)
-			{
-				// Only fire the SequenceHierarchy callback if its an EntityHierarchy sequence
-				csp::common::String Key			 = SequenceDeserialiser.GetEventParams().Key;
-				csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
-
-				if (SequenceType == "EntityHierarchy")
-				{
-					SequenceHierarchyChangedEventDeserialiser Deserialiser;
-					Deserialiser.Parse(EventValues);
-					EntitySystem->SequenceHierarchyChangedCallback(Deserialiser.GetEventParams());
-				}
-			}
+            // There are a variety of sequence types.
+            // Other CSP callbacks may also need to fire if the sequence change relates to a particular sequence type.
+			const csp::common::String Key = SequenceDeserialiser.GetEventParams().Key;
+            const csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
+            if (SequenceType == "EntityHierarchy")
+            {
+                auto EntitySystem = csp::systems::SystemsManager::Get().GetSpaceEntitySystem();
+                if(EntitySystem->SequenceHierarchyChangedCallback)
+                {
+	                SequenceHierarchyChangedEventDeserialiser HierarchyDeserialiser;
+                	HierarchyDeserialiser.Parse(EventValues);
+                	EntitySystem->SequenceHierarchyChangedCallback(HierarchyDeserialiser.GetEventParams());
+                }
+            }
+            else if(SequenceType == "Hotspots")
+            {
+	            if(HotspotSequenceChangedCallback)
+	            {
+                    SequenceHotspotChangedEventDeserialiser HotspotDeserialiser;
+                    HotspotDeserialiser.Parse(EventValues);
+		            HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());
+	            }
+            }
 		}
 		else
 		{

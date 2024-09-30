@@ -33,22 +33,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
-void WaitForCallback(bool& CallbackCalled)
-{
-	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (CallbackCalled == false && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-}
-
 } // namespace
 
 void CreateHotspotgroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem,
@@ -220,11 +204,40 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	csp::common::Array<csp::common::String> GroupItems {"Hotspot1", "Hotspot2", "Hotspot3"};
 	csp::common::String TestGroupName = "CSP-UNITTEST-SEQUENCE-MAG";
 
+	// Validate sequence creation events.
+	bool CallbackCalled = false;
+	auto* Connection = SystemsManager.GetMultiplayerConnection();
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	{
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
+		EXPECT_EQ(Params.SpaceId, Space.Id);
+		EXPECT_EQ(Params.Name, TestGroupName);
+		CallbackCalled = true; 
+	});
+
 	csp::systems::HotspotGroup HotspotGroup;
 	CreateHotspotgroup(HotspotSystem, TestGroupName, GroupItems, HotspotGroup);
 
+	WaitForCallback(CallbackCalled);
+	CallbackCalled = false;
+
+	// Validate sequence deletion events.	
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	{
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
+		EXPECT_EQ(Params.SpaceId, Space.Id);
+		EXPECT_EQ(Params.Name, TestGroupName);
+		CallbackCalled = true;
+	});
+
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
+
+	// Clear out the callback as we have validated what we came here for.
+	WaitForCallback(CallbackCalled);
+	Connection->SetHotspotSequenceChangedCallback(nullptr);
+
+
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -320,12 +333,27 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 
 	CreateHotspotgroup(HotspotSystem, TestGroupName, SequenceItems, HotspotGroup1);
 
-	csp::systems::HotspotGroup expected;
-	expected.Name  = HotspotGroup1.Name;
-	expected.Items = {"Hotspot3"};
+	// Validate sequence update events.
+	bool CallbackCalled = false;
+	auto* Connection = SystemsManager.GetMultiplayerConnection();
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	{
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+		EXPECT_EQ(Params.SpaceId, Space.Id);
+		EXPECT_EQ(Params.Name, TestGroupName);
+		CallbackCalled = true;
+	});
+
+	csp::systems::HotspotGroup Expected;
+	Expected.Name  = HotspotGroup1.Name;
+	Expected.Items = {"Hotspot3"};
 
 	UpdateHotspotGroup(HotspotSystem, TestGroupName, NewItems, HotspotGroup2);
-	CompareGroups(HotspotGroup2, expected);
+	CompareGroups(HotspotGroup2, Expected);
+
+	// Clear out the callback as we have validated what we came here for.
+	WaitForCallback(CallbackCalled);
+	Connection->SetHotspotSequenceChangedCallback(nullptr);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, TestGroupName);
@@ -363,7 +391,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
 	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-
 	// Create hotspot group
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2"};
 	csp::common::String OldTestGroupName = "CSP-UNITTEST-SEQUENCE-MAG1";
@@ -375,8 +402,40 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
 	CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
 	EXPECT_EQ(HotspotGroup.Name, OldTestGroupName);
+
+	bool CallbackCalled = false;
+	bool ReceivedRenameCallback = false;
+	auto* Connection = SystemsManager.GetMultiplayerConnection();
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	{
+		// When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
+		// The second is an update, as CSP will also update the group's metadata to reflect the new name.
+		if(ReceivedRenameCallback == false)
+		{
+			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Rename);
+
+			// With rename events, we expect to be able to receive both the old and new names.
+			EXPECT_EQ(Params.Name, OldTestGroupName);
+			EXPECT_EQ(Params.NewName, NewTestGroupName);			
+
+			ReceivedRenameCallback = true;
+		}
+		else
+		{
+			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+			EXPECT_EQ(Params.Name, NewTestGroupName);
+			CallbackCalled = true; // Both the rename and update callbacks have now fired. That's all the expected events.
+		}
+
+		
+		EXPECT_EQ(Params.SpaceId, Space.Id);
+	});
+
 	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
 	EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
+
+	WaitForCallback(CallbackCalled);
+	Connection->SetHotspotSequenceChangedCallback(nullptr);
 
 	// Delete sequence
 	DeleteHotspotGroup(HotspotSystem, NewTestGroupName);
