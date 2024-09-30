@@ -22,6 +22,13 @@ from Parser import read_whole_file, error_in_file, warning_in_file
 
 
 class CSharpWrapperGenerator:
+    """Convert and output the parsed C++ types into corresponding C# types.
+    
+    C++ types are translated into the equivalent C# types.
+
+    The callback-based methods in the C++ API are converted into methods
+    returning Task<T> objects for use with native C# `async` methods.
+    """
     __TEMPLATE_DIRECTORY = config["template_directory"] + "CSharp/"
     __PARTIALS_DIRECTORY = __TEMPLATE_DIRECTORY + "Partials/"
     __OUTPUT_DIRECTORY = config["output_directory"] + "CSharp/"
@@ -35,6 +42,13 @@ class CSharpWrapperGenerator:
         "systems": "Systems",
         "web": "Web",
     }
+
+    enums: Dict[str, EnumMetadata]
+    structs: Dict[str, StructMetadata]
+    functions: Dict[str, FunctionMetadata]
+    classes: Dict[str, ClassMetadata]
+    templates: Dict[str, TemplateMetadata]
+    interfaces: Dict[str, InterfaceMetadata]
 
     def __translate_namespace(self, obj: Any) -> None:
         if obj.namespace is None:
@@ -227,6 +241,8 @@ class CSharpWrapperGenerator:
         templates: Dict[str, TemplateMetadata],
         interfaces: Dict[str, InterfaceMetadata],
     ) -> None:
+        """Given the dictionaries passed in from the Parser, output the corresponding C# source."""
+
         # Deepcopy all metadata so we don't modify the original data for any wrapper generator classes that get called after this one
         self.enums = deepcopy(enums)
         self.structs = deepcopy(structs)
@@ -279,6 +295,7 @@ class CSharpWrapperGenerator:
         )
 
     def __translate_functions(self, functions) -> None:
+        """Translate the global functions by rewriting the parameter and return types."""
         for f in functions.values():
             self.__translate_comments(f.doc_comments)
 
@@ -297,6 +314,7 @@ class CSharpWrapperGenerator:
                                 self.__translate_type(fp.type)
 
     def __render_enums(self, enum_template) -> None:
+        """Render the parsed enums into corresponding C# files."""
         for e in self.enums.values():
             e.surrounding_types = None
 
@@ -318,6 +336,7 @@ class CSharpWrapperGenerator:
             self.__render_named_object(e, enum_template)
 
     def __render_structs(self, struct_template) -> None:
+        """Render the parsed structs into corresponding C# files."""
         for s in self.structs.values():
             s.surrounding_types = None
 
@@ -331,6 +350,7 @@ class CSharpWrapperGenerator:
             self.__render_named_object(s, struct_template)
 
     def __render_global_functions(self, global_functions_template) -> None:
+        """Render the global functions into the static global function class."""
         file_path = f"{self.__OUTPUT_DIRECTORY}Csp.cs"
         with open(file_path, "w", encoding="utf-8") as f:
             print(
@@ -345,6 +365,7 @@ class CSharpWrapperGenerator:
             )
 
     def __render_interfaces(self, interface_template) -> None:
+        """Rewrite and render the interfaces into corresponding C# files."""
         for i in self.interfaces.values():
             i.surrounding_types = None
 
@@ -368,6 +389,7 @@ class CSharpWrapperGenerator:
             self.__render_named_object(i, interface_template)
 
     def __render_classes(self, class_template) -> None:
+        """Rewrite and render the classes into corresponding C# files."""
         for c in self.classes.values():
             c.surrounding_types = None
 
@@ -385,14 +407,7 @@ class CSharpWrapperGenerator:
             delegates = []
             events = []
 
-            for f in c.fields:
-                self.__translate_type(f.type)
-
-                if f.type.is_template:
-                    assert f.type.template_arguments
-
-                    for ta in f.type.template_arguments:
-                        self.__translate_type(ta.type)
+            self.__rewrite_fields(c)
 
             self.__rewrite_methods(c.methods, delegates, events)
 
@@ -402,7 +417,29 @@ class CSharpWrapperGenerator:
 
             self.__render_named_object(c, class_template)
 
-    def __rewrite_methods(self, methods, delegates, events, is_interface=False):
+    def __rewrite_fields(self, c: ClassMetadata) -> None:
+        """Rewrite the fields of a class to the corresponding C# type names."""
+        for f in c.fields:
+            self.__translate_type(f.type)
+
+            if f.type.is_template:
+                assert f.type.template_arguments
+
+                for ta in f.type.template_arguments:
+                    self.__translate_type(ta.type)
+
+    def __rewrite_methods(
+        self,
+        methods: List[FunctionMetadata],
+        delegates: List[Dict],
+        events: List[Dict],
+        is_interface=False,
+    ) -> None:
+        """Rewrite the methods of a class or interface.
+        
+        If the methods have callback parameters they will be wrapped in logic to return a Task<> of the corresponding callback type.
+        Set__Callback functions will be converted into On__ events.
+        """
         for m in methods:
             self.__translate_comments(m.doc_comments)
 
@@ -423,45 +460,51 @@ class CSharpWrapperGenerator:
                 self.__rewrite_method_parameters(m)
                 self.__rewrite_callback_parameters(m, delegates, events, is_interface)
 
+    def __rewrite_method_parameters(self, method: FunctionMetadata) -> None:
+        """Rewrite C++ types to C# types in a method definition."""
+        for param in method.parameters:
+            self.__translate_type(param.type)
 
-    def __rewrite_method_parameters(self, m:FunctionMetadata):
-        for p in m.parameters:
-            self.__translate_type(p.type)
+            if param.type.is_template:
+                assert param.type.template_arguments is not None
 
-            if p.type.is_template:
-                assert p.type.template_arguments is not None
-
-                for ta in p.type.template_arguments:
+                for ta in param.type.template_arguments:
                     self.__translate_type(ta.type)
 
-    def __rewrite_callback_parameters(self, m: FunctionMetadata, delegates:List[Dict], events:List[Dict], is_interface:bool):
+    def __rewrite_callback_parameters(
+        self,
+        method: FunctionMetadata,
+        delegates: List[Dict],
+        events: List[Dict],
+        is_interface: bool,
+    ) -> None:
         """Finds callback parameters in a method and creates a custom delegate type"""
         # TODO: Rather than generate a unique delegate type per method, it would be more efficient to
         # translate the shared *Callback types into shared delegate definitions and reuse them here.
 
         is_regular_method = not (
-            m.is_async_result or m.is_async_result_with_progress or m.is_event
+            method.is_async_result or method.is_async_result_with_progress or method.is_event
         )
 
         if is_interface:
             if not is_regular_method:
                 error_in_file(
-                    m.header_file,
-                    m.start_line,
+                    method.header_file,
+                    method.start_line,
                     r"Method '{m.name}' is not a regular function. Interfaces cannot currently contain asynchronous methods",
                 )
                 return
 
         # Find parameters that take function signatures and ensure that there's only one of them:
         # If there's more than one, we won't be able to create an async method from it later.
-        callback_params = [p for p in m.parameters if p.type.is_function_signature]
+        callback_params = [p for p in method.parameters if p.type.is_function_signature]
         if not callback_params:
             return
 
         if len(callback_params) > 1:
             error_in_file(
-                m.header_file,
-                m.start_line,
+                method.header_file,
+                method.start_line,
                 r"Method '{m.name}' contains more than one callback parameter so cannot be converted to an async function"
             )
             return
@@ -469,9 +512,9 @@ class CSharpWrapperGenerator:
         # Create the custom delegate based on the function signature of the callback
         p = callback_params[0]
         function_signature = p.type.function_signature
-        m.results = function_signature.parameters
-        m.has_results = bool(m.results)
-        m.has_multiple_results = len(m.results) > 1
+        method.results = function_signature.parameters
+        method.has_results = bool(method.results)
+        method.has_multiple_results = len(method.results) > 1
 
         param_name = p.name[0].upper() + p.name[1:]
 
@@ -491,70 +534,76 @@ class CSharpWrapperGenerator:
                 )
 
         delegate = {
-            "name": f"{m.name}{param_name}Delegate",
-            "method_name": m.name,
+            "name": f"{method.name}{param_name}Delegate",
+            "method_name": method.name,
             "return_type": function_signature.return_type,
             "parameters": deepcopy(function_signature.parameters),
             "has_parameters": bool(function_signature.parameters),
-            "has_progress": m.is_async_result_with_progress,
+            "has_progress": method.is_async_result_with_progress,
             "include_managed": is_regular_method,
         }
 
         delegates.append(delegate)
-        m.delegate = delegate
+        method.delegate = delegate
         p.delegate = delegate
 
-        if m.is_event:
-            self.__rewrite_event(m, p, delegate, events)
+        if method.is_event:
+            self.__rewrite_event(method, p, delegate, events)
 
         # Remove this parameter since it will be converted to a Task<T> return instead
-        m.parameters.remove(p)
+        method.parameters.remove(p)
 
-        if len(m.parameters) > 0:
-            m.parameters[-1].is_last = True
+        if len(method.parameters) > 0:
+            method.parameters[-1].is_last = True
 
-    def __rewrite_event(self, m: FunctionMetadata, p: ParameterMetadata, delegate: Dict, events: List[Dict]):
+    def __rewrite_event(
+        self,
+        method: FunctionMetadata,
+        param: ParameterMetadata,
+        delegate: Dict,
+        events: List[Dict],
+    ) -> None:
         """Create a C# event field for SetCallback methods"""
         event_name = ""
 
-        assert m.name
+        assert method.name
 
         # Rename `Set____Callback` to `On____`
         # e.g. `SetDisconnectionCallback` becomes `OnDisconnection`
         # Note: This violates C# naming conventions, which would name the event `Disconnected`
-        if m.name.startswith("Set") and m.name.endswith("Callback"):
-            event_name = f"On{m.name[len('Set'):-len('Callback')]}"
+        if method.name.startswith("Set") and method.name.endswith("Callback"):
+            event_name = f"On{method.name[len('Set'):-len('Callback')]}"
         else:
             warning_in_file(
-                m.header_file,
-                m.start_line,
+                method.header_file,
+                method.start_line,
                 "Event functions should follow the naming pattern 'SetXCallback'.",
             )
-            event_name = m.name
+            event_name = method.name
 
         event = {
             "name": event_name,
-            "class_name": m.parent_class.name,
-            "method_name": m.name,
-            "unique_method_name": m.unique_name,
-            "parameters": deepcopy(p.type.function_signature.parameters),
-            "has_parameters": bool(p.type.function_signature.parameters),
+            "class_name": method.parent_class.name,
+            "method_name": method.name,
+            "unique_method_name": method.unique_name,
+            "parameters": deepcopy(param.type.function_signature.parameters),
+            "has_parameters": bool(param.type.function_signature.parameters),
             "has_multiple_parameters": (
-                p.type.function_signature.parameters
-                and len(p.type.function_signature.parameters) > 1
+                param.type.function_signature.parameters
+                and len(param.type.function_signature.parameters) > 1
             ),
             "delegate": delegate,
         }
 
         events.append(event)
-        m.event = event
+        method.event = event
 
-    def __rewrite_task_doc_comments(self, m):
-        if m.is_task and m.doc_comments:
-            assert m.parameters is not None
+    def __rewrite_task_doc_comments(self, method: FunctionMetadata):
+        if method.is_task and method.doc_comments:
+            assert method.parameters is not None
 
-            param = m.parameters[-1]
-            m.doc_comments = m.doc_comments[:-1]
+            param = method.parameters[-1]
+            method.doc_comments = method.doc_comments[:-1]
 
             assert param.type.function_signature is not None
 
@@ -567,10 +616,10 @@ class CSharpWrapperGenerator:
 
                 if tag != "@param":
                     error_in_file(
-                        m.header_file or "", -1, "Error in comment: " + comment
+                        method.header_file or "", -1, "Error in comment: " + comment
                     )
                     error_in_file(
-                        m.header_file or "",
+                        method.header_file or "",
                         -1,
                         "Last doc comment must describe callback parameter",
                     )
@@ -591,9 +640,9 @@ class CSharpWrapperGenerator:
                 if content[0].islower():
                     content = content.capitalize()
 
-                m.doc_comments.append(f"<returns>{content}</returns>")
+                method.doc_comments.append(f"<returns>{content}</returns>")
             else:
-                m.doc_comments.append("<returns>The result for the request</returns>")
+                method.doc_comments.append("<returns>The result for the request</returns>")
 
     def __render_templates(self, templateclass_template) -> None:
         for t in self.templates.values():
