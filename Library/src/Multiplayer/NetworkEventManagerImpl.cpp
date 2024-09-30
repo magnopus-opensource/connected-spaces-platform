@@ -18,12 +18,13 @@
 
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
+#include "CallHelpers.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
-#include "CallHelpers.h"
 
 #include <iostream>
+
 
 
 namespace csp::multiplayer
@@ -114,6 +115,17 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 				Fields.push_back(Arguments[i].GetString().c_str());
 
 				std::vector<signalr::value> Component {msgpack_typeids::ItemComponentData::STRING, Fields};
+				Components.insert({i, Component});
+
+				break;
+			}
+			case ReplicatedValueType::Vector2:
+			{
+				std::vector<signalr::value> Fields;
+				auto Vector = Arguments[i].GetVector2();
+				Fields.push_back(std::vector<signalr::value> {Vector.X, Vector.Y});
+
+				std::vector<signalr::value> Component {msgpack_typeids::ItemComponentData::FLOAT_ARRAY, Fields};
 				Components.insert({i, Component});
 
 				break;

@@ -20,6 +20,7 @@
 
 namespace csp::multiplayer
 {
+static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
 static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
 static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
 
@@ -61,6 +62,11 @@ ReplicatedValue::ReplicatedValue(const csp::common::String& InValue) : Replicate
 	Value.String = InValue;
 }
 
+ReplicatedValue::ReplicatedValue(const csp::common::Vector2& InValue) : ReplicatedType(ReplicatedValueType::Vector2)
+{
+	Value.Vector2 = InValue;
+}
+
 ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue) : ReplicatedType(ReplicatedValueType::Vector3)
 {
 	Value.Vector3 = InValue;
@@ -98,6 +104,11 @@ ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
 		case ReplicatedValueType::String:
 		{
 			SetString(InValue.GetString());
+			break;
+		}
+		case ReplicatedValueType::Vector2:
+		{
+			SetVector2(InValue.GetVector2());
 			break;
 		}
 		case ReplicatedValueType::Vector3:
@@ -150,6 +161,11 @@ bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 			case ReplicatedValueType::String:
 			{
 				IsEqual = GetString() == OtherValue.GetString();
+				break;
+			}
+			case ReplicatedValueType::Vector2:
+			{
+				IsEqual = GetVector2() == OtherValue.GetVector2();
 				break;
 			}
 			case ReplicatedValueType::Vector3:
@@ -236,6 +252,22 @@ const csp::common::String& ReplicatedValue::GetDefaultString()
 	return InvalidString;
 }
 
+void ReplicatedValue::SetVector2(const csp::common::Vector2& InValue)
+{
+	ReplicatedType = ReplicatedValueType::Vector2;
+	Value.Vector2  = InValue;
+}
+
+const csp::common::Vector2& ReplicatedValue::GetVector2() const
+{
+	assert(ReplicatedType == ReplicatedValueType::Vector2);
+	return Value.Vector2;
+}
+
+const csp::common::Vector2& ReplicatedValue::GetDefaultVector2()
+{
+	return InvalidVector2;
+}
 
 void ReplicatedValue::SetVector3(const csp::common::Vector3& InValue)
 {
