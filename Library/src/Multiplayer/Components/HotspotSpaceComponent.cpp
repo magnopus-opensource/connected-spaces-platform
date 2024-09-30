@@ -69,9 +69,14 @@ void HotspotSpaceComponent::SetIsSpawnPoint(bool Value)
 
 const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId() const
 {
-	static csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
-	UniqueComponentId += ":";
-	UniqueComponentId += std::to_string(Id).c_str();
+	static csp::common::String UniqueComponentId;
+
+	if (UniqueComponentId.Length() == 0)
+	{
+		UniqueComponentId = std::to_string(Parent->GetId()).c_str();
+		UniqueComponentId += ":";
+		UniqueComponentId += std::to_string(Id).c_str();
+	}
 
 	return UniqueComponentId;
 }
