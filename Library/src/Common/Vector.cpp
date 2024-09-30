@@ -30,6 +30,56 @@ bool IsNearlyEqual(const float A, const float B)
 	return abs(A - B) < FloatComparatorThreshold;
 }
 
+const Vector2& Vector2::Zero()
+{
+	static Vector2 _Zero = {0, 0};
+
+	return _Zero;
+}
+
+const Vector2& Vector2::One()
+{
+	static Vector2 _One = {1, 1};
+
+	return _One;
+}
+
+Vector2 Vector2::operator+(const Vector2& Other) const
+{
+	return Vector2(X + Other.X, Y + Other.Y);
+}
+
+Vector2 Vector2::operator-(const Vector2& Other) const
+{
+	return Vector2(X - Other.X, Y - Other.Y);
+}
+
+Vector2 Vector2::operator/(float Divisor) const
+{
+	return Vector2(X / Divisor, Y / Divisor);
+}
+
+Vector2 Vector2::operator*(const Vector2& Other) const
+{
+	return Vector2(X * Other.X, Y * Other.Y);
+}
+
+Vector2 Vector2::operator*(float Scalar) const
+{
+	return Vector2(X * Scalar, Y * Scalar);
+}
+
+bool Vector2::operator==(const Vector2 Other) const
+{
+	return IsNearlyEqual(X, Other.X) && IsNearlyEqual(Y, Other.Y);
+}
+
+bool Vector2::operator!=(const Vector2 Other) const
+{
+	return !(*this == Other);
+}
+
+
 const Vector3& Vector3::Zero()
 {
 	static Vector3 _Zero = {0, 0, 0};
