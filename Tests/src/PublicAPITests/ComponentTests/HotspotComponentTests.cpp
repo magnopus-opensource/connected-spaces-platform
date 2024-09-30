@@ -110,7 +110,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
 	EXPECT_EQ(HotspotUniqueComponentId, UniqueComponentId);
 
-	// Test again to ensure internal static variable is set correctly
+	// Test again to ensure getter works with multiple calls.
 	const csp::common::String& HotspotUniqueComponentId2 = HotspotComponent->GetUniqueComponentId();
 
 	EXPECT_EQ(HotspotUniqueComponentId2, UniqueComponentId);
