@@ -16,6 +16,7 @@ from MetadataTypes import (
     TemplateMetadata,
     TypeMetadata,
     InterfaceMetadata,
+    ParameterMetadata,
 )
 from Parser import read_whole_file, error_in_file, warning_in_file
 
@@ -418,82 +419,109 @@ class CSharpWrapperGenerator:
 
             self.__rewrite_task_doc_comments(m)
 
-            self.__rewrite_method_parameters(m, delegates, events, is_interface)
+            if m.parameters:
+                self.__rewrite_method_parameters(m)
+                self.__rewrite_callback_parameters(m, delegates, events, is_interface)
 
-    def __rewrite_method_parameters(self, m, delegates, events, is_interface):
+
+    def __rewrite_method_parameters(self, m:FunctionMetadata):
+        for p in m.parameters:
+            self.__translate_type(p.type)
+
+            if p.type.is_template:
+                assert p.type.template_arguments is not None
+
+                for ta in p.type.template_arguments:
+                    self.__translate_type(ta.type)
+
+    def __rewrite_callback_parameters(self, m: FunctionMetadata, delegates:List[Dict], events:List[Dict], is_interface:bool):
+        """Finds callback parameters in a method and creates a custom delegate type"""
+        # TODO: Rather than generate a unique delegate type per method, it would be more efficient to
+        # translate the shared *Callback types into shared delegate definitions and reuse them here.
+
         is_regular_method = not (
-            m.is_async_result
-            or m.is_async_result_with_progress
-            or m.is_event
+            m.is_async_result or m.is_async_result_with_progress or m.is_event
         )
 
-        if m.parameters:
-            for p in m.parameters:
-                self.__translate_type(p.type)
+        if is_interface:
+            if not is_regular_method:
+                error_in_file(
+                    m.header_file,
+                    m.start_line,
+                    r"Method '{m.name}' is not a regular function. Interfaces cannot currently contain asynchronous methods",
+                )
+                return
 
-                if p.type.is_template:
-                    assert p.type.template_arguments is not None
+        # Find parameters that take function signatures and ensure that there's only one of them:
+        # If there's more than one, we won't be able to create an async method from it later.
+        callback_params = [p for p in m.parameters if p.type.is_function_signature]
+        if not callback_params:
+            return
 
-                    for ta in p.type.template_arguments:
-                        self.__translate_type(ta.type)
+        if len(callback_params) > 1:
+            error_in_file(
+                m.header_file,
+                m.start_line,
+                r"Method '{m.name}' contains more than one callback parameter so cannot be converted to an async function"
+            )
+            return
 
-                if is_interface and is_regular_method:
-                    continue
+        # Create the custom delegate based on the function signature of the callback
+        p = callback_params[0]
+        function_signature = p.type.function_signature
+        m.results = function_signature.parameters
+        m.has_results = bool(m.results)
+        m.has_multiple_results = len(m.results) > 1
 
-                if not p.type.is_function_signature:
-                    continue
+        param_name = p.name[0].upper() + p.name[1:]
 
-                m.results = p.type.function_signature.parameters
-                m.has_results = (
-                        p.type.function_signature.parameters is not None
-                    ) and (len(p.type.function_signature.parameters) > 0)
-                m.has_multiple_results = len(m.results) > 1
+        if function_signature.parameters:
+            for dp in function_signature.parameters:
+                self.__translate_type(dp.type)
 
-                param_name = p.name[0].upper() + p.name[1:]
+                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
+                dp.type.is_result_base = (
+                    full_type_name in self.classes
+                    and self.__class_derives_from(
+                        self.classes[full_type_name],
+                        "csp::systems",
+                        "ResultBase",
+                        self.classes,
+                    )
+                )
 
-                if p.type.function_signature.parameters is not None:
-                    for dp in p.type.function_signature.parameters:
-                        self.__translate_type(dp.type)
+        delegate = {
+            "name": f"{m.name}{param_name}Delegate",
+            "method_name": m.name,
+            "return_type": function_signature.return_type,
+            "parameters": deepcopy(function_signature.parameters),
+            "has_parameters": bool(function_signature.parameters),
+            "has_progress": m.is_async_result_with_progress,
+            "include_managed": is_regular_method,
+        }
 
-                        full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                        dp.type.is_result_base = (
-                                full_type_name in self.classes
-                                and self.__class_derives_from(
-                                    self.classes[full_type_name],
-                                    "csp::systems",
-                                    "ResultBase",
-                                    self.classes,
-                                )
-                            )
+        delegates.append(delegate)
+        m.delegate = delegate
+        p.delegate = delegate
 
-                delegate = {
-                        "name": f"{m.name}{param_name}Delegate",
-                        "method_name": m.name,
-                        "return_type": p.type.function_signature.return_type,
-                        "parameters": deepcopy(p.type.function_signature.parameters),
-                        "has_parameters": bool(p.type.function_signature.parameters),
-                        "has_progress": m.is_async_result_with_progress,
-                        "include_managed": is_regular_method,
-                    }
+        if m.is_event:
+            self.__rewrite_event(m, p, delegate, events)
 
-                delegates.append(delegate)
-                m.delegate = delegate
-                p.delegate = delegate
+        # Remove this parameter since it will be converted to a Task<T> return instead
+        m.parameters.remove(p)
 
-                if not (not is_interface and is_regular_method):
-                    if m.is_event:
-                        self.__rewrite_event(events, m, p, delegate)
+        if len(m.parameters) > 0:
+            m.parameters[-1].is_last = True
 
-                    m.parameters.remove(p)
-
-                    if len(m.parameters) > 0:
-                        m.parameters[-1].is_last = True
-
-    def __rewrite_event(self, events, m, p, delegate):
+    def __rewrite_event(self, m: FunctionMetadata, p: ParameterMetadata, delegate: Dict, events: List[Dict]):
+        """Create a C# event field for SetCallback methods"""
         event_name = ""
 
         assert m.name
 
+        # Rename `Set____Callback` to `On____`
+        # e.g. `SetDisconnectionCallback` becomes `OnDisconnection`
+        # Note: This violates C# naming conventions, which would name the event `Disconnected`
         if m.name.startswith("Set") and m.name.endswith("Callback"):
             event_name = f"On{m.name[len('Set'):-len('Callback')]}"
         else:
