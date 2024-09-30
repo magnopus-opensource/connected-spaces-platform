@@ -96,7 +96,8 @@ enum class ESequenceUpdateType
 	Create,
 	Update,
     Rename,
-	Delete
+	Delete,
+    Invalid
 };
 
 class CSP_API SequenceChangedParams

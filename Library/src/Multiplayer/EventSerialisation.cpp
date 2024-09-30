@@ -28,26 +28,30 @@ namespace
 {
 ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
 {
+    ESequenceUpdateType SequenceUpdateType = ESequenceUpdateType::Invalid;
+
 	if (UpdateType == 0)
 	{
-		return ESequenceUpdateType::Create;
+		SequenceUpdateType = ESequenceUpdateType::Create;
 	}
 	else if (UpdateType == 1)
 	{
-		return ESequenceUpdateType::Update;
+		SequenceUpdateType = ESequenceUpdateType::Update;
 	}
 	else if (UpdateType == 2)
 	{
-		return ESequenceUpdateType::Rename;
+		SequenceUpdateType = ESequenceUpdateType::Rename;
 	}
 	else if (UpdateType == 3)
 	{
-		return ESequenceUpdateType::Delete;
+		SequenceUpdateType = ESequenceUpdateType::Delete;
 	}
 	else
 	{
 		CSP_LOG_ERROR_MSG("SequenceChangedEvent - Detected an unsupported update type.");
 	}
+
+    return SequenceUpdateType;
 }
 
 std::string RemoveIdPrefix(const std::string& Id)
@@ -105,6 +109,10 @@ void EventDeserialiser::ParseCommon(const std::vector<signalr::value>& EventValu
 	SenderClientId = EventValues[1].as_uinteger();
 }
 
+csp::common::String EventDeserialiser::GetSequenceKey() const
+{
+	return csp::common::Decode::URI(EventData[1].GetString());
+}
 
 void EventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
 {
@@ -339,7 +347,7 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	EventParams.Key = csp::common::Decode::URI(EventData[1].GetString());
+	EventParams.Key = GetSequenceKey();
 
 	// Optional parameter for when a key is changed
 	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
@@ -363,7 +371,7 @@ void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const st
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
     // Sequence keys are URI encoded to support reserved characters.
-	csp::common::String Key	   = csp::common::Decode::URI(EventData[1].GetString());
+	csp::common::String Key	   = GetSequenceKey();
 
 	std::string ParentIdString = GetSequenceKeyIndex(Key, 2).c_str();
 	csp::common::Optional<uint64_t> ParentId;
@@ -390,12 +398,11 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
 {
 	EventDeserialiser::Parse(EventValues);
 
-    // TODO
-	//if (EventData.Size() != 3)
-	//{
-	//	CSP_LOG_ERROR_MSG("SequenceChangedEvent - Invalid arguments.");
-	//	return;
-	//}
+	if (EventData.Size() != 3)
+	{
+		CSP_LOG_ERROR_FORMAT("SequenceHotspotChangedEvent - Invalid arguments. Expected 3 arguments but got %i.", EventData.Size());
+		return;
+	}
 
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
