@@ -220,9 +220,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	CallbackCalled = false;
 
 	// Validate sequence deletion events.	
-	Connection->SetHotspotSequenceChangedCallback([](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled](const csp::multiplayer::SequenceHotspotChangedParams& Params)
 	{
 		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
+		CallbackCalled = true;
 	});
 
 	// Delete sequence
@@ -331,9 +332,10 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 	// Validate sequence update events.
 	bool CallbackCalled = false;
 	auto* Connection = SystemsManager.GetMultiplayerConnection();
-	Connection->SetHotspotSequenceChangedCallback([](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled](const csp::multiplayer::SequenceHotspotChangedParams& Params)
 	{
 		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+		CallbackCalled = true;
 	});
 
 	csp::systems::HotspotGroup Expected;
@@ -395,7 +397,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	CreateHotspotgroup(HotspotSystem, OldTestGroupName, SequenceItems, HotspotGroup);
 	EXPECT_EQ(HotspotGroup.Name, OldTestGroupName);
 
-	// Validate sequence rename events.
 	bool CallbackCalled = false;
 	auto* Connection = SystemsManager.GetMultiplayerConnection();
 	Connection->SetHotspotSequenceChangedCallback([&CallbackCalled](const csp::multiplayer::SequenceHotspotChangedParams& Params)
@@ -407,7 +408,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 	RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
 	EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
 
-	// Clear out the callback as we have validated what we came here for.
 	WaitForCallback(CallbackCalled);
 	Connection->SetHotspotSequenceChangedCallback(nullptr);
 
