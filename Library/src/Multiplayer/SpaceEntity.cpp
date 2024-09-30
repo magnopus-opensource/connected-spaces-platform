@@ -651,7 +651,7 @@ void SpaceEntity::Serialise(IEntitySerialiser& Serialiser)
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, static_cast<int64_t>(SelectedId));
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYPLATFORM, static_cast<int64_t>(ThirdPartyPlatform));
 			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_THIRDPARTYREF, ThirdPartyRef);
-			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_NEXT_ENTITY_ID, static_cast<int64_t>(*NextEntityId));
+			Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_NEXT_ENTITY_ID, NextEntityId.HasValue() ? static_cast<int64_t>(*NextEntityId) : 0);
 
 			assert(DirtyComponents.Size() < COMPONENT_KEY_END_COMPONENTS - COMPONENT_KEY_START_COMPONENTS);
 
@@ -832,16 +832,21 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
 
 			if (Deserialiser.HasViewComponent(COMPONENT_KEY_VIEW_NEXT_ENTITY_ID))
 			{
-				NextEntityId = static_cast<uint64_t>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_NEXT_ENTITY_ID).GetInt());
-				UpdateEntityPosition();
+				uint64_t NewNextId = static_cast<uint64_t>(Deserialiser.GetViewComponent(COMPONENT_KEY_VIEW_NEXT_ENTITY_ID).GetInt());
 
-				if (ShouldUpdateParent)
+				if (NewNextId != *NextEntityId || ShouldUpdateParent)
 				{
-					UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
-					ShouldUpdateParent = false;
-				}
+					NextEntityId					 = NewNextId;
+					EntitySystem->ShouldProcessAgain = UpdateEntityPosition(true);
 
-				UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_INDEX);
+					if (ShouldUpdateParent)
+					{
+						UpdateFlags		   = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_PARENT);
+						ShouldUpdateParent = false;
+					}
+
+					UpdateFlags = static_cast<SpaceEntityUpdateFlags>(UpdateFlags | UPDATE_FLAGS_INDEX);
+				}
 			}
 
 			if (RealComponentCount > 0)
@@ -1031,8 +1036,15 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 						break;
 					case COMPONENT_KEY_VIEW_NEXT_ENTITY_ID:
 					{
-						NextEntityId = DirtyProperties[PropertyKey].GetInt();
-						UpdateEntityPosition();
+						uint64_t NewNextId = DirtyProperties[PropertyKey].GetInt();
+
+						if (NewNextId == *NextEntityId && ShouldUpdateParent == false)
+						{
+							break;
+						}
+
+						NextEntityId					 = NewNextId;
+						EntitySystem->ShouldProcessAgain = UpdateEntityPosition(true);
 
 						if (ShouldUpdateParent)
 						{
@@ -1343,17 +1355,24 @@ ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool Se
 		CSP_DELETE(DirtyComponentKeys);
 	}
 
-
 	return LocatedComponent;
 }
 
-void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity)
+bool SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity, bool SendUpdate)
 {
+	bool ChangedPrevious			 = false;
 	SpaceEntity* PreviousChildEntity = GetLastChild();
 
 	if (PreviousChildEntity)
 	{
+		if (SendUpdate)
+		{
+			PreviousChildEntity->SetNextEntityId(ChildEntity->GetId());
+			PreviousChildEntity->QueueUpdate();
+		}
+
 		PreviousChildEntity->NextEntity = ChildEntity;
+		ChangedPrevious					= true;
 	}
 	else
 	{
@@ -1366,29 +1385,56 @@ void SpaceEntity::AddChildEntitiy(SpaceEntity* ChildEntity)
 	ChildEntity->Parent		= this;
 
 	RebuildEntityList();
+
+	return ChangedPrevious;
 }
 
 
-void SpaceEntity::AddChildEntitiyBefore(SpaceEntity* ChildEntity, uint64_t NextEntityId)
+bool SpaceEntity::AddChildEntitiyBefore(SpaceEntity* ChildEntity, uint64_t NextEntityId, bool SendUpdate)
 {
-	SpaceEntity* Current = FirstChild;
+	/* SpaceEntity* Current = FirstChild;
 
 	while (Current && Current->GetId() != NextEntityId && Current->NextEntity != nullptr)
 	{
 		Current = Current->NextEntity;
-	}
+	}*/
 
-	if (Current)
+	SpaceEntity* NewNextEntity = EntitySystem->FindSpaceEntityById(NextEntityId);
+
+	if (NewNextEntity)
 	{
-		AddChildEntitiyBefore(ChildEntity, Current);
+		return AddChildEntitiyBefore(ChildEntity, NewNextEntity, SendUpdate);
+	}
+	else
+	{
+		// TODO: Error
+
+		if (SendUpdate)
+		{
+			ChildEntity->SetNextEntityId(0);
+			ChildEntity->QueueUpdate();
+		}
+
+		AddChildEntitiy(ChildEntity, SendUpdate);
+
+		return true;
 	}
 }
 
-void SpaceEntity::AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* NextEntity)
+bool SpaceEntity::AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* NextEntity, bool SendUpdate)
 {
+	bool ChangedPrevious = false;
+
 	if (NextEntity->PrevEntity)
 	{
+		if (SendUpdate)
+		{
+			NextEntity->PrevEntity->SetNextEntityId(ChildEntity->GetId());
+			NextEntity->PrevEntity->QueueUpdate();
+		}
+
 		NextEntity->PrevEntity->NextEntity = ChildEntity;
+		ChangedPrevious					   = true;
 	}
 	else
 	{
@@ -1402,30 +1448,46 @@ void SpaceEntity::AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* N
 	ChildEntity->Parent = this;
 
 	RebuildEntityList();
+
+	return ChangedPrevious;
 }
 
-void SpaceEntity::RemoveChildEntity(SpaceEntity* ChildEntity)
+bool SpaceEntity::RemoveChildEntity(SpaceEntity* ChildEntity, bool SendUpdate)
 {
+	bool Changed = false;
 	// If this was the first child, update to use the next entity
 	if (FirstChild == ChildEntity)
 	{
 		FirstChild = ChildEntity->NextEntity;
 	}
+
 	// If there was a previous entity, update this entities NextChild
 	if (ChildEntity->PrevEntity)
 	{
+		if (SendUpdate)
+		{
+			uint64_t NewId = ChildEntity->NextEntity ? ChildEntity->NextEntity->GetId() : 0;
+			ChildEntity->PrevEntity->SetNextEntityId(NewId);
+			ChildEntity->PrevEntity->QueueUpdate();
+		}
+
 		ChildEntity->PrevEntity->NextEntity = ChildEntity->NextEntity;
+		Changed								= true;
 	}
+
 	// If there was a next entity, update this entities PrevEntity
 	if (ChildEntity->NextEntity)
 	{
 		ChildEntity->NextEntity->PrevEntity = ChildEntity->PrevEntity;
 	}
 
+	ChildEntity->Parent		= nullptr;
 	ChildEntity->PrevEntity = nullptr;
 	ChildEntity->NextEntity = nullptr;
 
 	RebuildEntityList();
+
+	return Changed;
 }
 
 bool SpaceEntity::HasChild(uint64_t ChildId) const
@@ -1451,11 +1513,14 @@ bool SpaceEntity::HasChild(uint64_t ChildId) const
 }
 
 
-void SpaceEntity::UpdateEntityPosition()
+bool SpaceEntity::UpdateEntityPosition(bool SendUpdate)
 {
+	bool PreviousUpdated = false;
+	// TODO: return early if nextids matches nextentity
+	// and parententityid = parententity
 	if (GetParentEntity())
 	{
-		GetParentEntity()->RemoveChildEntity(this);
+		PreviousUpdated |= GetParentEntity()->RemoveChildEntity(this, SendUpdate);
 	}
 
 	// Insert it into the new position
@@ -1465,17 +1530,15 @@ void SpaceEntity::UpdateEntityPosition()
 	{
 		if (*NextEntityId == 0)
 		{
-			NewParent->AddChildEntitiy(this);
+			PreviousUpdated |= NewParent->AddChildEntitiy(this, SendUpdate);
 		}
 		else
 		{
-			NewParent->AddChildEntitiyBefore(this, *NextEntityId);
+			PreviousUpdated |= NewParent->AddChildEntitiyBefore(this, *NextEntityId, SendUpdate);
 		}
 	}
-	else
-	{
-		// TODO: log
-	}
+
+	return PreviousUpdated;
 }
 
 void SpaceEntity::RebuildEntityList()

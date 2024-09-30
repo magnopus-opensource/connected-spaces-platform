@@ -724,7 +724,7 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 	Objects.Clear();
 	Avatars.Clear();
 
-	// Dont destroy the root entity until we destroy the system
+	// Dont destroy the root entity until we destroy the system.
 	RootEntity->FirstChild = nullptr;
 
 	// Clear adds/removes, we don't want to mutate if we're cleaning everything else.
@@ -808,79 +808,27 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-	// Ensure entity list is up to date
-	ProcessPendingEntityOperations();
-
 	csp::common::List<SpaceEntity*> InvalidEntities;
 
-	// Resolve entity hierarchy
-	for (size_t i = 0; i < Entities.Size(); ++i)
+	// Validate entity hierarchy
+	// This is done before ProcessPendingEntityOperations
+	// as the hierarchy is processed for the new entities then
+	// This prevents spaces from breaking that previously used the ParendId
+	// before the linked list was introduced.
+	for (size_t i = 0; i < PendingAdds->size(); ++i)
 	{
-		SpaceEntity* Entity		  = Entities[i];
-		SpaceEntity* ParentEntity = FindSpaceEntityById(Entity->ParentId);
+		SpaceEntity* Entity = (*PendingAdds)[i];
 
 		if (Entity->NextEntityId.HasValue() == false)
 		{
-			// Linked list hasn't been setup for this entity.
-			InvalidEntities.Append(Entity);
-			break;
-		}
-
-		if (ParentEntity)
-		{
-			Entity->Parent = ParentEntity;
-		}
-		else
-		{
-			CSP_LOG_ERROR_FORMAT("Unable to find parent id: %s for entity: %s. Moving to root",
-								 std::to_string(Entity->ParentId).c_str(),
-								 std::to_string(Entity->GetId()).c_str());
-
-			InvalidEntities.Append(Entity);
-			break;
-		}
-
-		/* if (*Entity->NextEntityId != 0)
-		{
-			SpaceEntity* NextEntity = FindSpaceEntityById(*Entity->NextEntityId);
-
-			if (NextEntity == nullptr)
-			{
-				CSP_LOG_ERROR_FORMAT("Unable to find next entity id: %s for entity: %s. Moving to root",
-									 std::to_string(*Entity->NextEntityId).c_str(),
-									 std::to_string(Entity->GetId()).c_str());
-
-				InvalidEntities.Append(Entity);
-				break;
-			}
-
-			Entity->NextEntity	   = NextEntity;
-			NextEntity->PrevEntity = Entity;
-		}*/
-	}
-
-	// Parent invalid entities to the end of the root
-	for (size_t i = 0; i < InvalidEntities.Size(); ++i)
-	{
-		SpaceEntity* Entity = InvalidEntities[i];
-
-		Entity->ParentId	 = 0;
-		Entity->NextEntityId = 0;
-		Entity->UpdateEntityPosition();
-	}
-
-	// Set parent entities FirstChild
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		SpaceEntity* Entity = Entities[i];
-
-		if (Entity->PrevEntity == nullptr)
-		{
-			// There is no previous entity in the list,
-			// so assume this is the first
-			Entity->Parent->FirstChild = Entity;
+			// Linked list hasn't been setup for this entity before.
+			Entity->ParentId	 = 0;
+			Entity->NextEntityId = 0;
 		}
 	}
+
+	// Ensure entity list is up to date
+	ProcessPendingEntityOperations();
 
 	// Register all scripts for import
 	for (size_t i = 0; i < Entities.Size(); ++i)
@@ -947,15 +895,20 @@ void SpaceEntitySystem::DetermineScriptOwners()
 
 void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
-	Deletion->GetParentEntity()->RemoveChildEntity(Deletion);
-
-	const SpaceEntityList* Children = Deletion->GetChildEntities();
-
-	for (size_t i = 0; i < Children->Size(); ++i)
+	if (Deletion->GetParentEntity())
 	{
-		(*Children)[i]->ParentId	 = 0;
-		(*Children)[i]->NextEntityId = 0;
-		(*Children)[i]->UpdateEntityPosition();
+		Deletion->GetParentEntity()->RemoveChildEntity(Deletion);
+	}
+
+	// Ensure a copy is made, as the list will get updated internally
+	SpaceEntityList Children = *Deletion->GetChildEntities();
+
+	for (size_t i = 0; i < Children.Size(); ++i)
+	{
+		SpaceEntity* Child	= Children[i];
+		Child->ParentId		= 0;
+		Child->NextEntityId = 0;
+		Child->UpdateEntityPosition();
 	}
 }
 
@@ -1224,103 +1177,12 @@ void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::com
 void SpaceEntitySystem::ProcessPendingEntityOperations()
 {
 	std::scoped_lock EntitiesLocker(*EntitiesLock);
-	csp::common::List<SpaceEntity*> PendingEntities;
-	// we run pending entity operations in a specific order
-	// 1 - flush pending adds - we do this first to ensure any attempts to apply updates after are successful
-	// 2 - flush pending updates - first the local representation, then the remote representation (with rate limiting)
-	// 3 - flush pending removes - we do this last so any pending updates can still mutate state on entities that are pending removal
+	ProcessPendingEntityOperationsInternal();
 
-	// adds
-	std::unordered_set<SpaceEntity*> AddedEntities;
-	while (PendingAdds->empty() == false)
+	if (ShouldProcessAgain)
 	{
-		SpaceEntity* PendingAddEntity = PendingAdds->front();
-
-		// we only want to add an entity once, even though a client could have queued it for updates multiple times
-		if (AddedEntities.find(PendingAddEntity) == AddedEntities.end())
-		{
-			AddPendingEntity(PendingAddEntity);
-			AddedEntities.emplace(PendingAddEntity);
-		}
-		PendingAdds->pop_front();
-	}
-
-	// local updates
-	while (PendingIncomingUpdates->empty() == false)
-	{
-		ApplyIncomingPatch(PendingIncomingUpdates->front());
-		PendingIncomingUpdates->pop_front();
-	}
-
-	// remote updates
-	{
-		for (auto it = PendingOutgoingUpdateUniqueSet->begin(); it != PendingOutgoingUpdateUniqueSet->end();)
-		{
-			SpaceEntity* PendingEntity = *it;
-
-			const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-
-			if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
-			{
-				// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-				if (!PendingEntity->IsModifiable())
-				{
-					CSP_LOG_ERROR_FORMAT(
-						"Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
-						PendingEntity->GetName().c_str());
-
-					it = PendingOutgoingUpdateUniqueSet->erase(it);
-					continue;
-				}
-
-				// since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
-				PendingEntity->OwnerId = MultiplayerConnectionInst->GetClientId();
-				ClaimScriptOwnership(PendingEntity);
-
-				PendingEntities.Append(PendingEntity);
-
-				if (PendingEntity->EntityPatchSentCallback != nullptr)
-				{
-					PendingEntity->EntityPatchSentCallback(true);
-				}
-
-				PendingEntity->TimeOfLastPatch = CurrentTime;
-				it							   = PendingOutgoingUpdateUniqueSet->erase(it);
-			}
-			else
-			{
-				++it;
-			}
-		}
-
-		// Only send if there are patches in list
-		if (PendingEntities.Size() != 0)
-		{
-			// Send list of PendingEntities to chs
-			SendPatches(Connection, PendingEntities);
-
-			// Loop through and apply local patches from generated list
-			for (int i = 0; i < PendingEntities.Size(); ++i)
-			{
-				PendingEntities[i]->ApplyLocalPatch(true);
-			}
-		}
-	}
-
-	// removes
-	std::unordered_set<SpaceEntity*> RemovedEntities;
-	while (PendingRemoves->empty() == false)
-	{
-		SpaceEntity* PendingRemoveEntity = PendingRemoves->front();
-
-		// we only want to remove an entity once, even though a client could have queued it for updates multiple times
-		if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
-		{
-			RemovedEntities.emplace(PendingRemoveEntity);
-
-			RemovePendingEntity(PendingRemoves->front());
-		}
-		PendingRemoves->pop_front();
+		ShouldProcessAgain = false;
+		ProcessPendingEntityOperationsInternal();
 	}
 }
 
@@ -1329,24 +1191,6 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 	if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
 	{
 		Entities.Append(EntityToAdd);
-
-		// Hierarchy needs to be resolved here instead of AddPendingEntity, otherwise,
-		// ProcessPendingEntityOperations will crash when all objects are received due
-		// to the hierarchy not being resolved.
-		SpaceEntity* Parent = FindSpaceEntityById(EntityToAdd->ParentId);
-
-		if (Parent)
-		{
-			if (Parent->HasChild(EntityToAdd->GetId()) == false)
-			{
-				EntityToAdd->UpdateEntityPosition();
-			}
-		}
-		else
-		{
-			// TODO: log
-		}
-
 
 		switch (EntityToAdd->GetEntityType())
 		{
@@ -1521,6 +1365,131 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName,
 
 	const signalr::value Params(Arr);
 	Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
+}
+
+void SpaceEntitySystem::ProcessPendingEntityOperationsInternal()
+{
+	csp::common::List<SpaceEntity*> PendingEntities;
+
+	// we run pending entity operations in a specific order
+	// 1 - flush pending adds - we do this first to ensure any attempts to apply updates after are successful
+	// 2 - flush pending updates - first the local representation, then the remote representation (with rate limiting)
+	// 3 - flush pending removes - we do this last so any pending updates can still mutate state on entities that are pending removal
+
+	// adds
+	std::unordered_set<SpaceEntity*> AddedEntities;
+	while (PendingAdds->empty() == false)
+	{
+		SpaceEntity* PendingAddEntity = PendingAdds->front();
+
+		// we only want to add an entity once, even though a client could have queued it for updates multiple times
+		if (AddedEntities.find(PendingAddEntity) == AddedEntities.end())
+		{
+			AddPendingEntity(PendingAddEntity);
+			AddedEntities.emplace(PendingAddEntity);
+		}
+		PendingAdds->pop_front();
+	}
+
+	for (auto AddedEntity : AddedEntities)
+	{
+		SpaceEntity* Parent = FindSpaceEntityById(AddedEntity->ParentId);
+
+		if (Parent)
+		{
+			if (Parent->HasChild(AddedEntity->GetId()) == false)
+			{
+				AddedEntity->UpdateEntityPosition();
+			}
+			else
+			{
+				int a = 0;
+			}
+		}
+		else
+		{
+			// TODO: log
+			int a = 0;
+		}
+	}
+
+	// local updates
+	while (PendingIncomingUpdates->empty() == false)
+	{
+		ApplyIncomingPatch(PendingIncomingUpdates->front());
+		PendingIncomingUpdates->pop_front();
+	}
+
+	// remote updates
+	{
+		for (auto it = PendingOutgoingUpdateUniqueSet->begin(); it != PendingOutgoingUpdateUniqueSet->end();)
+		{
+			SpaceEntity* PendingEntity = *it;
+
+			const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+
+			if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
+			{
+				// If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
+				if (!PendingEntity->IsModifiable())
+				{
+					CSP_LOG_ERROR_FORMAT(
+						"Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
+						PendingEntity->GetName().c_str());
+
+					it = PendingOutgoingUpdateUniqueSet->erase(it);
+					continue;
+				}
+
+				// since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
+				PendingEntity->OwnerId = MultiplayerConnectionInst->GetClientId();
+				ClaimScriptOwnership(PendingEntity);
+
+				PendingEntities.Append(PendingEntity);
+
+				if (PendingEntity->EntityPatchSentCallback != nullptr)
+				{
+					PendingEntity->EntityPatchSentCallback(true);
+				}
+
+				PendingEntity->TimeOfLastPatch = CurrentTime;
+				it							   = PendingOutgoingUpdateUniqueSet->erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		// Only send if there are patches in list
+		if (PendingEntities.Size() != 0)
+		{
+			// Send list of PendingEntities to chs
+			SendPatches(Connection, PendingEntities);
+
+			// Loop through and apply local patches from generated list
+			for (int i = 0; i < PendingEntities.Size(); ++i)
+			{
+				PendingEntities[i]->ApplyLocalPatch(true);
+			}
+		}
+	}
+
+	// removes
+	std::unordered_set<SpaceEntity*> RemovedEntities;
+	while (PendingRemoves->empty() == false)
+	{
+		SpaceEntity* PendingRemoveEntity = PendingRemoves->front();
+
+		// we only want to remove an entity once, even though a client could have queued it for updates multiple times
+		if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
+		{
+			RemovedEntities.emplace(PendingRemoveEntity);
+
+			RemovePendingEntity(PendingRemoves->front());
+		}
+		PendingRemoves->pop_front();
+	}
 }
 
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)

@@ -381,21 +381,21 @@ private:
 	ComponentBase* FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents = false) const;
 
 	// Adds a child entity to the end of the linked list using an entities NextEntity
-	void AddChildEntitiy(SpaceEntity* ChildEntity);
+	bool AddChildEntitiy(SpaceEntity* ChildEntity, bool SendUpdate = false);
 
 	// Adds a child entity to the linked list before the given NextEntityId
-	void AddChildEntitiyBefore(SpaceEntity* ChildEntity, uint64_t NextEntityId);
+	bool AddChildEntitiyBefore(SpaceEntity* ChildEntity, uint64_t NextEntityId, bool SendUpdate = false);
 	//  Called by previous AddChildEntitiy functions
-	void AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* NextEntity);
+	bool AddChildEntitiyBefore(SpaceEntity* ChildEntity, SpaceEntity* NextEntity, bool SendUpdate = false);
 
 	// Removes a child from the linked list and updates affected nodes
-	void RemoveChildEntity(SpaceEntity* ChildEntity);
+	bool RemoveChildEntity(SpaceEntity* ChildEntity, bool SendUpdate = false);
 
 	bool HasChild(uint64_t ChildId) const;
 
 	// Remove entity from current list and inserts it into its new position.
 	// This function assumes that the ParentId nad NextEntityId are set correctly.
-	void UpdateEntityPosition();
+	bool UpdateEntityPosition(bool SendUpdate = false);
 	void RebuildEntityList();
 
 	void SetParentId(uint64_t ParentId);

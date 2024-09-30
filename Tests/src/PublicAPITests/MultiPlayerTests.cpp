@@ -2710,7 +2710,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 		// Create Entities
 		csp::common::String ParentEntityName = "ParentEntity";
 		csp::common::String ChildEntityName	 = "ChildEntity";
-		csp::common::String RootEntityName	 = "RootEntity";
+		csp::common::String ChildEntity2Name = "ChildEntity2";
 		SpaceTransform ObjectTransform
 			= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
 
@@ -2721,7 +2721,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 		auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
 		auto [CreatedChildEntity]  = AWAIT(EntitySystem, CreateObject, ChildEntityName, ObjectTransform);
-		auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, RootEntityName, ObjectTransform);
+		auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntity2Name, ObjectTransform);
 
 		ParentEntityId = CreatedParentEntity->GetId();
 		ChildEntity2Id = CreatedChildEntity2->GetId();
@@ -2739,16 +2739,36 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 				}
 			});
 
+		bool ChildEntity2Updated = false;
+
+		CreatedChildEntity2->SetUpdateCallback(
+			[&ChildEntity2Updated,
+			 ChildEntity2Name](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (Entity->GetName() == ChildEntity2Name && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				{
+					ChildEntity2Updated = true;
+				}
+			});
+
 		// Add child to parent
 		CreatedParentEntity->AppendChild(CreatedChildEntity->GetId());
-		CreatedParentEntity->AppendChild(CreatedChildEntity2->GetId());
 		CreatedChildEntity->QueueUpdate();
 
 		// Wait for update
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
 
-		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 3);
+		CreatedParentEntity->AppendChild(CreatedChildEntity2->GetId());
+		CreatedChildEntity2->QueueUpdate();
+
+		WaitForCallbackWithUpdate(ChildEntity2Updated, EntitySystem);
+		EXPECT_TRUE(ChildEntity2Updated);
+
+		auto children = *CreatedParentEntity->GetChildEntities();
+
+		EXPECT_EQ(EntitySystem->GetRootEntity()->GetChildEntities()->Size(), 1);
+		EXPECT_EQ(CreatedParentEntity->GetChildEntities()->Size(), 2);
 
 		// Exit Space
 		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);

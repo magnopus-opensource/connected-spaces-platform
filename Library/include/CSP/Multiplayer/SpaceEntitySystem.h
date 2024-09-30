@@ -411,6 +411,10 @@ private:
 							  const SpaceTransform& InSpaceTransform,
 							  EntityCreatedCallback Callback);
 
+	// Runs the main entity process logic, but without the mutex lock
+	// This is currenty used if we need to send a second update.
+	void ProcessPendingEntityOperationsInternal();
+
 	class EntityScriptBinding* ScriptBinding;
 	class SpaceEntityEventHandler* EventHandler;
 	class ClientElectionManager* ElectionManager;
@@ -433,6 +437,10 @@ private:
 	bool EntityPatchRateLimitEnabled = true;
 
 	bool IsInitialised = false;
+
+	// If a new hierarchy patch has modified another entity,
+	// we need to process the entities a second time;
+	bool ShouldProcessAgain = false;
 };
 
 } // namespace csp::multiplayer
