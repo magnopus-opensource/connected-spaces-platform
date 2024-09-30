@@ -61,7 +61,6 @@ public:
 
 protected:
 	void ParseCommon(const std::vector<signalr::value>& EventValues);
-    csp::common::String GetSequenceKey() const;
 
 	csp::multiplayer::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
 

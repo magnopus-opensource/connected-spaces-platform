@@ -132,7 +132,11 @@ public:
 	/// @brief The type of update to the sequence.
 	ESequenceUpdateType UpdateType;
 
-    // TODO
+    /// @brief The unique identifier of the space that this hotspot sequence belongs to.
+	csp::common::String SpaceId;
+
+    /// @brief The name of the hotspot group that has been changed.
+	csp::common::String HotspotGroupName;
 };
 
 } // namespace csp::multiplayer

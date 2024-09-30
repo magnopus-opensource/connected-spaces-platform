@@ -64,6 +64,12 @@ std::string RemoveIdPrefix(const std::string& Id)
 	return Id;
 }
 
+csp::common::String GetSequenceKey(const csp::common::Array<csp::multiplayer::ReplicatedValue>& EventData)
+{
+	// Sequence keys are URI encoded to support reserved characters.
+	return csp::common::Decode::URI(EventData[1].GetString());
+}
+
 } // namespace
 
 csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::String& SequenceKey, int i)
@@ -107,11 +113,6 @@ void EventDeserialiser::ParseCommon(const std::vector<signalr::value>& EventValu
 
 	EventType	   = (csp::common::String) EventValues[0].as_string().c_str();
 	SenderClientId = EventValues[1].as_uinteger();
-}
-
-csp::common::String EventDeserialiser::GetSequenceKey() const
-{
-	return csp::common::Decode::URI(EventData[1].GetString());
 }
 
 void EventDeserialiser::Parse(const std::vector<signalr::value>& EventValues)
@@ -347,7 +348,7 @@ void csp::multiplayer::SequenceChangedEventDeserialiser::Parse(const std::vector
 
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-	EventParams.Key = GetSequenceKey();
+	EventParams.Key = GetSequenceKey(EventData);
 
 	// Optional parameter for when a key is changed
 	if (EventData[2].GetReplicatedValueType() == ReplicatedValueType::String)
@@ -370,9 +371,7 @@ void csp::multiplayer::SequenceHierarchyChangedEventDeserialiser::Parse(const st
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-    // Sequence keys are URI encoded to support reserved characters.
-	csp::common::String Key	   = GetSequenceKey();
-
+    csp::common::String Key	   = GetSequenceKey(EventData);
 	std::string ParentIdString = GetSequenceKeyIndex(Key, 2).c_str();
 	csp::common::Optional<uint64_t> ParentId;
 
@@ -407,5 +406,8 @@ void SequenceHotspotChangedEventDeserialiser::Parse(const std::vector<signalr::v
 	int64_t UpdateType	   = EventData[0].GetInt();
 	EventParams.UpdateType = ESequenceUpdateIntToUpdateType(UpdateType);
 
-    // TODO
+    // See CreateKey in HotspotSequenceSystem
+	csp::common::String Key = GetSequenceKey(EventData);
+    EventParams.SpaceId = GetSequenceKeyIndex(Key, 1);
+    EventParams.HotspotGroupName = GetSequenceKeyIndex(Key, 2);
 }
