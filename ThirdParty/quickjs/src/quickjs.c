@@ -14462,7 +14462,7 @@ static no_inline __exception int js_binary_arith_slow(JSContext *ctx, JSValue *s
         r = fmod(d1, d2);
         break;
     case OP_pow:
-        r = js_pow(d1, d2);
+		r = js_math_pow(d1, d2);
         break;
     default:
         abort();
