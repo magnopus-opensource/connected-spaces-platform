@@ -110,6 +110,11 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
 	EXPECT_EQ(HotspotUniqueComponentId, UniqueComponentId);
 
+	// Test again to ensure getter works with multiple calls.
+	const csp::common::String& HotspotUniqueComponentId2 = HotspotComponent->GetUniqueComponentId();
+
+	EXPECT_EQ(HotspotUniqueComponentId2, UniqueComponentId);
+
 	// Set new values
 
 	HotspotComponent->SetPosition(csp::common::Vector3::One());
