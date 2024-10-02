@@ -107,6 +107,16 @@ public:
 												 const csp::common::Map<csp::common::String, csp::common::String>& MetaData,
 												 SequencesResultCallback Callback);
 
+	/// @brief Finds all sequences that contain the given items
+	/// @param Items csp::common::Array<csp::common::String> : An array of items which should be searched for
+	/// @param ReferenceType csp::common::String : The type of reference (GroupId etc.). Must be used with ReferenceIds
+	/// @param ReferenceIds csp::common::Array<csp::common::String> : The ids of the reference. Must be used with ReferenceType
+	/// @param Callback SequencesResultCallback : callback to call when a response is received
+	CSP_ASYNC_RESULT void GetAllSequencesContainingItems(const csp::common::Array<csp::common::String>& Items,
+														 const csp::common::Optional<csp::common::String>& ReferenceType,
+														 const csp::common::Array<csp::common::String>& ReferenceIds,
+														 SequencesResultCallback Callback);
+
 	/// @brief Gets a sequence by it's key
 	/// @note This call will fail (Reason InvalidSequenceKey) if the SequenceKey parameter contains invalid keys, such as spaces, '/' or '%'
 	/// @param SequenceKey csp::common::String : The unique grouping name

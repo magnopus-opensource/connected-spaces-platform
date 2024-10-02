@@ -200,6 +200,52 @@ void GetSequencesByCriteria(csp::systems::SequenceSystem* SequenceSystem,
 	OutSequences										 = Sequences;
 }
 
+void GetAllSequencesContainingItems(csp::systems::SequenceSystem* SequenceSystem,
+									const csp::common::Array<csp::common::String>& InItems,
+									const csp::common::Optional<csp::common::String>& InReferenceType,
+									const csp::common::Array<csp::common::String>& InReferenceIds,
+									csp::common::Array<csp::systems::Sequence>& OutSequences,
+									csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
+									csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None,
+									uint16_t ExpectedHTTPResponseCode							  = 200)
+{
+	auto [Result] = Awaitable(&csp::systems::SequenceSystem::GetAllSequencesContainingItems, SequenceSystem, InItems, InReferenceType, InReferenceIds)
+						.Await(RequestPredicate);
+
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
+	EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
+	EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
+
+	csp::common::Array<csp::systems::Sequence> Sequences = Result.GetSequences();
+	OutSequences										 = Sequences;
+
+	// Search all sequences
+	for (size_t i = 0; i < OutSequences.Size(); ++i)
+	{
+		const csp::systems::Sequence& Sequence = OutSequences[i];
+		bool Found							   = false;
+
+		// Search all items in sequence
+		for (size_t j = 0; j < Sequence.Items.Size(); ++j)
+		{
+			const csp::common::String FoundItem = Sequence.Items[j];
+
+			// Search all searched items to find a match
+			for (size_t k = 0; k < InItems.Size(); ++k)
+			{
+				const csp::common::String SearchedItem = InItems[k];
+
+				if (FoundItem == SearchedItem)
+				{
+					Found = true;
+				}
+			}
+		}
+
+		EXPECT_TRUE(Found);
+	}
+}
+
 void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequence& S2)
 {
 	EXPECT_EQ(S1.Key, S2.Key);
@@ -277,7 +323,11 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 				   200);
 
 	// Delete sequences
-	DeleteSequences(SequenceSystem, {Sequence.Key, ReservedCharsSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
+	DeleteSequences(SequenceSystem,
+					{Sequence.Key, ReservedCharsSequence.Key},
+					csp::systems::EResultCode::Success,
+					csp::systems::ERequestFailureReason::None,
+					204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1156,6 +1206,121 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 
 	// Delete sequence
 	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SEQUENCESYSTEM_TESTS || RUN_SEQUENCESYSTEM_GETALLSEQUENCESCONTAINING_TEST
+CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	// Create sequences
+	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
+
+	const char* TestSequenceKey1 = "CSP UNITTEST SEQUENCE MAG*";
+	char UniqueSequenceName1[256];
+	SPRINTF(UniqueSequenceName1, "%s-%s", TestSequenceKey1, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence;
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceName1,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence,
+				   csp::systems::EResultCode::Success,
+				   csp::systems::ERequestFailureReason::None,
+				   200);
+
+	const char* TestSequenceKey2 = "CSP UNITTEST SEQUENCE MAG2";
+	char UniqueSequenceName2[256];
+	SPRINTF(UniqueSequenceName2, "%s-%s", TestSequenceKey2, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence2;
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceName2,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems,
+				   {},
+				   Sequence2,
+				   csp::systems::EResultCode::Success,
+				   csp::systems::ERequestFailureReason::None,
+				   200);
+
+	csp::common::Array<csp::common::String> SequenceItems3 {"Hotspot1", "Hotspot2"};
+
+	const char* TestSequenceKey3 = "CSP UNITTEST SEQUENCE MAG3";
+	char UniqueSequenceName3[256];
+	SPRINTF(UniqueSequenceName3, "%s-%s", TestSequenceKey3, GetUniqueString().c_str());
+
+	csp::systems::Sequence Sequence3;
+	CreateSequence(SequenceSystem,
+				   UniqueSequenceName3,
+				   "GroupId",
+				   Space.Id,
+				   SequenceItems3,
+				   {},
+				   Sequence3,
+				   csp::systems::EResultCode::Success,
+				   csp::systems::ERequestFailureReason::None,
+				   200);
+
+	csp::common::Array<csp::systems::Sequence> FoundSequences;
+	GetAllSequencesContainingItems(SequenceSystem, {"Hotspot3"}, "GroupId", {Space.Id}, FoundSequences);
+
+	EXPECT_EQ(FoundSequences.Size(), 2);
+
+	bool FoundSequence1 = false;
+	bool FoundSequence2 = false;
+
+	for (size_t i = 0; i < FoundSequences.Size(); ++i)
+	{
+		if (FoundSequences[i].Key == UniqueSequenceName1)
+		{
+			FoundSequence1 = true;
+		}
+		else if (FoundSequences[i].Key == UniqueSequenceName2)
+		{
+			FoundSequence2 = true;
+		}
+	}
+
+	EXPECT_TRUE(FoundSequence1);
+	EXPECT_TRUE(FoundSequence2);
+
+	// Delete sequences
+	DeleteSequences(SequenceSystem,
+					{Sequence.Key, Sequence2.Key, Sequence3.Key},
+					csp::systems::EResultCode::Success,
+					csp::systems::ERequestFailureReason::None,
+					204);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

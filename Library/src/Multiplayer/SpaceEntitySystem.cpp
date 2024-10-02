@@ -378,6 +378,18 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 														  },
 														  Components};
 
+
+	auto EntityComponents = Entity->GetComponents();
+	auto Keys			  = EntityComponents->Keys();
+
+	for (size_t i = 0; i < Keys->Size(); ++i)
+	{
+		auto EntityComponent = Entity->GetComponent((*Keys)[i]);
+		EntityComponent->OnLocalDelete();
+	}
+
+	CSP_DELETE(Keys);
+
 	// We break the usual pattern of not considering local state to be true until we get the ack back from CHS here
 	// and instead immediately delete the local view of the entity before issuing the delete for the remote view.
 	// We do this so that clients can immediately respond to the deletion and avoid sending further updates for the
@@ -1163,7 +1175,8 @@ void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionRes
 	};
 
 	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
+	SequenceSystem
+		->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
 }
 
 void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, systems::NullResultCallback Callback)
