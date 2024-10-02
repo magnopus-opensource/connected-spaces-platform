@@ -70,6 +70,11 @@ void UpdateSequences(const std::vector<systems::Sequence>& Sequences,
 
 		auto UpdateCB = [Callback](const systems::SequenceResult& Result)
 		{
+			if (Result.GetResultCode() == systems::EResultCode::InProgress)
+			{
+				return;
+			}
+
 			Callback(systems::NullResult(Result.GetResultCode(), Result.GetHttpResultCode()));
 		};
 
