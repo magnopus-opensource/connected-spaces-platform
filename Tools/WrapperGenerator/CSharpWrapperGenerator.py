@@ -548,14 +548,16 @@ class CSharpWrapperGenerator:
         method.delegate = delegate
         p.delegate = delegate
 
+        # Generate an event for functions decorated with the event macro
         if method.is_event:
             self.__rewrite_event(method, p, delegate, events)
 
-        # Remove this parameter since it will be converted to a Task<T> return instead
-        method.parameters.remove(p)
-
-        if len(method.parameters) > 0:
-            method.parameters[-1].is_last = True
+        # For any methods that will be generating a callback, remove the callback
+        # parameter from the method signature
+        if not is_regular_method:
+            method.parameters.remove(p)
+            if len(method.parameters) > 0:
+                method.parameters[-1].is_last = True
 
     def __rewrite_event(
         self,
