@@ -111,7 +111,7 @@ public:
 	void SetIsARVisible(bool InValue) override;
 	/// @}
 
-	// @brief Called internally when the hotspot is deleted
+	/// @brief Called internally when the hotspot is deleted
 	CSP_NO_EXPORT void RemoveSequences(csp::systems::NullResultCallback Callback);
 
 private:

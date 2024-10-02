@@ -763,25 +763,24 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 	// Create Hotspot groups
 	csp::common::String TestGroupName1 = "CSP-UNITTEST-SEQUENCE-MAG1";
 	csp::common::String TestGroupName2 = "CSP-UNITTEST-SEQUENCE-MAG2";
-	csp::common::String TestGroupName3 = "CSP-UNITTEST-SEQUENCE-MAG3";
+	csp::common::String TestItemName   = "AnotherItem";
 
 	{
 		// Create 2 groups that contains the component
+
+		// Create one with only a single item to test deletion functionality
 		csp::systems::HotspotGroup HotspotGroup1;
 		CreateHotspotgroup(HotspotSystem, TestGroupName1, {HotspotComponent->GetUniqueComponentId()}, HotspotGroup1);
 
+		// Create one with an additional item to test update functionality
 		csp::systems::HotspotGroup HotspotGroup2;
-		CreateHotspotgroup(HotspotSystem, TestGroupName2, {HotspotComponent->GetUniqueComponentId()}, HotspotGroup2);
+		CreateHotspotgroup(HotspotSystem, TestGroupName2, {HotspotComponent->GetUniqueComponentId(), TestItemName}, HotspotGroup2);
 
-		// Create another group that doesnt contain the component
-		csp::systems::HotspotGroup HotspotGroup3;
-		CreateHotspotgroup(HotspotSystem, TestGroupName3, {"TestName"}, HotspotGroup3);
-
-		// Ensure the 3 groups are created correctly
+		// Ensure the 2 groups are created correctly
 		csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2, TestGroupName3}, FoundGroups);
+		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2}, FoundGroups);
 
-		EXPECT_EQ(FoundGroups.Size(), 3);
+		EXPECT_EQ(FoundGroups.Size(), 2);
 	}
 
 	// Remove component
@@ -815,16 +814,21 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 
 		// We currently need to wait some extra time, because our callback doesnt rely on the internal sequence calls finishing.
 		// We shouldn't need to do this after completing OF-1191 as we can do this in the new deletion endpoint callback
-		std::this_thread::sleep_for(2500ms);
+		std::this_thread::sleep_for(3000ms);
 	}
 
-	// 2 of the hotspot groups should now have been deleted
+	// 1 group should be deleted, and one should have its key removed
 	{
 		csp::common::Array<csp::systems::HotspotGroup> RemainingGroups;
-		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2, TestGroupName3}, RemainingGroups);
+		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2}, RemainingGroups);
 
 		EXPECT_EQ(RemainingGroups.Size(), 1);
+		EXPECT_EQ(RemainingGroups[0].Items.Size(), 1);
+		EXPECT_EQ(RemainingGroups[0].Items[0], TestItemName);
 	}
+
+	// Delete remaining group
+	DeleteHotspotGroup(HotspotSystem, TestGroupName2);
 
 	// Exit space
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -908,25 +912,24 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 	// Create Hotspot groups
 	csp::common::String TestGroupName1 = "CSP-UNITTEST-SEQUENCE-MAG1";
 	csp::common::String TestGroupName2 = "CSP-UNITTEST-SEQUENCE-MAG2";
-	csp::common::String TestGroupName3 = "CSP-UNITTEST-SEQUENCE-MAG3";
+	csp::common::String TestItemName   = "AnotherItem";
 
 	{
 		// Create 2 groups that contains the component
+
+		// Create one with only a single item to test deletion functionality
 		csp::systems::HotspotGroup HotspotGroup1;
 		CreateHotspotgroup(HotspotSystem, TestGroupName1, {HotspotComponent->GetUniqueComponentId()}, HotspotGroup1);
 
+		// Create one with an additional item to test update functionality
 		csp::systems::HotspotGroup HotspotGroup2;
-		CreateHotspotgroup(HotspotSystem, TestGroupName2, {HotspotComponent->GetUniqueComponentId()}, HotspotGroup2);
+		CreateHotspotgroup(HotspotSystem, TestGroupName2, {HotspotComponent->GetUniqueComponentId(), TestItemName}, HotspotGroup2);
 
-		// Create another group that doesnt contain the component
-		csp::systems::HotspotGroup HotspotGroup3;
-		CreateHotspotgroup(HotspotSystem, TestGroupName3, {"TestName"}, HotspotGroup3);
-
-		// Ensure the 3 groups are created correctly
+		// Ensure the 2 groups are created correctly
 		csp::common::Array<csp::systems::HotspotGroup> FoundGroups;
-		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2, TestGroupName3}, FoundGroups);
+		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2}, FoundGroups);
 
-		EXPECT_EQ(FoundGroups.Size(), 3);
+		EXPECT_EQ(FoundGroups.Size(), 2);
 	}
 
 	// Remove entity
@@ -946,13 +949,18 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 		std::this_thread::sleep_for(2500ms);
 	}
 
-	// 2 of the hotspot groups should now have been deleted
+	// 1 group should be deleted, and one should have its key removed
 	{
 		csp::common::Array<csp::systems::HotspotGroup> RemainingGroups;
-		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2, TestGroupName3}, RemainingGroups);
+		GetHotspotGroups(HotspotSystem, {TestGroupName1, TestGroupName2}, RemainingGroups);
 
 		EXPECT_EQ(RemainingGroups.Size(), 1);
+		EXPECT_EQ(RemainingGroups[0].Items.Size(), 1);
+		EXPECT_EQ(RemainingGroups[0].Items[0], TestItemName);
 	}
+
+	// Delete remaining group
+	DeleteHotspotGroup(HotspotSystem, TestGroupName2);
 
 	// Exit space
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
