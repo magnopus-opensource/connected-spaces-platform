@@ -16,8 +16,7 @@
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
-#include "CSP/Systems/Sequence/SequenceSystem.h"
-#include "CSP/Systems/Spaces/SpaceSystem.h"
+#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
@@ -26,103 +25,6 @@
 
 namespace csp::multiplayer
 {
-
-namespace
-{
-void DeleteSequences(const std::vector<systems::Sequence>& Sequences, csp::systems::NullResultCallback Callback)
-{
-	systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
-
-	// Remove necessary sequences
-	common::Array<common::String> DeletionKeys(Sequences.size());
-
-	for (size_t i = 0; i < Sequences.size(); ++i)
-	{
-		DeletionKeys[i] = Sequences[i].Key;
-	}
-
-	auto DeleteCallback = [Callback, SequenceSystem](const csp::systems::NullResult& DeleteResult)
-	{
-		if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress)
-		{
-			return;
-		}
-
-		Callback(DeleteResult);
-	};
-
-	SequenceSystem->DeleteSequences(DeletionKeys, DeleteCallback);
-}
-
-void UpdateSequences(const std::vector<systems::Sequence>& Sequences,
-					 const csp::common::String& ItemToRemove,
-					 csp::systems::NullResultCallback Callback)
-{
-	systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
-
-	for (const auto& Sequence : Sequences)
-	{
-		// Remove key from items array
-		common::Array<common::String> Items = Sequence.Items;
-		auto ItemsList						= Items.ToList();
-		ItemsList.RemoveItem(ItemToRemove);
-		Items = ItemsList.ToArray();
-
-		auto UpdateCB = [Callback](const systems::SequenceResult& Result)
-		{
-			if (Result.GetResultCode() == systems::EResultCode::InProgress)
-			{
-				return;
-			}
-
-			Callback(systems::NullResult(Result.GetResultCode(), Result.GetHttpResultCode()));
-		};
-
-		SequenceSystem->UpdateSequence(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Items, Sequence.MetaData, UpdateCB);
-	}
-}
-
-void ProcessAssociatedSequences(const csp::common::Array<systems::Sequence>& Sequences,
-								const csp::common::String& ItemToRemove,
-								csp::systems::NullResultCallback Callback)
-{
-	std::vector<systems::Sequence> SequencesToDelete;
-	std::vector<systems::Sequence> SequencesToUpdate;
-	SequencesToDelete.reserve(Sequences.Size());
-	SequencesToUpdate.reserve(Sequences.Size());
-
-	for (size_t i = 0; i < Sequences.Size(); ++i)
-	{
-		if (Sequences[i].Items.Size() == 1)
-		{
-			// This is the only item in the sequence, so delete the sequence
-			SequencesToDelete.push_back(Sequences[i]);
-		}
-		else
-		{
-			// There are other items in this sequence, so only remove this item
-			SequencesToUpdate.push_back(Sequences[i]);
-		}
-	}
-
-	// Wait for all callbacks before returning
-	int CallbackCount	 = Sequences.Size();
-	int CurrentCallbacks = 0;
-
-	auto CB = [Callback, &CallbackCount, &CurrentCallbacks](const systems::NullResult& Res)
-	{
-		CurrentCallbacks++;
-
-		if (CurrentCallbacks >= CallbackCount)
-		{
-			Callback(Res);
-		}
-	};
-
-	DeleteSequences(SequencesToDelete, CB);
-	UpdateSequences(SequencesToUpdate, ItemToRemove, CB);
-}
-} // namespace
 
 HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Hotspot, Parent)
 {
@@ -222,27 +124,6 @@ void HotspotSpaceComponent::SetIsARVisible(bool Value)
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value);
 }
 
-void HotspotSpaceComponent::RemoveSequences(csp::systems::NullResultCallback Callback)
-{
-	systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
-	systems::SpaceSystem* SpaceSystem		= systems::SystemsManager::Get().GetSpaceSystem();
-
-	csp::common::String Id = GetUniqueComponentId();
-
-	auto GetSequencesCallback = [this, Callback, Id](const systems::SequencesResult& SequencesResult)
-	{
-		if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
-		{
-			return;
-		}
-
-		ProcessAssociatedSequences(SequencesResult.GetSequences(), Id, Callback);
-	};
-
-	// Find all sequences containing this name
-	SequenceSystem->GetAllSequencesContainingItems({Id}, "GroupId", {SpaceSystem->GetCurrentSpace().Id}, GetSequencesCallback);
-}
-
 void HotspotSpaceComponent::OnLocalDelete()
 {
 	auto CB = [](const csp::systems::NullResult& Result)
@@ -250,7 +131,7 @@ void HotspotSpaceComponent::OnLocalDelete()
 
 	};
 
-	RemoveSequences(CB);
+	systems::SystemsManager::Get().GetHotspotSequenceSystem()->UpdateAllGroupsContainingItem(GetUniqueComponentId(), CB);
 }
 
 } // namespace csp::multiplayer

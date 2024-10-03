@@ -785,36 +785,35 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 
 	// Remove component
 	{
-		uint16_t ComponentId  = HotspotComponent->GetId();
-		bool ComponentRemoved = false;
+		bool SequenceDeleted  = false;
+		bool SequenceUpdate	  = false;
+		bool SequencesUpdated = false;
 
-		CreatedObject->SetUpdateCallback(
-			[&ComponentRemoved, ObjectName, ComponentId](csp::multiplayer::SpaceEntity* Entity,
-														 csp::multiplayer::SpaceEntityUpdateFlags Flags,
-														 csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
+		auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
+					  const csp::multiplayer::SequenceHotspotChangedParams& Params)
+		{
+			if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
 			{
-				if (Entity->GetName() == ObjectName)
-				{
-					for (size_t i = 0; i < UpdateInfo.Size(); ++i)
-					{
-						if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Delete)
-						{
-							ComponentRemoved = true;
-						}
-					}
-				}
-			});
+				// Ensure we delete the group which only has one item
+				SequenceDeleted = true;
+			}
+			else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+			{
+				// Ensure we update the sequence that has multiple items
+				SequenceUpdate = true;
+			}
+
+			SequencesUpdated = SequenceDeleted & SequenceUpdate;
+		};
+
+		Connection->SetHotspotSequenceChangedCallback(CB);
 
 		CreatedObject->RemoveComponent(HotspotComponent->GetId());
-
 		CreatedObject->QueueUpdate();
-		WaitForCallbackWithUpdate(ComponentRemoved, EntitySystem);
 
-		EXPECT_TRUE(ComponentRemoved);
+		WaitForCallbackWithUpdate(SequencesUpdated, EntitySystem);
 
-		// We currently need to wait some extra time, because our callback doesnt rely on the internal sequence calls finishing.
-		// We shouldn't need to do this after completing OF-1191 as we can do this in the new deletion endpoint callback
-		std::this_thread::sleep_for(3000ms);
+		EXPECT_TRUE(SequencesUpdated);
 	}
 
 	// 1 group should be deleted, and one should have its key removed
@@ -934,19 +933,35 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 
 	// Remove entity
 	{
-		bool EntityRemoved = false;
+		bool SequenceDeleted  = false;
+		bool SequenceUpdate	  = false;
+		bool SequencesUpdated = false;
+
+		auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
+					  const csp::multiplayer::SequenceHotspotChangedParams& Params)
+		{
+			if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
+			{
+				// Ensure we delete the group which only has one item
+				SequenceDeleted = true;
+			}
+			else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+			{
+				// Ensure we update the sequence that has multiple items
+				SequenceUpdate = true;
+			}
+
+			SequencesUpdated = SequenceDeleted & SequenceUpdate;
+		};
+
+		Connection->SetHotspotSequenceChangedCallback(CB);
 
 		CreatedObject->Destroy(
-			[&EntityRemoved](bool Success)
+			[](bool Success)
 			{
-				EntityRemoved = true;
 			});
 
-		WaitForCallbackWithUpdate(EntityRemoved, EntitySystem);
-
-		EXPECT_TRUE(EntityRemoved);
-
-		std::this_thread::sleep_for(2500ms);
+		WaitForCallbackWithUpdate(SequencesUpdated, EntitySystem);
 	}
 
 	// 1 group should be deleted, and one should have its key removed
