@@ -8,12 +8,6 @@
 [submodule "modules/mimalloc"]
 	path = modules/mimalloc
 	url = https://github.com/microsoft/mimalloc
-[submodule "modules/msgpack"]
-	path = modules/msgpack
-	url = https://github.com/msgpack/msgpack-c
-[submodule "modules/openssl"]
-	path = modules/openssl
-	url = https://github.com/openssl/openssl
 [submodule "modules/poco"]
 	path = modules/poco
 	url = https://github.com/pocoproject/poco
