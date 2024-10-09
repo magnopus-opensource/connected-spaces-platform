@@ -20,6 +20,7 @@ ARM64/*
 **/node_modules/**
 *.log
 *.npmrc
+app.config
 
 # Allows Project files for Examples
 !/Examples/**/**.sln
