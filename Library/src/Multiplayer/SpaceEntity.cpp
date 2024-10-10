@@ -1020,6 +1020,9 @@ void SpaceEntity::ApplyLocalPatch(bool InvokeUpdateCallback)
 			{
 				if (Components.HasKey(TransientDeletionComponentIds[i]))
 				{
+					ComponentBase* Component = GetComponent(TransientDeletionComponentIds[i]);
+					Component->OnLocalDelete();
+
 					DestroyComponent(TransientDeletionComponentIds[i]);
 
 					// Start indexing from the end of the section reserved for DirtyComponents.
