@@ -36,5 +36,5 @@ call npm install
 
 cd ../..
 
-"modules/premake/bin/release/premake5.exe" vs2019 %*
+"modules/premake/bin/release/premake5.exe" vs2022 %*
 pause

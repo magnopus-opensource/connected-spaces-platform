@@ -78,6 +78,7 @@ class CSP_API ComponentBase
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceEntity;
+	friend class SpaceEntitySystem;
 	friend class EntityScriptInterface;
 #ifdef CSP_TESTS
 	friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
@@ -165,7 +166,14 @@ protected:
 
 	virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
 
+	// Called whenever an entity is removed from the system.
+	// Used to shutdown any behaviour managed by the entity.
 	virtual void OnRemove();
+
+	// Called when the component is locally deleted from the space,
+	// or the entity the component is attached to is locally deleted.
+	// Used for handling behaviour when a client first deletes the component.
+	virtual void OnLocalDelete();
 
 	CSP_START_IGNORE
 	void SetScriptInterface(ComponentScriptInterface* ScriptInterface);

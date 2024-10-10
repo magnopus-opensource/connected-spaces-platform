@@ -34,7 +34,61 @@ csp::common::String CreateKey(const csp::common::String& Key, const csp::common:
 	return "Hotspots:" + SpaceId + ":" + Key;
 }
 
+void DeleteSequences(const std::vector<systems::Sequence>& Sequences, csp::systems::NullResultCallback Callback)
+{
+	systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
+
+	// Remove necessary sequences
+	common::Array<common::String> DeletionKeys(Sequences.size());
+
+	for (size_t i = 0; i < Sequences.size(); ++i)
+	{
+		DeletionKeys[i] = Sequences[i].Key;
+	}
+
+	auto DeleteCallback = [Callback, SequenceSystem](const csp::systems::NullResult& DeleteResult)
+	{
+		if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		Callback(DeleteResult);
+	};
+
+	SequenceSystem->DeleteSequences(DeletionKeys, DeleteCallback);
+}
+
+void UpdateSequences(const std::vector<systems::Sequence>& Sequences,
+					 const csp::common::String& ItemToRemove,
+					 csp::systems::NullResultCallback Callback)
+{
+	systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
+
+	for (const auto& Sequence : Sequences)
+	{
+		// Remove key from items array
+		common::Array<common::String> Items = Sequence.Items;
+		auto ItemsList						= Items.ToList();
+		ItemsList.RemoveItem(ItemToRemove);
+		Items = ItemsList.ToArray();
+
+		auto UpdateCB = [Callback](const systems::SequenceResult& Result)
+		{
+			if (Result.GetResultCode() == systems::EResultCode::InProgress)
+			{
+				return;
+			}
+
+			Callback(systems::NullResult(Result.GetResultCode(), Result.GetHttpResultCode()));
+		};
+
+		SequenceSystem->UpdateSequence(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Items, Sequence.MetaData, UpdateCB);
+	}
+}
+
 } // namespace
+
 HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem)
 {
 	this->SequenceSystem = SequenceSystem;
@@ -216,6 +270,54 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
 	SpaceSystem	   = nullptr;
 	SequenceSystem = nullptr;
 }
+
+void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback)
+{
+	systems::SpaceSystem* SpaceSystem = systems::SystemsManager::Get().GetSpaceSystem();
+	// This uses multiple async calls, so ensure this variable exists within this function
+	csp::common::String ItemCopy = ItemName;
+
+	auto GetSequencesCallback = [this, Callback, ItemCopy](const systems::SequencesResult& SequencesResult)
+	{
+		if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
+		{
+			return;
+		}
+
+		const auto& Sequences = SequencesResult.GetSequences();
+
+		std::vector<systems::Sequence> SequencesToDelete;
+		std::vector<systems::Sequence> SequencesToUpdate;
+		SequencesToDelete.reserve(Sequences.Size());
+		SequencesToUpdate.reserve(Sequences.Size());
+
+		for (size_t i = 0; i < Sequences.Size(); ++i)
+		{
+			if (Sequences[i].Items.Size() == 1)
+			{
+				// This is the only item in the sequence, so delete the sequence
+				SequencesToDelete.push_back(Sequences[i]);
+			}
+			else
+			{
+				// There are other items in this sequence, so only remove this item
+				SequencesToUpdate.push_back(Sequences[i]);
+			}
+		}
+
+		auto CB = [](const systems::NullResult& Res)
+		{
+
+		};
+
+		DeleteSequences(SequencesToDelete, CB);
+		UpdateSequences(SequencesToUpdate, ItemCopy, CB);
+	};
+
+	// Find all sequences containing this name
+	SequenceSystem->GetAllSequencesContainingItems({ItemCopy}, "GroupId", {SpaceSystem->GetCurrentSpace().Id}, GetSequencesCallback);
+}
+
 HotspotSequenceSystem::HotspotSequenceSystem()
 {
 	SpaceSystem	   = nullptr;
