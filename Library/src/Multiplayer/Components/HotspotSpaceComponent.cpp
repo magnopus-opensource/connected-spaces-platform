@@ -131,7 +131,7 @@ void HotspotSpaceComponent::OnLocalDelete()
 
 	};
 
-	systems::SystemsManager::Get().GetHotspotSequenceSystem()->UpdateAllGroupsContainingItem(GetUniqueComponentId(), CB);
+	systems::SystemsManager::Get().GetHotspotSequenceSystem()->RemoveItemFromGroups(GetUniqueComponentId(), CB);
 }
 
 } // namespace csp::multiplayer

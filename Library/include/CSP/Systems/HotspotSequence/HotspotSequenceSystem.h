@@ -102,7 +102,7 @@ public:
 	/// For any groups which contanin the given item and additional items, it will just update the group by removing the given item.
 	/// @param ItemName csp::common::String : An item to update all sequences containing.
 	/// @param Callback NullResultCallback : callback to call when a response is received
-	CSP_ASYNC_RESULT void UpdateAllGroupsContainingItem(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback);
+	CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback);
 
 private:
 	HotspotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
