@@ -31,7 +31,7 @@ def main():
 
     os.makedirs(args.output_directory)
 	
-	start_commit = ""
+    start_commit = ""
 
     # Get changelist
     if len(repo.tags) > 0:
