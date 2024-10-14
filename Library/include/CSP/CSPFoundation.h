@@ -112,11 +112,6 @@ public:
 	/// @return const EndpointURIs& : The EndpointURIs class with current endpoint data
 	static const EndpointURIs& GetEndpoints();
 
-	/// @brief Sets a class containing all relevant Client info currently set for Foundation.
-	/// Used internally to generate ClientUserAgentString.
-	/// @param The Client Info class with current Client Info data
-	static void SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader);
-
 	/// @brief Gets a class containing all relevant Client info currently set for Foundation.
 	/// @return const ClientUserAgent& : The Client Info class with current Client Info data
 	static const ClientUserAgent& GetClientUserAgentInfo();
@@ -131,6 +126,11 @@ public:
 	static const csp::common::String& GetTenant();
 
 private:
+	/// @brief Sets a class containing all relevant Client info currently set for Foundation.
+	/// Used internally to generate ClientUserAgentString.
+	/// @param The Client Info class with current Client Info data
+	static void SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader);
+
 	static bool IsInitialised;
 	static EndpointURIs* Endpoints;
 	static ClientUserAgent* ClientUserAgentInfo;

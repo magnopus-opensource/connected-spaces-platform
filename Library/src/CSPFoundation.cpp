@@ -277,8 +277,7 @@ void CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
 
 	csp::systems::SystemsManager::Instantiate();
 
-	*DeviceId	  = LoadDeviceId().c_str();
-	IsInitialised = true;
+	*DeviceId = LoadDeviceId().c_str();
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 
@@ -290,7 +289,10 @@ void CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
 		if (Res.GetResultCode() != systems::EResultCode::InProgress)
 		{
 			csp::systems::BooleanResult BoolResult(Res.GetResultCode(), Res.GetHttpResultCode());
-			BoolResult.SetValue(Res.GetResultCode() == systems::EResultCode::Success);
+
+			bool Success = Res.GetResultCode() == systems::EResultCode::Success;
+			BoolResult.SetValue(Success);
+			IsInitialised = Success;
 
 			Callback(BoolResult);
 		}
@@ -392,7 +394,6 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 {
 	if (IsInitialised == false)
 	{
-
 		return;
 	}
 
