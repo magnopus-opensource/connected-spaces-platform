@@ -162,6 +162,8 @@ inline void PrintProgress(float Progress)
 	std::cerr << ProgressString;
 }
 
+inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20);
+
 inline void SetRandSeed()
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -212,8 +214,6 @@ inline void LogFatal(std::string Message)
 
 inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 {
-	csp::CSPFoundation::Initialise(EndpointRootURI, "OKO_TESTS");
-
 	csp::ClientUserAgent ClientHeaderInfo;
 	ClientHeaderInfo.CSPVersion		   = csp::CSPFoundation::GetVersion();
 	ClientHeaderInfo.ClientOS		   = "CPPTestsOS";
@@ -222,11 +222,24 @@ inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& End
 	ClientHeaderInfo.ClientEnvironment = "ODev";
 	ClientHeaderInfo.CHSEnvironment	   = "oDev";
 
-	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+	bool Called = false;
+
+	csp::CSPFoundation::Initialise(EndpointRootURI,
+								   "OKO_TESTS",
+								   ClientHeaderInfo,
+								   [&Called](const csp::systems::BooleanResult& Result)
+								   {
+									   EXPECT_TRUE(Result.GetValue());
+									   Called = true;
+								   });
+
+	WaitForCallback(Called);
+
+	EXPECT_TRUE(Called);
 }
 
 
-inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
+inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds)
 {
 	// Wait for message
 	auto Start		 = std::chrono::steady_clock::now();

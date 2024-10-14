@@ -17,7 +17,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
-
+#include "CSP/Systems/SystemsResult.h"
 
 namespace csp
 {
@@ -67,9 +67,13 @@ public:
 	/// systems required for foundation to operate.
 	/// @param EndpointRootURI csp::common::String : Root URI for service endpoints
 	/// @param Tenant csp::common::String : Tenant for Magnopus Services. Data is not shared between tenants so clients using separate tenants cannot
+	/// @param ClientHeaderInfo ClientUserAgent : Information needed for CSP initialisation
 	/// interact with each other.
-	/// @return bool : True for successful initialisation.
-	static bool Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& Tenant);
+	/// @param Callback BooleanResultCallback : Returns false if CSP is already initialized, or we can't reach the provided uri
+	static void Initialise(const csp::common::String& EndpointRootURI,
+						   const csp::common::String& Tenant,
+						   const csp::ClientUserAgent& ClientHeaderInfo,
+						   csp::systems::BooleanResultCallback Callback);
 
 	/// @brief This should be used at the end of the application lifecycle.
 	/// Clears event queues and destroys foundation systems.

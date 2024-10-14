@@ -40,6 +40,11 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp
+{
+class CSPFoundation;
+}
+
 
 namespace csp::systems
 {
@@ -70,6 +75,7 @@ protected:
 };
 
 
+
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
 class CSP_API BooleanResult : public csp::systems::ResultBase
 {
@@ -77,6 +83,7 @@ class CSP_API BooleanResult : public csp::systems::ResultBase
 	friend class SettingsSystem;
 	friend class MaintenanceSystem;
 	friend class SpaceSystem;
+	friend class csp::CSPFoundation;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

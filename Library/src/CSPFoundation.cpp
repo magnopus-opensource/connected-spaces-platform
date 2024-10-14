@@ -18,6 +18,7 @@
 #include "../../Tools/WrapperGenerator/Output/C/generated_wrapper.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
 #include "CSP/version.h"
 #include "Common/UUIDGenerator.h"
 #include "Common/Wrappers.h"
@@ -236,11 +237,14 @@ csp::common::String* CSPFoundation::DeviceId			  = nullptr;
 csp::common::String* CSPFoundation::ClientUserAgentString = nullptr;
 csp::common::String* CSPFoundation::Tenant				  = nullptr;
 
-bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
+void CSPFoundation::Initialise(const csp::common::String& EndpointRootURI,
+							   const csp::common::String& InTenant,
+							   const csp::ClientUserAgent& ClientHeaderInfo,
+							   csp::systems::BooleanResultCallback Callback)
 {
 	if (IsInitialised)
 	{
-		return false;
+		return Callback(csp::systems::BooleanResult());
 	}
 
 	// remove last char if a slash
@@ -259,7 +263,6 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
 
-
 	Endpoints			  = CSP_NEW EndpointURIs();
 	ClientUserAgentInfo	  = CSP_NEW ClientUserAgent();
 	DeviceId			  = CSP_NEW csp::common::String("");
@@ -277,18 +280,23 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	*DeviceId	  = LoadDeviceId().c_str();
 	IsInitialised = true;
 
-	// Initialises ClientAgentHeaderInfo with default values in case the client doesn't call SetClientUserAgentInfo().
-	ClientUserAgent ClientAgentHeaderInfo;
-	ClientAgentHeaderInfo.CSPVersion		= CSP_TEXT("CSPVersionUnset");
-	ClientAgentHeaderInfo.ClientOS			= CSP_TEXT("ClientOSUnset");
-	ClientAgentHeaderInfo.ClientSKU			= CSP_TEXT("ClientSKUUnset");
-	ClientAgentHeaderInfo.ClientVersion		= CSP_TEXT("ClientVersionUnset");
-	ClientAgentHeaderInfo.ClientEnvironment = CSP_TEXT("ClientBuildTypeUnset");
-	ClientAgentHeaderInfo.CHSEnvironment	= CSP_TEXT("CHSEnvironmentUnset");
+	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 
-	SetClientUserAgentInfo(ClientAgentHeaderInfo);
+	// Check the uri provided is valid:
+	systems::UserSystem* UserSystem = systems::SystemsManager::Get().GetUserSystem();
 
-	return true;
+	auto CB = [Callback](const csp::systems::NullResult& Res)
+	{
+		if (Res.GetResultCode() != systems::EResultCode::InProgress)
+		{
+			csp::systems::BooleanResult BoolResult(Res.GetResultCode(), Res.GetHttpResultCode());
+			BoolResult.SetValue(Res.GetResultCode() == systems::EResultCode::Success);
+
+			Callback(BoolResult);
+		}
+	};
+
+	UserSystem->Ping(CB);
 }
 
 bool CSPFoundation::Shutdown()
@@ -382,12 +390,19 @@ const csp::common::String& CSPFoundation::GetTenant()
 
 void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUserAgentHeader)
 {
-	ClientUserAgentInfo->CSPVersion			= CSP_TEXT(ClientUserAgentHeader.CSPVersion);
-	ClientUserAgentInfo->ClientOS			= CSP_TEXT(ClientUserAgentHeader.ClientOS);
-	ClientUserAgentInfo->ClientSKU			= CSP_TEXT(ClientUserAgentHeader.ClientSKU);
-	ClientUserAgentInfo->ClientVersion		= CSP_TEXT(ClientUserAgentHeader.ClientVersion);
-	ClientUserAgentInfo->ClientEnvironment	= CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
-	ClientUserAgentInfo->CHSEnvironment		= CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
+	if (IsInitialised == false)
+	{
+
+		return;
+	}
+
+	ClientUserAgentInfo->CSPVersion		   = CSP_TEXT(ClientUserAgentHeader.CSPVersion);
+	ClientUserAgentInfo->ClientOS		   = CSP_TEXT(ClientUserAgentHeader.ClientOS);
+	ClientUserAgentInfo->ClientSKU		   = CSP_TEXT(ClientUserAgentHeader.ClientSKU);
+	ClientUserAgentInfo->ClientVersion	   = CSP_TEXT(ClientUserAgentHeader.ClientVersion);
+	ClientUserAgentInfo->ClientEnvironment = CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
+	ClientUserAgentInfo->CHSEnvironment	   = CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
+
 	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
 
 	*ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat,

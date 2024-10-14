@@ -15,6 +15,7 @@
  */
 #include "Awaitable.h"
 #include "CSP/CSPFoundation.h"
+#include "CSP/Systems/Log/LogSystem.h"
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -1125,5 +1126,34 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	EXPECT_NE(Result.GetValue(), "");
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_INVALID_URL_LOGIN_TEST
+CSP_INTERNAL_TEST(CSPEngine, UserSystemTests, InvalidURLLoginTest)
+{
+	bool Called = false;
+
+	csp::ClientUserAgent ClientHeaderInfo;
+	ClientHeaderInfo.CSPVersion		   = csp::CSPFoundation::GetVersion();
+	ClientHeaderInfo.ClientOS		   = "CPPTestsOS";
+	ClientHeaderInfo.ClientSKU		   = TESTS_CLIENT_SKU;
+	ClientHeaderInfo.ClientVersion	   = csp::CSPFoundation::GetVersion();
+	ClientHeaderInfo.ClientEnvironment = "ODev";
+	ClientHeaderInfo.CHSEnvironment	   = "oDev";
+
+	csp::CSPFoundation::Initialise("https://invalid-url.cloud",
+								   "OKO_TESTS",
+								   ClientHeaderInfo,
+								   [&Called](const csp::systems::BooleanResult& Result)
+								   {
+									   EXPECT_FALSE(Result.GetValue());
+									   Called = true;
+								   });
+
+	WaitForCallback(Called);
+	EXPECT_TRUE(Called);
+
+	csp::CSPFoundation::Shutdown();
 }
 #endif
