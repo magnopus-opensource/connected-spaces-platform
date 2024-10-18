@@ -19,6 +19,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
@@ -57,7 +58,9 @@ public:
 	/** @endcond */
 	CSP_END_IGNORE
 
-	HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem);
+	HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem,
+						  csp::systems::SpaceSystem* SpaceSystem,
+						  csp::multiplayer::EventBus* InEventBus);
 	/// @brief Create a Hotspot group
 	/// @param GroupName csp::common::String : The unique grouping name
 	/// @param HotspotIds csp::common::Array<csp::common::String> : set of Hotspot ids to add to the group
@@ -104,9 +107,26 @@ public:
 	/// @param Callback NullResultCallback : callback to call when a response is received
 	CSP_ASYNC_RESULT void RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback);
 
+	// Callback to receive hotspot sequence changes, contains a SequenceHotspotChangedParams with the details.
+	typedef std::function<void(const csp::multiplayer::SequenceHotspotChangedParams&)> HotspotSequenceChangedCallbackHandler;
+
+	/// @brief Sets a callback to be fired when a hotspot sequence is changed.
+	/// @param Callback HotspotSequenceChangedCallbackHandler: Callback to receive data for the hotspot sequence that has been changed.
+	CSP_EVENT void SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback);
+
+	/// @brief Registers the system to listen for the named event.
+	void RegisterSystemCallback();
+	/// @brief Deregisters the system from listening for the named event.
+	void DeregisterSystemCallback();
+	/// @brief Deserialises the event values of the system.
+	/// @param EventValues std::vector<signalr::value> : event values to deserialise
+	CSP_NO_EXPORT void Deserialise(const std::vector<signalr::value>& EventValues);
+
 private:
 	HotspotSequenceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	csp::systems::SequenceSystem* SequenceSystem;
 	csp::systems::SpaceSystem* SpaceSystem;
+
+	HotspotSequenceChangedCallbackHandler HotspotSequenceChangedCallback;
 };
 } // namespace csp::systems

@@ -86,6 +86,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -204,6 +205,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -420,6 +422,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -736,6 +739,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
@@ -793,9 +797,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 		ConversationNewMessagecallbackCalled = true;
 	};
 
-	Connection->SetConversationSystemCallback(ConversationNewMessageCallback);
-
 	ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
+
+	ConversationSystem->SetConversationSystemCallback(ConversationNewMessageCallback);
 
 	auto [Result]  = AWAIT_PRE(ConversationSystem, CreateConversation, RequestPredicate, "TestMessage");
 	ConversationId = Result.GetValue();
@@ -884,6 +888,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
@@ -986,7 +991,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	}
 
 	{
-		Connection->SetConversationSystemCallback(ConversationDeleteMessageCallback);
+		ConversationSystem->SetConversationSystemCallback(ConversationDeleteMessageCallback);
 		auto [Result] = AWAIT(ConversationSystem, DeleteMessage, MessageId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1042,6 +1047,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
@@ -1147,7 +1153,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	}
 
 	{
-		Connection->SetConversationSystemCallback(ConversationDeleteConversationCallback);
+		ConversationSystem->SetConversationSystemCallback(ConversationDeleteConversationCallback);
 		auto [Result] = AWAIT(ConversationSystem, DeleteConversation, ConversationId);
 
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1194,6 +1200,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-OKO";
@@ -1279,7 +1286,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
 	}
 
-	Connection->SetConversationSystemCallback(ConversationConversationInformationCallback);
+	ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
+	ConversationSystem->SetConversationSystemCallback(ConversationConversationInformationCallback);
 
 	{
 		auto [Result] = AWAIT_PRE(ConvSystem, GetConversationInformation, RequestPredicate, ConversationId);
@@ -1383,6 +1391,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-OKO";
@@ -1468,7 +1477,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 		EXPECT_EQ(Result.GetConversationInfo().CameraPosition.Scale.Z, DefaultValue.Scale.Z);
 	}
 
-	Connection->SetConversationSystemCallback(ConversationMessageInformationCallback);
+	ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
+	ConversationSystem->SetConversationSystemCallback(ConversationMessageInformationCallback);
 
 	{
 		auto [Result] = AWAIT_PRE(ConvSystem, AddMessageToConversation, RequestPredicate, ConversationId, "test", "test");

@@ -109,11 +109,11 @@ std::vector<std::shared_ptr<chs::OrganizationInviteDto>>
 	return OrganizationInvites;
 }
 
-OrganizationSystem::OrganizationSystem() : SystemBase(), OrganizationApi(nullptr)
+OrganizationSystem::OrganizationSystem() : SystemBase(nullptr, nullptr), OrganizationApi(nullptr)
 {
 }
 
-OrganizationSystem::OrganizationSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
+OrganizationSystem::OrganizationSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr)
 {
 	OrganizationApi = CSP_NEW chs::OrganizationApi(InWebClient);
 }
@@ -151,7 +151,7 @@ void OrganizationSystem::GetOrganization(const csp::common::Optional<csp::common
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to GetOrganization failed. You do not belong to an Organization.");
+			CSP_LOG_ERROR_MSG("Call to GetOrganization failed. You do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
 
@@ -209,7 +209,7 @@ void OrganizationSystem::UpdateOrganization(const csp::common::Optional<csp::com
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to UpdateOrganization failed. No Organization has been updated as you do not belong to one.");
+			CSP_LOG_ERROR_MSG("Call to UpdateOrganization failed. No Organization has been updated as you do not belong to one.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
 
@@ -261,7 +261,8 @@ void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::c
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to InviteToOrganization failed. The specified user has not been invited as you do not belong to an Organization.");
+			CSP_LOG_ERROR_MSG(
+				"Call to InviteToOrganization failed. The specified user has not been invited as you do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -326,7 +327,7 @@ void OrganizationSystem::BulkInviteToOrganization(const csp::common::Optional<cs
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to BulkInviteToOrganization failed. No-one has been invited as you do not belong to an Organization.");
+			CSP_LOG_ERROR_MSG("Call to BulkInviteToOrganization failed. No-one has been invited as you do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 
@@ -369,7 +370,7 @@ void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Optional<
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to GetUserRolesInOrganization failed. You do not belong to an Organization.");
+			CSP_LOG_ERROR_MSG("Call to GetUserRolesInOrganization failed. You do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationRolesResult>());
 
@@ -411,7 +412,7 @@ void OrganizationSystem::RemoveUserFromOrganization(const csp::common::Optional<
 
 		if (SelectedOrganizationId.IsEmpty())
 		{
-            CSP_LOG_ERROR_MSG("Call to RemoveUserFromOrganization failed. You do not belong to an Organization.");
+			CSP_LOG_ERROR_MSG("Call to RemoveUserFromOrganization failed. You do not belong to an Organization.");
 
 			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 

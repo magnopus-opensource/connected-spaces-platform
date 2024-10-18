@@ -16,9 +16,11 @@
 
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
@@ -305,18 +307,55 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 		);
 }
 
-SequenceSystem::SequenceSystem() : SystemBase(), SequenceAPI(nullptr)
+SequenceSystem::SequenceSystem() : SystemBase(nullptr, nullptr), SequenceAPI(nullptr)
 {
 }
 
-SequenceSystem::SequenceSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
+SequenceSystem::SequenceSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus) : SystemBase(InWebClient, InEventBus)
 {
 	SequenceAPI = CSP_NEW chs::SequenceApi(InWebClient);
+
+	RegisterSystemCallback();
 }
 
 SequenceSystem::~SequenceSystem()
 {
 	CSP_DELETE(SequenceAPI);
+
+	DeregisterSystemCallback();
+}
+
+void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
+{
+	SequenceChangedCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void SequenceSystem::RegisterSystemCallback()
+{
+	if (!SequenceChangedCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenEvent("SequenceChanged", this);
+}
+
+void SequenceSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+		EventBusPtr->StopListenEvent("SequenceChanged");
+}
+
+void SequenceSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+{
+	csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
+	SequenceDeserialiser.Parse(EventValues);
+
+	if (SequenceChangedCallback)
+	{
+		SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
+	}
 }
 
 } // namespace csp::systems

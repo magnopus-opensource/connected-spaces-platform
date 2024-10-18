@@ -46,11 +46,11 @@ namespace chs = csp::services::generated::userservice;
 namespace csp::systems
 {
 
-SettingsSystem::SettingsSystem() : SystemBase(), SettingsAPI(nullptr)
+SettingsSystem::SettingsSystem() : SystemBase(nullptr, nullptr), SettingsAPI(nullptr)
 {
 }
 
-SettingsSystem::SettingsSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
+SettingsSystem::SettingsSystem(web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr)
 {
 	SettingsAPI = CSP_NEW chs::SettingsApi(InWebClient);
 }

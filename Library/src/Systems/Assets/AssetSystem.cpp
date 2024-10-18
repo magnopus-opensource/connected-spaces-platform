@@ -148,16 +148,18 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 namespace csp::systems
 {
 
-AssetSystem::AssetSystem() : SystemBase(), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
+AssetSystem::AssetSystem() : SystemBase(nullptr, nullptr), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus) : SystemBase(InWebClient, InEventBus)
 {
 	PrototypeAPI   = CSP_NEW chs::PrototypeApi(InWebClient);
 	AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
 
 	FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+
+	RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
@@ -166,6 +168,8 @@ AssetSystem::~AssetSystem()
 
 	CSP_DELETE(AssetDetailAPI);
 	CSP_DELETE(PrototypeAPI);
+
+	DeregisterSystemCallback();
 }
 
 void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId,
@@ -846,6 +850,38 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	};
 
 	GetAssetsByCriteria({InAsset.AssetCollectionId}, nullptr, nullptr, Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
+}
+
+CSP_EVENT void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+{
+	AssetDetailBlobChangedCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void AssetSystem::RegisterSystemCallback()
+{
+	if (!AssetDetailBlobChangedCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenEvent("AssetDetailBlobChanged", this);
+}
+
+void AssetSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+		EventBusPtr->StopListenEvent("AssetDetailBlobChanged");
+}
+
+void AssetSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+{
+	if (!AssetDetailBlobChangedCallback)
+		return;
+
+	csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
 }
 
 } // namespace csp::systems

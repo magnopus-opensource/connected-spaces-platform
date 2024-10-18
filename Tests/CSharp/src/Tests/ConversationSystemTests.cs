@@ -628,6 +628,7 @@ namespace CSPEngine
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
+            var eventBus = systemsManager.GetEventBus();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
@@ -636,7 +637,9 @@ namespace CSPEngine
             var gotMessage = false;
             var conversationId = "";
 
-            connection.OnConversationSystem += (s, p) =>
+            var conversationSystem = connection.GetConversationSystem();
+
+            conversationSystem.OnConversationSystem += (s, p) =>
             {
                 if (gotMessage)
                     return;
@@ -646,8 +649,6 @@ namespace CSPEngine
 
                 gotMessage = true;
             };
-
-            var conversationSystem = connection.GetConversationSystem();
 
             // Create conversation
             {
@@ -1032,6 +1033,7 @@ namespace CSPEngine
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
+            var eventBus = systemsManager.GetEventBus();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
@@ -1039,7 +1041,9 @@ namespace CSPEngine
             var gotMessage = false;
             var conversationId = "";
 
-            connection.OnConversationSystem += (s, p) =>
+            var conversationSystem = connection.GetConversationSystem();
+
+            conversationSystem.OnConversationSystem += (s, p) =>
             {
                 if (gotMessage)
                 {
@@ -1051,8 +1055,6 @@ namespace CSPEngine
 
                 gotMessage = true;
             };
-
-            var conversationSystem = connection.GetConversationSystem();
 
             // Create conversation
             {

@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Systems/Spaces/Space.h"
+#include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
 namespace csp::multiplayer
@@ -29,13 +30,14 @@ namespace csp::multiplayer
 
 /// @ingroup Conversation System
 /// @brief Public facing system that can handle conversations taking place between users of a space in the form of thread messages.
-class CSP_API CSP_NO_DISPOSE ConversationSystem
+class CSP_API CSP_NO_DISPOSE ConversationSystem : public csp::systems::SystemBase
 {
 public:
 	/// @brief Constructs a conversation system instance that uses the given multiplayer connection.
 	/// @param InMultiPlayerConnection MultiplayerConnection : The connection to be used.
 	ConversationSystem(MultiplayerConnection* InMultiPlayerConnection);
 
+	~ConversationSystem();
 
 	/** @name Asynchronous Calls
 	 *   These are methods that perform WebClient calls and therefore operate asynchronously and require a callback to be passed for a completion
@@ -133,6 +135,22 @@ public:
 	/// @param InConnection csp::multiplayer::SignalRConnection : The connection to be used by the conversation system.
 	CSP_NO_EXPORT void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
 
+	// Callback to receive ConversationSystem Data when a message is sent.
+	typedef std::function<void(const csp::multiplayer::ConversationSystemParams&)> ConversationSystemCallbackHandler;
+
+	/// @brief Sets a callback for a conversation new message event.
+	/// @param Callback ConversationMessageCallbackHandler: Callback to receive ConversationSystem Data when a message is sent.
+	/// Callback will have to reset the callback passed to the system to avoid "dangling objects" after use.
+	CSP_EVENT void SetConversationSystemCallback(ConversationSystemCallbackHandler Callback);
+
+	/// @brief Registers the system to listen for the named event.
+	void RegisterSystemCallback();
+	/// @brief Deregisters the system from listening for the named event.
+	void DeregisterSystemCallback();
+	/// @brief Deserialises the event values of the system.
+	/// @param EventValues std::vector<signalr::value> : event values to deserialise
+	CSP_NO_EXPORT void Deserialise(const std::vector<signalr::value>& EventValues);
+
 private:
 	void StoreConversationMessage(const csp::common::String& ConversationId,
 								  const csp::systems::Space& Space,
@@ -145,6 +163,8 @@ private:
 
 	MultiplayerConnection* MultiPlayerConnection;
 	SignalRConnection* Connection;
+
+	ConversationSystemCallbackHandler ConversationSystemCallback;
 };
 
 } // namespace csp::multiplayer

@@ -18,6 +18,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -75,11 +76,11 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 namespace csp::systems
 {
 
-SpaceSystem::SpaceSystem() : SystemBase(), GroupAPI(nullptr), SpaceAPI(nullptr)
+SpaceSystem::SpaceSystem() : SystemBase(nullptr, nullptr), GroupAPI(nullptr), SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient), CurrentSpace()
+SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr), CurrentSpace()
 {
 	GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
 	SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);

@@ -15,14 +15,18 @@
  */
 #include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 
+#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
+#include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "ConversationSystemHelpers.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/HttpResponse.h"
 
@@ -30,8 +34,15 @@
 namespace csp::multiplayer
 {
 
-ConversationSystem::ConversationSystem(MultiplayerConnection* Connection) : MultiPlayerConnection(Connection), Connection(nullptr)
+ConversationSystem::ConversationSystem(MultiplayerConnection* Connection)
+	: MultiPlayerConnection(Connection), Connection(nullptr), SystemBase(Connection->EventBusPtr)
 {
+	RegisterSystemCallback();
+}
+
+ConversationSystem::~ConversationSystem()
+{
+	DeregisterSystemCallback();
 }
 
 void ConversationSystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
@@ -753,6 +764,40 @@ void ConversationSystem::GetConversationInformation(const csp::common::String& C
 	};
 
 	AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+}
+
+CSP_EVENT void ConversationSystem::SetConversationSystemCallback(ConversationSystemCallbackHandler Callback)
+{
+	ConversationSystemCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void ConversationSystem::RegisterSystemCallback()
+{
+	if (!ConversationSystemCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenEvent("ConversationSystem", this);
+}
+
+void ConversationSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+		EventBusPtr->StopListenEvent("ConversationSystem");
+}
+
+void ConversationSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+{
+	if (!ConversationSystemCallback)
+	{
+		return;
+	}
+
+	ConversationEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	ConversationSystemCallback(Deserialiser.GetEventParams());
 }
 
 } // namespace csp::multiplayer

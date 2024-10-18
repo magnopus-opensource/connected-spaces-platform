@@ -354,6 +354,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
@@ -428,6 +430,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
@@ -1117,6 +1121,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
@@ -1158,7 +1163,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(CreateCallback);
+	SequenceSystem->SetSequenceChangedCallback(CreateCallback);
 
 	csp::systems::Sequence Sequence;
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -1179,7 +1184,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(UpdateCallback);
+	SequenceSystem->SetSequenceChangedCallback(UpdateCallback);
 	CallbackCalled = false;
 
 	csp::systems::Sequence UpdatedSequence;
@@ -1197,7 +1202,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(DeleteCallback);
+	SequenceSystem->SetSequenceChangedCallback(DeleteCallback);
 	CallbackCalled = false;
 
 	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);

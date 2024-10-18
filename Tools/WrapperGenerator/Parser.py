@@ -414,12 +414,17 @@ class Parser:
 
         start_line = reader.current_line
         namespace = '::'.join(self.namespaces)
+
         name = word
-        log(f"Entering enum '{namespace}::{name}'", self.indent)
-        self.indent += 1
 
         word = reader.next_word()
         base: str | None = None
+
+        if word == ';':
+             return
+
+        log(f"Entering enum '{namespace}::{name}'", self.indent)
+        self.indent += 1
 
         if word == ':':
             base = reader.next_word()
@@ -428,7 +433,7 @@ class Parser:
             log(f"Base Type: {base}", self.indent)
         
         if word != '{':
-            error_in_file(filename, reader.current_line, f"Expected '{{' after enum declaration. Got '{word}'.")
+            error_in_file(filename, reader.current_line, f"Expected '{{' or ';' after enum declaration. Got '{word}'.")
 
         fields: List[EnumFieldMetadata] = []
         
@@ -1561,6 +1566,7 @@ class Parser:
                         reader.next_word()
                 elif word == 'namespace':
                     doc_comments.clear()
+                    assert not self.namespaces
                     namespace = reader.next_word()
                     word = reader.next_word()
 

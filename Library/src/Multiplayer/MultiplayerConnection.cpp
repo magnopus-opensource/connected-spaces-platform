@@ -17,6 +17,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Multiplayer/Conversation/ConversationSystem.h"
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -117,13 +118,14 @@ constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 /// @brief MultiplayerConnection
 MultiplayerConnection::MultiplayerConnection()
-	: Connection(nullptr)
-	, WebSocketClient(nullptr)
-	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
-	, ClientId(0)
-	, Connected(false)
-	, ConversationSystemPtr(CSP_NEW ConversationSystem(this))
+	: Connection(nullptr),
+	WebSocketClient(nullptr),
+	NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this)),
+	ClientId(0),
+	Connected(false)
 {
+	EventBusPtr			  = CSP_NEW EventBus(this);
+	ConversationSystemPtr = CSP_NEW ConversationSystem(this);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -148,22 +150,22 @@ MultiplayerConnection::~MultiplayerConnection()
 		CSP_DELETE(WebSocketClient);
 		CSP_DELETE(NetworkEventManager);
 		CSP_DELETE(ConversationSystemPtr);
+		EventBusPtr = nullptr;
 	}
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
 {
-	Connection					   = InBoundConnection.Connection;
-	WebSocketClient				   = InBoundConnection.WebSocketClient;
-	NetworkEventManager			   = InBoundConnection.NetworkEventManager;
-	ConversationSystemPtr		   = InBoundConnection.ConversationSystemPtr;
-	ClientId					   = InBoundConnection.ClientId;
-	DisconnectionCallback		   = InBoundConnection.DisconnectionCallback;
-	ConnectionCallback			   = InBoundConnection.ConnectionCallback;
-	NetworkInterruptionCallback	   = InBoundConnection.NetworkInterruptionCallback;
-	AssetDetailBlobChangedCallback = InBoundConnection.AssetDetailBlobChangedCallback;
-	ConversationSystemCallback	   = InBoundConnection.ConversationSystemCallback;
-	Connected					   = (InBoundConnection.Connected) ? true : false;
+	Connection					= InBoundConnection.Connection;
+	WebSocketClient				= InBoundConnection.WebSocketClient;
+	NetworkEventManager			= InBoundConnection.NetworkEventManager;
+	ConversationSystemPtr		= InBoundConnection.ConversationSystemPtr;
+	ClientId					= InBoundConnection.ClientId;
+	DisconnectionCallback		= InBoundConnection.DisconnectionCallback;
+	ConnectionCallback			= InBoundConnection.ConnectionCallback;
+	NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
+	EventBusPtr					= InBoundConnection.EventBusPtr;
+	Connected					= (InBoundConnection.Connected) ? true : false;
 }
 
 void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
@@ -194,7 +196,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 	ConversationSystemPtr->SetConnection(Connection);
 	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
 
-	StartEventMessageListening();
+	EventBusPtr->StartEventMessageListening();
 
 	// Initialise
 	Start(
@@ -349,141 +351,6 @@ CSP_EVENT void MultiplayerConnection::SetNetworkInterruptionCallback(NetworkInte
 	NetworkInterruptionCallback = Callback;
 }
 
-CSP_EVENT void MultiplayerConnection::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
-{
-	AssetDetailBlobChangedCallback = Callback;
-}
-
-CSP_EVENT void MultiplayerConnection::SetConversationSystemCallback(ConversationSystemCallbackHandler Callback)
-{
-	ConversationSystemCallback = Callback;
-}
-
-void MultiplayerConnection::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
-{
-	UserPermissionsChangedCallback = Callback;
-}
-
-void MultiplayerConnection::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
-{
-	SequenceChangedCallback = Callback;
-}
-
-void MultiplayerConnection::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback)
-{
-	HotspotSequenceChangedCallback = Callback;
-}
-
-void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
-{
-	if (Connection == nullptr || !Connected)
-	{
-		return;
-	}
-
-	NetworkEventMap[EventName].push_back(Callback);
-}
-
-void MultiplayerConnection::StopListenNetworkEvent(const csp::common::String& EventName)
-{
-	NetworkEventMap.erase(EventName);
-}
-
-// Begin listening to EventMessages from CHS. Must be called before Connection->Start.
-void MultiplayerConnection::StartEventMessageListening()
-{
-	if (Connection == nullptr)
-	{
-		return;
-	}
-
-	std::function<void(signalr::value)> LocalCallback = [this](signalr::value Result)
-	{
-		if (Result.is_null())
-		{
-			return;
-		}
-
-		std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
-		const csp::common::String EventType(EventValues[0].as_string().c_str());
-
-		if (EventType == "AssetDetailBlobChanged")
-		{
-			if (!AssetDetailBlobChangedCallback)
-			{
-				return;
-			}
-
-			AssetChangedEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "ConversationSystem")
-		{
-			if (!ConversationSystemCallback)
-			{
-				return;
-			}
-
-			ConversationEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			ConversationSystemCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "AccessControlChanged")
-		{
-			if (!UserPermissionsChangedCallback)
-			{
-				return;
-			}
-
-			UserPermissionsChangedEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			UserPermissionsChangedCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "OrganizationMemberAdded")
-		{
-			CSP_LOG_MSG(systems::LogLevel::Log, "Custom deserialiser for OrganizationMemberAdded event not yet implemented.")
-			// todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
-		}
-		else if (EventType == "SequenceChanged")
-		{
-			SequenceChangedEventDeserialiser SequenceDeserialiser;
-			SequenceDeserialiser.Parse(EventValues);
-
-			if (SequenceChangedCallback)
-			{
-				SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
-			}
-
-			// There are a variety of sequence types.
-			// Other CSP callbacks may also need to fire if the sequence change relates to a particular sequence type.
-			const csp::common::String Key		   = SequenceDeserialiser.GetEventParams().Key;
-			const csp::common::String SequenceType = GetSequenceKeyIndex(Key, 0);
-			if (SequenceType == "Hotspots")
-			{
-				if (HotspotSequenceChangedCallback)
-				{
-					SequenceHotspotChangedEventDeserialiser HotspotDeserialiser;
-					HotspotDeserialiser.Parse(EventValues);
-					HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());
-				}
-			}
-		}
-		else
-		{
-			// For everything else, use the generic deserialiser
-			EventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-
-			for (const auto& Callback : NetworkEventMap[EventType])
-			{
-				Callback(true, Deserialiser.GetEventData());
-			}
-		}
-	};
-
-	Connection->On("OnEventMessage", LocalCallback);
-}
 
 void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const
 {

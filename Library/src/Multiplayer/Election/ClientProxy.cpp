@@ -195,7 +195,7 @@ void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
 	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
 	const int64_t MessageId = Eid++;
