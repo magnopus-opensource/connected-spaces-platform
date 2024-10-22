@@ -212,7 +212,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CinematicCamera_SCRIPT_INTERFACE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CINEMATIC_CAMERA_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceTest)
 {
 	SetRandSeed();
