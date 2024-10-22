@@ -46,7 +46,7 @@ void ToJson(JsonSerializer& Serializer, const TestObjectProps& Obj)
 	Serializer.SerializeMember("charPtrMember", Obj.CharPtrMember);
 }
 
-void FromJson(JsonDeserializer& Deserializer, TestObjectProps& Obj)
+void FromJson(const JsonDeserializer& Deserializer, TestObjectProps& Obj)
 {
 	Deserializer.DeserializeMember("int32Member", Obj.Int32Member);
 	Deserializer.DeserializeMember("uint32Member", Obj.Uint32Member);
@@ -69,7 +69,7 @@ void ToJson(JsonSerializer& Serializer, const TestOptionalPropObject& Obj)
 	Serializer.SerializeMember("int32Member1", Obj.Int32Member1);
 }
 
-void FromJson(JsonDeserializer& Deserializer, TestOptionalPropObject& Obj)
+void FromJson(const JsonDeserializer& Deserializer, TestOptionalPropObject& Obj)
 {
 	Deserializer.DeserializeMember("int32Member1", Obj.Int32Member1);
 

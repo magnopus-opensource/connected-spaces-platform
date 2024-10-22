@@ -28,50 +28,12 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, int32_t& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, uint32_t& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, int64_t& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, uint64_t& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, bool& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, float& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, double& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::String& Value);
-void FromJson(const csp::json::JsonDeserializer& Deserializer, const char* Value);
+template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, T Object);
+template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T& Object);
+template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T* Object);
 
-template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::Array<T>& Values)
-{
-	int Size = Deserializer.ValueStack.top()->Size();
-	Values	 = csp::common::Array<T>(Size);
-
-	for (int i = 0; i < Size; ++i)
-	{
-		auto JsonValue = &(*Deserializer.ValueStack.top())[i];
-		Deserializer.ValueStack.push(JsonValue);
-
-		T NewVal;
-		FromJson(Deserializer, NewVal);
-		Values[i] = NewVal;
-
-		Deserializer.ValueStack.pop();
-	}
-}
-
-template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::List<T>& Values)
-{
-	int Size = Deserializer.ValueStack.top()->Size();
-
-	for (int i = 0; i < Size; ++i)
-	{
-		auto JsonValue = &(*Deserializer.ValueStack.top())[i];
-		Deserializer.ValueStack.push(JsonValue);
-
-		T NewVal;
-		FromJson(Deserializer, NewVal);
-		Values.Append(NewVal);
-
-		Deserializer.ValueStack.pop();
-	}
-}
+template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
+template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
 
 namespace csp::json
 {
@@ -133,10 +95,6 @@ private:
 	template <typename T> void SerializeValue(const csp::common::List<T>& Value);
 };
 
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, T Object);
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T& Object);
-template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, const T* Object);
-
 class JsonDeserializer
 {
 public:
@@ -158,7 +116,7 @@ public:
 		rapidjson::Value Root = Deserializer.Doc.GetObject();
 
 		Deserializer.ValueStack.push(&Root);
-		FromJson(Deserializer, Object);
+		Deserializer.DeserializeValue(Object);
 		Deserializer.ValueStack.pop();
 
 		return true;
@@ -172,7 +130,7 @@ public:
 	template <typename T> const void DeserializeMember(const char* Key, T& Val) const
 	{
 		ValueStack.push(&(*ValueStack.top())[Key]);
-		::FromJson(*this, Val);
+		DeserializeValue(Val);
 		ValueStack.pop();
 	}
 
@@ -191,25 +149,27 @@ private:
 		Doc.Parse(Data);
 	}
 
+	template <typename T> inline void DeserializeValue(T& Value) const
+	{
+		::FromJson(*this, Value);
+	}
+
 	rapidjson::Document Doc;
 	mutable std::stack<const rapidjson::Value*> ValueStack;
 
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, int32_t& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, uint32_t& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, int64_t& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, uint64_t& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, bool& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, float& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, double& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::String& Value);
-	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, const char* Value);
+	void DeserializeValue(int32_t& Value) const;
+	void DeserializeValue(uint32_t& Value) const;
+	void DeserializeValue(int64_t& Value) const;
+	void DeserializeValue(uint64_t& Value) const;
+	void DeserializeValue(bool& Value) const;
+	void DeserializeValue(float& Value) const;
+	void DeserializeValue(double& Value) const;
+	void DeserializeValue(csp::common::String& Value) const;
+	void DeserializeValue(const char* Value) const;
 
-	template <typename T> friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::Array<T>& Value);
-	template <typename T> friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::List<T>& Value);
+	template <typename T> void DeserializeValue(csp::common::Array<T>& Value) const;
+	template <typename T> void DeserializeValue(csp::common::List<T>& Value) const;
 };
-
-template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
-template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
 
 template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Array<T>& Value)
 {
@@ -233,6 +193,41 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
 	}
 
 	Writer.EndArray();
+}
+
+template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::Array<T>& Values) const
+{
+	int Size = ValueStack.top()->Size();
+	Values	 = csp::common::Array<T>(Size);
+
+	for (int i = 0; i < Size; ++i)
+	{
+		auto JsonValue = &(*ValueStack.top())[i];
+		ValueStack.push(JsonValue);
+
+		T NewVal;
+		DeserializeValue(NewVal);
+		Values[i] = NewVal;
+
+		ValueStack.pop();
+	}
+}
+
+template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common::List<T>& Values) const
+{
+	int Size = ValueStack.top()->Size();
+
+	for (int i = 0; i < Size; ++i)
+	{
+		auto JsonValue = &(*ValueStack.top())[i];
+		ValueStack.push(JsonValue);
+
+		T NewVal;
+		DeserializeValue(NewVal);
+		Values.Append(NewVal);
+
+		ValueStack.pop();
+	}
 }
 
 } // namespace csp::json

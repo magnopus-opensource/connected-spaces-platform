@@ -16,53 +16,9 @@
 
 #include "JsonSerializer.h"
 
-void FromJson(const csp::json::JsonDeserializer& Deserializer, int32_t& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetInt();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, uint32_t& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetUint();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, int64_t& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetInt64();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, uint64_t& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetUint64();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, bool& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetBool();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, float& Value)
-{
-	Value = static_cast<float>(Deserializer.ValueStack.top()->GetDouble());
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, double& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetDouble();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::String& Value)
-{
-	Value = Deserializer.ValueStack.top()->GetString();
-}
-
-void FromJson(const csp::json::JsonDeserializer& Deserializer, const char* Value)
-{
-	Value = Deserializer.ValueStack.top()->GetString();
-}
-
 namespace csp::json
 {
+
 void JsonSerializer::SerializeValue(int32_t Value)
 {
 	Writer.Int(Value);
@@ -111,5 +67,50 @@ void JsonSerializer::SerializeValue(const char* Value)
 void JsonSerializer::SerializeValue(std::nullptr_t Value)
 {
 	Writer.Null();
+}
+
+void JsonDeserializer::DeserializeValue(int32_t& Value) const
+{
+	Value = ValueStack.top()->GetInt();
+}
+
+void JsonDeserializer::DeserializeValue(uint32_t& Value) const
+{
+	Value = ValueStack.top()->GetUint();
+}
+
+void JsonDeserializer::DeserializeValue(int64_t& Value) const
+{
+	Value = ValueStack.top()->GetInt64();
+}
+
+void JsonDeserializer::DeserializeValue(uint64_t& Value) const
+{
+	Value = ValueStack.top()->GetUint64();
+}
+
+void JsonDeserializer::DeserializeValue(bool& Value) const
+{
+	Value = ValueStack.top()->GetBool();
+}
+
+void JsonDeserializer::DeserializeValue(float& Value) const
+{
+	Value = static_cast<float>(ValueStack.top()->GetDouble());
+}
+
+void JsonDeserializer::DeserializeValue(double& Value) const
+{
+	Value = ValueStack.top()->GetDouble();
+}
+
+void JsonDeserializer::DeserializeValue(csp::common::String& Value) const
+{
+	Value = ValueStack.top()->GetString();
+}
+
+void JsonDeserializer::DeserializeValue(const char* Value) const
+{
+	Value = ValueStack.top()->GetString();
 }
 } // namespace csp::json
