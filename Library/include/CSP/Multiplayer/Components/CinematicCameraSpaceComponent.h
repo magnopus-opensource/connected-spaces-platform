@@ -64,7 +64,7 @@ public:
 	CinematicCameraSpaceComponent(SpaceEntity* Parent);
 
 	/// @brief Gived the sensor size and focal length, return the horizonal fov
-	/// @return FOV in degrees
+	/// @return FOV in radians
 	float GetFov() const;
 
 	/// \addtogroup IPositionComponent
