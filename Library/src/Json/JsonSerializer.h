@@ -28,17 +28,6 @@ class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
 
-void ToJson(csp::json::JsonSerializer& Serializer, int32_t Value);
-void ToJson(csp::json::JsonSerializer& Serializer, uint32_t Value);
-void ToJson(csp::json::JsonSerializer& Serializer, int64_t Value);
-void ToJson(csp::json::JsonSerializer& Serializer, uint64_t Value);
-void ToJson(csp::json::JsonSerializer& Serializer, bool Value);
-void ToJson(csp::json::JsonSerializer& Serializer, float Value);
-void ToJson(csp::json::JsonSerializer& Serializer, double Value);
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::String& Value);
-void ToJson(csp::json::JsonSerializer& Serializer, const char* Value);
-void ToJson(csp::json::JsonSerializer& Serializer, std::nullptr_t Value);
-
 void FromJson(const csp::json::JsonDeserializer& Deserializer, int32_t& Value);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, uint32_t& Value);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, int64_t& Value);
@@ -48,30 +37,6 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, float& Value);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, double& Value);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::String& Value);
 void FromJson(const csp::json::JsonDeserializer& Deserializer, const char* Value);
-
-template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::Array<T>& Value)
-{
-	Serializer.Writer.StartArray();
-
-	for (size_t i = 0; i < Value.Size(); ++i)
-	{
-		ToJson(Serializer, Value[i]);
-	}
-
-	Serializer.Writer.EndArray();
-}
-
-template <typename T> void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::List<T>& Value)
-{
-	Serializer.Writer.StartArray();
-
-	for (size_t i = 0; i < Value.Size(); ++i)
-	{
-		ToJson(Serializer, Value[i]);
-	}
-
-	Serializer.Writer.EndArray();
-}
 
 template <typename T> void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::common::Array<T>& Values)
 {
@@ -123,32 +88,16 @@ public:
 	{
 		JsonSerializer Serializer;
 
-		Serializer.Writer.StartObject();
-		::ToJson(Serializer, Object);
-		Serializer.Writer.EndObject();
+		Serializer.SerializeValue(Object);
 		return Serializer.Buffer.GetString();
 	}
 
 	/// @brief Should be called within custon ToJson function
-	/// This will serialize an object member
+	/// This will serialize a member
 	/// If the member is another custom type, this was internally call ToJson on that type
-	/// @param Key const char * Key : The key to reference the object
-	/// @param Value const T& : The object value to serialize
-	template <typename T> void SerializeObject(const char* Key, const T& Value)
-	{
-		Writer.String(Key);
-
-		Writer.StartObject();
-		::ToJson(*this, Value);
-		Writer.EndObject();
-	}
-
-	/// @brief Should be called within custon ToJson function
-	/// This will serialize a property member
-	/// If the member is another custom type, this was internally call ToJson on that type
-	/// @param Key const char * Key : The key to reference the object
-	/// @param Value const T& : The property value to serialize
-	template <typename Val> void SerializeProperty(const char* Key, const Val& Value)
+	/// @param Key const char * Key : The key to reference the item
+	/// @param Value const T& : The value to serialize
+	template <typename Val> void SerializeMember(const char* Key, const Val& Value)
 	{
 		Writer.String(Key);
 		SerializeValue(Value);
@@ -164,23 +113,24 @@ private:
 
 	template <typename T> void SerializeValue(const T& Value)
 	{
+		Writer.StartObject();
 		::ToJson(*this, Value);
+		Writer.EndObject();
 	}
 
-	// Default types should be friend to access internal json writer
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, int32_t Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, uint32_t Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, int64_t Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, uint64_t Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, bool Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, float Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, double Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::common::String& Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, const char* Value);
-	friend void ::ToJson(csp::json::JsonSerializer& Serializer, std::nullptr_t Value);
+	void SerializeValue(int32_t Value);
+	void SerializeValue(uint32_t Value);
+	void SerializeValue(int64_t Value);
+	void SerializeValue(uint64_t Value);
+	void SerializeValue(bool Value);
+	void SerializeValue(float Value);
+	void SerializeValue(double Value);
+	void SerializeValue(const csp::common::String& Value);
+	void SerializeValue(const char* Value);
+	void SerializeValue(std::nullptr_t Value);
 
-	template <typename T> friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::common::Array<T>& Value);
-	template <typename T> friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::common::List<T>& Value);
+	template <typename T> void SerializeValue(const csp::common::Array<T>& Value);
+	template <typename T> void SerializeValue(const csp::common::List<T>& Value);
 };
 
 template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, T Object);
@@ -210,6 +160,8 @@ public:
 		Deserializer.ValueStack.push(&Root);
 		FromJson(Deserializer, Object);
 		Deserializer.ValueStack.pop();
+
+		return true;
 	}
 
 	/// @brief Should be called within custom FromJson function
@@ -258,4 +210,29 @@ private:
 
 template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
 template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
+
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::Array<T>& Value)
+{
+	Writer.StartArray();
+
+	for (size_t i = 0; i < Value.Size(); ++i)
+	{
+		SerializeValue(Value[i]);
+	}
+
+	Writer.EndArray();
+}
+
+template <typename T> inline void JsonSerializer::SerializeValue(const csp::common::List<T>& Value)
+{
+	Writer.StartArray();
+
+	for (size_t i = 0; i < Value.Size(); ++i)
+	{
+		SerializeValue(Value[i]);
+	}
+
+	Writer.EndArray();
+}
+
 } // namespace csp::json

@@ -16,56 +16,6 @@
 
 #include "JsonSerializer.h"
 
-void ToJson(csp::json::JsonSerializer& Serializer, int32_t Value)
-{
-	Serializer.Writer.Int(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, uint32_t Value)
-{
-	Serializer.Writer.Uint(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, int64_t Value)
-{
-	Serializer.Writer.Int64(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, uint64_t Value)
-{
-	Serializer.Writer.Uint64(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, bool Value)
-{
-	Serializer.Writer.Bool(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, float Value)
-{
-	Serializer.Writer.Double(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, double Value)
-{
-	Serializer.Writer.Double(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, const csp::common::String& Value)
-{
-	Serializer.Writer.String(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, const char* Value)
-{
-	Serializer.Writer.String(Value);
-}
-
-void ToJson(csp::json::JsonSerializer& Serializer, std::nullptr_t Value)
-{
-	Serializer.Writer.Null();
-}
-
 void FromJson(const csp::json::JsonDeserializer& Deserializer, int32_t& Value)
 {
 	Value = Deserializer.ValueStack.top()->GetInt();
@@ -113,5 +63,53 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, const char* Value
 
 namespace csp::json
 {
-
+void JsonSerializer::SerializeValue(int32_t Value)
+{
+	Writer.Int(Value);
 }
+
+void JsonSerializer::SerializeValue(uint32_t Value)
+{
+	Writer.Uint(Value);
+}
+
+void JsonSerializer::SerializeValue(int64_t Value)
+{
+	Writer.Int64(Value);
+}
+
+void JsonSerializer::SerializeValue(uint64_t Value)
+{
+	Writer.Uint64(Value);
+}
+
+void JsonSerializer::SerializeValue(bool Value)
+{
+	Writer.Bool(Value);
+}
+
+void JsonSerializer::SerializeValue(float Value)
+{
+	Writer.Double(Value);
+}
+
+void JsonSerializer::SerializeValue(double Value)
+{
+	Writer.Double(Value);
+}
+
+void JsonSerializer::SerializeValue(const csp::common::String& Value)
+{
+	Writer.String(Value);
+}
+
+void JsonSerializer::SerializeValue(const char* Value)
+{
+	Writer.String(Value);
+}
+
+void JsonSerializer::SerializeValue(std::nullptr_t Value)
+{
+	Writer.Null();
+}
+} // namespace csp::json

@@ -36,14 +36,14 @@ struct TestObjectProps
 
 void ToJson(JsonSerializer& Serializer, const TestObjectProps& Obj)
 {
-	Serializer.SerializeProperty("int32Member", Obj.Int32Member);
-	Serializer.SerializeProperty("uint32Member", Obj.Uint32Member);
-	Serializer.SerializeProperty("int64Member", Obj.Int64Member);
-	Serializer.SerializeProperty("uint64Member", Obj.Uint64Member);
-	Serializer.SerializeProperty("floatMember", Obj.FloatMember);
-	Serializer.SerializeProperty("doubleMember", Obj.DoubleMember);
-	Serializer.SerializeProperty("stringMember", Obj.StringMember);
-	Serializer.SerializeProperty("charPtrMember", Obj.CharPtrMember);
+	Serializer.SerializeMember("int32Member", Obj.Int32Member);
+	Serializer.SerializeMember("uint32Member", Obj.Uint32Member);
+	Serializer.SerializeMember("int64Member", Obj.Int64Member);
+	Serializer.SerializeMember("uint64Member", Obj.Uint64Member);
+	Serializer.SerializeMember("floatMember", Obj.FloatMember);
+	Serializer.SerializeMember("doubleMember", Obj.DoubleMember);
+	Serializer.SerializeMember("stringMember", Obj.StringMember);
+	Serializer.SerializeMember("charPtrMember", Obj.CharPtrMember);
 }
 
 void FromJson(JsonDeserializer& Deserializer, TestObjectProps& Obj)
@@ -60,15 +60,20 @@ void FromJson(JsonDeserializer& Deserializer, TestObjectProps& Obj)
 
 struct TestOptionalPropObject
 {
-	int32_t Int32Member = 0;
+	int32_t Int32Member1 = 0;
+	int32_t Int32Member2 = 0;
 };
 
 void ToJson(JsonSerializer& Serializer, const TestOptionalPropObject& Obj)
 {
+	Serializer.SerializeMember("int32Member1", Obj.Int32Member1);
 }
 
 void FromJson(JsonDeserializer& Deserializer, TestOptionalPropObject& Obj)
 {
+	Deserializer.DeserializeMember("int32Member1", Obj.Int32Member1);
+
+	EXPECT_FALSE(Deserializer.HasProperty("int32Member2"));
 }
 
 struct TestNestedObject
@@ -85,9 +90,9 @@ struct TestParentObject
 
 void ToJson(JsonSerializer& Serializer, const TestParentObject& Obj)
 {
-	Serializer.SerializeProperty("int32Member", Obj.Int32Member);
-	Serializer.SerializeObject("obj", Obj.Obj);
-	Serializer.SerializeProperty("floatMember", Obj.FloatMember);
+	Serializer.SerializeMember("int32Member", Obj.Int32Member);
+	Serializer.SerializeMember("obj", Obj.Obj);
+	Serializer.SerializeMember("floatMember", Obj.FloatMember);
 }
 
 void FromJson(const JsonDeserializer& Deserializer, TestParentObject& Obj)
@@ -99,7 +104,7 @@ void FromJson(const JsonDeserializer& Deserializer, TestParentObject& Obj)
 
 void ToJson(JsonSerializer& Serializer, const TestNestedObject& Obj)
 {
-	Serializer.SerializeProperty("stringMember", Obj.StringMember);
+	Serializer.SerializeMember("stringMember", Obj.StringMember);
 }
 
 void FromJson(const JsonDeserializer& Deserializer, TestNestedObject& Obj)
@@ -115,8 +120,8 @@ struct TestContainerObject
 
 void ToJson(JsonSerializer& Serializer, const TestContainerObject& Obj)
 {
-	Serializer.SerializeProperty("intMembers", Obj.IntMembers);
-	Serializer.SerializeProperty("floatMembers", Obj.FloatMembers);
+	Serializer.SerializeMember("intMembers", Obj.IntMembers);
+	Serializer.SerializeMember("floatMembers", Obj.FloatMembers);
 }
 
 void FromJson(const JsonDeserializer& Deserializer, TestContainerObject& Obj)
@@ -133,8 +138,8 @@ struct TestObjectContainerObject
 
 void ToJson(JsonSerializer& Serializer, const TestObjectContainerObject& Obj)
 {
-	Serializer.SerializeProperty("arrayMember", Obj.ArrayMember);
-	Serializer.SerializeProperty("listMember", Obj.ListMember);
+	Serializer.SerializeMember("arrayMember", Obj.ArrayMember);
+	Serializer.SerializeMember("listMember", Obj.ListMember);
 }
 
 void FromJson(const JsonDeserializer& Deserializer, TestObjectContainerObject& Obj)
@@ -172,6 +177,17 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonPropertiesTest)
 
 CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonOptionalPropertyTest)
 {
+	TestOptionalPropObject Obj;
+	Obj.Int32Member1 = 5;
+	Obj.Int32Member2 = 6;
+
+	const csp::common::String result = JsonSerializer::Serialize(Obj);
+
+	TestOptionalPropObject Obj2;
+	JsonDeserializer::Deserialize(result, Obj2);
+
+	EXPECT_EQ(Obj.Int32Member1, Obj2.Int32Member1);
+	EXPECT_FALSE(Obj.Int32Member2 == Obj2.Int32Member2);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonNestedObjectTest)
