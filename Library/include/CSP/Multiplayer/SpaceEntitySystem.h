@@ -409,6 +409,8 @@ private:
 	void ApplyIncomingPatch(const signalr::value*);
 	void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
+	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, CallbackHandler Callback);
+
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();
 

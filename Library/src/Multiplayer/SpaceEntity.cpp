@@ -46,6 +46,7 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/Script/EntityScriptInterface.h"
+#include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "signalrclient/signalr_value.h"
 
@@ -105,6 +106,7 @@ SpaceEntity::SpaceEntity()
 	, PropertiesLock(CSP_NEW std::mutex)
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
+	, LockUserId(0)
 	, ParentId(nullptr)
 	, ShouldUpdateParent(false)
 	, ThirdPartyRef("")
@@ -130,6 +132,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
 	, PropertiesLock(CSP_NEW std::mutex)
 	, RefCount(CSP_NEW std::atomic_int(0))
 	, SelectedId(0)
+	, LockUserId(0)
 	, ParentId(nullptr)
 	, ShouldUpdateParent(false)
 	, ThirdPartyRef("")
@@ -166,6 +169,11 @@ uint64_t SpaceEntity::GetId() const
 uint64_t SpaceEntity::GetOwnerId() const
 {
 	return OwnerId;
+}
+
+uint64_t SpaceEntity::GetParentId() const
+{
+	return ParentId.HasValue() ? *ParentId : 0;
 }
 
 const csp::common::String& SpaceEntity::GetName() const
@@ -1222,12 +1230,146 @@ bool SpaceEntity::IsModifiable()
 {
 	if (EntitySystem != nullptr && csp::systems::SystemsManager::Get().GetMultiplayerConnection() != nullptr)
 	{
-		return (OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable);
+		int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
+
+		return ((OwnerId == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId() || IsTransferable)
+				&& (LockUserId == 0 ? true : LockUserId == ClientId));
 	}
 	else
 	{
 		return true;
 	}
+}
+
+void SerialisePatchForResponse(const SpaceEntity* EntityToSerialise,
+							   SignalRMsgPackEntitySerialiser& Serialiser,
+							   uint16_t ViewComponentKey,
+							   const ReplicatedValue& ViewComponentValue)
+{
+	Serialiser.BeginEntity();
+	{
+		Serialiser.WriteUInt64(EntityToSerialise->GetId());		 // [0] uint Id
+		Serialiser.WriteUInt64(EntityToSerialise->GetOwnerId()); // [1] uint OwnerId
+		Serialiser.WriteBool(false);							 // [2] bool Destroy
+		Serialiser.BeginArray();								 // [3] [bool, uint?] ParentId
+		{
+			Serialiser.WriteBool(false);
+			if (EntityToSerialise->GetParentId() == 0)
+			{
+				Serialiser.WriteNull();
+			}
+			else
+			{
+				Serialiser.WriteUInt64(EntityToSerialise->GetParentId());
+			}
+		}
+		Serialiser.EndArray();
+
+		Serialiser.BeginComponents(); // [4] map<uint, vec> Components
+		{
+			Serialiser.AddViewComponent(ViewComponentKey, ViewComponentValue);
+		}
+		Serialiser.EndComponents();
+	}
+	Serialiser.EndEntity();
+}
+
+void SpaceEntity::Lock(CallbackHandler Callback)
+{
+	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
+
+	// Verify that the Entity is not already locked or that the current User has not already locked it.
+	if (LockUserId != 0)
+	{
+		if (LockUserId == ClientId)
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "You already have this Space Entity locked.");
+			Callback(true);
+			return;
+		}
+
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning,
+					   "Failed to lock Space Entity. Space Entity locked by user: %s",
+					   std::to_string(LockUserId).c_str());
+		Callback(false);
+		return;
+	}
+
+	ReplicatedValue ClientIdValue(ClientId);
+
+	SignalRMsgPackEntitySerialiser Serialiser;
+
+	std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+
+	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, ClientIdValue);
+
+	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful)
+	{
+		if (LockSuccessful)
+		{
+			LockUserId = ClientId;
+		}
+
+		Callback(LockSuccessful);
+	};
+
+	auto SerialisedEntity = Serialiser.Finalise();
+
+	EntitySystem->SendEntityPatchWithResponse(SerialisedEntity, LocalCallback);
+}
+
+void SpaceEntity::Unlock(CallbackHandler Callback)
+{
+	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
+
+	// Verify that the Entity is locked by the current User.
+	if (LockUserId == 0)
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "The Space Entity is not currently locked.");
+		Callback(true);
+		return;
+	}
+
+	if (LockUserId != ClientId)
+	{
+		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
+					   "Failed to unlock Space Entity as another user has it locked. Space Entity is locked by user: %s",
+					   std::to_string(LockUserId).c_str());
+		Callback(false);
+		return;
+	}
+
+	ReplicatedValue UnlockValue(static_cast<int64_t>(0));
+
+	SignalRMsgPackEntitySerialiser Serialiser;
+
+	std::scoped_lock<std::mutex> ComponentsLocker(*ComponentsLock);
+
+	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, UnlockValue);
+
+	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful)
+	{
+		if (UnlockSuccessful)
+		{
+			LockUserId = 0;
+		}
+
+		Callback(UnlockSuccessful);
+	};
+
+	auto SerialisedEntity = Serialiser.Finalise();
+
+	EntitySystem->SendEntityPatchWithResponse(SerialisedEntity, LocalCallback);
+}
+
+bool SpaceEntity::GetIsLocked()
+{
+	return LockUserId != 0;
+}
+
+uint64_t SpaceEntity::GetLockingUserId()
+{
+	return LockUserId;
 }
 
 bool SpaceEntity::InternalSetSelectionStateOfEntity(const bool SelectedState, uint64_t ClientID)

@@ -409,6 +409,16 @@ void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 			Entity->EntityDestroyCallback(true);
 		}
 
+		// If the SpaceEntity is locked by the current user this lock should be removed.
+		int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
+		if (Entity->GetLockingUserId() == ClientId)
+		{
+			Entity->Unlock(
+				[](bool /*UnlockSuccessful*/)
+				{
+				});
+		}
+
 		RemoveEntity(Entity);
 	}
 }
@@ -1691,4 +1701,17 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
 	}
 }
+
+void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, CallbackHandler Callback)
+{
+	const std::vector InvokeArguments = {signalr::value(EntityPatch)};
+
+	// Todo: CHS are exposing a new endpoint for sending object patches that require a response.
+	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
+	// Connection->Invoke("SendObjectPatchWithResponse", InvokeArguments, LocalCallback);
+	Connection->Invoke("SendObjectPatches", InvokeArguments);
+
+	Callback(true);
+}
+
 } // namespace csp::multiplayer

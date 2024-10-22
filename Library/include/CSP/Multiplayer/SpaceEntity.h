@@ -146,6 +146,10 @@ public:
 	/// @return the uint64_t ClientID of the owner of the SpaceEntity.
 	uint64_t GetOwnerId() const;
 
+	/// @brief Get the ID of the parent SpaceEntity.
+	/// @return uint64_t ID of the SpaceEntity parent.
+	uint64_t GetParentId() const;
+
 	/// @brief Get the name set for this SpaceEntity.
 	/// @return Name.
 	const csp::common::String& GetName() const;
@@ -350,6 +354,21 @@ public:
 	/// @return True if the entity can be modified, False if not.
 	bool IsModifiable();
 
+	/// @brief Locks this SpaceEntity if it is not already locked by another user.
+	CSP_ASYNC_RESULT void Lock(CallbackHandler Callback);
+
+	/// @brief Unlocks this SpaceEntity if it is locked by the current user.
+	CSP_ASYNC_RESULT void Unlock(CallbackHandler Callback);
+
+	/// @brief Retrieves the lock status of this SpaceEntity.
+	/// @return True if the SpaceEntity is currently locked, false otherwise.
+	bool GetIsLocked();
+
+	/// @brief Retrieves the User Id of the user who is currently locking the SpaceEntity.
+	/// @return The User Id of the user with the SpaceEntity lock. Returns an empty string if not locked.
+	uint64_t GetLockingUserId();
+
+
 private:
 	class DirtyComponent
 	{
@@ -400,6 +419,7 @@ private:
 	csp::systems::EThirdPartyPlatform ThirdPartyPlatform;
 	csp::common::String ThirdPartyRef;
 	uint64_t SelectedId;
+	uint64_t LockUserId;
 
 	SpaceEntity* Parent;
 	csp::common::List<SpaceEntity*> ChildEntities;
