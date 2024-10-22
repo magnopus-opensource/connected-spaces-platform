@@ -48,7 +48,7 @@ CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent
 
 float CinematicCameraSpaceComponent::GetFov() const
 {
-	return 2.0f * atan(GetSensorSize().X / 2.0f * GetFocalLength()) * 1000.0f;
+	return 2.0f * atan(GetSensorSize().X / (2.0f * GetFocalLength()));
 }
 
 // transforms
