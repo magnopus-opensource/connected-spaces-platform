@@ -98,7 +98,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
 	EXPECT_FLOAT_EQ(CinematicCamera->GetNearClip(), 0.1f);
 	EXPECT_FLOAT_EQ(CinematicCamera->GetFarClip(), 20000.0f);
 	EXPECT_FLOAT_EQ(CinematicCamera->GetIso(), 400.0f);
-	EXPECT_FLOAT_EQ(CinematicCamera->GetShutterSpeed(), 0.0167);
+	EXPECT_FLOAT_EQ(CinematicCamera->GetShutterSpeed(), 0.0167f);
 	EXPECT_FLOAT_EQ(CinematicCamera->GetAperture(), 4.0f);
 	EXPECT_FALSE(CinematicCamera->GetIsViewerCamera());
 
@@ -138,7 +138,81 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_CinematicCamera_TESTS || RUN_CinematicCamera_SCRIPT_INTERFACE_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CINEMATIC_CAMERA_COMPONENT_FOV_TEST
+CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Create object to represent the Camera
+	csp::common::String ObjectName = "Object 1";
+	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+	// Create Camera component
+	auto* CinematicCamera = static_cast<CinematicCameraSpaceComponent*>(CreatedObject->AddComponent(ComponentType::CinematicCamera));
+
+	// Calcuate FOV
+
+	CinematicCamera->SetFocalLength(0.035f);
+	CinematicCamera->SetSensorSize(csp::common::Vector2(0.036f, 0.024f));
+
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.95002151f); // 54.43222311f degrees
+
+	CinematicCamera->SetFocalLength(0.024f);
+	CinematicCamera->SetSensorSize(csp::common::Vector2(0.0223f, 0.0149f));
+
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.86983005f); // 49.83759112f degrees
+
+	CinematicCamera->SetFocalLength(0.150f);
+	CinematicCamera->SetSensorSize(csp::common::Vector2(0.02703f, 0.01425f));
+
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.17971473f); // 10.29689609f degrees
+
+	CinematicCamera->SetFocalLength(0.018f);
+	CinematicCamera->SetSensorSize(csp::common::Vector2(0.036f, 0.024f));
+
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 1.57079632f); // 90.0f degrees
+
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_CINEMATIC_CAMERA_TESTS || RUN_CinematicCamera_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceTest)
 {
 	SetRandSeed();
