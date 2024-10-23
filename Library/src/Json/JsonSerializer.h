@@ -54,12 +54,12 @@ public:
 		return Serializer.Buffer.GetString();
 	}
 
-	/// @brief Should be called within custon ToJson function
+	/// @brief Should be called within custom ToJson function
 	/// This will serialize a member
 	/// If the member is another custom type, this was internally call ToJson on that type
 	/// @param Key const char * Key : The key to reference the item
 	/// @param Value const T& : The value to serialize
-	template <typename Val> void SerializeMember(const char* Key, const Val& Value)
+	template <typename T> void SerializeMember(const char* Key, const T& Value)
 	{
 		Writer.String(Key);
 		SerializeValue(Value);
@@ -75,6 +75,8 @@ private:
 
 	template <typename T> void SerializeValue(const T& Value)
 	{
+		// If T isn't one of the internal supported types,
+		// assume this is a custom object
 		Writer.StartObject();
 		::ToJson(*this, Value);
 		Writer.EndObject();
@@ -134,7 +136,7 @@ public:
 		ValueStack.pop();
 	}
 
-	/// @brief Should be called within custon FromJson function
+	/// @brief Should be called within custom FromJson function
 	/// This will return true if the given key exists
 	/// @param Key const char* : The key to check
 	/// @return bool : Returns true if the key exists in this object
