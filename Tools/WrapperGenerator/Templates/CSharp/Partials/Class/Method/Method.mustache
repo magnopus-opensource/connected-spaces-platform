@@ -99,26 +99,15 @@ override
     var _{{ name }} = GCHandle.Alloc({{ name }});
 {{/ type.is_function_signature }}
 {{/ parameters }}
+{{!
 
+David's new code
+
+}}
 {{# return_type }}
-    var _result =
-{{# is_pointer_or_reference }}
-{{# is_primitive }}
-{{^ is_const }}
-        new Ref<{{> Type }}>(
-{{/ is_const }}
-{{/ is_primitive }}
-{{^ is_primitive }}
-        new {{> Type }}(
-{{/ is_primitive }}
-{{/ is_pointer_or_reference }}
-{{^ is_pointer_or_reference }}
-{{# is_class_or_interface }}
-        new {{> Type }}(
-{{/ is_class_or_interface }}
-{{/ is_pointer_or_reference }}
+    var _value = 
 {{/ return_type }}
-        {{ unique_name }}(
+        {{ unique_name }}( {{! Call the function, appending all the necessary parameters}}
 {{^ is_static }}
             _ptr {{# has_parameters }},{{/ has_parameters }}
 {{/ is_static }}
@@ -156,8 +145,27 @@ override
 {{/ type.is_string }}
 {{/ is_out }}
 {{/ parameters }}
-        )
+        );
+
+{{! If there is a return type, wrap it if necessary }}
 {{# return_type }}
+    var _result =
+{{# is_pointer_or_reference }}
+{{# is_primitive }}
+{{^ is_const }}
+        new Ref<{{> Type }}>(
+{{/ is_const }}
+{{/ is_primitive }}
+{{^ is_primitive }}
+        new {{> Type }}(
+{{/ is_primitive }}
+{{/ is_pointer_or_reference }}
+{{^ is_pointer_or_reference }}
+{{# is_class_or_interface }}
+        new {{> Type }}(
+{{/ is_class_or_interface }}
+{{/ is_pointer_or_reference }}
+            _value
 {{# is_void_pointer }}
         .Pointer
 {{/ is_void_pointer }}
@@ -177,7 +185,7 @@ override
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
 {{/ return_type }};
-
+    
 {{! Return value }}
 {{# return_type }}
 {{# is_string }}
