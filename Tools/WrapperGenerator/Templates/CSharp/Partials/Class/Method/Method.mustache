@@ -149,23 +149,30 @@ David's new code
 
 {{! If there is a return type, wrap it if necessary }}
 {{# return_type }}
-    var _result =
 {{# is_pointer_or_reference }}
 {{# is_primitive }}
 {{^ is_const }}
-        new Ref<{{> Type }}>(
+    var _result = new Ref<{{> Type }}>(_value
 {{/ is_const }}
 {{/ is_primitive }}
 {{^ is_primitive }}
-        new {{> Type }}(
+    if (_value.Equals(NativePointer.Zero))
+        return null;
+
+    var _result = new {{> Type }}(_value
 {{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
-        new {{> Type }}(
+    if (_value.Equals(NativePointer.Zero))
+        return null;
+
+    var _result = new {{> Type }}(_value
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+    var _result = _value
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
-            _value
 {{# is_void_pointer }}
         .Pointer
 {{/ is_void_pointer }}
