@@ -99,11 +99,6 @@ override
     var _{{ name }} = GCHandle.Alloc({{ name }});
 {{/ type.is_function_signature }}
 {{/ parameters }}
-{{!
-
-David's new code
-
-}}
 {{# return_type }}
     var _value = 
 {{/ return_type }}
@@ -164,8 +159,7 @@ David's new code
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
-    if (_value.Equals(NativePointer.Zero))
-        return null;
+    WrapperHelper.CheckNativePointer(_value);
 
     var _result = new {{> Type }}(_value
 {{/ is_class_or_interface }}
@@ -191,10 +185,8 @@ David's new code
         )
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
-{{/ return_type }};
+;
     
-{{! Return value }}
-{{# return_type }}
 {{# is_string }}
     {{! Convert native string to C# string }}
     var _resultString = WrapperHelper.NativeUTF8ToString(_result);

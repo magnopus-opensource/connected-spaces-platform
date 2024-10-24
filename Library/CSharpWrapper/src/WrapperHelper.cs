@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -91,6 +92,13 @@ namespace Csp
             if (t.IsEnum) return Enum.ToObject(t, (int)value.Pointer);
 
             return default;
+        }
+
+        [Conditional("Debug")]
+        internal static void CheckNativePointer(NativePointer value)
+        {
+            if (value.Equals(NativePointer.Zero))
+                throw new NullReferenceException();
         }
     }
 }
