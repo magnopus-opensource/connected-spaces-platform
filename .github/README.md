@@ -83,16 +83,16 @@ For more information about tenants and tenant IDs, visit our [FAQ.](https://www.
 To help you get started using the Connected Spaces Platform, we have a set of examples for each supported language. We keep these examples up to date with each new major version of the library.
 
 - WebAssembly
-  - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
-  - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/Web)
+  - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Initialising%20Foundation/Web)
+  - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Basic%20Framework/Web)
 - C++
 
-  - [C++ Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
-  - [C++ Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
+  - [C++ Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Initialising%20Foundation/CPlusPlus/InitialisingFoundation)
+  - [C++ Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Basic%20Framework/CPlusPlus/BasicFramework)
 
 - Unity C#
-  - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
-  - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
+  - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
+  - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
 ---
 
