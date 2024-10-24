@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/IEntitySerialiser.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
+#include "CSP/Systems/SystemsResult.h"
 #include "CSP/ThirdPartyPlatforms.h"
 #include "SpaceEntitySystem.h"
 
@@ -355,10 +356,10 @@ public:
 	bool IsModifiable();
 
 	/// @brief Locks this SpaceEntity if it is not already locked by another user.
-	CSP_ASYNC_RESULT void Lock(CallbackHandler Callback);
+	CSP_ASYNC_RESULT void Lock(csp::systems::NullResultCallback Callback);
 
 	/// @brief Unlocks this SpaceEntity if it is locked by the current user.
-	CSP_ASYNC_RESULT void Unlock(CallbackHandler Callback);
+	CSP_ASYNC_RESULT void Unlock(csp::systems::NullResultCallback Callback);
 
 	/// @brief Retrieves the lock status of this SpaceEntity.
 	/// @return True if the SpaceEntity is currently locked, false otherwise.

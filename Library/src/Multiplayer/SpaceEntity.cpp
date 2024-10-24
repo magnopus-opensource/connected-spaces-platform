@@ -48,6 +48,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
 #include "Multiplayer/SpaceEntityKeys.h"
+#include "Web/HttpResponse.h"
 #include "signalrclient/signalr_value.h"
 
 #include <chrono>
@@ -1274,7 +1275,7 @@ void SerialisePatchForResponse(const SpaceEntity* EntityToSerialise,
 	Serialiser.EndEntity();
 }
 
-void SpaceEntity::Lock(CallbackHandler Callback)
+void SpaceEntity::Lock(csp::systems::NullResultCallback Callback)
 {
 	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
 
@@ -1284,14 +1285,16 @@ void SpaceEntity::Lock(CallbackHandler Callback)
 		if (LockUserId == ClientId)
 		{
 			CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "You already have this Space Entity locked.");
-			Callback(true);
+			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseOK);
+			Callback(InternalResult);
 			return;
 		}
 
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning,
 					   "Failed to lock Space Entity. Space Entity locked by user: %s",
 					   std::to_string(LockUserId).c_str());
-		Callback(false);
+		csp::systems::NullResult InternalResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+		Callback(InternalResult);
 		return;
 	}
 
@@ -1308,9 +1311,14 @@ void SpaceEntity::Lock(CallbackHandler Callback)
 		if (LockSuccessful)
 		{
 			LockUserId = ClientId;
+			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseOK);
+			Callback(InternalResult);
 		}
-
-		Callback(LockSuccessful);
+		else
+		{
+			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
+			Callback(InternalResult);
+		}
 	};
 
 	auto SerialisedEntity = Serialiser.Finalise();
@@ -1318,7 +1326,7 @@ void SpaceEntity::Lock(CallbackHandler Callback)
 	EntitySystem->SendEntityPatchWithResponse(SerialisedEntity, LocalCallback);
 }
 
-void SpaceEntity::Unlock(CallbackHandler Callback)
+void SpaceEntity::Unlock(csp::systems::NullResultCallback Callback)
 {
 	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
 

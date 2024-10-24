@@ -100,6 +100,9 @@ public:
 	// Callback to receive sequence hierarchy changes, contains a SequenceHierarchyChangedParams with the details.
 	typedef std::function<void(const SequenceHierarchyChangedParams&)> SequenceHierarchyChangedCallbackHandler;
 
+	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
+	typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+
 	/// @brief Creates a SpaceEntity with type Avatar, and relevant components and default states as specified.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
 	/// @param InSpaceTransform SpaceTransform : The initial transform to set the SpaceEntity to.

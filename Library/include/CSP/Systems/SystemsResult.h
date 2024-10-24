@@ -77,6 +77,7 @@ class CSP_API BooleanResult : public csp::systems::ResultBase
 	friend class SettingsSystem;
 	friend class MaintenanceSystem;
 	friend class SpaceSystem;
+	friend class SpaceEntitySystem;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -88,13 +89,14 @@ public:
 	[[nodiscard]]
 	bool GetValue() const;
 
-private:
+protected:
 	BooleanResult() = default;
 	BooleanResult(void*) {};
 	BooleanResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 	void SetValue(bool InValue);
 
+private:
 	bool Value = false;
 };
 
