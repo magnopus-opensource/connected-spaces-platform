@@ -95,9 +95,9 @@ enum class ESequenceUpdateType
 {
 	Create,
 	Update,
-    Rename,
+	Rename,
 	Delete,
-    Invalid
+	Invalid
 };
 
 class CSP_API SequenceChangedParams
@@ -113,26 +113,13 @@ public:
 	csp::common::String NewKey;
 };
 
-class CSP_API SequenceHierarchyChangedParams
-{
-public:
-	/// @brief The type of update to the sequence.
-	ESequenceUpdateType UpdateType;
-
-	/// @brief The parent for the updated sequence hierarchy.
-	uint64_t ParentId;
-
-	/// @brief True if this is the root hierarchy.
-	bool IsRoot;
-};
-
 class CSP_API SequenceHotspotChangedParams
 {
 public:
 	/// @brief The type of update to the sequence.
 	ESequenceUpdateType UpdateType;
 
-    /// @brief The unique identifier of the space that this hotspot sequence belongs to.
+	/// @brief The unique identifier of the space that this hotspot sequence belongs to.
 	csp::common::String SpaceId;
 
 	/// @brief The name of the hotspot group that has been changed.
