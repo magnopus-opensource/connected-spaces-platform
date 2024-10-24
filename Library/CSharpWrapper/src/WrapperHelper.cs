@@ -94,7 +94,7 @@ namespace Csp
             return default;
         }
 
-        [Conditional("Debug")]
+        [Conditional("DEBUG")]
         internal static void CheckNativePointer(NativePointer value)
         {
             if (value.Equals(NativePointer.Zero))
