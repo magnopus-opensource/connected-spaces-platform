@@ -170,9 +170,9 @@ public:
 	/// \addtogroup IEnableableComponent
 	/// @{
 	/// @copydoc IEnableableComponent::GetIsEnabled()
-	bool GetIsEnabled() const;
+	bool GetIsEnabled() const override;
 	/// @copydoc IEnableableComponent::SetIsEnabled()
-	void SetIsEnabled(bool InValue);
+	void SetIsEnabled(bool InValue) override;
 	/// @}
 
 	/// \addtogroup IThirdPartyComponentRef
