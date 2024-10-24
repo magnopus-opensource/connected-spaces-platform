@@ -127,10 +127,10 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
 	static_cast<chs::SequenceApi*>(SequenceAPI)
-		->apiV1SequencesKeysOldKeyKeyPut(csp::common::Encode::URI(OldSequenceKey, true),    // OldKey, URI-encoded to support reserved characters.
-										 csp::common::Encode::URI(NewSequenceKey),          // NewKey, URI-encoded to support reserved characters.
-										 ResponseHandler,			                        // ResponseHandler
-										 CancellationToken::Dummy()                         // CancellationToken
+		->apiV1SequencesKeysOldKeyKeyPut(csp::common::Encode::URI(OldSequenceKey, true), // OldKey, URI-encoded to support reserved characters.
+										 csp::common::Encode::URI(NewSequenceKey),		 // NewKey, URI-encoded to support reserved characters.
+										 ResponseHandler,								 // ResponseHandler
+										 CancellationToken::Dummy()						 // CancellationToken
 		);
 }
 
@@ -153,16 +153,16 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 			return;
 		}
 
-        // We URI-encode sequence keys to support reserved characters.
-        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
+		// We URI-encode sequence keys to support reserved characters.
+		EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
 	}
 
-    // Regexes may also include reserved characters which require encoding.
-    Optional<String> Regex;
-    if(InKeyRegex.HasValue())
-    {
+	// Regexes may also include reserved characters which require encoding.
+	Optional<String> Regex;
+	if (InKeyRegex.HasValue())
+	{
 		Regex = csp::common::Encode::URI(*InKeyRegex);
-    }
+	}
 
 	if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
 	{
@@ -184,6 +184,34 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 							KeyRegex,				   // Regex
 							ReferenceType,			   // ReferenceType
 							ReferenceIds,			   // ReferenceIds
+							std::nullopt,			   // Items
+							std::nullopt,			   // MetaData
+							std::nullopt,			   // Skip
+							std::nullopt,			   // Limit
+							ResponseHandler,		   // ResponseHandler
+							CancellationToken::Dummy() // CancellationToken
+		);
+}
+
+
+void SequenceSystem::GetAllSequencesContainingItems(const Array<String>& InItems,
+													const Optional<String>& InReferenceType,
+													const Array<String>& InReferenceIds,
+													SequencesResultCallback Callback)
+{
+	std::optional<std::vector<String>> Items		= Convert(InItems);
+	std::optional<String> ReferenceType				= Convert(InReferenceType);
+	std::optional<std::vector<String>> ReferenceIds = Convert(InReferenceIds);
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= SequenceAPI->CreateHandler<SequencesResultCallback, SequencesResult, void, csp::services::DtoArray<chs::SequenceDto>>(Callback, nullptr);
+
+	static_cast<chs::SequenceApi*>(SequenceAPI)
+		->apiV1SequencesGet(std::nullopt,			   // Keys
+							std::nullopt,			   // Regex
+							ReferenceType,			   // ReferenceType
+							ReferenceIds,			   // ReferenceIds
+							Items,					   // Items
 							std::nullopt,			   // MetaData
 							std::nullopt,			   // Skip
 							std::nullopt,			   // Limit
@@ -206,15 +234,15 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
 	static_cast<chs::SequenceApi*>(SequenceAPI)
-		->apiV1SequencesKeysKeyGet(csp::common::Encode::URI(SequenceKey, true),	// Key
-								   ResponseHandler,			                    // ResponseHandler
-								   CancellationToken::Dummy()                   // CancellationToken
+		->apiV1SequencesKeysKeyGet(csp::common::Encode::URI(SequenceKey, true), // Key
+								   ResponseHandler,								// ResponseHandler
+								   CancellationToken::Dummy()					// CancellationToken
 		);
 }
 
 void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullResultCallback Callback)
 {
-    Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
+	Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
 	for (size_t i = 0; i < InSequenceKeys.Size(); i++)
 	{
 		if (!ValidateKey(InSequenceKeys[i]))
@@ -226,8 +254,8 @@ void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullRe
 			return;
 		}
 
-        // We URI-encode sequence keys to support reserved characters.
-        EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
+		// We URI-encode sequence keys to support reserved characters.
+		EncodedSequenceKeys[i] = csp::common::Encode::URI(InSequenceKeys[i]);
 	}
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= SequenceAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(Callback,

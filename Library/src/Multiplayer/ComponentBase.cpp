@@ -233,6 +233,10 @@ SpaceEntity* ComponentBase::GetParent()
 	return Parent;
 }
 
+void ComponentBase::OnLocalDelete()
+{
+}
+
 void ComponentBase::SetScriptInterface(ComponentScriptInterface* InScriptInterface)
 {
 	ScriptInterface = InScriptInterface;

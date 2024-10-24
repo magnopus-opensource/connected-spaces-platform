@@ -3,10 +3,9 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Dict, List, Union, Any
 
+import os
 import subprocess
 import chevron
-import os
-import sys
 
 from Config import config
 from MetadataTypes import (
@@ -17,11 +16,19 @@ from MetadataTypes import (
     TemplateMetadata,
     TypeMetadata,
     InterfaceMetadata,
+    ParameterMetadata,
 )
 from Parser import read_whole_file, error_in_file, warning_in_file
 
 
 class CSharpWrapperGenerator:
+    """Convert and output the parsed C++ types into corresponding C# types.
+    
+    C++ types are translated into the equivalent C# types.
+
+    The callback-based methods in the C++ API are converted into methods
+    returning Task<T> objects for use with native C# `async` methods.
+    """
     __TEMPLATE_DIRECTORY = config["template_directory"] + "CSharp/"
     __PARTIALS_DIRECTORY = __TEMPLATE_DIRECTORY + "Partials/"
     __OUTPUT_DIRECTORY = config["output_directory"] + "CSharp/"
@@ -36,10 +43,16 @@ class CSharpWrapperGenerator:
         "web": "Web",
     }
 
-    def __translate_namespace(self, obj: Any) -> None:
-        if obj.namespace == None:
-            setattr(obj, "translated_namespace", None)
+    enums: Dict[str, EnumMetadata]
+    structs: Dict[str, StructMetadata]
+    functions: Dict[str, FunctionMetadata]
+    classes: Dict[str, ClassMetadata]
+    templates: Dict[str, TemplateMetadata]
+    interfaces: Dict[str, InterfaceMetadata]
 
+    def __translate_namespace(self, obj: Any) -> None:
+        if obj.namespace is None:
+            obj.translated_namespace = None
             return
 
         namespaces = obj.namespace.split("::")
@@ -48,7 +61,7 @@ class CSharpWrapperGenerator:
             if namespaces[i] in self.__NAMESPACE_TRANSLATIONS:
                 namespaces[i] = self.__NAMESPACE_TRANSLATIONS[namespaces[i]]
 
-        setattr(obj, "translated_namespace", ".".join(namespaces))
+        obj.translated_namespace = ".".join(namespaces)
 
     def __translate_enum_base(self, obj: EnumMetadata) -> None:
         t = obj.base
@@ -70,48 +83,49 @@ class CSharpWrapperGenerator:
         t = obj.name
 
         if not hasattr(obj, "is_void_pointer"):
-            setattr(obj, "is_void_pointer", False)
+            obj.is_void_pointer = False
 
-        if t == "int8_t":
-            obj.name = "sbyte"
-        elif t == "uint8_t" or t == "unsigned char":
-            obj.name = "byte"
-        elif t == "int16_t":
-            obj.name = "short"
-        elif t == "uint16_t":
-            obj.name = "ushort"
-        elif t == "int32_t" or t == "long":
-            obj.name = "int"
-        elif t == "uint32_t" or t == "unsigned int" or t == "unsigned long":
-            obj.name = "uint"
-        elif t == "int64_t" or t == "long long" or t == "long int":
-            obj.name = "long"
-        elif t == "uint64_t" or t == "unsigned long long" or t == "unsigned long int":
-            obj.name = "ulong"
-        elif t == "size_t":
-            # Assume 64-bit only for now
-            obj.name = "ulong"
-        elif t == "String":
-            obj.name = "string"
-            obj.namespace = None
-            setattr(obj, "translated_namespace", None)
-            obj.is_pointer = False
-            obj.is_reference = False
-            obj.is_pointer_or_reference = False
-        elif (t == "void" or t == "char") and obj.is_pointer:
-            obj.name = "IntPtr"
-            obj.is_pointer = False
-            obj.is_reference = False
-            obj.is_pointer_or_reference = False
-            setattr(obj, "is_void_pointer", True)
-            setattr(obj, "translated_namespace", None)
+        match t:
+            case "int8_t":
+                obj.name = "sbyte"
+            case "uint8_t" | "unsigned char":
+                obj.name = "byte"
+            case "int16_t":
+                obj.name = "short"
+            case "uint16_t":
+                obj.name = "ushort"
+            case "int32_t" | "long":
+                obj.name = "int"
+            case "uint32_t" | "unsigned int" | "unsigned long":
+                obj.name = "uint"
+            case "int64_t" | "long long" | "long int":
+                obj.name = "long"
+            case "uint64_t" | "unsigned long long" | "unsigned long int":
+                obj.name = "ulong"
+            case "size_t":
+                # Assume 64-bit only for now
+                obj.name = "ulong"
+            case "String":
+                obj.name = "string"
+                obj.namespace = None
+                obj.translated_namespace = None
+                obj.is_pointer = False
+                obj.is_reference = False
+                obj.is_pointer_or_reference = False
+            case "void" | "char" if obj.is_pointer:
+                obj.name = "IntPtr"
+                obj.is_pointer = False
+                obj.is_reference = False
+                obj.is_pointer_or_reference = False
+                obj.is_void_pointer = True
+                obj.translated_namespace = None
 
     def __translate_comments(self, comments: List[str]) -> None:
+        """Rewrite a list of comments from Javadoc-style to C# XML style"""
         if comments is None:
             return
 
-        for i in range(len(comments)):
-            comment = comments[i]
+        for i, comment in enumerate(comments):
             comment = comment.replace("<", "&lt;").replace(">", "&gt;")
 
             if comment[0] != "@":
@@ -120,7 +134,7 @@ class CSharpWrapperGenerator:
 
             index = comment.find(" ")
             tag = comment[:index]
-            content = comment[index + 1 :]
+            content = comment[index + 1:]
 
             if tag == "@brief":
                 comments[i] = f"<summary>{content}</summary>"
@@ -130,7 +144,7 @@ class CSharpWrapperGenerator:
                 while content[index + 1] == ":":
                     index = content.find(":", index + 2)
 
-                content = content[index + 1 :].lstrip()
+                content = content[index + 1:].lstrip()
 
                 if content[0].islower():
                     content = content.capitalize()
@@ -139,14 +153,14 @@ class CSharpWrapperGenerator:
             elif tag == "@param":
                 index = content.find(" ")
                 var_name = content[:index]
-                content = content[index + 1 :].lstrip()
+                content = content[index + 1:].lstrip()
 
                 index = content.find(":")
 
                 while content[index + 1] == ":":
                     index = content.find(":", index + 2)
 
-                content = content[index + 1 :].lstrip()
+                content = content[index + 1:].lstrip()
 
                 if content[0].islower():
                     content = content.capitalize()
@@ -156,9 +170,13 @@ class CSharpWrapperGenerator:
                 comments[i] = f"<remarks>{content}</remarks>"
 
     def __class_derives_from(
-        self, obj: ClassMetadata, base_namespace: str, base_name: str, classes: Dict[str, ClassMetadata]
+        self,
+        obj: ClassMetadata,
+        base_namespace: str,
+        base_name: str,
+        classes: Dict[str, ClassMetadata],
     ) -> bool:
-        if obj.base == None:
+        if obj.base is None:
             return False
 
         if obj.base.namespace == base_namespace and obj.base.name == base_name:
@@ -166,7 +184,7 @@ class CSharpWrapperGenerator:
 
         full_type_name = f"{obj.base.namespace}::{obj.base.name}"
 
-        if not full_type_name in classes:
+        if full_type_name not in classes:
             return False
 
         base_class = classes[full_type_name]
@@ -174,7 +192,14 @@ class CSharpWrapperGenerator:
         return self.__class_derives_from(base_class, base_namespace, base_name, classes)
 
     def __get_file_output_directory(
-        self, obj: Union[EnumMetadata, StructMetadata, InterfaceMetadata, ClassMetadata, TemplateMetadata]
+        self,
+        obj: Union[
+            EnumMetadata,
+            StructMetadata,
+            InterfaceMetadata,
+            ClassMetadata,
+            TemplateMetadata,
+        ],
     ):
         header_file: str
 
@@ -188,6 +213,26 @@ class CSharpWrapperGenerator:
 
         return "/".join(out_path)
 
+    def __render_named_object(self, named_object, enum_template) -> None:
+        """Given an object with a "name" attribute, render it to the corresponding .cs file."""
+        subdir = self.__get_file_output_directory(named_object)
+        if named_object.surrounding_types:
+            for st in named_object.surrounding_types:
+                subdir = f"{subdir}/{st}"
+
+        Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
+
+        file_path = f"{self.__OUTPUT_DIRECTORY}{subdir}/{named_object.name}.cs"
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(
+                chevron.render(
+                    enum_template,
+                    {"data": named_object, "extra_data": config},
+                    self.__PARTIALS_DIRECTORY,
+                    warn=True,
+                )
+            )
+
     def generate(
         self,
         enums: Dict[str, EnumMetadata],
@@ -197,13 +242,15 @@ class CSharpWrapperGenerator:
         templates: Dict[str, TemplateMetadata],
         interfaces: Dict[str, InterfaceMetadata],
     ) -> None:
+        """Given the dictionaries passed in from the Parser, output the corresponding C# source."""
+
         # Deepcopy all metadata so we don't modify the original data for any wrapper generator classes that get called after this one
-        enums = deepcopy(enums)
-        structs = deepcopy(structs)
-        functions = deepcopy(functions)
-        classes = deepcopy(classes)
-        templates = deepcopy(templates)
-        interfaces = deepcopy(interfaces)
+        self.enums = deepcopy(enums)
+        self.structs = deepcopy(structs)
+        self.functions = deepcopy(functions)
+        self.classes = deepcopy(classes)
+        self.templates = deepcopy(templates)
+        self.interfaces = deepcopy(interfaces)
 
         out_path = Path(self.__OUTPUT_DIRECTORY)
 
@@ -216,76 +263,44 @@ class CSharpWrapperGenerator:
 
         enum_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Enum.mustache")
         struct_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Struct.mustache")
-        global_functions_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "GlobalFunctions.mustache")
+        global_functions_template = read_whole_file(
+            self.__TEMPLATE_DIRECTORY + "GlobalFunctions.mustache"
+        )
         class_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Class.mustache")
-        interface_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Interface.mustache")
-        templateclass_template = read_whole_file(self.__TEMPLATE_DIRECTORY + "Template.mustache")
+        interface_template = read_whole_file(
+            self.__TEMPLATE_DIRECTORY + "Interface.mustache"
+        )
+        templateclass_template = read_whole_file(
+            self.__TEMPLATE_DIRECTORY + "Template.mustache"
+        )
 
-        for e in enums.values():
-            surrounding_types = None
+        self.__translate_functions(self.functions)
 
-            if e.is_nested_type:
-                surrounding_types = e.namespace[e.namespace.find("::") + 2 :].split("::")
-                e.namespace = e.namespace[: e.namespace.find("::")]
+        self.__render_enums(enum_template)
+        self.__render_structs(struct_template)
+        self.__render_global_functions(global_functions_template)
+        self.__render_interfaces(interface_template)
+        self.__render_classes(class_template)
+        self.__render_templates(templateclass_template)
 
-            if e.doc_comments is not None:
-                self.__translate_comments(e.doc_comments)
+        self.format_output()
 
-            self.__translate_namespace(e)
-            self.__translate_enum_base(e)
-            subdir = self.__get_file_output_directory(e)
+    def format_output(self):
+        """Format output with CSharpier"""
+        script_directory = os.path.dirname(os.path.realpath(__file__))
+        # TODO(OB-3780): This will fail with a warning on Mac since you can't run a .NET executable directly
+        subprocess.run(
+            f'"{script_directory}\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
+            shell=True,
+            check=False,  # When fixed, change this to check=True
+        )
 
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            setattr(e, "surrounding_types", surrounding_types)
-
-            for f in e.fields:
-                if f.doc_comments is not None:
-                    self.__translate_comments(f.doc_comments)
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{e.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        enum_template, {"data": e, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
-
-        for s in structs.values():
-            surrounding_types = None
-
-            if s.is_nested_type:
-                surrounding_types = s.namespace[s.namespace.find("::") + 2 :].split("::")
-                s.namespace = s.namespace[: s.namespace.find("::")]
-
-            self.__translate_comments(s.doc_comments)
-            self.__translate_namespace(s)
-            subdir = self.__get_file_output_directory(s)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            setattr(s, "surrounding_types", surrounding_types)
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{s.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        struct_template, {"data": s, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
-
+    def __translate_functions(self, functions) -> None:
+        """Translate the global functions by rewriting the parameter and return types."""
         for f in functions.values():
             self.__translate_comments(f.doc_comments)
 
-            if f.return_type != None:
+            if f.return_type is not None:
                 self.__translate_type(f.return_type)
 
             if f.parameters is not None:
@@ -299,22 +314,65 @@ class CSharpWrapperGenerator:
                             for fp in p.type.function_signature.parameters:
                                 self.__translate_type(fp.type)
 
-        with open(f"{self.__OUTPUT_DIRECTORY}Csp.cs", "w") as f:
+    def __render_enums(self, enum_template) -> None:
+        """Render the parsed enums into corresponding C# files."""
+        for e in self.enums.values():
+            e.surrounding_types = None
+
+            if e.is_nested_type:
+                e.surrounding_types = e.namespace[e.namespace.find(
+                    "::") + 2:].split("::")
+                e.namespace = e.namespace[: e.namespace.find("::")]
+
+            if e.doc_comments is not None:
+                self.__translate_comments(e.doc_comments)
+
+            self.__translate_namespace(e)
+            self.__translate_enum_base(e)
+
+            for f in e.fields:
+                if f.doc_comments is not None:
+                    self.__translate_comments(f.doc_comments)
+
+            self.__render_named_object(e, enum_template)
+
+    def __render_structs(self, struct_template) -> None:
+        """Render the parsed structs into corresponding C# files."""
+        for s in self.structs.values():
+            s.surrounding_types = None
+
+            if s.is_nested_type:
+                s.surrounding_types = s.namespace[s.namespace.find(
+                    "::") + 2:].split("::")
+                s.namespace = s.namespace[: s.namespace.find("::")]
+
+            self.__translate_comments(s.doc_comments)
+            self.__translate_namespace(s)
+            self.__render_named_object(s, struct_template)
+
+    def __render_global_functions(self, global_functions_template) -> None:
+        """Render the global functions into the static global function class."""
+        file_path = f"{self.__OUTPUT_DIRECTORY}Csp.cs"
+        with open(file_path, "w", encoding="utf-8") as f:
             print(
                 chevron.render(
                     global_functions_template,
-                    {"data": list(functions.values()), "extra_data": config},
+                    {"data": list(self.functions.values()),
+                     "extra_data": config},
                     self.__PARTIALS_DIRECTORY,
                     warn=True,
                 ),
                 file=f,
             )
 
-        for i in interfaces.values():
-            surrounding_types = None
+    def __render_interfaces(self, interface_template) -> None:
+        """Rewrite and render the interfaces into corresponding C# files."""
+        for i in self.interfaces.values():
+            i.surrounding_types = None
 
             if i.is_nested_type:
-                surrounding_types = i.namespace[i.namespace.find("::") + 2 :].split("::")
+                i.surrounding_types = i.namespace[i.namespace.find(
+                    "::") + 2:].split("::")
                 i.namespace = i.namespace[: i.namespace.find("::")]
 
             self.__translate_comments(i.doc_comments)
@@ -323,371 +381,278 @@ class CSharpWrapperGenerator:
             delegates = []
             events = []
 
-            for m in i.methods:
-                self.__translate_comments(m.doc_comments)
+            self.__rewrite_methods(i.methods, delegates, events, True)
 
-                if m.return_type != None:
-                    self.__translate_type(m.return_type)
+            i.delegates = delegates
+            i.events = events
+            i.has_events = len(events) > 0
 
-                    if m.return_type.is_template:
-                        assert m.return_type.template_arguments is not None
+            self.__render_named_object(i, interface_template)
 
-                        for ta in m.return_type.template_arguments:
-                            self.__translate_type(ta.type)
-
-                setattr(m, "is_task", m.is_async_result or m.is_async_result_with_progress)
-
-                if getattr(m, "is_task", False) and m.doc_comments != None and len(m.doc_comments) > 0:
-                    assert m.parameters is not None
-
-                    param = m.parameters[-1]
-                    m.doc_comments = m.doc_comments[:-1]
-
-                    assert param.type.function_signature is not None
-
-                    if len(param.type.function_signature.doc_comments) > 0:
-                        comment = param.type.function_signature.doc_comments[-1]
-                        comment = comment.replace("<", "&lt;").replace(">", "&gt;")
-
-                        comment_index = comment.find(" ")
-                        tag = comment[:comment_index]
-
-                        if tag != "@param":
-                            error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
-
-                        content = comment[comment_index + 1 :]
-                        comment_index = content.find(" ")
-                        # var_name = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        comment_index = content.find(":")
-
-                        while content[comment_index + 1] == ":":
-                            comment_index = content.find(":", comment_index + 2)
-
-                        # var_type = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        if content[0].islower():
-                            content = content.capitalize()
-
-                        m.doc_comments.append(f"<returns>{content}</returns>")
-                    else:
-                        m.doc_comments.append("<returns>The result for the request</returns>")
-
-                if m.parameters is not None:
-                    for p in m.parameters:
-                        self.__translate_type(p.type)
-
-                        if p.type.is_template:
-                            assert p.type.template_arguments is not None
-
-                            for ta in p.type.template_arguments:
-                                self.__translate_type(ta.type)
-
-                        if not m.is_async_result and not m.is_async_result_with_progress and not m.is_event:
-                            continue
-
-                        if not p.type.is_function_signature:
-                            continue
-
-                        assert p.type.function_signature is not None
-
-                        setattr(m, "results", p.type.function_signature.parameters)
-                        setattr(
-                            m,
-                            "has_results",
-                            (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                        )
-                        setattr(m, "has_multiple_results", len(getattr(m, "results")) > 1)
-
-                        param_name = p.name[0].upper() + p.name[1:]
-
-                        if p.type.function_signature.parameters is not None:
-                            for dp in p.type.function_signature.parameters:
-                                self.__translate_type(dp.type)
-
-                                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                setattr(
-                                    dp.type,
-                                    "is_result_base",
-                                    full_type_name in classes
-                                    and self.__class_derives_from(
-                                        classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    ),
-                                )
-
-                        delegate = {
-                            "name": f"{m.name}{param_name}Delegate",
-                            "method_name": m.name,
-                            "return_type": p.type.function_signature.return_type,
-                            "parameters": deepcopy(p.type.function_signature.parameters),
-                            "has_parameters": (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                            "has_progress": m.is_async_result_with_progress,
-                        }
-
-                        delegates.append(delegate)
-                        setattr(m, "delegate", delegate)
-                        setattr(p, "delegate", delegate)
-
-                        if m.is_event:
-                            event_name = ""
-
-                            assert m.name is not None
-
-                            if m.name.startswith("Set") and m.name.endswith("Callback"):
-                                event_name = f"On{m.name[len('Set'):-len('Callback')]}"
-                            else:
-                                warning_in_file(
-                                    m.header_file,
-                                    m.start_line,
-                                    "Event functions should follow the naming pattern 'SetXCallback'.",
-                                )
-                                event_name = m.name
-
-                            event = {
-                                "name": event_name,
-                                "class_name": m.parent_class.name,
-                                "method_name": m.name,
-                                "unique_method_name": m.unique_name,
-                                "parameters": deepcopy(p.type.function_signature.parameters),
-                                "has_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 0),
-                                "has_multiple_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 1),
-                                "delegate": delegate,
-                            }
-
-                            events.append(event)
-                            setattr(m, "event", event)
-
-                        m.parameters.remove(p)
-
-                        if len(m.parameters) > 0:
-                            m.parameters[-1].is_last = True
-
-            setattr(i, "delegates", delegates)
-            setattr(i, "events", events)
-            setattr(i, "has_events", len(events) > 0)
-
-            subdir = self.__get_file_output_directory(i)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            setattr(i, "surrounding_types", surrounding_types)
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{i.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        interface_template, {"data": i, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
-                )
-
-        for c in classes.values():
-            surrounding_types = None
+    def __render_classes(self, class_template) -> None:
+        """Rewrite and render the classes into corresponding C# files."""
+        for c in self.classes.values():
+            c.surrounding_types = None
 
             if c.is_nested_type:
-                surrounding_types = c.namespace[c.namespace.find("::") + 2 :].split("::")
+                c.surrounding_types = c.namespace[c.namespace.find(
+                    "::") + 2:].split("::")
                 c.namespace = c.namespace[: c.namespace.find("::")]
 
             self.__translate_comments(c.doc_comments)
             self.__translate_namespace(c)
 
-            if c.base != None:
+            if c.base:
                 self.__translate_namespace(c.base)
 
             delegates = []
             events = []
 
-            for f in c.fields:
-                self.__translate_type(f.type)
+            self.__rewrite_fields(c)
 
-                if f.type.is_template:
-                    assert f.type.template_arguments is not None
+            self.__rewrite_methods(c.methods, delegates, events)
 
-                    for ta in f.type.template_arguments:
+            c.delegates = delegates
+            c.events = events
+            c.has_events = len(events) > 0
+
+            self.__render_named_object(c, class_template)
+
+    def __rewrite_fields(self, c: ClassMetadata) -> None:
+        """Rewrite the fields of a class to the corresponding C# type names."""
+        for f in c.fields:
+            self.__translate_type(f.type)
+
+            if f.type.is_template:
+                assert f.type.template_arguments
+
+                for ta in f.type.template_arguments:
+                    self.__translate_type(ta.type)
+
+    def __rewrite_methods(
+        self,
+        methods: List[FunctionMetadata],
+        delegates: List[Dict],
+        events: List[Dict],
+        is_interface=False,
+    ) -> None:
+        """Rewrite the methods of a class or interface.
+        
+        If the methods have callback parameters they will be wrapped in logic to return a Task<> of the corresponding callback type.
+        Set__Callback functions will be converted into On__ events.
+        """
+        for m in methods:
+            self.__translate_comments(m.doc_comments)
+
+            if m.return_type:
+                self.__translate_type(m.return_type)
+
+                if m.return_type.is_template:
+                    assert m.return_type.template_arguments
+
+                    for ta in m.return_type.template_arguments:
                         self.__translate_type(ta.type)
 
-            for m in c.methods:
-                self.__translate_comments(m.doc_comments)
+            m.is_task = m.is_async_result or m.is_async_result_with_progress
 
-                if m.return_type != None:
-                    self.__translate_type(m.return_type)
+            self.__rewrite_task_doc_comments(m)
 
-                    if m.return_type.is_template:
-                        assert m.return_type.template_arguments is not None
+            if m.parameters:
+                self.__rewrite_method_parameters(m)
+                self.__rewrite_callback_parameters(m, delegates, events, is_interface)
 
-                        for ta in m.return_type.template_arguments:
-                            self.__translate_type(ta.type)
+    def __rewrite_method_parameters(self, method: FunctionMetadata) -> None:
+        """Rewrite C++ types to C# types in a method definition."""
+        for param in method.parameters:
+            self.__translate_type(param.type)
 
-                setattr(m, "is_task", m.is_async_result or m.is_async_result_with_progress)
+            if param.type.is_template:
+                assert param.type.template_arguments is not None
 
-                if getattr(m, "is_task", False) and m.doc_comments != None and len(m.doc_comments) > 0:
-                    assert m.parameters is not None
+                for ta in param.type.template_arguments:
+                    self.__translate_type(ta.type)
 
-                    param = m.parameters[-1]
-                    m.doc_comments = m.doc_comments[:-1]
+    def __rewrite_callback_parameters(
+        self,
+        method: FunctionMetadata,
+        delegates: List[Dict],
+        events: List[Dict],
+        is_interface: bool,
+    ) -> None:
+        """Finds callback parameters in a method and creates a custom delegate type"""
+        # TODO: Rather than generate a unique delegate type per method, it would be more efficient to
+        # translate the shared *Callback types into shared delegate definitions and reuse them here.
 
-                    assert param.type.function_signature is not None
+        is_regular_method = not (
+            method.is_async_result or method.is_async_result_with_progress or method.is_event
+        )
 
-                    if len(param.type.function_signature.doc_comments) > 0:
-                        comment = param.type.function_signature.doc_comments[-1]
-                        comment = comment.replace("<", "&lt;").replace(">", "&gt;")
+        if is_interface:
+            if not is_regular_method:
+                error_in_file(
+                    method.header_file,
+                    method.start_line,
+                    r"Method '{m.name}' is not a regular function. Interfaces cannot currently contain asynchronous methods",
+                )
+                return
 
-                        comment_index = comment.find(" ")
-                        tag = comment[:comment_index]
+        # Find parameters that take function signatures and ensure that there's only one of them:
+        # If there's more than one, we won't be able to create an async method from it later.
+        callback_params = [p for p in method.parameters if p.type.is_function_signature]
+        if not callback_params:
+            return
 
-                        if tag != "@param":
-                            error_in_file(m.header_file or "", -1, "Error in comment: " + comment)
-                            error_in_file(m.header_file or "", -1, "Last doc comment must describe callback parameter")
+        if len(callback_params) > 1:
+            error_in_file(
+                method.header_file,
+                method.start_line,
+                r"Method '{m.name}' contains more than one callback parameter so cannot be converted to an async function"
+            )
+            return
 
-                        content = comment[comment_index + 1 :]
-                        comment_index = content.find(" ")
-                        # var_name = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
+        # Create the custom delegate based on the function signature of the callback
+        p = callback_params[0]
+        function_signature = p.type.function_signature
+        method.results = function_signature.parameters
+        method.has_results = bool(method.results)
+        method.has_multiple_results = len(method.results) > 1
 
-                        comment_index = content.find(":")
+        param_name = p.name[0].upper() + p.name[1:]
 
-                        while content[comment_index + 1] == ":":
-                            comment_index = content.find(":", comment_index + 2)
+        if function_signature.parameters:
+            for dp in function_signature.parameters:
+                self.__translate_type(dp.type)
 
-                        # var_type = content[:comment_index]
-                        content = content[comment_index + 1 :].lstrip()
-
-                        if content[0].islower():
-                            content = content.capitalize()
-
-                        m.doc_comments.append(f"<returns>{content}</returns>")
-                    else:
-                        m.doc_comments.append("<returns>The result for the request</returns>")
-
-                if m.parameters is not None:
-                    for p in m.parameters:
-                        self.__translate_type(p.type)
-
-                        if p.type.is_template:
-                            assert p.type.template_arguments is not None
-
-                            for ta in p.type.template_arguments:
-                                self.__translate_type(ta.type)
-
-                        if not p.type.is_function_signature:
-                            continue
-
-                        assert p.type.function_signature is not None
-
-                        setattr(m, "results", p.type.function_signature.parameters)
-                        setattr(
-                            m,
-                            "has_results",
-                            (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                        )
-                        setattr(m, "has_multiple_results", len(getattr(m, "results")) > 1)
-
-                        param_name = p.name[0].upper() + p.name[1:]
-
-                        if p.type.function_signature.parameters is not None:
-                            for dp in p.type.function_signature.parameters:
-                                self.__translate_type(dp.type)
-
-                                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
-                                setattr(
-                                    dp.type,
-                                    "is_result_base",
-                                    full_type_name in classes
-                                    and self.__class_derives_from(
-                                        classes[full_type_name], "csp::systems", "ResultBase", classes
-                                    ),
-                                )
-
-                        delegate = {
-                            "name": f"{m.name}{param_name}Delegate",
-                            "method_name": m.name,
-                            "return_type": p.type.function_signature.return_type,
-                            "parameters": deepcopy(p.type.function_signature.parameters),
-                            "has_parameters": (p.type.function_signature.parameters is not None)
-                            and (len(p.type.function_signature.parameters) > 0),
-                            "has_progress": m.is_async_result_with_progress,
-                            "include_managed": not (m.is_async_result or m.is_async_result_with_progress or m.is_event),
-                        }
-
-                        delegates.append(delegate)
-                        setattr(m, "delegate", delegate)
-
-                        if not m.is_async_result and not m.is_async_result_with_progress and not m.is_event:
-                            continue
-
-                        if m.is_event:
-                            event_name = ""
-
-                            assert m.name is not None
-
-                            if m.name.startswith("Set") and m.name.endswith("Callback"):
-                                event_name = f"On{m.name[len('Set'):-len('Callback')]}"
-                            else:
-                                warning_in_file(
-                                    m.header_file,
-                                    m.start_line,
-                                    "Event functions should follow the naming pattern 'SetXCallback'.",
-                                )
-                                event_name = m.name
-
-                            event = {
-                                "name": event_name,
-                                "class_name": m.parent_class.name,
-                                "method_name": m.name,
-                                "unique_method_name": m.unique_name,
-                                "parameters": deepcopy(p.type.function_signature.parameters),
-                                "has_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 0),
-                                "has_multiple_parameters": (p.type.function_signature.parameters is not None)
-                                and (len(p.type.function_signature.parameters) > 1),
-                                "delegate": delegate,
-                            }
-
-                            events.append(event)
-                            setattr(m, "event", event)
-
-                        m.parameters.remove(p)
-
-                        if len(m.parameters) > 0:
-                            m.parameters[-1].is_last = True
-
-            setattr(c, "delegates", delegates)
-            setattr(c, "events", events)
-            setattr(c, "has_events", len(events) > 0)
-
-            subdir = self.__get_file_output_directory(c)
-
-            if surrounding_types != None:
-                for st in surrounding_types:
-                    subdir = f"{subdir}/{st}"
-
-            setattr(c, "surrounding_types", surrounding_types)
-
-            Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
-
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{c.name}.cs", "w") as f:
-                print(
-                    chevron.render(
-                        class_template, {"data": c, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
+                full_type_name = f"{dp.type.namespace}::{dp.type.name}"
+                dp.type.is_result_base = (
+                    full_type_name in self.classes
+                    and self.__class_derives_from(
+                        self.classes[full_type_name],
+                        "csp::systems",
+                        "ResultBase",
+                        self.classes,
+                    )
                 )
 
-        for t in templates.values():
+        delegate = {
+            "name": f"{method.name}{param_name}Delegate",
+            "method_name": method.name,
+            "return_type": function_signature.return_type,
+            "parameters": deepcopy(function_signature.parameters),
+            "has_parameters": bool(function_signature.parameters),
+            "has_progress": method.is_async_result_with_progress,
+            "include_managed": is_regular_method,
+        }
+
+        delegates.append(delegate)
+        method.delegate = delegate
+        p.delegate = delegate
+
+        # Generate an event for functions decorated with the event macro
+        if method.is_event:
+            self.__rewrite_event(method, p, delegate, events)
+
+        # For any methods that will be generating a callback, remove the callback
+        # parameter from the method signature
+        if not is_regular_method:
+            method.parameters.remove(p)
+            if len(method.parameters) > 0:
+                method.parameters[-1].is_last = True
+
+    def __rewrite_event(
+        self,
+        method: FunctionMetadata,
+        param: ParameterMetadata,
+        delegate: Dict,
+        events: List[Dict],
+    ) -> None:
+        """Create a C# event field for SetCallback methods"""
+        event_name = ""
+
+        assert method.name
+
+        # Rename `Set____Callback` to `On____`
+        # e.g. `SetDisconnectionCallback` becomes `OnDisconnection`
+        # Note: This violates C# naming conventions, which would name the event `Disconnected`
+        if method.name.startswith("Set") and method.name.endswith("Callback"):
+            event_name = f"On{method.name[len('Set'):-len('Callback')]}"
+        else:
+            warning_in_file(
+                method.header_file,
+                method.start_line,
+                "Event functions should follow the naming pattern 'SetXCallback'.",
+            )
+            event_name = method.name
+
+        event = {
+            "name": event_name,
+            "class_name": method.parent_class.name,
+            "method_name": method.name,
+            "unique_method_name": method.unique_name,
+            "parameters": deepcopy(param.type.function_signature.parameters),
+            "has_parameters": bool(param.type.function_signature.parameters),
+            "has_multiple_parameters": (
+                param.type.function_signature.parameters
+                and len(param.type.function_signature.parameters) > 1
+            ),
+            "delegate": delegate,
+        }
+
+        events.append(event)
+        method.event = event
+
+    def __rewrite_task_doc_comments(self, method: FunctionMetadata):
+        if method.is_task and method.doc_comments:
+            assert method.parameters is not None
+
+            param = method.parameters[-1]
+            method.doc_comments = method.doc_comments[:-1]
+
+            assert param.type.function_signature is not None
+
+            if len(param.type.function_signature.doc_comments) > 0:
+                comment = param.type.function_signature.doc_comments[-1]
+                comment = comment.replace("<", "&lt;").replace(">", "&gt;")
+
+                comment_index = comment.find(" ")
+                tag = comment[:comment_index]
+
+                if tag != "@param":
+                    error_in_file(
+                        method.header_file or "", -1, "Error in comment: " + comment
+                    )
+                    error_in_file(
+                        method.header_file or "",
+                        -1,
+                        "Last doc comment must describe callback parameter",
+                    )
+
+                content = comment[comment_index + 1:]
+                comment_index = content.find(" ")
+                # var_name = content[:comment_index]
+                content = content[comment_index + 1:].lstrip()
+
+                comment_index = content.find(":")
+
+                while content[comment_index + 1] == ":":
+                    comment_index = content.find(":", comment_index + 2)
+
+                    # var_type = content[:comment_index]
+                content = content[comment_index + 1:].lstrip()
+
+                if content[0].islower():
+                    content = content.capitalize()
+
+                method.doc_comments.append(f"<returns>{content}</returns>")
+            else:
+                method.doc_comments.append("<returns>The result for the request</returns>")
+
+    def __render_templates(self, templateclass_template) -> None:
+        for t in self.templates.values():
             self.__translate_namespace(t.definition)
 
             for m in t.definition.methods:
-                if m.return_type != None:
+                if m.return_type is not None:
                     self.__translate_type(m.return_type)
 
                 if m.parameters is not None:
@@ -697,17 +662,13 @@ class CSharpWrapperGenerator:
             subdir = self.__get_file_output_directory(t)
             Path(self.__OUTPUT_DIRECTORY + subdir).mkdir(parents=True, exist_ok=True)
 
-            with open(f"{self.__OUTPUT_DIRECTORY}{subdir}/{t.definition.name}.cs", "w") as f:
-                print(
+            path = f"{self.__OUTPUT_DIRECTORY}{subdir}/{t.definition.name}.cs"
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(
                     chevron.render(
-                        templateclass_template, {"data": t, "extra_data": config}, self.__PARTIALS_DIRECTORY, warn=True
-                    ),
-                    file=f,
+                        templateclass_template,
+                        {"data": t, "extra_data": config},
+                        self.__PARTIALS_DIRECTORY,
+                        warn=True,
+                    )
                 )
-
-        # Format output with CSharpier
-        scriptDirectory = os.path.dirname(os.path.realpath(__file__))
-        subprocess.run(
-            f'"{ scriptDirectory }\\Formatters\\CSharpier\\dotnet-csharpier.exe" "{self.__OUTPUT_DIRECTORY}"',
-            shell=True,
-        )

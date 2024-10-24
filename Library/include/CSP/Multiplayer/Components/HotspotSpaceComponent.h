@@ -25,6 +25,7 @@
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
+#include "CSP/Systems/SystemsResult.h"
 
 
 namespace csp::multiplayer
@@ -109,6 +110,9 @@ public:
 	/// @copydoc IVisibleComponent::SetIsARVisible()
 	void SetIsARVisible(bool InValue) override;
 	/// @}
+
+private:
+	void OnLocalDelete() override;
 };
 
 } // namespace csp::multiplayer
