@@ -21,7 +21,6 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
-#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -414,7 +413,7 @@ void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 		if (Entity->GetLockingUserId() == ClientId)
 		{
 			Entity->Unlock(
-				[](bool /*UnlockSuccessful*/)
+				[](bool /*UnlockSuccessful*/, csp::common::String /*ResponseMessage*/)
 				{
 				});
 		}
@@ -1702,16 +1701,15 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 	}
 }
 
-void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, CallbackHandler Callback)
+void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, SpaceEntity::EntityLockCallback Callback)
 {
 	const std::vector InvokeArguments = {signalr::value(EntityPatch)};
 
-	// Todo: CHS are exposing a new endpoint for sending object patches that require a response.
+	// Todo: CHS are exposing a new 'ApplyPatchWithResult' endpoint for sending object patches that require a response.
 	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
-	// Connection->Invoke("SendObjectPatchWithResponse", InvokeArguments, LocalCallback);
 	Connection->Invoke("SendObjectPatches", InvokeArguments);
 
-	Callback(true);
+	Callback(true, "The SpaceEntity Lock has been successfully acquired.");
 }
 
 } // namespace csp::multiplayer

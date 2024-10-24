@@ -22,6 +22,7 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Multiplayer/SequenceHierarchy.h"
+#include "SpaceEntity.h"
 
 #include <deque>
 #include <functional>
@@ -412,7 +413,7 @@ private:
 	void ApplyIncomingPatch(const signalr::value*);
 	void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, CallbackHandler Callback);
+	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, SpaceEntity::EntityLockCallback Callback);
 
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();

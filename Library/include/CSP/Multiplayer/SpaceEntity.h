@@ -127,6 +127,9 @@ public:
 	// Callback that will provide a pointer to a SpaceEntity object.
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
+	// Callback used for Entity Lock updates.
+	typedef std::function<void(bool, csp::common::String)> EntityLockCallback;
+
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();
 
@@ -356,10 +359,10 @@ public:
 	bool IsModifiable();
 
 	/// @brief Locks this SpaceEntity if it is not already locked by another user.
-	CSP_ASYNC_RESULT void Lock(csp::systems::NullResultCallback Callback);
+	CSP_ASYNC_RESULT void Lock(EntityLockCallback Callback);
 
 	/// @brief Unlocks this SpaceEntity if it is locked by the current user.
-	CSP_ASYNC_RESULT void Unlock(csp::systems::NullResultCallback Callback);
+	CSP_ASYNC_RESULT void Unlock(EntityLockCallback Callback);
 
 	/// @brief Retrieves the lock status of this SpaceEntity.
 	/// @return True if the SpaceEntity is currently locked, false otherwise.

@@ -1275,7 +1275,7 @@ void SerialisePatchForResponse(const SpaceEntity* EntityToSerialise,
 	Serialiser.EndEntity();
 }
 
-void SpaceEntity::Lock(csp::systems::NullResultCallback Callback)
+void SpaceEntity::Lock(EntityLockCallback Callback)
 {
 	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
 
@@ -1284,17 +1284,13 @@ void SpaceEntity::Lock(csp::systems::NullResultCallback Callback)
 	{
 		if (LockUserId == ClientId)
 		{
-			CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "You already have this Space Entity locked.");
-			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseOK);
-			Callback(InternalResult);
+			Callback(true, "You already have this Space Entity locked.");
 			return;
 		}
 
-		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning,
-					   "Failed to lock Space Entity. Space Entity locked by user: %s",
-					   std::to_string(LockUserId).c_str());
-		csp::systems::NullResult InternalResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
-		Callback(InternalResult);
+		csp::common::String ErrorMessage("Failed to lock Space Entity. Space Entity locked by user: ");
+		ErrorMessage.Append(std::to_string(LockUserId).c_str());
+		Callback(false, ErrorMessage);
 		return;
 	}
 
@@ -1306,19 +1302,14 @@ void SpaceEntity::Lock(csp::systems::NullResultCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, ClientIdValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful)
+	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful, csp::common::String ResponseMessage)
 	{
 		if (LockSuccessful)
 		{
 			LockUserId = ClientId;
-			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t) csp::web::EResponseCodes::ResponseOK);
-			Callback(InternalResult);
 		}
-		else
-		{
-			csp::systems::NullResult InternalResult(csp::systems::EResultCode::Failed, (uint16_t) csp::web::EResponseCodes::ResponseBadRequest);
-			Callback(InternalResult);
-		}
+
+		Callback(LockSuccessful, ResponseMessage);
 	};
 
 	auto SerialisedEntity = Serialiser.Finalise();
@@ -1326,7 +1317,7 @@ void SpaceEntity::Lock(csp::systems::NullResultCallback Callback)
 	EntitySystem->SendEntityPatchWithResponse(SerialisedEntity, LocalCallback);
 }
 
-void SpaceEntity::Unlock(csp::systems::NullResultCallback Callback)
+void SpaceEntity::Unlock(EntityLockCallback Callback)
 {
 	int64_t ClientId = csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId();
 
@@ -1334,16 +1325,16 @@ void SpaceEntity::Unlock(csp::systems::NullResultCallback Callback)
 	if (LockUserId == 0)
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "The Space Entity is not currently locked.");
-		Callback(true);
+		Callback(true, "The Space Entity is not currently locked.");
 		return;
 	}
 
 	if (LockUserId != ClientId)
 	{
-		CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
-					   "Failed to unlock Space Entity as another user has it locked. Space Entity is locked by user: %s",
-					   std::to_string(LockUserId).c_str());
-		Callback(false);
+		csp::common::String ErrorMessage("Failed to unlock Space Entity as another user has it locked. Space Entity is locked by user: ");
+		ErrorMessage.Append(std::to_string(LockUserId).c_str());
+		Callback(false, ErrorMessage);
+
 		return;
 	}
 
@@ -1355,14 +1346,14 @@ void SpaceEntity::Unlock(csp::systems::NullResultCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, UnlockValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful)
+	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful, csp::common::String ResponseMessage)
 	{
 		if (UnlockSuccessful)
 		{
 			LockUserId = 0;
 		}
 
-		Callback(UnlockSuccessful);
+		Callback(UnlockSuccessful, ResponseMessage);
 	};
 
 	auto SerialisedEntity = Serialiser.Finalise();

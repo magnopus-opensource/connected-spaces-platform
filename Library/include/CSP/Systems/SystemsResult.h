@@ -77,7 +77,6 @@ class CSP_API BooleanResult : public csp::systems::ResultBase
 	friend class SettingsSystem;
 	friend class MaintenanceSystem;
 	friend class SpaceSystem;
-	friend class SpaceEntitySystem;
 
 	CSP_START_IGNORE
 	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
