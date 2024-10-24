@@ -151,8 +151,13 @@ override
 {{/ is_const }}
 {{/ is_primitive }}
 {{^ is_primitive }}
+{{# is_reference }}
+    WrapperHelper.CheckNativePointer(_value);
+{{/ is_reference}}
+{{^ is_reference}}
     if (_value.Equals(NativePointer.Zero))
         return null;
+{{/ is_reference}}
 
     var _result = new {{> Type }}(_value
 {{/ is_primitive }}
