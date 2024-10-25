@@ -34,7 +34,7 @@ def main():
     # Create and publish NPM package
     root_dir = PrepareUnityPackage.get_git_root()
     os.chdir(args.output_directory)
-    if input_args.npm_publish_flag == True:
+    if eval(args.npm_publish_flag):
         subprocess.call(
             f'npm {args.release_mode} --userconfig="{root_dir}/unity.npmrc" --"@magnopus-opensource:registry={args.registry}"',
             shell=True,
