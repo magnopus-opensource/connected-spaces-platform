@@ -3042,10 +3042,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 }
 #endif
 
-
-// One user log in, confirm locka acquired, perform some property update, confirm that IsModifiable returns true, Confirm entity unlocked.
-// Two users log in. One acquires lock. Seconds user blocked from updating a property (ismodifiable returns false). First user releases lock.
-
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCK_ENTITY_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 {
@@ -3093,7 +3089,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
 
 	// Lock the Entity
-	auto [LockResult] = AWAIT(CreatedDefaultEntity, Lock);
+	auto [LockResult, ResultMessage] = AWAIT(CreatedDefaultEntity, Lock);
 	EXPECT_EQ(LockResult, true);
 
 	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
@@ -3101,7 +3097,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
 
 	// Unlock the Entity
-	auto [UnlockResult] = AWAIT(CreatedDefaultEntity, Unlock);
+	auto [UnlockResult, ResultMessage] = AWAIT(CreatedDefaultEntity, Unlock);
 	EXPECT_EQ(UnlockResult, true);
 
 	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
@@ -3178,7 +3174,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityOnUserLogOutTest)
 	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
 
 	// Lock the Entity
-	auto [LockResult] = AWAIT(CreatedDefaultEntity, Lock);
+	auto [LockResult, ResultMessage] = AWAIT(CreatedDefaultEntity, Lock);
 	EXPECT_EQ(LockResult, true);
 
 	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
@@ -3186,7 +3182,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityOnUserLogOutTest)
 	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
 
 	// Unlock the Entity
-	auto [UnlockResult] = AWAIT(CreatedDefaultEntity, Unlock);
+	auto [UnlockResult, ResultMessage] = AWAIT(CreatedDefaultEntity, Unlock);
 	EXPECT_EQ(UnlockResult, true);
 
 	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);

@@ -22,7 +22,6 @@
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Multiplayer/SequenceHierarchy.h"
-#include "SpaceEntity.h"
 
 #include <deque>
 #include <functional>
@@ -97,6 +96,9 @@ public:
 
 	// Callback that will provide a pointer to a SpaceEntity object.
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
+
+	// Callback used for Entity Lock updates.
+	typedef std::function<void(bool, const csp::common::String&)> EntityLockCallback;
 
 	// Callback to receive sequence hierarchy changes, contains a SequenceHierarchyChangedParams with the details.
 	typedef std::function<void(const SequenceHierarchyChangedParams&)> SequenceHierarchyChangedCallbackHandler;
@@ -413,7 +415,7 @@ private:
 	void ApplyIncomingPatch(const signalr::value*);
 	void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, SpaceEntity::EntityLockCallback Callback);
+	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockCallback Callback);
 
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();

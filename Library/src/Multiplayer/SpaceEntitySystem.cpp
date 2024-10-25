@@ -15,6 +15,7 @@
  */
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 
+#include "CSP//Multiplayer/SpaceEntity.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
@@ -1701,7 +1702,7 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 	}
 }
 
-void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, SpaceEntity::EntityLockCallback Callback)
+void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockCallback Callback)
 {
 	const std::vector InvokeArguments = {signalr::value(EntityPatch)};
 
@@ -1709,7 +1710,7 @@ void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& Entity
 	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
 	Connection->Invoke("SendObjectPatches", InvokeArguments);
 
-	Callback(true, "The SpaceEntity Lock has been successfully acquired.");
+	Callback(true, "Success.");
 }
 
 } // namespace csp::multiplayer

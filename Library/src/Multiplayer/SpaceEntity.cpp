@@ -1302,7 +1302,7 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, ClientIdValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful, csp::common::String ResponseMessage)
+	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful, const csp::common::String& ResponseMessage)
 	{
 		if (LockSuccessful)
 		{
@@ -1346,7 +1346,7 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, UnlockValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful, csp::common::String ResponseMessage)
+	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful, const csp::common::String& ResponseMessage)
 	{
 		if (UnlockSuccessful)
 		{

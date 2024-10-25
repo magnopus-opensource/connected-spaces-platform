@@ -128,7 +128,7 @@ public:
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
 	// Callback used for Entity Lock updates.
-	typedef std::function<void(bool, csp::common::String)> EntityLockCallback;
+	typedef std::function<void(bool, const csp::common::String&)> EntityLockCallback;
 
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();
