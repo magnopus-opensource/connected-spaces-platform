@@ -73,7 +73,7 @@ class CSP_API EntityLockResultObject
 {
 public:
 	EntityLockResultObject(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
-		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode)) {};
+		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode) {};
 
 	bool Result;
 	csp::common::String ResultMessage;
