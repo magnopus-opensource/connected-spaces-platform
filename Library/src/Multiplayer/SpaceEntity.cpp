@@ -1284,13 +1284,17 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 	{
 		if (LockUserId == ClientId)
 		{
-			Callback(true, "You already have this Space Entity locked.");
+			EntityLockResult LockResult(true, "You already have this Space Entity locked.", 200);
+			Callback(LockResult);
+
 			return;
 		}
 
 		csp::common::String ErrorMessage("Failed to lock Space Entity. Space Entity locked by user: ");
 		ErrorMessage.Append(std::to_string(LockUserId).c_str());
-		Callback(false, ErrorMessage);
+		EntityLockResult LockResult(false, ErrorMessage, 400);
+		Callback(LockResult);
+
 		return;
 	}
 
@@ -1302,14 +1306,19 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, ClientIdValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool LockSuccessful, const csp::common::String& ResponseMessage)
+	const std::function LocalCallback = [this, ClientId, Callback](EntityLockResultObject EntityLockObject)
 	{
-		if (LockSuccessful)
+		if (EntityLockObject.Result)
 		{
 			LockUserId = ClientId;
+			EntityLockResult LockResult(EntityLockObject.Result, EntityLockObject.ResultMessage, EntityLockObject.ErrorCode);
+			Callback(LockResult);
+
+			return;
 		}
 
-		Callback(LockSuccessful, ResponseMessage);
+		EntityLockResult LockResult(EntityLockObject.Result, "You failed to acquire the lock.", 400);
+		Callback(LockResult);
 	};
 
 	auto SerialisedEntity = Serialiser.Finalise();
@@ -1325,7 +1334,9 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 	if (LockUserId == 0)
 	{
 		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "The Space Entity is not currently locked.");
-		Callback(true, "The Space Entity is not currently locked.");
+		EntityLockResult LockResult(true, "The Space Entity is not currently locked.", 200);
+		Callback(LockResult);
+
 		return;
 	}
 
@@ -1333,7 +1344,8 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 	{
 		csp::common::String ErrorMessage("Failed to unlock Space Entity as another user has it locked. Space Entity is locked by user: ");
 		ErrorMessage.Append(std::to_string(LockUserId).c_str());
-		Callback(false, ErrorMessage);
+		EntityLockResult LockResult(false, ErrorMessage, 400);
+		Callback(LockResult);
 
 		return;
 	}
@@ -1346,14 +1358,20 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, UnlockValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](bool UnlockSuccessful, const csp::common::String& ResponseMessage)
+	const std::function LocalCallback = [this, ClientId, Callback](EntityLockResultObject EntityLockObject)
 	{
-		if (UnlockSuccessful)
+		if (EntityLockObject.Result)
 		{
 			LockUserId = 0;
+
+			EntityLockResult LockResult(EntityLockObject.Result, EntityLockObject.ResultMessage, EntityLockObject.ErrorCode);
+			Callback(LockResult);
+
+			return;
 		}
 
-		Callback(UnlockSuccessful, ResponseMessage);
+		EntityLockResult LockResult(EntityLockObject.Result, "You failed to remove the lock.", 400);
+		Callback(LockResult);
 	};
 
 	auto SerialisedEntity = Serialiser.Finalise();

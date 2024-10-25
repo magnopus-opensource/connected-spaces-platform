@@ -78,6 +78,18 @@ public:
 	ComponentUpdateType UpdateType;
 };
 
+/// @brief Info class that captures the results of an operation ot lock or unlock a SpaceEntity.
+class CSP_API EntityLockResult
+{
+public:
+	EntityLockResult(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
+		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode) {};
+
+	bool Result;
+	csp::common::String ResultMessage;
+	uint16_t ErrorCode;
+};
+
 /// @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.
 /// Use this to determine which parts of an entity to copy values from when an update occurs.
 /// It is a bitwise flag enum, so values are additive, the value may represent several flags.
@@ -128,7 +140,7 @@ public:
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
 	// Callback used for Entity Lock updates.
-	typedef std::function<void(bool, const csp::common::String&)> EntityLockCallback;
+	typedef std::function<void(EntityLockResult)> EntityLockCallback;
 
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();

@@ -68,6 +68,18 @@ class SignalRConnection;
 class SpaceEntity;
 class SpaceTransform;
 
+/// @brief Info class that captures the results of an operation ot lock or unlock a SpaceEntity.
+class CSP_API EntityLockResultObject
+{
+public:
+	EntityLockResultObject(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode, signalr::value* LockObjectMessage)
+		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode), ObjectMessage(LockObjectMessage) {};
+
+	bool Result;
+	csp::common::String ResultMessage;
+	uint16_t ErrorCode;
+	signalr::value* ObjectMessage;
+};
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.
 ///
@@ -97,14 +109,14 @@ public:
 	// Callback that will provide a pointer to a SpaceEntity object.
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
-	// Callback used for Entity Lock updates.
-	typedef std::function<void(bool, const csp::common::String&)> EntityLockCallback;
-
 	// Callback to receive sequence hierarchy changes, contains a SequenceHierarchyChangedParams with the details.
 	typedef std::function<void(const SequenceHierarchyChangedParams&)> SequenceHierarchyChangedCallbackHandler;
 
 	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
 	typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+
+	// Callback used for Entity Lock updates.
+	typedef std::function<void(EntityLockResultObject)> EntityLockObjectCallback;
 
 	/// @brief Creates a SpaceEntity with type Avatar, and relevant components and default states as specified.
 	/// @param InName csp::common::String : The name to give the new SpaceEntity.
@@ -415,7 +427,7 @@ private:
 	void ApplyIncomingPatch(const signalr::value*);
 	void HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription);
 
-	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockCallback Callback);
+	void SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockObjectCallback Callback);
 
 	void OnAllEntitiesCreated();
 	void DetermineScriptOwners();

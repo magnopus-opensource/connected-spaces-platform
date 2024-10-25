@@ -15,13 +15,13 @@
  */
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 
-#include "CSP//Multiplayer/SpaceEntity.h"
 #include "CSP/Common/List.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
+#include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -414,7 +414,7 @@ void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 		if (Entity->GetLockingUserId() == ClientId)
 		{
 			Entity->Unlock(
-				[](bool /*UnlockSuccessful*/, csp::common::String /*ResponseMessage*/)
+				[](EntityLockResult /*EntityLockResultObject*/)
 				{
 				});
 		}
@@ -1702,7 +1702,7 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 	}
 }
 
-void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockCallback Callback)
+void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockObjectCallback Callback)
 {
 	const std::vector InvokeArguments = {signalr::value(EntityPatch)};
 
@@ -1710,7 +1710,8 @@ void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& Entity
 	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
 	Connection->Invoke("SendObjectPatches", InvokeArguments);
 
-	Callback(true, "Success.");
+	EntityLockResultObject LockResultObject(true, "Success.", 200, CSP_NEW signalr::value());
+	Callback(LockResultObject);
 }
 
 } // namespace csp::multiplayer
