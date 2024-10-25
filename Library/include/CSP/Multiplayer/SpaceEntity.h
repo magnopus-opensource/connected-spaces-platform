@@ -83,11 +83,11 @@ class CSP_API EntityLockResult
 {
 public:
 	EntityLockResult(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
-		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode) {};
+		: Result(LockResult), ResultMessage(LockResultMessage), ResultCode(LockErrorCode) {};
 
 	bool Result;
 	csp::common::String ResultMessage;
-	uint16_t ErrorCode;
+	uint16_t ResultCode;
 };
 
 /// @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.

@@ -72,13 +72,12 @@ class SpaceTransform;
 class CSP_API EntityLockResultObject
 {
 public:
-	EntityLockResultObject(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode, signalr::value* LockObjectMessage)
-		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode), ObjectMessage(LockObjectMessage) {};
+	EntityLockResultObject(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
+		: Result(LockResult), ResultMessage(LockResultMessage), ErrorCode(LockErrorCode)) {};
 
 	bool Result;
 	csp::common::String ResultMessage;
 	uint16_t ErrorCode;
-	signalr::value* ObjectMessage;
 };
 
 /// @brief Class for creating and managing multiplayer objects known as space entities.

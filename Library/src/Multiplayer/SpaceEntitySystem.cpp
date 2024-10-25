@@ -1710,7 +1710,7 @@ void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& Entity
 	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
 	Connection->Invoke("SendObjectPatches", InvokeArguments);
 
-	EntityLockResultObject LockResultObject(true, "Success.", 200, CSP_NEW signalr::value());
+	EntityLockResultObject LockResultObject(true, "Success.", 200);
 	Callback(LockResultObject);
 }
 
