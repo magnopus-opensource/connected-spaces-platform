@@ -106,7 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(HotspotComponent->GetId()).c_str();
 
-  const csp::common::String HotspotUniqueComponentId = HotspotComponent->GetUniqueComponentId();
+	const csp::common::String HotspotUniqueComponentId = HotspotComponent->GetUniqueComponentId();
 
 	EXPECT_EQ(HotspotUniqueComponentId, UniqueComponentId);
 

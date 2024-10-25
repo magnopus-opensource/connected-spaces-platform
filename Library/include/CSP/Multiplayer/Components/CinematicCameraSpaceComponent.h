@@ -64,7 +64,7 @@ public:
 	CinematicCameraSpaceComponent(SpaceEntity* Parent);
 
 	/// @brief Gived the sensor size and focal length, return the horizonal fov
-	/// @return FOV in degrees
+	/// @return FOV in radians
 	float GetFov() const;
 
 	/// \addtogroup IPositionComponent
@@ -170,9 +170,9 @@ public:
 	/// \addtogroup IEnableableComponent
 	/// @{
 	/// @copydoc IEnableableComponent::GetIsEnabled()
-	bool GetIsEnabled() const;
+	bool GetIsEnabled() const override;
 	/// @copydoc IEnableableComponent::SetIsEnabled()
-	void SetIsEnabled(bool InValue);
+	void SetIsEnabled(bool InValue) override;
 	/// @}
 
 	/// \addtogroup IThirdPartyComponentRef

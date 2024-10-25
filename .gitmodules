@@ -17,9 +17,6 @@
 [submodule "modules/signalr"]
 	path = modules/signalr
 	url = https://github.com/SignalR/SignalR
-[submodule "Tools/WrapperGenerator/chevron"]
-	path = Tools/WrapperGenerator/chevron
-	url = https://github.com/noahmorrison/chevron.git
 [submodule "modules/tinyspline"]
 	path = modules/tinyspline
 	url = https://github.com/msteinbeck/tinyspline
