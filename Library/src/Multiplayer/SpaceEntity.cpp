@@ -1333,7 +1333,6 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 	// Verify that the Entity is locked by the current User.
 	if (LockUserId == 0)
 	{
-		CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "The Space Entity is not currently locked.");
 		EntityLockResult LockResult(true, "The Space Entity is not currently locked.", 200);
 		Callback(LockResult);
 
