@@ -185,4 +185,45 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralAssignmentTest)
 	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::String);
 	EXPECT_TRUE(MyValue.GetString() == "This is a string");
 }
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapConstructorTest)
+{
+	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
+	MyMap[1ll] = "Test1";
+	MyMap[2ll] = "Test2";
+	MyMap[3ll] = "Test3";
+
+	ReplicatedValue MyValue(MyMap);
+
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
+	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetMapTest)
+{
+	ReplicatedValue MyValue;
+	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
+	MyMap[1ll] = "Test1";
+	MyMap[2ll] = "Test2";
+	MyMap[3ll] = "Test3";
+
+	MyValue.SetMap(MyMap);
+
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
+	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapAssignmentTest)
+{
+	ReplicatedValue MyValue;
+	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
+	MyMap[1ll] = "Test1";
+	MyMap[2ll] = "Test2";
+	MyMap[3ll] = "Test3";
+
+	MyValue = MyMap;
+
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
+	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+}
 #endif

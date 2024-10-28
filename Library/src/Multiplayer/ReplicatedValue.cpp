@@ -35,6 +35,10 @@ ReplicatedValue::~ReplicatedValue()
 	{
 		Value.String.~String();
 	}
+	else if (ReplicatedType == ReplicatedValueType::Map)
+	{
+		Value.Map.~Map();
+	}
 }
 
 ReplicatedValue::ReplicatedValue(bool InValue) : ReplicatedType(ReplicatedValueType::Boolean)
@@ -75,6 +79,11 @@ ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue) : Replicat
 ReplicatedValue::ReplicatedValue(const csp::common::Vector4& InValue) : ReplicatedType(ReplicatedValueType::Vector4)
 {
 	Value.Vector4 = InValue;
+}
+
+ReplicatedValue::ReplicatedValue(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InMapValue) : ReplicatedType(ReplicatedValueType::Map)
+{
+	Value.Map = InMapValue;
 }
 
 ReplicatedValue::ReplicatedValue(const ReplicatedValue& OtherValue)
@@ -119,6 +128,11 @@ ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
 		case ReplicatedValueType::Vector4:
 		{
 			SetVector4(InValue.GetVector4());
+			break;
+		}
+		case ReplicatedValueType::Map:
+		{
+			SetMap(InValue.GetMap());
 			break;
 		}
 		case ReplicatedValueType::InvalidType:
@@ -178,6 +192,10 @@ bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 				IsEqual = GetVector4() == OtherValue.GetVector4();
 				break;
 			}
+			case ReplicatedValueType::Map:
+			{
+				IsEqual = GetMap() == OtherValue.GetMap();
+			}
 			default:
 			{
 				assert(0 && "Unhandled replicated value type!");
@@ -190,6 +208,66 @@ bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const
 {
 	return (*this == OtherValue) == false;
+}
+
+bool ReplicatedValue::operator<(const ReplicatedValue& OtherValue) const
+{
+	switch (OtherValue.GetReplicatedValueType())
+	{
+		case ReplicatedValueType::Boolean:
+		{
+			return GetBool() < OtherValue.GetBool();
+		}
+		case ReplicatedValueType::Integer:
+		{
+			return GetInt() < OtherValue.GetInt();
+		}
+		case ReplicatedValueType::Float:
+		{
+			return GetFloat() < OtherValue.GetFloat();
+		}
+		case ReplicatedValueType::String:
+		{
+			return GetString() < OtherValue.GetString();
+		}
+		default:
+		{
+			assert(0 && "Unhandled replicated value type!");
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool ReplicatedValue::operator>(const ReplicatedValue& OtherValue) const
+{
+	switch (OtherValue.GetReplicatedValueType())
+	{
+		case ReplicatedValueType::Boolean:
+		{
+			return GetBool() > OtherValue.GetBool();
+		}
+		case ReplicatedValueType::Integer:
+		{
+			return GetInt() > OtherValue.GetInt();
+		}
+		case ReplicatedValueType::Float:
+		{
+			return GetFloat() > OtherValue.GetFloat();
+		}
+		case ReplicatedValueType::String:
+		{
+			return GetString() > OtherValue.GetString();
+		}
+		default:
+		{
+			assert(0 && "Unhandled replicated value type!");
+			break;
+		}
+	}
+
+	return false;
 }
 
 void ReplicatedValue::SetBool(bool InValue)
@@ -301,6 +379,18 @@ const csp::common::Vector4& ReplicatedValue::GetVector4() const
 const csp::common::Vector4& ReplicatedValue::GetDefaultVector4()
 {
 	return InvalidVector4;
+}
+
+const csp::common::Map<ReplicatedValue, ReplicatedValue>& ReplicatedValue::GetMap() const
+{
+	assert(ReplicatedType == ReplicatedValueType::Map);
+	return Value.Map;
+}
+
+void ReplicatedValue::SetMap(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InValue)
+{
+	ReplicatedType = ReplicatedValueType::Map;
+	Value.Map	   = InValue;
 }
 
 size_t ReplicatedValue::GetSizeOfInternalValue()
