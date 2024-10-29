@@ -403,14 +403,26 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
 
 	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
 
-	// Create replicated map
-	csp::common::Map<ReplicatedValue, ReplicatedValue> MaterialOverrides;
-	MaterialOverrides["Key1"] = "Test1";
-	MaterialOverrides["Key2"] = "Test2";
-	MaterialOverrides["Key3"] = "Test3";
+	int64_t Prop1 = 10ll;
+	MyCustomComponent.SetCustomProperty("Prop1", Prop1);
+
+	// Create replicated maps
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map1;
+	Map1["Key1"] = "Test1";
+	Map1["Key2"] = "Test2";
+	Map1["Key3"] = "Test3";
+
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map2;
+	Map2[0ll] = 0.1f;
+	Map2[1ll] = 0.2f;
+	Map2[2ll] = 0.3f;
 
 	// Store map in a custom property
-	MyCustomComponent.SetCustomProperty("MyMap", MaterialOverrides);
+	MyCustomComponent.SetCustomProperty("MyMap1", Map1);
+	MyCustomComponent.SetCustomProperty("MyMap2", Map2);
+
+	csp::common::String Prop2 = "Test";
+	MyCustomComponent.SetCustomProperty("Prop2", Prop2);
 
 	// Serialize
 	SignalRMsgPackEntitySerialiser Serialiser;
@@ -424,8 +436,11 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
 
 	auto* DeserializedComponent = static_cast<CustomSpaceComponent*>(DeserialisedObject->GetComponent(0));
 
-	// Ensure deserialized value is correct
-	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap"), MaterialOverrides);
+	// Ensure deserialized values are correct
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop1"), Prop1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap1"), Map1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap2"), Map2);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop2"), Prop2);
 
 	delete MySpaceEntity;
 }
