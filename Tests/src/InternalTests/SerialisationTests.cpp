@@ -21,6 +21,7 @@
 	#include "CSP/Multiplayer/SpaceEntity.h"
 	#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 	#include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
+	#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 	#include "Multiplayer/SpaceEntityKeys.h"
 	#include "TestHelpers.h"
 
@@ -391,5 +392,43 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	CSP_DELETE(DeserialisedObject);
 	CSP_DELETE(Object);
 }
+
+CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
+{
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+
+	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	MySpaceEntity->Type		   = SpaceEntityType::Object;
+	MySpaceEntity->Id		   = 1337;
+
+	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+
+	// Create replicated map
+	csp::common::Map<ReplicatedValue, ReplicatedValue> MaterialOverrides;
+	MaterialOverrides["Key1"] = "Test1";
+	MaterialOverrides["Key2"] = "Test2";
+	MaterialOverrides["Key3"] = "Test3";
+
+	// Store map in a custom property
+	MyCustomComponent.SetCustomProperty("MyMap", MaterialOverrides);
+
+	// Serialize
+	SignalRMsgPackEntitySerialiser Serialiser;
+	MySpaceEntity->Serialise(Serialiser);
+	auto SerialisedObject = Serialiser.Finalise();
+
+	// Deserialize
+	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedObject);
+	auto DeserialisedObject = CSP_NEW SpaceEntity();
+	DeserialisedObject->Deserialise(Deserialiser);
+
+	auto* DeserializedComponent = static_cast<CustomSpaceComponent*>(DeserialisedObject->GetComponent(0));
+
+	// Ensure deserialized value is correct
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap"), MaterialOverrides);
+
+	delete MySpaceEntity;
+}
+
 
 #endif

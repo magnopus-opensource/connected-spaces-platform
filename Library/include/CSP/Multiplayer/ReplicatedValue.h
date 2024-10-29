@@ -223,6 +223,10 @@ public:
 	/// @brief Set a Map value for this replicated value from a csp::common::Map, will overwrite and previous value.
 	void SetMap(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InValue);
 
+	/// @brief Get a generic default Map.
+	/// @return The default Map.
+	CSP_NO_EXPORT static const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetDefaultMap();
+
 	/// @brief returns the size of the stored internal value.
 	/// @return size_t size of the internal value.
 	CSP_NO_EXPORT static size_t GetSizeOfInternalValue();

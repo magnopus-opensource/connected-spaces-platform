@@ -20,9 +20,10 @@
 
 namespace csp::multiplayer
 {
-static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
-static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
-static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
+static const csp::common::Vector2 InvalidVector2						   = csp::common::Vector2();
+static const csp::common::Vector3 InvalidVector3						   = csp::common::Vector3();
+static const csp::common::Vector4 InvalidVector4						   = csp::common::Vector4();
+static const csp::common::Map<ReplicatedValue, ReplicatedValue> InvalidMap = csp::common::Map<ReplicatedValue, ReplicatedValue>();
 
 ReplicatedValue::ReplicatedValue()
 {
@@ -195,6 +196,7 @@ bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 			case ReplicatedValueType::Map:
 			{
 				IsEqual = GetMap() == OtherValue.GetMap();
+				break;
 			}
 			default:
 			{
@@ -391,6 +393,11 @@ void ReplicatedValue::SetMap(const csp::common::Map<ReplicatedValue, ReplicatedV
 {
 	ReplicatedType = ReplicatedValueType::Map;
 	Value.Map	   = InValue;
+}
+
+const csp::common::Map<ReplicatedValue, ReplicatedValue>& ReplicatedValue::GetDefaultMap()
+{
+	return InvalidMap;
 }
 
 size_t ReplicatedValue::GetSizeOfInternalValue()
