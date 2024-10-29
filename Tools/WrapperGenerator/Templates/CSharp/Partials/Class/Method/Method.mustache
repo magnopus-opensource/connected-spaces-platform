@@ -147,26 +147,26 @@ override
 {{# is_pointer_or_reference }}
 {{# is_primitive }}
 {{# is_const }}
-    var _result = _value
+    var _result = _value;
 {{/ is_const}}
 {{^ is_const }}
-    var _result = new Ref<{{> Type }}>(_value)
+    var _result = new Ref<{{> Type }}>(_value);
 {{/ is_const }}
 {{/ is_primitive }}
 {{^ is_primitive }}
 {{# is_reference }}
-    WrapperHelper.CheckNativePointer(_value)
+    WrapperHelper.CheckNativePointer(_value);
 {{/ is_reference}}
 {{^ is_reference}}
     if (_value.Equals(NativePointer.Zero))
-        return null
+        return null;
 {{/ is_reference}}
-    var _result = new {{> Type }}(_value)
+    var _result = new {{> Type }}(_value);
 {{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
-    WrapperHelper.CheckNativePointer(_value)
+    WrapperHelper.CheckNativePointer(_value);
 
     var _result = new {{> Type }}(_value)
 {{/ is_class_or_interface }}
