@@ -82,8 +82,10 @@ std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const
 			const auto& Map = Value.GetMap();
 			auto Keys		= Map.Keys();
 
-			// Root of map which contains the type information
-			// and an array of key-value pairs
+			// Root of map which contains:
+			// 0 = Type information of the key
+			// 1 = Type information of value
+			// 2 = vector of key-value pairs
 			std::vector<signalr::value> MapRoot;
 			MapRoot.reserve(3);
 
