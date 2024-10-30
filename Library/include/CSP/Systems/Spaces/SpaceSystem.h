@@ -115,6 +115,7 @@ public:
 									  const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 									  const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
+									  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 									  SpaceResultCallback Callback);
 
 	/// @brief Creates a new space Using BufferAssetDataSource.
@@ -132,6 +133,7 @@ public:
 												const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 												const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 												const csp::systems::BufferAssetDataSource& Thumbnail,
+												const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 												SpaceResultCallback Callback);
 
 	/// @brief Updates the name and/or the description of a Space
@@ -361,6 +363,7 @@ private:
 	void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
 	void AddMetadata(const csp::common::String& SpaceId,
 					 const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+					 const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 					 NullResultCallback Callback);
 	void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 

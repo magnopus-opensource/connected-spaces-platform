@@ -377,11 +377,12 @@ void SpaceSystem::CreateSpace(const String& Name,
 							  const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 							  const Map<String, String>& Metadata,
 							  const Optional<FileAssetDataSource>& Thumbnail,
+							  const Optional<Array<String>>& Tags,
 							  SpaceResultCallback Callback)
 {
 	CSP_PROFILE_SCOPED();
 
-	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, this](const SpaceResult& CreateSpaceResult)
+	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
 	{
 		if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
 		{
@@ -491,7 +492,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 			}
 		};
 
-		AddMetadata(Space.Id, Metadata, AddMetadataCallback);
+		AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
 	};
 
 	::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
@@ -503,11 +504,12 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 										const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 										const Map<String, String>& Metadata,
 										const BufferAssetDataSource& Thumbnail,
+										const Optional<Array<String>>& Tags,
 										SpaceResultCallback Callback)
 {
 	CSP_PROFILE_SCOPED();
 
-	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, this](const SpaceResult& CreateSpaceResult)
+	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
 	{
 		if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
 		{
@@ -603,7 +605,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 			AddSpaceThumbnailWithBuffer(SpaceId, Thumbnail, UploadSpaceThumbnailCallback);
 		};
 
-		AddMetadata(Space.Id, Metadata, AddMetadataCallback);
+		AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
 	};
 
 	::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
@@ -1318,7 +1320,10 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
 	AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
 }
 
-void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<String, String>& Metadata, NullResultCallback Callback)
+void SpaceSystem::AddMetadata(const csp::common::String& SpaceId,
+							  const Map<String, String>& Metadata,
+							  const Optional<Array<String>>& Tags,
+							  NullResultCallback Callback)
 {
 	AssetCollectionResultCallback CreateAssetCollCallback = [Callback](const AssetCollectionResult& Result)
 	{
@@ -1335,7 +1340,7 @@ void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<Stri
 									   MetadataAssetCollectionName,
 									   Metadata,
 									   EAssetCollectionType::FOUNDATION_INTERNAL,
-									   nullptr,
+									   Tags,
 									   CreateAssetCollCallback);
 }
 
