@@ -991,7 +991,10 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
 	GetSpace(SpaceId, GetSpaceCallback);
 }
 
-void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, String>& NewMetadata, NullResultCallback Callback)
+void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId,
+									  const Map<String, String>& NewMetadata,
+									  const Optional<Array<String>>& Tags,
+									  NullResultCallback Callback)
 {
 	if (SpaceId.IsEmpty())
 	{
@@ -1002,7 +1005,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 		return;
 	}
 
-	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
+	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata, Tags](const AssetCollectionResult& Result)
 	{
 		if (Result.GetResultCode() == EResultCode::InProgress)
 		{
@@ -1026,7 +1029,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 		};
 
 		const auto& AssetCollection = Result.GetAssetCollection();
-		AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, UpdateAssetCollCallback);
+		AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, Tags, UpdateAssetCollCallback);
 	};
 
 	GetMetadataAssetCollection(SpaceId, MetadataAssetCollCallback);
