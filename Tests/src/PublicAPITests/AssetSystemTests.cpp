@@ -265,10 +265,11 @@ void GetAssetsByCollectionIds(csp::systems::AssetSystem* AssetSystem,
 void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 								   csp::systems::AssetCollection& AssetCollection,
 								   const csp::common::Map<csp::common::String, csp::common::String>& InMetaData,
+								   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 								   csp::common::Map<csp::common::String, csp::common::String>& OutMetaData)
 {
-	auto [Result]
-		= Awaitable(&csp::systems::AssetSystem::UpdateAssetCollectionMetadata, AssetSystem, AssetCollection, InMetaData).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAssetCollectionMetadata, AssetSystem, AssetCollection, InMetaData, Tags)
+						.Await(RequestPredicate);
 	auto ResultAssetCollection = Result.GetAssetCollection();
 
 	// Check Result Data has only changed MetData
@@ -282,11 +283,11 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 
 	EXPECT_NE(ResultAssetCollection.UpdatedAt, AssetCollection.UpdatedAt);
 
-	auto Tags = ResultAssetCollection.Tags;
+	auto AssetCollectionTags = ResultAssetCollection.Tags;
 
-	for (size_t i = 0U; i < Tags.Size(); ++i)
+	for (size_t i = 0U; i < AssetCollectionTags.Size(); ++i)
 	{
-		EXPECT_EQ(Tags[i], AssetCollection.Tags[i]);
+		EXPECT_EQ(AssetCollectionTags[i], AssetCollection.Tags[i]);
 	}
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);

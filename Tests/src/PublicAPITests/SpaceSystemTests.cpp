@@ -247,11 +247,14 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
 	}
 }
 
-void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, const Optional<Map<String, String>>& NewMetadata)
+void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem,
+						 const String& SpaceId,
+						 const Optional<Map<String, String>>& NewMetadata,
+						 const Optional<Array<String>>& Tags)
 {
 	Map<String, String> Metadata = NewMetadata.HasValue() ? *NewMetadata : Map<String, String>();
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata);
+	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata, Tags);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1448,6 +1451,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 	LogIn(UserSystem, UserId);
 
 	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
+	Array<String> Tags					  = {"tag-test"};
 
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space);
@@ -1460,7 +1464,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 
 	TestSpaceMetadata["site"] = "MagOffice";
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata);
+	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, Tags);
 
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
 
@@ -1721,7 +1725,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, nullptr);
+	UpdateSpaceMetadata(SpaceSystem, Space.Id, nullptr, nullptr);
 
 	Map<String, String> RetrievedSpaceMetadata;
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);

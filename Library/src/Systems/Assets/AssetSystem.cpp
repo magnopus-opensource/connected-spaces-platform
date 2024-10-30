@@ -433,10 +433,11 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 
 void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
 												const Map<String, String>& NewMetadata,
+												const Optional<Array<String>>& Tags,
 												AssetCollectionResultCallback Callback)
 {
 	auto PrototypeInfo
-		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, nullptr);
+		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, Tags);
 
 	services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
