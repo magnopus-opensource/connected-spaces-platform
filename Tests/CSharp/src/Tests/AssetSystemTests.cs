@@ -255,7 +255,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out _);
@@ -306,7 +306,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collections
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, null, null, out var assetCollection1);
@@ -358,7 +358,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -455,7 +455,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collections
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, null, null, out var assetCollection1);
@@ -511,7 +511,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var tags = new Common.Array<string>(1);
             tags[0] = space.Id;
@@ -611,7 +611,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
 
@@ -700,7 +700,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             CreateAssetCollection(assetSystem, space, null, testFirstAssetCollectionName, null, null, out var firstAssetCollection);
             CreateAssetCollection(assetSystem, space, null, testSecondAssetCollectionName, null, null, out var secondAssetCollection);
@@ -775,7 +775,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -831,7 +831,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1006,7 +1006,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1076,7 +1076,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1144,7 +1144,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1216,7 +1216,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1302,7 +1302,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testSpaceName, null, null, out var assetCollection);
@@ -1394,7 +1394,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1447,7 +1447,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create 'source' space and asset collection
-            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             {
                 CreateAssetCollection(assetSystem, sourceSpace, null, testAssetCollectionName, null, null, out sourceAssetCollection);
                 CreateAsset(assetSystem, sourceAssetCollection, testAssetName, null, null, out var sourceAsset);
@@ -1466,7 +1466,7 @@ namespace CSPEngine
             }
 
             // Create 'dest' space and invoke the copy
-            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             Common.Array<Systems.AssetCollection> destAssetCollections = null;
 
             {
