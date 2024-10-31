@@ -36,7 +36,7 @@ namespace CSPEngine
             var defaultTestUserId = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create space
-            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null, pushCleanupFunction: false);
 
             // Add the second test user to the space
             {
@@ -317,7 +317,7 @@ namespace CSPEngine
             var defaultTestUserId = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create space
-            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null, pushCleanupFunction: false);
 
             // Add the second test user to the space
             {
@@ -522,7 +522,7 @@ namespace CSPEngine
             var defaultTestUserId = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create space
-            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            using var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null, pushCleanupFunction: false);
 
             // Add self to space and fire EnterSpace event
             {
@@ -616,7 +616,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Add self to space and fire EnterSpace event
             {
@@ -737,7 +737,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Add self to space and fire EnterSpace event
             {
@@ -877,7 +877,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Add self to space and fire EnterSpace event
             {
@@ -1020,7 +1020,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-OKO");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-OKO");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Add self to space and fire EnterSpace event
             {
@@ -1192,7 +1192,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-OKO");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-OKO");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Add self to space and fire EnterSpace event
             {

@@ -27,7 +27,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            _ = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            _ = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Run Query
             var testQuery = "spaces{items{name}}";

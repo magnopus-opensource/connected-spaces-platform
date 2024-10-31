@@ -212,9 +212,9 @@ namespace CSPEngine
             assets = result.GetAssets();
         }
 
-        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, out Common.Map<string, string> metaDataOut)
+        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, Common.Array<string> Tags, out Common.Map<string, string> metaDataOut)
         {
-            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn).Result;
+            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn, Tags).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
