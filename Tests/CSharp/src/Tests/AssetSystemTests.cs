@@ -1295,7 +1295,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-            string[] tags = new Common.Array<string>();
+            var tags = new Common.Array<string>();
             tags[0] = "test-tag";
 
             using var metadataIn = new Common.Map<string, string>();
