@@ -19,7 +19,7 @@ namespace
 {
 
 int WaitForTestTimeoutCountMs;
-const int WaitForTestTimeoutLimit	= 20000;
+const int WaitForTestTimeoutLimit = 20000;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result)
 {
@@ -197,7 +197,15 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, CreateSequenceHierarchyTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -266,7 +274,15 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, UpdateSequenceHierarchyTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -347,7 +363,15 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetSequenceHierarchyTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -424,7 +448,15 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, GetAllSequenceHierarchiesTest
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -602,7 +634,7 @@ void SetupSpace()
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, SpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, SpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
 
@@ -712,7 +744,15 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceHierarchyTests, RegisterSequenceHierarchyUpda
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
