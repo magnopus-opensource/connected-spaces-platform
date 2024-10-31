@@ -212,9 +212,9 @@ namespace CSPEngine
             assets = result.GetAssets();
         }
 
-        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, Common.Array<string> Tags, out Common.Map<string, string> metaDataOut)
+        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, Common.Array<string> tags, out Common.Map<string, string> metaDataOut)
         {
-            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn, Tags).Result;
+            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn, tags).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -1295,6 +1295,9 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
+            var tags = new Common.Array<string>();
+            tags[0] = 'test-tag';
+
             using var metadataIn = new Common.Map<string, string>();
             metadataIn[testSpaceName] = testSpaceName;
 
@@ -1307,7 +1310,7 @@ namespace CSPEngine
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testSpaceName, null, null, out var assetCollection);
 
-            UpdateAssetCollectionMetadata(assetSystem, assetCollection, metadataIn, out var metaDataOut);
+            UpdateAssetCollectionMetadata(assetSystem, assetCollection, metadataIn, tags, out var metaDataOut);
 
             Assert.AreEqual(metadataIn[testSpaceName], metaDataOut[testSpaceName]);
 

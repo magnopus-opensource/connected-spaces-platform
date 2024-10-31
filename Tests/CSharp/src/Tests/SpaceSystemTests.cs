@@ -1063,7 +1063,7 @@ namespace CSPEngine
                 ["site"] = "Void"
             };
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
 
             GetSpaceMetadata(spaceSystem, space, out var retrievedSpaceMetadata);
 
@@ -1098,8 +1098,8 @@ namespace CSPEngine
                 ["site"] = "Void"
             };
 
-            var space1 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null, null);
-            var space2 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null, null);
+            var space1 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
+            var space2 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
 
             var spaces = new Common.Array<Systems.Space>(2)
             {
