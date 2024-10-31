@@ -1866,7 +1866,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	csp::common::Map<csp::common::String, csp::common::String> MetaDataMapOut;
 	MetaDataMapIn[UniqueSpaceName] = UniqueSpaceName;
 
-	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, MetaDataMapOut);
+	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, nullptr, MetaDataMapOut);
 	EXPECT_TRUE(MetaDataMapOut.HasKey(UniqueSpaceName));
 
 	// Delete asset collection
