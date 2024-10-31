@@ -2052,7 +2052,6 @@ namespace CSPEngine
                                     inviteInfo,
                                     null,
                                     null,
-                                    null,
                                     pushCleanupFunction: false);
 
             // Log out and log back in as alt user
