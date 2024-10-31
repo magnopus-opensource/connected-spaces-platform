@@ -1833,6 +1833,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
+	csp::common::Array<csp::common::String> Tags = {"tag-test"};
+
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -1866,7 +1868,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	csp::common::Map<csp::common::String, csp::common::String> MetaDataMapOut;
 	MetaDataMapIn[UniqueSpaceName] = UniqueSpaceName;
 
-	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, nullptr, MetaDataMapOut);
+	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, Tags, MetaDataMapOut);
 	EXPECT_TRUE(MetaDataMapOut.HasKey(UniqueSpaceName));
 
 	// Delete asset collection
