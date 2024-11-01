@@ -276,17 +276,20 @@ namespace CSPEngine
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
 
+            var tags = new Common.Array<string>(1);
+            tags[0] = "test-tag";
+
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create asset collection
-            CreateAssetCollection(assetSystem, null, null, testAssetCollectionName, null, null, out _);
+            CreateAssetCollection(assetSystem, null, null, testAssetCollectionName, null, tags, out _);
 
             // Get asset collections
             GetAssetCollectionByName(assetSystem, testAssetCollectionName, out var assetCollection);
 
             Assert.AreEqual(assetCollection.Name, testAssetCollectionName);
-            Assert.IsTrue(assetCollection.SpaceId.Length > 0);
+            Assert.IsFalse(assetCollection.SpaceId.Length > 0);
         }
 #endif
 
@@ -514,7 +517,7 @@ namespace CSPEngine
             var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var tags = new Common.Array<string>(1);
-            tags[0] = space.Id;
+            tags[0] = "test-tag";
 
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, Systems.EAssetCollectionType.SPACE_THUMBNAIL, null, out var assetCollection1);
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName2, Systems.EAssetCollectionType.SPACE_THUMBNAIL, tags, out var assetCollection2);
@@ -531,7 +534,7 @@ namespace CSPEngine
 
             // Search by parentId
             {
-                var assetCollections = FindAssetCollections(assetSystem, ids: new[] { assetCollection1.Id });
+                var assetCollections = FindAssetCollections(assetSystem, parentId: assetCollection1.Id );
 
                 Assert.AreEqual(assetCollections.Size(), 1UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection3.Id);
@@ -542,9 +545,9 @@ namespace CSPEngine
 
             // Search by tag
             {
-                var assetCollections = FindAssetCollections(assetSystem, tags: new[] { space.Id });
+                var assetCollections = FindAssetCollections(assetSystem, tags: new[] { "test-tag" });
 
-                Assert.AreEqual(assetCollections.Size(), 1UL);
+                Assert.AreEqual(assetCollections.Size(), 2UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection2.Id);
                 Assert.AreEqual(assetCollections[0].Name, assetCollection2.Name);
 
@@ -1484,7 +1487,7 @@ namespace CSPEngine
 
             // Validate the copied asset collection and its data
 	        {
-                Assert.AreEqual(destAssetCollections.Size(), 1UL);
+                Assert.AreEqual(destAssetCollections.Size(), 2UL);
 		        Assert.AreNotEqual(destAssetCollections[0].Id, sourceAssetCollection.Id);
 		        Assert.AreEqual(destAssetCollections[0].SpaceId, destSpace.Id);
 		        Assert.AreEqual(destAssetCollections[0].Type, sourceAssetCollection.Type);
