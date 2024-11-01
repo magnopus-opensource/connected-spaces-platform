@@ -52,8 +52,7 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMater
 	Serializer.SerializeMember("roughnessFactor", Obj.RoughnessFactor);
 
 	// Emissive Factor
-	Serializer.SerializeMember("emissiveFactor",
-							   csp::common::Array<float> {Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z, Obj.EmissiveFactor.W});
+	Serializer.SerializeMember("emissiveFactor", csp::common::Array<float> {Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z});
 
 	// Textures
 	Serializer.SerializeMember("baseColorTexture", Obj.BaseColorTexture);
@@ -104,7 +103,7 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLT
 	csp::common::Array<float> EmissiveFactorArray;
 	Deserializer.DeserializeMember("emissiveFactor", EmissiveFactorArray);
 
-	Obj.EmissiveFactor = csp::common::Vector4(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2], EmissiveFactorArray[3]);
+	Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
 
 	// Textures
 	Deserializer.DeserializeMember("baseColorTexture", Obj.BaseColorTexture);
@@ -122,17 +121,17 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& InAssetCollectionId, const
 	, AssetId(InAssetId)
 	, Name("")
 	, Type(EShaderType::Standard)
-	, BaseColorFactor(0, 0, 0, 0)
-	, MetallicFactor(0.f)
-	, RoughnessFactor(0.f)
-	, EmissiveFactor(0.f, 0.f, 0.f, 0.f)
+	, BaseColorFactor(1.f, 1.f, 1.f, 1.f)
+	, MetallicFactor(1.f)
+	, RoughnessFactor(1.f)
+	, EmissiveFactor(0.f, 0.f, 0.f)
 	, MetallicRoughnessTexture()
 	, BaseColorTexture()
 	, NormalTexture()
 	, OcclusionTexture()
 	, EmissiveTexture()
 	, AlphaMode(EAlphaMode::Opaque)
-	, AlphaCutoff(0.f)
+	, AlphaCutoff(0.5f)
 	, DoubleSided(false)
 	, Version(1)
 {
@@ -178,12 +177,12 @@ float GLTFMaterial::GetRoughnessFactor() const
 	return RoughnessFactor;
 }
 
-void GLTFMaterial::SetEmissiveFactor(const csp::common::Vector4& Factor)
+void GLTFMaterial::SetEmissiveFactor(const csp::common::Vector3& Factor)
 {
 	EmissiveFactor = Factor;
 }
 
-const csp::common::Vector4& GLTFMaterial::GetEmissiveFactor() const
+const csp::common::Vector3& GLTFMaterial::GetEmissiveFactor() const
 {
 	return EmissiveFactor;
 }

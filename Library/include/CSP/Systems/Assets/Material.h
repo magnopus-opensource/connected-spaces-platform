@@ -104,12 +104,12 @@ public:
 	float GetRoughnessFactor() const;
 
 	/// @brief Sets the factor of the emissive texture
-	/// @param Factor const csp::common::Vector4&
-	void SetEmissiveFactor(const csp::common::Vector4& Factor);
+	/// @param Factor const csp::common::Vector3&
+	void SetEmissiveFactor(const csp::common::Vector3& Factor);
 
 	/// @brief Gets the factor of the emissive color texture
-	/// @return csp::common::Vector4&
-	const csp::common::Vector4& GetEmissiveFactor() const;
+	/// @return csp::common::Vector3&
+	const csp::common::Vector3& GetEmissiveFactor() const;
 
 	/// @brief Sets the base color texture
 	/// @param Texture const TextureInfo&
@@ -177,7 +177,7 @@ private:
 	csp::common::Vector4 BaseColorFactor;
 	float MetallicFactor;
 	float RoughnessFactor;
-	csp::common::Vector4 EmissiveFactor;
+	csp::common::Vector3 EmissiveFactor;
 
 	TextureInfo BaseColorTexture;
 	TextureInfo MetallicRoughnessTexture;

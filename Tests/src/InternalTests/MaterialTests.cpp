@@ -37,11 +37,11 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
 
 	// Test defaults
 	EXPECT_EQ(Material.GetName(), "");
-	EXPECT_EQ(Material.GetBaseColorFactor(), csp::common::Vector4(0.f, 0.f, 0.f, 0.f));
-	EXPECT_EQ(Material.GetMetallicFactor(), 0.f);
-	EXPECT_EQ(Material.GetRoughnessFactor(), 0.f);
-	EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector4(0.f, 0.f, 0.f, 0.f));
-	EXPECT_EQ(Material.GetAlphaCutoff(), 0.f);
+	EXPECT_EQ(Material.GetBaseColorFactor(), csp::common::Vector4(1.f, 1.f, 1.f, 1.f));
+	EXPECT_EQ(Material.GetMetallicFactor(), 1.f);
+	EXPECT_EQ(Material.GetRoughnessFactor(), 1.f);
+	EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
+	EXPECT_EQ(Material.GetAlphaCutoff(), 0.5f);
 	EXPECT_EQ(Material.GetDoubleSided(), false);
 }
 
@@ -54,7 +54,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
 	csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
 	float TestMetallicFactor  = 1.f;
 	float TestRoughnessFactor = 2.f;
-	csp::common::Vector4 TestEmissiveFactor(1.f, 1.f, 1.f, 1.f);
+	csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
 	float TestAlphaCutoff = 3.f;
 	bool TestDoubleSided  = true;
 
@@ -88,7 +88,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
 	float TestMetallicFactor  = 1.f;
 	float TestRoughnessFactor = 2.f;
-	csp::common::Vector4 TestEmissiveFactor(1.f, 1.f, 1.f, 1.f);
+	csp::common::Vector3 TestEmissiveFactor(1.f, 1.f, 1.f);
 	float TestAlphaCutoff = 3.f;
 	bool TestDoubleSided  = true;
 
