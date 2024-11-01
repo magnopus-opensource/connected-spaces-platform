@@ -113,8 +113,18 @@ std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const
 				else
 				{
 					// Ensure key and values are all the same type
-					assert(KeyType == KeyValue.first && "Key types dont match!");
-					assert(ValueType == Value.first && "Value types dont match!");
+					if (KeyType != KeyValue.first)
+					{
+						CSP_LOG_ERROR_FORMAT("Map key types dont match! %s %s",
+											 std::to_string(KeyType).c_str(),
+											 std::to_string(KeyValue.first).c_str());
+					}
+					if (ValueType != Value.first)
+					{
+						CSP_LOG_ERROR_FORMAT("Map value types dont match! %s %s",
+											 std::to_string(ValueType).c_str(),
+											 std::to_string(Value.first).c_str());
+					}
 				}
 
 				// Add key-value pair to the signalr value
