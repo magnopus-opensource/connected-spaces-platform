@@ -226,7 +226,7 @@ namespace CSPEngine
             Assert.AreNotEqual(updatedAssetCollection.UpdatedAt, assetCollection.UpdatedAt);
 
             for (var i = 0UL; i < updatedAssetCollection.Tags.Size(); i++)
-                Assert.AreEqual(updatedAssetCollection.Tags[i], assetCollection.Tags[i]);
+                Assert.AreEqual(updatedAssetCollection.Tags[i], tags[i]);
 
             metaDataOut = new Common.Map<string, string>(updatedAssetCollection.GetMetadataImmutable());
         }
@@ -1295,7 +1295,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-            var tags = new Common.Array<string>();
+            var tags = new Common.Array<string>(1);
             tags[0] = "test-tag";
 
             using var metadataIn = new Common.Map<string, string>();
