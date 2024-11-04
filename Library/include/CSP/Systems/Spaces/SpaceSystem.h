@@ -363,13 +363,13 @@ private:
 	~SpaceSystem();
 
 	// Space Metadata
-	void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
-	void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
-	void AddMetadata(const csp::common::String& SpaceId,
-					 const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
-					 const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-					 NullResultCallback Callback);
-	void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void GetMetadataAssetCollection(const csp::common::String& SpaceId, AssetCollectionResultCallback Callback);
+	CSP_ASYNC_RESULT void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
+	CSP_ASYNC_RESULT void AddMetadata(const csp::common::String& SpaceId,
+									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+									  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+									  NullResultCallback Callback);
+	CSP_ASYNC_RESULT void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 
 	// Space Thumbnail
 	void AddSpaceThumbnail(const csp::common::String& SpaceId, const csp::systems::FileAssetDataSource& ImageDataSource, NullResultCallback Callback);
