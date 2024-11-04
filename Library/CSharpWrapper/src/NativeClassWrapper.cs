@@ -21,7 +21,7 @@ namespace Csp
         public static NativePointer Zero => new NativePointer(IntPtr.Zero, 0);
     }
 
-    public class NativeClassWrapper
+    public class NativeClassWrapper : IDisposable
     {
         internal IntPtr _ptr;
         internal bool _ownsPtr;
@@ -37,6 +37,53 @@ namespace Csp
         {
             _ptr = ptr.Pointer;
             _ownsPtr = ptr.OwnsOwnData;
+        }
+
+        protected virtual void DisposeNativeObject() { }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                try
+                {
+                    if (_ownsPtr)
+                    {
+                        if (!disposing)
+                        {
+                            //TODO: Log that the object wasn't disposed and is being destroyed by finalizer
+                        }
+
+                        if (_ptr == IntPtr.Zero)
+                        {
+                            throw new InvalidOperationException("Internal pointer was null");
+                        }
+
+                        if (CSPFoundation.GetIsInitialised())
+                        {
+                            DisposeNativeObject();
+                        }
+                    }
+                }
+                finally
+                {
+                    _ptr = IntPtr.Zero;
+                    _disposed = true;
+                }
+            }
+        }
+
+        ~NativeClassWrapper()
+        {
+             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+             Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

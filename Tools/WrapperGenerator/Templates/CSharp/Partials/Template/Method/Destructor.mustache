@@ -1,21 +1,6 @@
 {{^ is_private }}
-~{{ definition.name }}()
+protected override void DisposeNativeObject()
 {
-    //RealDispose();
-}
-
-void RealDispose() {
-    if (_ownsPtr && !_disposed)
-    {
-        {{ unique_name }}(_ptr);
-        _disposed = true;
-    }
-
-    _disposed = true;
-}
-
-public void Dispose() {
-    RealDispose();
-    GC.SuppressFinalize(this);
+    {{ unique_name }}(_ptr);
 }
 {{/ is_private }}
