@@ -38,13 +38,13 @@ namespace csp::systems
 {
 
 /// @brief Enum representing the shader type of a material. Currently not in use.
-enum class EShaderType : uint32_t
+enum class EShaderType
 {
 	Standard
 };
 
 /// @brief The alpha mode of a material.
-enum class EAlphaMode : uint32_t
+enum class EAlphaMode
 {
 	Opaque,
 	Mask,

@@ -39,7 +39,7 @@ namespace csp::systems
 /// @brief Enum representing the source type of the texture
 /// If Component is set, the data of the texture comes from the specified media component
 /// If ImageAsset is set, th data of the texture comes from the specified asset
-enum class ETextureResourceType : uint32_t
+enum class ETextureResourceType
 {
 	Component,
 	ImageAsset
