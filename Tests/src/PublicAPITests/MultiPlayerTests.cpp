@@ -3072,37 +3072,74 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	// Create Entity
-	csp::common::String EntityName = "ParentEntity";
+	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
 
-	SpaceTransform ObjectTransform;
+	if (FlagSetResult == ErrorCode::None)
+	{
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](SpaceEntity* Entity)
+		// Create Entity
+		csp::common::String EntityName = "LockTest";
+
+		SpaceTransform ObjectTransform;
+
+		EntitySystem->SetEntityCreatedCallback(
+			[](SpaceEntity* Entity)
+			{
+			});
+
+		auto [CreatedDefaultEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+		EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
+		EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
+		EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+
+		bool EntityUpdated = false;
+
+		CreatedDefaultEntity->SetUpdateCallback(
+			[&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (Entity->GetName() == "LockTest")
+				{
+
+					EXPECT_EQ(Entity->GetIsLocked(), true);
+					EXPECT_EQ(Entity->GetLockingUserId(), Connection->GetClientId());
+					EXPECT_EQ(Entity->IsModifiable(), true);
+
+					EntityUpdated = true;
+					// if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS)
+					//{
+					//	std::cerr << "Scale Updated" << std::endl;
+					//	EntityUpdated = true;
+					// }
+				}
+			});
+
+
+		// Lock the Entity
+		auto [EntityLockResult] = AWAIT(CreatedDefaultEntity, Lock);
+		EXPECT_EQ(EntityLockResult.Result, true);
+
+		while (!EntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 		{
-		});
+			EntitySystem->ProcessPendingEntityOperations();
+			std::this_thread::sleep_for(50ms);
+			WaitForTestTimeoutCountMs += 50;
+		}
 
-	auto [CreatedDefaultEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+		EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
+		EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), Connection->GetClientId());
+		EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
 
-	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
-	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
-	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+		// Unlock the Entity
+		auto [EntityUnlockResult] = AWAIT(CreatedDefaultEntity, Unlock);
+		EXPECT_EQ(EntityUnlockResult.Result, true);
 
-	// Lock the Entity
-	auto [EntityLockResult] = AWAIT(CreatedDefaultEntity, Lock);
-	EXPECT_EQ(EntityLockResult.Result, true);
+		EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
+		EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
+		EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+	}
 
-	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
-	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), Connection->GetClientId());
-	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
-
-	// Unlock the Entity
-	auto [EntityUnlockResult] = AWAIT(CreatedDefaultEntity, Unlock);
-	EXPECT_EQ(EntityUnlockResult.Result, true);
-
-	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
-	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
-	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+	auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
