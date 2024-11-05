@@ -123,6 +123,15 @@ public:
 	/// @return int
 	int GetTexCoord() const;
 
+	/// @brief True if this texture has been set for the current material
+	/// @return bool
+	bool IsSet() const;
+
+	/// @brief Sets if this texture is active for the current material
+	/// This is true by default when a new texture is created
+	/// @param Value bool
+	void SetTexture(bool Value);
+
 private:
 	csp::common::String AssetCollectionId;
 	csp::common::String AssetId;
@@ -135,6 +144,8 @@ private:
 	csp::common::Vector2 UVScale;
 
 	int TexCoord;
+
+	bool Set;
 
 	friend void ::ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::TextureInfo& Obj);
 	friend void ::FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::TextureInfo& Obj);

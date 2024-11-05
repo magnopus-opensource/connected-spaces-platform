@@ -142,7 +142,7 @@ public:
 	/// @return bool : Returns true if the key exists in this object
 	bool HasProperty(const char* Key) const
 	{
-		return Doc.HasMember(Key);
+		return ValueStack.top()->HasMember(Key);
 	}
 
 private:

@@ -55,11 +55,26 @@ void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::GLTFMater
 	Serializer.SerializeMember("emissiveFactor", csp::common::Array<float> {Obj.EmissiveFactor.X, Obj.EmissiveFactor.Y, Obj.EmissiveFactor.Z});
 
 	// Textures
-	Serializer.SerializeMember("baseColorTexture", Obj.BaseColorTexture);
-	Serializer.SerializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
-	Serializer.SerializeMember("normalTexture", Obj.NormalTexture);
-	Serializer.SerializeMember("occlusionTexture", Obj.OcclusionTexture);
-	Serializer.SerializeMember("emissiveTexture", Obj.EmissiveTexture);
+	if (Obj.BaseColorTexture.IsSet())
+	{
+		Serializer.SerializeMember("baseColorTexture", Obj.BaseColorTexture);
+	}
+	if (Obj.MetallicRoughnessTexture.IsSet())
+	{
+		Serializer.SerializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
+	}
+	if (Obj.NormalTexture.IsSet())
+	{
+		Serializer.SerializeMember("normalTexture", Obj.NormalTexture);
+	}
+	if (Obj.OcclusionTexture.IsSet())
+	{
+		Serializer.SerializeMember("occlusionTexture", Obj.OcclusionTexture);
+	}
+	if (Obj.EmissiveTexture.IsSet())
+	{
+		Serializer.SerializeMember("emissiveTexture", Obj.EmissiveTexture);
+	}
 }
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLTFMaterial& Obj)
@@ -106,11 +121,26 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLT
 	Obj.EmissiveFactor = csp::common::Vector3(EmissiveFactorArray[0], EmissiveFactorArray[1], EmissiveFactorArray[2]);
 
 	// Textures
-	Deserializer.DeserializeMember("baseColorTexture", Obj.BaseColorTexture);
-	Deserializer.DeserializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
-	Deserializer.DeserializeMember("normalTexture", Obj.NormalTexture);
-	Deserializer.DeserializeMember("occlusionTexture", Obj.OcclusionTexture);
-	Deserializer.DeserializeMember("emissiveTexture", Obj.EmissiveTexture);
+	if (Deserializer.HasProperty("baseColorTexture"))
+	{
+		Deserializer.DeserializeMember("baseColorTexture", Obj.BaseColorTexture);
+	}
+	if (Deserializer.HasProperty("metallicRoughnessTexture"))
+	{
+		Deserializer.DeserializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
+	}
+	if (Deserializer.HasProperty("normalTexture"))
+	{
+		Deserializer.DeserializeMember("normalTexture", Obj.NormalTexture);
+	}
+	if (Deserializer.HasProperty("occlusionTexture"))
+	{
+		Deserializer.DeserializeMember("occlusionTexture", Obj.OcclusionTexture);
+	}
+	if (Deserializer.HasProperty("emissiveTexture"))
+	{
+		Deserializer.DeserializeMember("emissiveTexture", Obj.EmissiveTexture);
+	}
 }
 
 namespace csp::systems
@@ -125,8 +155,8 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& InAssetCollectionId, const
 	, MetallicFactor(1.f)
 	, RoughnessFactor(1.f)
 	, EmissiveFactor(0.f, 0.f, 0.f)
-	, MetallicRoughnessTexture()
 	, BaseColorTexture()
+	, MetallicRoughnessTexture()
 	, NormalTexture()
 	, OcclusionTexture()
 	, EmissiveTexture()
@@ -135,6 +165,11 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& InAssetCollectionId, const
 	, DoubleSided(false)
 	, Version(1)
 {
+	BaseColorTexture.SetTexture(false);
+	MetallicRoughnessTexture.SetTexture(false);
+	NormalTexture.SetTexture(false);
+	OcclusionTexture.SetTexture(false);
+	EmissiveTexture.SetTexture(false);
 }
 
 void GLTFMaterial::SetName(const csp::common::String& InName)

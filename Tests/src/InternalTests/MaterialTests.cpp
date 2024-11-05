@@ -43,6 +43,12 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
 	EXPECT_EQ(Material.GetEmissiveFactor(), csp::common::Vector3(0.f, 0.f, 0.f));
 	EXPECT_EQ(Material.GetAlphaCutoff(), 0.5f);
 	EXPECT_EQ(Material.GetDoubleSided(), false);
+
+	EXPECT_EQ(Material.GetBaseColorTexture().IsSet(), false);
+	EXPECT_EQ(Material.GetMetallicRoughnessTexture().IsSet(), false);
+	EXPECT_EQ(Material.GetNormalTexture().IsSet(), false);
+	EXPECT_EQ(Material.GetOcclusionTexture().IsSet(), false);
+	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), false);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
@@ -227,6 +233,12 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVRotation(), TestEmissiveTextureRotation);
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVScale(), TestEmissiveTextureUVScale);
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetTexCoord(), TestEmissiveTextureTexCoord);
+
+	EXPECT_EQ(Material.GetBaseColorTexture().IsSet(), true);
+	EXPECT_EQ(Material.GetMetallicRoughnessTexture().IsSet(), true);
+	EXPECT_EQ(Material.GetNormalTexture().IsSet(), true);
+	EXPECT_EQ(Material.GetOcclusionTexture().IsSet(), true);
+	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
@@ -241,6 +253,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
 	EXPECT_EQ(Texture.GetUVRotation(), 0.f);
 	EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
 	EXPECT_EQ(Texture.GetTexCoord(), 0);
+	EXPECT_EQ(Texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
@@ -258,6 +271,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
 	EXPECT_EQ(Texture.GetUVRotation(), 0.f);
 	EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
 	EXPECT_EQ(Texture.GetTexCoord(), 0);
+	EXPECT_EQ(Texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTest)
@@ -274,6 +288,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTes
 	EXPECT_EQ(Texture.GetUVRotation(), 0.f);
 	EXPECT_EQ(Texture.GetUVScale(), csp::common::Vector2(1.f, 1.f));
 	EXPECT_EQ(Texture.GetTexCoord(), 0);
+	EXPECT_EQ(Texture.IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureSetterTest)
@@ -293,6 +308,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureSetterTest)
 	Texture.SetUVRotation(TestRotation);
 	Texture.SetUVScale(TestUVScale);
 	Texture.SetTexCoord(TestTexCoord);
+	Texture.SetTexture(false);
 
 	EXPECT_EQ(Texture.GetAssetCollectionId(), TestAssetCollectionId);
 	EXPECT_EQ(Texture.GetAssetId(), TestAssetId);
@@ -301,6 +317,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureSetterTest)
 	EXPECT_EQ(Texture.GetUVRotation(), TestRotation);
 	EXPECT_EQ(Texture.GetUVScale(), TestUVScale);
 	EXPECT_EQ(Texture.GetTexCoord(), TestTexCoord);
+	EXPECT_EQ(Texture.IsSet(), false);
 
 	Texture.SetEntityComponentId(TestEntityComponentId);
 

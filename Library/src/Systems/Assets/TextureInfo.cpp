@@ -91,6 +91,7 @@ TextureInfo::TextureInfo()
 	, UVRotation(0.f)
 	, UVScale(1.f, 1.f)
 	, TexCoord(0)
+	, Set(true)
 {
 }
 
@@ -178,5 +179,15 @@ void TextureInfo::SetTexCoord(int Coord)
 int TextureInfo::GetTexCoord() const
 {
 	return TexCoord;
+}
+
+bool TextureInfo::IsSet() const
+{
+	return Set;
+}
+
+void TextureInfo::SetTexture(bool Value)
+{
+	Set = Value;
 }
 } // namespace csp::systems
