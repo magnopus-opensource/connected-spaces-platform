@@ -68,11 +68,11 @@ public:
 	/// @param AssetId const csp::common::String& : The asset where the texture info is stored
 	void SetCollectionAndAssetId(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
-	/// @brief Gets the asset collection id
+	/// @brief Gets the asset collection id for the texture
 	/// @return csp::common::String&
 	const csp::common::String& GetAssetCollectionId() const;
 
-	/// @brief Gets the asset id
+	/// @brief Gets the asset id for the texture
 	/// @return csp::common::String&
 	const csp::common::String& GetAssetId() const;
 
@@ -115,11 +115,12 @@ public:
 	/// @return csp::common::Vector2
 	csp::common::Vector2 GetUVScale() const;
 
-	/// @brief Sets the tex coord of the texture
+	/// @brief Sets The set index of texture's TEXCOORD attribute
+	/// used for texture coordinate mapping.
 	/// @param Coord int
 	void SetTexCoord(int Coord);
 
-	/// @brief Gets the tex coord of the texture
+	/// @brief Gets the index of texture's TEXCOORD attribute
 	/// @return int
 	int GetTexCoord() const;
 
