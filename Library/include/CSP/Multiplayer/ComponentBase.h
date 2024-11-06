@@ -159,6 +159,7 @@ protected:
 	const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
 	const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
 	const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
+	const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetMapProperty(uint32_t Key) const;
 
 	void SetProperty(uint32_t Key, const ReplicatedValue& Value);
 	void RemoveProperty(uint32_t Key);
