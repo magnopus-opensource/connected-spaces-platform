@@ -18,7 +18,7 @@
 	#include "TestHelpers.h"
 	#include "gtest/gtest.h"
 
-	#include "CSP/Systems/Assets/Material.h"
+	#include "CSP/Systems/Assets/GLTFMaterial.h"
 	#include "Json/JsonSerializer.h"
 
 using namespace csp::json;
