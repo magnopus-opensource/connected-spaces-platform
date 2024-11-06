@@ -1268,7 +1268,8 @@ void SerialisePatchForResponse(const SpaceEntity* EntityToSerialise,
 
 		Serialiser.BeginComponents(); // [4] map<uint, vec> Components
 		{
-			Serialiser.AddViewComponent(ViewComponentKey, ViewComponentValue);
+			Serialiser.AddViewComponent(ViewComponentKey, ViewComponentValue.GetInt());
+			// Serialiser.AddViewComponent(COMPONENT_KEY_VIEW_SELECTEDCLIENTID, DirtyProperties[COMPONENT_KEY_VIEW_SELECTEDCLIENTID].GetInt());
 		}
 		Serialiser.EndComponents();
 	}

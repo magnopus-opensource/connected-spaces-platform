@@ -3096,7 +3096,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 		bool EntityUpdated = false;
 
 		CreatedDefaultEntity->SetUpdateCallback(
-			[&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			[&EntityUpdated, &Connection](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
 			{
 				if (Entity->GetName() == "LockTest")
 				{
@@ -3118,6 +3118,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 		// Lock the Entity
 		auto [EntityLockResult] = AWAIT(CreatedDefaultEntity, Lock);
 		EXPECT_EQ(EntityLockResult.Result, true);
+		// CreatedDefaultEntity->SetScale(csp::common::Vector3 {3.0f, 3.0f, 3.0f});
+		// CreatedDefaultEntity->QueueUpdate();
 
 		while (!EntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 		{

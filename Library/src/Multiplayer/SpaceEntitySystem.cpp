@@ -1704,11 +1704,29 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 
 void SpaceEntitySystem::SendEntityPatchWithResponse(const signalr::value& EntityPatch, EntityLockObjectCallback Callback)
 {
-	const std::vector InvokeArguments = {signalr::value(EntityPatch)};
+	std::vector<signalr::value> ObjectPatches;
+	ObjectPatches.push_back(EntityPatch);
+
+	const std::vector InvokeArguments = {signalr::value(ObjectPatches)};
+
+	const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+	{
+		try
+		{
+			if (Except)
+			{
+				std::rethrow_exception(Except);
+			}
+		}
+		catch (const std::exception& e)
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
+		}
+	};
 
 	// Todo: CHS are exposing a new 'ApplyPatchWithResult' endpoint for sending object patches that require a response.
 	// Once completed we will utilise this new endpoint here. In the meantime we are assuming success.
-	Connection->Invoke("SendObjectPatches", InvokeArguments);
+	Connection->Invoke("SendObjectPatches", InvokeArguments, LocalCallback);
 
 	EntityLockResultObject LockResultObject(true, "Success.", 200);
 	Callback(LockResultObject);
