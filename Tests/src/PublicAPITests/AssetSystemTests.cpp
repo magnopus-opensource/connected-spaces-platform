@@ -1848,19 +1848,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Tags, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSpaceName, nullptr, nullptr, AssetCollection);
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSpaceName, nullptr, Tags, AssetCollection);
 
 	csp::systems::AssetCollection IdAssetCollection;
 	// Update MetaData
