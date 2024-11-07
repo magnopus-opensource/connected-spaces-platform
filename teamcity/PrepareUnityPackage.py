@@ -129,6 +129,8 @@ def prepare_package(args):
     # Ensure our current working directory is always the git repository root
     root_dir = get_git_root()
     os.chdir(root_dir)
+    
+    print ('Root directory: ' + root_dir)
 
     # Clean previously-generated package
     shutil.rmtree(args.output_directory, ignore_errors=True)
