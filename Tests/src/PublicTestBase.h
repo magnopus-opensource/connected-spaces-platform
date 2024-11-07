@@ -19,7 +19,7 @@
 
 
 // constexpr char* EndpointBaseURI = "https://ogs-internal.magnopus-dev.cloud";
-constexpr char* EndpointBaseURI = "localhost:8081";
+constexpr char* EndpointBaseURI = "curl localhost:8081";
 
 
 class PublicTestBase : public ::testing::Test
