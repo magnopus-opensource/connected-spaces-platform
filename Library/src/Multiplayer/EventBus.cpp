@@ -31,13 +31,6 @@ constexpr const uint64_t ALL_CLIENTS_ID = -1;
 
 EventBus::~EventBus()
 {
-	CSP_DELETE(MultiplayerConnectionInst);
-}
-
-EventBus::EventBus(const EventBus& InBoundConnection)
-{
-	MultiplayerConnectionInst = InBoundConnection.MultiplayerConnectionInst;
-	EventMap				  = InBoundConnection.EventMap;
 }
 
 EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection)
@@ -50,11 +43,17 @@ void EventBus::ListenEvent(const csp::common::String& EventName, ParameterisedCa
 {
 	if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
 	{
+		std::string ErrorMessage = "Error: Multiplayer connection is not available.";
+		CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
 		return;
 	}
 
 	if (!Callback && !System)
+	{
+		std::string ErrorMessage = "Error: Expected non-null callback or system.";
+		CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
 		return;
+	}
 
 	if (Callback)
 	{
@@ -90,11 +89,13 @@ void EventBus::StartEventMessageListening()
 	{
 		if (Result.is_null())
 		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event values were empty.\n");
 			return;
 		}
 
 		if (EventMap.empty())
 		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event map was empty.\n");
 			return;
 		}
 
@@ -103,6 +104,7 @@ void EventBus::StartEventMessageListening()
 
 		if (EventMap.find(EventType) == EventMap.end())
 		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event was not found in event map.\n");
 			return;
 		}
 

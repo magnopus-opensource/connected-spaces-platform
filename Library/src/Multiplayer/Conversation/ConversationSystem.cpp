@@ -785,7 +785,9 @@ void ConversationSystem::RegisterSystemCallback()
 void ConversationSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
+	{
 		EventBusPtr->StopListenEvent("ConversationSystem");
+	}
 }
 
 void ConversationSystem::Deserialise(const std::vector<signalr::value>& EventValues)

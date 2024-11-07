@@ -344,7 +344,9 @@ void SequenceSystem::RegisterSystemCallback()
 void SequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
+	{
 		EventBusPtr->StopListenEvent("SequenceChanged");
+	}
 }
 
 void SequenceSystem::Deserialise(const std::vector<signalr::value>& EventValues)

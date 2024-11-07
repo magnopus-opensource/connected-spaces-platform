@@ -352,7 +352,9 @@ void HotspotSequenceSystem::RegisterSystemCallback()
 void HotspotSequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
+	{
 		EventBusPtr->StopListenEvent("SequenceChanged");
+	}
 }
 
 void HotspotSequenceSystem::Deserialise(const std::vector<signalr::value>& EventValues)

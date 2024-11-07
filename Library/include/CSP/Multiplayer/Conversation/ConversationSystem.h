@@ -144,12 +144,12 @@ public:
 	CSP_EVENT void SetConversationSystemCallback(ConversationSystemCallbackHandler Callback);
 
 	/// @brief Registers the system to listen for the named event.
-	void RegisterSystemCallback();
+	void RegisterSystemCallback() override;
 	/// @brief Deregisters the system from listening for the named event.
-	void DeregisterSystemCallback();
+	void DeregisterSystemCallback() override;
 	/// @brief Deserialises the event values of the system.
 	/// @param EventValues std::vector<signalr::value> : event values to deserialise
-	CSP_NO_EXPORT void Deserialise(const std::vector<signalr::value>& EventValues);
+	CSP_NO_EXPORT void Deserialise(const std::vector<signalr::value>& EventValues) override;
 
 private:
 	void StoreConversationMessage(const csp::common::String& ConversationId,

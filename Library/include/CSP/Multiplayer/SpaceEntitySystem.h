@@ -324,6 +324,7 @@ public:
 	/// @brief Retrieves all entites that exist at the root level (do not have a parent entity).
 	/// @return A list of root entities.
 	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
+
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 

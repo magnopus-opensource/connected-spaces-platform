@@ -49,19 +49,25 @@ void SystemBase::RegisterSystemCallback()
 	}
 
 	if (EventBusPtr)
+	{
 		EventBusPtr->ListenEvent("DefaultEvent", this);
+	}
 }
 
 void SystemBase::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
+	{
 		EventBusPtr->StopListenEvent("DefaultEvent");
+	}
 }
 
 void SystemBase::Deserialise(const std::vector<signalr::value>& EventValues)
 {
 	if (!SystemCallback)
+	{
 		return;
+	}
 
 	csp::multiplayer::EventDeserialiser Deserialiser;
 	Deserialiser.Parse(EventValues);

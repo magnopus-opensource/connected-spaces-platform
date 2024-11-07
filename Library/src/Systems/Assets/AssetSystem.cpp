@@ -871,13 +871,17 @@ void AssetSystem::RegisterSystemCallback()
 void AssetSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
+	{
 		EventBusPtr->StopListenEvent("AssetDetailBlobChanged");
+	}
 }
 
 void AssetSystem::Deserialise(const std::vector<signalr::value>& EventValues)
 {
 	if (!AssetDetailBlobChangedCallback)
+	{
 		return;
+	}
 
 	csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
 	Deserialiser.Parse(EventValues);

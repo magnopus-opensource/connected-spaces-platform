@@ -150,7 +150,7 @@ MultiplayerConnection::~MultiplayerConnection()
 		CSP_DELETE(WebSocketClient);
 		CSP_DELETE(NetworkEventManager);
 		CSP_DELETE(ConversationSystemPtr);
-		EventBusPtr = nullptr;
+		CSP_DELETE(EventBusPtr);
 	}
 }
 

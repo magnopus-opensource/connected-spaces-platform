@@ -67,12 +67,14 @@ public:
 	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
 	void ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
-	/// @brief Registers a system to listen for the named event.
+	/// @brief Registers a system to listen for the named event, where the system can define its
+	/// @brief own callback and deserialiser.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
 	/// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
 	CSP_NO_EXPORT void ListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
 
-	/// @brief Registers a callback and a system to listen for the named event.
+	/// @brief Registers a callback and a system to listen for the named event, where the system
+	/// @brief can define its own callback and deserialiser.
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
 	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
 	/// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
@@ -89,7 +91,6 @@ private:
 	EventBus();
 	~EventBus();
 
-	EventBus(const EventBus& InBoundConnection);
 	EventBus(MultiplayerConnection* InMultiplayerConnection);
 
 	class MultiplayerConnection* MultiplayerConnectionInst;
