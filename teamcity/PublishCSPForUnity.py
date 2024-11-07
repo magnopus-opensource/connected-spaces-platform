@@ -23,7 +23,7 @@ def main():
     arg_parser.add_argument(
         "--npm_publish_flag",
         help="Whether the package should be published to NPM. Default == True",
-        default=True)
+        default="True")
 
     PrepareUnityPackage.add_args(arg_parser)
 
