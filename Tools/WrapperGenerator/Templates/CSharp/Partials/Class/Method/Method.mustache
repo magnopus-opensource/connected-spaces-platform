@@ -99,26 +99,10 @@ override
     var _{{ name }} = GCHandle.Alloc({{ name }});
 {{/ type.is_function_signature }}
 {{/ parameters }}
-
 {{# return_type }}
-    var _result =
-{{# is_pointer_or_reference }}
-{{# is_primitive }}
-{{^ is_const }}
-        new Ref<{{> Type }}>(
-{{/ is_const }}
-{{/ is_primitive }}
-{{^ is_primitive }}
-        new {{> Type }}(
-{{/ is_primitive }}
-{{/ is_pointer_or_reference }}
-{{^ is_pointer_or_reference }}
-{{# is_class_or_interface }}
-        new {{> Type }}(
-{{/ is_class_or_interface }}
-{{/ is_pointer_or_reference }}
+    var _value = 
 {{/ return_type }}
-        {{ unique_name }}(
+        {{ unique_name }}( {{! Call the function, appending all the necessary parameters}}
 {{^ is_static }}
             _ptr {{# has_parameters }},{{/ has_parameters }}
 {{/ is_static }}
@@ -156,30 +140,45 @@ override
 {{/ type.is_string }}
 {{/ is_out }}
 {{/ parameters }}
-        )
+        );
+
+{{! If there is a return type, wrap it if necessary }}
 {{# return_type }}
-{{# is_void_pointer }}
-        .Pointer
-{{/ is_void_pointer }}
 {{# is_pointer_or_reference }}
 {{# is_primitive }}
+{{# is_const }}
+    var _result = _value;
+{{/ is_const}}
 {{^ is_const }}
-        )
+    var _result = new Ref<{{> Type }}>(_value);
 {{/ is_const }}
 {{/ is_primitive }}
 {{^ is_primitive }}
-        )
+{{# is_reference }}
+    WrapperHelper.CheckNativePointer(_value);
+{{/ is_reference}}
+{{^ is_reference}}
+    if (_value.Equals(NativePointer.Zero))
+        return null;
+{{/ is_reference}}
+    var _result = new {{> Type }}(_value);
 {{/ is_primitive }}
 {{/ is_pointer_or_reference }}
 {{^ is_pointer_or_reference }}
 {{# is_class_or_interface }}
-        )
+    WrapperHelper.CheckNativePointer(_value);
+
+    var _result = new {{> Type }}(_value)
+{{/ is_class_or_interface }}
+{{^ is_class_or_interface }}
+    var _result = _value
 {{/ is_class_or_interface }}
 {{/ is_pointer_or_reference }}
-{{/ return_type }};
-
-{{! Return value }}
-{{# return_type }}
+{{# is_void_pointer }}
+        .Pointer
+{{/ is_void_pointer }}
+;
+    
 {{# is_string }}
     {{! Convert native string to C# string }}
     var _resultString = WrapperHelper.NativeUTF8ToString(_result);
