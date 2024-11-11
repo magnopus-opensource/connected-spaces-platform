@@ -182,21 +182,24 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest
 
 	// Calcuate FOV
 
+	CinematicCamera->SetAspectRatio(16.0f / 9.0f);
 	CinematicCamera->SetFocalLength(0.035f);
 	CinematicCamera->SetSensorSize(csp::common::Vector2(0.036f, 0.024f));
 
-	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.95002151f); // 54.43222311f degrees
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.95002151f); // 54.432223114614956 degrees
 
+	CinematicCamera->SetAspectRatio(4.0f / 3.0f);
 	CinematicCamera->SetFocalLength(0.024f);
 	CinematicCamera->SetSensorSize(csp::common::Vector2(0.0223f, 0.0149f));
 
-	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.86983005f); // 49.83759112f degrees
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.78484384f); // ~44 degrees
 
+	CinematicCamera->SetAspectRatio(16.0f / 9.0f);
 	CinematicCamera->SetFocalLength(0.150f);
 	CinematicCamera->SetSensorSize(csp::common::Vector2(0.02703f, 0.01425f));
+	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.16848914); // ~9 degrees
 
-	EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.17971473f); // 10.29689609f degrees
-
+	CinematicCamera->SetAspectRatio(21.0f / 9.0f);
 	CinematicCamera->SetFocalLength(0.018f);
 	CinematicCamera->SetSensorSize(csp::common::Vector2(0.036f, 0.024f));
 
