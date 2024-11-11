@@ -872,7 +872,7 @@ void AssetSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("AssetDetailBlobChanged");
+		EventBusPtr->StopSystemListenEvent("AssetDetailBlobChanged", this);
 	}
 }
 

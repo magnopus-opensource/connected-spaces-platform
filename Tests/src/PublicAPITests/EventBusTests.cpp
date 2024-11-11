@@ -49,9 +49,6 @@ namespace
 {
 
 void InitialiseTestingConnection();
-// void OnConnect();
-// void OnDisconnect(bool ok);
-// void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem);
 
 std::atomic_bool IsTestComplete;
 std::atomic_bool IsDisconnected;
@@ -95,6 +92,69 @@ void InitialiseTestingConnection()
 	ObjectIntProperty	 = ReplicatedValue(static_cast<int64_t>(42));
 	ObjectStringProperty = "My replicated string";
 }
+
+typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> TestCallbackHandler;
+
+
+class TestSystem : public csp::systems::SystemBase
+{
+public:
+	// Test callback
+	csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback;
+
+	TestSystem(csp::multiplayer::EventBus* InEventBus) : SystemBase(nullptr, InEventBus)
+	{
+		RegisterSystemCallback();
+	}
+
+	~TestSystem()
+	{
+		DeregisterSystemCallback();
+	}
+
+	void RegisterSystemCallback()
+	{
+		if (!TestCallback)
+		{
+			return;
+		}
+
+		if (EventBusPtr)
+		{
+			EventBusPtr->ListenEvent("TestEvent", this);
+		}
+	}
+
+	void DeregisterSystemCallback()
+	{
+		if (EventBusPtr)
+		{
+			EventBusPtr->StopSystemListenEvent("TestEvent", this);
+		}
+	}
+
+	void Deserialise(const std::vector<signalr::value>& EventValues)
+	{
+		if (!TestCallback)
+		{
+			return;
+		}
+
+		csp::multiplayer::EventDeserialiser Deserialiser;
+		Deserialiser.Parse(EventValues);
+
+		TestCallback(true, Deserialiser.GetEventData());
+	}
+
+	void SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
+	{
+		TestCallback = Callback;
+		RegisterSystemCallback();
+	}
+};
+
+TestSystem* TestSystem1;
+TestSystem* TestSystem2;
 
 } // namespace
 
@@ -296,6 +356,250 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 		std::this_thread::sleep_for(50ms);
 		WaitForTestTimeoutCountMs += 50;
 	}
+
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_CALLBACKS_SYSTEMS_TEST
+CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	TestSystem1 = CSP_NEW TestSystem(EventBus);
+	TestSystem2 = CSP_NEW TestSystem(EventBus);
+
+	auto& LogSystem				  = *SystemsManager.GetLogSystem();
+	std::atomic_bool LogConfirmed = false;
+	csp::common::String TestMsg;
+
+	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	InitialiseTestingConnection();
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Set up Log callback
+	LogSystem.SetLogCallback(
+		[&](csp::common::String InMessage)
+		{
+			LogConfirmed = InMessage == TestMsg;
+		});
+
+	// Set up Test callback
+	bool TestCallback1Called = false, TestCallback2Called = false;
+	int TestCallbackId = 0;
+
+	csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
+		= [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+	{
+		EXPECT_TRUE(ok);
+
+		if (TestCallback1Called)
+		{
+			return;
+		}
+
+		TestCallback1Called = true;
+		TestCallbackId		= 1111;
+	};
+
+	csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback2
+		= [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+	{
+		EXPECT_TRUE(ok);
+
+		if (TestCallback2Called)
+		{
+			return;
+		}
+
+		TestCallback2Called = true;
+		TestCallbackId		= 2222;
+	};
+
+	auto ErrorCallback = [](ErrorCode Error)
+	{
+		ASSERT_EQ(Error, ErrorCode::None);
+	};
+
+	// Test that registering a system works
+	TestSystem1->SetSystemCallback(TestCallback1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_TRUE(TestCallback1Called);
+	EXPECT_EQ(TestCallbackId, 1111);
+	TestCallback1Called = false;
+
+	// Test that registering a system when there already is a registered system does not work
+	TestMsg = "Error: there is already a system registered for TestEvent.\n";
+	TestSystem2->SetSystemCallback(TestCallback2);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_TRUE(TestCallback1Called);
+	EXPECT_EQ(TestCallbackId, 1111);
+	TestCallback1Called = false;
+	WaitForCallback(TestCallback2Called);
+	EXPECT_FALSE(TestCallback2Called);
+	EXPECT_TRUE(LogConfirmed);
+	TestMsg		 = "";
+	LogConfirmed = false;
+
+	// Deregister the system and test that registering a new one now works
+	EventBus->StopSystemListenEvent("TestEvent", TestSystem1);
+	TestSystem2->SetSystemCallback(TestCallback2);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback2Called);
+	EXPECT_TRUE(TestCallback2Called);
+	EXPECT_EQ(TestCallbackId, 2222);
+	TestCallback2Called = false;
+
+	// Test that registering a callback when there already is a registered system does not work
+	TestMsg = "Error: there is already a system registered for TestEvent.\n";
+	EventBus->ListenEvent("TestEvent", TestCallback1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback2Called);
+	EXPECT_TRUE(TestCallback2Called);
+	EXPECT_EQ(TestCallbackId, 2222);
+	TestCallback2Called = false;
+	WaitForCallback(TestCallback1Called);
+	EXPECT_FALSE(TestCallback1Called);
+	EXPECT_TRUE(LogConfirmed);
+	TestMsg		 = "";
+	LogConfirmed = false;
+
+	// Test that registering a callback for a new event works
+	EventBus->StopSystemListenEvent("TestEvent", TestSystem2);
+	EventBus->ListenEvent("TestEvent", TestCallback1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_TRUE(TestCallback1Called);
+	EXPECT_EQ(TestCallbackId, 1111);
+	TestCallback1Called = false;
+
+	// Test that registering a system when there already is a registered callback does not work
+	TestMsg = "Error: there is already at least one callback registered for TestEvent.\n";
+	TestSystem1->SetSystemCallback(TestCallback2);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_TRUE(TestCallback1Called);
+	EXPECT_EQ(TestCallbackId, 1111);
+	TestCallback1Called = false;
+	WaitForCallback(TestCallback2Called);
+	EXPECT_FALSE(TestCallback2Called);
+	EXPECT_TRUE(LogConfirmed);
+	TestMsg		 = "";
+	LogConfirmed = false;
+
+	// Test that deregistering a system that is registered works
+	EventBus->StopAllListenEvent("TestEvent"); // clean up
+	EventBus->ListenEvent("TestEvent", TestSystem1);
+	EventBus->StopSystemListenEvent("TestEvent", TestSystem1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	TestCallback1Called = false;
+	WaitForCallback(TestCallback1Called);
+	EXPECT_FALSE(TestCallback1Called);
+
+	// Test that registering several callbacks for one event works
+	EventBus->ListenEvent("TestEvent", TestCallback1);
+	EventBus->ListenEvent("TestEvent", TestCallback2);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_TRUE(TestCallback1Called);
+	TestCallback1Called = false;
+	WaitForCallback(TestCallback2Called);
+	EXPECT_TRUE(TestCallback2Called);
+	TestCallback2Called = false;
+
+	// THIS FUNCTIONALITY IS NOT CURRENTLY IMPLEMENTED
+	//// Test that deregistering a callback that is not registered does nothing
+	// EventBus->StopCallbackListenEvent("NonExistingEvent", TestCallback2);
+	//
+	//// Test that deregistering one callback when 2 are registered works
+	// Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	//  EventBus->StopCallbackListenEvent("TestEvent", TestCallback1);
+	//  WaitForCallback(TestCallback1Called);
+	//  EXPECT_FALSE(TestCallback1Called);
+	//  WaitForCallback(TestCallback2Called);
+	//  EXPECT_TRUE(TestCallback2Called);
+	//  EXPECT_EQ(TestCallbackId, 2222);
+	//  TestCallback2Called = false;
+	//
+	//// Test that deregistering a callback that is registered works
+	// EventBus->ListenEvent("TestEvent", TestCallback1);
+	// Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	// EventBus->StopCallbackListenEvent("TestEvent", TestCallback1);
+	// WaitForCallback(TestCallback1Called);
+	// EXPECT_FALSE(TestCallback1Called);
+
+	// Test that deregistering all callbacks when 2 are registered works
+	EventBus->ListenEvent("TestEvent", TestCallback1);
+	EventBus->ListenEvent("TestEvent", TestCallback2);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopAllListenEvent("TestEvent");
+	WaitForCallback(TestCallback1Called);
+	EXPECT_FALSE(TestCallback1Called);
+	WaitForCallback(TestCallback2Called);
+	EXPECT_FALSE(TestCallback2Called);
+
+	// Test that deregistering a system that is not registered does nothing
+	EventBus->StopSystemListenEvent("NonExistingEvent", TestSystem2);
+	WaitForCallback(TestCallback2Called);
+	EXPECT_FALSE(TestCallback2Called);
+
+	// Test that deregistering a system that is registered works (using StopSystemListenEvent)
+	TestSystem1->SetSystemCallback(TestCallback1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopSystemListenEvent("TestEvent", TestSystem1);
+	WaitForCallback(TestCallback1Called);
+	EXPECT_FALSE(TestCallback1Called);
+
+	// Test that deregistering a system that is registered works (using StopAllListenEvent)
+	TestSystem1->SetSystemCallback(TestCallback1);
+	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopAllListenEvent("TestEvent");
+	WaitForCallback(TestCallback1Called);
+	EXPECT_FALSE(TestCallback1Called);
+
+	LogSystem.ClearAllCallbacks();
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 

@@ -118,11 +118,7 @@ constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 /// @brief MultiplayerConnection
 MultiplayerConnection::MultiplayerConnection()
-	: Connection(nullptr),
-	WebSocketClient(nullptr),
-	NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this)),
-	ClientId(0),
-	Connected(false)
+	: Connection(nullptr), WebSocketClient(nullptr), NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this)), ClientId(0), Connected(false)
 {
 	EventBusPtr			  = CSP_NEW EventBus(this);
 	ConversationSystemPtr = CSP_NEW ConversationSystem(this);

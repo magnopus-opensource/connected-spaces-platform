@@ -188,7 +188,6 @@ using namespace std::chrono;
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)
 	: MultiplayerConnectionInst(InMultiplayerConnection)
-	, SystemBase(InMultiplayerConnection->EventBusPtr)
 	, Connection(nullptr)
 	, EventHandler(CSP_NEW SpaceEntityEventHandler(this))
 	, ElectionManager(nullptr)
@@ -203,7 +202,6 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, EntityPatchRate(90)
 {
 	Initialise();
-	RegisterSystemCallback();
 }
 
 SpaceEntitySystem::~SpaceEntitySystem()
@@ -219,8 +217,6 @@ SpaceEntitySystem::~SpaceEntitySystem()
 	CSP_DELETE(PendingRemoves);
 	CSP_DELETE(PendingOutgoingUpdateUniqueSet);
 	CSP_DELETE(PendingIncomingUpdates);
-
-	DeregisterSystemCallback();
 }
 
 void SpaceEntitySystem::Initialise()
@@ -1104,7 +1100,6 @@ const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntiti
 {
 	return &RootHierarchyEntities;
 }
-
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 {

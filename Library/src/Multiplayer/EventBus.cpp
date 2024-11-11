@@ -27,7 +27,14 @@ namespace csp::multiplayer
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
+template <typename T, typename... U> size_t GetCallbackAddress(std::function<T(U...)> f)
+{
+	// typedef T(fnType)(U...);
+	// fnType** fnPointer = f.template target<fnType*>();
+	// return (size_t) *fnPointer;
+	//   The above throws an exception -- also it is not portable. better to use a handle or an ID instead.
+	return 42;
+}
 
 EventBus::~EventBus()
 {
@@ -39,7 +46,7 @@ EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection)
 	EventMap				  = {};
 }
 
-void EventBus::ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback, csp::systems::SystemBase* System)
+void EventBus::ListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
 {
 	if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
 	{
@@ -48,38 +55,94 @@ void EventBus::ListenEvent(const csp::common::String& EventName, ParameterisedCa
 		return;
 	}
 
-	if (!Callback && !System)
+	if (!System)
 	{
-		std::string ErrorMessage = "Error: Expected non-null callback or system.";
+		std::string ErrorMessage = "Error: Expected non-null system.";
 		CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
 		return;
 	}
 
-	if (Callback)
+	if (!EventMap.empty() && EventMap.find(EventName) != EventMap.end())
 	{
-		EventMap[EventName].first.push_back(Callback);
+		if (!EventMap[EventName].first.empty())
+		{
+			CSP_LOG_ERROR_FORMAT("Error: there is already at least one callback registered for %s.\n", EventName.c_str());
+			return;
+		}
+		else if (EventMap[EventName].second)
+		{
+			CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
+			return;
+		}
 	}
-	if (System)
-	{
-		EventMap[EventName].second = System;
-	}
-}
 
-void EventBus::ListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
-{
-	ListenEvent(EventName, nullptr, System);
+	EventMap[EventName].second = System;
 }
 
 void EventBus::ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
-	ListenEvent(EventName, Callback, nullptr);
+	if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
+	{
+		std::string ErrorMessage = "Error: Multiplayer connection is not available.";
+		CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
+		return;
+	}
+
+	if (!Callback)
+	{
+		std::string ErrorMessage = "Error: Expected non-null callback.";
+		CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
+		return;
+	}
+
+	if (!EventMap.empty() && EventMap.find(EventName) != EventMap.end() && EventMap[EventName].second)
+	{
+		CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
+		return;
+	}
+
+	EventMap[EventName].first.push_back(Callback);
 }
 
-void EventBus::StopListenEvent(const csp::common::String& EventName)
+void EventBus::StopAllListenEvent(const csp::common::String& EventName)
 {
 	if (!EventMap.empty() && EventMap.find(EventName) != EventMap.end())
 	{
 		EventMap.erase(EventName);
+	}
+}
+
+void EventBus::StopSystemListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
+{
+	if (System && !EventMap.empty() && EventMap.find(EventName) != EventMap.end() && EventMap[EventName].second == System)
+	{
+		// Remove system
+		EventMap[EventName].second = nullptr;
+		// Remove entry altogether
+		EventMap.erase(EventName);
+	}
+}
+
+void EventBus::StopCallbackListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
+{
+	if (Callback && !EventMap.empty() && EventMap.find(EventName) != EventMap.end() && !EventMap[EventName].first.empty())
+	{
+		// Remove the callback
+		EventMap[EventName].first.erase(std::remove_if(EventMap[EventName].first.begin(),
+													   EventMap[EventName].first.end(),
+													   [Callback](const auto& RegisteredCallback)
+													   {
+														   // TODO: comparing callbacks is NOT straightforward.
+														   // currently always returns the same value
+														   return GetCallbackAddress(Callback) == GetCallbackAddress(RegisteredCallback);
+													   }),
+										EventMap[EventName].first.end());
+
+		// If there are no callbacks left, remove entry altogether
+		if (EventMap[EventName].first.size() == 0)
+		{
+			EventMap.erase(EventName);
+		}
 	}
 }
 

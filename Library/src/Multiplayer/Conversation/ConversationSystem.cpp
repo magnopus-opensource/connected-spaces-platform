@@ -786,7 +786,7 @@ void ConversationSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("ConversationSystem");
+		EventBusPtr->StopSystemListenEvent("ConversationSystem", this);
 	}
 }
 

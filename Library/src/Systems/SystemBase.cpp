@@ -43,23 +43,12 @@ SystemBase::~SystemBase()
 
 void SystemBase::RegisterSystemCallback()
 {
-	if (!SystemCallback)
-	{
-		return;
-	}
-
-	if (EventBusPtr)
-	{
-		EventBusPtr->ListenEvent("DefaultEvent", this);
-	}
+	// Do nothing.
 }
 
 void SystemBase::DeregisterSystemCallback()
 {
-	if (EventBusPtr)
-	{
-		EventBusPtr->StopListenEvent("DefaultEvent");
-	}
+	// Do nothing.
 }
 
 void SystemBase::Deserialise(const std::vector<signalr::value>& EventValues)

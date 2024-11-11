@@ -820,7 +820,7 @@ void UserSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("AccessControlChanged");
+		EventBusPtr->StopSystemListenEvent("AccessControlChanged", this);
 	}
 }
 

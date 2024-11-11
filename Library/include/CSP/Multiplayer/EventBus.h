@@ -59,13 +59,8 @@ public:
 	friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
 	/** @endcond */
 
-	// The callback used to register to listen to network events.
+	// The callback used to register to listen to events.
 	typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
-
-	/// @brief Registers a callback to listen for the named event.
-	/// @param EventName csp::common::String : The identifying name for the event to listen for.
-	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
-	void ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
 	/// @brief Registers a system to listen for the named event, where the system can define its
 	/// @brief own callback and deserialiser.
@@ -73,16 +68,26 @@ public:
 	/// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
 	CSP_NO_EXPORT void ListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
 
-	/// @brief Registers a callback and a system to listen for the named event, where the system
-	/// @brief can define its own callback and deserialiser.
+	/// @brief Registers a callback to listen for the named event
 	/// @param EventName csp::common::String : The identifying name for the event to listen for.
 	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
-	/// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
-	CSP_NO_EXPORT void ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback, csp::systems::SystemBase* System);
+	void ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
-	/// @brief Stops the event bus from listening for a particular event.
+	/// @brief Stops the event bus from listening for a particular event, for any system or callbacks
+	/// @brief that were registered.
 	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
-	void StopListenEvent(const csp::common::String& EventName);
+	void StopAllListenEvent(const csp::common::String& EventName);
+
+	/// @brief Stops the event bus from listening for a particular event, for the specified system.
+	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
+	/// @param System csp::systems::SystemBase : The system that will stop being registered.
+	void StopSystemListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
+
+	/// @brief Stops the event bus from listening for a particular event, for the specified callback.
+	/// @brief Other callbacks which may be registered to the same event are not affected.
+	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
+	/// @param Callback ParameterisedCallbackHandler : The callback that will stop being registered.
+	void StopCallbackListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
 	/// @brief Instructs the event bus to start listening to messages
 	void StartEventMessageListening();
