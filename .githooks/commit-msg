@@ -63,30 +63,26 @@ validate_commit_msg() {
     local second_word=$(echo "${subject}" | awk '{print $2;}')
     local is_allowed=false
 
-    
     # Validate the ticket ID
-    re='^[0-9]+$'
-    first_character=${first_word:0:1}
-    last_character=${first_word: -1}
-    if [[ "$first_character" == *"["* ]] && [[ "$last_character" == *"]"* ]] && [[ "$first_word" == *"-"* ]]  ; then
-        truncated_first_word=${first_word#"["}
-        truncated_first_word=${truncated_first_word%"]"}
-        IFS='-' read -ra ADDR <<< "$truncated_first_word"
-        if ! [[ ${ADDR[0]} =~ $re ]] ; then
-            if [[ ${ADDR[1]} =~ $re ]] ; then
-                is_allowed=true
-            fi
-        fi
+    if [[ "$first_word" =~ ^\[([[:alpha:]]+-|#)([[:digit:]]+)\]$ ]]; then
+        is_allowed=true
     fi
 
-    if [[ "${is_allowed}" == true ]]; then
-        is_allowed=false
-        for verb in "${allowed_subject_verbs[@]}"; do
-            if [[ "${verb}" == "${second_word}" ]]; then
-                is_allowed=true
-            fi
-        done
+    if [[ "${is_allowed}" == false ]]; then
+        echo "${error_msg} Include a ticket ID at the start of the subject line."
+        echo "Your subject must start with a ticket ID in square brackets."
+        echo "The ID must be an internal Jira ID, e.g. [OB-1234], or a Github Issue ID, e.g. [#1234]."
+        echo "For changes without a ticket ID (e.g. refactoring changes), use [nt-0]."
+        exit 1
     fi
+
+    # Validate that the message has a verb
+    is_allowed=false
+    for verb in "${allowed_subject_verbs[@]}"; do
+        if [[ "${verb}" == "${second_word}" ]]; then
+            is_allowed=true
+        fi
+    done
 
     if [[ "${is_allowed}" == false ]]; then
         echo "${error_msg} Use the imperative mood in the subject line"

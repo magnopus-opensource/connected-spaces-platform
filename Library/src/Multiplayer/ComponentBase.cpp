@@ -171,6 +171,20 @@ const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) cons
 	return ReplicatedValue::GetDefaultVector4();
 }
 
+const csp::common::Map<ReplicatedValue, ReplicatedValue>& ComponentBase::GetMapProperty(uint32_t Key) const
+{
+	const auto& RepVal = GetProperty(Key);
+
+	if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Map)
+	{
+		return RepVal.GetMap();
+	}
+
+	CSP_LOG_ERROR_MSG("Underlying ReplicatedValue not a valid Map type");
+
+	return ReplicatedValue::GetDefaultMap();
+}
+
 void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 {
 	if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())

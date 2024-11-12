@@ -267,23 +267,24 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	// Use `GET /api/v1/prototypes` and only pass asset collection IDs
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
-			std::nullopt,		// Tags
-			std::nullopt,		// TagsAll
-			AssetCollectionIds, // const std::optional<std::vector<utility::string_t>>& Ids
-			std::nullopt,		// Names
-			std::nullopt,		// PartialNames
-			std::nullopt,		// ExcludedIds
-			std::nullopt,		// PointOfInterestIds
-			std::nullopt,		// ParentId
-			std::nullopt,		// GroupIds
-			std::nullopt,		// Types
-			true,				// HasGroup
-			std::nullopt,		// CreatedBy
-			std::nullopt,		// PrototypeOwnerIds
-			std::nullopt,		// ReadAccessFilters
-			std::nullopt,		// WriteAccessFilters
-			std::nullopt,		// OrganizationIds
-			std::nullopt,
+			std::nullopt,							// Tags
+			std::nullopt,							// ExcludedTags
+			std::nullopt,							// TagsAll
+			AssetCollectionIds,						// const std::optional<std::vector<utility::string_t>>& Ids
+			std::nullopt,							// Names
+			std::nullopt,							// PartialNames
+			std::nullopt,							// ExcludedIds
+			std::nullopt,							// PointOfInterestIds
+			std::nullopt,							// ParentId
+			std::nullopt,							// GroupIds
+			std::nullopt,							// Types
+			true,									// HasGroup
+			std::nullopt,							// CreatedBy
+			std::nullopt,							// CreatedAfter
+			std::nullopt,							// PrototypeOwnerIds
+			std::nullopt,							// ReadAccessFilters
+			std::nullopt,							// WriteAccessFilters
+			std::nullopt,							// OrganizationIds
 			SourceSpaceId,							// originalGroupId
 			DestSpaceId,							// newGroupId
 			std::nullopt,							// shallowCopy
@@ -408,6 +409,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGet(PrototypeTags,		// Tags
+							 std::nullopt,		// ExcludedTags
 							 std::nullopt,		// TagsAll
 							 PrototypeIds,		// Ids
 							 PrototypeNames,	// Names
@@ -419,15 +421,15 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 							 PrototypeTypes,	// Types
 							 std::nullopt,		// HasGroup
 							 std::nullopt,		// CreatedBy
+							 std::nullopt,		// CreatedAfter
 							 std::nullopt,		// PrototypeOwnerIds
 							 std::nullopt,		// ReadAccessFilters
 							 std::nullopt,		// WriteAccessFilters
 							 std::nullopt,		// OrganizationIds
-							 std::nullopt,
-							 Skip,		   // Skip
-							 Limit,		   // Limit
-							 std::nullopt, // SortBy
-							 std::nullopt, // SortDirection
+							 Skip,				// Skip
+							 Limit,				// Limit
+							 std::nullopt,		// SortBy
+							 std::nullopt,		// SortDirection
 							 ResponseHandler);
 }
 
@@ -556,6 +558,7 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 										 std::nullopt, // PrototypeNames
 										 std::nullopt, // PrototypeParentNames
 										 std::nullopt, // Tags
+										 std::nullopt, // ExcludedTags
 										 std::nullopt, // TagsAll
 										 ResponseHandler);
 }
@@ -635,17 +638,18 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds,
 		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,
-										 std::nullopt,
-										 AssetDetailTypes,
-										 std::nullopt,
-										 AssetDetailNames,
-										 std::nullopt,
-										 PrototypeIds,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
+		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,   // Ids
+										 std::nullopt,	   // SupportedPlatforms
+										 AssetDetailTypes, // AssetTypes
+										 std::nullopt,	   // Styles
+										 AssetDetailNames, // Names
+										 std::nullopt,	   // CreatedAfter
+										 PrototypeIds,	   // PrototypeIds
+										 std::nullopt,	   // PrototypeNames
+										 std::nullopt,	   // PrototypeParentNames
+										 std::nullopt,	   // Tags
+										 std::nullopt,	   // ExcludedTags
+										 std::nullopt,	   // TagsAll
 										 ResponseHandler);
 }
 
@@ -672,17 +676,18 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
 	// Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 Ids,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
+		->apiV1PrototypesAssetDetailsGet(std::nullopt, // Ids
+										 std::nullopt, // SupportedPlatforms
+										 std::nullopt, // AssetTypes
+										 std::nullopt, // Styles
+										 std::nullopt, // Names
+										 std::nullopt, // CreatedAfter
+										 Ids,		   // PrototypeIds
+										 std::nullopt, // PrototypeNames
+										 std::nullopt, // PrototypeParentNames
+										 std::nullopt, // Tags
+										 std::nullopt, // ExcludedTags
+										 std::nullopt, // TagsAll
 										 ResponseHandler);
 }
 

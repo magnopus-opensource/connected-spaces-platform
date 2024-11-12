@@ -21,6 +21,7 @@
 	#include "CSP/Multiplayer/SpaceEntity.h"
 	#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 	#include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
+	#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 	#include "Multiplayer/SpaceEntityKeys.h"
 	#include "TestHelpers.h"
 
@@ -391,5 +392,58 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	CSP_DELETE(DeserialisedObject);
 	CSP_DELETE(Object);
 }
+
+CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
+{
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+
+	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	MySpaceEntity->Type		   = SpaceEntityType::Object;
+	MySpaceEntity->Id		   = 1337;
+
+	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+
+	int64_t Prop1 = 10ll;
+	MyCustomComponent.SetCustomProperty("Prop1", Prop1);
+
+	// Create replicated maps
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map1;
+	Map1["Key1"] = "Test1";
+	Map1["Key2"] = "Test2";
+	Map1["Key3"] = "Test3";
+
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map2;
+	Map2[0ll] = 0.1f;
+	Map2[1ll] = 0.2f;
+	Map2[2ll] = 0.3f;
+
+	// Store map in a custom property
+	MyCustomComponent.SetCustomProperty("MyMap1", Map1);
+	MyCustomComponent.SetCustomProperty("MyMap2", Map2);
+
+	csp::common::String Prop2 = "Test";
+	MyCustomComponent.SetCustomProperty("Prop2", Prop2);
+
+	// Serialize
+	SignalRMsgPackEntitySerialiser Serialiser;
+	MySpaceEntity->Serialise(Serialiser);
+	auto SerialisedObject = Serialiser.Finalise();
+
+	// Deserialize
+	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedObject);
+	auto DeserialisedObject = CSP_NEW SpaceEntity();
+	DeserialisedObject->Deserialise(Deserialiser);
+
+	auto* DeserializedComponent = static_cast<CustomSpaceComponent*>(DeserialisedObject->GetComponent(0));
+
+	// Ensure deserialized values are correct
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop1"), Prop1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap1"), Map1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap2"), Map2);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop2"), Prop2);
+
+	delete MySpaceEntity;
+}
+
 
 #endif

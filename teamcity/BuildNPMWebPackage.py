@@ -51,6 +51,9 @@ def get_arguments_commandline():
     parser.add_argument('--scope',
                         help="Enter the scope of the published package. Appends the registry URL.",
                         default=None)
+    parser.add_argument('--npm_publish_flag',
+                        help="Whether the package should be published to NPM. Default == True",
+                        default=True)
                      
     args = parser.parse_args()
 
@@ -160,7 +163,8 @@ def main():
     if package_dir_valid == True:
         copy_readme(input_args, generation_folder)
         create_package_file(input_args, generation_folder)
-        generate_final_package(input_args, generation_folder)
+        if input_args.npm_publish_flag == True:
+            generate_final_package(input_args, generation_folder)
         
 
 if __name__ == '__main__':
