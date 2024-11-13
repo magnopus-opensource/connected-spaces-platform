@@ -89,7 +89,8 @@ void SequenceSystem::CreateSequence(const String& SequenceKey,
 		= SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
 	static_cast<chs::SequenceApi*>(SequenceAPI)
-		->apiV1SequencesPut(SequenceInfo,			   // Dto
+		->apiV1SequencesPut(std::nullopt,			   // NewKey
+							SequenceInfo,			   // Dto
 							ResponseHandler,		   // ResponseHandler
 							CancellationToken::Dummy() // CancellationToken
 		);

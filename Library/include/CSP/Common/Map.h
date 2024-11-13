@@ -114,7 +114,15 @@ public:
 			return *this;
 		}
 
-		Container->~MapType();
+		if (Container)
+		{
+			Container->~MapType();
+		}
+		else
+		{
+			Container = (MapType*) csp::memory::DllAlloc(sizeof(MapType));
+		}
+
 		new (Container) MapType(*Other.Container);
 
 		return *this;
@@ -130,10 +138,29 @@ public:
 			return *this;
 		}
 
-		Container->~MapType();
+		if (Container)
+		{
+			Container->~MapType();
+		}
+		else
+		{
+			Container = (MapType*) csp::memory::DllAlloc(sizeof(MapType));
+		}
+
 		new (Container) MapType(*Other.Container);
 
 		return *this;
+	}
+
+
+	CSP_NO_EXPORT bool operator==(const Map<TKey, TValue>& OtherValue) const
+	{
+		return *Container == *OtherValue.Container;
+	}
+
+	CSP_NO_EXPORT bool operator!=(const Map<TKey, TValue>& OtherValue) const
+	{
+		return *Container != *OtherValue.Container;
 	}
 
 	/// @brief Returns the number of elements in this map.

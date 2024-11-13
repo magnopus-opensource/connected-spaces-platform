@@ -36,6 +36,7 @@ class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
 class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
+class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
 #endif
 CSP_END_IGNORE
 
@@ -109,6 +110,7 @@ class CSP_API SpaceEntity
 	friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRDeserialisationTest_Test;
 	friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRSerialisationTest_Test;
 	friend class ::CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_Test;
+	friend class ::CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
 #endif
 	/** @endcond */
 	CSP_END_IGNORE
