@@ -200,7 +200,6 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
 	, EnableEntityTick(false)
 	, LastTickTime(std::chrono::system_clock::now())
 	, EntityPatchRate(90)
-	, SequenceHierarchyChangedCallback(nullptr)
 {
 	Initialise();
 }
@@ -1082,121 +1081,6 @@ void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled)
 const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const
 {
 	return &RootHierarchyEntities;
-}
-
-void SpaceEntitySystem::CreateSequenceHierarchy(const common::Optional<uint64_t>& ParentId,
-												const common::Array<uint64_t>& HierarchyItemIds,
-												SequenceHierarchyResultCallback Callback)
-{
-	const auto* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	common::String SpaceId	= SpaceSystem->GetCurrentSpace().Id;
-	common::String Key		= CreateSequenceKey(ParentId, SpaceId);
-
-	// Convert uint64_t ids to strings
-	common::Array<common::String> HierarchyItemStringIds(HierarchyItemIds.Size());
-
-	for (size_t i = 0; i < HierarchyItemStringIds.Size(); ++i)
-	{
-		HierarchyItemStringIds[i] = std::to_string(HierarchyItemIds[i]).c_str();
-	}
-
-	common::Map<common::String, common::String> MetaData;
-
-	if (ParentId.HasValue())
-	{
-		MetaData["ParentId"] = (std::to_string(*ParentId)).c_str();
-	}
-
-	auto CreateSequenceCallback = [Callback](const systems::SequenceResult& CreateSequenceResult)
-	{
-		SequenceHierarchyResult Result(CreateSequenceResult.GetResultCode(), CreateSequenceResult.GetHttpResultCode());
-
-		if (CreateSequenceResult.GetResultCode() == systems::EResultCode::InProgress)
-		{
-			Callback(Result);
-			return;
-		}
-
-		SequenceToSequenceHierarchy(CreateSequenceResult.GetSequence(), Result.SequenceHierarchy);
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->CreateSequence(Key, "GroupId", SpaceId, HierarchyItemStringIds, MetaData, CreateSequenceCallback);
-}
-
-void SpaceEntitySystem::UpdateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												const common::Array<uint64_t>& HierarchyItemIds,
-												SequenceHierarchyResultCallback Callback)
-{
-	CreateSequenceHierarchy(ParentId, HierarchyItemIds, Callback);
-}
-
-void SpaceEntitySystem::GetSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, SequenceHierarchyResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-	const common::String Key	 = CreateSequenceKey(ParentId, SpaceId);
-
-	auto GetSequenceCallback = [Callback](const systems::SequenceResult& GetSequenceResult)
-	{
-		SequenceHierarchyResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
-		SequenceToSequenceHierarchy(GetSequenceResult.GetSequence(), Result.SequenceHierarchy);
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->GetSequence(Key, GetSequenceCallback);
-}
-
-void SpaceEntitySystem::GetAllSequenceHierarchies(SequenceHierarchyCollectionResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-
-	auto GetSequencesCallback = [Callback](const systems::SequencesResult& GetSequenceResult)
-	{
-		SequenceHierarchyCollectionResult Result(GetSequenceResult.GetResultCode(), GetSequenceResult.GetHttpResultCode());
-
-		if (GetSequenceResult.GetResultCode() == systems::EResultCode::Success)
-		{
-			auto GetSequenceResultSequences	   = GetSequenceResult.GetSequences();
-			Result.SequenceHierarchyCollection = common::Array<SequenceHierarchy>(GetSequenceResultSequences.Size());
-
-			for (size_t i = 0; i < GetSequenceResultSequences.Size(); ++i)
-			{
-				SequenceToSequenceHierarchy(GetSequenceResultSequences[i], Result.SequenceHierarchyCollection[i]);
-			}
-		}
-
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem
-		->GetSequencesByCriteria({}, csp::multiplayer::SequenceConstants::GetHierarchyName(), "GroupId", {SpaceId}, {}, GetSequencesCallback);
-}
-
-void SpaceEntitySystem::DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, systems::NullResultCallback Callback)
-{
-	const auto* SpaceSystem		 = csp::systems::SystemsManager::Get().GetSpaceSystem();
-	const common::String SpaceId = SpaceSystem->GetCurrentSpace().Id;
-	const common::String Key	 = CreateSequenceKey(ParentId, SpaceId);
-
-	auto DeleteSequenceCallback = [Callback](const systems::NullResult& Result)
-	{
-		Callback(Result);
-	};
-
-	auto SequenceSystem = csp::systems::SystemsManager::Get().GetSequenceSystem();
-	SequenceSystem->DeleteSequences({Key}, DeleteSequenceCallback);
-}
-
-void SpaceEntitySystem::SetSequenceHierarchyChangedCallback(SequenceHierarchyChangedCallbackHandler Callback)
-{
-	SequenceHierarchyChangedCallback = Callback;
 }
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
