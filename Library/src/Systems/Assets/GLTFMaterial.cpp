@@ -124,22 +124,27 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::GLT
 	if (Deserializer.HasProperty("baseColorTexture"))
 	{
 		Deserializer.DeserializeMember("baseColorTexture", Obj.BaseColorTexture);
+		Obj.BaseColorTexture.SetTexture(true);
 	}
 	if (Deserializer.HasProperty("metallicRoughnessTexture"))
 	{
 		Deserializer.DeserializeMember("metallicRoughnessTexture", Obj.MetallicRoughnessTexture);
+		Obj.MetallicRoughnessTexture.SetTexture(true);
 	}
 	if (Deserializer.HasProperty("normalTexture"))
 	{
 		Deserializer.DeserializeMember("normalTexture", Obj.NormalTexture);
+		Obj.NormalTexture.SetTexture(true);
 	}
 	if (Deserializer.HasProperty("occlusionTexture"))
 	{
 		Deserializer.DeserializeMember("occlusionTexture", Obj.OcclusionTexture);
+		Obj.OcclusionTexture.SetTexture(true);
 	}
 	if (Deserializer.HasProperty("emissiveTexture"))
 	{
 		Deserializer.DeserializeMember("emissiveTexture", Obj.EmissiveTexture);
+		Obj.EmissiveTexture.SetTexture(true);
 	}
 }
 

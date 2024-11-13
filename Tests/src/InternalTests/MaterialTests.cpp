@@ -234,11 +234,11 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVScale(), TestEmissiveTextureUVScale);
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetTexCoord(), TestEmissiveTextureTexCoord);
 
-	EXPECT_EQ(Material.GetBaseColorTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetMetallicRoughnessTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetNormalTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetOcclusionTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetNormalTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().IsSet(), true);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)

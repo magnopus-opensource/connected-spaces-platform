@@ -34,7 +34,7 @@ class CSP_API Material
 {
 public:
 	/// @brief Sets the user-defined name of the material
-	/// @param ComponentId const csp::common::String&
+	/// @param Name const csp::common::String&
 	void SetName(const csp::common::String& Name);
 
 	/// @brief Gets the user-defined name of the material
