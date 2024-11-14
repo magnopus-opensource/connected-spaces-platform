@@ -1339,6 +1339,20 @@ void SpaceEntity::ResolveParentChildRelationship()
 		// Set our new parent
 		Parent = GetSpaceEntitySystem()->FindSpaceEntityById(*ParentId);
 
+		if (Parent == nullptr)
+		{
+			// Parent may not have been added yet
+			// so check pending entities
+			for (const auto& PendingParent : *EntitySystem->PendingAdds)
+			{
+				if (PendingParent->Id == *ParentId)
+				{
+					Parent = PendingParent;
+					break;
+				}
+			}
+		}
+
 		if (Parent != nullptr)
 		{
 			Parent->ChildEntities.Append(this);

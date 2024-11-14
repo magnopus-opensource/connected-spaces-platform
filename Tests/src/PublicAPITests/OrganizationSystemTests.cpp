@@ -28,10 +28,10 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <PublicAPITests/AssetSystemTestHelpers.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <PublicAPITests/AssetSystemTestHelpers.h>
 
 
 using namespace csp::common;
@@ -554,7 +554,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Get the Id of the Organization the user is authenticated against. Users can currently only
 	// belong to a single Organization so we just use the first one.
@@ -620,7 +620,15 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, OrganizationIdTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
