@@ -3314,7 +3314,7 @@ void RunParentDeletionTest(bool Local)
 			[&ChildEntityUpdated,
 			 ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
 			{
-				if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
 				{
 					ChildEntityUpdated = true;
 				}
