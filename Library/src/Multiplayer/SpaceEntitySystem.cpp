@@ -349,7 +349,9 @@ void SpaceEntitySystem::CreateObject(const csp::common::String& InName, const Sp
 
 void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callback)
 {
-	const std::function LocalCallback = [this, Callback](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
+	const auto& Children = Entity->ChildEntities;
+
+	const std::function LocalCallback = [this, Callback, Children](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
 	{
 		try
 		{
@@ -364,18 +366,46 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 			Callback(false);
 		}
 
+		csp::common::Array<ComponentUpdateInfo> Info;
+
+		// Manually process the parent updates locally
+		// We want this callback to fire before the deletion so clients can react to children first
+		for (size_t i = 0; i < Children.Size(); ++i)
+		{
+			ResolveEntityHierarchy(Children[i]);
+			Children[i]->EntityUpdateCallback(Children[i], UPDATE_FLAGS_PARENT, Info);
+		}
+
 		Callback(true);
 	};
 
-	const std::map<uint64_t, signalr::value> Components;
-	const std::vector<signalr::value> EntityMessagePatch {Entity->GetId(),
-														  MultiplayerConnectionInst->GetClientId(),
-														  true,
-														  std::vector<signalr::value> {
+	std::vector<signalr::value> ObjectPatches;
+
+	const std::vector<signalr::value> DeletionPatch {Entity->GetId(),
+													 MultiplayerConnectionInst->GetClientId(),
+													 true,
+													 std::vector<signalr::value> {
+														 false,
+														 signalr::value_type::null,
+													 },
+													 {}};
+
+	ObjectPatches.push_back(signalr::value {DeletionPatch});
+
+	// Move children to the root in the same patch
+	for (size_t i = 0; i < Children.Size(); ++i)
+	{
+		const std::vector<signalr::value> ChildParentIdPatch {Children[i]->GetId(),
+															  MultiplayerConnectionInst->GetClientId(),
 															  false,
-															  signalr::value_type::null,
-														  },
-														  Components};
+															  std::vector<signalr::value> {
+																  true,						 // Update Parent
+																  signalr::value_type::null, // Move to root
+															  },
+															  {}};
+
+		ObjectPatches.push_back(signalr::value {ChildParentIdPatch});
+	}
 
 
 	auto EntityComponents = Entity->GetComponents();
@@ -395,8 +425,8 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 	// entity that has been scheduled for deletion.
 	LocalDestroyEntity(Entity);
 
-	const std::vector InvokeArguments {signalr::value(EntityMessagePatch)};
-	Connection->Invoke("SendObjectPatch", InvokeArguments, LocalCallback);
+	const std::vector InvokeArguments = {signalr::value(ObjectPatches)};
+	Connection->Invoke("SendObjectPatches", InvokeArguments, LocalCallback);
 }
 
 void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
@@ -542,7 +572,6 @@ void SpaceEntitySystem::BindOnObjectMessage()
 					   auto& EntityMessage = Params.as_array()[0];
 
 					   SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
-					   ResolveEntityHierarchy(NewEntity);
 
 					   if (SpaceEntityCreatedCallback)
 					   {
@@ -807,25 +836,6 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 	// Ensure entity list is up to date
 	ProcessPendingEntityOperations();
 
-	// Resolve entity hierarchy
-	for (size_t i = 0; i < Entities.Size(); ++i)
-	{
-		SpaceEntity* Entity = Entities[i];
-
-		if (Entity->ParentId.HasValue())
-		{
-			SpaceEntity* ParentEntity = FindSpaceEntityById(*Entity->ParentId);
-			// Set the entities parent
-			Entity->Parent = ParentEntity;
-			// Set the parents child
-			ParentEntity->ChildEntities.Append(Entity);
-		}
-		else
-		{
-			RootHierarchyEntities.Append(Entity);
-		}
-	}
-
 	// Register all scripts for import
 	for (size_t i = 0; i < Entities.Size(); ++i)
 	{
@@ -900,6 +910,7 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 	{
 		Deletion->ChildEntities[i]->RemoveParentEntity();
 		Deletion->ChildEntities[i]->Parent = nullptr;
+		ResolveEntityHierarchy(Deletion->ChildEntities[i]);
 	}
 }
 
@@ -1222,6 +1233,8 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 		{
 			AddPendingEntity(PendingAddEntity);
 			AddedEntities.emplace(PendingAddEntity);
+
+			ResolveEntityHierarchy(PendingAddEntity);
 		}
 		PendingAdds->pop_front();
 	}
