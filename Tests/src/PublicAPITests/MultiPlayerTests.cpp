@@ -42,8 +42,6 @@
 #include <filesystem>
 #include <thread>
 
-#define RUN_MULTIPLAYER_TESTS 1;
-
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
