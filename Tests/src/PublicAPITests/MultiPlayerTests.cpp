@@ -3223,7 +3223,7 @@ void RunParentDeletionTest(bool Local)
 		EXPECT_TRUE(EntitiesCreated);
 	}
 
-	// Ensure children have been parented to the root
+	// Ensure children have been unparented and are now root entities
 	{
 		auto RetrievedChildEntity1 = EntitySystem->FindSpaceEntity(ChildEntityName1);
 		auto RetrievedChildEntity2 = EntitySystem->FindSpaceEntity(ChildEntityName2);
