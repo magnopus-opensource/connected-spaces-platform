@@ -34,8 +34,8 @@ namespace CSPEngine
         /// <remarks>Automatically deletes and disposes the created space after each test unless otherwise specified.</remarks>
         public static Systems.Space CreateSpace(Systems.SpaceSystem spaceSystem, string name, string description,
             Systems.SpaceAttributes spaceAttributes, Common.Map<string, string>? spaceMetadata, 
-            Systems.InviteUserRoleInfoCollection? inviteUsers, Systems.FileAssetDataSource? thumbnail,
-            bool pushCleanupFunction = true, bool disposeFoundationResources = true)
+            Systems.InviteUserRoleInfoCollection? inviteUsers, Systems.FileAssetDataSource? thumbnail, 
+            Common.Array<string> tags, bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
             var testMetadata = spaceMetadata;
 
@@ -47,7 +47,7 @@ namespace CSPEngine
                 };
             }
 
-            using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
+            using var result = spaceSystem.CreateSpace(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail, tags).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -65,7 +65,7 @@ namespace CSPEngine
         public static Systems.Space CreateSpaceWithBuffer(Systems.SpaceSystem spaceSystem, string name, string description,
             Systems.SpaceAttributes spaceAttributes, Common.Map<string, string>? spaceMetadata,
             Systems.InviteUserRoleInfoCollection? inviteUsers, Systems.BufferAssetDataSource thumbnail,
-            bool pushCleanupFunction = true, bool disposeFoundationResources = true)
+            Common.Array<string> tags, bool pushCleanupFunction = true, bool disposeFoundationResources = true)
         {
             var testMetadata = spaceMetadata;
 
@@ -75,7 +75,7 @@ namespace CSPEngine
                 testMetadata["site"] = "Void";
             }
 
-            using var result = spaceSystem.CreateSpaceWithBuffer(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail).Result;
+            using var result = spaceSystem.CreateSpaceWithBuffer(name, description, spaceAttributes, inviteUsers, testMetadata, thumbnail, tags).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -241,9 +241,9 @@ namespace CSPEngine
             usersRoles = result.GetUsersRoles();
         }
 
-        static void UpdateSpaceMetadata(Systems.SpaceSystem spaceSystem, Systems.Space space, Common.Map<string, string>? newMetadata)
+        static void UpdateSpaceMetadata(Systems.SpaceSystem spaceSystem, Systems.Space space, Common.Map<string, string>? newMetadata, Common.Array<string>? tags)
         {
-            using var result = spaceSystem.UpdateSpaceMetadata(space.Id, newMetadata ?? new Common.Map<string, string>()).Result;
+            using var result = spaceSystem.UpdateSpaceMetadata(space.Id, newMetadata ?? new Common.Map<string, string>(), tags ?? new Common.Array<string>()).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -325,7 +325,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             Assert.AreEqual(space.Name, testSpaceName);
         }
@@ -346,7 +346,7 @@ namespace CSPEngine
             var InviteUsers = CreateInviteUsers();
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, null);
 
             Assert.AreEqual(space.Name, testSpaceName);
 
@@ -393,7 +393,7 @@ namespace CSPEngine
             source.SetMimeType("image/png");
 
             // Create space
-            var space = CreateSpaceWithBuffer(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source);
+            var space = CreateSpaceWithBuffer(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source, null);
 
             Assert.AreEqual(space.Name, testSpaceName);
 
@@ -432,7 +432,7 @@ namespace CSPEngine
             var InviteUsers = CreateInviteUsers();
 
             // Create space
-            var space = CreateSpaceWithBuffer(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, source);
+            var space = CreateSpaceWithBuffer(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, source, null);
 
             Assert.AreEqual(space.Name, testSpaceName);
 
@@ -467,7 +467,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             string updatedTestSpaceDescription = testSpaceDescription + "-Updated";
             UpdateSpace(spaceSystem, space, null, updatedTestSpaceDescription, null, out var updatedBasicSpace);
@@ -500,7 +500,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var updatedTestSpaceAttributes = Systems.SpaceAttributes.Public;
             UpdateSpace(spaceSystem, space, null, null, updatedTestSpaceAttributes, out var updatedBasicSpace);
@@ -533,7 +533,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            _ = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            _ = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Get spaces
             {
@@ -578,7 +578,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             using var resultSpace = GetSpace(spaceSystem, space.Id);
 
@@ -600,8 +600,8 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var publicSpace = CreateSpace(spaceSystem, testPublicSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null);
-            var privateSpace = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var publicSpace = CreateSpace(spaceSystem, testPublicSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null);
+            var privateSpace = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var spaceIds = new string[2];
             spaceIds[0] = publicSpace.Id;
@@ -645,7 +645,7 @@ namespace CSPEngine
 
             for (int i = 0; i < SPACE_COUNT; i++)
             {
-                spaces[i] = CreateSpace(spaceSystem, GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND"), "OLY-UNITTEST-SPACEDESC-REWIND", Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+                spaces[i] = CreateSpace(spaceSystem, GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND"), "OLY-UNITTEST-SPACEDESC-REWIND", Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
             }
 
             // Log out and log back in as guest user
@@ -688,7 +688,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testPublicSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null);
+            var space = CreateSpace(spaceSystem, testPublicSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null);
 
             GetSpacesByAttributes(spaceSystem, true, false, false, null, null, out var publicSpaces);
 
@@ -740,7 +740,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             GetSpacesByAttributes(spaceSystem, false, false, true, null, null, out var privateSpaces);
 
@@ -791,7 +791,7 @@ namespace CSPEngine
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
-            _ = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            _ = CreateSpace(spaceSystem, testPrivateSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var privateSpaceFound = false;
 
@@ -832,7 +832,7 @@ namespace CSPEngine
             // Login as an admin user in order to be able to create the test space
             var spaceOwnerUserId = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            using var publicSpace = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            using var publicSpace = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             UserSystemTests.LogOut(userSystem);
 
@@ -881,7 +881,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             AddSiteInfo(spaceSystem, null, space, out _);
         }
@@ -898,7 +898,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             AddSiteInfo(spaceSystem, "Site1", space, out var siteInfo1);
             AddSiteInfo(spaceSystem, "Site2", space, out var siteInfo2);
@@ -942,7 +942,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, altUserId).Result;
             var resCode = addUserResult.GetResultCode();
@@ -987,7 +987,7 @@ namespace CSPEngine
             // Login as an admin user in order to be able to create the test space
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            using var publicSpace = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            using var publicSpace = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             UserSystemTests.LogOut(userSystem);
 
@@ -1034,7 +1034,7 @@ namespace CSPEngine
             // Login as an admin user in order to be able to create the test space
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             using var result = spaceSystem.InviteToSpace(space.Id, UserSystemTests.AlternativeLoginEmail, true, testEmailLinkUrl, testSignupUrl).Result;
             Assert.AreEqual(result.GetResultCode(), Systems.EResultCode.Success);
@@ -1063,7 +1063,7 @@ namespace CSPEngine
                 ["site"] = "Void"
             };
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
 
             GetSpaceMetadata(spaceSystem, space, out var retrievedSpaceMetadata);
 
@@ -1072,7 +1072,7 @@ namespace CSPEngine
 
             testSpaceMetadata["site"] = "MagOffice";
 
-            UpdateSpaceMetadata(spaceSystem, space, testSpaceMetadata);
+            UpdateSpaceMetadata(spaceSystem, space, testSpaceMetadata, null);
 
             GetSpaceMetadata(spaceSystem, space, out retrievedSpaceMetadata);
 
@@ -1098,8 +1098,8 @@ namespace CSPEngine
                 ["site"] = "Void"
             };
 
-            var space1 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null);
-            var space2 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null);
+            var space1 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
+            var space2 = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, testSpaceMetadata, null, null, null);
 
             var spaces = new Common.Array<Systems.Space>(2)
             {
@@ -1134,7 +1134,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword);
 
             // create a space without a thumbnail
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
@@ -1176,7 +1176,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(email: UserSystemTests.AlternativeLoginEmail, password: UserSystemTests.AlternativeLoginPassword);
 
             // create a space without a thumbnail
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             {
                 using var result = spaceSystem.GetSpaceThumbnail(space.Id).Result;
@@ -1233,7 +1233,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             var metadata = new Common.Map<string, string>();
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, metadata, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, metadata, null, null, null);
 
             GetSpaceMetadata(spaceSystem, space, out var retrievedSpaceMetadata);
 
@@ -1252,9 +1252,9 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
-            UpdateSpaceMetadata(spaceSystem, space, null);
+            UpdateSpaceMetadata(spaceSystem, space, null, null);
 
             GetSpaceMetadata(spaceSystem, space, out var retrievedSpaceMetadata);
 
@@ -1275,7 +1275,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             using var result = spaceSystem.InviteToSpace(space.Id, "testnopus.pokemon@magnopus.com", null, testEmailLinkUrl, testSignupUrl).Result;
             var resCode = result.GetResultCode();
@@ -1310,7 +1310,7 @@ namespace CSPEngine
 
             var InviteUsers = CreateInviteUsers();
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, null);
 
             using var result = spaceSystem.BulkInviteToSpace(space.Id, InviteUsers).Result;
             var resCode = result.GetResultCode();
@@ -1350,7 +1350,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
             // Create public space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, testSpaceMetadata, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, testSpaceMetadata, null, null, null);
 
             // Log out with default user and in with alt user
             UserSystemTests.LogOut(userSystem);
@@ -1396,7 +1396,7 @@ namespace CSPEngine
             };
 
             // Create a space with a thumbnail
-            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, spaceThumbnail, pushCleanupFunction: false);
+            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, spaceThumbnail, null, pushCleanupFunction: false);
 
             string initialSpaceThumbnailUri;
 
@@ -1447,7 +1447,7 @@ namespace CSPEngine
             };
 
             // Create a space with a thumbnail
-            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, spaceThumbnail, pushCleanupFunction: false);
+            using var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, spaceThumbnail, null, pushCleanupFunction: false);
 
             UserSystemTests.LogOut(userSystem);
 
@@ -1498,7 +1498,7 @@ namespace CSPEngine
             // Login as an admin user in order to be able to create the test space
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, guestUserId).Result;
             var addUserResCode = addUserResult.GetResultCode();
@@ -1549,7 +1549,7 @@ namespace CSPEngine
             // Login as an admin user in order to be able to create the test space
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
 
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             using var addUserResult = spaceSystem.AddUserToSpace(space.Id, altUserId).Result;
             var addUserResCode = addUserResult.GetResultCode();
@@ -1595,7 +1595,7 @@ namespace CSPEngine
 
             // Login as an admin user
             _ = userSystem.TestLogIn(pushCleanupFunction: false);
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null, pushCleanupFunction: false);
 
             // Enter space
             EnterSpace(spaceSystem, space.Id, false);
@@ -1634,7 +1634,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var initialLocation = new Systems.GeoLocation();
             initialLocation.Latitude = 1.1;
@@ -1748,7 +1748,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var validLocation = new Systems.GeoLocation();
             validLocation.Latitude = 1.1;
@@ -1871,7 +1871,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword, pushCleanupFunction: false);
 
             // Create a space as the primary user
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null, pushCleanupFunction: false);
 
             var initialLocation = new Systems.GeoLocation();
             initialLocation.Latitude = 1.1;
@@ -1951,7 +1951,7 @@ namespace CSPEngine
             _ = userSystem.TestLogIn(UserSystemTests.DefaultLoginEmail, UserSystemTests.DefaultLoginPassword, pushCleanupFunction: false);
 
             // Create a space as the primary user
-            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, pushCleanupFunction: false);
+            var space = CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Public, null, null, null, null, pushCleanupFunction: false);
 
             var initialLocation = new Systems.GeoLocation();
             initialLocation.Latitude = 1.1;
@@ -2050,6 +2050,7 @@ namespace CSPEngine
                                     Systems.SpaceAttributes.Private,
                                     null,
                                     inviteInfo,
+                                    null,
                                     null,
                                     pushCleanupFunction: false);
 

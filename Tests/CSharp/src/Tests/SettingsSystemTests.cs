@@ -24,7 +24,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Clear blocked spaces
             {
@@ -78,7 +78,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Clear blocked spaces
             {

@@ -452,6 +452,7 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 
 		AssetSystem->UpdateAssetCollectionMetadata(GetMessageResult.GetAssetCollection(),
 												   ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData),
+												   nullptr,
 												   GetUpdatedMessageCallback);
 	};
 
@@ -716,6 +717,7 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 
 			AssetSystem->UpdateAssetCollectionMetadata(GetConversationResult.GetAssetCollection(),
 													   ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData),
+													   nullptr,
 													   GetUpdatedConversationCallback);
 		};
 
