@@ -188,7 +188,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -286,7 +294,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -403,7 +419,15 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
