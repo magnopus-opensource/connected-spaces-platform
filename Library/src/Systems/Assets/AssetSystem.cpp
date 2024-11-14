@@ -847,4 +847,24 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	GetAssetsByCriteria({InAsset.AssetCollectionId}, nullptr, nullptr, Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
 }
 
+void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback)
+{
+}
+
+void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback)
+{
+}
+
+void AssetSystem::DeleteMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, NullResultCallback Callback)
+{
+}
+
+void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback)
+{
+}
+
+void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback)
+{
+}
+
 } // namespace csp::systems

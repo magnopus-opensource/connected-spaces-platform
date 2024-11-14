@@ -22,6 +22,7 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
@@ -250,6 +251,23 @@ public:
 	/// @param Callback AssetResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
+
+	// TODO: comment
+	CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
+
+	// TODO: comment
+	CSP_ASYNC_RESULT void UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
+
+	// TODO: comment
+	CSP_ASYNC_RESULT void
+		DeleteMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, NullResultCallback Callback);
+
+	// TODO: comment
+	CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback);
+
+	// TODO: comment
+	CSP_ASYNC_RESULT void
+		GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback);
 
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
