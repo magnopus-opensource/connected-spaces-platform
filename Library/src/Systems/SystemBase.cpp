@@ -51,7 +51,7 @@ void SystemBase::DeregisterSystemCallback()
 	// Do nothing.
 }
 
-void SystemBase::Deserialise(const std::vector<signalr::value>& EventValues)
+void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	if (!SystemCallback)
 	{

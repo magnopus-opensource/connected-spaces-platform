@@ -18,6 +18,7 @@
 
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
+#include "Common/UUIDGenerator.h"
 #include "Multiplayer/EventSerialisation.h"
 
 #include <map>
@@ -59,8 +60,31 @@ public:
 	friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
 	/** @endcond */
 
-	// The callback used to register to listen to events.
+	//// The callback used to register to listen to events.
 	typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
+	// template <typename R, typename... T> class ParameterisedCallbackHandler
+	//{
+	// public:
+	//	template <typename R, typename... T> ParameterisedCallbackHandler(const std::function<R(T...)>& func)
+	//	{
+	//		Uuid = GenerateUUID();
+	//	}
+
+	//	template <typename... T> void operator()(T... values) const
+	//	{
+	//		Function(values);
+	//	}
+
+	//	bool operator==(const ParameterisedCallbackHandler& other) const
+	//	{
+	//		return Uuid == other.Uuid;
+	//	}
+
+	// private:
+	//	std::function<R(T...)> Function;
+	//	// std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> Function;
+	//	std::string Uuid;
+	// };
 
 	/// @brief Registers a system to listen for the named event, where the system can define its
 	/// @brief own callback and deserialiser.
@@ -81,13 +105,13 @@ public:
 	/// @brief Stops the event bus from listening for a particular event, for the specified system.
 	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
 	/// @param System csp::systems::SystemBase : The system that will stop being registered.
-	void StopSystemListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
+	CSP_NO_EXPORT void StopListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
 
 	/// @brief Stops the event bus from listening for a particular event, for the specified callback.
 	/// @brief Other callbacks which may be registered to the same event are not affected.
 	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
 	/// @param Callback ParameterisedCallbackHandler : The callback that will stop being registered.
-	void StopCallbackListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
+	void StopListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
 	/// @brief Instructs the event bus to start listening to messages
 	void StartEventMessageListening();
@@ -103,8 +127,9 @@ private:
 	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
 	//   change depending on which runtime is used.
 	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
-	typedef std::map<csp::common::String, std::pair<Callbacks, csp::systems::SystemBase*>> EventMaps;
-	EventMaps EventMap;
+	// typedef std::vector<std::function<void(bool, const csp::common::Array<ReplicatedValue>&)>> Callbacks;
+	std::map<csp::common::String, Callbacks> CallbacksEventMap;
+	std::map<csp::common::String, csp::systems::SystemBase*> SystemsEventMap;
 };
 
 } // namespace csp::multiplayer

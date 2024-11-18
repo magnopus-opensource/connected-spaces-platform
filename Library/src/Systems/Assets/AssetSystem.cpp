@@ -872,11 +872,11 @@ void AssetSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopSystemListenEvent("AssetDetailBlobChanged", this);
+		EventBusPtr->StopListenEvent("AssetDetailBlobChanged", this);
 	}
 }
 
-void AssetSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	if (!AssetDetailBlobChangedCallback)
 	{

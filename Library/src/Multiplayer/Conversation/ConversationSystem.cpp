@@ -786,11 +786,11 @@ void ConversationSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopSystemListenEvent("ConversationSystem", this);
+		EventBusPtr->StopListenEvent("ConversationSystem", this);
 	}
 }
 
-void ConversationSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+void ConversationSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	if (!ConversationSystemCallback)
 	{

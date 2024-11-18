@@ -353,11 +353,11 @@ void HotspotSequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopSystemListenEvent("SequenceChanged", this);
+		EventBusPtr->StopListenEvent("SequenceChanged", this);
 	}
 }
 
-void HotspotSequenceSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
 	SequenceDeserialiser.Parse(EventValues);

@@ -345,11 +345,11 @@ void SequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopSystemListenEvent("SequenceChanged", this);
+		EventBusPtr->StopListenEvent("SequenceChanged", this);
 	}
 }
 
-void SequenceSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+void SequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
 	SequenceDeserialiser.Parse(EventValues);

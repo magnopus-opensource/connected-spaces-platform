@@ -274,7 +274,7 @@ public:
 	void DeregisterSystemCallback() override;
 	/// @brief Deserialises the event values of the system.
 	/// @param EventValues std::vector<signalr::value> : event values to deserialise
-	CSP_NO_EXPORT void Deserialise(const std::vector<signalr::value>& EventValues) override;
+	CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
 
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used

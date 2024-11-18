@@ -62,7 +62,7 @@ public:
 
 	/// @brief Deserialises the event values of the system.
 	/// @param EventValues std::vector<signalr::value> : event values to deserialise
-	CSP_NO_EXPORT virtual void Deserialise(const std::vector<signalr::value>& EventValues);
+	CSP_NO_EXPORT virtual void OnEvent(const std::vector<signalr::value>& EventValues);
 
 	/// @brief Sets a callback for a default event.
 	/// @param Callback csp::multiplayer::EventBus::ParameterisedCallbackHandler: Callback to receive data for the system that has been changed.

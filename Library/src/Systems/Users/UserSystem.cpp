@@ -820,11 +820,11 @@ void UserSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopSystemListenEvent("AccessControlChanged", this);
+		EventBusPtr->StopListenEvent("AccessControlChanged", this);
 	}
 }
 
-void UserSystem::Deserialise(const std::vector<signalr::value>& EventValues)
+void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
 	if (!UserPermissionsChangedCallback)
 	{
