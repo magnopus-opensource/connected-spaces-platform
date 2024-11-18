@@ -38,3 +38,4 @@ void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem,
 						   csp::systems::Space& OutSpace);
 void DeleteSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId);
 void GetSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId, csp::systems::Space& OutSpace);
+void CreateDefaultTestSpace(csp::systems::SpaceSystem* SpaceSystem, csp::systems::Space& OutSpace);
