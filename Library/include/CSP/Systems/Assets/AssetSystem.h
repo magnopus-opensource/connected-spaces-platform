@@ -274,6 +274,10 @@ private:
 	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
 	~AssetSystem();
 
+	CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void
+		DeleteAssetById(const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
+
 	csp::services::ApiBase* PrototypeAPI;
 	csp::services::ApiBase* AssetDetailAPI;
 
