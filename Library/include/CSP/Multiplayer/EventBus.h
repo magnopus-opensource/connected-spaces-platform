@@ -60,31 +60,8 @@ public:
 	friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
 	/** @endcond */
 
-	//// The callback used to register to listen to events.
+	// The callback used to register to listen to events.
 	typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
-	// template <typename R, typename... T> class ParameterisedCallbackHandler
-	//{
-	// public:
-	//	template <typename R, typename... T> ParameterisedCallbackHandler(const std::function<R(T...)>& func)
-	//	{
-	//		Uuid = GenerateUUID();
-	//	}
-
-	//	template <typename... T> void operator()(T... values) const
-	//	{
-	//		Function(values);
-	//	}
-
-	//	bool operator==(const ParameterisedCallbackHandler& other) const
-	//	{
-	//		return Uuid == other.Uuid;
-	//	}
-
-	// private:
-	//	std::function<R(T...)> Function;
-	//	// std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> Function;
-	//	std::string Uuid;
-	// };
 
 	/// @brief Registers a system to listen for the named event, where the system can define its
 	/// @brief own callback and deserialiser.
@@ -127,7 +104,6 @@ private:
 	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
 	//   change depending on which runtime is used.
 	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
-	// typedef std::vector<std::function<void(bool, const csp::common::Array<ReplicatedValue>&)>> Callbacks;
 	std::map<csp::common::String, Callbacks> CallbacksEventMap;
 	std::map<csp::common::String, csp::systems::SystemBase*> SystemsEventMap;
 };
