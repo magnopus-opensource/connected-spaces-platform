@@ -27,15 +27,6 @@ namespace csp::multiplayer
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
-template <typename T, typename... U> size_t GetCallbackAddress(std::function<T(U...)> f)
-{
-	// typedef T(fnType)(U...);
-	// fnType** fnPointer = f.template target<fnType*>();
-	// return (size_t) *fnPointer;
-	//   The above throws an exception -- also it is not portable. better to use a handle or an ID instead.
-	return 42;
-}
-
 EventBus::~EventBus()
 {
 }
@@ -132,9 +123,9 @@ void EventBus::StopCallbackListenEvent(const csp::common::String& EventName, Par
 													   EventMap[EventName].first.end(),
 													   [Callback](const auto& RegisteredCallback)
 													   {
-														   // TODO: comparing callbacks is NOT straightforward.
-														   // currently always returns the same value
-														   return GetCallbackAddress(Callback) == GetCallbackAddress(RegisteredCallback);
+														   // Will be done as part of OF-1462
+														   // return Callback == RegisteredCallback;
+														   return false;
 													   }),
 										EventMap[EventName].first.end());
 

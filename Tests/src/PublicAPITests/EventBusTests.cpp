@@ -573,7 +573,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	EXPECT_TRUE(TestCallback2Called);
 	TestCallback2Called = false;
 
-	// THIS FUNCTIONALITY IS NOT CURRENTLY IMPLEMENTED
+	// THIS FUNCTIONALITY IS NOT CURRENTLY IMPLEMENTED - it will be in OF-1462
 	//// Test that deregistering a callback that is not registered does nothing
 	// EventBus->StopCallbackListenEvent("NonExistingEvent", TestCallback2);
 	//
