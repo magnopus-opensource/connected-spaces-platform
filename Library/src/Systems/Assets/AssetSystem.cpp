@@ -961,7 +961,7 @@ void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallbac
 	GetAssetCollectionById(Material.GetAssetCollectionId(), GetAssetCollectionCB);
 }
 
-void AssetSystem::DeleteMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, NullResultCallback Callback)
+void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback)
 {
 	// 1. Delete asset
 	auto DeleteAssetCB = [this, Callback](const NullResult& DeleteAssetResult)
@@ -979,7 +979,7 @@ void AssetSystem::DeleteMaterial(const csp::common::String& AssetCollectionId, c
 		};
 	};
 
-	DeleteAssetById(AssetCollectionId, AssetId, DeleteAssetCB);
+	DeleteAssetById(Material.GetAssetCollectionId(), Material.GetAssetId(), DeleteAssetCB);
 }
 
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback)

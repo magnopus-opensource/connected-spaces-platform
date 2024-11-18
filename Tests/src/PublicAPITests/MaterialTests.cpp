@@ -55,9 +55,9 @@ void UpdateMaterial(AssetSystem* AssetSystem, const GLTFMaterial& Material)
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
-void DeleteMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
+void DeleteMaterial(AssetSystem* AssetSystem, const GLTFMaterial& Material)
 {
-	auto [Result] = AWAIT_PRE(AssetSystem, DeleteMaterial, RequestPredicate, AssetCollectionId, AssetId);
+	auto [Result] = AWAIT_PRE(AssetSystem, DeleteMaterial, RequestPredicate, Material);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 }
@@ -106,7 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
 	CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
 
 	// Cleanup
-	DeleteMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId());
+	DeleteMaterial(AssetSystem, CreatedMaterial);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -151,7 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 	EXPECT_EQ(UpdatedMaterial.GetAlphaCutoff(), 1);
 
 	// Cleanup
-	DeleteMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId());
+	DeleteMaterial(AssetSystem, CreatedMaterial);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -233,9 +233,9 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 	EXPECT_EQ(FoundMaterials[2].GetName(), TestMaterialName3);
 
 	// Cleanup
-	DeleteMaterial(AssetSystem, CreatedMaterial1.GetAssetCollectionId(), CreatedMaterial1.GetAssetId());
-	DeleteMaterial(AssetSystem, CreatedMaterial2.GetAssetCollectionId(), CreatedMaterial2.GetAssetId());
-	DeleteMaterial(AssetSystem, CreatedMaterial3.GetAssetCollectionId(), CreatedMaterial3.GetAssetId());
+	DeleteMaterial(AssetSystem, CreatedMaterial1);
+	DeleteMaterial(AssetSystem, CreatedMaterial2);
+	DeleteMaterial(AssetSystem, CreatedMaterial3);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -272,7 +272,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 	EXPECT_EQ(FoundMaterial.GetName(), CreatedMaterial.GetName());
 
 	// Cleanup
-	DeleteMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId());
+	DeleteMaterial(AssetSystem, CreatedMaterial);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -307,7 +307,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 	GetMaterial(AssetSystem, "InvalidAssetCollectionId", "InvalidAssetId", FoundMaterial);
 
 	// Cleanup
-	DeleteMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId());
+	DeleteMaterial(AssetSystem, CreatedMaterial);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);

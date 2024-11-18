@@ -252,20 +252,31 @@ public:
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
 
-	// TODO: comment
+	/// @brief Creates a new material backed by an AssetCollection/Asset.
+	/// @param Name const csp::common::String& : The name of the new material.
+	/// @param SpaceId const csp::common::String& : The space id this material is associated with.
+	/// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
 
-	// TODO: comment
+	/// @brief Updates an existing materials properties.
+	/// @param Material const GLTFMaterial& : The material to update
+	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
 
-	// TODO: comment
-	CSP_ASYNC_RESULT void
-		DeleteMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, NullResultCallback Callback);
+	/// @brief Deletes a given material.
+	/// @param Material const GLTFMaterial& : The material to delete
+	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+	CSP_ASYNC_RESULT void DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
 
-	// TODO: comment
+	/// @brief Gets all materials associated with the given space.
+	/// @param SpaceId const csp::common::String& : The space id the material is associated with.
+	/// @param Callback GLTFMaterialsResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback);
 
-	// TODO: comment
+	/// @brief Gets a material using its AssetCollection and Asset Id.
+	/// @param AssetCollectionId const csp::common::String& : The asset collection id this material is associated with.
+	/// @param AssetId const csp::common::String& : The asset id this material is associated with.
+	/// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void
 		GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback);
 
