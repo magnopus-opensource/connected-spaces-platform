@@ -61,12 +61,12 @@ void EventBus::ListenEvent(const csp::common::String& EventName, csp::systems::S
 			CSP_LOG_ERROR_FORMAT("Error: there is already at least one callback registered for %s.\n", EventName.c_str());
 			return;
 		}
+	}
 
-		if (!SystemsEventMap.empty() && SystemsEventMap.find(EventName) != SystemsEventMap.end() && SystemsEventMap[EventName])
-		{
-			CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
-			return;
-		}
+	if (!SystemsEventMap.empty() && SystemsEventMap.find(EventName) != SystemsEventMap.end() && SystemsEventMap[EventName])
+	{
+		CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
+		return;
 	}
 
 	SystemsEventMap[EventName] = System;
