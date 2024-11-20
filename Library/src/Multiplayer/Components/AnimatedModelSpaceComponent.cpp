@@ -28,16 +28,18 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : 
 {
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId)]			= "";
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]							= csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]							= csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]								= csp::common::Vector3 {1, 1, 1};
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]					= false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]							= false;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]							= true;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]					= static_cast<int64_t>(-1);
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]						= true;
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)]			= "";
-	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]					= true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides)]
+		= csp::common::Map<csp::multiplayer::ReplicatedValue, csp::multiplayer::ReplicatedValue>();
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)]				 = csp::common::Vector3 {0, 0, 0};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)]				 = csp::common::Vector4 {0, 0, 0, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)]					 = csp::common::Vector3 {1, 1, 1};
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsLoopPlayback)]		 = false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsPlaying)]				 = false;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsVisible)]				 = true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex)]		 = static_cast<int64_t>(-1);
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsARVisible)]			 = true;
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)] = "";
+	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]		 = true;
 
 	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
 }
@@ -144,6 +146,41 @@ int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 {
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex), Value);
+}
+
+csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceComponent::GetMaterialOverrides() const
+{
+	// Convert replicated values map to string values
+	const auto& ReplicatedOverrides = GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+	csp::common::Map<csp::common::String, csp::common::String> Overrides;
+
+	const auto* Keys = ReplicatedOverrides.Keys();
+
+	for (size_t i = 0; i < Keys->Size(); ++i)
+	{
+		const auto& CurrentKey			  = (*Keys)[i];
+		Overrides[CurrentKey.GetString()] = ReplicatedOverrides[CurrentKey].GetString();
+	}
+
+	CSP_DELETE(Keys);
+
+	return Overrides;
+}
+
+void AnimatedModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId)
+{
+	auto ReplicatedOverrides	   = GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+	ReplicatedOverrides[ModelPath] = MaterialAssetId;
+
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+}
+
+void AnimatedModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
+{
+	auto ReplicatedOverrides = GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+	ReplicatedOverrides.Remove(ModelPath);
+
+	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 /* IVisibleComponent */

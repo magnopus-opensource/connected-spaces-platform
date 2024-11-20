@@ -60,6 +60,7 @@ enum class AnimatedModelPropertyKeys
 	IsARVisible,
 	ThirdPartyComponentRef,
 	IsShadowCaster,
+	MaterialOverrides,
 	Num
 };
 
@@ -139,6 +140,22 @@ public:
 	/// @brief Sets the index of the currently active animation.
 	/// @return The index of the currently active animation.
 	void SetAnimationIndex(int64_t Value);
+
+	/// @brief Gets the material overrides of this component.
+	/// Should be in the format:
+	/// Key = Path to the model
+	/// Value = The material asset id
+	/// @return The material overrides on this component.
+	csp::common::Map<csp::common::String, csp::common::String> GetMaterialOverrides() const;
+
+	/// @brief Adds a new material override to this component.
+	/// @param The path to the models material to override.
+	/// @param The asset id of the material to override with.
+	void AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId);
+
+	/// @brief Removes a material override from this component.
+	/// @param The path to the models material to override to be removed.
+	void RemoveMaterialOverride(const csp::common::String& ModelPath);
 
 	/// \addtogroup IVisibleComponent
 	/// @{
