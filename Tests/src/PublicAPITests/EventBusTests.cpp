@@ -129,7 +129,7 @@ public:
 	{
 		if (EventBusPtr)
 		{
-			EventBusPtr->StopListenEvent("TestEvent", this);
+			EventBusPtr->StopListenEvent("TestEvent");
 		}
 	}
 
@@ -508,7 +508,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Deregister the system and test that registering a new one now works
-	EventBus->StopListenEvent("TestEvent", TestSystem1);
+	EventBus->StopListenEvent("TestEvent");
 	TestSystem2->SetSystemCallback(TestCallback2);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback2Called);
@@ -517,7 +517,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	TestCallback2Called = false;
 
 	// Test that registering a callback when there already is a registered system does not work
-	TestMsg = "Error: there is already a system registered for TestEvent.\n";
+	TestMsg				= "Error: there is already a system registered for TestEvent.\n";
+	TestCallback1Called = false; // clean up
 	EventBus->ListenEvent("TestEvent", TestCallback1);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback2Called);
@@ -531,7 +532,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Test that registering a callback for a new event works
-	EventBus->StopListenEvent("TestEvent", TestSystem2);
+	EventBus->StopListenEvent("TestEvent");
 	EventBus->ListenEvent("TestEvent", TestCallback1);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
@@ -540,7 +541,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	TestCallback1Called = false;
 
 	// Test that registering a system when there already is a registered callback does not work
-	TestMsg = "Error: there is already at least one callback registered for TestEvent.\n";
+	TestMsg = "Error: there is already a callback registered for TestEvent.\n";
 	TestSystem1->SetSystemCallback(TestCallback2);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
@@ -554,72 +555,47 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Test that deregistering a system that is registered works
-	EventBus->StopAllListenEvent("TestEvent"); // clean up
+	EventBus->StopListenEvent("TestEvent"); // clean up
 	EventBus->ListenEvent("TestEvent", TestSystem1);
-	EventBus->StopListenEvent("TestEvent", TestSystem1);
+	EventBus->StopListenEvent("TestEvent");
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	TestCallback1Called = false;
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 
-	// Test that registering several callbacks for one event works
+	// Test that registering a callback when there already is a registered callback does not work
+	EventBus->StopListenEvent("TestEvent"); // clean up
+	TestMsg = "Error: there is already a callback registered for TestEvent.\n";
 	EventBus->ListenEvent("TestEvent", TestCallback1);
 	EventBus->ListenEvent("TestEvent", TestCallback2);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
+	EXPECT_EQ(TestCallbackId, 1111);
 	TestCallback1Called = false;
 	WaitForCallback(TestCallback2Called);
-	EXPECT_TRUE(TestCallback2Called);
-	TestCallback2Called = false;
+	EXPECT_FALSE(TestCallback2Called);
+	EXPECT_TRUE(LogConfirmed);
+	TestMsg		 = "";
+	LogConfirmed = false;
 
-	// THIS FUNCTIONALITY IS NOT CURRENTLY IMPLEMENTED - it will be in OF-1462
-	//// Test that deregistering a callback that is not registered does nothing
-	// EventBus->StopCallbackListenEvent("NonExistingEvent", TestCallback2);
-	//
-	//// Test that deregistering one callback when 2 are registered works
-	// Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	//  EventBus->StopCallbackListenEvent("TestEvent", TestCallback1);
-	//  WaitForCallback(TestCallback1Called);
-	//  EXPECT_FALSE(TestCallback1Called);
-	//  WaitForCallback(TestCallback2Called);
-	//  EXPECT_TRUE(TestCallback2Called);
-	//  EXPECT_EQ(TestCallbackId, 2222);
-	//  TestCallback2Called = false;
-	//
-	//// Test that deregistering a callback that is registered works
-	// EventBus->ListenEvent("TestEvent", TestCallback1);
-	// Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	// EventBus->StopCallbackListenEvent("TestEvent", TestCallback1);
-	// WaitForCallback(TestCallback1Called);
-	// EXPECT_FALSE(TestCallback1Called);
+	// Test that deregistering an event that is not registered does nothing
+	EventBus->StopListenEvent("NonExistingEvent");
+	WaitForCallback(TestCallback2Called);
+	EXPECT_FALSE(TestCallback2Called);
 
-	// Test that deregistering all callbacks when 2 are registered works
+	// Test that deregistering a callback that is registered works
+	EventBus->StopListenEvent("TestEvent"); // clean up
 	EventBus->ListenEvent("TestEvent", TestCallback1);
-	EventBus->ListenEvent("TestEvent", TestCallback2);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	EventBus->StopAllListenEvent("TestEvent");
-	WaitForCallback(TestCallback1Called);
-	EXPECT_FALSE(TestCallback1Called);
-	WaitForCallback(TestCallback2Called);
-	EXPECT_FALSE(TestCallback2Called);
-
-	// Test that deregistering a system that is not registered does nothing
-	EventBus->StopListenEvent("NonExistingEvent", TestSystem2);
-	WaitForCallback(TestCallback2Called);
-	EXPECT_FALSE(TestCallback2Called);
-
-	// Test that deregistering a system that is registered works (using StopSystemListenEvent)
-	TestSystem1->SetSystemCallback(TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	EventBus->StopListenEvent("TestEvent", TestSystem1);
+	EventBus->StopListenEvent("TestEvent");
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 
-	// Test that deregistering a system that is registered works (using StopAllListenEvent)
+	// Test that deregistering a system that is registered works
 	TestSystem1->SetSystemCallback(TestCallback1);
 	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	EventBus->StopAllListenEvent("TestEvent");
+	EventBus->StopListenEvent("TestEvent");
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 

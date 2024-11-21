@@ -345,7 +345,7 @@ void SequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("SequenceChanged", this);
+		EventBusPtr->StopListenEvent("SequenceChanged");
 	}
 }
 

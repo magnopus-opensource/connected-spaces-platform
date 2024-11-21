@@ -353,7 +353,7 @@ void HotspotSequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("SequenceChanged", this);
+		EventBusPtr->StopListenEvent("SequenceChanged");
 	}
 }
 

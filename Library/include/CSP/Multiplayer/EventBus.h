@@ -74,21 +74,10 @@ public:
 	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
 	void ListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
-	/// @brief Stops the event bus from listening for a particular event, for any system or callbacks
+	/// @brief Stops the event bus from listening for a particular event, for any system or callback
 	/// @brief that were registered.
 	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
-	void StopAllListenEvent(const csp::common::String& EventName);
-
-	/// @brief Stops the event bus from listening for a particular event, for the specified system.
-	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
-	/// @param System csp::systems::SystemBase : The system that will stop being registered.
-	CSP_NO_EXPORT void StopListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
-
-	/// @brief Stops the event bus from listening for a particular event, for the specified callback.
-	/// @brief Other callbacks which may be registered to the same event are not affected.
-	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
-	/// @param Callback ParameterisedCallbackHandler : The callback that will stop being registered.
-	void StopListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
+	void StopListenEvent(const csp::common::String& EventName);
 
 	/// @brief Instructs the event bus to start listening to messages
 	void StartEventMessageListening();
@@ -101,10 +90,7 @@ private:
 
 	class MultiplayerConnection* MultiplayerConnectionInst;
 
-	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
-	//   change depending on which runtime is used.
-	typedef std::vector<ParameterisedCallbackHandler> Callbacks;
-	std::map<csp::common::String, Callbacks> CallbacksEventMap;
+	std::map<csp::common::String, ParameterisedCallbackHandler> CallbacksEventMap;
 	std::map<csp::common::String, csp::systems::SystemBase*> SystemsEventMap;
 };
 

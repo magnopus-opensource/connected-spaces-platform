@@ -56,9 +56,9 @@ void EventBus::ListenEvent(const csp::common::String& EventName, csp::systems::S
 
 	if (!CallbacksEventMap.empty() && CallbacksEventMap.find(EventName) != CallbacksEventMap.end())
 	{
-		if (!CallbacksEventMap[EventName].empty())
+		if (CallbacksEventMap[EventName])
 		{
-			CSP_LOG_ERROR_FORMAT("Error: there is already at least one callback registered for %s.\n", EventName.c_str());
+			CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.\n", EventName.c_str());
 			return;
 		}
 	}
@@ -88,17 +88,28 @@ void EventBus::ListenEvent(const csp::common::String& EventName, ParameterisedCa
 		return;
 	}
 
+	if (!CallbacksEventMap.empty() && CallbacksEventMap.find(EventName) != CallbacksEventMap.end())
+	{
+		if (CallbacksEventMap[EventName])
+		{
+			CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.\n", EventName.c_str());
+			return;
+		}
+	}
+
 	if (!SystemsEventMap.empty() && SystemsEventMap.find(EventName) != SystemsEventMap.end() && SystemsEventMap[EventName])
 	{
 		CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
 		return;
 	}
 
-	CallbacksEventMap[EventName].push_back(Callback);
+	CallbacksEventMap[EventName] = Callback;
 }
 
-void EventBus::StopAllListenEvent(const csp::common::String& EventName)
+void EventBus::StopListenEvent(const csp::common::String& EventName)
 {
+	// There is no need to split this into two different functions because we will always
+	// have either a system or a callback, not both
 	if (!SystemsEventMap.empty() && SystemsEventMap.find(EventName) != SystemsEventMap.end())
 	{
 		SystemsEventMap.erase(EventName);
@@ -106,39 +117,6 @@ void EventBus::StopAllListenEvent(const csp::common::String& EventName)
 	if (!CallbacksEventMap.empty() && CallbacksEventMap.find(EventName) != CallbacksEventMap.end())
 	{
 		CallbacksEventMap.erase(EventName);
-	}
-}
-
-void EventBus::StopListenEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
-{
-	if (System && !SystemsEventMap.empty() && SystemsEventMap.find(EventName) != SystemsEventMap.end() && SystemsEventMap[EventName] == System)
-	{
-		// Remove entry
-		SystemsEventMap.erase(EventName);
-	}
-}
-
-void EventBus::StopListenEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
-{
-	if (Callback && !CallbacksEventMap.empty() && CallbacksEventMap.find(EventName) != CallbacksEventMap.end()
-		&& !CallbacksEventMap[EventName].empty())
-	{
-		// Remove the callback
-		CallbacksEventMap[EventName].erase(std::remove_if(CallbacksEventMap[EventName].begin(),
-														  CallbacksEventMap[EventName].end(),
-														  [Callback](const auto& RegisteredCallback)
-														  {
-															  // Will be done as part of OF-1462
-															  // return Callback == RegisteredCallback;
-															  return false;
-														  }),
-										   CallbacksEventMap[EventName].end());
-
-		// If there are no callbacks left, remove entry altogether
-		if (CallbacksEventMap[EventName].size() == 0)
-		{
-			CallbacksEventMap.erase(EventName);
-		}
 	}
 }
 
@@ -177,10 +155,7 @@ void EventBus::StartEventMessageListening()
 			EventDeserialiser Deserialiser;
 			Deserialiser.Parse(EventValues);
 
-			for (const auto& Callback : CallbacksEventMap[EventType])
-			{
-				Callback(true, Deserialiser.GetEventData());
-			}
+			CallbacksEventMap[EventType](true, Deserialiser.GetEventData());
 		}
 	};
 
