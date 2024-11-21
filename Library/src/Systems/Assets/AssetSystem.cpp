@@ -82,6 +82,8 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
 		return "Audio";
 	else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
 		return "GaussianSplat";
+	else if (AssetType == systems::EAssetType::MATERIAL)
+		return "Material";
 	else
 	{
 		assert(false && "Unsupported Asset Type!");
@@ -913,7 +915,9 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 		CreateAsset(CreateAssetCollectionResult.GetAssetCollection(), Name, nullptr, nullptr, EAssetType::MATERIAL, CreateAssetCB);
 	};
 
-	CreateAssetCollection(SpaceId, nullptr, Name, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollectionCB);
+	const csp::common::String MaterialCollectionName = MATERIAL_ASSET_COLLECTION_NAME_PREFIX + SpaceId + "_" + Name;
+
+	CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollectionCB);
 }
 
 void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback)

@@ -57,6 +57,8 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
+constexpr const char* MATERIAL_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MATERIAL_";
+
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
 class CSP_API AssetSystem : public SystemBase

@@ -24,7 +24,7 @@
 using namespace csp::json;
 using namespace csp::systems;
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialConstructorTest)
 {
 	const char* TestAssetCollectionId = "TestAssetCollectionId";
 	const char* TestAssetId			  = "TestAssetId";
@@ -51,7 +51,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
 	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), false);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialSetterTest)
 {
 	const char* TestAssetCollectionId = "TestAssetCollectionId";
 	const char* TestAssetId			  = "TestAssetId";
@@ -85,7 +85,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
 	EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialJsonSerializationTest)
 {
 	// Material vars
 	const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
@@ -241,7 +241,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoDefaultConstructorTest)
 {
 	TextureInfo Texture;
 
@@ -256,7 +256,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoAssetIdConstructorTest)
 {
 	const char* TestAssetCollectionId = "TestAssetCollectionId";
 	const char* TestAssetId			  = "TestAssetId";
@@ -274,7 +274,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoComponentIdConstructorTest)
 {
 	const char* TestComponentId = "TestComponentId";
 
@@ -291,7 +291,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTes
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureSetterTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureSetterTest)
 {
 	const char* TestAssetCollectionId = "TestAssetCollectionId";
 	const char* TestAssetId			  = "TestAssetId";
