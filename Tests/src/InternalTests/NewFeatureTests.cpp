@@ -235,7 +235,7 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, OptionalAssignmentOperatorTest)
 
 	// Test Optional<T*> constructors
 	{
-		auto Instance = (MyCoolClass*) CSP_ALLOC(sizeof(MyCoolClass));
+		auto Instance = (MyCoolClass*) std::malloc(sizeof(MyCoolClass));
 		new (Instance) MyCoolClass();
 		csp::common::Optional<MyCoolClass> OptionalInstance(Instance);
 	}

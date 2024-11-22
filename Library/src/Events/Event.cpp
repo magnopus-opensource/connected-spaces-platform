@@ -87,14 +87,14 @@ private:
 		{
 			if (ParamType == TypeString)
 			{
-				CSP_FREE(StringParam);
+				std::free(StringParam);
 			}
 		}
 
 		void SetString(const char* InString)
 		{
 			size_t StringLen = strlen(InString);
-			StringParam		 = (char*) CSP_ALLOC(StringLen + 1);
+			StringParam		 = (char*) std::malloc(StringLen + 1);
 
 			STRCPY(StringParam, StringLen + 1, InString);
 		}

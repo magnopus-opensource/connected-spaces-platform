@@ -206,7 +206,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapKeysTest)
 	EXPECT_EQ(MyKeys->Size(), 3);
 	EXPECT_FALSE(MyKeys->Data() == nullptr);
 
-	CSP_FREE(const_cast<Array<int>*>(MyKeys));
+	std::free(const_cast<Array<int>*>(MyKeys));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
@@ -219,7 +219,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapValuesTest)
 	EXPECT_EQ(MyValues->Size(), 3);
 	EXPECT_FALSE(MyValues->Data() == nullptr);
 
-	CSP_FREE(const_cast<Array<String>*>(MyValues));
+	std::free(const_cast<Array<String>*>(MyValues));
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapClearTest)

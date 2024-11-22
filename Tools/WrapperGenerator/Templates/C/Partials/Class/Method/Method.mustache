@@ -395,7 +395,7 @@
           auto _cstr = _result.c_str();
         {{/ is_pointer }}
 
-        auto _resultCopy = (char*)CSP_ALLOC(_result.Length() + 1);
+        auto _resultCopy = (char*)malloc(_result.Length() + 1);
         std::memcpy(_resultCopy, _cstr, _result.Length());
         _resultCopy[_result.Length()] = '\0';
 

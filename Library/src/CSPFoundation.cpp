@@ -404,7 +404,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 
 void Free(void* Pointer)
 {
-	CSP_FREE(Pointer);
+	std::free(Pointer);
 }
 
 void* ModuleHandle = nullptr;

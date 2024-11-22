@@ -23,7 +23,7 @@ namespace csp::memory
 void* DllAlloc(size_t Size)
 {
 	size_t Alignment = size_t(16);
-	return CSP_ALLOC(Size);
+	return std::malloc(Size);
 }
 
 void* DllRealloc(void* Ptr, size_t NewSize)
@@ -33,7 +33,7 @@ void* DllRealloc(void* Ptr, size_t NewSize)
 
 void DllFree(void* Ptr)
 {
-	CSP_FREE(Ptr);
+	std::free(Ptr);
 }
 
 } // namespace csp::memory
