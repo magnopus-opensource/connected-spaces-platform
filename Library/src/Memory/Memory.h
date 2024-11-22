@@ -200,8 +200,6 @@ inline Allocator* DefaultAllocator()
 
 	#define CSP_ALLOC(size) csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
 
-	#define CSP_REALLOC(ptr, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
-
 	#define CSP_NEW new (csp::memory::DefaultAllocator())
 
 	#define CSP_FREE(ptr) csp::memory::Deallocate(ptr)

@@ -28,7 +28,7 @@ void* DllAlloc(size_t Size)
 
 void* DllRealloc(void* Ptr, size_t NewSize)
 {
-	return CSP_REALLOC(Ptr, NewSize);
+	return std::realloc(Ptr, NewSize);
 }
 
 void DllFree(void* Ptr)

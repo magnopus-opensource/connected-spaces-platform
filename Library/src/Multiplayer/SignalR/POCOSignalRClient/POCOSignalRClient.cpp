@@ -249,7 +249,7 @@ void CSPWebSocketClientPOCO::ReceiveThreadFunc()
 			// Resize buffer if needed
 			if (CurrentBufferIndex + RECEIVE_BLOCK_SIZE > CurrentBufferSize)
 			{
-				auto* NewBuffer	  = CSP_REALLOC(Buffer, CurrentBufferSize * 2);
+				auto* NewBuffer	  = std::realloc(Buffer, CurrentBufferSize * 2);
 				Buffer			  = static_cast<char*>(NewBuffer);
 				CurrentBufferSize = CurrentBufferSize * 2;
 				CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Resizing receive buffer to %d", CurrentBufferSize);

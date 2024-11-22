@@ -69,14 +69,16 @@ CSP_INTERNAL_TEST(CSPEngine, MemoryTests, StlCustomAllocatorTest)
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, ReallocationTest)
 {
-	auto* Buffer		= CSP_ALLOC(16);
+	auto* Buffer		= std::malloc(16);
 	*(uint64_t*) Buffer = 0x0123456789ABCDEF;
 
-	Buffer = CSP_REALLOC(Buffer, 32);
+	Buffer = std::realloc(Buffer, 32);
 	EXPECT_TRUE(*(uint64_t*) Buffer == 0x0123456789ABCDEF);
 
-	Buffer = CSP_REALLOC(Buffer, 128 * 1024);
+	Buffer = std::realloc(Buffer, 128 * 1024);
 	EXPECT_TRUE(*(uint64_t*) Buffer == 0x0123456789ABCDEF);
+
+	std::free(Buffer);
 }
 
 #endif
