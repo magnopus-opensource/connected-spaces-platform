@@ -37,6 +37,9 @@ namespace chs = services::generated::prototypeservice;
 constexpr int DEFAULT_SKIP_NUMBER		= 0;
 constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
 
+static const char* MATERIAL_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MATERIAL_";
+static const char* MATERIAL_ASSET_NAME_PREFIX			 = "ASSET_MATERIAL_";
+static const char* MATERIAL_FILE_NAME_PREFIX			 = "ASSET_MATERIAL_FILE_";
 
 namespace
 {
@@ -864,7 +867,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback)
 {
 	// 1. Create asset collection
-	auto CreateAssetCollectionCB = [this, &Name, Callback](const AssetCollectionResult& CreateAssetCollectionResult)
+	auto CreateAssetCollectionCB = [this, Callback, Name, SpaceId](const AssetCollectionResult& CreateAssetCollectionResult)
 	{
 		if (CreateAssetCollectionResult.GetResultCode() != EResultCode::Success)
 		{
@@ -875,7 +878,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 		// 2. Create asset
 		const AssetCollection& CreatedAssetCollection = CreateAssetCollectionResult.GetAssetCollection();
 
-		auto CreateAssetCB = [this, Callback, CreatedAssetCollection](const AssetResult& CreateAssetResult)
+		auto CreateAssetCB = [this, Callback, CreatedAssetCollection, SpaceId, Name](const AssetResult& CreateAssetResult)
 		{
 			if (CreateAssetResult.GetResultCode() != EResultCode::Success)
 			{
@@ -887,7 +890,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 			GLTFMaterial NewMaterial;
 			csp::common::String MaterialJson = csp::json::JsonSerializer::Serialize(NewMaterial);
 
-			auto UploadMaterialCallback = [this, Callback, NewMaterial](const UriResult& UploadResult)
+			auto UploadMaterialCallback = [this, Callback, NewMaterial, SpaceId, Name](const UriResult& UploadResult)
 			{
 				if (UploadResult.GetResultCode() != EResultCode::Success)
 				{
@@ -902,7 +905,10 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 				Callback(FinalResult);
 			};
 
-			const Asset& CreatedAsset = CreateAssetResult.GetAsset();
+			const csp::common::String MaterialFileName = MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name;
+
+			Asset CreatedAsset	  = CreateAssetResult.GetAsset();
+			CreatedAsset.FileName = MaterialFileName;
 
 			BufferAssetDataSource AssetData;
 			AssetData.SetMimeType("application/json");
@@ -912,7 +918,9 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 			UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
 		};
 
-		CreateAsset(CreateAssetCollectionResult.GetAssetCollection(), Name, nullptr, nullptr, EAssetType::MATERIAL, CreateAssetCB);
+		const csp::common::String MaterialAssetName = MATERIAL_ASSET_NAME_PREFIX + SpaceId + "_" + Name;
+
+		CreateAsset(CreateAssetCollectionResult.GetAssetCollection(), MaterialAssetName, nullptr, nullptr, EAssetType::MATERIAL, CreateAssetCB);
 	};
 
 	const csp::common::String MaterialCollectionName = MATERIAL_ASSET_COLLECTION_NAME_PREFIX + SpaceId + "_" + Name;
