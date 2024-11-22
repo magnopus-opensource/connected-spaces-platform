@@ -43,7 +43,7 @@ CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent
 	Properties[static_cast<uint32_t>(CinematicCameraPropertyKeys::ThirdPartyComponentRef)] = "";
 
 
-	SetScriptInterface(CSP_NEW CinematicCameraSpaceComponentScriptInterface(this));
+	SetScriptInterface(new CinematicCameraSpaceComponentScriptInterface(this));
 }
 
 float CinematicCameraSpaceComponent::GetFov() const

@@ -40,7 +40,7 @@ FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent) : ComponentBase(Compon
 	Properties[static_cast<uint32_t>(FogPropertyKeys::IsARVisible)]			   = true;
 	Properties[static_cast<uint32_t>(FogPropertyKeys::ThirdPartyComponentRef)] = "";
 
-	SetScriptInterface(CSP_NEW FogSpaceComponentScriptInterface(this));
+	SetScriptInterface(new FogSpaceComponentScriptInterface(this));
 }
 
 FogMode FogSpaceComponent::GetFogMode() const

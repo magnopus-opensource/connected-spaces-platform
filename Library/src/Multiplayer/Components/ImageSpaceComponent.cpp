@@ -37,7 +37,7 @@ ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent) : ComponentBase(Co
 	Properties[static_cast<uint32_t>(ImagePropertyKeys::IsARVisible)]		= true;
 	Properties[static_cast<uint32_t>(ImagePropertyKeys::IsEmissive)]		= false;
 
-	SetScriptInterface(CSP_NEW ImageSpaceComponentScriptInterface(this));
+	SetScriptInterface(new ImageSpaceComponentScriptInterface(this));
 }
 
 

@@ -198,9 +198,6 @@ inline Allocator* DefaultAllocator()
 
 #else
 
-	#define CSP_NEW new (csp::memory::DefaultAllocator())
-
-	#define CSP_DELETE(ptr) csp::memory::Delete(ptr)
 
 #endif // #if !CSP_MEMORY_TRACKING_ENABLED
 
@@ -208,7 +205,7 @@ template <class T> struct OlyDeleter
 {
 	void operator()(T* Ptr)
 	{
-		CSP_DELETE(Ptr);
+		delete (Ptr);
 	}
 };
 

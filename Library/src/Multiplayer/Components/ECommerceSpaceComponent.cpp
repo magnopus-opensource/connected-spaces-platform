@@ -29,7 +29,7 @@ ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent) : Componen
 	Properties[static_cast<uint32_t>(ECommercePropertyKeys::Position)]	= csp::common::Vector3 {0, 0, 0};
 	Properties[static_cast<uint32_t>(ECommercePropertyKeys::ProductId)] = "";
 
-	SetScriptInterface(CSP_NEW ECommerceSpaceComponentScriptInterface(this));
+	SetScriptInterface(new ECommerceSpaceComponentScriptInterface(this));
 }
 
 

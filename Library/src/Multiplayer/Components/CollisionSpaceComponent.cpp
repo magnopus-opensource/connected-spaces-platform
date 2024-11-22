@@ -45,7 +45,7 @@ CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent) : Componen
 	Properties[static_cast<uint32_t>(CollisionPropertyKeys::AssetCollectionId)]		 = "";
 	Properties[static_cast<uint32_t>(CollisionPropertyKeys::ThirdPartyComponentRef)] = "";
 
-	SetScriptInterface(CSP_NEW CollisionSpaceComponentScriptInterface(this));
+	SetScriptInterface(new CollisionSpaceComponentScriptInterface(this));
 }
 
 

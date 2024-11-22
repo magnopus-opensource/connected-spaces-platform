@@ -88,11 +88,11 @@ AnalyticsEvent::AnalyticsEvent(const csp::common::String& Tag) : Tag {Tag}
 
 AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag)
 {
-	return CSP_NEW AnalyticsEvent(Tag);
+	return new AnalyticsEvent(Tag);
 }
 
 void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event)
 {
-	CSP_DELETE(Event);
+	delete (Event);
 }
 } // namespace csp::systems

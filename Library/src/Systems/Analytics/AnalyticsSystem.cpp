@@ -86,7 +86,7 @@ private:
 };
 
 
-AnalyticsSystem::AnalyticsSystem() : Impl {CSP_NEW AnalyticsSystemImpl()}
+AnalyticsSystem::AnalyticsSystem() : Impl {new AnalyticsSystemImpl()}
 {
 	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
 }
@@ -94,7 +94,7 @@ AnalyticsSystem::AnalyticsSystem() : Impl {CSP_NEW AnalyticsSystemImpl()}
 AnalyticsSystem::~AnalyticsSystem()
 {
 	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
-	CSP_DELETE(Impl);
+	delete (Impl);
 }
 
 void AnalyticsSystem::Log(AnalyticsEvent* Event)

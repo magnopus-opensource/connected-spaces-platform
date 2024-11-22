@@ -39,12 +39,12 @@ namespace csp::systems
 
 EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	EventTicketingAPI = CSP_NEW chs::TicketedSpaceApi(InWebClient);
+	EventTicketingAPI = new chs::TicketedSpaceApi(InWebClient);
 }
 
 EventTicketingSystem::~EventTicketingSystem()
 {
-	CSP_DELETE(EventTicketingAPI);
+	delete (EventTicketingAPI);
 }
 
 void EventTicketingSystem::CreateTicketedEvent(const csp::common::String& SpaceId,

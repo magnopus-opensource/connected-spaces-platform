@@ -67,11 +67,11 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 
 	if (protocol == "https")
 	{
-		cs = CSP_NEW Poco::Net::HTTPSClientSession(domain, 443);
+		cs = new Poco::Net::HTTPSClientSession(domain, 443);
 	}
 	else
 	{
-		cs = CSP_NEW Poco::Net::HTTPClientSession(domain, 80);
+		cs = new Poco::Net::HTTPClientSession(domain, 80);
 	}
 
 	Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
@@ -88,7 +88,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 
 	try
 	{
-		PocoWebSocket = CSP_NEW Poco::Net::WebSocket(*cs, request, response);
+		PocoWebSocket = new Poco::Net::WebSocket(*cs, request, response);
 		// Receive worker thread
 		ReceiveThread = std::thread(
 			[this]()
@@ -106,7 +106,7 @@ void CSPWebSocketClientPOCO::Start(const std::string& Url, CallbackHandler Callb
 		Callback(false);
 	}
 
-	CSP_DELETE(cs);
+	delete (cs);
 }
 
 void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
@@ -146,7 +146,7 @@ void CSPWebSocketClientPOCO::Stop(CallbackHandler Callback)
 			CSP_LOG_ERROR_FORMAT("%s", "Error: Failed to close socket.");
 		}
 
-		CSP_DELETE(PocoWebSocket);
+		delete (PocoWebSocket);
 		PocoWebSocket = nullptr;
 	}
 	else

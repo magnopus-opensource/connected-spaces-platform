@@ -24,7 +24,7 @@ Scheduler* GetScheduler()
 {
 	if (SchedulerPtr == nullptr)
 	{
-		SchedulerPtr = CSP_NEW Scheduler();
+		SchedulerPtr = new Scheduler();
 		SchedulerPtr->Initialise();
 	}
 
@@ -33,7 +33,7 @@ Scheduler* GetScheduler()
 
 void DestroyScheduler()
 {
-	CSP_DELETE(SchedulerPtr);
+	delete (SchedulerPtr);
 	SchedulerPtr = nullptr;
 }
 

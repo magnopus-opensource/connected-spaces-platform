@@ -119,10 +119,10 @@ constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 MultiplayerConnection::MultiplayerConnection()
 	: Connection(nullptr)
 	, WebSocketClient(nullptr)
-	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
+	, NetworkEventManager(new NetworkEventManagerImpl(this))
 	, ClientId(0)
 	, Connected(false)
-	, ConversationSystemPtr(CSP_NEW ConversationSystem(this))
+	, ConversationSystemPtr(new ConversationSystem(this))
 {
 }
 
@@ -144,10 +144,10 @@ MultiplayerConnection::~MultiplayerConnection()
 			shutdownFuture.wait();
 		}
 
-		CSP_DELETE(Connection);
-		CSP_DELETE(WebSocketClient);
-		CSP_DELETE(NetworkEventManager);
-		CSP_DELETE(ConversationSystemPtr);
+		delete (Connection);
+		delete (WebSocketClient);
+		delete (NetworkEventManager);
+		delete (ConversationSystemPtr);
 	}
 }
 
@@ -177,19 +177,19 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 			return;
 		}
 
-		CSP_DELETE(Connection);
+		delete (Connection);
 	}
 
 #ifdef CSP_WASM
-	WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientEmscripten();
+	WebSocketClient = new csp::multiplayer::CSPWebSocketClientEmscripten();
 #else
-	WebSocketClient = CSP_NEW csp::multiplayer::CSPWebSocketClientPOCO();
+	WebSocketClient = new csp::multiplayer::CSPWebSocketClientPOCO();
 #endif
 	csp::multiplayer::SetWebSocketClient(WebSocketClient);
 
-	Connection = CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(),
-															 KEEP_ALIVE_INTERVAL,
-															 std::make_shared<csp::multiplayer::CSPWebsocketClient>());
+	Connection = new csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(),
+														 KEEP_ALIVE_INTERVAL,
+														 std::make_shared<csp::multiplayer::CSPWebsocketClient>());
 	NetworkEventManager->SetConnection(Connection);
 	ConversationSystemPtr->SetConnection(Connection);
 	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);

@@ -18,6 +18,7 @@
 
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/Convert.h"
 #include "Common/DateTime.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
@@ -25,8 +26,6 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Dto.h"
 #include "Systems/Users/Authentication.h"
-
-#include "Common/Convert.h"
 
 
 using namespace csp;
@@ -40,7 +39,7 @@ namespace chs_aggregation = csp::services::generated::aggregationservice;
 namespace csp::systems
 {
 
-LoginState::LoginState() : State(ELoginState::LoggedOut), AccessTokenRefreshTime(CSP_NEW DateTime())
+LoginState::LoginState() : State(ELoginState::LoggedOut), AccessTokenRefreshTime(new DateTime())
 {
 }
 
@@ -66,12 +65,12 @@ void LoginState::CopyStateFrom(const LoginState& OtherState)
 
 	// Must reallocate the access token when copying otherwise destructor of
 	// copied state will delete the original memory pointer potentially causing corruption
-	AccessTokenRefreshTime = CSP_NEW DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
+	AccessTokenRefreshTime = new DateTime(OtherState.AccessTokenRefreshTime->GetTimePoint());
 }
 
 LoginState::~LoginState()
 {
-	CSP_DELETE(AccessTokenRefreshTime);
+	delete (AccessTokenRefreshTime);
 }
 
 bool LoginState::RefreshNeeded() const
@@ -114,12 +113,12 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
 		if (State)
 		{
-			State->State		= ELoginState::LoggedIn;
-			State->AccessToken	= AuthResponse->GetAccessToken();
-			State->RefreshToken = AuthResponse->GetRefreshToken();
-			State->UserId		= AuthResponse->GetUserId();
-			State->DeviceId		= AuthResponse->GetDeviceId();
-            State->OrganizationIds = csp::common::Convert(AuthResponse->GetOrganizationIds());
+			State->State		   = ELoginState::LoggedIn;
+			State->AccessToken	   = AuthResponse->GetAccessToken();
+			State->RefreshToken	   = AuthResponse->GetRefreshToken();
+			State->UserId		   = AuthResponse->GetUserId();
+			State->DeviceId		   = AuthResponse->GetDeviceId();
+			State->OrganizationIds = csp::common::Convert(AuthResponse->GetOrganizationIds());
 
 			const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
 			const DateTime CurrentTime(DateTime::UtcTimeNow());

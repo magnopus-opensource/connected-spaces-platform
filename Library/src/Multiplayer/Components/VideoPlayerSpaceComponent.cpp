@@ -52,7 +52,7 @@ VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)]			= static_cast<int64_t>(0);
 	Properties[static_cast<uint32_t>(VideoPlayerPropertyKeys::IsEnabled)]				= true;
 
-	SetScriptInterface(CSP_NEW VideoPlayerSpaceComponentScriptInterface(this));
+	SetScriptInterface(new VideoPlayerSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& VideoPlayerSpaceComponent::GetName() const

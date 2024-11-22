@@ -39,7 +39,7 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent) : 
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ThirdPartyComponentRef)]			= "";
 	Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::IsShadowCaster)]					= true;
 
-	SetScriptInterface(CSP_NEW AnimatedModelSpaceComponentScriptInterface(this));
+	SetScriptInterface(new AnimatedModelSpaceComponentScriptInterface(this));
 }
 
 

@@ -235,7 +235,7 @@ EntityScriptBinding::EntityScriptBinding(SpaceEntitySystem* InEntitySystem) : En
 
 EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* InEntitySystem)
 {
-	EntityScriptBinding* ScriptBinding		 = CSP_NEW EntityScriptBinding(InEntitySystem);
+	EntityScriptBinding* ScriptBinding		 = new EntityScriptBinding(InEntitySystem);
 	csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
 	ScriptSystem->RegisterScriptBinding(ScriptBinding);
 	return ScriptBinding;
@@ -580,8 +580,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
 		.fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity");
 
-	Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
-	Context->global()["ThisEntity"]		 = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
+	Context->global()["TheEntitySystem"] = new EntitySystemScriptInterface(EntitySystem);
+	Context->global()["ThisEntity"]		 = new EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
 
 	// Always import OKO module into scripts
 	std::stringstream ss;

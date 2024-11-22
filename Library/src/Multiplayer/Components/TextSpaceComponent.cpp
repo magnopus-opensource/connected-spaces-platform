@@ -38,7 +38,7 @@ TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent) : ComponentBase(Comp
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsVisible)]			 = true;
 	Properties[static_cast<uint32_t>(TextPropertyKeys::IsARVisible)]		 = true;
 
-	SetScriptInterface(CSP_NEW TextSpaceComponentScriptInterface(this));
+	SetScriptInterface(new TextSpaceComponentScriptInterface(this));
 }
 
 

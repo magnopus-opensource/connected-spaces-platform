@@ -165,7 +165,7 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 			}
 		}
 
-		CSP_DELETE(ComponentKeys);
+		delete (ComponentKeys);
 	}
 
 	return Components;

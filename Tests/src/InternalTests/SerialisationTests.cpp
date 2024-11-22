@@ -38,7 +38,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
 	SignalRMsgPackEntitySerialiser Serialiser;
-	auto User			 = CSP_NEW SpaceEntity();
+	auto User			 = new SpaceEntity();
 	User->Type			 = SpaceEntityType::Avatar;
 	User->Id			 = 42;
 	User->Name			 = "MyUser";
@@ -160,9 +160,9 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 		}
 	}
 
-	CSP_DELETE(User);
+	delete (User);
 
-	csp::CSPFoundation::Shutdown();
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeserialisationTest)
@@ -170,7 +170,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
 	SignalRMsgPackEntitySerialiser Serialiser;
-	auto User			 = CSP_NEW SpaceEntity();
+	auto User			 = new SpaceEntity();
 	User->Id			 = 42;
 	User->Name			 = "MyUser";
 	User->Transform		 = {Vector3 {1.2f, 2.34f, 3.45f}, Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, Vector3 {1, 1, 1}};
@@ -189,7 +189,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	auto SerialisedUser = Serialiser.Finalise();
 
 	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedUser);
-	auto DeserialisedUser = CSP_NEW SpaceEntity();
+	auto DeserialisedUser = new SpaceEntity();
 	DeserialisedUser->Deserialise(Deserialiser);
 
 	EXPECT_EQ(DeserialisedUser->Id, User->Id);
@@ -211,8 +211,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	EXPECT_EQ(DeserialisedAvatarComponent->GetState(), AvatarComponent->GetState());
 	EXPECT_EQ(DeserialisedAvatarComponent->GetUserId(), AvatarComponent->GetUserId());
 
-	CSP_DELETE(DeserialisedUser);
-	CSP_DELETE(User);
+	delete (DeserialisedUser);
+	delete (User);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSerialisationTest)
@@ -220,7 +220,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
 	SignalRMsgPackEntitySerialiser Serialiser;
-	auto Object			   = CSP_NEW SpaceEntity();
+	auto Object			   = new SpaceEntity();
 	Object->Type		   = SpaceEntityType::Object;
 	Object->Id			   = 1337;
 	Object->IsTransferable = true;
@@ -231,7 +231,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	Object->ParentId	   = 9999;
 
 	auto Type										   = (ComponentType) ((int) ComponentType::Custom + 1);
-	Object->Components[COMPONENT_KEY_START_COMPONENTS] = CSP_NEW ComponentBase(Type, Object);
+	Object->Components[COMPONENT_KEY_START_COMPONENTS] = new ComponentBase(Type, Object);
 	auto* NewComponent								   = Object->Components[COMPONENT_KEY_START_COMPONENTS];
 	NewComponent->Id								   = COMPONENT_KEY_START_COMPONENTS;
 	NewComponent->Properties[0xDEAD]				   = true;
@@ -338,9 +338,9 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 		}
 	}
 
-	CSP_DELETE(Object);
+	delete (Object);
 
-	csp::CSPFoundation::Shutdown();
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeserialisationTest)
@@ -352,7 +352,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	const int DefaultComponentProps = 1;
 
 	SignalRMsgPackEntitySerialiser Serialiser;
-	auto Object			   = CSP_NEW SpaceEntity();
+	auto Object			   = new SpaceEntity();
 	Object->Type		   = SpaceEntityType::Object;
 	Object->Id			   = 1337;
 	Object->IsTransferable = true;
@@ -370,7 +370,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	auto SerialisedObject = Serialiser.Finalise();
 
 	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedObject);
-	auto DeserialisedObject = CSP_NEW SpaceEntity();
+	auto DeserialisedObject = new SpaceEntity();
 	DeserialisedObject->Deserialise(Deserialiser);
 
 	EXPECT_EQ(DeserialisedObject->Id, Object->Id);
@@ -393,10 +393,10 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedComponent->GetExternalResourceAssetCollectionId(), "blah");
 	EXPECT_EQ(DeserialisedComponent->GetIsVisible(), true);
 
-	CSP_DELETE(DeserialisedObject);
-	CSP_DELETE(Object);
+	delete (DeserialisedObject);
+	delete (Object);
 
-	csp::CSPFoundation::Shutdown();
+    csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
@@ -437,7 +437,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
 
 	// Deserialize
 	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedObject);
-	auto DeserialisedObject = CSP_NEW SpaceEntity();
+	auto DeserialisedObject = new SpaceEntity();
 	DeserialisedObject->Deserialise(Deserialiser);
 
 	auto* DeserializedComponent = static_cast<CustomSpaceComponent*>(DeserialisedObject->GetComponent(0));

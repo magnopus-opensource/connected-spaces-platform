@@ -103,7 +103,7 @@ public:
 
 	Impl* Clone() const
 	{
-		return CSP_NEW Impl(Text, Length);
+		return new Impl(Text, Length);
 	}
 
 	inline void Append(const char* Other, size_t OtherLength)
@@ -179,19 +179,19 @@ public:
 };
 
 
-String::String() : ImplPtr(CSP_NEW Impl(""))
+String::String() : ImplPtr(new Impl(""))
 {
 }
 
-String::String(char const* const Text, size_t Length) : ImplPtr(CSP_NEW Impl(Text, Length))
+String::String(char const* const Text, size_t Length) : ImplPtr(new Impl(Text, Length))
 {
 }
 
-String::String(size_t Length) : ImplPtr(CSP_NEW Impl(Length))
+String::String(size_t Length) : ImplPtr(new Impl(Length))
 {
 }
 
-String::String(const char* Text) : ImplPtr(CSP_NEW Impl(Text))
+String::String(const char* Text) : ImplPtr(new Impl(Text))
 {
 }
 
@@ -220,7 +220,7 @@ String& String::operator=(const String& Rhs)
 {
 	if (ImplPtr != nullptr)
 	{
-		CSP_DELETE(ImplPtr);
+		delete (ImplPtr);
 	}
 
 	ImplPtr = Rhs.ImplPtr->Clone();
@@ -231,7 +231,7 @@ String& String::operator=(String&& Rhs)
 {
 	if (ImplPtr != nullptr)
 	{
-		CSP_DELETE(ImplPtr);
+		delete (ImplPtr);
 	}
 
 	ImplPtr		= Rhs.ImplPtr;
@@ -243,10 +243,10 @@ String& String::operator=(char const* const Text)
 {
 	if (ImplPtr != nullptr)
 	{
-		CSP_DELETE(ImplPtr);
+		delete (ImplPtr);
 	}
 
-	ImplPtr = CSP_NEW Impl(Text);
+	ImplPtr = new Impl(Text);
 	return *this;
 }
 
@@ -321,7 +321,7 @@ String::~String()
 {
 	if (ImplPtr != nullptr)
 	{
-		CSP_DELETE(ImplPtr);
+		delete (ImplPtr);
 	}
 }
 

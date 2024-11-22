@@ -154,18 +154,18 @@ AssetSystem::AssetSystem() : SystemBase(), PrototypeAPI(nullptr), AssetDetailAPI
 
 AssetSystem::AssetSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	PrototypeAPI   = CSP_NEW chs::PrototypeApi(InWebClient);
-	AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
+	PrototypeAPI   = new chs::PrototypeApi(InWebClient);
+	AssetDetailAPI = new chs::AssetDetailApi(InWebClient);
 
-	FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+	FileManager = new web::RemoteFileManager(InWebClient);
 }
 
 AssetSystem::~AssetSystem()
 {
-	CSP_DELETE(FileManager);
+	delete (FileManager);
 
-	CSP_DELETE(AssetDetailAPI);
-	CSP_DELETE(PrototypeAPI);
+	delete (AssetDetailAPI);
+	delete (PrototypeAPI);
 }
 
 void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId,

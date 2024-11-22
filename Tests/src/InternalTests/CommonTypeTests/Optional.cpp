@@ -104,7 +104,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalPointerInitialisationT
 {
 	try
 	{
-		auto* TestClassInstancePtr = CSP_NEW OptionalTestClass(2);
+		auto* TestClassInstancePtr = new OptionalTestClass(2);
 		Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr);
 
 		EXPECT_TRUE(OptionalInstance.HasValue());
@@ -127,13 +127,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalPointerAndDestructorIn
 		std::function<void(OptionalTestClass*)> CustomDestructor = [&](OptionalTestClass* Pointer)
 		{
 			Pointer->~OptionalTestClass();
-			CSP_DELETE(Pointer);
+			delete (Pointer);
 			DestructorRan = true;
 		};
 
 		// Scope block used to force the call on the destructor.
 		{
-			auto* TestClassInstancePtr = CSP_NEW OptionalTestClass(3);
+			auto* TestClassInstancePtr = new OptionalTestClass(3);
 			Optional<OptionalTestClass> OptionalInstance(TestClassInstancePtr, CustomDestructor);
 
 			EXPECT_TRUE(OptionalInstance.HasValue());
@@ -154,14 +154,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonOptionalTests, OptionalOtherClassPointerIniti
 {
 	try
 	{
-		auto* OtherClassInstancePtr					 = CSP_NEW OtherTestClass(4);
+		auto* OtherClassInstancePtr					 = new OtherTestClass(4);
 		Optional<OptionalTestClass> OptionalInstance = Optional<OptionalTestClass>((OtherTestClass*) OtherClassInstancePtr);
 
 		EXPECT_TRUE(OptionalInstance.HasValue());
 		EXPECT_EQ((*OptionalInstance).SomeField, OtherClassInstancePtr->OtherField);
 		EXPECT_EQ(OptionalInstance->SomeField, OtherClassInstancePtr->OtherField);
 
-		CSP_DELETE(OtherClassInstancePtr);
+		delete (OtherClassInstancePtr);
 	}
 	catch (...)
 	{

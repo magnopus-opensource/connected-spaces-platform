@@ -63,7 +63,7 @@
     NativePointer {
 {{# is_pointer_or_reference }}
 {{# is_const }}
-        CSP_NEW {{> Type }}(
+        new {{> Type }}(
 {{# is_pointer }}
         *
 {{/ is_pointer }}
@@ -75,7 +75,7 @@
 {{/ is_const }}
 {{/ is_reference }}
 {{^ is_pointer_or_reference }}
-        CSP_NEW {{> Type }}(
+        new {{> Type }}(
 {{/ is_pointer_or_reference }}
 {{/ is_class_or_interface }}
 {{^ is_class_or_interface }}

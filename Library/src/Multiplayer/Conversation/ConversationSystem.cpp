@@ -104,10 +104,10 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
 
 	auto DeletionCounterDeleter = [](size_t* ptr)
 	{
-		CSP_DELETE(ptr);
+		delete (ptr);
 	};
 
-	std::shared_ptr<size_t> DeletionCounter(CSP_NEW size_t, DeletionCounterDeleter);
+	std::shared_ptr<size_t> DeletionCounter(new size_t, DeletionCounterDeleter);
 	*DeletionCounter = 0;
 
 	for (auto idx = 0; idx < MessagesCount; ++idx)

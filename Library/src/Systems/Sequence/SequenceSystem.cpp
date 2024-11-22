@@ -277,12 +277,12 @@ SequenceSystem::SequenceSystem() : SystemBase(), SequenceAPI(nullptr)
 
 SequenceSystem::SequenceSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	SequenceAPI = CSP_NEW chs::SequenceApi(InWebClient);
+	SequenceAPI = new chs::SequenceApi(InWebClient);
 }
 
 SequenceSystem::~SequenceSystem()
 {
-	CSP_DELETE(SequenceAPI);
+	delete (SequenceAPI);
 }
 
 } // namespace csp::systems

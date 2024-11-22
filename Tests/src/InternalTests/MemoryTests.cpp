@@ -39,9 +39,9 @@ CSP_INTERNAL_TEST(CSPEngine, MemoryTests, AllocationTest)
 		int32_t IntMember;
 	};
 
-	TestObject* Obj = CSP_NEW TestObject();
+	TestObject* Obj = new TestObject();
 	EXPECT_TRUE(Obj != nullptr);
-	CSP_DELETE(Obj);
+	delete (Obj);
 }
 
 

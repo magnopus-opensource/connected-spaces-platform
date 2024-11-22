@@ -52,12 +52,12 @@ SettingsSystem::SettingsSystem() : SystemBase(), SettingsAPI(nullptr)
 
 SettingsSystem::SettingsSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	SettingsAPI = CSP_NEW chs::SettingsApi(InWebClient);
+	SettingsAPI = new chs::SettingsApi(InWebClient);
 }
 
 SettingsSystem::~SettingsSystem()
 {
-	CSP_DELETE(SettingsAPI);
+	delete (SettingsAPI);
 }
 
 void SettingsSystem::SetSettingValue(const String& InContext, const String& InKey, const String& InValue, NullResultCallback Callback) const
@@ -429,8 +429,8 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, AvatarPortraitAssetCollCallback);
 }
 
@@ -552,8 +552,8 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, ThumbnailAssetCollCallback);
 }
 
@@ -863,8 +863,8 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
 

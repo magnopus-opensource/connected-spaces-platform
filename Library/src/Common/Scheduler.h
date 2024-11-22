@@ -92,7 +92,7 @@ public:
 	{
 		assert(Thread == nullptr);
 		ShouldExit = false;
-		Thread	   = CSP_NEW std::thread(
+		Thread	   = new std::thread(
 			[this]()
 			{
 				ThreadLoop();
@@ -105,7 +105,7 @@ public:
 		{
 			ShouldExit = true;
 			Thread->join();
-			CSP_DELETE(Thread);
+			delete (Thread);
 			Thread = nullptr;
 		}
 	}

@@ -34,7 +34,7 @@ ButtonSpaceComponent::ButtonSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 	Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsEnabled)]		 = true;
 	Properties[static_cast<uint32_t>(ButtonPropertyKeys::IsARVisible)]		 = true;
 
-	SetScriptInterface(CSP_NEW ButtonSpaceComponentScriptInterface(this));
+	SetScriptInterface(new ButtonSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ButtonSpaceComponent::GetLabelText() const

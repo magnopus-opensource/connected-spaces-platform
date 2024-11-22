@@ -243,7 +243,7 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 							}
 						}
 
-						CSP_DELETE(PropertyKeys);
+						delete (PropertyKeys);
 					}
 				}
 			}

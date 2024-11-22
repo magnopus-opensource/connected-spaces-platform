@@ -27,7 +27,7 @@ SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent) : ComponentBase(
 {
 	Properties[static_cast<uint32_t>(SplinePropertyKeys::Waypoints)] = 0.f;
 
-	SetScriptInterface(CSP_NEW SplineSpaceComponentScriptInterface(this));
+	SetScriptInterface(new SplineSpaceComponentScriptInterface(this));
 }
 
 csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)

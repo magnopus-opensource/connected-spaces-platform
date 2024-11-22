@@ -33,12 +33,12 @@ AnchorSystem::AnchorSystem() : SystemBase(), AnchorsAPI(nullptr)
 
 AnchorSystem::AnchorSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	AnchorsAPI = CSP_NEW chs::AnchorsApi(InWebClient);
+	AnchorsAPI = new chs::AnchorsApi(InWebClient);
 }
 
 AnchorSystem::~AnchorSystem()
 {
-	CSP_DELETE(AnchorsAPI);
+	delete (AnchorsAPI);
 }
 
 void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorProvider,

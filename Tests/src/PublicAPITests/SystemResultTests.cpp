@@ -128,7 +128,7 @@ CSP_PUBLIC_TEST(CSPEngine, SystemResultTests, BaseResultTest)
 	const csp::web::EResponseCodes MyTestResponseCode = csp::web::EResponseCodes::ResponseOK;
 	const csp::common::String MyTestPayload			  = "1234";
 
-	auto* WebClient = CSP_NEW TestWebClient(80, csp::web::ETransferProtocol::HTTP);
+	auto* WebClient = new TestWebClient(80, csp::web::ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
 	ResponseReceiver Receiver;

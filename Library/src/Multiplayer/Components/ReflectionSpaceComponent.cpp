@@ -34,7 +34,7 @@ ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent) : Compon
 	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)]		  = static_cast<int64_t>(ReflectionShape::UnitBox);
 	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
 
-	SetScriptInterface(CSP_NEW ReflectionSpaceComponentScriptInterface(this));
+	SetScriptInterface(new ReflectionSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() const

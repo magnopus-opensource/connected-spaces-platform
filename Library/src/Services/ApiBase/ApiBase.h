@@ -247,7 +247,7 @@ public:
 	{
 		// This gets owned by the HttpRequest and gets deleted in it's destructor once the request is complete
 		ResponseHandlerPtr Handler
-			= CSP_NEW ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(InCallback, InDepend, InValidResponseCode);
+			= new ApiResponseHandler<CallbackType, ResponseType, ResponseDependType, DtoType>(InCallback, InDepend, InValidResponseCode);
 		return Handler;
 	}
 
@@ -260,13 +260,13 @@ public:
 // Template definitions
 //
 
-template <class DtoType> ApiResponse<DtoType>::ApiResponse() : ApiResponseBase(CSP_NEW DtoType())
+template <class DtoType> ApiResponse<DtoType>::ApiResponse() : ApiResponseBase(new DtoType())
 {
 }
 
 template <class DtoType> ApiResponse<DtoType>::~ApiResponse()
 {
-	CSP_DELETE(Dto);
+	delete (Dto);
 }
 
 } // namespace csp::services

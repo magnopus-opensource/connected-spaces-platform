@@ -171,7 +171,7 @@
               {{/ is_static }}
 
               {{^ is_static }}
-                CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+                new {{# return_type }}{{> Type }}{{/ return_type }}(
               {{/ is_static }}
             {{/ return_type.is_reference }}
         {{/ return_type.is_string }}
@@ -181,7 +181,7 @@
     {{^ return_type.is_pointer_or_reference }}
       {{# return_type.is_class_or_interface }}
         NativePointer {
-          CSP_NEW {{# return_type }}{{> Type }}{{/ return_type }}(
+          new {{# return_type }}{{> Type }}{{/ return_type }}(
       {{/ return_type.is_class_or_interface }}
     {{/ return_type.is_pointer_or_reference }}
   {{/ has_return }}
@@ -234,7 +234,7 @@
             {{^ type.is_string }}
               {{# type.is_reference }}
                 auto* _{{ name }} =
-                  CSP_NEW {{# type.namespace }}{{ type.namespace }}::{{/ type.namespace }}{{ type.name }}({{ name }});
+                  new {{# type.namespace }}{{ type.namespace }}::{{/ type.namespace }}{{ type.name }}({{ name }});
               {{/ type.is_reference }}
             {{/ type.is_string }}
           {{/ parameters }}

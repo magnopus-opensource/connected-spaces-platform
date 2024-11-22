@@ -131,7 +131,7 @@ std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const
 				MapArray.push_back(signalr::value(std::vector<signalr::value> {KeyValue.second, Value.second}));
 			}
 
-			CSP_DELETE(Keys);
+			delete (Keys);
 
 			MapRoot.push_back(signalr::value(KeyType));
 			MapRoot.push_back(signalr::value(ValueType));

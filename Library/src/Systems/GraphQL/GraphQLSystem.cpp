@@ -34,12 +34,12 @@ GraphQLSystem::GraphQLSystem() : SystemBase(), GraphQLAPI(nullptr)
 
 GraphQLSystem::GraphQLSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	GraphQLAPI = CSP_NEW chs::GraphQLApi(InWebClient);
+	GraphQLAPI = new chs::GraphQLApi(InWebClient);
 }
 
 GraphQLSystem::~GraphQLSystem()
 {
-	CSP_DELETE(GraphQLAPI);
+	delete (GraphQLAPI);
 }
 
 void GraphQLSystem::RunQuery(const csp::common::String QueryText, GraphQLReceivedCallback Callback)

@@ -62,12 +62,12 @@ ECommerceSystem::ECommerceSystem() : SystemBase(), ShopifyAPI(nullptr)
 
 ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	ShopifyAPI = CSP_NEW chs::ShopifyApi(InWebClient);
+	ShopifyAPI = new chs::ShopifyApi(InWebClient);
 }
 
 ECommerceSystem::~ECommerceSystem()
 {
-	CSP_DELETE(ShopifyAPI);
+	delete (ShopifyAPI);
 }
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
@@ -99,14 +99,14 @@ void ECommerceSystem::GetProductInfoCollectionByVariantIds(const common::String&
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
 {
 	std::string CharacterCheck = CartId.c_str();
-    if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
-    {
+	if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
+	{
 		CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
 
 		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CheckoutInfoResult>());
 
-        return;
-    }
+		return;
+	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
 		= ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(

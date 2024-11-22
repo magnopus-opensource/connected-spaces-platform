@@ -202,13 +202,13 @@ bool EventPayloadImpl::GetBool(const char* Key) const
 }
 
 
-Event::Event(const EventId& InId) : Id(InId), Impl(CSP_NEW EventPayloadImpl())
+Event::Event(const EventId& InId) : Id(InId), Impl(new EventPayloadImpl())
 {
 }
 
 Event::~Event()
 {
-	CSP_DELETE(Impl);
+	delete (Impl);
 }
 
 void Event::AddInt(const char* Key, const int Value)

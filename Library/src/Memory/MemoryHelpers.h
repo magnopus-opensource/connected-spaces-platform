@@ -24,7 +24,7 @@ namespace csp::memory
 
 template <class T> void ObjectDeleter(T* Obj)
 {
-	CSP_DELETE(Obj);
+	delete (Obj);
 }
 
 } // namespace csp::memory

@@ -48,13 +48,13 @@ private:
 };
 
 
-CancellationToken::CancellationToken() : ImplPtr(CSP_NEW Impl())
+CancellationToken::CancellationToken() : ImplPtr(new Impl())
 {
 }
 
 CancellationToken::~CancellationToken()
 {
-	CSP_DELETE(ImplPtr);
+	delete (ImplPtr);
 }
 
 void CancellationToken::Cancel()

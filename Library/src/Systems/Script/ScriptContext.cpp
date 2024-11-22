@@ -36,7 +36,7 @@ ScriptContext::~ScriptContext()
 
 void ScriptContext::Initialise()
 {
-	Context = CSP_NEW qjs::Context(*Runtime);
+	Context = new qjs::Context(*Runtime);
 
 	Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
 	{
@@ -70,13 +70,13 @@ void ScriptContext::Shutdown()
 {
 	for (auto Module : Modules)
 	{
-		CSP_DELETE(Module.second);
+		delete (Module.second);
 	}
 
 	Modules.clear();
 	Imports.clear();
 
-	CSP_DELETE(Context);
+	delete (Context);
 }
 
 
@@ -101,7 +101,7 @@ void ScriptContext::AddModule(const csp::common::String& ModuleName)
 
 	if (It == Modules.end())
 	{
-		ScriptModule* TheScriptModule = CSP_NEW ScriptModule();
+		ScriptModule* TheScriptModule = new ScriptModule();
 		TheScriptModule->ModuleName	  = ModuleName;
 		TheScriptModule->Module		  = &Context->addModule(ModuleName.c_str());
 		Modules.insert(ModuleMap::value_type(ModuleName.c_str(), TheScriptModule));

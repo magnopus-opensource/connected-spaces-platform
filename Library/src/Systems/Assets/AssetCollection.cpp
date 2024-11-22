@@ -112,10 +112,10 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 		AssetCollection.IsUnique = Dto.GetHighlander();
 	}
 
-    if (Dto.HasOrganizationId())
+	if (Dto.HasOrganizationId())
 	{
 		AssetCollection.OrganizationId = Dto.GetOrganizationId();
-    }
+	}
 }
 
 } // namespace
@@ -127,7 +127,7 @@ namespace csp::systems
 
 AssetCollection::AssetCollection() : Type(EAssetCollectionType::DEFAULT), IsUnique(false)
 {
-	Metadata = CSP_NEW csp::common::Map<csp::common::String, csp::common::String>();
+	Metadata = new csp::common::Map<csp::common::String, csp::common::String>();
 }
 
 AssetCollection::AssetCollection(const AssetCollection& Other) : AssetCollection()
@@ -137,7 +137,7 @@ AssetCollection::AssetCollection(const AssetCollection& Other) : AssetCollection
 
 AssetCollection::~AssetCollection()
 {
-	CSP_DELETE(Metadata);
+	delete (Metadata);
 }
 
 AssetCollection& AssetCollection::operator=(const AssetCollection& Other)

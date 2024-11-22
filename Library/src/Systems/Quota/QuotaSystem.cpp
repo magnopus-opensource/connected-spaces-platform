@@ -31,16 +31,16 @@ QuotaSystem::QuotaSystem() : SystemBase(), QuotaManagementAPI(nullptr), QuotaTie
 
 QuotaSystem::QuotaSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	QuotaManagementAPI	   = CSP_NEW chs::QuotaManagementApi(InWebClient);
-	QuotaTierAssignmentAPI = CSP_NEW chs::QuotaTierAssignmentApi(InWebClient);
-	QuotaActivityAPI	   = CSP_NEW chs::QuotaActivityApi(InWebClient);
+	QuotaManagementAPI	   = new chs::QuotaManagementApi(InWebClient);
+	QuotaTierAssignmentAPI = new chs::QuotaTierAssignmentApi(InWebClient);
+	QuotaActivityAPI	   = new chs::QuotaActivityApi(InWebClient);
 }
 
 QuotaSystem::~QuotaSystem()
 {
-	CSP_DELETE(QuotaManagementAPI);
-	CSP_DELETE(QuotaTierAssignmentAPI);
-	CSP_DELETE(QuotaActivityAPI);
+	delete (QuotaManagementAPI);
+	delete (QuotaTierAssignmentAPI);
+	delete (QuotaActivityAPI);
 }
 
 void QuotaSystem::GetTotalSpacesOwnedByUser(FeatureLimitCallback Callback)

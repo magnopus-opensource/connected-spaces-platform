@@ -60,7 +60,7 @@ void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
 
 ClientElectionManager::ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem)
 	: SpaceEntitySystemPtr(InSpaceEntitySystem)
-	, EventHandler(CSP_NEW ClientElectionEventHandler(this))
+	, EventHandler(new ClientElectionEventHandler(this))
 	, TheConnectionState(ConnectionState::Disconnected)
 	, TheElectionState(ElectionState::Idle)
 	, LocalClient(nullptr)
@@ -78,12 +78,12 @@ ClientElectionManager::~ClientElectionManager()
 
 	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
 	csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
-	CSP_DELETE(EventHandler);
+	delete (EventHandler);
 
 	for (const auto& Client : Clients)
 	{
 		ClientProxy* Proxy = Client.second;
-		CSP_DELETE(Proxy);
+		delete (Proxy);
 	}
 }
 
@@ -112,7 +112,7 @@ void ClientElectionManager::OnDisconnect()
 	for (const auto& Client : Clients)
 	{
 		ClientProxy* Proxy = Client.second;
-		CSP_DELETE(Proxy);
+		delete (Proxy);
 	}
 
 	UnBindNetworkEvents();
@@ -217,7 +217,7 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 
 	if (Clients.find(ClientId) == Clients.end())
 	{
-		Client = CSP_NEW ClientProxy(ClientId, this);
+		Client = new ClientProxy(ClientId, this);
 		Clients.insert(ClientMap::value_type(ClientId, Client));
 
 		if ((LocalClient != nullptr) && (Leader != nullptr))
@@ -256,7 +256,7 @@ void ClientElectionManager::RemoveClientUsingId(int64_t ClientId)
 			LocalClient = nullptr;
 		}
 
-		CSP_DELETE(Client);
+		delete (Client);
 		Clients.erase(ClientId);
 	}
 	else

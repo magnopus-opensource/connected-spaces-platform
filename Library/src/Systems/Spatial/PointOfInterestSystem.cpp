@@ -15,7 +15,6 @@
  */
 
 #include "CSP/Systems/Spatial/PointOfInterestSystem.h"
-#include "Systems/Spatial/PointOfInterestHelpers.h"
 
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Spaces/Space.h"
@@ -23,6 +22,7 @@
 #include "Services/SpatialDataService/Api.h"
 #include "Services/SpatialDataService/Dto.h"
 #include "Systems/ResultHelpers.h"
+#include "Systems/Spatial/PointOfInterestHelpers.h"
 
 
 namespace chs = csp::services::generated::spatialdataservice;
@@ -40,12 +40,12 @@ PointOfInterestSystem::PointOfInterestSystem() : SystemBase(), POIApiPtr(nullptr
 
 PointOfInterestSystem::PointOfInterestSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
 {
-	POIApiPtr = CSP_NEW chs::PointOfInterestApi(InWebClient);
+	POIApiPtr = new chs::PointOfInterestApi(InWebClient);
 }
 
 PointOfInterestSystem::~PointOfInterestSystem()
 {
-	CSP_DELETE(POIApiPtr);
+	delete (POIApiPtr);
 }
 
 CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String& Title,
@@ -89,7 +89,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
 		POIInfo->SetTags(DTOTags);
 	}
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+	const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
 	POIInfo->SetType(TypeString);
 
 	POIInfo->SetOwner(Owner);
@@ -118,7 +118,7 @@ void PointOfInterestSystem::DeletePOI(const PointOfInterest& POI, NullResultCall
 
 void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& OriginLocation,
 										  const double AreaRadius,
-                                          const csp::common::Optional<EPointOfInterestType>& Type,
+										  const csp::common::Optional<EPointOfInterestType>& Type,
 										  POICollectionResultCallback Callback)
 {
 	csp::services::ResponseHandlerPtr ResponseHandler
@@ -127,8 +127,8 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
 			nullptr,
 			csp::web::EResponseCodes::ResponseOK);
 
-    // If the user has provided a type of POI to search for, prepare the corresponding search term string.
-    // Otherwise, leave the term as null, to search for all POI types.
+	// If the user has provided a type of POI to search for, prepare the corresponding search term string.
+	// Otherwise, leave the term as null, to search for all POI types.
 	std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
 	if (Type.HasValue())
 	{
@@ -180,7 +180,7 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreateSite(const Site& Site, SiteRe
 	uniqueName.Append(Site.SpaceId);
 	POIInfo->SetName(uniqueName);
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
+	const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::DEFAULT);
 	POIInfo->SetType(TypeString);
 
 	POIInfo->SetOwner(Site.SpaceId);
@@ -270,7 +270,7 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 {
 	auto POIInfo = std::make_shared<chs::PointOfInterestDto>();
 
-    const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+	const csp::common::String TypeString = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
 	POIInfo->SetType(TypeString);
 
 	chs::LocalizedString POITitle;
@@ -492,7 +492,7 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
 void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
 {
-    const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
+	const csp::common::String SpacePOIType = PointOfInterestHelpers::TypeToString(EPointOfInterestType::SPACE);
 
 	std::vector<csp::common::String> SpaceIds({SpaceId});
 

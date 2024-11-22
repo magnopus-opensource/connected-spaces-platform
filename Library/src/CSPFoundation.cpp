@@ -250,7 +250,7 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 		RootURI.resize(RootURI.length() - 1);
 	}
 
-	Tenant = CSP_NEW csp::common::String(InTenant);
+	Tenant = new csp::common::String(InTenant);
 
 	const std::string UserServiceURI		= RootURI + "/mag-user";
 	const std::string PrototypeServiceURI	= RootURI + "/mag-prototype";
@@ -260,10 +260,10 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
 
 
-	Endpoints			  = CSP_NEW EndpointURIs();
-	ClientUserAgentInfo	  = CSP_NEW ClientUserAgent();
-	DeviceId			  = CSP_NEW csp::common::String("");
-	ClientUserAgentString = CSP_NEW csp::common::String("");
+	Endpoints			  = new EndpointURIs();
+	ClientUserAgentInfo	  = new ClientUserAgent();
+	DeviceId			  = new csp::common::String("");
+	ClientUserAgentString = new csp::common::String("");
 
 	Endpoints->UserServiceURI		 = CSP_TEXT(UserServiceURI.c_str());
 	Endpoints->PrototypeServiceURI	 = CSP_TEXT(PrototypeServiceURI.c_str());
@@ -305,11 +305,11 @@ bool CSPFoundation::Shutdown()
 	csp::events::EventSystem::Get().UnRegisterAllListeners();
 	csp::systems::SystemsManager::Destroy();
 
-	CSP_DELETE(Tenant);
-	CSP_DELETE(Endpoints);
-	CSP_DELETE(ClientUserAgentInfo);
-	CSP_DELETE(DeviceId);
-	CSP_DELETE(ClientUserAgentString);
+	delete (Tenant);
+	delete (Endpoints);
+	delete (ClientUserAgentInfo);
+	delete (DeviceId);
+	delete (ClientUserAgentString);
 
 	return true;
 }

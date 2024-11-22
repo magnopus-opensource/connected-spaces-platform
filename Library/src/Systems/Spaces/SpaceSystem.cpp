@@ -81,13 +81,13 @@ SpaceSystem::SpaceSystem() : SystemBase(), GroupAPI(nullptr), SpaceAPI(nullptr)
 
 SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient), CurrentSpace()
 {
-	GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
-	SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
+	GroupAPI = new chs::GroupApi(InWebClient);
+	SpaceAPI = new chsaggregation::SpaceApi(InWebClient);
 }
 
 SpaceSystem::~SpaceSystem()
 {
-	CSP_DELETE(GroupAPI);
+	delete (GroupAPI);
 }
 
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)

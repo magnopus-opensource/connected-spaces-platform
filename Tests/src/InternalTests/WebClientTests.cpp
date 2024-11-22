@@ -573,7 +573,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 	HttpPayload Payload;
 	ResponseReceiver Receiver;
 
-	auto* WebClient = CSP_NEW TestWebClient(80, ETransferProtocol::HTTP);
+	auto* WebClient = new TestWebClient(80, ETransferProtocol::HTTP);
 	EXPECT_TRUE(WebClient != nullptr);
 
 	WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
