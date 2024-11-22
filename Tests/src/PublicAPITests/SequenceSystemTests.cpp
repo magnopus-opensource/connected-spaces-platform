@@ -1173,8 +1173,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 
 	auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
 	{
-		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update); // Move to update as rename is not longer use
-		EXPECT_EQ(Params.NewKey, Sequence.Key);
+		EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
+		EXPECT_EQ(Params.Key, std::string(UniqueUpdatedSequenceName).c_str());
 
 		CallbackCalled = true;
 	};
