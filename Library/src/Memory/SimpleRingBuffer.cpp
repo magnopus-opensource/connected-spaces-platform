@@ -24,13 +24,13 @@ namespace csp::memory
 {
 
 SimpleRingBuffer::SimpleRingBuffer(size_t BufferSize)
-	: BufferSize(BufferSize), Buffer(CSP_NEW unsigned char[BufferSize]), ReadPosition(0), WritePosition(0), AvailableDataLength(0)
+	: BufferSize(BufferSize), Buffer(new unsigned char[BufferSize]), ReadPosition(0), WritePosition(0), AvailableDataLength(0)
 {
 }
 
 SimpleRingBuffer::~SimpleRingBuffer()
 {
-	CSP_DELETE_ARRAY(Buffer);
+	delete[] Buffer;
 }
 
 size_t SimpleRingBuffer::Read(void* OutBuffer, size_t Length)

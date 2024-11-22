@@ -204,8 +204,7 @@ inline Allocator* DefaultAllocator()
 
 	#define CSP_FREE(ptr) csp::memory::Deallocate(ptr)
 
-	#define CSP_DELETE(ptr)		  csp::memory::Delete(ptr)
-	#define CSP_DELETE_ARRAY(ptr) csp::memory::DeleteArray(ptr)
+	#define CSP_DELETE(ptr) csp::memory::Delete(ptr)
 
 #endif // #if !CSP_MEMORY_TRACKING_ENABLED
 

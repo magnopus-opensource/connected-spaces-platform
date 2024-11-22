@@ -28,7 +28,7 @@ SimpleBufferPool::SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize) : 
 
 	for (int i = 0; i < InitialPoolSize; ++i)
 	{
-		Buffers[i] = CSP_NEW unsigned char[BufferSize];
+		Buffers[i] = new unsigned char[BufferSize];
 	}
 }
 
@@ -36,7 +36,7 @@ SimpleBufferPool::~SimpleBufferPool()
 {
 	for (auto Buffer : Buffers)
 	{
-		CSP_DELETE_ARRAY(Buffer);
+		delete[] Buffer;
 	}
 
 	Buffers.clear();
@@ -58,7 +58,7 @@ unsigned char* SimpleBufferPool::Rent()
 
 	if (Buffer == nullptr)
 	{
-		return CSP_NEW unsigned char[BufferSize];
+		return new unsigned char[BufferSize];
 	}
 
 	return Buffer;

@@ -35,7 +35,7 @@ class String::Impl
 public:
 	~Impl()
 	{
-		CSP_DELETE_ARRAY(Text);
+		delete[] Text;
 	}
 
 	explicit Impl(char const* const InText) : Text(nullptr), Length(0)
@@ -49,7 +49,7 @@ public:
 
 		const size_t Len = strlen(_InText);
 
-		char* NewText = CSP_NEW char[Len + 1];
+		char* NewText = new char[Len + 1];
 
 		if (Len > 0)
 		{
@@ -72,7 +72,7 @@ public:
 			Len		= 0;
 		}
 
-		char* NewText = CSP_NEW char[Len + 1];
+		char* NewText = new char[Len + 1];
 
 		if (Len > 0)
 		{
@@ -87,7 +87,7 @@ public:
 
 	explicit Impl(size_t Len) : Text(nullptr), Length(0)
 	{
-		char* NewText = CSP_NEW char[Len + 1];
+		char* NewText = new char[Len + 1];
 
 #if DEBUG
 		if (Len > 0)
@@ -114,12 +114,12 @@ public:
 		}
 
 		auto NewLength = Length + OtherLength;
-		auto NewText   = CSP_NEW char[NewLength + 1];
+		auto NewText   = new char[NewLength + 1];
 		memcpy(NewText, Text, Length);
 		memcpy(NewText + Length, Other, OtherLength);
 		NewText[NewLength] = '\0';
 
-		CSP_DELETE_ARRAY(Text);
+		delete[] Text;
 		Text   = NewText;
 		Length = NewLength;
 	}
@@ -420,7 +420,7 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
 		Length += Parts.Size() - 1;
 	}
 
-	auto Buffer = CSP_NEW char[Length + 1]();
+	auto Buffer = new char[Length + 1]();
 	size_t Pos	= 0;
 
 	for (size_t i = 0; i < Parts.Size(); ++i)
@@ -445,7 +445,7 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
 
 	String JoinedString(Buffer);
 
-	CSP_DELETE_ARRAY(Buffer);
+	delete[] Buffer;
 
 	return JoinedString;
 }
@@ -474,7 +474,7 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 		Length += Parts.size() - 1;
 	}
 
-	auto Buffer = CSP_NEW char[Length + 1]();
+	auto Buffer = new char[Length + 1]();
 	size_t Pos	= 0;
 
 	for (size_t i = 0; i < Parts.size(); ++i)
@@ -499,7 +499,7 @@ String String::Join(const std::initializer_list<String>& Parts, Optional<char> S
 
 	String JoinedString(Buffer);
 
-	CSP_DELETE_ARRAY(Buffer);
+	delete[] Buffer;
 
 	return JoinedString;
 }
