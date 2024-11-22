@@ -20,14 +20,15 @@
 namespace csp::memory
 {
 
-void* DllAlloc(size_t Size, size_t Alignment)
+void* DllAlloc(size_t Size)
 {
-	return CSP_ALLOC_ALIGN(Size, (std::align_val_t) Alignment);
+	size_t Alignment = size_t(16);
+	return CSP_ALLOC(Size);
 }
 
-void* DllRealloc(void* Ptr, size_t NewSize, size_t Alignment)
+void* DllRealloc(void* Ptr, size_t NewSize)
 {
-	return CSP_REALLOC_ALIGN(Ptr, NewSize, (std::align_val_t) Alignment);
+	return CSP_REALLOC(Ptr, NewSize);
 }
 
 void DllFree(void* Ptr)

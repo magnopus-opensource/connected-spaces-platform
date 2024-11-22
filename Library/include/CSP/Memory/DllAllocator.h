@@ -29,13 +29,12 @@ namespace csp::memory
 /// @param Size size_t : Size in bytes to allocate
 /// @param Alignment size_t : Alignment of data in memory. Defaults to 16
 /// @return void* : Pointer to the start of the allocated memory
-CSP_API void* DllAlloc(size_t Size, size_t Alignment = size_t(16));
+CSP_API void* DllAlloc(size_t Size);
 
 /// @brief Dll safe re-allocation of memory.
 /// @param Size size_t : Size in bytes to allocate
-/// @param Alignment size_t : Alignment of data in memory. Defaults to 16
 /// @return void* : Pointer to the start of the allocated memory
-CSP_API void* DllRealloc(void* Ptr, size_t NewSize, size_t Alignment = size_t(16));
+CSP_API void* DllRealloc(void* Ptr, size_t NewSize);
 
 /// @brief Dll safe freeing of memory.
 /// @param Ptr void* : Data to free

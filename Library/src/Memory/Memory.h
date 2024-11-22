@@ -194,23 +194,18 @@ inline Allocator* DefaultAllocator()
 
 	#define CSP_DELETE(ptr)				 csp::memory::Delete(ptr, __FILE__, __LINE__)
 	#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator, __FILE__, __LINE__)
-	#define CSP_DELETE_ARRAY(ptr)		 delete[](ptr, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+	#define CSP_DELETE_ARRAY(ptr)		 delete[] (ptr, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
 
 #else
 
-	#define CSP_ALLOC(size)								  csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_ALLOC_ALIGN(size, alignment)			  csp::memory::Allocate(size, alignment, csp::memory::DefaultAllocator())
-	#define CSP_ALLOC_P(allocator, size)				  csp::memory::Allocate(size, std::align_val_t(16), allocator)
-	#define CSP_ALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Allocate(size, alignment, allocator)
+	#define CSP_ALLOC(size)				 csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
+	#define CSP_ALLOC_P(allocator, size) csp::memory::Allocate(size, std::align_val_t(16), allocator)
 
-	#define CSP_REALLOC(ptr, size)							csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_REALLOC_ALIGN(ptr, size, alignment)			csp::memory::Reallocate(ptr, size, alignment, csp::memory::DefaultAllocator())
-	#define CSP_REALLOC_P(allocator, size)					csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator)
-	#define CSP_REALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Reallocate(ptr, size, alignment, allocator)
+	#define CSP_REALLOC(ptr, size)		   csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
+	#define CSP_REALLOC_P(allocator, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator)
 
-	#define CSP_NEW								  new (csp::memory::DefaultAllocator())
-	#define CSP_NEW_P(allocator)				  new (allocator)
-	#define CSP_NEW_ALIGN_P(allocator, alignment) new (alignment, allocator)
+	#define CSP_NEW				 new (csp::memory::DefaultAllocator())
+	#define CSP_NEW_P(allocator) new (allocator)
 
 	#define CSP_FREE(ptr)			   csp::memory::Deallocate(ptr)
 	#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator)
@@ -255,11 +250,5 @@ void operator delete[](void* Ptr, std::align_val_t Alignment, csp::memory::Alloc
 
 // For EASTL
 void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
-void* operator new[](size_t size,
-					 size_t alignment,
-					 size_t alignmentOffset,
-					 const char* pName,
-					 int flags,
-					 unsigned debugFlags,
-					 const char* file,
-					 int line);
+void* operator new[](
+	size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
