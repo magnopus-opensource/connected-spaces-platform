@@ -198,21 +198,16 @@ inline Allocator* DefaultAllocator()
 
 #else
 
-	#define CSP_ALLOC(size)				 csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_ALLOC_P(allocator, size) csp::memory::Allocate(size, std::align_val_t(16), allocator)
+	#define CSP_ALLOC(size) csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
 
-	#define CSP_REALLOC(ptr, size)		   csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_REALLOC_P(allocator, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator)
+	#define CSP_REALLOC(ptr, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
 
-	#define CSP_NEW				 new (csp::memory::DefaultAllocator())
-	#define CSP_NEW_P(allocator) new (allocator)
+	#define CSP_NEW new (csp::memory::DefaultAllocator())
 
-	#define CSP_FREE(ptr)			   csp::memory::Deallocate(ptr)
-	#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator)
+	#define CSP_FREE(ptr) csp::memory::Deallocate(ptr)
 
-	#define CSP_DELETE(ptr)				 csp::memory::Delete(ptr)
-	#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator)
-	#define CSP_DELETE_ARRAY(ptr)		 csp::memory::DeleteArray(ptr)
+	#define CSP_DELETE(ptr)		  csp::memory::Delete(ptr)
+	#define CSP_DELETE_ARRAY(ptr) csp::memory::DeleteArray(ptr)
 
 #endif // #if !CSP_MEMORY_TRACKING_ENABLED
 

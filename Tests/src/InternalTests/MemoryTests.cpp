@@ -44,24 +44,6 @@ CSP_INTERNAL_TEST(CSPEngine, MemoryTests, AllocationTest)
 	CSP_DELETE(Obj);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MemoryTests, NewCustomAllocatorTest)
-{
-	MemoryAllocator MyAllocator;
-
-	struct TestObject
-	{
-		int32_t IntMember;
-	};
-
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
-
-	TestObject* Obj = CSP_NEW_P(&MyAllocator) TestObject();
-	EXPECT_TRUE(Obj != nullptr);
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == sizeof(TestObject));
-
-	CSP_DELETE_P(Obj, &MyAllocator);
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
-}
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, StlCustomAllocatorTest)
 {
