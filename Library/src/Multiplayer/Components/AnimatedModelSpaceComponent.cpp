@@ -151,10 +151,19 @@ void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceComponent::GetMaterialOverrides() const
 {
 	// Convert replicated values map to string values
-	const auto& ReplicatedOverrides = GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+	common::Map<multiplayer::ReplicatedValue, multiplayer::ReplicatedValue> ReplicatedOverrides
+		= GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+
 	csp::common::Map<csp::common::String, csp::common::String> Overrides;
 
-	const auto* Keys = ReplicatedOverrides.Keys();
+	auto Deleter = [](const common::Array<multiplayer::ReplicatedValue>* Ptr)
+	{
+		CSP_DELETE(Ptr);
+	};
+
+	std::unique_ptr<common::Array<multiplayer::ReplicatedValue>, decltype(Deleter)> Keys(
+		const_cast<common::Array<multiplayer::ReplicatedValue>*>(ReplicatedOverrides.Keys()),
+		Deleter);
 
 	for (size_t i = 0; i < Keys->Size(); ++i)
 	{
@@ -162,15 +171,13 @@ csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceCom
 		Overrides[CurrentKey.GetString()] = ReplicatedOverrides[CurrentKey].GetString();
 	}
 
-	CSP_DELETE(Keys);
-
 	return Overrides;
 }
 
-void AnimatedModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId)
+void AnimatedModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
 {
 	auto ReplicatedOverrides	   = GetMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
-	ReplicatedOverrides[ModelPath] = MaterialAssetId;
+	ReplicatedOverrides[ModelPath] = MaterialId;
 
 	SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }

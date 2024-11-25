@@ -144,13 +144,13 @@ public:
 	/// @brief Gets the material overrides of this component.
 	/// Should be in the format:
 	/// Key = Path to the model
-	/// Value = The material asset id
+	/// Value = The material id
 	/// @return The material overrides on this component.
 	csp::common::Map<csp::common::String, csp::common::String> GetMaterialOverrides() const;
 
 	/// @brief Adds a new material override to this component.
 	/// @param The path to the models material to override.
-	/// @param The asset id of the material to override with.
+	/// @param The id of the material to override with.
 	void AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId);
 
 	/// @brief Removes a material override from this component.

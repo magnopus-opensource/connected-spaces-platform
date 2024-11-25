@@ -24,7 +24,7 @@ namespace csp::systems
 {
 
 Material::Material(const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
-	: AssetCollectionId(InAssetCollectionId), AssetId(InAssetId), Name(""), Type(EShaderType::Standard)
+	: CollectionId(InAssetCollectionId), Id(InAssetId), Name(""), Type(EShaderType::Standard)
 {
 }
 
@@ -38,14 +38,14 @@ const csp::common::String& Material::GetName() const
 	return Name;
 }
 
-const csp::common::String& Material::GetAssetCollectionId() const
+const csp::common::String& Material::GetMaterialCollectionId() const
 {
-	return AssetCollectionId;
+	return CollectionId;
 }
 
-const csp::common::String& Material::GetAssetId() const
+const csp::common::String& Material::GetMaterialId() const
 {
-	return AssetId;
+	return Id;
 }
 
 } // namespace csp::systems
