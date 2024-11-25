@@ -67,6 +67,7 @@ Examples for each supported language are below.
 .. toctree::
    :maxdepth: 2
 
+   articles/overview/mcs
    api/library_root
 ```
 
