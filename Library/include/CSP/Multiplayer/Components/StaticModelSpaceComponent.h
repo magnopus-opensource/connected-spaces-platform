@@ -97,7 +97,7 @@ public:
 	void AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialAssetId);
 
 	/// @brief Removes a material override from this component.
-	/// @param The path to the models material to override to be removed.
+	/// @param The path to the models material override to be removed.
 	void RemoveMaterialOverride(const csp::common::String& ModelPath);
 
 	/// \addtogroup ITransformComponent
