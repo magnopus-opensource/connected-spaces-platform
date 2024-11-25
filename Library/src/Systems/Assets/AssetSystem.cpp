@@ -28,23 +28,22 @@
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
 
+#include <future>
 #include <thread>
-
 
 using namespace csp;
 using namespace csp::common;
 
 namespace chs = services::generated::prototypeservice;
 
+namespace
+{
 constexpr int DEFAULT_SKIP_NUMBER		= 0;
 constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
 
-static const char* MATERIAL_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MATERIAL_";
-static const char* MATERIAL_ASSET_NAME_PREFIX			 = "ASSET_MATERIAL_";
-static const char* MATERIAL_FILE_NAME_PREFIX			 = "ASSET_MATERIAL_FILE_";
-
-namespace
-{
+constexpr const char* MATERIAL_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_MATERIAL_";
+constexpr const char* MATERIAL_ASSET_NAME_PREFIX			= "ASSET_MATERIAL_";
+constexpr const char* MATERIAL_FILE_NAME_PREFIX				= "ASSET_MATERIAL_FILE_";
 
 String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCollectionType)
 {
@@ -149,6 +148,22 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 	}
 
 	return PrototypeInfo;
+}
+
+
+csp::common::String CreateUniqueMaterialAssetCollectionName(const csp::common::String& Name, const csp::common::String& SpaceId)
+{
+	return MATERIAL_ASSET_COLLECTION_NAME_PREFIX + SpaceId + "_" + Name;
+}
+
+csp::common::String CreateUniqueMaterialAssetName(const csp::common::String& Name, const csp::common::String& SpaceId)
+{
+	return MATERIAL_ASSET_NAME_PREFIX + SpaceId + "_" + Name;
+}
+
+csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name, const csp::common::String& SpaceId)
+{
+	return MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name + ".json";
 }
 
 } // namespace
@@ -909,9 +924,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 				Callback(FinalResult);
 			};
 
-			const csp::common::String MaterialFileName = MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name + ".json";
-
-			CreatedAsset.FileName = MaterialFileName;
+			CreatedAsset.FileName = CreateUniqueMaterialFileName(Name, SpaceId);
 
 			BufferAssetDataSource AssetData;
 			AssetData.SetMimeType("application/json");
@@ -921,12 +934,12 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 			UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
 		};
 
-		const csp::common::String MaterialAssetName = MATERIAL_ASSET_NAME_PREFIX + SpaceId + "_" + Name;
+		const csp::common::String MaterialAssetName = CreateUniqueMaterialAssetName(Name, SpaceId);
 
 		CreateAsset(CreateAssetCollectionResult.GetAssetCollection(), MaterialAssetName, nullptr, nullptr, EAssetType::MATERIAL, CreateAssetCB);
 	};
 
-	const csp::common::String MaterialCollectionName = MATERIAL_ASSET_COLLECTION_NAME_PREFIX + SpaceId + "_" + Name;
+	const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
 
 	CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollectionCB);
 }
@@ -987,7 +1000,7 @@ void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallbac
 			return;
 		}
 
-		// 2. Deletion asset collection
+		// 2. Delete asset collection
 		auto DeleteAssetCollectionCB = [this, Callback](const NullResult& DeleteAssetCollectionResult)
 		{
 			Callback(DeleteAssetCollectionResult);
@@ -1041,11 +1054,12 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 
 			csp::common::Array<GLTFMaterial> SpaceMaterials(AssetsToDownload);
 			size_t AssetsDownloaded = 0;
-			bool Finished			= false;
+			std::promise<void> CallbackPromise;
+			std::future<void> CallbackFuture = CallbackPromise.get_future();
 
 			// 3. Download asset data for each material asset
 			auto DownloadMaterialCallback
-				= [this, Callback, &AssetsToDownload, &AssetsDownloaded, &SpaceMaterials, &Finished](const AssetDataResult& DownloadResult)
+				= [this, Callback, &AssetsToDownload, &AssetsDownloaded, &SpaceMaterials, &CallbackPromise](const AssetDataResult& DownloadResult)
 			{
 				if (DownloadResult.GetResultCode() != EResultCode::Success)
 				{
@@ -1076,7 +1090,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 					Result.SetGLTFMaterials(SpaceMaterials);
 
 					Callback(Result);
-					Finished = true;
+					CallbackPromise.set_value();
 				}
 			};
 
@@ -1086,10 +1100,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 			}
 
 			// We have to wait so this function doesn't exit and destroy "AssetsDownloaded"
-			while (!Finished)
-			{
-				std::this_thread::sleep_for(std::chrono::milliseconds {10});
-			}
+			CallbackFuture.wait();
 		};
 
 		GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array {EAssetType::MATERIAL}, GetAssetsCB);

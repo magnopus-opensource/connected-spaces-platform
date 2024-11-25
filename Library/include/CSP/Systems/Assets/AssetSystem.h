@@ -258,12 +258,16 @@ public:
 	/// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
 
-	/// @brief Updates an existing materials properties.
+	/// @brief Updates an existing material's properties.
+	/// The material should be retrieved through GetMaterials or GetMaterial.
+	/// If the material doesn't exist, EResultCode::Failed will be returned.
+	/// If the material hasn't changed, EResultCode::Success will still be returned.
 	/// @param Material const GLTFMaterial& : The material to update
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
 
 	/// @brief Deletes a given material.
+	/// The material should be retrieved through GetMaterials or GetMaterial.
 	/// @param Material const GLTFMaterial& : The material to delete
 	/// @param Callback NullResultCallback : Callback when asynchronous task finishes.
 	CSP_ASYNC_RESULT void DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
