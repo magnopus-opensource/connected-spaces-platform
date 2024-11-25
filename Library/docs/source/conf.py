@@ -19,7 +19,7 @@ from recommonmark.transform import AutoStructify
 # -- Project information -----------------------------------------------------
 
 project = 'Connected Spaces Platform'
-copyright = '2023, Magnopus'
+copyright = 'Magnopus'
 author = 'Magnopus'
 
 # The full version, including alpha/beta/rc tags
@@ -76,11 +76,15 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 
+# Default theme to dark mode (togglable on the page back to light mode)
 default_dark_mode = True
 
 html_theme = 'sphinx_rtd_theme'
 
 html_logo = '_static/logo.png'
+
+# Don't show the 'View page source' link at the top
+html_show_sourcelink = False
 
 html_theme_options = {
     'logo_only': True,
