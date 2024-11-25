@@ -1,0 +1,6 @@
+@media (prefers-color-scheme: dark) {
+	/* We override the colorisation of class names so that it looks good in both light and dark modes. */
+	.descclassname, .descname {
+		color: darkorange !important;
+	}
+}

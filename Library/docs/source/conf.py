@@ -83,6 +83,8 @@ html_theme = 'sphinx_rtd_theme'
 
 html_logo = '_static/logo.png'
 
+html_css_files = ["custom.css"]
+
 # Don't show the 'View page source' link at the top
 html_show_sourcelink = False
 
