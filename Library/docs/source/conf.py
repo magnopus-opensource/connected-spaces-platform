@@ -76,8 +76,10 @@ exclude_patterns = []
 #
 html_theme = 'sphinx_rtd_theme'
 
+html_logo = '_static/logo.png'
+
 html_theme_options = {
-    'logo_only': False,
+    'logo_only': True,
     'collapse_navigation': False,
     'navigation_depth': -1
 }
@@ -86,7 +88,6 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
 
 # Sphinx runs this for every module imported, app = instance of Sphinx
 # This enables AutoStructify and recommonmark for markdown and enables embedded rst in md
