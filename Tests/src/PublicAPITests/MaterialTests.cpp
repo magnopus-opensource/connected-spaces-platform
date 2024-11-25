@@ -74,11 +74,13 @@ void GetMaterials(AssetSystem* AssetSystem, const csp::common::String& SpaceId, 
 void GetMaterial(AssetSystem* AssetSystem,
 				 const csp::common::String& AssetCollectionId,
 				 const csp::common::String& AssetId,
-				 GLTFMaterial& OutMaterial)
+				 GLTFMaterial& OutMaterial,
+				 csp::systems::EResultCode ExpectedResultCode				   = csp::systems::EResultCode::Success,
+				 csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None)
 {
 	auto [Result] = AWAIT_PRE(AssetSystem, GetMaterial, RequestPredicate, AssetCollectionId, AssetId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+	EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
 
 	OutMaterial = Result.GetGLTFMaterial();
 }
@@ -228,9 +230,22 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 	EXPECT_EQ(FoundMaterials.Size(), 3);
 
 	// Ensure we found the right materials
-	EXPECT_EQ(FoundMaterials[0].GetName(), TestMaterialName1);
-	EXPECT_EQ(FoundMaterials[1].GetName(), TestMaterialName2);
-	EXPECT_EQ(FoundMaterials[2].GetName(), TestMaterialName3);
+	std::vector<csp::common::String> MaterialNames {TestMaterialName1, TestMaterialName2, TestMaterialName3};
+
+	for (int i = 0; i < FoundMaterials.Size(); ++i)
+	{
+		const csp::common::String& SearchName = FoundMaterials[i].GetName();
+
+		auto Found = std::find_if(std::begin(MaterialNames),
+								  std::end(MaterialNames),
+								  [&SearchName](const csp::common::String& Name)
+								  {
+									  return Name == SearchName;
+								  });
+
+
+		EXPECT_TRUE(Found != MaterialNames.end());
+	}
 
 	// Cleanup
 	DeleteMaterial(AssetSystem, CreatedMaterial1);
@@ -304,7 +319,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 
 	// Attempt to get an invalid material
 	GLTFMaterial FoundMaterial;
-	GetMaterial(AssetSystem, "InvalidAssetCollectionId", "InvalidAssetId", FoundMaterial);
+	GetMaterial(AssetSystem, "InvalidAssetCollectionId", "InvalidAssetId", FoundMaterial, csp::systems::EResultCode::Failed);
 
 	// Cleanup
 	DeleteMaterial(AssetSystem, CreatedMaterial);

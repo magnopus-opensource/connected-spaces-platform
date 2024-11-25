@@ -189,11 +189,12 @@ public:
 	const TextureInfo& GetEmissiveTexture() const;
 
 	/// @brief Constructor which links the material to an asset
+	/// @param Name const csp::common::String& : The name of the material.
 	/// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
 	/// @param AssetId const csp::common::String& : The asset where the material info is stored
-	GLTFMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+	GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 
-	GLTFMaterial() = default;
+	GLTFMaterial();
 
 private:
 	int Version;

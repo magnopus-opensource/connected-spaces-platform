@@ -241,8 +241,8 @@ const TextureInfo& GLTFMaterial::GetEmissiveTexture() const
 	return EmissiveTexture;
 }
 
-GLTFMaterial::GLTFMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-	: Material(AssetCollectionId, AssetId)
+GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
+	: Material(Name, AssetCollectionId, AssetId)
 	, BaseColorFactor(1.f, 1.f, 1.f, 1.f)
 	, MetallicFactor(1.f)
 	, RoughnessFactor(1.f)
@@ -262,6 +262,10 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& AssetCollectionId, const c
 	NormalTexture.SetTexture(false);
 	OcclusionTexture.SetTexture(false);
 	EmissiveTexture.SetTexture(false);
+}
+
+GLTFMaterial::GLTFMaterial() : GLTFMaterial("", "", "")
+{
 }
 
 void GLTFMaterial::SetAlphaMode(EAlphaMode Mode)

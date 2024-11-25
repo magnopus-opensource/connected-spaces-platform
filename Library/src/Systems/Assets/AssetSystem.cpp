@@ -28,6 +28,8 @@
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
 
+#include <thread>
+
 
 using namespace csp;
 using namespace csp::common;
@@ -887,7 +889,9 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 			}
 
 			// 3. Upload default material
-			GLTFMaterial NewMaterial;
+			Asset CreatedAsset = CreateAssetResult.GetAsset();
+
+			GLTFMaterial NewMaterial(Name, CreatedAssetCollection.Id, CreatedAsset.Id);
 			csp::common::String MaterialJson = csp::json::JsonSerializer::Serialize(NewMaterial);
 
 			auto UploadMaterialCallback = [this, Callback, NewMaterial, SpaceId, Name](const UriResult& UploadResult)
@@ -905,9 +909,8 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 				Callback(FinalResult);
 			};
 
-			const csp::common::String MaterialFileName = MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name;
+			const csp::common::String MaterialFileName = MATERIAL_FILE_NAME_PREFIX + SpaceId + "_" + Name + ".json";
 
-			Asset CreatedAsset	  = CreateAssetResult.GetAsset();
 			CreatedAsset.FileName = MaterialFileName;
 
 			BufferAssetDataSource AssetData;
@@ -956,7 +959,7 @@ void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallbac
 				Callback(NullResult(UploadResult.GetResultCode(), UploadResult.GetHttpResultCode()));
 			};
 
-			csp::common::String MaterialJson = csp::json::JsonSerializer::Serialize(Material);
+			csp::common::String MaterialJson = json::JsonSerializer::Serialize(Material);
 			const Asset& CreatedAsset		 = CreateAssetResult.GetAsset();
 
 			BufferAssetDataSource AssetData;
@@ -976,7 +979,7 @@ void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallbac
 void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback)
 {
 	// 1. Delete asset
-	auto DeleteAssetCB = [this, Callback](const NullResult& DeleteAssetResult)
+	auto DeleteAssetCB = [this, Callback, &Material](const NullResult& DeleteAssetResult)
 	{
 		if (DeleteAssetResult.GetResultCode() != EResultCode::Success)
 		{
@@ -989,6 +992,8 @@ void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallbac
 		{
 			Callback(DeleteAssetCollectionResult);
 		};
+
+		DeleteAssetCollectionById(Material.GetAssetCollectionId(), DeleteAssetCollectionCB);
 	};
 
 	DeleteAssetById(Material.GetAssetCollectionId(), Material.GetAssetId(), DeleteAssetCB);
@@ -1036,10 +1041,11 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 
 			csp::common::Array<GLTFMaterial> SpaceMaterials(AssetsToDownload);
 			size_t AssetsDownloaded = 0;
+			bool Finished			= false;
 
 			// 3. Download asset data for each material asset
 			auto DownloadMaterialCallback
-				= [this, Callback, &AssetsToDownload, &AssetsDownloaded, &SpaceMaterials](const AssetDataResult& DownloadResult)
+				= [this, Callback, &AssetsToDownload, &AssetsDownloaded, &SpaceMaterials, &Finished](const AssetDataResult& DownloadResult)
 			{
 				if (DownloadResult.GetResultCode() != EResultCode::Success)
 				{
@@ -1051,7 +1057,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
 				GLTFMaterial FoundMaterial;
-				bool Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
+				bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
 
 				if (Deserialized == false)
 				{
@@ -1068,13 +1074,21 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 					// Finish
 					GLTFMaterialsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
 					Result.SetGLTFMaterials(SpaceMaterials);
+
 					Callback(Result);
+					Finished = true;
 				}
 			};
 
 			for (size_t i = 0; i < Assets.Size(); ++i)
 			{
 				DownloadAssetData(Assets[i], DownloadMaterialCallback);
+			}
+
+			// We have to wait so this function doesn't exit and destroy "AssetsDownloaded"
+			while (!Finished)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds {10});
 			}
 		};
 
