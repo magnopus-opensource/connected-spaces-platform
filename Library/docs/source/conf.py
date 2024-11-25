@@ -36,6 +36,7 @@ extensions = [
     'breathe',
     'exhale',
     'sphinx_rtd_theme',
+    'sphinx_rtd_dark_mode',
     'recommonmark'
 ]
 
@@ -74,6 +75,9 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+
+default_dark_mode = True
+
 html_theme = 'sphinx_rtd_theme'
 
 html_logo = '_static/logo.png'
