@@ -50,7 +50,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::HOLOCAP_AUDIO;
 	else if (DTOAssetDetailType == "Audio")
 		return csp::systems::EAssetType::AUDIO;
-    else if(DTOAssetDetailType == "GaussianSplat")
+	else if (DTOAssetDetailType == "GaussianSplat")
 		return csp::systems::EAssetType::GAUSSIAN_SPLAT;
 	else
 	{
@@ -156,7 +156,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 
 	if (Dto.HasUri())
 	{
-		Asset.Uri = web::Uri::Encode(Dto.GetUri());
+		Asset.Uri = Dto.GetUri();
 	}
 
 	if (Dto.HasChecksum())
