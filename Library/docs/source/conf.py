@@ -37,6 +37,7 @@ extensions = [
     'exhale',
     'sphinx_rtd_theme',
     'sphinx_rtd_dark_mode',
+    'sphinx_markdown_tables',
     'recommonmark'
 ]
 

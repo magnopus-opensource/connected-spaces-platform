@@ -18,37 +18,37 @@ The Connected Spaces Platform (CSP) incorporates a logging system designed to me
 
 1. **System-Level Logging**: CSP allows you to set the verbosity of logging at a system-wide level. This means you can control the amount of detail logged, from critical errors to informational debug messages.
 
-   * **SetSystemLevel**: Adjusts the verbosity level for logging.
+   * `SetSystemLevel`: Adjusts the verbosity level for logging.
 
-   * **GetSystemLevel**: Retrieves the current verbosity level.
+   * `GetSystemLevel`: Retrieves the current verbosity level.
 
-   * **LoggingEnabled**: Checks if logging is enabled for a specified verbosity level.
+   * `LoggingEnabled`: Checks if logging is enabled for a specified verbosity level.
 
 2. **Event Logging**: CSP supports logging specific events, which can be used for monitoring significant occurrences within the system.
 
-   * **LogEvent**: Records an event in the log.
+   * `LogEvent`: Records an event in the log.
 
 3. **Marker Events**: CSP introduces the concept of marker events to indicate the beginning and end of specific processes, providing a clear outline of operations within the logs.
 
-   * **BeginMarker**: Specifies the start of a marker event.
+   * `BeginMarker`: Specifies the start of a marker event.
 
-   * **EndMarker**: Indicates the end of a marker event.
+   * `EndMarker`: Indicates the end of a marker event.
 
 4. **Callback System**: One of the standout features of CSP's logging system is the ability to set callbacks for various types of logs. This allows client applications to react to specific logs or events in real-time.
 
-   * **SetLogCallback**: Sets a callback for handling log messages.
+   * `SetLogCallback`: Sets a callback for handling log messages.
 
-   * **SetEventCallback**: Sets a callback for handling event logs.
+   * `SetEventCallback`: Sets a callback for handling event logs.
 
-   * **SetBeginMarkerCallback**: Sets a callback for handling the start of marker events.
+   * `SetBeginMarkerCallback`: Sets a callback for handling the start of marker events.
 
-   * **SetEndMarkerCallback**: Sets a callback for handling the end of marker events.
+   * `SetEndMarkerCallback`: Sets a callback for handling the end of marker events.
 
-   * **ClearAllCallbacks**: Clears all logging callbacks, providing a way to reset the logging behavior.
+   * `ClearAllCallbacks`: Clears all logging callbacks, providing a way to reset the logging behavior.
 
 5. **Message Logging**: CSP also allows the client application to  provide log  messages at specific verbosity levels, providing detailed information based on the set logging level.
 
-   * **LogMsg**: Logs a message with a specified verbosity level.
+   * `LogMsg`: Logs a message with a specified verbosity level.
 
 ## CSP Log Categories
 

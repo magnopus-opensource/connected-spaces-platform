@@ -1,5 +1,5 @@
 # Magnopus Cloud Services (MCS)
-CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Space Platform. These services act as an independent layer that supports both the CSP and client applications. It is not required to use MCS with the Connected Spaces platform.
+CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Spaces Platform. These services act as an independent layer that supports both the CSP and client applications. It is not required to use MCS with the Connected Spaces platform.
 
 It is however recommended to use MCS with CSP, as MCS helps developers simplify development by providing ready-to-use tools and services, reducing the complexity of building and maintaining applications. Selecting MCS as the backend service provider allows the developer to not worry about the services themselves, and exclusively focus on building their spatial-web application using the CSP API.
 

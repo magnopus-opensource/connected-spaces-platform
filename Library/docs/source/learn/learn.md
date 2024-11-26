@@ -2,7 +2,7 @@
 
 Developing applications across today's fragmented internet is difficult. Most solutions require development across multiple platforms, making them expensive and complicated. An ideal approach should support open standards for seamless work across environments.
 
-The Connected Space Platform (CSP) is an open-source, client-side library designed to make it easy for developers to create interoperable, cross-reality, multi-user applications. The main goal of CSP is to create an interoperability system for the spatial web, where different devices and applications can smoothly work together. Users can interact with any digital content without worrying about what technology or platform they're using. 
+The Connected Spaces Platform (CSP) is an open-source, client-side library designed to make it easy for developers to create interoperable, cross-reality, multi-user applications. The main goal of CSP is to create an interoperability system for the spatial web, where different devices and applications can smoothly work together. Users can interact with any digital content without worrying about what technology or platform they're using. 
 
 Architecturally, CSP functions as a bridge between the client applications and a set of cloud services.
 
@@ -44,7 +44,7 @@ This layer represents client applications which use CSP. These may be in any num
 
 ### CSP Layer
 
-Architecturally, the Connected Space Platform is an interoperability layer. It acts as a translator that allows different software and applications to communicate and share data, ensuring seamless integration and interaction across various systems.
+Architecturally, the Connected Spaces Platform is an interoperability layer. It acts as a translator that allows different software and applications to communicate and share data, ensuring seamless integration and interaction across various systems.
 
 Key components of this layer include:
 
@@ -64,7 +64,7 @@ Key components of this layer include:
 
 ### Cloud Service Layer
 
-The cloud service layer relies on a stable internet connection to provide users with seamless interaction with the Connected Space Platform.
+The cloud service layer relies on a stable internet connection to provide users with seamless interaction with the Connected Spaces Platform.
 
 Key components of the layer include:
 
@@ -98,4 +98,5 @@ You will learn about how CSP functions and whether it makes sense for your use-c
    overview/protocols
    overview/graphql
    overview/logging
+   overview/maintenance_windows
 ```
