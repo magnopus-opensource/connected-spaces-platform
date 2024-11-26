@@ -94,4 +94,5 @@ You will learn about how CSP functions and whether it makes sense for your use-c
    :titlesonly:
 
    overview/mcs
+   overview/tenants
 ```

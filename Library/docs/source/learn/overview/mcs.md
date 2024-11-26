@@ -189,3 +189,146 @@ private:
 * The AssetCollectionResult defines two getters to get the AssetCollection by reference or by const reference.
 
 * The `AssetCollectionResult` includes an `OnResponse` method that is used internally within CSP to transform the DTO (Data Transfer Object)  received from services into a strongly typed CSP object, `AssetCollection`.
+
+## Interaction Between Callbacks and Result Objects
+
+For asynchronous operations, the interaction between callbacks and result objects is essential. 
+
+Here is an example of a workflow:
+
+**1\. Client Code Initiates Request**:
+
+```
+csp::systems::AssetCollectionResultCallback GetAssetCollectionByIdCallback = [Callback, this](const csp::systems::AssetCollectionResult& Result)
+{
+	if (Response == EOKOResponse::Success)
+	{
+		const csp::systems::AssetCollection& RetrievedAssetCollection = Result.GetAssetCollection();
+		// Process the retrieved asset collection...
+	}
+};
+
+AssetSystem->GetAssetCollectionById(MyAssetCollectionId, GetAssetCollectionByIdCallback);
+```
+
+**2\. Request Handling**:
+
+1. The client code defines a callback (`GetAssetCollectionByIdCallback`) as a lambda expression.
+
+2. The client code calls the GetAssetCollectionById method, passing the asset collection ID and the callback as parameters.  
+   
+
+**3\. Services Response**:
+
+1. The services process the request and send a response.
+
+2. The CSP ResponseHandler generates an AssetCollectionResult object from the HTTP response.  
+   
+
+**4\. Callback Execution**:
+
+1. Within CSP, The OnResponse method of AssetCollectionResult parses the DTO into a CSP object.
+
+2. The callback is executed, allowing the client application to use the parsed data via the result object's getters.
+
+## Mapping Magnopus Cloud Services to CSP Systems
+
+Mapping MCS to CSP systems is crucial to understanding how various services and functionalities are used within CSP. This process involves aligning the core components of MCS with the corresponding systems and subsystems in CSP to ensure they work together smoothly and effectively to establish a strong operational connection
+
+The primary systems within CSP include:
+
+**1\. User System**
+
+The User System is responsible for managing user identities and credentials within CSP. It includes functionalities such as:
+
+* **User Authentication and Authorization**: Ensures that only authenticated users can access the platform and have the appropriate permissions for their roles.  
+* **Profile Management**: Allows users to create and update their profiles, including preferences and settings.  
+* **User Sessions**: Manages user sessions to maintain a consistent and secure experience across different devices and applications.
+
+**2\. Asset System**
+
+The Asset System manages the digital assets within CSP. Key features include:
+
+* **Asset Storage**: Securely stores digital assets, including 3D models, textures, audio files, and videos.  
+* **Asset Retrieval**: Provides efficient mechanisms for retrieving assets as needed by different applications and users.  
+* **Version Control**: Maintains different versions of assets to ensure that users can access the most up-to-date or preferred versions as required.
+
+**3\. Space System**
+
+The Space System manages the digital and physical spaces within CSP. It includes:
+
+* **Space Creation and Management**: Facilitates the creation, configuration, and maintenance of virtual spaces.  
+* **Access Control**: Ensures that spaces are accessible only to authorized users.  
+* **Content Management**: Manages the content within these spaces, including layout, visibility, and interaction rules.
+
+**4\. Multiplayer System**
+
+The Multiplayer System supports real-time, synchronous interactions among users. Features include:
+
+* **Session Management**: Manages multi-users sessions, ensuring users can join, interact, and leave sessions seamlessly.  
+* **State Synchronization**: Keeps the state of the virtual environment consistent across all users, enabling a shared experience.  
+* **Interaction Management**: Facilitates various forms of user interactions, such as communication, collaboration, and competition.
+
+**5\. Scripting System**
+
+The Scripting System allows developers to add custom behaviors and interactions within CSP. It provides:
+
+* **Script Execution**: Executes scripts that define how objects and environments behave.  
+* **Event Handling**: Manages events triggered by user actions or system changes, allowing for dynamic and responsive interactions.  
+* **Customization**: Supports customization of interactions and functionalities to meet specific application needs.
+
+**6\. Anchoring System**
+
+The Anchoring System links digital spaces to real-world locations, providing spatial accuracy. It includes:
+
+* **Geospatial Mapping**: Maps virtual objects to physical locations with high precision.  
+* **Spatial Anchoring**: Ensures that digital objects remain in their designated positions relative to the real world, even as users move around.  
+* **Augmented Reality Integration**: Integrates with AR systems to enhance the realism and utility of virtual overlays on physical spaces.
+
+## How do Specific MCS Services Map to CSP Systems
+
+**User Service**
+
+![image info](../../_static/mcs/user_service.png)
+
+The user service is integral to the CSP user system. It handles the creation and storage of user profiles, groups, and space information. Additionally, it provides secure authentication tokens for accessing CSP and premium services such as Agora, Eventbrite, Shopify, and single sign-on. This service ensures a structured framework for managing user identities, securing access, and facilitating efficient group interactions within the CSP environment.
+
+**Ranking Service**
+
+![image info](../../_static/mcs/ranking_service.png)
+
+The Ranking Service plays a crucial role within the CSP User System. It stores user preferences and settings, allowing applications to customize experiences for individual users. This service enables users to rank resources along application-specific dimensions, supporting features like "likes" and "favorites." The persistent nature of this information ensures a familiar yet unique user experience across all platforms.
+
+**Asset Service**
+
+![image info](../../_static/mcs/asset_service.png)
+
+The Asset Service is a key component of the CSP Asset System. It manages the storage and distribution of various digital assets, including metadata, 2D and 3D art, video, and audio files. The service also supports advanced features like Level of Detail (LOD) model generation and object capturing, which optimize content delivery and simplify asset management. By storing assets in the cloud, they become accessible from anywhere, ensuring efficient content management.
+
+**Multiplayer Service**
+
+![image info](../../_static/mcs/multiplayer_service.png)
+
+The Multiplayer Service enhances the CSP Multiplayer System by facilitating real-time networked experiences. It enables users to interact with each other and their environment in real time, using SignalR technology for low-latency, stable connections globally. Supported by services like Redis Backplane and MongoDB, this service ensures seamless interactions, regardless of users' physical locations. Additionally, it provides persistence, ensuring that user interactions extend beyond individual sessions, fostering a dynamic and interconnected community.
+
+**Spatial Data Service**
+
+![image info](../../_static/mcs/spatialdata_service.png)
+
+The Spatial Data Service is essential for the CSP Space and Anchoring Systems. It stores and accesses real-world geographical data, enabling location-based experiences. This service allows spaces, objects, and events to be geolocated and anchored to physical locations, bridging the gap between the digital and physical worlds. The spatial data service empowers users with personalized, interactive, and contextually relevant encounters in their surroundings, enhancing their experiences across various contexts.
+
+**Aggregation Service**
+
+![image info](../../_static/mcs/aggregation_service.png)
+
+The Aggregation Service simplifies data retrieval within the CSP User and Space Systems. Built with GraphQL, it optimizes querying by consolidating multiple API calls into single queries. This service streamlines data retrieval, reduces network overhead, and enhances performance, providing a seamless user experience.
+
+## Summary
+
+This topic explored how Magnopus Cloud Services (MCS) is essential to the  Connected Spaces Platform. It outlined key MCS components like user management, security, social connections, asset management, multiplayer services, geospatial databases, and economic interfaces. These components ensure that CSP-enabled applications can offer scalable, flexible, and reliable services.
+
+This topic also detailed how specific services, such as User Service, Ranking Service, Asset Service, Multiplayer Service, Spatial Data Service, and Aggregation Service, can enhance functionality and user experience in CSP.
+
+Callbacks and result objects are crucial for handling asynchronous operations in MCS. These functionalities enable efficient data retrieval and processing, ensuring smooth interactions in the platform.
+
+Overall, cloud-hosted services play a vital role in providing infrastructure and services to meet the dynamic needs of the CSP ecosystem, driving innovation and improving user experiences.
