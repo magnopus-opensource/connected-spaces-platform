@@ -61,5 +61,6 @@ Examples for each supported language are below.
    :hidden:
 
    learn/learn
+   manual/manual
    api/library_root
 ```
