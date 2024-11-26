@@ -1,7 +1,7 @@
 # Magnopus Cloud Services (MCS)
-CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Spaces Platform. These services act as an independent layer that supports both the CSP and client applications. It is not required to use MCS with the Connected Spaces platform.
+CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Spaces Platform. These services act as an independent layer that supports both the CSP and client applications. It is not required to use MCS with the Connected Spaces Platform.
 
-It is however recommended to use MCS with CSP, as MCS helps developers simplify development by providing ready-to-use tools and services, reducing the complexity of building and maintaining applications. Selecting MCS as the backend service provider allows the developer to not worry about the services themselves, and exclusively focus on building their spatial-web application using the CSP API.
+It is however recommended to use MCS with CSP, as MCS helps developers simplify development by providing ready-to-use tools and services, reducing the complexity of building and maintaining applications. Selecting MCS as the backend service provider allows the developer to _not_ worry about the services themselves, and exclusively focus on building their spatial-web application using the CSP API.
 
 ### Importance of MCS in the CSP Ecosystem
 * **Scalability**: MCS allows CSP-enabled applications to scale their operations seamlessly to accommodate growing users and applications without compromising performance. It adjusts resources dynamically to handle peak periods, keeping services running without interruptions.
@@ -12,7 +12,7 @@ It is however recommended to use MCS with CSP, as MCS helps developers simplify 
 
 * **Increased Developer Experience:** MCS lets developers focus on building and innovating instead of managing infrastructure by providing comprehensive tools, APIs, and services. 
 
-* **User engagement:** MCS provides an interactive environment through various services, including user management, social connections, and multi-users services. These services improve user satisfaction by allowing customized experiences, collaboration, and community-building.  
+* **User engagement:** MCS provides an interactive environment through various services, including user management, social connections, and multi-user services. These services improve user satisfaction by allowing customized experiences, collaboration, and community-building.  
 
 ### What are the Core Components of MCS?
 
@@ -34,7 +34,7 @@ Referential Object Definitions and Instances manage objects and their references
 
 **5\. Persistent Multiplayer Services**
 
-Persistent Multiplayer Services support continuous, scalable and synchronized multi-users experiences. This component ensures that users can interact in real-time within shared virtual spaces, providing a seamless multi-user environment that is always available.
+Persistent Multiplayer Services support continuous, scalable and synchronized multi-user experiences. This component ensures that users can interact in real-time within shared virtual spaces, providing a seamless multi-user environment that is always available.
 
 **6\. Geospatial Databases**
 
@@ -92,7 +92,7 @@ Key Features:
 
 The Multiplayer Service enables real-time interactions between users. This service is crucial for:
 
-* Session Creation: Starting multi-users sessions.  
+* Session Creation: Starting multi-user sessions.  
 * User Connectivity: Connecting users to the same session.  
 * State Synchronization: Ensuring all users see the same state in real time.
 
@@ -163,7 +163,7 @@ void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetC
 
 * Within CSP, the GetAssetCollectionById method, the AssetCollectionId is used to fetch an AssetCollection from the services. 
 
-* The Callback object is then invoked by the ResponseHandler (once it has converted an HttpResponse into a Result Object) to notify the client application and provide them with the result.
+* The Callback object is then invoked by the ResponseHandler (once it has converted an HttpResponse into a Result Object) to notify the client application and provide the result.
 
 ### Result Objects
 
@@ -227,13 +227,13 @@ AssetSystem->GetAssetCollectionById(MyAssetCollectionId, GetAssetCollectionByIdC
 
 **4\. Callback Execution**:
 
-1. Within CSP, The OnResponse method of AssetCollectionResult parses the DTO into a CSP object.
+1. Within CSP, the OnResponse method of AssetCollectionResult parses the DTO into a CSP object.
 
 2. The callback is executed, allowing the client application to use the parsed data via the result object's getters.
 
 ## Mapping Magnopus Cloud Services to CSP Systems
 
-Mapping MCS to CSP systems is crucial to understanding how various services and functionalities are used within CSP. This process involves aligning the core components of MCS with the corresponding systems and subsystems in CSP to ensure they work together smoothly and effectively to establish a strong operational connection
+Mapping MCS to CSP systems is crucial to understand how various services and functionalities are used within CSP. This process involves aligning the core components of MCS with the corresponding systems and subsystems in CSP to ensure they work together smoothly and effectively to establish a strong operational connection
 
 The primary systems within CSP include:
 
@@ -265,7 +265,7 @@ The Space System manages the digital and physical spaces within CSP. It includes
 
 The Multiplayer System supports real-time, synchronous interactions among users. Features include:
 
-* **Session Management**: Manages multi-users sessions, ensuring users can join, interact, and leave sessions seamlessly.  
+* **Session Management**: Manages multi-user sessions, ensuring users can join, interact, and leave sessions seamlessly.  
 * **State Synchronization**: Keeps the state of the virtual environment consistent across all users, enabling a shared experience.  
 * **Interaction Management**: Facilitates various forms of user interactions, such as communication, collaboration, and competition.
 
@@ -285,7 +285,7 @@ The Anchoring System links digital spaces to real-world locations, providing spa
 * **Spatial Anchoring**: Ensures that digital objects remain in their designated positions relative to the real world, even as users move around.  
 * **Augmented Reality Integration**: Integrates with AR systems to enhance the realism and utility of virtual overlays on physical spaces.
 
-## How do Specific MCS Services Map to CSP Systems
+## How Specific MCS Services Map to CSP Systems
 
 **User Service**
 

@@ -54,7 +54,7 @@ Key components of this layer include:
 
 * **Logic Aggregations for Scene Graphs, Object Hierarchies, and Visibility Scopes**: Manages complex data structures and their relationships.
 
-* **Event Routing**: Route events to the appropriate handlers.
+* **Event Routes**: Route events to the appropriate handlers.
 
 * **JavaScript Scripting Engine:** Allows developers to write scripts that can interact with various components of CSP.
 
