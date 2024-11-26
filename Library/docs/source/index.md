@@ -1,14 +1,4 @@
-# 🌎 Connected Spaces Platform
-
-_"An interoperable communication library for the spatial internet."_
-
-⚡️ Current Supported Languages : C++, C#, Web Assembly
-
-🖥️ Current Supported Platforms : Windows, Android, IOS and MacOS
-
-****
-
-## Background
+## Overview
 Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
 
@@ -62,16 +52,15 @@ Examples for each supported language are below.
     - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
 ****
- ## 📖 Api Documentation
+ ## ©️ License
+
+ [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+
 ```eval_rst
 .. toctree::
    :maxdepth: 2
+   :hidden:
 
    articles/overview/mcs
    api/library_root
 ```
-
-****
- ## ©️ License
-
- [Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
