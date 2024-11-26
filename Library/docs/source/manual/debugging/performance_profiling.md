@@ -52,7 +52,7 @@ The following snippet shows how an Unreal client can hook into the CSP profiling
 
 In this case the client is calling [Unreal Insights](https://docs.unrealengine.com/5.1/en-US/unreal-insights-in-unreal-engine/) profiling calls, but could equally be calling macros for other systems such as [Optick](https://github.com/bombomby/optick) or [Microprofile](https://github.com/jonasmr/microprofile).
 
-![image](https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/de3c6049-05a4-4f14-bc87-9c42c0ba5484)
+![image info](../../_static/debugging/insights.png)
 
 ```c++
 void FUnrealModule::RegisterCSPCallbacks()

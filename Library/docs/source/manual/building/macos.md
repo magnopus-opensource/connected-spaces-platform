@@ -31,10 +31,7 @@ First of all you'll need to run the following script:
 
 `xcodebuild BITCODE_GENERATION_MODE=bitcode OTHER_CFLAGS="-fembed-bitcode" -configuration ReleaseDLL -project Library/ConnectedSpacesPlatform.xcodeproj`
 
-### Note
-
-To Build Debug DLLs replace `ReleaseDLL` with `DebugDLL` and likewise with the directory location
-
+_Note: To Build Debug DLLs replace `ReleaseDLL` with `DebugDLL` and likewise with the directory location._
 
 ## Where is the file output?
 

@@ -31,16 +31,13 @@ First of all you'll need to run the following script:
 
 `xcodebuild -configuration ReleaseDLL -project Library/ConnectedSpacesPlatform_ios.xcodeproj`
 
-### Note
-
-To Build Debug DLLs replace `ReleaseDLL` with `DebugDLL` and likewise with the directory location
-
+_Note: To Build Debug DLLs replace `ReleaseDLL` with `DebugDLL` and likewise with the directory location._
 
 ## Where is the file output?
 
 Once Foundation has finished building you will find the DLL has been generated in `connected-spaces-platform\Library\Binaries\ios\ReleaseDLL`.
 
-## How to import to unity
+## How to import to Unity
 
 1. Open your unity project and click Assets in the top menu bar
 

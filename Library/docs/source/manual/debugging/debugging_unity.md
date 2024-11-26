@@ -1,8 +1,6 @@
 # Debugging CSP for Unity
 
-> :warning: _This tutorial is for debugging the native CSP DLL. If you are trying to debug the C# wrapper code, you can do this directly from your Unity project's generated Visual Studio project._
-
-<br>
+_Note: This tutorial is for debugging the native CSP DLL. If you are trying to debug the C# wrapper code, you can do this directly from your Unity project's generated Visual Studio project._
 
 This guide assumes the developer is working on a Windows PC using Visual Studio.
 

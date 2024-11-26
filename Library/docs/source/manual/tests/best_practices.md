@@ -8,5 +8,5 @@ It is accepted that in some cases targeting small easily testable functions can 
 
 This document mostly focuses on C++ code and tests as it is assumed that WrapperGenerator unit tests ensure consistency of the API in the Web/C#. However, in some cases macros are used to control code for different builds and it is important that when this occurs we ensure that functional tests exist targeting all code variants. An example could be the WebClient implementation used in web vs C++.
 
-# Pull requests
+## Pull requests
 When reviewing a pull request it should be clear from tests alone what has been introduced into the code base. If new functionality is added then tests should cover those use cases. If a bug is being fixed a test should be added that reproduces the issue and the new code should ensure that test passes. Sometimes it is not always possible to do this but a PR should not be approved without these in place or a reasonable explanation of why they are missing. 

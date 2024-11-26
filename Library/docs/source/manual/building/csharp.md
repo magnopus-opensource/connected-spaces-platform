@@ -36,10 +36,10 @@ First of all you'll need to run the following script:
 4. Double click `ConnectedSpacesPlatform.sln` to open up the Foundation Project in your chosen ide (For this walk through we will be using Rider).
 >  This will take some time but its loaded it should look like this:
 
-> <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/6f0a48cb-29eb-479c-84b2-dc694915e993" width="50%" height="50%">
+> ![image info](../../_static/building/csharp_sln.png)
 
 5. Select the `ReleaseDLL-CSharp` option in the build configuration settings alongside `x64` click the **Green Hammer** to start the build.
-> <img src="https://github.com/magnopus-opensource/connected-spaces-platform/assets/99482500/22b799ce-1162-4a75-bd9e-475573345c90" width="30%" height="30%">
+> ![image info](../../_static/building/csharp_cfg.png)
 
 ## Where is the file output?
 

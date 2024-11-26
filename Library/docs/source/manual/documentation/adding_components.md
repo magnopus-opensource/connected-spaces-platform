@@ -1,7 +1,7 @@
 # Adding Components to CSP
 A common practice when developing in CSP is adding new Component classes to the library. This page details this process so that all the relevant steps are tackled and the new feature contains all the functionality expected of a new component.
 
-## Add the new Component class
+## Add a new Component class
 The first thing to do will be adding the new class files. The header files are to be added to `Library/include/CSP/Multiplayer/Components/`, while CPP files should go in `Library/src/Multiplayer/Components/`.
 
 Add your component code, using the other components as examples.
