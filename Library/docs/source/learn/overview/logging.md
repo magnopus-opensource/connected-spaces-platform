@@ -257,6 +257,6 @@ Use the LoggingEnabled function, to see if a specific log level is currently bei
 bool isLogging = LogSystem.LoggingEnabled(csp::systems::LogLevel::Info);
 ```
 
-# Summary and Recap
+## Summary
 
 Logging is essential in software development and system management, capturing events, messages, and errors during application execution. It provides insights into system behavior, aiding in debugging, monitoring, auditing, performance analysis, and user behavior analysis.
