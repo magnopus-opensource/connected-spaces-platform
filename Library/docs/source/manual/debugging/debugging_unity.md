@@ -4,7 +4,7 @@ _Note: This tutorial is for debugging the native CSP DLL. If you are trying to d
 
 This guide assumes the developer is working on a Windows PC using Visual Studio.
 
-1. If you haven't already done so already, please follow the [C# Buiild instructions](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CSharp) to generate a locally debuggable version of the library.
+1. If you haven't already done so already, please follow the [C# Build instructions](../building/csharp) to generate a locally debuggable version of the library.
 2. Navigate to your local CSP repository.
 3. Fetch the latest tags.
     - `git fetch --all`

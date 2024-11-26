@@ -16,7 +16,6 @@ NPM packages are available for Web and Unity and can be found on npmjs.
 - Web: [https://www.npmjs.com/package/connected-spaces-platform.web](https://www.npmjs.com/package/connected-spaces-platform.web)
 
 - Unity: [https://www.npmjs.com/package/connected-spaces-platform.unity.core](https://www.npmjs.com/package/connected-spaces-platform.unity.core)
-  - For detailed installation instructions head over [here](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Using-CSP-For-Unity).
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
 
@@ -27,12 +26,12 @@ If you want to build CSP for your own use case follow the instructions below.
 ## 🔨 Build Instructions
 Build instructions for each supported language are below.
 
-- [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
-- [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
-- [Building for C#](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CSharp)
-- [Building for Android](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Android)
-- [Building for MacOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-MacOS)
-- [Building for IOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-IOS)
+- [Building for Web](manual/building/web)
+- [Building for C++](manual/building/cpp)
+- [Building for C#](manual/building/csharp)
+- [Building for Android](manual/building/android)
+- [Building for MacOS](manual/building/macos)
+- [Building for IOS](manual/building/ios)
 
 ****
 

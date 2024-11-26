@@ -6,7 +6,7 @@ The list reads numerically in the suggested order of execution. While some opera
 Language details and CSP API syntax may differ depending on the client.
 
 For details about the sending of data using the Multiplayer System, please see the following page:
-[Multiplayer and State Replication](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Multiplayer-and-State-Replication)
+[Multiplayer and State Replication](multiplayer_state_replication)
 
 ## 1. Initialise CSP
 ```c++
