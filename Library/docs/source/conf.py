@@ -50,7 +50,7 @@ breathe_default_project = "Connected Spaces Platform"
 exhale_args = {
     "containmentFolder":     "./api",
     "rootFileName":          "library_root.rst",
-    "rootFileTitle":         "API Documentation",
+    "rootFileTitle":         "API DOCUMENTATION",
     "doxygenStripFromPath":  "..",
     "createTreeView":        True,
 }

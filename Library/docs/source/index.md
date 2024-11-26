@@ -1,7 +1,6 @@
 ## Overview
 Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
-
 ![image info](./_static/interop.gif)
 
 The Connected Spaces Platform is a library that provides developers across a range of language and platforms with a means to build *interoperable, cross-reality, multi-user applications*.
@@ -61,6 +60,6 @@ Examples for each supported language are below.
    :maxdepth: 2
    :hidden:
 
-   articles/overview/mcs
+   learn/learn
    api/library_root
 ```

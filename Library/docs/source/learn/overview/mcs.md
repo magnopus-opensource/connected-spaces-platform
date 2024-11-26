@@ -130,7 +130,7 @@ Key Features:
 
 ## Callbacks and Result Objects in CSP
 
-CSP relies on a set of cloud-hosted services. To perform asynchronous operations in CSP, like fetching and storing data from servers, there are two key patterns to be aware of: Callbacks and the Result Object. 
+CSP relies on a set of cloud-hosted services. To perform asynchronous operations in CSP, like fetching and storing data from servers, there are two key patterns to be aware of: Callbacks and Result Objects.
 
 ### Callbacks
 
