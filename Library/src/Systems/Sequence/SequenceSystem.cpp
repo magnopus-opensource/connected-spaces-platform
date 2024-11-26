@@ -159,10 +159,10 @@ void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& 
 		const auto SequenceInfo = CreateSequenceDto(Sequence.Key, Sequence.ReferenceType, Sequence.ReferenceId, Sequence.Items, Sequence.MetaData);
 
 		static_cast<chs::SequenceApi*>(SequenceAPI)
-			->apiV1SequencesPut(NewSequenceKey,			   // NewKey
-								SequenceInfo,			   // Dto
-								ResponseHandler,		   // ResponseHandler
-								CancellationToken::Dummy() // CancellationToken
+			->apiV1SequencesPut(csp::common::Encode::URI(NewSequenceKey), // NewKey
+								SequenceInfo,							  // Dto
+								ResponseHandler,						  // ResponseHandler
+								CancellationToken::Dummy()				  // CancellationToken
 			);
 	};
 
