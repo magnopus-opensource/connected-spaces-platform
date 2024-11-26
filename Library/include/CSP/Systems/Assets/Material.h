@@ -33,10 +33,6 @@ enum class EShaderType
 class CSP_API Material
 {
 public:
-	/// @brief Sets the user-defined name of the material
-	/// @param ComponentId const csp::common::String&
-	void SetName(const csp::common::String& Name);
-
 	/// @brief Gets the user-defined name of the material
 	/// @return csp::common::String&
 	const csp::common::String& GetName() const;
@@ -50,9 +46,10 @@ public:
 	const csp::common::String& GetAssetId() const;
 
 	/// @brief Constructor which links the material to an asset
+	/// @param Name const csp::common::String& : The name of the material.
 	/// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
 	/// @param AssetId const csp::common::String& : The asset where the material info is stored
-	Material(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+	Material(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
 	Material() = default;
 
 protected:

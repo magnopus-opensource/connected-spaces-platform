@@ -24,19 +24,20 @@
 using namespace csp::json;
 using namespace csp::systems;
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialConstructorTest)
 {
-	const char* TestAssetCollectionId = "TestAssetCollectionId";
-	const char* TestAssetId			  = "TestAssetId";
+	constexpr const char* TestName				= "TestName";
+	constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
+	constexpr const char* TestAssetId			= "TestAssetId";
 
-	GLTFMaterial Material(TestAssetCollectionId, TestAssetId);
+	GLTFMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
 
 	// Test constructor params
 	EXPECT_EQ(Material.GetAssetCollectionId(), TestAssetCollectionId);
 	EXPECT_EQ(Material.GetAssetId(), TestAssetId);
 
 	// Test defaults
-	EXPECT_EQ(Material.GetName(), "");
+	EXPECT_EQ(Material.GetName(), TestName);
 	EXPECT_EQ(Material.GetBaseColorFactor(), csp::common::Vector4(1.f, 1.f, 1.f, 1.f));
 	EXPECT_EQ(Material.GetMetallicFactor(), 1.f);
 	EXPECT_EQ(Material.GetRoughnessFactor(), 1.f);
@@ -51,12 +52,12 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialConstructorTest)
 	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), false);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialSetterTest)
 {
-	const char* TestAssetCollectionId = "TestAssetCollectionId";
-	const char* TestAssetId			  = "TestAssetId";
+	constexpr const char* TestName				= "TestName";
+	constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
+	constexpr const char* TestAssetId			= "TestAssetId";
 
-	const char* TestName = "TestName";
 	csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
 	float TestMetallicFactor  = 1.f;
 	float TestRoughnessFactor = 2.f;
@@ -64,10 +65,9 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
 	float TestAlphaCutoff = 3.f;
 	bool TestDoubleSided  = true;
 
-	GLTFMaterial Material(TestAssetCollectionId, TestAssetId);
+	GLTFMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
 
 	// Set new values
-	Material.SetName(TestName);
 	Material.SetBaseColorFactor(TestBaseColorFactor);
 	Material.SetMetallicFactor(TestMetallicFactor);
 	Material.SetRoughnessFactor(TestRoughnessFactor);
@@ -85,12 +85,13 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialSetterTest)
 	EXPECT_EQ(Material.GetDoubleSided(), TestDoubleSided);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialJsonSerializationTest)
 {
 	// Material vars
-	const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
-	const char* TestMaterialAssetId			  = "TestAssetId";
-	const char* TestName					  = "TestName";
+	constexpr const char* TestName						= "TestName";
+	constexpr const char* TestMaterialAssetCollectionId = "TestAssetCollectionId";
+	constexpr const char* TestMaterialAssetId			= "TestAssetId";
+
 	csp::common::Vector4 TestBaseColorFactor(0.f, 0.f, 0.f, 0.f);
 	float TestMetallicFactor  = 1.f;
 	float TestRoughnessFactor = 2.f;
@@ -98,10 +99,9 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	float TestAlphaCutoff = 3.f;
 	bool TestDoubleSided  = true;
 
-	GLTFMaterial Material(TestMaterialAssetCollectionId, TestMaterialAssetId);
+	GLTFMaterial Material(TestName, TestMaterialAssetCollectionId, TestMaterialAssetId);
 
 	// Set new values
-	Material.SetName(TestName);
 	Material.SetBaseColorFactor(TestBaseColorFactor);
 	Material.SetMetallicFactor(TestMetallicFactor);
 	Material.SetRoughnessFactor(TestRoughnessFactor);
@@ -185,7 +185,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 
 	csp::common::String JsonData = JsonSerializer::Serialize(Material);
 
-	GLTFMaterial DeserializedMaterial("", "");
+	GLTFMaterial DeserializedMaterial;
 	JsonDeserializer::Deserialize(JsonData, DeserializedMaterial);
 
 	EXPECT_EQ(DeserializedMaterial.GetName(), TestName);
@@ -234,14 +234,14 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, MaterialJsonSerializationTest)
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetUVScale(), TestEmissiveTextureUVScale);
 	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().GetTexCoord(), TestEmissiveTextureTexCoord);
 
-	EXPECT_EQ(Material.GetBaseColorTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetMetallicRoughnessTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetNormalTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetOcclusionTexture().IsSet(), true);
-	EXPECT_EQ(Material.GetEmissiveTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetBaseColorTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetMetallicRoughnessTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetNormalTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetOcclusionTexture().IsSet(), true);
+	EXPECT_EQ(DeserializedMaterial.GetEmissiveTexture().IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoDefaultConstructorTest)
 {
 	TextureInfo Texture;
 
@@ -256,10 +256,10 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoDefaultConstructorTest)
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoAssetIdConstructorTest)
 {
-	const char* TestAssetCollectionId = "TestAssetCollectionId";
-	const char* TestAssetId			  = "TestAssetId";
+	constexpr const char* TestAssetCollectionId = "TestAssetCollectionId";
+	constexpr const char* TestAssetId			= "TestAssetId";
 
 	TextureInfo Texture(TestAssetCollectionId, TestAssetId);
 
@@ -274,9 +274,9 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoAssetIdConstructorTest)
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureInfoComponentIdConstructorTest)
 {
-	const char* TestComponentId = "TestComponentId";
+	constexpr const char* TestComponentId = "TestComponentId";
 
 	TextureInfo Texture(TestComponentId);
 
@@ -291,7 +291,7 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureInfoComponentIdConstructorTes
 	EXPECT_EQ(Texture.IsSet(), true);
 }
 
-CSP_INTERNAL_TEST(CSPEngine, MaterialTests, TextureSetterTest)
+CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, TextureSetterTest)
 {
 	const char* TestAssetCollectionId = "TestAssetCollectionId";
 	const char* TestAssetId			  = "TestAssetId";

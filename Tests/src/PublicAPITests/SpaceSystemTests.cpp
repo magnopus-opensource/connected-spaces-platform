@@ -98,6 +98,18 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem,
 	OutSpace = Result.GetSpace();
 }
 
+void CreateDefaultTestSpace(SpaceSystem* SpaceSystem, Space& OutSpace)
+{
+	// Create space
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, OutSpace);
+}
+
 void GetSpace(::SpaceSystem* SpaceSystem, const String& SpaceId, Space& OutSpace)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpace, RequestPredicate, SpaceId);
