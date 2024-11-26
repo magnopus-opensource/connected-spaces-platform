@@ -1,6 +1,11 @@
 @media (prefers-color-scheme: dark) {
-	/* We override the colorisation of class names so that it looks good in both light and dark modes. */
+	/* We override the colorization of class names so that it looks good in both light and dark modes. */
 	.descclassname, .descname {
 		color: darkorange !important;
+	}
+	
+	/* We disable search result background highlighting as we feel it is visually distracting to the reader. */
+	.rst-content .highlighted {
+		background: transparent;
 	}
 }
