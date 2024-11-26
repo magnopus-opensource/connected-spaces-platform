@@ -926,9 +926,12 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 
 			CreatedAsset.FileName = CreateUniqueMaterialFileName(Name, SpaceId);
 
+			// Create a new string to prevent const casting
+			std::string Buffer(MaterialJson.c_str());
+
 			BufferAssetDataSource AssetData;
 			AssetData.SetMimeType("application/json");
-			AssetData.Buffer	   = const_cast<char*>(MaterialJson.c_str());
+			AssetData.Buffer	   = Buffer.data();
 			AssetData.BufferLength = MaterialJson.Length();
 
 			UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
@@ -975,9 +978,12 @@ void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallbac
 			csp::common::String MaterialJson = json::JsonSerializer::Serialize(Material);
 			const Asset& CreatedAsset		 = CreateAssetResult.GetAsset();
 
+			// Create a new string to prevent const casting
+			std::string Buffer(MaterialJson.c_str());
+
 			BufferAssetDataSource AssetData;
 			AssetData.SetMimeType("application/json");
-			AssetData.Buffer	   = const_cast<char*>(MaterialJson.c_str());
+			AssetData.Buffer	   = Buffer.data();
 			AssetData.BufferLength = MaterialJson.Length();
 
 			UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
