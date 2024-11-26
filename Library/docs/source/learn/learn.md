@@ -82,7 +82,7 @@ Key components of the layer include:
 
 * **Economic Engine Interfaces:** Integrates economic models and transactions.
 
-## Topics
+## Overview
 
 This series will introduce you to CSP and give you an overview of its features. 
 
@@ -95,4 +95,7 @@ You will learn about how CSP functions and whether it makes sense for your use-c
 
    overview/mcs
    overview/tenants
+   overview/protocols
+   overview/graphql
+   overview/logging
 ```
