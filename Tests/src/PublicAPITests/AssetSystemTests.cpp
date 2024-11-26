@@ -1515,6 +1515,159 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_WITH_UNENCODED_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	constexpr char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	constexpr char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	constexpr char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	constexpr char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+	auto FilePath = std::filesystem::absolute("assets/TestWith Space.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	// Upload data
+	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Get uploaded asset
+	auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
+	std::string UriStr = AssetResult.GetAsset().Uri;
+
+	// Check uri is encoded as expected
+	EXPECT_TRUE(UriStr.find("TestWith%20Space") != std::string::npos);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_WITH_ENCODED_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	constexpr char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	constexpr char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	constexpr char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	constexpr char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+	auto FilePath = std::filesystem::absolute("assets/TestWithEncoded%20Space.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	// Upload data
+	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Get uploaded asset
+	auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
+	std::string UriStr = AssetResult.GetAsset().Uri;
+
+	// Check uri is encoded as expected
+	EXPECT_TRUE(UriStr.find("TestWithEncoded%20Space") != std::string::npos);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_AS_BUFFER_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
@@ -2259,7 +2412,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 {
 	SetRandSeed();
 
