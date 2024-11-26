@@ -813,14 +813,14 @@ void UserSystem::RegisterSystemCallback()
 		return;
 	}
 
-	EventBusPtr->ListenEvent("AccessControlChanged", this);
+	EventBusPtr->ListenNetworkEvent("AccessControlChanged", this);
 }
 
 void UserSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("AccessControlChanged");
+		EventBusPtr->StopListenNetworkEvent("AccessControlChanged");
 	}
 }
 

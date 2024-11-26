@@ -112,7 +112,6 @@ ErrorCode ParseError(std::exception_ptr Exception)
 
 
 constexpr const uint64_t ALL_ENTITIES_ID	 = -1;
-constexpr const uint64_t ALL_CLIENTS_ID		 = -1;
 constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 
@@ -315,21 +314,6 @@ void MultiplayerConnection::Stop(const ExceptionCallbackHandler Callback) const
 	}
 
 	Connection->Stop(Callback);
-}
-
-void MultiplayerConnection::SendNetworkEvent(const csp::common::String& EventName,
-											 const csp::common::Array<ReplicatedValue>& Args,
-											 ErrorCodeCallbackHandler Callback)
-{
-	SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID, Callback);
-}
-
-void MultiplayerConnection::SendNetworkEventToClient(const csp::common::String& EventName,
-													 const csp::common::Array<ReplicatedValue>& Args,
-													 uint64_t TargetClientId,
-													 ErrorCodeCallbackHandler Callback)
-{
-	NetworkEventManager->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
 }
 
 void MultiplayerConnection::SetDisconnectionCallback(DisconnectionCallbackHandler Callback)

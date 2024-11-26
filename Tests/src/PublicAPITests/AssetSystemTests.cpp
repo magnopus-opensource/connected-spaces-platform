@@ -2362,13 +2362,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	ReplicatedValue Param4 = "";
 	ReplicatedValue Param5 = "";
 
-	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
-										 {Param1, Param2, Param3, Param4, Param5},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 EXPECT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("AssetDetailBlobChanged",
+									   {Param1, Param2, Param3, Param4, Param5},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   EXPECT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
 	WaitForCallback(AssetDetailBlobChangedCallbackCalled);

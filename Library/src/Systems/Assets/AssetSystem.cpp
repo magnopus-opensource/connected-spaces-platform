@@ -865,14 +865,14 @@ void AssetSystem::RegisterSystemCallback()
 		return;
 	}
 
-	EventBusPtr->ListenEvent("AssetDetailBlobChanged", this);
+	EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
 }
 
 void AssetSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("AssetDetailBlobChanged");
+		EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
 	}
 }
 

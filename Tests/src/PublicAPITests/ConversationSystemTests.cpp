@@ -839,13 +839,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-	Connection->SendNetworkEventToClient("ConversationSystem",
-										 {ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
 	auto Start		 = std::chrono::steady_clock::now();
@@ -998,13 +998,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-	Connection->SendNetworkEventToClient("ConversationSystem",
-										 {ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
 	auto Start		 = std::chrono::steady_clock::now();
@@ -1160,13 +1160,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-	Connection->SendNetworkEventToClient("ConversationSystem",
-										 {ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
 	auto Start		 = std::chrono::steady_clock::now();
@@ -1347,13 +1347,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-	Connection->SendNetworkEventToClient("ConversationSystem",
-										 {ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
+									   });
 
 	{
 		auto [Result] = AWAIT(ConvSystem, DeleteConversation, ConversationId);
@@ -1509,13 +1509,13 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	}
 
 	// Generate Networkevent as SendNetworkEvent doesnt fire sender callback
-	Connection->SendNetworkEventToClient("ConversationSystem",
-										 {ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
+									   });
 
 	{
 		auto [Result] = AWAIT(ConvSystem, DeleteConversation, ConversationId);

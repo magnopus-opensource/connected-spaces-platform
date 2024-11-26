@@ -121,7 +121,7 @@ public:
 
 		if (EventBusPtr)
 		{
-			EventBusPtr->ListenEvent("TestEvent", this);
+			EventBusPtr->ListenNetworkEvent("TestEvent", this);
 		}
 	}
 
@@ -129,7 +129,7 @@ public:
 	{
 		if (EventBusPtr)
 		{
-			EventBusPtr->StopListenEvent("TestEvent");
+			EventBusPtr->StopListenNetworkEvent("TestEvent");
 		}
 	}
 
@@ -208,45 +208,45 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 		{
 		});
 
-	EventBus->ListenEvent("TestEvent",
-						  [](bool ok, csp::common::Array<ReplicatedValue> Data)
-						  {
-							  EXPECT_TRUE(ok);
+	EventBus->ListenNetworkEvent("TestEvent",
+								 [](bool ok, csp::common::Array<ReplicatedValue> Data)
+								 {
+									 EXPECT_TRUE(ok);
 
-							  std::cerr << "Test Event Received " << ok << std::endl;
-						  });
+									 std::cerr << "Test Event Received " << ok << std::endl;
+								 });
 
-	EventBus->ListenEvent("TestEvent",
-						  [](bool ok, csp::common::Array<ReplicatedValue> Data)
-						  {
-							  EXPECT_TRUE(ok);
+	EventBus->ListenNetworkEvent("TestEvent",
+								 [](bool ok, csp::common::Array<ReplicatedValue> Data)
+								 {
+									 EXPECT_TRUE(ok);
 
-							  EventReceived = true;
+									 EventReceived = true;
 
-							  if (EventSent)
-							  {
-								  IsTestComplete = true;
-							  }
+									 if (EventSent)
+									 {
+										 IsTestComplete = true;
+									 }
 
-							  std::cerr << "Second Test Event Received " << ok << std::endl;
-						  });
+									 std::cerr << "Second Test Event Received " << ok << std::endl;
+								 });
 
-	Connection->SendNetworkEventToClient("TestEvent",
-										 {},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
+	EventBus->SendNetworkEventToClient("TestEvent",
+									   {},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
 
-											 EventSent = true;
+										   EventSent = true;
 
-											 if (EventReceived)
-											 {
-												 IsTestComplete = true;
-											 }
+										   if (EventReceived)
+										   {
+											   IsTestComplete = true;
+										   }
 
-											 std::cerr << "Test Event Sent " << (Error == ErrorCode::None ? "true" : "false") << std::endl;
-										 });
+										   std::cerr << "Test Event Sent " << (Error == ErrorCode::None ? "true" : "false") << std::endl;
+									   });
 
 	while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 	{
@@ -316,56 +316,56 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 		{
 		});
 
-	EventBus->ListenEvent("MultiTypeEvent",
-						  [](bool ok, csp::common::Array<ReplicatedValue> Data)
-						  {
-							  EXPECT_TRUE(ok);
+	EventBus->ListenNetworkEvent("MultiTypeEvent",
+								 [](bool ok, csp::common::Array<ReplicatedValue> Data)
+								 {
+									 EXPECT_TRUE(ok);
 
-							  std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
+									 std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
 
-							  for (int i = 0; i < Data.Size(); ++i)
-							  {
-								  if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
-								  {
-									  printf("%s\n", Data[i].GetBool() ? "true" : "false");
-								  }
-								  else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Integer)
-								  {
-									  printf("%lli\n", Data[i].GetInt());
-								  }
-								  else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Float)
-								  {
-									  printf("%f\n", Data[i].GetFloat());
-								  }
-							  }
+									 for (int i = 0; i < Data.Size(); ++i)
+									 {
+										 if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
+										 {
+											 printf("%s\n", Data[i].GetBool() ? "true" : "false");
+										 }
+										 else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Integer)
+										 {
+											 printf("%lli\n", Data[i].GetInt());
+										 }
+										 else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Float)
+										 {
+											 printf("%f\n", Data[i].GetFloat());
+										 }
+									 }
 
-							  EventReceived = true;
+									 EventReceived = true;
 
-							  if (EventSent)
-							  {
-								  IsTestComplete = true;
-							  }
-						  });
+									 if (EventSent)
+									 {
+										 IsTestComplete = true;
+									 }
+								 });
 
 	ReplicatedValue EventInt((int64_t) -1);
 	ReplicatedValue EventFloat(1234.567890f);
 
-	Connection->SendNetworkEventToClient("MultiTypeEvent",
-										 {EventInt, EventFloat},
-										 Connection->GetClientId(),
-										 [EventInt, EventFloat](ErrorCode Error)
-										 {
-											 ASSERT_EQ(Error, ErrorCode::None);
+	EventBus->SendNetworkEventToClient("MultiTypeEvent",
+									   {EventInt, EventFloat},
+									   Connection->GetClientId(),
+									   [EventInt, EventFloat](ErrorCode Error)
+									   {
+										   ASSERT_EQ(Error, ErrorCode::None);
 
-											 EventSent = true;
+										   EventSent = true;
 
-											 if (EventReceived)
-											 {
-												 IsTestComplete = true;
-											 }
+										   if (EventReceived)
+										   {
+											   IsTestComplete = true;
+										   }
 
-											 printf("%lli, %f, \n", EventInt.GetInt(), EventFloat.GetFloat());
-										 });
+										   printf("%lli, %f, \n", EventInt.GetInt(), EventFloat.GetFloat());
+									   });
 
 	while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
 	{
@@ -487,7 +487,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 
 	// Test that registering a system works
 	TestSystem1->SetSystemCallback(TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
 	EXPECT_EQ(TestCallbackId, 1111);
@@ -496,7 +496,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	// Test that registering a system when there already is a registered system does not work
 	TestMsg = "Error: there is already a system registered for TestEvent.\n";
 	TestSystem2->SetSystemCallback(TestCallback2);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
 	EXPECT_EQ(TestCallbackId, 1111);
@@ -508,9 +508,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Deregister the system and test that registering a new one now works
-	EventBus->StopListenEvent("TestEvent");
+	EventBus->StopListenNetworkEvent("TestEvent");
 	TestSystem2->SetSystemCallback(TestCallback2);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback2Called);
 	EXPECT_TRUE(TestCallback2Called);
 	EXPECT_EQ(TestCallbackId, 2222);
@@ -519,8 +519,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	// Test that registering a callback when there already is a registered system does not work
 	TestMsg				= "Error: there is already a system registered for TestEvent.\n";
 	TestCallback1Called = false; // clean up
-	EventBus->ListenEvent("TestEvent", TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback2Called);
 	EXPECT_TRUE(TestCallback2Called);
 	EXPECT_EQ(TestCallbackId, 2222);
@@ -532,9 +532,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Test that registering a callback for a new event works
-	EventBus->StopListenEvent("TestEvent");
-	EventBus->ListenEvent("TestEvent", TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopListenNetworkEvent("TestEvent");
+	EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
 	EXPECT_EQ(TestCallbackId, 1111);
@@ -543,7 +543,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	// Test that registering a system when there already is a registered callback does not work
 	TestMsg = "Error: there is already a callback registered for TestEvent.\n";
 	TestSystem1->SetSystemCallback(TestCallback2);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
 	EXPECT_EQ(TestCallbackId, 1111);
@@ -555,20 +555,20 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Test that deregistering a system that is registered works
-	EventBus->StopListenEvent("TestEvent"); // clean up
-	EventBus->ListenEvent("TestEvent", TestSystem1);
-	EventBus->StopListenEvent("TestEvent");
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopListenNetworkEvent("TestEvent"); // clean up
+	EventBus->ListenNetworkEvent("TestEvent", TestSystem1);
+	EventBus->StopListenNetworkEvent("TestEvent");
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	TestCallback1Called = false;
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 
 	// Test that registering a callback when there already is a registered callback does not work
-	EventBus->StopListenEvent("TestEvent"); // clean up
+	EventBus->StopListenNetworkEvent("TestEvent"); // clean up
 	TestMsg = "Error: there is already a callback registered for TestEvent.\n";
-	EventBus->ListenEvent("TestEvent", TestCallback1);
-	EventBus->ListenEvent("TestEvent", TestCallback2);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
+	EventBus->ListenNetworkEvent("TestEvent", TestCallback2);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
 	WaitForCallback(TestCallback1Called);
 	EXPECT_TRUE(TestCallback1Called);
 	EXPECT_EQ(TestCallbackId, 1111);
@@ -580,22 +580,22 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 	LogConfirmed = false;
 
 	// Test that deregistering an event that is not registered does nothing
-	EventBus->StopListenEvent("NonExistingEvent");
+	EventBus->StopListenNetworkEvent("NonExistingEvent");
 	WaitForCallback(TestCallback2Called);
 	EXPECT_FALSE(TestCallback2Called);
 
 	// Test that deregistering a callback that is registered works
-	EventBus->StopListenEvent("TestEvent"); // clean up
-	EventBus->ListenEvent("TestEvent", TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	EventBus->StopListenEvent("TestEvent");
+	EventBus->StopListenNetworkEvent("TestEvent"); // clean up
+	EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopListenNetworkEvent("TestEvent");
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 
 	// Test that deregistering a system that is registered works
 	TestSystem1->SetSystemCallback(TestCallback1);
-	Connection->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
-	EventBus->StopListenEvent("TestEvent");
+	EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
+	EventBus->StopListenNetworkEvent("TestEvent");
 	WaitForCallback(TestCallback1Called);
 	EXPECT_FALSE(TestCallback1Called);
 

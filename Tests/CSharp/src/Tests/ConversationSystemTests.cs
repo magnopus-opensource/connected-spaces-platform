@@ -55,6 +55,7 @@ namespace CSPEngine
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
+            var eventBus = systemsManager.GetEventBus();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
@@ -695,7 +696,7 @@ namespace CSPEngine
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.NewMessage);
                 array[1] = new Multiplayer.ReplicatedValue(conversationId);
-                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+                eventBus.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -832,7 +833,7 @@ namespace CSPEngine
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.DeleteMessage);
                 array[1] = new Multiplayer.ReplicatedValue(messageId);
-                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+                eventBus.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -977,7 +978,7 @@ namespace CSPEngine
                 var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
                 array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.DeleteConversation));
                 array[1] = new Multiplayer.ReplicatedValue(conversationId);
-                connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+                eventBus.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
             }
 
             // Wait for message
@@ -1154,7 +1155,7 @@ namespace CSPEngine
             var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
             array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.ConversationInformation));
             array[1] = new Multiplayer.ReplicatedValue(conversationId);
-            connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+            eventBus.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
 
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;
@@ -1293,7 +1294,7 @@ namespace CSPEngine
             var array = new Common.Array<Multiplayer.ReplicatedValue>(2);
             array[0] = new Multiplayer.ReplicatedValue(new Multiplayer.ReplicatedValue((int)Multiplayer.ConversationMessageType.MessageInformation));
             array[1] = new Multiplayer.ReplicatedValue(messageId);
-            connection.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
+            eventBus.SendNetworkEventToClient("ConversationSystem", array, connection.GetClientId());
 
             {
                 using var result = conversationSystem.DeleteConversation(conversationId).Result;

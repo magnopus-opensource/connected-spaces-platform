@@ -161,7 +161,6 @@ private:
 
 	void DeleteMessages(const csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 
-	MultiplayerConnection* MultiPlayerConnection;
 	SignalRConnection* Connection;
 
 	ConversationSystemCallbackHandler ConversationSystemCallback;

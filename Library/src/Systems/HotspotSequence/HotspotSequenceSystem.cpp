@@ -346,14 +346,14 @@ void HotspotSequenceSystem::RegisterSystemCallback()
 		return;
 	}
 
-	EventBusPtr->ListenEvent("SequenceChanged", this);
+	EventBusPtr->ListenNetworkEvent("SequenceChanged", this);
 }
 
 void HotspotSequenceSystem::DeregisterSystemCallback()
 {
 	if (EventBusPtr)
 	{
-		EventBusPtr->StopListenEvent("SequenceChanged");
+		EventBusPtr->StopListenNetworkEvent("SequenceChanged");
 	}
 }
 

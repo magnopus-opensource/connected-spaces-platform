@@ -491,17 +491,17 @@ void ClientElectionManager::BindNetworkEvents()
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	EventBus* EventBus	 = SystemsManager.GetEventBus();
 
-	EventBus->ListenEvent(ClientElectionMessage,
-						  [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
-						  {
-							  this->OnClientElectionEvent(Data);
-						  });
+	EventBus->ListenNetworkEvent(ClientElectionMessage,
+								 [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
+								 {
+									 this->OnClientElectionEvent(Data);
+								 });
 
-	EventBus->ListenEvent(RemoteRunScriptMessage,
-						  [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
-						  {
-							  this->OnRemoteRunScriptEvent(Data);
-						  });
+	EventBus->ListenNetworkEvent(RemoteRunScriptMessage,
+								 [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
+								 {
+									 this->OnRemoteRunScriptEvent(Data);
+								 });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
@@ -509,8 +509,8 @@ void ClientElectionManager::UnBindNetworkEvents()
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	EventBus* EventBus	 = SystemsManager.GetEventBus();
 
-	EventBus->StopListenEvent(ClientElectionMessage);
-	EventBus->StopListenEvent(RemoteRunScriptMessage);
+	EventBus->StopListenNetworkEvent(ClientElectionMessage);
+	EventBus->StopListenNetworkEvent(RemoteRunScriptMessage);
 }
 
 void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data)

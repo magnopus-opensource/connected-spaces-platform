@@ -112,23 +112,6 @@ public:
 	// The callback for network interruption, contains a string showing failure.
 	typedef std::function<void(const csp::common::String&)> NetworkInterruptionCallbackHandler;
 
-	/// @brief Sends a network event by EventName to all currently connected clients.
-	/// @param EventName csp::common::String : The identifying name for the event.
-	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void
-		SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
-
-	/// @brief Sends a network event by EventName, to TargetClientId.
-	/// @param EventName csp::common::String : The identifying name for the event.
-	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
-	/// @param TargetClientId uint64_t : The client ID to send the event to.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName,
-												   const csp::common::Array<ReplicatedValue>& Args,
-												   uint64_t TargetClientId,
-												   ErrorCodeCallbackHandler Callback);
-
 	/// @brief Sets a callback for a disconnection event.
 	/// @param Callback DisconnectionCallbackHandler : The callback for disconnection, contains a string with a reason for disconnection.
 	CSP_EVENT void SetDisconnectionCallback(DisconnectionCallbackHandler Callback);

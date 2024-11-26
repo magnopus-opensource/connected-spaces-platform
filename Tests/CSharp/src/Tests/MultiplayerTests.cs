@@ -2387,7 +2387,7 @@ namespace CSPEngine
             }
 
             // Listen for event
-            bus.ListenEvent("TestEvent", ListenDelegate);
+            bus.ListenNetworkEvent("TestEvent", ListenDelegate);
 
             // Send Network event to self
             using var TestString = new Multiplayer.ReplicatedValue("TestString");
@@ -2397,7 +2397,7 @@ namespace CSPEngine
             Params[0] = TestString;
             Params[1] = TestFloat;
 
-            connection.SendNetworkEventToClient("TestEvent", Params, connection.GetClientId());
+            bus.SendNetworkEventToClient("TestEvent", Params, connection.GetClientId());
 
             while (!gotEvent)
                 Thread.Sleep(10);
