@@ -100,7 +100,7 @@ html_theme_options = {
 html_context = {
     'display_github': True,
     'github_user': 'magnopus-opensource',
-    'github_repo': 'bconnected-spaces-platform',
+    'github_repo': 'connected-spaces-platform',
     'github_version': 'develop/Library/docs/source/',
 }
 
