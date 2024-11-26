@@ -89,42 +89,43 @@ Space Querying is done using the SpaceSystem singleton.
 The code snippet below, shows how to retrieve the singleton instance for SpaceSystem.
 ```
 #include "CSP/Systems/SystemsManager.h"
-#include “CSP/Systems/Spaces/SpaceSystem.h
+#include "CSP/Systems/Spaces/SpaceSystem.h
 
 
 csp::systems::SystemsManager& systemManager = csp::systems::SystemsManager::Get();
 csp::systems::SpaceSystem* spaceSystem = SystemsManager.GetSpaceSystem();
 ```
 
-You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled “Authenticating”.
+You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled "Authenticating".
 
 ### Retrieving all spaces associated with the currently logged in user
 
 First, a callback is defined to handle the result of the query call.
+
 ```
 auto resultHandler = [](const SpacesResult& result)
 {
     // Example code responding to a successful query
     if(result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        std::cout<<”SUCCESS: ”<<std::endl;
+        std::cout << "SUCCESS: " << std::endl;
 
         for (int i = 0; i < result.GetSpaces().Size(); i++)
         {
-            std::cout<<”Space found: ”<<result.GetSpaces()[i].Id<<std::endl;
+            std::cout << "Space found: " << result.GetSpaces()[i].Id << std::endl;
         } 
         return true;
     }
     else if(result.GetResultCode() == csp::systems::EResultCode::InProgress)
     {
         // Example progress reporting code
-        std::cout<<”Progress: ”<<result.GetRequestProgress()<<std::endl;
+        std::cout << "Progress: " << result.GetRequestProgress() << std::endl;
         return true;
     }
     else
     {
         // Example failure logging
-        std::cout<<”Error:<< ToString(result.GetFailureReason())<<std::endl;
+        std::cout << "Error: " << ToString(result.GetFailureReason()) << std::endl;
         return false;
     }
 };
@@ -134,33 +135,34 @@ spaceSystem->GetSpaces(resultHandler);
 Where the space ids are alphanumeric strings.
 
 ### Retrieving a single space, associated with a particular space id
+
 ```
 auto resultHandler = [](const SpaceResult& result)
 {
     if(result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        std::cout<<”SUCCESS: ”<<std::endl;
+        std::cout << "SUCCESS: " << std::endl;
 
         // Example code responding to a successful query
-        std::cout<<”Space found: ”<<result.GetSpace().Id<<std::endl;
+        std::cout << "Space found: " << result.GetSpace().Id << std::endl;
 
         return true;
     }
     else if(result.GetResultCode() == csp::systems::EResultCode::InProgress)
     {
         // Example progress reporting code
-        std::cout<<”Progress: ”<<result.GetRequestProgress()<<std::endl;
+        std::cout << "Progress: " << result.GetRequestProgress() << std::endl;
         return true;
     }
     else
     {
         // Example failure logging
-        std::cout<<”Error:<< ToString(result.GetFailureReason())<<std::endl;
+        std::cout << "Error: " << ToString(result.GetFailureReason()) << std::endl;
         return false;
     }
 };
 
-SpaceSystem->GetSpace(“ah34hgt25prv”, resultHandler);
+SpaceSystem->GetSpace("ah34hgt25prv", resultHandler);
 ```
 
 Where the space id is an alphanumeric string.
@@ -172,11 +174,11 @@ auto resultHandler = [](const SpacesResult& result)
     // Example code responding to a successful query
     if(result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        std::cout<<”SUCCESS: ”<<std::endl;
+        std::cout << "SUCCESS: " << std::endl;
 
         for (int i = 0; i < result.GetSpaces().Size(); i++)
         {
-	    std::cout<<”Space found: ”<<result.GetSpaces()[i].Id<<std::endl;
+	    std::cout << "Space found: " << result.GetSpaces()[i].Id << std::endl;
         } 
 
         return true;
@@ -184,19 +186,19 @@ auto resultHandler = [](const SpacesResult& result)
     else if(result.GetResultCode() == csp::systems::EResultCode::InProgress)
     {
         // Example progress reporting code
-	std::cout<<”Progress: ”<<result.GetRequestProgress()<<std::endl;
+	std::cout << "Progress: " << result.GetRequestProgress() << std::endl;
 	return true;
     }
     else
     {
 	// Example failure logging
-        std::cout<<”Error:<< ToString(result.GetFailureReason())<<std::endl;
+        std::cout << "Error: " << ToString(result.GetFailureReason()) << std::endl;
         return false;
     }
 };
 
 SpaceSystem->GetSpacesForUserId(
-    “bc649hnt21h”, 
+    "bc649hnt21h", 
     resultHandler
 );
 ```
@@ -211,24 +213,24 @@ auto resultHandler = [](const SpacesResult& result)
     // Example code responding to a successful query
     if(result.GetResultCode() == csp::systems::EResultCode::Success)
     {
-        std::cout<<”SUCCESS: ”<<std::endl;
+        std::cout << "SUCCESS: " << std::endl;
 
         for (int i = 0; i < result.GetSpaces().Size(); i++)
         {
-            std::cout<<”Space found: ”<<result.GetSpaces()[i].Id<<std::endl;
+            std::cout << "Space found: " << result.GetSpaces()[i].Id << std::endl;
         } 
         return true;
     }
     else if(result.GetResultCode() == csp::systems::EResultCode::InProgress)
     {
         // Example progress reporting code
-        std::cout<<”Progress: ”<<result.GetRequestProgress()<<std::endl;
+        std::cout << "Progress: " << result.GetRequestProgress() << std::endl;
         return true;
     }
     else
     {
         // Example failure logging
-        std::cout<<”Error:<< ToString(result.GetFailureReason())<<std::endl;
+        std::cout << "Error: " << ToString(result.GetFailureReason()) << std::endl;
         return false;
     }
 };

@@ -44,7 +44,7 @@ Scalar Types are basic data types that represent a single value. GraphQL include
 
 **Object Types** are complex types that represent objects with multiple fields. Each field can have its own type, which can be a scalar type or another object type.
 
-```
+```text
 type User {
 	id: ID!
 	name: String!
@@ -58,7 +58,7 @@ type User {
 
 * **Enums:** They are a special kind of scalar that restricts a field to a specified set of values.
 
-```
+```text
 enum Role {
 	ADMIN
 	USER
@@ -70,7 +70,7 @@ enum Role {
 
 **Input Types** are used to define complex arguments for queries and mutations. They cannot be used as output types.
 
-```
+```text
 input UserInput {
 	name: String!
 	email: String!
@@ -89,7 +89,7 @@ Output types in GraphQL are types that can be used in the response of a query or
 
 Queries are used to fetch data from the server. They specify what data is required and the structure of the response.
 
-```
+```text
 query {
 	user(id: "1") {
 		id
@@ -101,7 +101,7 @@ query {
 
 Queries can also include arguments to filter or modify the data returned.
 
-```
+```text
 query getUser($id: ID!) {
 	user(id: $id) {
 		id
@@ -115,7 +115,7 @@ query getUser($id: ID!) {
 
 Mutations are used to modify data on the server. They have a similar structure to queries but represent operations that change data (e.g., creating, updating, deleting).
 
-```
+```text
 mutation {
 	createUser(input: { name: "John", email: "john@example.com" }) {
 		id
@@ -127,7 +127,7 @@ mutation {
 
 Mutations can also accept arguments and return specific fields from the modified data.
 
-```
+```text
 mutation createUser($input: UserInput!) {
 	createUser(input: $input) {
 		id
@@ -155,7 +155,7 @@ Here are some of the methods to perform complex queries in GraphQL.
 
 Nested queries in GraphQL allow you to retrieve related data within a single query. This means you can fetch an object and its related objects in one request. For example, in CSP, nested queries can be used to fetch a space and its associated users and assets.
 
-```
+```text
 {
 space(id: "101") {
 	name
@@ -185,7 +185,7 @@ Aliases in GraphQL allow you to rename the result of a field to avoid conflicts 
 
 Here is a syntax of Aliases:
 
-```
+```text
 {
 	admin: user(id: "1") {
 		name
@@ -204,7 +204,7 @@ In GraphQL, fragments are reusable query components. They eliminate duplication 
 
 Here is an example of a Fragment: 
 
-```
+```text
 fragment userFields on User {
 	id
 	name
@@ -238,7 +238,7 @@ Variables in GraphQL make queries more flexible and reusable. Instead of hardcod
 
 Here is an example: 
 
-```
+```text
 query GetUser($id: ID!) {
 	user(id: $id) {
 		name
@@ -257,7 +257,7 @@ Directives in GraphQL control how queries can be executed based on a specific co
 
 Here is an example: 
 
-```
+```text
 	query GetUser($withEmail: Boolean!) {
 	user(id: "1") {
 		name
@@ -290,7 +290,7 @@ In CSP, GraphQL queries can retrieve detailed information across multiple databa
 
 Here’s an example of a GraphQL query in CSP:
 
-```
+```text
 {
 	prototype(filters: { groupIds: \["659bf45f5sf871cm7501c71c"\], types: \["Default"\] }) {
 		items {
@@ -368,7 +368,7 @@ This is an example of another limitation when directly using GraphQL queries. Si
 
 **Queries**: Fetch data from the server.
 
-```
+```text
 query {
 	user(id: "1") {
 		id
@@ -380,7 +380,7 @@ query {
 
 **Mutations**: Modify data on the server.
 
-```
+```text
 mutation {
 	createUser(input: { name: "John", email: "john@example.com" }) {
 		id

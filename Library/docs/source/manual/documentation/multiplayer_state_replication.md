@@ -21,7 +21,7 @@ MyStaticModelComponent.SetModelAssetId(ModelAssetId);
 Once the client has made their changes to the component properties they need to (They are free to make as many changes over any period of time, no replication will occur until they specify), they will queue up a patch message to be sent to cloud hosted services by invoking `QueueUpdate` on the space entity.
 
 ```c++
-void SpaceEntity::SendUpdate(CallbackHandler Callback)
+void SpaceEntity::SendUpdate(CallbackHandler Callback);
 ```
 
 This calls into the `SpaceEntitySystem` (which manages all entities and is responsible for multiplayer service communication) and the entity will be enqueued for patch message transmission.
@@ -95,7 +95,7 @@ switch (Value.GetReplicatedValueType())
 	case ReplicatedValueType::Boolean:
 		Value.GetBool() ? PropertyPacker.pack_true() : PropertyPacker.pack_false();
 		Break;
-…
+	...
 ```
 
 As you can see above, we first pack the `Id` for the property, so that we can apply to the correct property in the map on the receiving end. We then pack the type of the replicated value, so that we know what data we should expect when unpacking (This is important as we need to know how many bytes to read, especially for data like strings).

@@ -49,6 +49,7 @@ Documentation on processes and principles that the library adheres to.
    documentation/script_system
    documentation/expected_application_flow
    documentation/multiplayer_state_replication
+   documentation/services_abstraction_layer
    documentation/external_tools
 ```
 

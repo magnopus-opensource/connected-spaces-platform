@@ -12,17 +12,17 @@
 
 4. Save the new scoped registry.
 
-![image info](./getting_started\npmjs_registry.png)
+![image info](../../_static/getting_started/npmjs_registry.png)
 
 5. Navigate to the Package Manager window via `Window->Package Manager`
 6. From the Packages dropdown, select the `My Registries` option.
 
-![image info](./getting_started\myregistry.png)
+![image info](../../_static/getting_started/myregistry.png)
 
 7. From the `Other` category, selected the `connected-spaces-platform.unity.core` package.
 8. Select `Install` to add the latest version of the package to your project.
 
-![image info](./getting_started\install_package.png)
+![image info](../../_static/getting_started/install_package.png)
 
 ## VisionOS
 

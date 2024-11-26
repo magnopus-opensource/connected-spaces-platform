@@ -93,25 +93,25 @@ The `GetMaintenanceInfo` method uses a callback pattern to handle asynchronous o
 ### CSP Implementation of the GetMaintenanceInfo Method
 
 ```
-|  void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback) {
-    const MaintenanceInfoCallback GetMaintenanceInfoCallback = [Callback](const MaintenanceInfoResult& Result) {
-        if (Result.GetResultCode() == InProgress) {
-            return;
-        }
-        if (Result.GetResultCode() == Failed) {
-            INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaintenanceInfoResult>());
-            return;
-        }
-        INVOKE_IF_NOT_NULL(Callback, Result);
-    };
+	void MaintenanceSystem::GetMaintenanceInfo(MaintenanceInfoCallback Callback) {
+	const MaintenanceInfoCallback GetMaintenanceInfoCallback = [Callback](const MaintenanceInfoResult& Result) {
+		if (Result.GetResultCode() == InProgress) {
+			return;
+		}
+		if (Result.GetResultCode() == Failed) {
+			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MaintenanceInfoResult>());
+			return;
+		}
+		INVOKE_IF_NOT_NULL(Callback, Result);
+	};
 
-    csp::services::ResponseHandlerPtr MaintenanceResponseHandler =
-        MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
-            GetMaintenanceInfoCallback, nullptr);
+	csp::services::ResponseHandlerPtr MaintenanceResponseHandler =
+		MaintenanceAPI->CreateHandler<MaintenanceInfoCallback, MaintenanceInfoResult, void, csp::services::NullDto>(
+			GetMaintenanceInfoCallback, nullptr);
 
-    static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(
-        csp::CSPFoundation::GetClientUserAgentInfo().CHSEnvironment, MaintenanceResponseHandler);
-}  |
+	static_cast<chs::MaintenanceApi*>(MaintenanceAPI)->Query(
+		csp::CSPFoundation::GetClientUserAgentInfo().CHSEnvironment, MaintenanceResponseHandler);
+}
 ```
 
 Explanation of Code Components
@@ -192,8 +192,8 @@ Here is a code sample:
 
 ```
 if (result.HasAnyMaintenanceWindows()) {
-    MaintenanceInfo latestInfo \= result.GetLatestMaintenanceInfo();
-    std::cout \<\< "Latest Maintenance Description: " \<\< latestInfo.Description \<\< std::endl;
+    MaintenanceInfo latestInfo = result.GetLatestMaintenanceInfo();
+    std::cout << "Latest Maintenance Description: " << latestInfo.Description << std::endl;
 }
 ```
 

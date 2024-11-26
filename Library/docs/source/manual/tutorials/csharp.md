@@ -96,7 +96,7 @@ using Csp.Systems;
 var spaceSystem = Csp.Systems.SystemsManager.Get().GetSpaceSystem();
 ```
 
-You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled “Authenticating”.
+You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled "Authenticating”.
 
 ### Retrieving all spaces associated with the currently logged in user
 ```
@@ -109,7 +109,7 @@ if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 }
 else if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.InProgress)
 {
-    Console.WriteLine(“Progress: ” + result.GetRequestProgress());
+    Console.WriteLine("Progress: ” + result.GetRequestProgress());
 }
 else
 {
@@ -121,7 +121,7 @@ else
 
 ### Retrieving a single space, associated with a particular space id
 ```
-using Csp.Systems.SpaceResult spaceResult = await spaceSystem.GetSpace(“ah34hgt25prv”);
+using Csp.Systems.SpaceResult spaceResult = await spaceSystem.GetSpace("ah34hgt25prv”);
 
 
 if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
@@ -131,7 +131,7 @@ if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 }
 else if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.InProgress)
 {
-    Console.WriteLine(“Progress: ” + result.GetRequestProgress());
+    Console.WriteLine("Progress: ” + result.GetRequestProgress());
 }
 else
 {
@@ -145,7 +145,7 @@ Where the id is an alphanumeric string.
 
 ### Retrieving spaces associated with a particular user id
 ```
-using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpacesForUserId(“bc649hnt21h”);
+using CspSystems.SpaceResult spaceResult = await spaceSystem.GetSpacesForUserId("bc649hnt21h”);
 
 if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 {
@@ -154,7 +154,7 @@ if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 }
 else if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.InProgress)
 {
-    Console.WriteLine(“Progress: ” + result.GetRequestProgress());
+    Console.WriteLine("Progress: ” + result.GetRequestProgress());
 }
 else
 {
@@ -169,9 +169,9 @@ It should be noted that this can only be performed by users with elevated privil
 ### Retrieving spaces by specifying a number of space identifiers associated with the currently logged in user
 ```
 using idArray = new Csp.Common.Array<string>(3);
-idArray[0] = “ah34hgt25prv”;
-idArray[1] = “ev936bym27c”; 
-idArray[2] = “jt94nrp74k”;
+idArray[0] = "ah34hgt25prv”;
+idArray[1] = "ev936bym27c”; 
+idArray[2] = "jt94nrp74k”;
 
 using CspSystems.SpacesResult spaceResult = await spaceSystem.GetSpacesByIds(idArray);
 
@@ -182,7 +182,7 @@ if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 }
 else if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.InProgress)
 {
-    Console.WriteLine(“Progress: ” + result.GetRequestProgress());
+    Console.WriteLine("Progress: ” + result.GetRequestProgress());
 }
 else
 {
@@ -228,7 +228,7 @@ if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.Success)
 }
 else if (spaceResult.GetResultCode() == Csp.Systems.EResultCode.InProgress)
 {
-    Console.WriteLine(“Progress: ” + result.GetRequestProgress());
+    Console.WriteLine("Progress: ” + result.GetRequestProgress());
 }
 else
 {

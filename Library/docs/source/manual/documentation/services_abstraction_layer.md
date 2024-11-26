@@ -1,4 +1,4 @@
-# CSP Services Abstraction Layer
+# Services Abstraction Layer
 
 The Connected Spaces Platform communicates with the world via RESTful endpoints and WebSockets, and in order for CSP to meet its goals around interoperability, it depends on those RESTful endpoints following a spec.
 
@@ -12,6 +12,6 @@ What that means practically speaking, is that if you as a CSP contributor wish t
 
 Typically, you will be updating the CSP submodule to reference to the latest version of the services repo. To do that, follow the same process as with any other change, and in your branch invoke:
 
-`git submodule update --init --remote modules/olympus-foundation-chs`
+`git submodule update --init --remote modules/csp-services`
 
 Include the resultant change as part of your push to the remote branch, and include it as part of the PR you eventually create.

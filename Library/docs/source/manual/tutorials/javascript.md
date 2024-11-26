@@ -95,7 +95,7 @@ The code snippet below, shows how to retrieve the singleton instance for `SpaceS
 
 `const spaceSystem = systemsManager.getSpaceSystem();`
 
-You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled “Authenticating”.
+You can then proceed to log in using an account or as a guest user, as described in the previous tutorial, entitled "Authenticating”.
 
 
 ### Retrieving all spaces associated with the currently logged in user
@@ -113,7 +113,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else
@@ -126,7 +126,7 @@ else
 
 ### Retrieving a single space, associated with a particular id
 ```
-let spaceId = “ah34hgt25prv”;
+let spaceId = "ah34hgt25prv”;
 
 const spaceResult = await spaceSystem.getSpace(spaceId);
 
@@ -141,7 +141,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else
@@ -154,7 +154,7 @@ else
 
 ### Retrieving spaces associated with a particular user id
 ```
-let user_id = “bc649hnt21h”;
+let user_id = "bc649hnt21h”;
 
 const spacesResult = await spaceSystem.getSpacesForUserId(user_id);
 
@@ -169,7 +169,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else
@@ -183,9 +183,9 @@ It should be noted that this can only be performed by users with elevated privil
 
 ### Retrieving spaces, by specifying a number of space identifiers associated with the currently logged in user
 ```
-let space_ids = [ “ah34hgt25prv”, 
-“ev936bym27c”, 
-“jt94nrp74k” ];
+let space_ids = [ "ah34hgt25prv”, 
+"ev936bym27c”, 
+"jt94nrp74k” ];
 
 const spacesResult = await spaceSystem.getSpacesByIds(space_ids);
 
@@ -200,7 +200,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else
@@ -231,7 +231,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else
@@ -270,7 +270,7 @@ if (spaceResult.getResultCode() === Systems.EResultCode.Success)
 }
 else if (spaceResult.getResultCode() === Systems.EResultCode.InProgress)
 {
-    console.log(“In progress: “, result.GetRequestProgress());
+    console.log("In progress: ", result.GetRequestProgress());
     enterSpaceResult.delete();
 }
 else

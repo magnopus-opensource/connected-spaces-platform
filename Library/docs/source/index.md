@@ -1,4 +1,3 @@
-## Overview
 Interoperability is the foundation of the spatial internet. We need experiences to move across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
 ![image info](./_static/interop.gif)
@@ -38,7 +37,6 @@ Build instructions for each supported language are below.
 ## 🖥️ Usage
 Examples for each supported language are below.
 
-- WebAssembly 
 - WebAssembly 
     - [Web Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Initialising%20Foundation/Web)
     - [Web Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/main/Examples/Basic%20Framework/Web)

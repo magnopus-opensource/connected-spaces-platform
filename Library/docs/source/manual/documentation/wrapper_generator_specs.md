@@ -19,7 +19,7 @@ To achieve this, it relies on API source files including some markup/generation-
    :maxdepth: 1
    :titlesonly:
 
-   wrapper_generator/C-interface
+   wrapper_generator/c_interface
    wrapper_generator/csharp_wrapper
    wrapper_generator/typescript_wrapper
 ```
