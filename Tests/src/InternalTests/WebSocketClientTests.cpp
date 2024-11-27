@@ -40,7 +40,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
 
 	// Stop
 	WebSocketStop(WebSocket);
@@ -62,7 +62,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
 
 	// Send
 	WebSocketSend(WebSocket, "test");
@@ -87,7 +87,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
 
 	// Receive
 	WebSocketSendReceive(WebSocket);

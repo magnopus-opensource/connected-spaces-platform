@@ -255,9 +255,14 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string UserServiceURI		= RootURI + "/mag-user";
 	const std::string PrototypeServiceURI	= RootURI + "/mag-prototype";
 	const std::string SpatialDataServiceURI = RootURI + "/mag-spatialdata";
-	const std::string MultiplayerServiceURI = RootURI + "/mag-multiplayer/hubs/v1/multiplayer";
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
+
+	const std::string Hostname = "ogs", MultiplayerHostname = Hostname + "-multiplayer";
+	const std::string RootMultiplayerURI
+		= RootURI.substr(0, RootURI.find(Hostname)) + MultiplayerHostname + RootURI.substr(RootURI.find(Hostname) + Hostname.length());
+	const std::string MultiplayerServiceURI = RootMultiplayerURI + "/mag-multiplayer/hubs/v1/multiplayer";
+
 
 
 	Endpoints			  = CSP_NEW EndpointURIs();
