@@ -28,13 +28,15 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 {
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)]			  = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]						  = csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]						  = csp::common::Vector4::Identity();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]							  = csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]						  = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]						  = true;
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)]			  = "";
-	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]					  = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides)]
+		= csp::common::Map<csp::multiplayer::ReplicatedValue, csp::multiplayer::ReplicatedValue>();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]			   = csp::common::Vector3::Zero();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]			   = csp::common::Vector4::Identity();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]				   = csp::common::Vector3::One();
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsVisible)]			   = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsARVisible)]			   = true;
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ThirdPartyComponentRef)] = "";
+	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::IsShadowCaster)]		   = true;
 
 	SetScriptInterface(CSP_NEW StaticModelSpaceComponentScriptInterface(this));
 }
@@ -60,6 +62,50 @@ const csp::common::String& StaticModelSpaceComponent::GetExternalResourceAssetCo
 void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId), Value);
+}
+
+csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceComponent::GetMaterialOverrides() const
+{
+	// Convert replicated values map to string values
+	common::Map<multiplayer::ReplicatedValue, multiplayer::ReplicatedValue> ReplicatedOverrides
+		= GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+
+	csp::common::Map<csp::common::String, csp::common::String> Overrides;
+
+	auto Deleter = [](const common::Array<multiplayer::ReplicatedValue>* Ptr)
+	{
+		CSP_DELETE(Ptr);
+	};
+
+	std::unique_ptr<common::Array<multiplayer::ReplicatedValue>, decltype(Deleter)> Keys(
+		const_cast<common::Array<multiplayer::ReplicatedValue>*>(ReplicatedOverrides.Keys()),
+		Deleter);
+
+	for (size_t i = 0; i < Keys->Size(); ++i)
+	{
+		const auto& CurrentKey			  = (*Keys)[i];
+		Overrides[CurrentKey.GetString()] = ReplicatedOverrides[CurrentKey].GetString();
+	}
+
+	return Overrides;
+}
+
+void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
+{
+	common::Map<multiplayer::ReplicatedValue, multiplayer::ReplicatedValue> ReplicatedOverrides
+		= GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+
+	ReplicatedOverrides[ModelPath] = MaterialId;
+
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+}
+
+void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
+{
+	auto ReplicatedOverrides = GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+	ReplicatedOverrides.Remove(ModelPath);
+
+	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 /* ITransformComponent */

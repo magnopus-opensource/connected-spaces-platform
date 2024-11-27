@@ -37,27 +37,27 @@ public:
 	/// @return csp::common::String&
 	const csp::common::String& GetName() const;
 
-	/// @brief Gets the asset collection id for where this material is stored
+	/// @brief Gets the collection id for the material
 	/// @return const csp::common::String&
-	const csp::common::String& GetAssetCollectionId() const;
+	const csp::common::String& GetMaterialCollectionId() const;
 
-	/// @brief Gets the asset id for where this material is stored
+	/// @brief Gets the id for the material
 	/// @return const csp::common::String&
-	const csp::common::String& GetAssetId() const;
+	const csp::common::String& GetMaterialId() const;
 
 	/// @brief Constructor which links the material to an asset
 	/// @param Name const csp::common::String& : The name of the material.
-	/// @param AssetCollectionId const csp::common::String& : The asset collection where the material info is stored
-	/// @param AssetId const csp::common::String& : The asset where the material info is stored
-	Material(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId);
+	/// @param MaterialCollectionId const csp::common::String& : The asset collection where the material info is stored
+	/// @param MaterialId const csp::common::String& : The asset where the material info is stored
+	Material(const csp::common::String& Name, const csp::common::String& MaterialCollectionId, const csp::common::String& MaterialId);
 	Material() = default;
 
 protected:
 	csp::common::String Name;
 	EShaderType Type;
 
-	csp::common::String AssetCollectionId;
-	csp::common::String AssetId;
+	csp::common::String CollectionId;
+	csp::common::String Id;
 };
 
 } // namespace csp::systems

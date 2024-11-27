@@ -33,8 +33,8 @@ CSP_INTERNAL_TEST(CSPEngine, MaterialUnitTests, MaterialConstructorTest)
 	GLTFMaterial Material(TestName, TestAssetCollectionId, TestAssetId);
 
 	// Test constructor params
-	EXPECT_EQ(Material.GetAssetCollectionId(), TestAssetCollectionId);
-	EXPECT_EQ(Material.GetAssetId(), TestAssetId);
+	EXPECT_EQ(Material.GetMaterialCollectionId(), TestAssetCollectionId);
+	EXPECT_EQ(Material.GetMaterialId(), TestAssetId);
 
 	// Test defaults
 	EXPECT_EQ(Material.GetName(), TestName);
