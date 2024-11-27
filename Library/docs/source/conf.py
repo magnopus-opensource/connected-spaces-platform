@@ -109,6 +109,17 @@ html_context = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# This function is called for every generated rst file.
+def read_rst(app, docname, source):
+    # Make sure we're outputting HTML
+    if app.builder.format != 'html':
+        return
+
+    # Inject meta to disable the 'Edit on GitHub' link in the banner (see breadcrumbs.html)
+    # This is because we don't revision the source files for API documentation, they are a
+    # transient artifact generated at documentation build time whilst reading the API.
+    source[0] = ":github_url: hide\n\n" + source[0];
+
 # Sphinx runs this for every module imported, app = instance of Sphinx
 # This enables AutoStructify and recommonmark for markdown and enables embedded rst in md
 def setup(app):
@@ -117,3 +128,4 @@ def setup(app):
         'enable_eval_rst': True,
     }, True)
     app.add_transform(AutoStructify)
+    app.connect("source-read", read_rst)
