@@ -142,7 +142,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 	// More comprehensive material setter/serialization tests exist in:
 	// InternalTests/MaterialUnitTests
 	GLTFMaterial UpdatedMaterial;
-	GetMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId(), UpdatedMaterial);
+	GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), UpdatedMaterial);
 
 	EXPECT_EQ(UpdatedMaterial.GetAlphaCutoff(), 1);
 
@@ -276,7 +276,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 
 	// Get the material to ensure it can be found
 	GLTFMaterial FoundMaterial;
-	GetMaterial(AssetSystem, CreatedMaterial.GetAssetCollectionId(), CreatedMaterial.GetAssetId(), FoundMaterial);
+	GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), FoundMaterial);
 
 	EXPECT_EQ(FoundMaterial.GetName(), CreatedMaterial.GetName());
 
@@ -357,22 +357,22 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 	// Ensure the deletion is correct
 	GLTFMaterial DeletedMaterial;
 	GetMaterial(AssetSystem,
-				CreatedMaterial1.GetAssetCollectionId(),
-				CreatedMaterial1.GetAssetId(),
+				CreatedMaterial1.GetMaterialCollectionId(),
+				CreatedMaterial1.GetMaterialId(),
 				DeletedMaterial,
 				csp::systems::EResultCode::Failed);
 
 	// Ensure the other material still exists
 	GLTFMaterial RemainingMaterial;
-	GetMaterial(AssetSystem, CreatedMaterial2.GetAssetCollectionId(), CreatedMaterial2.GetAssetId(), RemainingMaterial);
+	GetMaterial(AssetSystem, CreatedMaterial2.GetMaterialCollectionId(), CreatedMaterial2.GetMaterialId(), RemainingMaterial);
 
 	// Delete second material
 	DeleteMaterial(AssetSystem, CreatedMaterial2);
 
 	// Ensure the final material is deleted
 	GetMaterial(AssetSystem,
-				CreatedMaterial2.GetAssetCollectionId(),
-				CreatedMaterial2.GetAssetId(),
+				CreatedMaterial2.GetMaterialCollectionId(),
+				CreatedMaterial2.GetMaterialId(),
 				RemainingMaterial,
 				csp::systems::EResultCode::Failed);
 

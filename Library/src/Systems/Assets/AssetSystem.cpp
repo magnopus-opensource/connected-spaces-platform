@@ -989,10 +989,10 @@ void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallbac
 			UploadAssetData(CreatedAssetCollection, CreatedAsset, AssetData, UploadMaterialCallback);
 		};
 
-		GetAssetById(Material.GetAssetCollectionId(), Material.GetAssetId(), GetAssetCB);
+		GetAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), GetAssetCB);
 	};
 
-	GetAssetCollectionById(Material.GetAssetCollectionId(), GetAssetCollectionCB);
+	GetAssetCollectionById(Material.GetMaterialCollectionId(), GetAssetCollectionCB);
 }
 
 void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback)
@@ -1012,10 +1012,10 @@ void AssetSystem::DeleteMaterial(const GLTFMaterial& Material, NullResultCallbac
 			Callback(DeleteAssetCollectionResult);
 		};
 
-		DeleteAssetCollectionById(Material.GetAssetCollectionId(), DeleteAssetCollectionCB);
+		DeleteAssetCollectionById(Material.GetMaterialCollectionId(), DeleteAssetCollectionCB);
 	};
 
-	DeleteAssetById(Material.GetAssetCollectionId(), Material.GetAssetId(), DeleteAssetCB);
+	DeleteAssetById(Material.GetMaterialCollectionId(), Material.GetMaterialId(), DeleteAssetCB);
 }
 
 void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback)
