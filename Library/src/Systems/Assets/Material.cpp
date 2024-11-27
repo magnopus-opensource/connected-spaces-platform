@@ -23,14 +23,9 @@
 namespace csp::systems
 {
 
-Material::Material(const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
-	: CollectionId(InAssetCollectionId), Id(InAssetId), Name(""), Type(EShaderType::Standard)
+Material::Material(const csp::common::String& Name, const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
+	: Name(Name), CollectionId(InAssetCollectionId), Id(InAssetId), Type(EShaderType::Standard)
 {
-}
-
-void Material::SetName(const csp::common::String& InName)
-{
-	Name = InName;
 }
 
 const csp::common::String& Material::GetName() const

@@ -241,8 +241,8 @@ const TextureInfo& GLTFMaterial::GetEmissiveTexture() const
 	return EmissiveTexture;
 }
 
-GLTFMaterial::GLTFMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
-	: Material(AssetCollectionId, AssetId)
+GLTFMaterial::GLTFMaterial(const csp::common::String& Name, const csp::common::String& AssetCollectionId, const csp::common::String& AssetId)
+	: Material(Name, AssetCollectionId, AssetId)
 	, BaseColorFactor(1.f, 1.f, 1.f, 1.f)
 	, MetallicFactor(1.f)
 	, RoughnessFactor(1.f)
@@ -262,6 +262,10 @@ GLTFMaterial::GLTFMaterial(const csp::common::String& AssetCollectionId, const c
 	NormalTexture.SetTexture(false);
 	OcclusionTexture.SetTexture(false);
 	EmissiveTexture.SetTexture(false);
+}
+
+GLTFMaterial::GLTFMaterial() : GLTFMaterial("", "", "")
+{
 }
 
 void GLTFMaterial::SetAlphaMode(EAlphaMode Mode)
@@ -293,4 +297,33 @@ bool GLTFMaterial::GetDoubleSided() const
 {
 	return DoubleSided;
 }
+
+const GLTFMaterial& GLTFMaterialResult::GetGLTFMaterial() const
+{
+	return Material;
+}
+
+void GLTFMaterialResult::SetGLTFMaterial(const GLTFMaterial& InMaterial)
+{
+	Material = InMaterial;
+}
+
+void GLTFMaterialResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+}
+
+const csp::common::Array<GLTFMaterial>& GLTFMaterialsResult::GetGLTFMaterials() const
+{
+	return Materials;
+}
+
+void GLTFMaterialsResult::SetGLTFMaterials(const csp::common::Array<GLTFMaterial>& InMaterials)
+{
+	Materials = InMaterials;
+}
+
+void GLTFMaterialsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+}
+
 } // namespace csp::systems
