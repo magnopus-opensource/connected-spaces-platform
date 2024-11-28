@@ -8,4 +8,10 @@
 	.rst-content .highlighted {
 		background: transparent;
 	}
+	
+	/* 	Override page width default of 800px to fit more text on-screen. 1320px is chosen so that the 
+		negative space on the right is symmetric in size to the sidebar on the left (300px wide). */
+	.wy-nav-content {
+		max-width: 1320px;
+	}
 }
