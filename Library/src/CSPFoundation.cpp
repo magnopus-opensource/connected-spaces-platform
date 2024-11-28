@@ -258,7 +258,10 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
 
+	// The multiplayer service now has its own hostname, ogs-multiplayer
 	const std::string Hostname = "ogs", MultiplayerHostname = Hostname + "-multiplayer";
+	// This constructs the multiplayer URI by adding -multiplayer after ogs and appending
+	// the rest of RootURI. This accounts for other hostnames like ogs-internal, etc.
 	const std::string RootMultiplayerURI
 		= RootURI.substr(0, RootURI.find(Hostname)) + MultiplayerHostname + RootURI.substr(RootURI.find(Hostname) + Hostname.length());
 	const std::string MultiplayerServiceURI = RootMultiplayerURI + "/mag-multiplayer/hubs/v1/multiplayer";
