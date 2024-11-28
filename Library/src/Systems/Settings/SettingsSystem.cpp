@@ -873,7 +873,6 @@ void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier
 	rapidjson::Document Json;
 	Json.SetObject();
 	Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
-	Json.AddMember("identifierType", static_cast<int>(VariantType::String), Json.GetAllocator());
 
 	Json.AddMember("identifier", rapidjson::Value(InIdentifier.c_str(), InIdentifier.Length()), Json.GetAllocator());
 
@@ -927,10 +926,9 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 			return;
 		}
 
-		const auto& type		   = Json["type"];
-		const auto& identifierType = Json["identifierType"];
+		const auto& type = Json["type"];
 
-		if (!type.IsInt() || !identifierType.IsInt())
+		if (!type.IsInt())
 		{
 			CSP_LOG_ERROR_MSG("Invalid avatar info!");
 
