@@ -100,3 +100,20 @@ You will learn about how CSP functions and whether it makes sense for your use-c
    overview/logging
    overview/maintenance_windows
 ```
+
+
+## Users
+
+This series covers how to use the CSP to reason about users.
+
+We'll cover user account creation, how to log in and out via the API, how users can manage their credentials and user-specific settings.
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+
+   users/authentication
+   users/management
+   users/settings
+```

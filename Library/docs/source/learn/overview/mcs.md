@@ -161,7 +161,7 @@ void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetC
 }
 ```
 
-* Within CSP, the GetAssetCollectionById method, the AssetCollectionId is used to fetch an AssetCollection from the services. 
+* Within CSP, the GetAssetCollectionById method and the AssetCollectionId are used to fetch an AssetCollection from the services. 
 
 * The Callback object is then invoked by the ResponseHandler (once it has converted an HttpResponse into a Result Object) to notify the client application and provide the result.
 
