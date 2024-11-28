@@ -429,8 +429,8 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, AvatarPortraitAssetCollCallback);
 }
 
@@ -552,8 +552,8 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, ThumbnailAssetCollCallback);
 }
 
@@ -863,35 +863,19 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 		}
 	};
 
-    auto* UserSystem     = SystemsManager::Get().GetUserSystem();
-    const auto& UserId = UserSystem->GetLoginState().UserId;
+	auto* UserSystem   = SystemsManager::Get().GetUserSystem();
+	const auto& UserId = UserSystem->GetLoginState().UserId;
 	GetAvatarPortraitAssetCollection(UserId, PortraitAvatarAssetCollCallback);
 }
 
-void SettingsSystem::SetAvatarInfo(AvatarType InType, const Variant& InIdentifier, NullResultCallback Callback)
+void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier, NullResultCallback Callback)
 {
 	rapidjson::Document Json;
 	Json.SetObject();
 	Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
-	Json.AddMember("identifierType", static_cast<int>(InIdentifier.GetValueType()), Json.GetAllocator());
+	Json.AddMember("identifierType", static_cast<int>(VariantType::String), Json.GetAllocator());
 
-	switch (InIdentifier.GetValueType())
-	{
-		case VariantType::Integer:
-			Json.AddMember("identifier", InIdentifier.GetInt(), Json.GetAllocator());
-			break;
-		case VariantType::String:
-			Json.AddMember("identifier", rapidjson::Value(InIdentifier.GetString().c_str(), InIdentifier.GetString().Length()), Json.GetAllocator());
-			break;
-		default:
-		{
-			CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
-
-			INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
-
-			return;
-		}
-	}
+	Json.AddMember("identifier", rapidjson::Value(InIdentifier.c_str(), InIdentifier.Length()), Json.GetAllocator());
 
 	rapidjson::StringBuffer Buffer;
 	rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
@@ -957,25 +941,7 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
 		InternalResult.SetAvatarType(static_cast<AvatarType>(type.GetInt()));
 
-		auto IdentifierType = static_cast<VariantType>(identifierType.GetInt());
-
-		switch (IdentifierType)
-		{
-			case VariantType::Integer:
-				InternalResult.SetAvatarIdentifier(static_cast<int64_t>(Json["identifier"].GetInt()));
-				break;
-			case VariantType::String:
-				InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
-				break;
-			default:
-			{
-				CSP_LOG_ERROR_MSG("Unsupported Avatar Identifier type.");
-
-				Callback(MakeInvalid<AvatarInfoResult>());
-
-				return;
-			}
-		}
+		InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
 
 		Callback(InternalResult);
 	};

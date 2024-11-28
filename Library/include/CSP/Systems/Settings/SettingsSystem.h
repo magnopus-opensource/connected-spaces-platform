@@ -130,7 +130,7 @@ public:
 	/// @brief Retrieves the Avatar Portrait information associated with the space
 	/// If the user of the Avatar portrait associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
 	/// and the Uri field inside the UriResult will be empty
-    /// @param InUserID const csp::common::String : The id of the user we are seelomg to retrieve the portrait for
+	/// @param InUserID const csp::common::String : The id of the user we are seelomg to retrieve the portrait for
 	/// @param Callback UriResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback);
 
@@ -141,9 +141,9 @@ public:
 
 	/// @brief Sets the avatar type and identifier for a user.
 	/// @param InType csp::systems::AvatarType : The type of avatar (predefined, Ready Player Me, or custom).
-	/// @param InIdentifier csp::common::Variant : A value used to identify or locate the avatar. Differs depending on the value of InType.
+	/// @param InIdentifier csp::common::String : A string used to identify or locate the avatar.
 	/// @param Callback NullResultCallback : Callback to call when task finishes.
-	CSP_ASYNC_RESULT void SetAvatarInfo(AvatarType InType, const csp::common::Variant& InIdentifier, NullResultCallback Callback);
+	CSP_ASYNC_RESULT void SetAvatarInfo(AvatarType InType, const csp::common::String& InIdentifier, NullResultCallback Callback);
 
 	/// @brief Retrieves the avatar type and identifier for a user.
 	/// @param Callback NullResultCallback : Callback to call when task finishes.
