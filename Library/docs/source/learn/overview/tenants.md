@@ -48,7 +48,7 @@ As a developer looking to use CSP and Magnopus Cloud Services, you must fill out
 
 Tenants are uniquely identified by a string that Magnopus will share with you once your tenancy request has been approved. 
 
-To direct CSP to a tenant, you need to specify the tenant string during the initialization of your application. This involves providing the tenant as an argument to the csp::CSPFoundation::Initialise function. This is expected to be the very first CSP invocation a client application makes in it’s lifecycle. 
+To direct CSP to a tenant, you need to specify the tenant string during the initialization of your application. This involves providing the tenant as an argument to the csp::CSPFoundation::Initialise function. This is expected to be the very first CSP invocation a client application makes in its lifecycle. 
 
 **Example Code Snippet:**
 
