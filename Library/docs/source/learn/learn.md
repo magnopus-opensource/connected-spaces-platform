@@ -104,9 +104,9 @@ You will learn about how CSP functions and whether it makes sense for your use-c
 
 ## Users
 
-This series covers how to use the CSP to reason about users.
+This series covers how to reason about users in your application, using CSP.
 
-We'll cover user account creation, how to log in and out via the API, how users can manage their credentials and user-specific settings.
+We'll cover user account creation, how to log in and out via the API, how users can manage their credentials, and user-specific settings.
 
 ```eval_rst
 .. toctree::

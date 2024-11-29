@@ -1,18 +1,24 @@
 # User Management
 
-Managing users within the Connected Spaces Platform (CSP) is vital for effective access control. The system allows administrators to create new users, reset passwords, and update display names. These actions ensure that only authorized users can access the platform while maintaining a smooth user experience.
+Managing users within the Connected Spaces Platform (CSP) is vital for effective access control.
 
-## Overview of User Management in CSP
+In CSP, user management focuses on creating and maintaining user profiles. Within the serivices being used, each profile contains personal information like usernames, email addresses, and display names. It should be noted that CSP itself will never store any personal user data.
 
-In CSP, user management focuses on creating and maintaining user profiles. Each profile contains personal information like usernames, email addresses, and display names. CSP supports several features to manage these profiles efficiently, such as creating users, resetting passwords, and updating profile information. These features ensure a secure and flexible environment for handling user accounts. The login process is at the core of this, ensuring users authenticate themselves before accessing any services or resources.
+CSP supports several features to support efficient management of these profiles, such as creating users, resetting passwords, and updating profile information. The system is designed to ensure a secure and flexible environment for handling user accounts. 
+
+The login process is at the core of this, ensuring users authenticate themselves before accessing any services or resources.
 
 ## Importance of User Creation, Password Management, and Updating Profile Information
 
-Proper user creation is crucial for CSP. Each user has a unique profile, which controls access to various parts of the platform. Password management, including resetting forgotten or compromised passwords, ensures security. Users can easily recover access without involving technical support. Additionally, updating profile information, such as the display name, allows for a personalized and organized user experience. Together, these aspects make it easier for administrators to manage users and for users to maintain control over their accounts.
+Proper user creation is crucial for CSP. Each user has a unique profile, which controls access to various parts of the platform. Password management, including resetting forgotten or compromised passwords, ensures security. Users can easily recover access without involving technical support. Additionally, updating profile information, such as the display name, allows for a personalized and organized user experience.
+
+Together, these aspects make it easier for administrators to manage users and for users to maintain control over their accounts.
 
 ## Creating a New User
 
-Creating users in CSP is essential for controlling access and managing user accounts. Each user must have a unique profile to access various features of the platform securely. User creation enables administrators to define who can log in, what resources they can access, and what actions they are authorized to perform.
+Creating users in CSP is essential for controlling access and managing user accounts. Each user must have a unique profile to access various features of the platform securely.
+
+User creation also enables administrators to define who can log in, what resources they can access, and what actions they are authorized to perform.
 
 ### Why Creating Users is Critical for Access Control in CSP
 
@@ -22,9 +28,9 @@ By defining user roles early, CSP prevents unauthorized access and ensures the s
 
 ### User Creation Methods
 
-CSP offers several methods for creating users, with the primary one being the `CreateUser` method. This method allows administrators to set up new users by providing basic details such as email, display name, and password or by utilizing optional settings for more advanced configurations.
+The primary method for creating users with CSP is the `CreateUser` method. This method allows client applications to set up new users by providing basic details such as email, display name, and password or by utilizing optional settings for more advanced configurations.
 
-The `CreateUser` method is a key part of the CSP API. It automates the process of generating new user profiles and makes it easy to integrate the system with external services. By calling this method, CSP creates a new profile and securely stores the user’s information.
+The `CreateUser` method is a key part of the CSP API. It automates the process of generating new user profiles and makes it easy to integrate the system with external services. By calling this method, CSP will ensure a new profile is created on the services, where the user's information is securely stored.
 
 ### Key Arguments Required for User Creation
 
@@ -44,16 +50,16 @@ Optional arguments include:
 
 * `HasVerifiedAge`: Confirms if the user has met any age-related requirements.
 
-* `RedirectUrl`: A URL to redirect the user after creation.
+* `RedirectUrl`: A URL to redirect the user to after profile creation.
 
 * `InviteToken`: An optional token if the user has been invited via an external URL that contains a token.
 
-### Step-by-Step Guide to Creating a User
+### How it works
 
-The `CreateUser` method is used to generate a user profile. Here’s a step-by-step guide to creating a new user:
+Once the `CreateUser` method is invoked, CSP begins the process of generating a user profile. Here’s a step-by-step account of the steps it takes to create a new user:
 
 1\. **Construct the CreateUserRequest Object**  
-   * Begin by constructing the `CreateUserRequest` object. This object will hold all the necessary information for the new user.
+   * CSP begins by constructing the `CreateUserRequest` object. This object will hold all the necessary information for the new user.
 
 ```
 auto Request = std::make_shared<CreateUserRequest>();
@@ -61,12 +67,12 @@ auto Request = std::make_shared<CreateUserRequest>();
 
 2\. **Set Up User Details (UserName, DisplayName, Email, Password)**
 
-* Populate the request with essential user details:  
-  * If a `UserName` is provided, add it to the request.
+* CSP then populates the request with essential user details:  
+  * If a `UserName` is provided, it is added to the request.
 
-  * Add the `DisplayName` to specify the name others will see.
+  * The `DisplayName` is added to specify the name others will see.
 
-  * Include the `Email` and `Password` to set up login credentials.
+  * The `Email` and `Password` are included to set up login credentials.
 
 ```
 if (UserName.HasValue()) {
@@ -80,7 +86,7 @@ Request->SetPassword(Password);
 
 3\. **Add Optional Settings (Newsletter Subscription, Age Verification, Redirect URL, Invite Token)**
 
-* Additional optional settings can be added, such as whether the user will receive newsletters, if their age has been verified, or if they should be redirected to a specific URL after account creation.
+* Additional optional settings may be added by CSP (if specified by the client application), such as whether the user will receive newsletters, if their age has been verified, or if they should be redirected to a specific URL after account creation.
 
 ```
 auto InitialSettings = std::make_shared<InitialSettingsDto>();
@@ -91,7 +97,7 @@ Request->SetInitialSettings({InitialSettings});
 
 4\. **Invoke the API to Create the User Profile**
 
-* Finally, call the CSP API to create the user profile, pass the `CreateUserRequest` object, and handle the response.
+* Finally, CSP will invoke the services endpoint to create the user profile, passing the `CreateUserRequest` object, and a callback to handle the response.
 
 ```
 static_cast<ProfileApi*>(ProfileAPI)->apiV1UsersPost(Request, ResponseHandler);
@@ -129,53 +135,70 @@ void UserSystem::CreateUser(const Optional<String>& UserName,
 }
 ```
 
+
+
+
+
+
+
+
+
 ## Resetting Password
 
-### Importance of Password Management
+Password management is a critical part of securing user access in CSP. Strong password policies help protect user accounts from unauthorized access. 
 
-Password management is a critical part of securing user access in CSP. Strong password policies help protect user accounts from unauthorized access. However, users may forget their passwords or need to reset them if they suspect a breach. In these situations, a secure password reset process is essential. It allows users to regain access to their accounts without compromising security, ensuring that passwords remain private and protected from unauthorized parties.
+However, users may forget their passwords or need to reset them if they suspect a breach. In these situations, a secure password reset process is essential. It allows users to regain access to their accounts without compromising security, ensuring that passwords remain private and protected from unauthorized parties.
 
 ### Password Reset Methods
 
-CSP provides several methods for password management. The two main methods for resetting a password are:
+The CSP API is designed to ensure that password resetting is done in a secure manner. There are two main methods involved in resetting a password.
 
-* `ResetUserPassword`: This method is used when users need to change their password after verification (such as receiving a reset link via email).
+* `ForgotPassword`: This method initiates the password reset flow by allowing the user to request a reset link. CSP expects the services to send an email with instructions on how to reset the password.
 
-* `ForgetPassword`: This method allows users to initiate a password reset by requesting a reset link. The system sends an email with instructions on how to reset the password.
+* `ResetUserPassword`: This method is then used by users after verification (performed by them receiving and interacting with a reset link via email).
+
+
 
 ### Step-by-Step Guide to Resetting a Password
 
 **Step 1: Confirming the User’s Email**
 
-Before resetting the password, confirm the user’s email address. This step ensures that the reset request comes from the legitimate user. CSP often sends a verification email to the registered email address.
+Before resetting the password, confirm the user’s email address. This step ensures that the reset request comes from the legitimate user.
 
-**Step 2: Sending the Password Reset Request**
+**Step 2: Invoking ForgotPassword**
 
-Use the ResetUserPassword method to initiate the password reset process. The system will trigger a reset email to the user containing a link that allows them to change their password.
+Use the `ForgotPassword` method to initiate the password reset process. The system will inform the services and expect a reset email to be sent to the user containing a link and token that allows them to change their password.
+
+The method also accepts three other parameters that govern where the user is taken during the password reset flow.
+
+* `EmailLinkUrl`: Optional email link url including the environment to land on that URL directly.
+* `RedirectUrl`: Optional redirect URL to embed in the generated email link.
+* `UseTokenChangePasswordUrl`: Whether to have the link in the email direct to the Token Change URL.
 
 ```
-void UserSystem::ResetUserPassword(const String& Email,
-                                   ProfileResultCallback Callback)
-{
-	auto Request = std::make_shared<ResetPasswordRequest>();
-	Request->SetEmail(Email);
-
-	const ResponseHandlerPtr ResponseHandler =
-		ProfileAPI->CreateHandler<ProfileResultCallback, ProfileResult, 
-								void, chs_user::ProfileDto>(Callback, nullptr, 
-								csp::web::EResponseCodes::ResponseOk);
-
-	static_cast<ProfileApi*>(ProfileAPI)->apiV1UsersPasswordResetPost(Request, ResponseHandler);
-}
+void ForgotPassword(const csp::common::String& Email,
+				const csp::common::Optional<csp::common::String>& RedirectUrl,
+				const csp::common::Optional<csp::common::String>& EmailLinkUrl,
+				bool UseTokenChangePasswordUrl,
+				NullResultCallback Callback);
 ```
 
 **Step 3: Implementing a Password Reset Form or Interface**
 
 Once the user receives the reset email, they click the link to a password reset form. The form typically prompts the user to enter and confirm a new password. Implement a simple and user-friendly interface to ensure users can easily update their passwords without confusion.
 
-**Step 4: Processing the Password Reset**
+**Step 4: Completing the Password Reset**
 
-After the user submits the form with a new password, the system updates the user’s profile with the new credentials. This step ensures the user can log in with the updated password immediately.
+After the user submits the form with a new password, the application can submit the verification token retrieved via the email, the user's ID, and the new password to CSP by invoking the `ResetUserPassword` method.
+
+```
+void ResetUserPassword(const csp::common::String& Token,
+			    const csp::common::String& UserId,
+			    const csp::common::String& NewPassword,
+			    NullResultCallback Callback);
+```
+
+The application should pass in the token obtained via the email expected to be sent by the services (after invoking `ForgotPassword`).
 
 ## Updating Display Name
 
@@ -183,7 +206,7 @@ Keeping user information accurate and updated is important for a good user exper
 
 ### Updating Display Name Method
 
-CSP provides a straightforward method for updating the display name: UpdateUserDisplayName. This method is part of the user profile management system and allows users to modify their display name while keeping other profile details intact.
+CSP provides a straightforward method for updating the display name: `UpdateUserDisplayName`. This method is part of the `UserSystem` and allows users to modify their display name while keeping other profile details intact.
 
 ### Step-by-Step Guide to Updating Display Name
 
@@ -195,7 +218,7 @@ Before making changes, you must retrieve the user’s current profile informatio
 
 **Step 2: Modifying the Display Name**
 
-Once you have the user’s profile, modify the display name to the desired value. The system allows users to enter a new name that will be shown across the platform.
+Once you have the user’s profile, allow them to modify the display name to their desired value.
 
 **Step 3: Sending an Update Request**
 
@@ -242,7 +265,7 @@ To ensure user profile security in CSP, follow these practices:
 To enhance user experience in managing profiles, consider these strategies:
 
 * **Simplify Password Resets**:  
-  * Provide clear, user-friendly interfaces for resetting passwords.
+  * Provide clear user-friendly interfaces for resetting passwords.
   * Include instructions and validation steps to avoid errors during the process.
   * Notify users via email when their password has been successfully reset.
 
@@ -272,12 +295,8 @@ Ensuring user data protection and compliance with privacy standards is crucial:
 
 ## Summary
 
-This topic covered the key aspects of managing user authentication within CSP. It focused on three essential components: creating new users, resetting passwords, and updating display names. Each task is critical for maintaining secure and organized access control in CSP.
+This topic covered some of the key aspects of managing user authentication within CSP.
 
 User creation is the foundation of access management. By creating unique user profiles, administrators ensure that each user has the proper permissions and access to the necessary resources. It also enables the platform to control who can log in and what actions they are authorized to perform.
 
-Password resets are vital for securing user accounts. They provide a way for users to regain access if they forget their password or their account is compromised. The process ensures that user credentials remain secure while allowing users to restore access quickly.
-
-Updating display names offers flexibility and personalization for users. It allows them to keep their profiles current and maintain a consistent identity across the platform. This enhances communication and collaboration between users.
-
-By managing user creation, password resets, and profile updates efficiently, CSP ensures secure access control, improved user experience, and compliance with privacy standards. These elements form the backbone of CSP’s robust authentication system, ensuring the platform remains secure and user-friendly.
+By managing users efficiently, CSP ensures secure access control, improved user experience, and compliance with privacy standards. These elements form the backbone of CSP’s robust authentication system, ensuring the platform remains secure and user-friendly.

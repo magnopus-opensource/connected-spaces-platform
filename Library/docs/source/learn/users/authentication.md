@@ -1,6 +1,6 @@
 # Authentication
 
-Authentication is the process of verifying a user’s identity before granting access to the Magnopus Cloud Services. It ensures that only authorized individuals can interact with the platform. This step is crucial for safeguarding user data, ensuring compliance with regulations like GDPR, and providing users with a personalized experience. 
+Authentication is the process of verifying a user’s identity before granting access to the Magnopus Cloud Services. It ensures that only authorized individuals can interact with the platform.
 
 It is often important for several reasons:
 
@@ -33,13 +33,13 @@ Logging into services involves using a username or email along with a password. 
 ### Steps for Logging In
 
 1. **Input: Username/Email, Password**  
-   Users can log in by providing their username or email and a password. The email field is left blank if the username is provided, and vice versa.
+   Users can log in by providing their username or email and a password. The email parameter is left blank if the username is provided, and vice versa.
 
 2. **Age Verification Requirement**  
    Services typically require users to confirm they are over 18 years old to use the platform. If age verification is not completed, the login attempt will be rejected.
 
 3. **Login Request Construction**  
-   When a user logs in, CSP constructs a `LoginRequest` object. This object includes:
+   When an application invokes `Login`, CSP internally constructs a `LoginRequest` object that is passed to the services. In addition to user credentials, this object includes:
 
    * **Device ID**: A unique identifier for the device being used.
    * **Tenant Info**: The specific tenant the user is logging into.
@@ -48,7 +48,7 @@ Logging into services involves using a username or email along with a password. 
 The following simplified example shows how CSP handles the login request:
 
 ```
-void UserSystem::Login(const String& UserName, const String& Password,Optional<bool> UserHasVerifiedAge, LoginStateResultCallback Callback) {
+void UserSystem::Login(const String& UserName, const csp::common::String& Email, const String& Password,Optional<bool> UserHasVerifiedAge, LoginStateResultCallback Callback) {
 	// Check if user is logged out or has an error state
 	if (CurrentLoginState.State == ELoginState::LoggedOut ||
 	CurrentLoginState.State == ELoginState::Error) {
@@ -57,6 +57,7 @@ void UserSystem::Login(const String& UserName, const String& Password,Optional<b
 		auto Request = std::make_shared<LoginRequest>();
 		Request->SetDeviceId(CSPFoundation::GetDeviceId());
 		Request->SetUserName(UserName);
+		Request->SetEmail(Email);
 		Request->SetPassword(Password);
 		Request->SetTenant(CSPFoundation::GetTenant());
 		
@@ -101,21 +102,23 @@ Single Sign-On (SSO) is a method that allows CSP users to authenticate using an 
    * A redirect URL where the user will be sent after logging in.
 
 3. **Log in Using the Third-Party Provider with a Token**  
-   CSP receives an authentication token once the user authorizes via the third-party login page. The `LoginToThirdPartyAuthenticationProvider` method processes this token with the state ID and completes the login.
+   CSP receives an authentication token once the user authorizes via the third-party authorization URL. The `LoginToThirdPartyAuthenticationProvider` method processes this token with the state ID and completes the login.
 
 Below is a simplified example showing how to retrieve supported providers and initiate an SSO login:
 
 ```
-// Retrieve supported third-party providers
+// Application retrieves supported third-party providers from CSP
 csp::common::Array<EThirdPartyAuthenticationProviders> providers =
 	UserSystem->GetSupportedThirdPartyAuthenticationProviders();
 	
-// Get authorization URL for the selected provider
+// Application gets authorization URL for the selected provider
 UserSystem->GetThirdPartyProviderAuthoriseURL(providers[0], RedirectURL, [](StringResultCallback callback) {
 	// Authorisation URL returned
 });
 
-// Log in with third-party token
+// Application redirects user to the third-party authorization URL and retrieves the token once the user has logged in
+
+// Application logs in via CSP in with third-party token
 UserSystem->LoginToThirdPartyAuthenticationProvider(ThirdPartyToken, ThirdPartyStateId, Optional<bool>(), LoginStateResultCallback);
 ```
 
@@ -131,7 +134,7 @@ UserSystem->LoginToThirdPartyAuthenticationProvider(ThirdPartyToken, ThirdPartyS
 
 Guest Login provides temporary access to services for users who do not have an account. It allows these users to explore the platform without creating login credentials, offering a simple way to experience the platform with limited functionality.
 
-### Steps for Guest Login
+There are some aspects of guest login to be aware of when considering supporting it in your application.
 
 1. **No Need for Username or Email**  
    Unlike standard login, Guest Login does not require a username or email. Instead, the system uses a **Device ID** and **Tenant Information** to identify the user.
@@ -169,7 +172,9 @@ static_cast<AuthenticationApi*>(AuthenticationAPI)->apiV1UsersLoginAsGuestPost(R
 
 ## Login with a Refresh Token
 
-Login with a refresh token allows users to maintain their session without repeatedly entering login credentials. Once authenticated, CSP issues a refresh token that the client can use to extend the session or login again. This method improves user convenience and security by managing sessions in the background.
+Login with a refresh token allows users to maintain their session without repeatedly entering login credentials.
+
+Once authenticated, CSP issues a refresh token that the client can retrieve and store to extend the session or login again. This method improves user convenience and security by managing sessions in the background.
 
 ### How It Works
 
@@ -207,15 +212,15 @@ UserSystem->LoginWithRefreshToken(UserId, StoredRefreshToken, [](LoginStateResul
 
 Logging out in CSP ends the user’s session, disconnecting them from all services, including multi-user features. It ensures the user’s credentials are no longer active, protecting their account and preventing unauthorized access.
 
-### Steps for Logging Out
+### How it works
 
 1. **Constructing a Logout Request**  
-   To log out, the system first constructs a `LogoutRequest`. This request includes the user’s **User ID** and **Device ID** to ensure the correct session is terminated.
+   Upon log out, CSP first constructs a `LogoutRequest`. This request includes the user’s **User ID** and **Device ID** to ensure the correct session is terminated.
 
-2. **Handling Responses**  
+2. **Handling responses**  
    The logout request triggers a response handler confirming whether the logout was successful or an error occurred. The response includes feedback on whether the session ended correctly.
 
-3. **Disconnection from Multi-users Services**  
+3. **Disconnection from multi-user services**  
    CSP also disconnects the user from any active multi-user connections. This step ensures the user is no longer connected to real-time services that require ongoing authentication.
 
 Below is an example of how CSP handles the logout process:

@@ -1,18 +1,18 @@
 # Settings
 
-The Settings System in the Connected Space Platform (CSP) allows users to manage their preferences and settings across all CSP-enabled applications. It provides a unified way for users to control their experience, ensuring consistency no matter which application they use.
+The `SettingsSystem` in the Connected Space Platform (CSP) allows users to manage their preferences and settings across all CSP-enabled applications. It provides a unified way for users to control their experience, ensuring consistency no matter which application they use.
 
-The Settings System stores user settings in the cloud. These settings are linked to the user's profile and are automatically synchronized across all CSP-enabled applications. For example, if a user changes their avatar in one application, the same avatar will appear in all other applications that support CSP. This synchronization guarantees a seamless experience for users, allowing them to move effortlessly between different applications without losing their personalized settings.
+The system stores user settings in the cloud. These settings are linked to the user's profile and are automatically synchronized across all CSP-enabled applications. 
 
-The main purpose of the Settings System is to maintain a consistent user experience across various CSP-enabled applications. It achieves this by ensuring that all user settings, such as preferences for newsletters or avatars, are applied uniformly. Users only need to set their preferences once, and the settings will be honored across all platforms that use CSP. This helps to build a cohesive and user-friendly ecosystem.
+For example, if a user changes their avatar in one application, the same avatar will appear in all other applications that support CSP. This synchronization guarantees a seamless experience for users, allowing them to move effortlessly between different applications without losing their personalized settings.
 
-The Settings System is designed with privacy in mind. CSP focuses on using non-personally identifiable information wherever possible. This approach minimizes the risk of exposing sensitive data and ensures compliance with data protection standards. Settings related to personal information, such as user choices or preferences, are handled securely and stored only when necessary.
-
-In CSP, users can change their settings to customize their experience across CSP-enabled applications. These settings are stored in the cloud to ensure consistency across all CSP-enabled applications. For instance, if a user updates their avatar in one application, the change will reflect in all other CSP-enabled applications they use. This flexibility allows users to maintain their preferences regardless of their platform or device.
+The `SettingsSystem` is designed with privacy in mind. CSP focuses on using non-personally identifiable information wherever possible. This approach minimizes the risk of exposing sensitive data and ensures compliance with data protection standards. Settings related to personal information, such as user choices or preferences, are handled securely and stored only when necessary.
 
 ## Understanding the Asynchronous Nature of Setting Changes
 
-When a setting is changed in CSP, the process is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application’s main flow. For example, when a user updates a setting, such as opting into a newsletter, the application sends a request to the server. This request does not block or delay the user’s interaction with the application. Instead, it allows the user to continue using the app while the server processes the update.
+When a setting is changed in CSP, the process is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application’s main flow.
+
+For example, when a user updates a setting, such as opting into a newsletter, the application sends a request to the server. This request does not block or delay the user’s interaction with the application. Instead, it allows the user to continue using the app while the server processes the update.
 
 The asynchronous nature of setting changes is crucial for maintaining application responsiveness and ensuring a smooth user experience. Once the setting change is processed, a callback function confirms the result.
 
@@ -21,10 +21,16 @@ The asynchronous nature of setting changes is crucial for maintaining applicatio
 Here is a detailed guide on how to change a setting for the current user:
 
 1. **Select the Desired Setting:**   
-   Identify the specific setting you want to change. CSP provides several settings that users can modify, such as opting in or out of newsletters, managing recently visited spaces, or updating an avatar. Each setting has a dedicated setter function provided by the CSP API, designed to handle the specific type of data or preference being updated.  
+   Identify the specific setting you want to change. CSP provides several settings that users can modify, such as opting in or out of newsletters, managing recently visited spaces, or updating an avatar.
+
+   Each setting has a dedicated setter function provided by the CSP API, designed to handle the specific type of data or preference being updated.  
+
 2. **Invoke the Corresponding Setter Function:**   
-   You need to call the appropriate setter function to change the selected setting. Each setting in CSP has a unique function for setting its value. For instance, to change the user's acceptance of a Non-Disclosure Agreement (NDA), use the `SetNDAStatus` function. When calling this function, you must provide the new value (e.g., true or false for a boolean setting) and a callback function to handle the response from the server.  
-   Example for changing the NDA status:
+   You need to call the appropriate setter function to change the selected setting. Each setting in CSP has a unique function for setting its value.
+
+   For instance, to change the user's acceptance of a Non-Disclosure Agreement (NDA), use the `SetNDAStatus` function. When calling this function, you must provide the new value (e.g., true or false for a boolean setting) and a callback function to handle the response from the server.  
+   
+   Example client application code for changing the NDA status:
 
 ```
 // Define the desired NDA status
@@ -45,10 +51,13 @@ SettingsSystem->SetNDAStatus(NDAStatus, [](const csp::systems::NullResult& Resul
 });
 ```
 
-In this example, the `SetNDAStatus` function sets the new value and uses a callback to handle the response from the server once the setting update is processed.
+In this example, the application invokes the `SetNDAStatus` function to set the new value and uses the provided callback to handle the response from the server once the setting update is processed.
 
 3. **Handle Callbacks to Confirm Changes:**   
-   The callback function is crucial in confirming whether the setting change was successful. When the server processes the request, it returns a result indicating success or failure. The callback function evaluates this result to determine the next steps. If the result indicates success (`EResultCode::Success`), the application can proceed with actions such as notifying the user or refreshing the settings interface. If there is an error, the callback function should handle it appropriately, including displaying an error message, providing user guidance, or attempting the change again.  
+   The callback function is crucial in confirming whether the setting change was successful. When the server processes the request, it returns a result indicating success or failure. The callback function can evaluate this result to determine the next steps.
+
+   If the result indicates success (`EResultCode::Success`), the application can proceed with actions such as notifying the user or refreshing the settings interface. If there is an error, the callback function should handle it appropriately, including displaying an error message, providing user guidance, or attempting the change again.  
+
    Example of handling the callback for a setting change:
 
 ```
@@ -63,15 +72,17 @@ SettingsSystem->SetNewsletterStatus(true, [](const csp::systems::NullResult& Res
 });
 ```
 
-The callback function checks the result code and provides appropriate feedback. This approach keeps the user informed about the status of their request and enhances the overall user experience.
+In this snippet, the callback function checks the result code and provides appropriate feedback. This approach keeps the user informed about the status of their request and enhances the overall user experience.
 
 ## Types of Settings Available for Change
 
-CSP offers various settings that users can modify to personalize their experience across all CSP-enabled applications. These settings help users manage preferences, control privacy, and maintain a consistent experience. Here is a detailed explanation of the available settings, their importance, and the steps to change them.
+CSP offers various settings that users can modify to personalize their experience across all CSP-enabled applications.
+
+These settings help users manage preferences, control privacy, and maintain a consistent experience. Here is a detailed explanation of the available settings, their importance, and the steps to change them.
 
 ### 1\. Acceptance of Non-Disclosure Agreement (NDA)
 
-The acceptance of a Non-Disclosure Agreement (NDA) is required for users to access sensitive information within CSP-enabled applications. Accepting the NDA is critical for protecting confidential data and ensuring compliance with legal requirements.
+The acceptance of a Non-Disclosure Agreement (NDA) may be required for users to access sensitive information within CSP-enabled applications. Accepting the NDA is critical for protecting confidential data and ensuring compliance with legal requirements.
 
 * **Description and Importance**:  
   The NDA status determines whether a user has agreed to the terms governing sensitive information use and confidentiality. This setting must reflect the user's agreement before accessing restricted content.
@@ -120,7 +131,7 @@ SettingsSystem->GetNDAStatus([](const csp::systems::BooleanResult& Result) {
 
 ### 2\. Newsletter Subscription Status
 
-Users can subscribe to or unsubscribe from newsletters and updates sent by CSP-enabled applications. This setting helps users control the type and frequency of communications they receive.
+If your use case involves newsletters, users can subscribe to or unsubscribe from newsletters and updates sent by CSP-enabled applications. This setting helps users control the type and frequency of communications they receive.
 
 * **Details on Opting In or Out**:  
   Opting in means the user will receive regular updates or newsletters, while opting out means they will not receive such communications.
@@ -170,7 +181,7 @@ CSP tracks the spaces a user has recently visited to provide quick access to the
   Tracking recently visited spaces allows users to easily return to spaces they frequently use or have recently interacted with. This helps streamline workflows and improve efficiency.
 
 * **Methods to Add, Retrieve, and Clear Recently Visited Spaces**:  
-  Use the following functions to manage recently visited spaces:
+  The following functions can be used to manage recently visited spaces.
 
   * `AddRecentlyVisitedSpace`: Adds a new space to the top of the recently visited list.
 
@@ -229,7 +240,7 @@ SettingsSystem->ClearRecentlyVisitedSpaces([](const csp::systems::NullResult& Re
 Blocking spaces allows users to avoid unwanted content or interactions, enhancing their experience by filtering out specific spaces.
 
 * **Functionality for Blocking and Unblocking Spaces:**  
-  Users can block or unblock spaces as needed:  
+  Users can block or unblock spaces as needed.
   * `AddBlockedSpace`: Adds a space to the user's blocked list.
 
   * `RemoveBlockedSpace`: Removes a space from the blocked list.
@@ -270,13 +281,13 @@ SettingsSystem->RemoveBlockedSpace(BlockedSpaceID, [](const csp::systems::NullRe
 
 ### 5\. User Avatar Configuration
 
-Users can personalize their appearance across CSP-enabled applications by setting their avatars. CSP supports three avatars: **predefined avatars**, **Ready Player Me avatars**, and **custom avatars**. This flexibility allows users to select an avatar that best represents them digitally.
+Users can personalize their appearance across CSP-enabled applications by setting their avatars. CSP supports three types of avatars: **Predefined avatars**, **Ready Player Me avatars**, and **Custom avatars**. This flexibility allows users to select an avatar that best represents them digitally.
 
 **Types of Avatar Settings:**
 
 * **Predefined**: A set of avatars provided by the application. Users can choose from these built-in options to represent themselves.
 
-* **Ready Player Me**: Avatars created through the third-party platform Ready Player Me. Users can generate a custom 3D avatar and link it to their CSP profile.
+* **Ready Player Me**: Avatars created through the third-party platform [Ready Player Me](https://readyplayer.me/). Users can generate a custom 3D avatar and link it to their CSP profile.
 
 * **Custom**: Any cloud-hosted 3D model that the user chooses. This option allows for maximum personalization by enabling the use of unique, user-generated models.
 
@@ -326,6 +337,10 @@ This code snippet retrieves the avatar type (e.g., `Predefined`, `ReadyPlayerMe`
 
 ## Summary
 
-The Settings System in the Connected Space Platform (CSP) enables users to personalize their experience across all CSP-enabled applications. Users can change key settings, such as NDA acceptance, newsletter subscriptions, recently visited spaces, blocked spaces, and avatar information. Each setting is stored in the cloud and synchronized across applications, ensuring changes are applied consistently.
+The Settings System in the Connected Space Platform (CSP) enables users to personalize their experience across all CSP-enabled applications. Users can change key settings, such as NDA acceptance, newsletter subscriptions, recently visited spaces, blocked spaces, and avatar information. 
 
-Using the Settings System is essential for creating a good user experience. By correctly managing these settings, users can maintain their preferences, control their interactions, and ensure a cohesive experience, no matter which CSP-enabled application they use. This focus on personalization and consistency enhances user satisfaction and engagement across the platform.
+Each setting is stored securely in the cloud and synchronized across applications, ensuring changes are applied consistently. CSP itself stores no personal data.
+
+Using the Settings System is essential for creating a good user experience. By correctly managing these settings, users can maintain their preferences, control their interactions, and ensure a cohesive experience, no matter which CSP-enabled application they use. 
+
+This focus on personalization and consistency enhances user satisfaction and engagement across the platform.
