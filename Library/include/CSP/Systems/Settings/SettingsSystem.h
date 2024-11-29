@@ -130,7 +130,7 @@ public:
 	/// @brief Retrieves the Avatar Portrait information associated with the space
 	/// If the user of the Avatar portrait associated with it the result callback will be successful, the HTTP res code will be ResponseNotFound
 	/// and the Uri field inside the UriResult will be empty
-	/// @param InUserID const csp::common::String : The id of the user we are seelomg to retrieve the portrait for
+	/// @param InUserID const csp::common::String : The id of the user we are seeking to retrieve the portrait for
 	/// @param Callback UriResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback);
 
