@@ -27,6 +27,8 @@
 
 using namespace csp::multiplayer;
 
+const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
+
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
 	// Initialise
@@ -40,7 +42,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
 	// Stop
 	WebSocketStop(WebSocket);
@@ -62,7 +64,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
 	// Send
 	WebSocketSend(WebSocket, "test");
@@ -87,7 +89,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 	LogIn(UserSystem, UserId);
 
 	// Start
-	auto* WebSocket = WebSocketStart("wss://ogs-multiplayer-odev-internal.magnoboard.com/mag-multiplayer/hubs/v1/multiplayer?id=");
+	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
 	// Receive
 	WebSocketSendReceive(WebSocket);
