@@ -67,7 +67,7 @@ In this example, the application invokes the `SetNDAStatus` function to set the 
 		    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Newsletter subscription updated successfully.");
         } else {
 		    // Error handling
-		    CSP_LOG_ERROR\_MSG("Failed to update subscription. Please try again.");
+		    CSP_LOG_ERROR_MSG("Failed to update subscription. Please try again.");
         }
     });
     ```
