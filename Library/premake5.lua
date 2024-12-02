@@ -49,6 +49,7 @@ if not Project then
         files {
             "%{wks.location}/Library/**.h",
             "%{wks.location}/Library/**.cpp",
+			"%{wks.location}/Library/docs/source/**.md",
             "%{wks.location}/modules/csp-services/generated/**.h",
             "%{wks.location}/modules/csp-services/generated/**.cpp"
         }
