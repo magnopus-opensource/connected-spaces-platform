@@ -25,6 +25,9 @@
 
 #include "gtest/gtest.h"
 #include <filesystem>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/writer.h>
 
 
 using namespace std::chrono_literals;
@@ -473,8 +476,8 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 }
 #endif
 
-#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARINFO_TEST
-CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
+#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARINFOSTRING_TEST
+CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoStringTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
@@ -506,6 +509,55 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
 		EXPECT_EQ(ReceivedIdentifier.GetValueType(), csp::common::VariantType::String);
 		EXPECT_EQ(ReceivedIdentifier.GetString(), Identifier);
+	}
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SETTINGSSYSTEM_TESTS || RUN_SETTINGSSYSTEM_AVATARINFOINT_TEST
+CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoIntTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SettingsSystem = SystemsManager.GetSettingsSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	auto Type	   = csp::systems::AvatarType::Custom;
+	int Identifier = 424242;
+
+	// Set Avatar info -- force int even if no longer supported
+	{
+		rapidjson::Document Json;
+		Json.SetObject();
+		Json.AddMember("type", static_cast<int>(Type), Json.GetAllocator());
+		Json.AddMember("identifierType", static_cast<int>(csp::common::VariantType::Integer), Json.GetAllocator());
+
+		Json.AddMember("identifier", rapidjson::Value(Identifier), Json.GetAllocator());
+		rapidjson::StringBuffer Buffer;
+		rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
+		Json.Accept(Writer);
+
+		// TODO: this is not called. manually add a callback and check if received -- await not working (?)
+		SettingsSystem->SetSettingValue("UserSettings", "AvatarInfo", Buffer.GetString(), nullptr);
+	}
+
+	// Get Avatar info -- check that int is retrieved gracefully as a string
+	{
+		auto [Result] = AWAIT(SettingsSystem, GetAvatarInfo);
+
+		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+		EXPECT_EQ(Result.GetAvatarType(), Type);
+
+		const auto& ReceivedIdentifier = Result.GetAvatarIdentifier();
+
+		EXPECT_EQ(ReceivedIdentifier.GetValueType(), csp::common::VariantType::String);
+		EXPECT_EQ(ReceivedIdentifier.GetString(), std::to_string(Identifier).c_str());
 	}
 
 	// Log out

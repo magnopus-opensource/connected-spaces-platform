@@ -22,6 +22,11 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
+CSP_START_IGNORE
+#ifdef CSP_TESTS
+class CSPEngine_SettingsSystemTests_AvatarInfoIntTest_Test;
+#endif
+CSP_END_IGNORE
 
 namespace csp::services
 {
@@ -61,6 +66,9 @@ class CSP_API SettingsSystem : public SystemBase
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
 	friend void csp::memory::Delete<SettingsSystem>(SettingsSystem* Ptr);
+#ifdef CSP_TESTS
+	friend class ::CSPEngine_SettingsSystemTests_AvatarInfoIntTest_Test;
+#endif
 	/** @endcond */
 	CSP_END_IGNORE
 
