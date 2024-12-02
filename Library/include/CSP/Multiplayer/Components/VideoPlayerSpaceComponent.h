@@ -90,7 +90,10 @@ enum class VideoPlayerPropertyKeys
 
 
 /// @ingroup VideoPlayerSpaceComponent
-/// @brief Data representation of an VideoPlayerSpaceComponent.
+/// @brief Enables the playback of video content within the space.
+///
+/// You can use it to stream videos from a URL or play videos stored as assets in CSP, allowing users to watch videos directly within the virtual
+/// environment.
 class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:

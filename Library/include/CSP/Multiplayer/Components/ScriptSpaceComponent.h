@@ -47,7 +47,10 @@ enum class ScriptComponentPropertyKeys
 
 
 /// @ingroup ScriptSpaceComponent
-/// @brief Data representation of a ScriptSpaceComponent.
+/// @brief Enables custom behavior through scripting.
+///
+/// This component allows developers to author scripts that control how entities and components behave based on specific conditions or user actions.
+/// Scripts can modify entity properties, trigger events, or respond to user inputs.
 class CSP_API ScriptSpaceComponent : public ComponentBase
 {
 public:

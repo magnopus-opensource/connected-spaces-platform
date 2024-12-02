@@ -63,7 +63,9 @@ enum class CollisionMode
 
 
 /// @ingroup CollisionSpaceComponent
-/// @brief Data representation of an CollisionSpaceComponent.
+/// @brief Add box, mesh, capsule and sphere colliders to objects in your Space.
+///
+/// These colliders can act as triggers, which can be used in conjunction with Scripts to drive behaviour.
 class CSP_API CollisionSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent
 {
 public:
