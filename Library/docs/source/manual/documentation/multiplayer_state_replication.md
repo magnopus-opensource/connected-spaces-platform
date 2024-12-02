@@ -7,7 +7,7 @@ We use an entity-component model to describe state within a space, which maps to
 ## Setting Data
 A client will access the `SpaceEntity`, and the component of the Space Entity they wish to set a value on. This Component will contain setters for the data the client wishes to set.
 
-As an example, we will use `StaticModelSpaceComponent` to demonstrate, but this would be the same process for any component. Let’s say we wish to set the ModelAssetId of this component and replicate it to other clients. We would use something like the following...
+As an example, we will use `StaticModelSpaceComponent` to demonstrate, but this would be the same process for any component. Let's say we wish to set the ModelAssetId of this component and replicate it to other clients. We would use something like the following...
 
 ```c++
 auto& MyStaticModelComponent = (StaticModelSpaceComponent&) MyEntity->AddComponent(ComponentType::StaticModel);
@@ -100,7 +100,7 @@ switch (Value.GetReplicatedValueType())
 
 As you can see above, we first pack the `Id` for the property, so that we can apply to the correct property in the map on the receiving end. We then pack the type of the replicated value, so that we know what data we should expect when unpacking (This is important as we need to know how many bytes to read, especially for data like strings).
 
-Then, depending on the type of data, we use the appropriate packing function from MsgPack. The code above is clipped to save space, but it currently packs; Bools, Integers, Floats, Strings, Vector3’s and Vector4’s. More can be added if they are needed, but these have suited our use-cases so far.
+Then, depending on the type of data, we use the appropriate packing function from MsgPack. The code above is clipped to save space, but it currently packs; Bools, Integers, Floats, Strings, Vector3's and Vector4's. More can be added if they are needed, but these have suited our use-cases so far.
 
 
 

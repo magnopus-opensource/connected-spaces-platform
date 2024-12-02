@@ -288,7 +288,7 @@ GraphQL is considered an advanced feature for developers who have mastered the s
 
 In CSP, GraphQL queries can retrieve detailed information across multiple databases. For instance, a client application might query for user details along with their related projects and tasks in a single request. 
 
-Here’s an example of a GraphQL query in CSP:
+Here's an example of a GraphQL query in CSP:
 
 ```text
 {

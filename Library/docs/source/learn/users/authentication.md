@@ -1,6 +1,6 @@
 # Authentication
 
-Authentication is the process of verifying a user’s identity before granting access to the Magnopus Cloud Services. It ensures that only authorized individuals can interact with the platform.
+Authentication is the process of verifying a user's identity before granting access to the Magnopus Cloud Services. It ensures that only authorized individuals can interact with the platform.
 
 It is often important for several reasons:
 
@@ -143,9 +143,9 @@ There are some aspects of guest login to be aware of when considering supporting
    Like other login methods, Guest Login requires users to verify that they are over 18. Users who fail to verify their age will be unable to log in.
 
 3. **Similarities with Standard Login**  
-   The Guest Login process follows a structure similar to the standard login flow. However, it simplifies the login request by omitting user-specific credentials and relying only on the user’s device and tenant information.
+   The Guest Login process follows a structure similar to the standard login flow. However, it simplifies the login request by omitting user-specific credentials and relying only on the user's device and tenant information.
 
-Here’s a simplified example of how CSP handles Guest Login:
+Here's a simplified example of how CSP handles Guest Login:
 
 ```
 // Construct Guest Login request
@@ -178,11 +178,11 @@ Once authenticated, CSP issues a refresh token that the client can retrieve and 
 
 ### How It Works
 
-Client applications can register a callback to receive new refresh tokens when a session is created or updated. This is done using the `UserSystem::SetNewLoginTokenReceivedCallback` method. Using the callback, the application can receive and store the token securely, often in persistent storage like the browser’s local storage.
+Client applications can register a callback to receive new refresh tokens when a session is created or updated. This is done using the `UserSystem::SetNewLoginTokenReceivedCallback` method. Using the callback, the application can receive and store the token securely, often in persistent storage like the browser's local storage.
 
 The application may then use the `UserSystem::LoginWithRefreshToken` method to authenticate the user using the token, eliminating the need for the user to log in again manually.
 
-Here’s a simplified example of how CSP handles Login with a Refresh Token:
+Here's a simplified example of how CSP handles Login with a Refresh Token:
 
 ```
 // Register a callback to receive the refresh token
@@ -210,12 +210,12 @@ UserSystem->LoginWithRefreshToken(UserId, StoredRefreshToken, [](LoginStateResul
 
 ## Log out
 
-Logging out in CSP ends the user’s session, disconnecting them from all services, including multi-user features. It ensures the user’s credentials are no longer active, protecting their account and preventing unauthorized access.
+Logging out in CSP ends the user's session, disconnecting them from all services, including multi-user features. It ensures the user's credentials are no longer active, protecting their account and preventing unauthorized access.
 
 ### How it works
 
 1. **Constructing a Logout Request**  
-   Upon log out, CSP first constructs a `LogoutRequest`. This request includes the user’s **User ID** and **Device ID** to ensure the correct session is terminated.
+   Upon log out, CSP first constructs a `LogoutRequest`. This request includes the user's **User ID** and **Device ID** to ensure the correct session is terminated.
 
 2. **Handling responses**  
    The logout request triggers a response handler confirming whether the logout was successful or an error occurred. The response includes feedback on whether the session ended correctly.

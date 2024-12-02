@@ -58,7 +58,7 @@ void MyUnrealCSPComponent::UnregisterActionHandler()
 Script messages are synonymous with events within the CSP scripting runtime environment. Any object with access to the Script Component of a specific SpaceEntity can post messages to it. The Script Component can then define how it responds to that message.
 
 ### Sending Messages between Entity Scripts
-Using the script system, entities can send messages to other entities running scripts. Scripts can post messages to one another using the ‘PostMessage’ function.
+Using the script system, entities can send messages to other entities running scripts. Scripts can post messages to one another using the ‘PostMessage' function.
 
 So when one entity posts a `HeyThere` message...
 
@@ -108,13 +108,13 @@ When a process P recovers from failure, or the failure detector indicates that t
 > 1. If P receives a Coordinator message, it treats the sender as the coordinator.
 
 ### Leader Heartbeat
-The purpose of the leader heartbeat is to allow the leader election system to respond to a connection error with the current leader. Without the heartbeat, if the leader’s connection drops, then all leader functionality (e.g. running scripts) will stop until the server notices that the leader is no longer there, which could currently take up to several minutes.
+The purpose of the leader heartbeat is to allow the leader election system to respond to a connection error with the current leader. Without the heartbeat, if the leader's connection drops, then all leader functionality (e.g. running scripts) will stop until the server notices that the leader is no longer there, which could currently take up to several minutes.
 
 When a client becomes a leader it will start sending periodic heartbeat messages to all other clients. The heartbeat period is configurable, but defaults to every 5 seconds.
 
-Clients expect to receive this heartbeat, and if they don’t receive it after some period of time (again configurable, but currently 3 heartbeat periods) then they will broadcast a ‘Leader Lost’ message to other clients.
+Clients expect to receive this heartbeat, and if they don't receive it after some period of time (again configurable, but currently 3 heartbeat periods) then they will broadcast a ‘Leader Lost' message to other clients.
 
-If enough ‘Leader Lost’ messages are received by any client then they will initiate a new leader election.
+If enough ‘Leader Lost' messages are received by any client then they will initiate a new leader election.
 
 The purpose of this approach is to try and avoid a re-election being caused by just one or two clients temporarily losing contact with the leader. Instead a majority must agree before the election is triggered.
 

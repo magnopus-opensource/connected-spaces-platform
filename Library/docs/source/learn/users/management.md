@@ -56,7 +56,7 @@ Optional arguments include:
 
 ### How it works
 
-Once the `CreateUser` method is invoked, CSP begins the process of generating a user profile. Here’s a step-by-step account of the steps it takes to create a new user:
+Once the `CreateUser` method is invoked, CSP begins the process of generating a user profile. Here's a step-by-step account of the steps it takes to create a new user:
 
 1\. **Construct the CreateUserRequest Object**  
    * CSP begins by constructing the `CreateUserRequest` object. This object will hold all the necessary information for the new user.
@@ -161,9 +161,9 @@ The CSP API is designed to ensure that password resetting is done in a secure ma
 
 ### Step-by-Step Guide to Resetting a Password
 
-**Step 1: Confirming the User’s Email**
+**Step 1: Confirming the User's Email**
 
-Before resetting the password, confirm the user’s email address. This step ensures that the reset request comes from the legitimate user.
+Before resetting the password, confirm the user's email address. This step ensures that the reset request comes from the legitimate user.
 
 **Step 2: Invoking ForgotPassword**
 
@@ -210,15 +210,15 @@ CSP provides a straightforward method for updating the display name: `UpdateUser
 
 ### Step-by-Step Guide to Updating Display Name
 
-Here’s how to update a user’s display name using the `UpdateUserDisplayName` method:
+Here's how to update a user's display name using the `UpdateUserDisplayName` method:
 
 **Step 1: Retrieving User Profile Information**
 
-Before making changes, you must retrieve the user’s current profile information. This can be done using methods like `GetProfileByUserId` to ensure you have the correct user data.
+Before making changes, you must retrieve the user's current profile information. This can be done using methods like `GetProfileByUserId` to ensure you have the correct user data.
 
 **Step 2: Modifying the Display Name**
 
-Once you have the user’s profile, allow them to modify the display name to their desired value.
+Once you have the user's profile, allow them to modify the display name to their desired value.
 
 **Step 3: Sending an Update Request**
 
@@ -299,4 +299,4 @@ This topic covered some of the key aspects of managing user authentication withi
 
 User creation is the foundation of access management. By creating unique user profiles, administrators ensure that each user has the proper permissions and access to the necessary resources. It also enables the platform to control who can log in and what actions they are authorized to perform.
 
-By managing users efficiently, CSP ensures secure access control, improved user experience, and compliance with privacy standards. These elements form the backbone of CSP’s robust authentication system, ensuring the platform remains secure and user-friendly.
+By managing users efficiently, CSP ensures secure access control, improved user experience, and compliance with privacy standards. These elements form the backbone of CSP's robust authentication system, ensuring the platform remains secure and user-friendly.

@@ -10,9 +10,9 @@ The `SettingsSystem` is designed with privacy in mind. CSP focuses on using non-
 
 ## Understanding the Asynchronous Nature of Setting Changes
 
-When a setting is changed in CSP, the process is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application’s main flow.
+When a setting is changed in CSP, the process is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application's main flow.
 
-For example, when a user updates a setting, such as opting into a newsletter, the application sends a request to the server. This request does not block or delay the user’s interaction with the application. Instead, it allows the user to continue using the app while the server processes the update.
+For example, when a user updates a setting, such as opting into a newsletter, the application sends a request to the server. This request does not block or delay the user's interaction with the application. Instead, it allows the user to continue using the app while the server processes the update.
 
 The asynchronous nature of setting changes is crucial for maintaining application responsiveness and ensuring a smooth user experience. Once the setting change is processed, a callback function confirms the result.
 
@@ -60,17 +60,17 @@ In this example, the application invokes the `SetNDAStatus` function to set the 
 
    Example of handling the callback for a setting change:
 
-```
-SettingsSystem->SetNewsletterStatus(true, [](const csp::systems::NullResult& Result) {
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-		// Successful update
-		CSP_LOG_MSG(csp::systems::LogLevel::Log, "Newsletter subscription updated successfully.");
-    } else {
-		// Error handling
-		CSP_LOG_ERROR\_MSG("Failed to update subscription. Please try again.");
-    }
-});
-```
+    ```
+    SettingsSystem->SetNewsletterStatus(true, [](const csp::systems::NullResult& Result) {
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+		    // Successful update
+		    CSP_LOG_MSG(csp::systems::LogLevel::Log, "Newsletter subscription updated successfully.");
+        } else {
+		    // Error handling
+		    CSP_LOG_ERROR\_MSG("Failed to update subscription. Please try again.");
+        }
+    });
+    ```
 
 In this snippet, the callback function checks the result code and provides appropriate feedback. This approach keeps the user informed about the status of their request and enhances the overall user experience.
 
@@ -293,7 +293,7 @@ Users can personalize their appearance across CSP-enabled applications by settin
 
 **Steps to Set Avatar Information:**
 
-To set or update a user’s avatar, use the `SetAvatarInfo` function. Provide the type of avatar (`Predefined`, `ReadyPlayerMe`, or `Custom`) and the corresponding identifier (such as a URL or an ID) to specify the avatar.
+To set or update a user's avatar, use the `SetAvatarInfo` function. Provide the type of avatar (`Predefined`, `ReadyPlayerMe`, or `Custom`) and the corresponding identifier (such as a URL or an ID) to specify the avatar.
 
 **Example Code to Set Avatar Information:**
 

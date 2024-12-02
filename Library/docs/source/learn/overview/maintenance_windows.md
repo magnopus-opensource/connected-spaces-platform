@@ -140,7 +140,7 @@ Explanation of Callback Mechanism
 
 * **Callback Invocation:** The callback is invoked with the `MaintenanceInfoResult` once the asynchronous operation completes.
 
-* **Result Processing:** Inside the callback, the result can be processed based on the request’s  status (in progress, failed, or successful). This mechanism ensures that the client application can react appropriately to the maintenance information retrieved.
+* **Result Processing:** Inside the callback, the result can be processed based on the request's  status (in progress, failed, or successful). This mechanism ensures that the client application can react appropriately to the maintenance information retrieved.
 
 ## Handling MaintenanceInfo Results
 
