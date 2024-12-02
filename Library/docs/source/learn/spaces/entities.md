@@ -63,46 +63,43 @@ The ComponentBase class is responsible for handling the replicated component pro
 
 There are some important aspects to the ComponentBase class that it is worth reviewing in more detail.
 
-**SubscribeToPropertyChange**
+* **SubscribeToPropertyChange**  
+  This method provides a mechanism by which users can be notified when the value of a specific property changes in their scripts. 
 
-This method provides a mechanism by which users can be notified when the value of a specific property changes in their scripts. 
+* **Actions**  
+  Each component is responsible for managing its own component actions. The ActionHandlers (what to do when an action is invoked) are defined at the client application level as functions to be executed. These actions can then be invoked via authored scripts defined in a Script Component. For example, an application may define ActionHandlers to be invoked for play, pause and reset actions on an AnimatedModelSpaceComponent. These actions can then be invoked via script as shown below:
 
-**Actions**
+  ```
+  animatedModels[0].invokeAction("PauseAnimation", JSON.stringify(animatedModels[0]));
+  ```
 
-Each component is responsible for managing its own component actions. The ActionHandlers (what to do when an action is invoked) are defined at the client application level as functions to be executed. These actions can then be invoked via authored scripts defined in a Script Component. For example, an application may define ActionHandlers to be invoked for play, pause and reset actions on an AnimatedModelSpaceComponent. These actions can then be invoked via script as shown below:
-
-```
-animatedModels[0].invokeAction("PauseAnimation", JSON.stringify(animatedModels[0]));
-```
-
-**Properties and ReplicatedValues**  
-All component properties are backed by the ReplicatedValue type. ReplicatedValues are an intermediate class that enable clients to pack data into types supported by CSP. Under-the-hood a ReplicatedValue uses a Union to handle the internal value.
-
-```
-union InternalValue
-{
-	InternalValue();
-	~InternalValue();
-
-	bool Bool;
-	float Float;
-	int64_t Int;
-	csp::common::String String;
-	csp::common::Vector3 Vector3;
-	csp::common::Vector4 Vector4;
-};
-
-InternalValue Value;
-```
-
-The ReplicatedValue provides type safe CRUD operations on the underlying type.
+* **Properties and ReplicatedValues**  
+  All component properties are backed by the ReplicatedValue type. ReplicatedValues are an intermediate class that enable clients to pack data into types supported by CSP. Under-the-hood a ReplicatedValue uses a Union to handle the internal value.
+  
+  ```
+  union InternalValue
+  {
+  	InternalValue();
+  	~InternalValue();
+  
+  	bool Bool;
+  	float Float;
+  	int64_t Int;
+  	csp::common::String String;
+  	csp::common::Vector3 Vector3;
+  	csp::common::Vector4 Vector4;
+  };
+  
+  InternalValue Value;
+  ```
+  
+  The `ReplicatedValue` provides type-safe CRUD operations on the underlying type.
 
 ## Avatar Entities
 
 In CSP, **Avatar Entities** represent users within a multi-user space. These entities serve as the visual and interactive representations of users, allowing them to participate in the virtual environment. However, **Avatar Entities** are not fundamentally different from other entities in their structure; they are essentially **space entities** with specific components attached.
 
 **AvatarSpaceComponent**
-
 The `AvatarSpaceComponent` is a special component that is automatically attached when creating an avatar entity. This component gives the avatar its identity and role within the space. It handles everything related to the user's presence, including the display of the user's visual model and replicated motion.
 
 ### The Difference Between Avatar Entities and Object Entities
