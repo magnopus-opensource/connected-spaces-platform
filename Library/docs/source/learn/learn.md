@@ -130,4 +130,5 @@ You will learn about how spaces are structured, how content relates to them, and
    :titlesonly:
 
    spaces/management
+   spaces/entities
 ```
