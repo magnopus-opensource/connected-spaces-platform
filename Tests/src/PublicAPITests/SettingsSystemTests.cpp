@@ -533,6 +533,13 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoIntTest)
 
 	// Set Avatar info -- force int even if no longer supported
 	{
+		bool CallbackCalled = false;
+
+		csp::systems::NullResultCallback Callback = [&CallbackCalled](const csp::systems::NullResult& Result)
+		{
+			CallbackCalled = true;
+		};
+
 		rapidjson::Document Json;
 		Json.SetObject();
 		Json.AddMember("type", static_cast<int>(Type), Json.GetAllocator());
@@ -543,8 +550,10 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoIntTest)
 		rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
 		Json.Accept(Writer);
 
-		// TODO: this is not called. manually add a callback and check if received -- await not working (?)
-		SettingsSystem->SetSettingValue("UserSettings", "AvatarInfo", Buffer.GetString(), nullptr);
+		SettingsSystem->SetSettingValue("UserSettings", "AvatarInfo", Buffer.GetString(), Callback);
+
+		WaitForCallback(CallbackCalled);
+		EXPECT_TRUE(CallbackCalled);
 	}
 
 	// Get Avatar info -- check that int is retrieved gracefully as a string
