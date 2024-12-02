@@ -26,6 +26,7 @@
 CSP_NO_EXPORT
 
 
+/** @cond DO_NOT_DOCUMENT */
 namespace
 {
 
@@ -36,6 +37,7 @@ template <typename T> void DefaultDestructor(T* Pointer)
 }
 
 } // namespace
+/** @endcond */
 
 
 namespace csp::common
