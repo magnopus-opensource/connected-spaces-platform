@@ -6,13 +6,13 @@ Tenants are necessary for securely organizing and managing resources. They help 
 
 ## What is an MCS Tenant?
 
-An MCS (Magnopus Cloud Services) tenant is a dedicated instance within the services backend specifically designed to segregate users and their data from others. Each MCS tenant operates independently, ensuring that data and interactions remain isolated.
+A tenant is a dedicated instance within the services backend specifically designed to segregate users and their data from others. Each MCS tenant operates independently, ensuring that data and interactions remain isolated.
 
 A developer building a CSP-powered application requires their own tenant to ensures that users of their application cannot interact with users of a different CSP-powered application.
 
 ## Multi-Tenancy in MCS
 
-Multi-tenancy is an architecture where a single cloud hosted environment  and its supporting infrastructure are shared among two or more tenants at the same time. While each tenant's data is isolated from the other tenants, each tenant shares a single database and SaaS server with the others.
+Multi-tenancy is an architecture where a single cloud hosted environment  and its supporting infrastructure are shared among two or more tenants at the same time. While each tenant's data is isolated from all other tenants' data, each tenant shares a single database and SaaS server with the others.
 
 With MCS, this means that one environment can host multiple tenants, each with its own segregated data. 
 

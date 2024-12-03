@@ -1,10 +1,10 @@
 # Authentication
 
-Authentication is the process of verifying a user's identity before granting access to the Magnopus Cloud Services. It ensures that only authorized individuals can interact with the platform.
+Authentication is the process of verifying a user's identity before granting access to the cloud-hosted services. It ensures that only authorized individuals can interact with the platform.
 
 It is often important for several reasons:
 
-* **Security**: It protects sensitive data by ensuring that only authenticated users can access Magnopus Cloud Services.
+* **Security**: It protects sensitive data by ensuring that only authenticated users can access the services.
 
 * **Personalized Experience**: Users have tailored access based on their account, including saved settings and preferences.
 
@@ -28,7 +28,7 @@ It is often important for several reasons:
    Logging out terminates the session, ensuring no unauthorized access continues after the user is finished.
 
 ## Log in
-Logging into services involves using a username or email along with a password. This allows users to access Magnopus Cloud Services and interact with their environment. The login process is handled by CSP's `UserSystem::Login` method, which ensures secure authentication. 
+Logging into services involves using a username or email along with a password. This allows users to access the cloud-hosted services and interact with their environment. The login process is handled by CSP's `UserSystem::Login` method, which ensures secure authentication. 
 
 ### Steps for Logging In
 

@@ -2,7 +2,7 @@
 
 The `SettingsSystem` in the Connected Space Platform (CSP) allows users to manage their preferences and settings across all CSP-enabled applications. It provides a unified way for users to control their experience, ensuring consistency no matter which application they use.
 
-The system stores user settings in the cloud. These settings are linked to the user's profile and are automatically synchronized across all CSP-enabled applications. 
+The system stores user settings in the cloud hosted services CSP has been configured to use. These settings are linked to the user's profile and are automatically synchronized across all CSP-enabled applications. 
 
 For example, if a user changes their avatar in one application, the same avatar will appear in all other applications that support CSP. This synchronization guarantees a seamless experience for users, allowing them to move effortlessly between different applications without losing their personalized settings.
 
@@ -10,7 +10,7 @@ The `SettingsSystem` is designed with privacy in mind. CSP focuses on using non-
 
 ## Understanding the Asynchronous Nature of Setting Changes
 
-When a setting is changed in CSP, the process is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application's main flow.
+When a setting is changed in CSP, the process of transmitting and applying the update at the services-level is handled asynchronously. Asynchronous operations allow tasks to run in the background without interrupting the application's main flow.
 
 For example, when a user updates a setting, such as opting into a newsletter, the application sends a request to the server. This request does not block or delay the user's interaction with the application. Instead, it allows the user to continue using the app while the server processes the update.
 

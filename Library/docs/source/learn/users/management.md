@@ -253,7 +253,7 @@ To ensure user profile security in CSP, follow these practices:
   * Passwords should be unique and changed regularly.
 
 * **Confirm Emails**:  
-  * Require users to confirm their email addresses during registration.
+  * Require users to confirm their email address during registration.
   * Verified emails ensure accounts are legitimate and aid in password recovery.
 
 * **Avoid Plain Text Passwords**:  
@@ -262,7 +262,7 @@ To ensure user profile security in CSP, follow these practices:
 
 ### User Experience Enhancements
 
-To enhance user experience in managing profiles, consider these strategies:
+To enhance the user experience when managing profiles, consider these strategies:
 
 * **Simplify Password Resets**:  
   * Provide clear user-friendly interfaces for resetting passwords.

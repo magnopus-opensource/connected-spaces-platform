@@ -122,7 +122,7 @@ We will cover user account creation, how to log in and out via the API, how user
 
 This series introduces the notion of what a space is, in the context of CSP.
 
-You will learn about how spaces are structured, how content relates to them, and gain an addition overview of space scene hierarchies.
+You will learn how spaces are structured, how content relates to them, and gain an addition overview of space scene hierarchies.
 
 ```eval_rst
 .. toctree::

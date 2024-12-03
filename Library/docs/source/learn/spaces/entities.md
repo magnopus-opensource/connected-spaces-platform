@@ -2,9 +2,9 @@
 
 In CSP, **Spaces** are environments where multi-user experiences take place. These virtual spaces are populated with objects and interactive elements to create rich, immersive worlds. At the core of these spaces are space entities, which act as the building blocks for everything you see and interact with.
 
- A SpaceEntity is a conceptual object that acts as a parent transform within a Space. It does not have any inherent visual representation but serves as a foundation to which child components can be added. These components define the visual and interactive behavior of the SpaceEntity, allowing for rich and dynamic interactions within the Space.
+ A `SpaceEntity` is a conceptual object that acts as a parent transform within a Space. It does not have any inherent visual representation but serves as a foundation to which child components can be added. These components define the visual and interactive behavior of the `SpaceEntity`, allowing for rich and dynamic interactions within the Space.
 
-Unlike a "container" (which implies merely holding properties), a SpaceEntity manages and integrates these properties, such as position, rotation, and scale, as part of its role in facilitating transformations and interactions in the 3D environment. Furthermore, space entities support CRUD operations for components, handle their multiplayer replication, and coordinate updates.
+Unlike a "container" (which implies merely holding properties), a `SpaceEntity` manages and integrates these properties, such as position, rotation, and scale, as part of its role in facilitating transformations and interactions in the 3D environment. Furthermore, space entities support CRUD operations for components, handle their multiplayer replication, and coordinate updates.
 
 ## Types of Space Entities in CSP
 
@@ -12,8 +12,8 @@ In CSP, the `SpaceEntity` is the core object that populates the virtual environm
 
 There are two types of space entities: **Avatar Entities** and **Object Entities**. Each type serves a different purpose, whether representing users or inanimate objects within the Space. These entities allow for interaction and visual representation, creating immersive experiences.
 
-* **Avatars** are used to represent the Avatar representation of all players in a Space. At a minimum they comprise a SpaceEntity, with a SpaceEntityType of Avatar, and a single AvatarSpaceComponent.  
-* **Objects** represent everything else in your Space. They have no components added by default (unlike an Avatar which has the AvatarSpaceComponent automatically attached), but can have components added to define the visual elements and behaviour of your experience.
+* **Avatars** are the avatar representations of users in spaces. At a minimum they comprise a `SpaceEntity`, with a `SpaceEntityType` of Avatar, and a single AvatarSpaceComponent.  
+* **Objects** represent everything else in your Space. They have no components added by default (unlike an Avatar which has the AvatarSpaceComponent automatically attached), but can have components added to define the visual elements and behavior of your experience.
 
 ### Avatar Entities
 
@@ -60,7 +60,7 @@ Each component introduces specific functionality to the overall composition, ena
 * A `ButtonSpaceComponent` adds a button as a child, introducing a clickable element.  
 * An `AudioSpaceComponent` plays sound, enhancing the immersive experience.
 
-These components allow the SpaceEntity to act as a parent for various functionalities, combining them to create a cohesive and dynamic entity in the virtual environment.
+These components allow the `SpaceEntity` to act as a parent for various functionalities, combining them to create a cohesive and dynamic entity in the virtual environment.
 
 The relationship between entity and component in CSP is hierarchical. The `SpaceEntity` is at the top of this hierarchy and serves as the parent.  The attached components act as children, each responsible for a specific aspect of the entity's behavior or appearance. 
 
@@ -112,7 +112,7 @@ In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created
 
 1. **Entity Creation** 
 
-    The first step in the entity lifecycle is **creating a** SpaceEntity. A SpaceEntity acts as the base object, which can represent anything from a user's avatar to an inanimate object like furniture. Each SpaceEntity is instantiated with basic properties like position and can be customized by attaching various components.
+    The first step in the entity lifecycle is **creating a** space entity. A `SpaceEntity` acts as the base object, which can represent anything from a user's avatar to an inanimate object like furniture. Each `SpaceEntity` is instantiated with basic properties like position and can be customized by attaching various components.
 	
 	```
     EntityCreatedCallback callback = [](SpaceEntity* entity) {
@@ -122,18 +122,18 @@ In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created
 	SpaceEntity* entity = spaceEntitySystem->CreateEntity("myEntityName", transform, callback);
 	```
 
-    This code creates a new SpaceEntity within the space. Once created, you can modify this entity by adding components that define its behavior and appearance.
+    This code creates a new `SpaceEntity` within the space. Once created, you can modify this entity by adding components that define its behavior and appearance.
 
 2. **Component Addition/Modification**
 
-	After creating a SpaceEntity, you can add or modify components to control its interaction, visual appearance, or other behavior. Components are child objects that give the entity functionality, such as movement, rendering, or interaction.
+	After creating a `SpaceEntity`, you can add or modify components to control its interaction, visual appearance, or other behavior. Components are child objects that give the entity functionality, such as movement, rendering, or interaction.
 	
 	```
 	StaticModelSpaceComponent* model = entity->AddComponent(ComponentType::StaticModel);
 	model->SetExternalResourceAssetId("table_model");
 	```
 
-    In this example, a static model component is added to the SpaceEntity, representing a table in the virtual space. You can also modify components to refine their behavior or appearance as needed.
+    In this example, a static model component is added to the `SpaceEntity`, representing a table in the virtual space. You can also modify components to refine their behavior or appearance as needed.
 
 3. **Multi-User Replication**
 
@@ -153,7 +153,7 @@ In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created
 	space->DestroyEntity(entity);
 	```
 
-    This command deletes a SpaceEntity, removing it from the space.
+    This command deletes a `SpaceEntity`, removing it from the space.
 
 ### Importance of SpaceEntityUpdates
 
