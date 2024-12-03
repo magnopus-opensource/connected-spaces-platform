@@ -3083,12 +3083,16 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
 		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 	}
 
 	// Test setting the parent for the second child
@@ -3106,11 +3110,13 @@ void RunParentChildDeletionTest(bool Local)
 			});
 
 		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
-
 		CreatedChildEntity2->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 	}
 
 	// Delete the first child
@@ -3129,6 +3135,8 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_TRUE(DestroyCalled);
 
 		// Check entity is  unparented correctly
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 2);
+
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 
