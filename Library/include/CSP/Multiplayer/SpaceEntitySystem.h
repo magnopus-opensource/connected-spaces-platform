@@ -359,6 +359,7 @@ private:
 	void BindOnObjectPatch();
 	void BindOnRequestToSendObject();
 	void BindOnRequestToDisconnect() const;
+	void BindOnRequestToLeaveScopes();
 
 	void GetEntitiesPaged(int Skip, int Limit, const std::function<void(const signalr::value&, std::exception_ptr)>& Callback);
 	std::function<void(const signalr::value&, std::exception_ptr)> CreateRetrieveAllEntitiesCallback(int Skip);

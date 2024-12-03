@@ -654,6 +654,17 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
 				   });
 }
 
+void SpaceEntitySystem::BindOnRequestToLeaveScopes()
+{
+	Connection->On("OnRequestToLeaveScopes",
+				   [this](const signalr::value& Params)
+				   {
+					   std::vector<signalr::value> const InvokeArguments = {Params}; // Params: string[] Scopes, string Reason
+					   // I have no idea what I am supposed to do here.
+					   Connection->Invoke("RequestToLeaveScopes", InvokeArguments);
+				   });
+}
+
 void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
 {
 	Connection = InConnection;
@@ -663,6 +674,8 @@ void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InCon
 	BindOnObjectPatch();
 
 	BindOnRequestToSendObject();
+
+	BindOnRequestToLeaveScopes(); // FIXME OR: does the order matter here????
 
 	BindOnRequestToDisconnect();
 }
