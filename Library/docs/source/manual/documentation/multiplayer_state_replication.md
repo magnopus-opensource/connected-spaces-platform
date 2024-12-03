@@ -84,7 +84,7 @@ for (int i = 0; i < DirtyComponentKeys->Size(); ++i)
 }
 ```
 
-`SerialiseComponent` then iterates over all properties and writes them using MsgPack's property packing to convert the `ReplicatedValues`.
+`SerialiseComponent` then iterates over all properties and writes them using MsgPack's property packing to convert the `ReplicatedValue`s.
 
 ```c++
 PropertyPacker.pack_uint64(Id);

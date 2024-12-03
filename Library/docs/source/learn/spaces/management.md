@@ -1,6 +1,6 @@
 # Space Management
 
-In the CSP, a Space represents a virtual environment where users can interact, collaborate, and engage in multi-user experiences. 
+In CSP, a Space represents a virtual environment where users can interact, collaborate, and engage in multi-user experiences. 
 
 A Space is a container that hosts visual and interactive elements in a virtual environment. It can include various objects, models, avatars, scripts, and other components that create a unique experience for users. Spaces are highly customizable and can be configured to support many different use cases, such as public events, private meetings, or location-based experiences.
 
@@ -105,7 +105,7 @@ When creating a new Space in CSP, you can include a thumbnail image to visually 
 
 ### Using `BufferAssetDataSource`
 
-`ufferAssetDataSource` is used when the thumbnail image is stored in memory as a data buffer instead of a file. This method allows you to upload the thumbnail directly from a buffer, which is useful when the image is generated dynamically or received from an external source.
+`BufferAssetDataSource` is used when the thumbnail image is stored in memory as a data buffer instead of a file. This method allows you to upload the thumbnail directly from a buffer, which is useful when the image is generated dynamically or received from an external source.
 
 **Steps to Use `BufferAssetDataSource`:**
 
@@ -184,7 +184,7 @@ Geolocated Spaces are Spaces tied to specific geographic locations. You can defi
 
 1. **Define the Geolocation Attributes**: Use an array of `GeoLocation` objects to define the boundaries of the geofence.
 
-2. **Update or Delete Geolocation Information**: Utilize the `UpdateSpaceGeoLocation` and `DeleteSpaceGeoLocation` methods to modify or remove the geolocation settings for a Space.
+2. **Update or Delete Geolocation Information**: Invoke the `UpdateSpaceGeoLocation` and `DeleteSpaceGeoLocation` methods to modify or remove the geolocation settings for a Space.
 
 Geolocated Spaces are useful for location-based events or activities, such as local meetups, site-specific collaborations, or augmented reality experiences tied to a real-world location.
 
@@ -392,7 +392,7 @@ When querying for Spaces, the SpaceSystem uses a callback function to handle the
 
 ## Summary
 
-In this topic, you have learned the core concepts and techniques for managing Spaces in the CSP. You now understand how to create, configure, and maintain Spaces to meet different requirements, making them a vital part of any multi-user or collaborative experience.
+In this topic, you have learned the core concepts and techniques for managing spaces in CSP. You now understand how to create, configure, and maintain Spaces to meet different requirements, making them a vital part of any multi-user or collaborative experience.
 
 1. **Creating Spaces**: You can create new Spaces using methods like `CreateSpace` and `CreateSpaceWithBuffer`. These methods allow you to define essential properties, including name, description, access control, and visual thumbnails. You have also learned how to choose the appropriate method for handling Space thumbnails using `FileAssetDataSource` or `BufferAssetDataSource`.
 

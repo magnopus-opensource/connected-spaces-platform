@@ -26,11 +26,11 @@ The `AvatarSpaceComponent` is a special component that is automatically attached
 
 **Avatar Entities** differ from **Object Entities** in one key way. Avatar entities are automatically assigned the AvatarSpaceComponent by default. This gives them the built-in capability to represent a user, whereas object entities do not come with default components and must be customized based on their intended use.
 
-## Transient and Non-Transient Entities
+## Transient and Persistent Entities
 
-In CSP, space entities may be either **transient** or **non-transient (persistent)** based on whether they should persist in a space.
+In CSP, space entities may be either **transient** or **persistent (non-transient)** based on whether they should persist in a space.
 
-The distinction between transient and non-transient entities plays a significant role in creating a consistent multi-user experience. Setting persistence incorrectly can lead to issues in the user experience.
+The distinction between transient and persistent entities plays a significant role in creating a consistent multi-user experience. Setting persistence incorrectly can lead to issues in the user experience.
 
 ### Transient Entities
 
@@ -40,13 +40,13 @@ An example of a transient entity is the **Avatar Entity**. Since an avatar repre
 
 Transient entities are particularly useful in scenarios where real-time interaction is essential, but the presence of certain entities is tied directly to specific users. By making these entities transient, you prevent unused or irrelevant objects from lingering in the space, which could otherwise lead to visual clutter or even performance issues.
 
-### Non-Transient (Persistent) Entities
+### Persistent Entities
 
-**Non-transient (persistent) entities** are objects that remain in the space, regardless of whether users are present. These entities are intended to persist across user sessions and to remain in the space to maintain continuity.
+**Persistent (non-transient) entities** are objects that remain in the space, regardless of whether users are present. These entities are intended to persist across user sessions and to remain in the space to maintain continuity.
 
-An example of a non-transient entity is a piece of furniture or other decorative items. These objects are part of the space's design and are not tied to the presence of any specific user. As such, they must remain in place even when no users are actively in the environment. Persistent entities create a stable environment that doesn't change unexpectedly when users leave, ensuring that the space looks the same for each user every time they log in.
+An example of a persistent entity is a piece of furniture or other decorative items. These objects are part of the space's design and are not tied to the presence of any specific user. As such, they must remain in place even when no users are actively in the environment. Persistent entities create a stable environment that doesn't change unexpectedly when users leave, ensuring that the space looks the same for each user every time they log in.
 
-Non-transient entities are ideal for objects that define the space's structure, behavior or aesthetic and must be available at all times. These can range from simple visual elements, like a painting on the wall, to more functional objects, like furniture or interactive devices that users can engage with whenever they are present in the space.
+Persistent entities are ideal for objects that define the space's structure, behavior or aesthetic and must be available at all times. These can range from simple visual elements, like a painting on the wall, to more functional objects, like furniture or interactive devices that users can engage with whenever they are present in the space.
 
 ## The Role of Components
 
@@ -84,8 +84,8 @@ There are some important aspects to the ComponentBase class that it is worth rev
   animatedModels[0].invokeAction("PauseAnimation", JSON.stringify(animatedModels[0]));
   ```
 
-* **Properties and ReplicatedValues**  
-  All component properties are backed by the ReplicatedValue type. ReplicatedValues are an intermediate class that enable clients to pack data into types supported by CSP. Under-the-hood a ReplicatedValue uses a Union to handle the internal value.
+* **Properties and the ReplicatedValue type**  
+  All component properties are backed by the ReplicatedValue type. ReplicatedValue is an intermediate class that enable clients to pack data into types supported by CSP. Under-the-hood a ReplicatedValue uses a Union to handle the internal value.
   
   ```
   union InternalValue
@@ -112,7 +112,7 @@ In CSP, the `SpaceEntitySystem` governs how objects (space entities) are created
 
 1. **Entity Creation** 
 
-    The first step in the entity lifecycle is **creating a** space entity. A `SpaceEntity` acts as the base object, which can represent anything from a user's avatar to an inanimate object like furniture. Each `SpaceEntity` is instantiated with basic properties like position and can be customized by attaching various components.
+    The first step in the entity lifecycle is **creating** a space entity. A `SpaceEntity` acts as the base object, which can represent anything from a user's avatar to an inanimate object like furniture. Each `SpaceEntity` is instantiated with basic properties like position and can be customized by attaching various components.
 	
 	```
     EntityCreatedCallback callback = [](SpaceEntity* entity) {

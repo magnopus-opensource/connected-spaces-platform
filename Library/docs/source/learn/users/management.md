@@ -2,9 +2,9 @@
 
 Managing users within the Connected Spaces Platform (CSP) is vital for effective access control.
 
-In CSP, user management focuses on creating and maintaining user profiles. Within the serivices being used, each profile contains personal information like usernames, email addresses, and display names. It should be noted that CSP itself will never store any personal user data.
+In CSP, user management focuses on creating and maintaining user profiles. Within the services being used, each profile contains personal information like usernames, email addresses, and display names. It should be noted that CSP itself will never store any personal user data.
 
-CSP supports several features to support efficient management of these profiles, such as creating users, resetting passwords, and updating profile information. The system is designed to ensure a secure and flexible environment for handling user accounts. 
+CSP offers several features to support efficient management of these profiles, such as creating users, resetting passwords, and updating profile information. The system is designed to ensure a secure and flexible environment for handling user accounts. 
 
 The login process is at the core of this, ensuring users authenticate themselves before accessing any services or resources.
 
@@ -22,7 +22,7 @@ User creation also enables administrators to define who can log in, what resourc
 
 ### Why Creating Users is Critical for Access Control in CSP
 
-In CSP, user creation is at the heart of managing access control. Every user, whether administrators, developers, or guests, needs an account to interact with the platform. Creating users allows administrators to assign permissions, roles, and settings specific to each individual or group. This structure ensures that sensitive data is protected, and users can only access the areas of the platform they are authorized to use.
+In CSP, user creation is at the heart of managing access control. Every user, whether administrator, developer, or guest, needs an account to interact with the platform. Creating users allows administrators to assign permissions, roles, and settings specific to each individual or group. This structure ensures that sensitive data is protected, and users can only access the areas of the platform they are authorized to use.
 
 By defining user roles early, CSP prevents unauthorized access and ensures the system operates securely. Managing user rights would be impossible without proper user creation, leading to security risks and potential system misuse.
 
@@ -56,7 +56,7 @@ Optional arguments include:
 
 ### How it works
 
-Once the `CreateUser` method is invoked, CSP begins the process of generating a user profile. Here's a step-by-step account of the steps it takes to create a new user:
+Once the `CreateUser` method is invoked, CSP begins the process of generating a user profile. Here's the steps it takes to create a new user:
 
 1\. **Construct the CreateUserRequest Object**  
    * CSP begins by constructing the `CreateUserRequest` object. This object will hold all the necessary information for the new user.
@@ -135,19 +135,11 @@ void UserSystem::CreateUser(const Optional<String>& UserName,
 }
 ```
 
-
-
-
-
-
-
-
-
 ## Resetting Password
 
 Password management is a critical part of securing user access in CSP. Strong password policies help protect user accounts from unauthorized access. 
 
-However, users may forget their passwords or need to reset them if they suspect a breach. In these situations, a secure password reset process is essential. It allows users to regain access to their accounts without compromising security, ensuring that passwords remain private and protected from unauthorized parties.
+However, users may forget their password or need to reset them if they suspect a breach. In these situations, a secure password reset process is essential. It allows users to regain access to their accounts without compromising security, ensuring that passwords remain private and protected from unauthorized parties.
 
 ### Password Reset Methods
 
@@ -156,8 +148,6 @@ The CSP API is designed to ensure that password resetting is done in a secure ma
 * `ForgotPassword`: This method initiates the password reset flow by allowing the user to request a reset link. CSP expects the services to send an email with instructions on how to reset the password.
 
 * `ResetUserPassword`: This method is then used by users after verification (performed by them receiving and interacting with a reset link via email).
-
-
 
 ### Step-by-Step Guide to Resetting a Password
 
@@ -171,7 +161,7 @@ Use the `ForgotPassword` method to initiate the password reset process. The syst
 
 The method also accepts three other parameters that govern where the user is taken during the password reset flow.
 
-* `EmailLinkUrl`: Optional email link url including the environment to land on that URL directly.
+* `EmailLinkUrl`: Optional email link URL, including the environment to land on that URL directly.
 * `RedirectUrl`: Optional redirect URL to embed in the generated email link.
 * `UseTokenChangePasswordUrl`: Whether to have the link in the email direct to the Token Change URL.
 
@@ -202,7 +192,7 @@ The application should pass in the token obtained via the email expected to be s
 
 ## Updating Display Name
 
-Keeping user information accurate and updated is important for a good user experience within CSP. Allowing users to update their display name provides flexibility and personalization. This feature helps users maintain current and relevant profiles, reflecting changes in their roles, preferences, or identities. A personalized display name ensures that users are easily recognizable within the platform, enhancing communication and collaboration.
+Keeping user information accurate and updated is important for a good user experience within CSP. Allowing users to update their display name provides flexibility and personalization. This feature helps users maintain a current and relevant profile, reflecting changes in their role, preferences, or identity. A personalized display name ensures that users are easily recognizable within the platform, enhancing communication and collaboration.
 
 ### Updating Display Name Method
 

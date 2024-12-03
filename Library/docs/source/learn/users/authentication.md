@@ -8,7 +8,7 @@ It is often important for several reasons:
 
 * **Personalized Experience**: Users have tailored access based on their account, including saved settings and preferences.
 
-* **GDPR Compliance**: Proper authentication ensures that CSP meets regulatory data protection standards.
+* **GDPR Compliance**: Proper authentication ensures that services meets regulatory data protection standards.
 
 ## Overview of CSP Authentication Methods
 
@@ -274,6 +274,6 @@ In this module, we covered several methods for logging into CSP:
    Implement proper session management by regularly refreshing tokens and securely logging out users when needed. Avoid leaving sessions active unnecessarily, especially for shared or public devices.
 
 3. **Maintain User Trust**  
-   User trust depends on security. Ensure that age verification, secure logouts, and trusted authentication processes are in place. Always comply with GDPR and other relevant data protection laws.
+   User trust depends on security. Ensure that age verification, secure logouts, and trusted authentication processes are in place. Always comply with your target regions' relevant data protection laws.
 
 By following these best practices, CSP ensures a secure and efficient login process for all users while maintaining their trust in the platform's integrity.
