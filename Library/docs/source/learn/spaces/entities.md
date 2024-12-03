@@ -15,7 +15,18 @@ There are two types of space entities: **Avatar Entities** and **Object Entities
 * **Avatars** are used to represent the Avatar representation of all players in a Space. At a minimum they comprise a SpaceEntity, with a SpaceEntityType of Avatar, and a single AvatarSpaceComponent.  
 * **Objects** represent everything else in your Space. They have no components added by default (unlike an Avatar which has the AvatarSpaceComponent automatically attached), but can have components added to define the visual elements and behaviour of your experience.
 
-## Distinction Between Transient and Non-Transient Entities
+### Avatar Entities
+
+In CSP, **Avatar Entities** represent users within a multi-user space. These entities serve as the visual and interactive representations of users, allowing them to participate in the virtual environment. However, **Avatar Entities** are not fundamentally different from other entities in their structure; they are essentially **space entities** with specific components attached.
+
+**AvatarSpaceComponent**
+The `AvatarSpaceComponent` is a special component that is automatically attached when creating an avatar entity. This component gives the avatar its identity and role within the space. It handles everything related to the user's presence, including the display of the user's visual model and replicated motion.
+
+### The Difference Between Avatar Entities and Object Entities
+
+**Avatar Entities** differ from **Object Entities** in one key way. Avatar entities are automatically assigned the AvatarSpaceComponent by default. This gives them the built-in capability to represent a user, whereas object entities do not come with default components and must be customized based on their intended use.
+
+## Transient and Non-Transient Entities
 
 In CSP, space entities may be either **transient** or **non-transient (persistent)** based on whether they should persist in a space.
 
@@ -94,17 +105,6 @@ There are some important aspects to the ComponentBase class that it is worth rev
   ```
   
   The `ReplicatedValue` provides type-safe CRUD operations on the underlying type.
-
-## Avatar Entities
-
-In CSP, **Avatar Entities** represent users within a multi-user space. These entities serve as the visual and interactive representations of users, allowing them to participate in the virtual environment. However, **Avatar Entities** are not fundamentally different from other entities in their structure; they are essentially **space entities** with specific components attached.
-
-**AvatarSpaceComponent**
-The `AvatarSpaceComponent` is a special component that is automatically attached when creating an avatar entity. This component gives the avatar its identity and role within the space. It handles everything related to the user's presence, including the display of the user's visual model and replicated motion.
-
-### The Difference Between Avatar Entities and Object Entities
-
-**Avatar Entities** differ from **Object Entities** in one key way. Avatar entities are automatically assigned the AvatarSpaceComponent by default. This gives them the built-in capability to represent a user, whereas object entities do not come with default components and must be customized based on their intended use.
 
 ## Entity Lifetime Management
 
