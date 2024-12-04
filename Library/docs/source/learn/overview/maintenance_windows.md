@@ -40,7 +40,7 @@ Communication of maintenance windows is crucial for keeping clients informed. MC
 
 ## Maintenance System Architecture
 
-The Maintenance System is a critical component designed to manage and communicate upcoming scheduled maintenance activities that impact the availability of Magnopus Cloud Services. It provides clients with timely information about maintenance windows, ensuring that they are informed about periods when services might be unavailable due to planned maintenance work. 
+The Maintenance System is a critical component designed to manage and communicate upcoming scheduled maintenance activities that impact the availability of the associated cloud-hosted services. It provides clients with timely information about maintenance windows, ensuring that they are informed about periods when services might be unavailable due to planned maintenance work. 
 
 The system uses a structured approach to deliver maintenance updates, describing each window as a `MaintenanceInfo` object. These objects contain details about each maintenance window, such as the description, start time, and end time. By accessing this information through the `GetMaintenanceInfo` method, clients can retrieve up-to-date data regarding scheduled maintenance activities.
 
@@ -140,7 +140,7 @@ Explanation of Callback Mechanism
 
 * **Callback Invocation:** The callback is invoked with the `MaintenanceInfoResult` once the asynchronous operation completes.
 
-* **Result Processing:** Inside the callback, the result can be processed based on the request’s  status (in progress, failed, or successful). This mechanism ensures that the client application can react appropriately to the maintenance information retrieved.
+* **Result Processing:** Inside the callback, the result can be processed based on the request's  status (in progress, failed, or successful). This mechanism ensures that the client application can react appropriately to the maintenance information retrieved.
 
 ## Handling MaintenanceInfo Results
 

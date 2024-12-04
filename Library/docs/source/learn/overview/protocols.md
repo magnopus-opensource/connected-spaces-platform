@@ -2,7 +2,7 @@
 
 A network protocol is a set of rules that control how data is delivered between devices inside the same network. It enables connected devices to interact with one another, independent of differences in internal operations, structure, or design. Network protocols are why people can use their devices to communicate with each other regardless of where they are in the world. Thus, network protocols play an important part in digital communications. 
 
-Just as speaking a common language improves communication between people, network protocols allow devices to engage with one another through preset rules built into the device’s software and hardware.
+Just as speaking a common language improves communication between people, network protocols allow devices to engage with one another through preset rules built into the device's software and hardware.
 
 ## Overview of How Network Protocol Works
 
@@ -29,7 +29,7 @@ The following groups have developed, defined, and published different network pr
 
 Network protocols in CSP facilitate seamless data transmission, ensuring that all applications adhere to the same communication rules. This consistency allows for interoperability, enabling different applications to work together, share data, and perform tasks without compatibility issues.
 
-In CSP, network protocols are important. CSP connects client applications with cloud services. It requires all communication to go through CSP’s API, ensuring that all client applications use the same rules and formats. This guarantees consistent and reliable communication.
+In CSP, network protocols are important. CSP connects client applications with cloud services. It requires all communication to go through CSP's API, ensuring that all client applications use the same rules and formats. This guarantees consistent and reliable communication.
 
 ### How Network Protocols Facilitate Communication in CSP
 

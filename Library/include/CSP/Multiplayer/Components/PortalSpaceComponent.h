@@ -45,14 +45,13 @@ enum class PortalPropertyKeys
 
 /**
  * @ingroup PortalSpaceComponent
- * @brief Data representation of a PortalSpaceComponent.
+ * @brief Add a portal to your space that can be used to teleport users to another configured Space.
  *
  * To ensure the connection to the new space is successful, clients should use the following steps:
  *
  * 1. Store the new space Id by calling PortalSpaceComponent::GetSpaceId()
- * 2. Disconnect by calling MultiplayerConnection::Disconnect()
- * 3. Create a new MultiplayerConnection instance using the space Id from step 1
- * 4. Follow the standard procedure to re-connect to a space
+ * 2. Exit the current space via the space system.
+ * 3. Enter the new one (also via the space system).
  */
 
 class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent
