@@ -87,7 +87,7 @@ In this section, you can find out how the tests work, testing best practices, an
 
 ## Debugging
 
-Inevitably, at some point you will encounter unexpected behaviour in your application, and you'll break out the debugger to diagnose.
+Inevitably, at some point you will encounter unexpected behavior in your application, and you'll break out the debugger to diagnose.
 
 CSP itself is also debuggable, and in this section you can learn how to dive inside the library at runtime.
 

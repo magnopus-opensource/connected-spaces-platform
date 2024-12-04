@@ -1,5 +1,5 @@
 # Magnopus Cloud Services (MCS)
-CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Spaces Platform. These services act as an independent layer that supports both the CSP and client applications. It is not required to use MCS with the Connected Spaces Platform.
+CSP-enabled applications rely on cloud-hosted services to function effectively. Magnopus offers a set of cloud-hosted services, known as Magnopus Cloud Services (MCS), specifically designed for the Connected Spaces Platform. These services act as an independent layer that supports both CSP and client applications. It is not required to use MCS with the Connected Spaces Platform.
 
 It is however recommended to use MCS with CSP, as MCS helps developers simplify development by providing ready-to-use tools and services, reducing the complexity of building and maintaining applications. Selecting MCS as the backend service provider allows the developer to _not_ worry about the services themselves, and exclusively focus on building their spatial-web application using the CSP API.
 
@@ -26,7 +26,7 @@ Security & Access Control is responsible for protecting data and ensuring that o
 
 **3\. Groups, Organizations, and Social Connections**
 
-This component facilitates social interactions and organizational structures within the CSP. Users can form groups, join organizations, and connect with others to collaborate and share experiences. It helps build a community and enhances user engagement.
+This component facilitates social interactions and organizational structures within CSP. Users can form groups, join organizations, and connect with others to collaborate and share experiences. It helps build a community and enhances user engagement.
 
 **4\. Referential Object Definitions and Instances**
 
@@ -42,7 +42,7 @@ Geospatial Databases handle spatial data, which is crucial for accurate and reli
 
 **7\. Economic Engine Interfaces**
 
-Economic Engine Interfaces integrate economic models and transactions into the CSP. This component allows for creating and managing e-commerce and e-ticketing platforms like Shopify and Eventbrite, providing a framework for monetization and financial interactions.
+Economic Engine Interfaces integrate economic models and transactions into CSP. This component allows for creating and managing e-commerce and e-ticketing platforms like Shopify and Eventbrite, providing a framework for monetization and financial interactions.
 
 ## Services Offered by MCS
 
@@ -161,7 +161,7 @@ void AssetSystem::GetAssetCollectionById(const String& AssetCollectionId, AssetC
 }
 ```
 
-* Within CSP, the GetAssetCollectionById method, the AssetCollectionId is used to fetch an AssetCollection from the services. 
+* Within CSP, the GetAssetCollectionById method and the AssetCollectionId are used to fetch an AssetCollection from the services. 
 
 * The Callback object is then invoked by the ResponseHandler (once it has converted an HttpResponse into a Result Object) to notify the client application and provide the result.
 

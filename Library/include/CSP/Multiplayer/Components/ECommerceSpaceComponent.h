@@ -37,7 +37,9 @@ enum class ECommercePropertyKeys
 
 
 // @ingroup ECommerceSpaceComponent
-/// @brief Data representation of an ECommerceSpaceComponent.
+/// @brief Can be used alongside CSP's Stripe integration to add e-commerce to your space.
+///
+/// This component is used to represent physical objects that can be purchased as virtual items in the environment.
 class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent
 {
 public:

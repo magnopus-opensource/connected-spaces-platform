@@ -100,3 +100,35 @@ You will learn about how CSP functions and whether it makes sense for your use-c
    overview/logging
    overview/maintenance_windows
 ```
+
+
+## Users
+
+This series covers how to reason about users in your application, using CSP.
+
+We will cover user account creation, how to log in and out via the API, how users can manage their credentials, and user-specific settings.
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+
+   users/authentication
+   users/management
+   users/settings
+```
+
+## Spaces
+
+This series introduces the notion of what a space is, in the context of CSP.
+
+You will learn how spaces are structured, how content relates to them, and gain an addition overview of space scene hierarchies.
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+
+   spaces/management
+   spaces/entities
+```

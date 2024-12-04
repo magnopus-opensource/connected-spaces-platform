@@ -69,7 +69,7 @@ System logs capture and record the operational activities of  CSP. They help in 
 
 ### Event Logs
 
-Event logs record specific actions or occurrences within the CSP. They are essential for monitoring user activities, tracking events, and understanding system interactions.
+Event logs record specific actions or occurrences within CSP. They are essential for monitoring user activities, tracking events, and understanding system interactions.
 
 **Examples of Event Logs:**
 

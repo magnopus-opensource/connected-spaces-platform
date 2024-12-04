@@ -61,7 +61,7 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 This call does several things:
 * First, it validates the user calling it has the relevant permissions to be in the space given. If not it will reject the call. 
-* Secondly, it sets ‘scopes’, which are a subscription to a set of Entity replication messages. At the time of writing there is a single scope for a space, so any Entity in that space is replicated to any other user in the space. This is due to change in future, with more complex scopes representing ‘layers’ that can be used to alter what data is replicated to which user.
+* Secondly, it sets 'scopes', which are a subscription to a set of Entity replication messages. At the time of writing there is a single scope for a space, so any Entity in that space is replicated to any other user in the space. This is due to change in future, with more complex scopes representing 'layers' that can be used to alter what data is replicated to which user.
 * Thirdly, it retrieves all Entities currently in the space. When received these will trigger the callback in the previous step, allowing the Client to create local representations based on their data.
 
 The Client must wait for the callback to be triggered before assuming the Space has been entered and performing any Entity operations.
@@ -86,4 +86,4 @@ This call does 2 things, it revokes the users authentication (and associated ses
 bool CSPFoundation::Shutdown()
 ```
 
-This call closes out CSP, destroying all Systems and unregistering listeners, tidying memory. It’s not a latent call, so once called, it should be assumed that CSP is now inactive.
+This call closes out CSP, destroying all Systems and unregistering listeners, tidying memory. It's not a latent call, so once called, it should be assumed that CSP is now inactive.
