@@ -366,16 +366,6 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 			Callback(false);
 		}
 
-		csp::common::Array<ComponentUpdateInfo> Info;
-
-		// Manually process the parent updates locally
-		// We want this callback to fire before the deletion so clients can react to children first
-		for (size_t i = 0; i < Children.Size(); ++i)
-		{
-			ResolveEntityHierarchy(Children[i]);
-			Children[i]->EntityUpdateCallback(Children[i], UPDATE_FLAGS_PARENT, Info);
-		}
-
 		Callback(true);
 	};
 
@@ -418,6 +408,25 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 	}
 
 	CSP_DELETE(Keys);
+
+	csp::common::Array<ComponentUpdateInfo> Info;
+
+	RootHierarchyEntities.RemoveItem(Entity);
+
+	// Manually process the parent updates locally
+	// We want this callback to fire before the deletion so clients can react to children first
+	auto ChildrenToUpdate = Children;
+
+	for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
+	{
+		ChildrenToUpdate[i]->ParentId = nullptr;
+		ResolveEntityHierarchy(ChildrenToUpdate[i]);
+
+		if (ChildrenToUpdate[i]->EntityUpdateCallback)
+		{
+			ChildrenToUpdate[i]->EntityUpdateCallback(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
+		}
+	}
 
 	// We break the usual pattern of not considering local state to be true until we get the ack back from CHS here
 	// and instead immediately delete the local view of the entity before issuing the delete for the remote view.
@@ -791,8 +800,6 @@ void SpaceEntitySystem::RemoveEntity(SpaceEntity* EntityToRemove)
 
 	// Remove from the unique set to indicate it could be queued again if needed.
 	PendingOutgoingUpdateUniqueSet->erase(EntityToRemove);
-
-	RootHierarchyEntities.RemoveItem(EntityToRemove);
 }
 
 void SpaceEntitySystem::TickEntities()
