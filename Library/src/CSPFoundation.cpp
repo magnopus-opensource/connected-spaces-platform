@@ -396,7 +396,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 	ClientUserAgentInfo->ClientVersion		= CSP_TEXT(ClientUserAgentHeader.ClientVersion);
 	ClientUserAgentInfo->ClientEnvironment	= CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
 	ClientUserAgentInfo->CHSEnvironment		= CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
-	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
+	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) CSP/%s(%s) CHS(%s) CSP/%s(%s)";
 
 	*ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat,
 													   GetClientUserAgentInfo().ClientSKU.c_str(),
