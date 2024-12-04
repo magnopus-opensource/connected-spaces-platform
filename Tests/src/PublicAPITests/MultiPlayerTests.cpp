@@ -3083,12 +3083,16 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
 		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 	}
 
 	// Test setting the parent for the second child
@@ -3106,11 +3110,13 @@ void RunParentChildDeletionTest(bool Local)
 			});
 
 		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
-
 		CreatedChildEntity2->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 	}
 
 	// Delete the first child
@@ -3129,6 +3135,8 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_TRUE(DestroyCalled);
 
 		// Check entity is  unparented correctly
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 2);
+
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 
@@ -3367,42 +3375,71 @@ void RunParentDeletionTest(bool Local)
 
 	// Delete the parent
 	{
-		bool DestroyCalled = false;
-
-		auto DestroyCb = [&DestroyCalled](bool Success)
-		{
-			DestroyCalled = true;
-			EXPECT_TRUE(Success);
-		};
-
-		bool ChildEntityUpdated = false;
+		bool LocalDestroyCalled	 = false;
+		bool EntityDestroyCalled = false;
+		bool ChildEntityUpdated	 = false;
+		bool ChildEntityUpdated2 = false;
 
 		CreatedChildEntity1->SetUpdateCallback(
-			[&ChildEntityUpdated,
-			 ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			[&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](SpaceEntity* Entity,
+																							   SpaceEntityUpdateFlags Flags,
+																							   csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
 			{
+				if (ChildEntityUpdated)
+				{
+					// Prevent from being called twice when AllowSelfMessaging is on
+					return;
+				}
+
 				if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 				{
 					ChildEntityUpdated = true;
+					// Ensure this is called before both destroy callbacks
+					EXPECT_FALSE(LocalDestroyCalled);
+					EXPECT_FALSE(EntityDestroyCalled);
 				}
 			});
 
-		bool ChildEntityUpdated2 = false;
-
 		CreatedChildEntity2->SetUpdateCallback(
-			[&ChildEntityUpdated2,
-			 ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			[&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](SpaceEntity* Entity,
+																								SpaceEntityUpdateFlags Flags,
+																								csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
 			{
+				if (ChildEntityUpdated2)
+				{
+					// Prevent from being called twice when AllowSelfMessaging is on
+					return;
+				}
+
 				if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 				{
 					ChildEntityUpdated2 = true;
+					// Ensure this is called before both destroy callbacks
+					EXPECT_FALSE(LocalDestroyCalled);
+					EXPECT_FALSE(EntityDestroyCalled);
 				}
 			});
 
-		EntitySystem->DestroyEntity(CreatedParentEntity, DestroyCb);
+		CreatedParentEntity->SetDestroyCallback(
+			[&EntityDestroyCalled](bool Success)
+			{
+				EntityDestroyCalled = true;
+				EXPECT_TRUE(Success);
+			});
 
-		WaitForCallbackWithUpdate(DestroyCalled, EntitySystem);
-		EXPECT_TRUE(DestroyCalled);
+
+		EntitySystem->DestroyEntity(CreatedParentEntity,
+									[&LocalDestroyCalled](bool Success)
+									{
+										LocalDestroyCalled = true;
+										EXPECT_TRUE(Success);
+									});
+
+		WaitForCallbackWithUpdate(LocalDestroyCalled, EntitySystem);
+		EXPECT_TRUE(LocalDestroyCalled);
+
+		WaitForCallbackWithUpdate(EntityDestroyCalled, EntitySystem);
+		EXPECT_TRUE(EntityDestroyCalled);
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);

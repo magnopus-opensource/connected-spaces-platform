@@ -55,8 +55,7 @@ enum class ExternalLinkPropertyKeys
 
 
 /// @ingroup ExternalLinkSpaceComponent
-/// @brief Data representation of an ExternalLinkSpaceComponent.
-/// @note This component can be used to handle external URLs that can be opened in game from a space.
+/// @brief Used to handle external URLs that can be opened from within a space.
 class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:

@@ -6,13 +6,13 @@ Tenants are necessary for securely organizing and managing resources. They help 
 
 ## What is an MCS Tenant?
 
-An MCS (Magnopus Cloud Services) tenant is a dedicated instance within the services backend specifically designed to segregate users and their data from others. Each MCS tenant operates independently, ensuring that data and interactions remain isolated.
+A tenant is a dedicated instance within the services backend specifically designed to segregate users and their data from others. Each MCS tenant operates independently, ensuring that data and interactions remain isolated.
 
 A developer building a CSP-powered application requires their own tenant to ensures that users of their application cannot interact with users of a different CSP-powered application.
 
 ## Multi-Tenancy in MCS
 
-Multi-tenancy is an architecture where a single cloud hosted environment  and its supporting infrastructure are shared among two or more tenants at the same time. While each tenant’s data is isolated from the other tenants, each tenant shares a single database and SaaS server with the others.
+Multi-tenancy is an architecture where a single cloud hosted environment  and its supporting infrastructure are shared among two or more tenants at the same time. While each tenant's data is isolated from all other tenants' data, each tenant shares a single database and SaaS server with the others.
 
 With MCS, this means that one environment can host multiple tenants, each with its own segregated data. 
 
@@ -39,7 +39,7 @@ As a developer looking to use CSP and Magnopus Cloud Services, you must fill out
 1. Go to [Magnopus CSP for Developers](https://www.magnopus.com/csp/for-developers#tenant-id).  
 2. Fill out the **Tenant Inquiry Form**  
 3. Review all the information you entered to ensure accuracy and click the **Submit Inquiry** button to send your request. You will receive a confirmation email acknowledging receipt of your request.  
-4. Tenant IDs requests are reviewed every two weeks, in line with Magnopus’ release schedule.  
+4. Tenant IDs requests are reviewed every two weeks, in line with Magnopus' release schedule.  
    If you have not heard back from the Magnopus team in two weeks confirming the creation of your tenant, please email [tenantkey@magnopus.com](mailto:tenantkey@magnopus.com).
 
 ## Initializing CSP with a Tenant
@@ -125,7 +125,7 @@ Mapping tenants to environments involves linking specific tenants to particular 
 
 ### How Tenants are Linked to Specific Environments
 
-In CSP, tenants and environments are linked through configuration settings during the setup of each environment. Here’s how this is typically done:
+In CSP, tenants and environments are linked through configuration settings during the setup of each environment. Here's how this is typically done:
 
 1. **Tenant Identification:** Each tenant is assigned a unique identifier. This identifier is used to specify the tenant within configuration files and during the initialization of applications.
 

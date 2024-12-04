@@ -54,7 +54,7 @@ enum class ReflectionShape
 
 
 /// @ingroup ReflectionSpaceComponent
-/// @brief Data representation of an ReflectionSpaceComponent.
+/// @brief Add sphere and box reflection captures to your Space which can be used by objects with reflective materials.
 class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionComponent, public IScaleComponent, public IThirdPartyComponentRef
 {
 public:
