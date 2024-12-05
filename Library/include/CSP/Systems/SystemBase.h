@@ -15,7 +15,6 @@
  */
 #pragma once
 
-#include "CSP/CSPCommon.h"
 #include "CSP/Multiplayer/EventBus.h"
 
 
@@ -34,6 +33,13 @@ class EventDeserialiser;
 class MultiplayerConnection;
 
 } // namespace csp::multiplayer
+
+namespace signalr
+{
+
+class value;
+
+} // namespace signalr
 
 namespace csp::systems
 {

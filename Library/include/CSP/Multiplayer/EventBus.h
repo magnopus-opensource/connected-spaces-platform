@@ -18,7 +18,6 @@
 
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-#include "Multiplayer/EventSerialisation.h"
 
 #include <map>
 

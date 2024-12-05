@@ -15,8 +15,8 @@
  */
 #include "CSP/Systems/SystemBase.h"
 
-#include "CSP/Multiplayer/EventBus.h"
-#include "Memory/Memory.h"
+#include "Multiplayer/EventSerialisation.h"
+
 
 namespace csp::systems
 {
