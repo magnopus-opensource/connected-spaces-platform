@@ -377,9 +377,9 @@ namespace CSPEngine
             Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = "Test";
             Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
             Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
@@ -422,9 +422,9 @@ namespace CSPEngine
             Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = "Test";
             Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
             Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
@@ -1416,9 +1416,9 @@ namespace CSPEngine
             Assert.AreEqual(assets[0].ThirdPartyPlatformType, Systems.EThirdPartyPlatform.NONE);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = "Test";
             Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
             Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             inboundAsset.Dispose();
 

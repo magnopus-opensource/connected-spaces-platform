@@ -270,11 +270,11 @@ test('AssetSystemTests', 'ThirdPartyPackagedAssetIdentifierTest', async function
     assert.areEqual(asset.ThirdPartyPackagedAssetIdentifier, "");
     assert.areEqual(asset.getThirdPartyPlatformType(), Systems.EThirdPartyPlatform.NONE);
 
-    asset.setThirdPartyPackagedAssetIdentifier("Test");
+    asset.ThirdPartyPackagedAssetIdentifier = "Test";
     assert.areEqual(asset.ThirdPartyPackagedAssetIdentifier, "Test");
 
-    asset.setThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL)
-    asset.setThirdPartyPackagedAssetIdentifier("")
+    asset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+    asset.ThirdPartyPackagedAssetIdentifier = "";
     const Assetupdated = await assetSystem.updateAsset(asset);
     assert.areEqual(Assetupdated.getAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
     assert.areEqual(Assetupdated.getAsset().ThirdPartyPackagedAssetIdentifier, "");
