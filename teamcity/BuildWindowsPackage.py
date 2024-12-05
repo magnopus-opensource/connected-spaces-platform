@@ -1,3 +1,8 @@
+"""
+This script packages the required Win64 lib files and include directory.
+It is used by TeamCity as part of the CSP Feature publish build config.
+"""
+
 import os
 import shutil
 
