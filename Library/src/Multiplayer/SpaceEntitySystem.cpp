@@ -670,7 +670,7 @@ void SpaceEntitySystem::BindOnRequestToLeaveScopes()
 			{
 				if (Error != ErrorCode::None)
 				{
-					CSP_LOG_ERROR_MSG("SpaceEntitySystem::OnRequestToLeaveScopes: SignalR connection: Error);
+					CSP_LOG_ERROR_MSG("SpaceEntitySystem::OnRequestToLeaveScopes: SignalR connection: Error");
 				}
 			};
 
