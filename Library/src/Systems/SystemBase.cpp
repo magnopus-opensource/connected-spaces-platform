@@ -15,7 +15,7 @@
  */
 #include "CSP/Systems/SystemBase.h"
 
-#include "Multiplayer/EventSerialisation.h"
+#include "CSP/Multiplayer/EventSerialisation.h"
 
 
 namespace csp::systems

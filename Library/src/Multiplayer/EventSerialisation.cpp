@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "Multiplayer/EventSerialisation.h"
+#include "CSP/Multiplayer/EventSerialisation.h"
 
 #include "Common/Encode.h"
 #include "Debug/Logging.h"

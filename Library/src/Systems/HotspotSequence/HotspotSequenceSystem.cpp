@@ -17,11 +17,11 @@
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventSerialisation.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Debug/Logging.h"
-#include "Multiplayer/EventSerialisation.h"
 
 #include <regex>
 #include <string>

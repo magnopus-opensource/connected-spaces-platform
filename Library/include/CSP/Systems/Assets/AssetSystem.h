@@ -22,12 +22,12 @@
 #include "CSP/Common/Optional.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Multiplayer/EventSerialisation.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
-#include "Multiplayer/EventSerialisation.h"
 
 namespace csp::services
 {
