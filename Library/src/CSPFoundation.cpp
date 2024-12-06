@@ -255,9 +255,17 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 	const std::string UserServiceURI		= RootURI + "/mag-user";
 	const std::string PrototypeServiceURI	= RootURI + "/mag-prototype";
 	const std::string SpatialDataServiceURI = RootURI + "/mag-spatialdata";
-	const std::string MultiplayerServiceURI = RootURI + "/mag-multiplayer/hubs/v1/multiplayer";
 	const std::string AggregationServiceURI = RootURI + "/oly-aggregation";
 	const std::string TrackingServiceURI	= RootURI + "/mag-tracking";
+
+	// The multiplayer service now has its own hostname, ogs-multiplayer
+	const std::string Hostname = "ogs", MultiplayerHostname = Hostname + "-multiplayer";
+	// This constructs the multiplayer URI by adding -multiplayer after ogs and appending
+	// the rest of RootURI. This accounts for other hostnames like ogs-internal, etc.
+	const std::string RootMultiplayerURI
+		= RootURI.substr(0, RootURI.find(Hostname)) + MultiplayerHostname + RootURI.substr(RootURI.find(Hostname) + Hostname.length());
+	const std::string MultiplayerServiceURI = RootMultiplayerURI + "/mag-multiplayer/hubs/v1/multiplayer";
+
 
 
 	Endpoints			  = CSP_NEW EndpointURIs();
@@ -388,7 +396,7 @@ void CSPFoundation::SetClientUserAgentInfo(const csp::ClientUserAgent& ClientUse
 	ClientUserAgentInfo->ClientVersion		= CSP_TEXT(ClientUserAgentHeader.ClientVersion);
 	ClientUserAgentInfo->ClientEnvironment	= CSP_TEXT(ClientUserAgentHeader.ClientEnvironment);
 	ClientUserAgentInfo->CHSEnvironment		= CSP_TEXT(ClientUserAgentHeader.CHSEnvironment);
-	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) Foundation/%s(%s) CHS(%s) CSP/%s(%s)";
+	const char* ClientUserAgentHeaderFormat = "%s/%s(%s) CSP/%s(%s) CHS(%s) CSP/%s(%s)";
 
 	*ClientUserAgentString = csp::common::StringFormat(ClientUserAgentHeaderFormat,
 													   GetClientUserAgentInfo().ClientSKU.c_str(),

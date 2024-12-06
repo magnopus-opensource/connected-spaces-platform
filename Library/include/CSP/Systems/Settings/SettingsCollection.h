@@ -102,7 +102,7 @@ public:
 	[[nodiscard]] const csp::common::Variant& GetAvatarIdentifier() const;
 
 	CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-		: Type(AvatarType::None), csp::systems::ResultBase(ResCode, HttpResCode) {};
+		: csp::systems::ResultBase(ResCode, HttpResCode), Type(AvatarType::None) {};
 
 private:
 	AvatarInfoResult() : Type(AvatarType::None) {};
