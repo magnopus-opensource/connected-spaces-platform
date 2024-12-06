@@ -431,7 +431,7 @@ namespace CSPEngine
             Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
             Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPackagedAssetIdentifier, "Test");
-            Assert.AreEqual(updatedAsset.GetAsset().GeThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
 
