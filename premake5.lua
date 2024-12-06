@@ -4,6 +4,7 @@ include "premake5_helpers.lua"
 include "Tests/premake5.lua"
 include "Tests/CSharp/premake5.lua"
 include "Tests/Multiplayer/premake5.lua"
+include "MultiplayerTestRunner/premake5.lua"
 include "Library/premake5.lua"
 
 -- The root premake script for CSP.
@@ -61,4 +62,6 @@ solution( "ConnectedSpacesPlatform" )
         if not CSP.IsGeneratingCPPOnMac() then
             Tests.MultiplayerTestClient.AddProject()
         end
+		
+		MultiplayerTestRunner.AddProject()
     end
