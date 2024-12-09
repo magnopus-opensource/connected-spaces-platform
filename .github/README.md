@@ -29,7 +29,7 @@ The official documentation for CSP can be found [here](https://builds.magnoboard
 
 * The [Manual](https://builds.magnoboard.com/connected-spaces-platform/manual/manual.html) covers quick start guides, tutorials, plus how to build and debug CSP locally.
 
-* It also includes up-to-date [API Documentation](https://builds.magnoboard.com/connected-spaces-platform/api/library_root.html), which can also be found inline in the CSP public API source.
+* The [API Documentation](https://builds.magnoboard.com/connected-spaces-platform/api/library_root.html) covers the API itself (this documentation can also be found inline in the CSP public API source).
 
 ## 📦 Install
 
