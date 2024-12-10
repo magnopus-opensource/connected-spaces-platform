@@ -58,6 +58,22 @@ void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
 	}
 }
 
+EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalPosition() const
+{
+	EntityScriptInterface::Vector3 GlobalPos = {0, 0, 0};
+
+	if (Entity)
+	{
+		const csp::common::Vector3& Position = Entity->GetGlobalPosition();
+
+		GlobalPos[0] = Position.X;
+		GlobalPos[1] = Position.Y;
+		GlobalPos[2] = Position.Z;
+	}
+
+	return GlobalPos;
+}
+
 EntityScriptInterface::Vector4 EntityScriptInterface::GetRotation() const
 {
 	EntityScriptInterface::Vector4 Rot = {0, 0, 0, 0};
@@ -88,6 +104,59 @@ void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 Rot)
 	}
 }
 
+EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
+{
+	EntityScriptInterface::Vector4 GlobalRot = {0, 0, 0, 0};
+
+	if (Entity)
+	{
+		csp::common::Vector4 Rotation = Entity->GetGlobalRotation();
+
+		GlobalRot[0] = Rotation.X;
+		GlobalRot[1] = Rotation.Y;
+		GlobalRot[2] = Rotation.Z;
+		GlobalRot[3] = Rotation.W;
+	}
+
+	return GlobalRot;
+}
+
+int64_t EntityScriptInterface::GetParentId()
+{
+	if (const auto& Parent = Entity->GetParentEntity())
+	{
+		return Parent->GetId();
+	}
+
+	return 0;
+}
+
+void EntityScriptInterface::SetParentId(uint64_t ParentId)
+{
+	if (Entity)
+	{
+		Entity->SetParentId(ParentId);
+	}
+}
+
+void EntityScriptInterface::RemoveParentEntity()
+{
+	if (Entity)
+	{
+		Entity->RemoveParentEntity();
+	}
+}
+
+SpaceEntity* EntityScriptInterface::GetParentEntity() const
+{
+	if (Entity)
+	{
+		return Entity->GetParentEntity();
+	}
+
+	return nullptr;
+}
+
 EntityScriptInterface::Vector3 EntityScriptInterface::GetScale() const
 {
 	EntityScriptInterface::Vector3 Scale = {0, 0, 0};
@@ -114,6 +183,22 @@ void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 Scale)
 		Entity->SetScale(NewScale);
 		Entity->MarkForUpdate();
 	}
+}
+
+EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalScale() const
+{
+	EntityScriptInterface::Vector3 GlobalScale = {0, 0, 0};
+
+	if (Entity)
+	{
+		csp::common::Vector3 EntityScale = Entity->GetGlobalScale();
+
+		GlobalScale[0] = EntityScale.X;
+		GlobalScale[1] = EntityScale.Y;
+		GlobalScale[2] = EntityScale.Z;
+	}
+
+	return GlobalScale;
 }
 
 const std::string EntityScriptInterface::GetName() const

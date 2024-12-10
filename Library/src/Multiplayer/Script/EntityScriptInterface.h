@@ -41,11 +41,24 @@ public:
 	Vector3 GetPosition() const;
 	void SetPosition(Vector3 Pos);
 
+	Vector3 GetGlobalPosition() const;
+
 	Vector3 GetScale() const;
 	void SetScale(Vector3 Scale);
 
+	Vector3 GetGlobalScale() const;
+
 	Vector4 GetRotation() const;
 	void SetRotation(Vector4 Rot);
+
+	Vector4 GetGlobalRotation() const;
+
+	int64_t GetParentId();
+	void SetParentId(uint64_t ParentId);
+
+	void RemoveParentEntity();
+
+	SpaceEntity* GetParentEntity() const;
 
 	const std::string GetName() const;
 	int64_t GetId() const;
