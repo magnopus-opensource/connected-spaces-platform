@@ -537,7 +537,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -597,7 +597,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -672,7 +672,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 	EXPECT_EQ(Assets[0].Uri, "");
 
 	Assets[0].ExternalUri	   = TestExternalUri;
@@ -2155,8 +2155,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
-	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, "");
+	EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::NONE);
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
@@ -2167,11 +2167,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
-	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::UNITY);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::UNITY);
 
-	Assets[0].SetThirdPartyPackagedAssetIdentifier(ThirdPartyPackagedAssetIdentifierLocal);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifierLocal);
+	Assets[0].ThirdPartyPackagedAssetIdentifier = ThirdPartyPackagedAssetIdentifierLocal;
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifierLocal);
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
