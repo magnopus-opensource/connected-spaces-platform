@@ -17,7 +17,6 @@
 
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/EventSerialisation.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemBase.h"
@@ -27,6 +26,7 @@
 #include "ConversationSystemHelpers.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/HttpResponse.h"
 

@@ -17,10 +17,10 @@
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/EventSerialisation.h"
 #include "CallHelpers.h"
 #include "Common/Convert.h"
 #include "Common/Encode.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Systems/ResultHelpers.h"
 
