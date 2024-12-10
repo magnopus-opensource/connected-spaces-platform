@@ -519,7 +519,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 	}
 
 	AssetInfo->SetAddressableId(
-		StringFormat("%s|%d", Asset.GetThirdPartyPackagedAssetIdentifier().c_str(), static_cast<int>(Asset.GetThirdPartyPlatformType())));
+		StringFormat("%s|%d", Asset.ThirdPartyPackagedAssetIdentifier.c_str(), static_cast<int>(Asset.ThirdPartyPlatformType)));
 
 	AssetInfo->SetAssetType(ConvertAssetTypeToString(Asset.Type));
 	services::ResponseHandlerPtr ResponseHandler
