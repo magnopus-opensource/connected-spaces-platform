@@ -646,36 +646,11 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
 				   [this](const signalr::value& Params)
 				   {
 					   const std::string Reason = Params.as_array()[0].as_string();
-					   // FIXME OR: why is this not invoking DisconnectWithReason with arguments?
-					   // i.e.:
-					   // std::vector<signalr::value> const InvokeArguments = {Params};
-					   // Connection->Invoke("DisconnectWithReason", InvokeArguments);
 					   csp::events::Event* DisconnectEvent
 						   = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
 					   DisconnectEvent->AddString("Reason", Reason.c_str());
 					   csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
 				   });
-}
-
-void SpaceEntitySystem::BindOnRequestToLeaveScopes()
-{
-	Connection->On(
-		"OnRequestToLeaveScopes",
-		[this](const signalr::value& Params)
-		{
-			csp::common::String Scopes = Params.as_array()[0].as_string().c_str();
-			csp::common::String Reason = Params.as_array()[1].as_string().c_str();
-
-			const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [](ErrorCode Error)
-			{
-				if (Error != ErrorCode::None)
-				{
-					CSP_LOG_ERROR_MSG("SpaceEntitySystem::OnRequestToLeaveScopes: SignalR connection: Error");
-				}
-			};
-
-			MultiplayerConnectionInst->SendNetworkEvent("RequestToLeaveScopes", {ReplicatedValue(Scopes), ReplicatedValue(Reason)}, SignalRCallback);
-		});
 }
 
 void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
@@ -687,8 +662,6 @@ void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InCon
 	BindOnObjectPatch();
 
 	BindOnRequestToSendObject();
-
-	BindOnRequestToLeaveScopes(); // FIXME OR: does the order matter here????
 
 	BindOnRequestToDisconnect();
 }

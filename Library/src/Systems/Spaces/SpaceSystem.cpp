@@ -26,6 +26,7 @@
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/ErrorCodeStrings.h"
+#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/AggregationService/Dto.h"
 #include "Services/UserService/Api.h"
@@ -1944,5 +1945,44 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId,
 																					  ResponseHandler // ResponseHandler
 	);
 }
+
+// expose a method to set a callback and fire it when they get it
+//  add a callback for leaving scopes
+
+// spacesystem to take a multiplayerconnection in the ctor
+// in multiplayerconnection: add getspacesystem->seetconnection. 195. and create a bind there
+// create new id spacesystem leavescopes
+// duplicate onrequesttodisconnct
+// add a test in space system. enter a space, bind to the event, exit the space, add an await.
+
+void SpaceSystem::BindOnRequestToLeaveScopes()
+{
+	Connection->On("OnRequestToLeaveScopes",
+				   [this](const signalr::value& Params)
+				   {
+					   auto Scopes				= Params.as_array()[0].as_array();
+					   const std::string Reason = Params.as_array()[1].as_string();
+					   csp::events::Event* LeaveScopesEvent
+						   = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
+					   int ScopeCount = 0;
+					   for (auto itr = Scopes.begin(); itr < Scopes.end(); itr++)
+					   {
+						   ScopeCount++;
+						   std::string ScopeString = "Scope " + std::to_string(ScopeCount);
+						   std::string Scope	   = (*itr).as_string();
+						   LeaveScopesEvent->AddString(ScopeString.c_str(), Scope.c_str());
+					   }
+					   LeaveScopesEvent->AddString("Reason", Reason.c_str());
+					   csp::events::EventSystem::Get().EnqueueEvent(LeaveScopesEvent);
+				   });
+}
+
+void SpaceSystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
+{
+	Connection = InConnection;
+
+	BindOnRequestToLeaveScopes();
+}
+
 
 } // namespace csp::systems

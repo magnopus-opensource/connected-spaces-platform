@@ -2854,3 +2854,70 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_LEAVESCOPES_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+
+	const char* TestSpaceName		 = "CSP-TEST-SPACE";
+	const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	Array<InviteUserRoleInfo> UserRoles(1);
+	UserRoles[0].UserEmail = AlternativeLoginEmail;
+	UserRoles[0].UserRole  = SpaceUserRole::User;
+	InviteUserRoleInfoCollection InviteInfo;
+	InviteInfo.InviteUserRoleInfos = UserRoles;
+
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space);
+
+	// Setup Leave Scopes callback
+	bool LeaveScopesCallbackCalled = false;
+
+	auto LeaveScopesCallback = [&LeaveScopesCallbackCalled](const csp::common::String[], const csp::common::String&)
+	{
+		if (LeaveScopesCallbackCalled)
+		{
+			return;
+		}
+
+		LeaveScopesCallbackCalled = true;
+	};
+
+	Connection->SetLeaveScopesCallback(LeaveScopesCallback);
+
+
+	Connection->SendNetworkEventToClient("LeaveScopes",
+										 {"DummyArg"},
+										 Connection->GetClientId(),
+										 [](csp::multiplayer::ErrorCode Error)
+										 {
+											 EXPECT_EQ(Error, csp::multiplayer::ErrorCode::None);
+										 });
+
+	// Wait for message
+	WaitForCallback(LeaveScopesCallbackCalled);
+	EXPECT_TRUE(LeaveScopesCallbackCalled);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif

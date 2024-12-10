@@ -53,6 +53,13 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
+namespace csp::multiplayer
+{
+
+class SignalRConnection;
+;
+
+} // namespace csp::multiplayer
 
 namespace csp::systems
 {
@@ -357,6 +364,14 @@ public:
 
 	///@}
 
+	/// @brief Sets a local pointer to the connection for communication with the endpoints, this should be called as early as possible.
+	///
+	/// Note that this is already called in MultiplayerConnection::Connect, so this shouldn't need to be called anywhere else.
+	/// This should not be called by client code directly, marked as No Export.
+	///
+	/// @param InConnection csp::multiplayer::SignalRConnection : A pointer to the connection object to be used by the system.
+	CSP_NO_EXPORT void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
+
 private:
 	SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
 	SpaceSystem(csp::web::WebClient* InWebClient);
@@ -382,9 +397,14 @@ private:
 
 	void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
 
+	void BindOnRequestToLeaveScopes();
+
 	csp::services::ApiBase* GroupAPI;
 	csp::services::ApiBase* SpaceAPI;
 	Space CurrentSpace;
+
+	// MultiplayerConnection* MultiplayerConnectionInst;
+	csp::multiplayer::SignalRConnection* Connection;
 };
 
 } // namespace csp::systems

@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
@@ -193,6 +194,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 	NetworkEventManager->SetConnection(Connection);
 	ConversationSystemPtr->SetConnection(Connection);
 	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
+	csp::systems::SystemsManager::Get().GetSpaceSystem()->SetConnection(Connection);
 
 	StartEventMessageListening();
 
@@ -347,6 +349,11 @@ void MultiplayerConnection::SetConnectionCallback(ConnectionCallbackHandler Call
 CSP_EVENT void MultiplayerConnection::SetNetworkInterruptionCallback(NetworkInterruptionCallbackHandler Callback)
 {
 	NetworkInterruptionCallback = Callback;
+}
+
+CSP_EVENT void MultiplayerConnection::SetLeaveScopesCallback(LeavingScopesCallbackHandler Callback)
+{
+	LeavingScopesCallback = Callback;
 }
 
 CSP_EVENT void MultiplayerConnection::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)

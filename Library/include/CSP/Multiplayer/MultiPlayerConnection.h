@@ -113,6 +113,9 @@ public:
 	// The callback for network interruption, contains a string showing failure.
 	typedef std::function<void(const csp::common::String&)> NetworkInterruptionCallbackHandler;
 
+	// The callback to leave scopes, contains an array of strings with the scopes, and a string with the reason for leaving.
+	typedef std::function<void(const csp::common::String[], const csp::common::String&)> LeavingScopesCallbackHandler;
+
 	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
 	typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
 
@@ -157,6 +160,11 @@ public:
 	/// Connection isn't recoverable after this point and Disconnect should be called.
 	/// @param Callback NetworkInterruptionCallbackHandler : The callback for network interruption, contains a string showing failure.
 	CSP_EVENT void SetNetworkInterruptionCallback(NetworkInterruptionCallbackHandler Callback);
+
+	/// @brief Sets a callback for a leave scopes event.
+	/// @param Callback LeavingScopesCallbackHandler : The callback for leaving scopes, contains an array of strings with the scopes, and a string
+	/// with the reason for leaving.
+	CSP_EVENT void SetLeaveScopesCallback(LeavingScopesCallbackHandler Callback);
 
 	/// @brief Sets a callback for an asset changed event.
 	/// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
@@ -261,12 +269,13 @@ private:
 	DisconnectionCallbackHandler DisconnectionCallback;
 	ConnectionCallbackHandler ConnectionCallback;
 	NetworkInterruptionCallbackHandler NetworkInterruptionCallback;
+	LeavingScopesCallbackHandler LeavingScopesCallback;
 	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 	ConversationSystemCallbackHandler ConversationSystemCallback;
 	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 
 	SequenceChangedCallbackHandler SequenceChangedCallback;
-    HotspotSequenceChangedCallbackHandler HotspotSequenceChangedCallback;
+	HotspotSequenceChangedCallbackHandler HotspotSequenceChangedCallback;
 
 	// TODO: Replace these with pointers! We can't use STL containers as class fields due to the fact that the class size will
 	//   change depending on which runtime is used.
