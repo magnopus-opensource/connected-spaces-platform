@@ -39,7 +39,8 @@ TEST(CLITest, AllArgsBasic)
 										"https://example.com"};
 	CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
 
-	EXPECT_EQ(Settings.LoginEmailAndPassword, std::make_pair("test@example.com", "password123"));
+	EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");
+	EXPECT_EQ(Settings.LoginEmailAndPassword.second, "password123");
 	EXPECT_EQ(Settings.TestIdentifier, TestIdentifier::CREATE_AVATAR);
 	EXPECT_EQ(Settings.Endpoint, "https://example.com");
 	EXPECT_EQ(Settings.TimeoutInSeconds, 60);
@@ -103,7 +104,8 @@ TEST(CLITest, DefaultsSet)
 	CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
 
 	// We don't want to go to the credentials file for the defaults, so we provide a user/password
-	EXPECT_EQ(Settings.LoginEmailAndPassword, std::make_pair("test@example.com", "password123"));
+	EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");
+	EXPECT_EQ(Settings.LoginEmailAndPassword.second, "password123");
 	EXPECT_EQ(Settings.TestIdentifier, TestIdentifier::CREATE_AVATAR);
 	EXPECT_EQ(Settings.Endpoint, "https://ogs-internal.magnopus-dev.cloud");
 	EXPECT_EQ(Settings.TimeoutInSeconds, 30);
