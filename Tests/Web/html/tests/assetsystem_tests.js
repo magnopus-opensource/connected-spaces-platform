@@ -267,22 +267,22 @@ test('AssetSystemTests', 'ThirdPartyPackagedAssetIdentifierTest', async function
     // Create asset
     var asset = await createAsset(assetSystem, assetCollection, assetName);
 
-    assert.areEqual(asset.getThirdPartyPackagedAssetIdentifier(), "");
+    assert.areEqual(asset.ThirdPartyPackagedAssetIdentifier, "");
     assert.areEqual(asset.getThirdPartyPlatformType(), Systems.EThirdPartyPlatform.NONE);
 
-    asset.setThirdPartyPackagedAssetIdentifier("Test");
-    assert.areEqual(asset.getThirdPartyPackagedAssetIdentifier(), "Test");
+    asset.ThirdPartyPackagedAssetIdentifier = "Test";
+    assert.areEqual(asset.ThirdPartyPackagedAssetIdentifier, "Test");
 
-    asset.setThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL)
-    asset.setThirdPartyPackagedAssetIdentifier("")
+    asset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+    asset.ThirdPartyPackagedAssetIdentifier = "";
     const Assetupdated = await assetSystem.updateAsset(asset);
-    assert.areEqual(Assetupdated.getAsset().getThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
-    assert.areEqual(Assetupdated.getAsset().getThirdPartyPackagedAssetIdentifier(), "");
+    assert.areEqual(Assetupdated.getAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
+    assert.areEqual(Assetupdated.getAsset().ThirdPartyPackagedAssetIdentifier, "");
 
     // Create asset
     const asset2 = await createAsset(assetSystem, assetCollection, assetName,thirdPartyPackagedAssetIdentifier, Systems.EThirdPartyPlatform.UNITY);
 
-    assert.areEqual(asset2.getThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
-    assert.areEqual(asset2.getThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNITY);
+    assert.areEqual(asset2.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
+    assert.areEqual(asset2.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNITY);
 
 });
