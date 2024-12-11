@@ -128,7 +128,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             const int NumClientInstances = 8;
             const bool DebugClientInstances = true;

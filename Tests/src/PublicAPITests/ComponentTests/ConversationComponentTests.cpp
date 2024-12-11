@@ -74,7 +74,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	const csp::common::String UserName		= "Player 1";
 	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -326,7 +334,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -470,7 +486,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);

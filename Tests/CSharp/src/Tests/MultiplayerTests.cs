@@ -100,7 +100,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -130,7 +130,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -173,7 +173,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -217,7 +217,7 @@ namespace CSPEngine
             LogDebug(userId);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -292,7 +292,7 @@ namespace CSPEngine
             InviteUsers.InviteUserRoleInfos[0] = new Systems.InviteUserRoleInfo { UserEmail = UserSystemTests.DefaultLoginEmail, UserRole = Systems.SpaceUserRole.User };
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, pushCleanupFunction: false);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, spaceName, spaceDescription, Systems.SpaceAttributes.Private, null, InviteUsers, null, null, pushCleanupFunction: false);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -370,7 +370,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -454,8 +454,8 @@ namespace CSPEngine
             string testSpaceName2 = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND-2");
             string testSpaceDescription2 = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space1 = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
-            var space2 = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName2, testSpaceDescription2, Systems.SpaceAttributes.Private, null, null, null);
+            var space1 = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
+            var space2 = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName2, testSpaceDescription2, Systems.SpaceAttributes.Private, null, null, null, null);
 
             string portalSpaceId;
 
@@ -553,7 +553,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -626,7 +626,7 @@ namespace CSPEngine
                 FilePath = Path.GetFullPath("assets/OKO.png")
             };
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, source, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -666,7 +666,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -721,7 +721,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -791,7 +791,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -875,7 +875,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -947,7 +947,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             {
                 var result = spaceSystem.EnterSpace(space.Id).Result;
@@ -1178,7 +1178,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             {
                 var result = spaceSystem.EnterSpace(space.Id).Result;
@@ -1316,7 +1316,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1383,7 +1383,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Connect to the SignalR server
             var systemsManager = Systems.SystemsManager.Get();
@@ -1484,7 +1484,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1557,7 +1557,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1621,7 +1621,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1719,7 +1719,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1843,7 +1843,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -1947,7 +1947,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2017,7 +2017,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2076,7 +2076,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2145,7 +2145,7 @@ namespace CSPEngine
             const string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
             const string objectName = "TestObject";
             const string applicationOrigin = "Application Origin";
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             {
                 var systemsManager = Systems.SystemsManager.Get();
@@ -2286,7 +2286,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2357,7 +2357,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2415,7 +2415,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2455,7 +2455,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2542,7 +2542,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2625,7 +2625,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2698,7 +2698,7 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-MULTI-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-MULTIDESC-REWIND";
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
@@ -2769,7 +2769,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             const int numClientInstances = 4;
 

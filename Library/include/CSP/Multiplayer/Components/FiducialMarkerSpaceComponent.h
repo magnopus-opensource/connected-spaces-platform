@@ -45,7 +45,7 @@ enum class FiducialMarkerPropertyKeys
 
 
 /// @ingroup FiducialMarkerSpaceComponent
-/// @brief Data representation of a FiducialMarkerSpaceComponent.
+/// @brief As an alternative to cloud-based anchors, fiducial markers can be used to anchor your space to a physical location.
 class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:

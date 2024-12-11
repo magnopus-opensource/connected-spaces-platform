@@ -21,7 +21,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
-#include "CSP/Multiplayer/SequenceHierarchy.h"
 
 #include <deque>
 #include <functional>
@@ -109,10 +108,10 @@ public:
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
 	// Callback to receive sequence hierarchy changes, contains a SequenceHierarchyChangedParams with the details.
-	typedef std::function<void(const SequenceHierarchyChangedParams&)> SequenceHierarchyChangedCallbackHandler;
+	// typedef std::function<void(const SequenceHierarchyChangedParams&)> SequenceHierarchyChangedCallbackHandler;
 
 	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
-	typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+	// typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
 
 	// Callback used for Entity Lock updates.
 	typedef std::function<void(EntityLockResultObject)> EntityLockObjectCallback;
@@ -346,41 +345,6 @@ public:
 	/// @return A list of root entities.
 	const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
-	/// @brief Creates an entity hierarchy for a given parent entity id. Pass null to create a hiererchy for the root.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to create a hiererchy for the root.
-	/// @param HierarchyItemIds Array<uint64_t> : An array of entity ids.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void CreateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												  const csp::common::Array<uint64_t>& HierarchyItemIds,
-												  SequenceHierarchyResultCallback Callback);
-
-	/// @brief Updates an entity hierarchy for a given parent entity id. Pass null to update the root.
-	/// This will create a hierarchy if it doesnt exist.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to create a hiererchy for the root.
-	/// @param HierarchyItemIds Array<uint64_t> : An array of entity ids.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void UpdateSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId,
-												  const csp::common::Array<uint64_t>& HierarchyItemIds,
-												  SequenceHierarchyResultCallback Callback);
-
-	/// @brief Gets an entity hierarchy for a given parent entity id. Pass null to get the root hierarchy.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to get the root hierarchy.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void GetSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, SequenceHierarchyResultCallback Callback);
-
-	/// @brief Gets all hierarchies for a space
-	/// @param Callback SequenceHierarchiesResultCallback : A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void GetAllSequenceHierarchies(SequenceHierarchyCollectionResultCallback Callback);
-
-	/// @brief Deletes an entity hierarchy for a given parent entity id. Pass null to delete the root hierarchy.
-	/// @param ParentId Optional<uint64_t> : An optional parent. Pass null to get the root hierarchy.
-	/// @param Callback SequenceHierarchyResultCallback :  A callback when the asynchronous task finishes.
-	CSP_ASYNC_RESULT void DeleteSequenceHierarchy(const csp::common::Optional<uint64_t>& ParentId, csp::systems::NullResultCallback Callback);
-
-	/// @brief Sets a callback for a sequence  hierarchy changed event.
-	/// @param Callback SequenceChangedCallbackHandler: Callback to receive data for the sequence hierarchy that has been changed.
-	CSP_EVENT void SetSequenceHierarchyChangedCallback(SequenceHierarchyChangedCallbackHandler Callback);
-
 protected:
 	using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -471,8 +435,6 @@ private:
 	bool EntityPatchRateLimitEnabled = true;
 
 	bool IsInitialised = false;
-
-	SequenceHierarchyChangedCallbackHandler SequenceHierarchyChangedCallback;
 };
 
 } // namespace csp::multiplayer

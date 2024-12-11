@@ -182,7 +182,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForSpace, RequestPredicate, Space.Id, TierFeaturesArray);
 
@@ -295,7 +295,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetConcurrentUsersInSpace, RequestPredicate, Space.Id);
 
@@ -352,7 +352,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	char UniqueAssetCollectionName[256];
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, Space.Id.c_str());

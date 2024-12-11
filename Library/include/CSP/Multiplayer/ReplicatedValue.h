@@ -17,6 +17,7 @@
 
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
+#include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 #include "CSP/Common/Vector.h"
 
@@ -26,16 +27,19 @@ namespace csp::multiplayer
 {
 
 /// @brief Enum representing the type of a replicated value.
+/// These values are serialized and stored as integers.
+/// When adding new values, always add to the end
 enum class ReplicatedValueType
 {
-	InvalidType,
-	Boolean,
-	Integer,
-	Float,
-	String,
-	Vector2,
-	Vector3,
-	Vector4
+	InvalidType = 0,
+	Boolean		= 1,
+	Integer		= 2,
+	Float		= 3,
+	String		= 4,
+	Vector3		= 5,
+	Vector4		= 6,
+	Vector2		= 7,
+	Map			= 8
 };
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
@@ -80,6 +84,10 @@ public:
 	/// @param InVector4Value csp::common::Vector4 : Initial value.
 	ReplicatedValue(const csp::common::Vector4& InVector4Value);
 
+	/// @brief Construct a ReplicatedValue based on an csp::common::Map type.
+	/// @param InMapValue csp::common::Map : Initial value.
+	ReplicatedValue(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InMapValue);
+
 	/// @brief Copy constructor
 	/// @param Other csp::multiplayer::ReplicatedValue& : The value to copy.
 	ReplicatedValue(const ReplicatedValue& Other);
@@ -98,6 +106,14 @@ public:
 	/// @brief Non equality operator overload.
 	/// @param ReplicatedValue : Other value to compare to.
 	bool operator!=(const ReplicatedValue& OtherValue) const;
+
+	/// @brief Less than operator overload.
+	/// @param ReplicatedValue : Other value to compare to.
+	bool operator<(const ReplicatedValue& OtherValue) const;
+
+	/// @brief Greater than operator overload.
+	/// @param ReplicatedValue : Other value to compare to.
+	bool operator>(const ReplicatedValue& OtherValue) const;
 
 	/// @brief Gets the type of replicated value.
 	/// @return ReplicatedValueType: Enum representing all supported replication base types.
@@ -198,6 +214,21 @@ public:
 	/// @return The default Vector4.
 	CSP_NO_EXPORT static const csp::common::Vector4& GetDefaultVector4();
 
+
+	/// @brief Get a csp::common::Map value from this replicated value, will assert if not a csp::common::Map type.
+	///
+	/// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
+	///
+	/// @return csp::common::Map
+	const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetMap() const;
+
+	/// @brief Set a Map value for this replicated value from a csp::common::Map, will overwrite and previous value.
+	void SetMap(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InValue);
+
+	/// @brief Get a generic default Map.
+	/// @return The default Map.
+	CSP_NO_EXPORT static const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetDefaultMap();
+
 	/// @brief returns the size of the stored internal value.
 	/// @return size_t size of the internal value.
 	CSP_NO_EXPORT static size_t GetSizeOfInternalValue();
@@ -218,6 +249,7 @@ private:
 		csp::common::Vector2 Vector2;
 		csp::common::Vector3 Vector3;
 		csp::common::Vector4 Vector4;
+		csp::common::Map<ReplicatedValue, ReplicatedValue> Map;
 	};
 
 	InternalValue Value;

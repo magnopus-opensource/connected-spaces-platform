@@ -159,6 +159,7 @@ protected:
 	const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
 	const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
 	const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
+	const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetMapProperty(uint32_t Key) const;
 
 	void SetProperty(uint32_t Key, const ReplicatedValue& Value);
 	void RemoveProperty(uint32_t Key);
@@ -167,12 +168,12 @@ protected:
 	virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
 
 	// Called whenever an entity is removed from the system.
-	// Used to shutdown any behaviour managed by the entity.
+	// Used to shutdown any behavior managed by the entity.
 	virtual void OnRemove();
 
 	// Called when the component is locally deleted from the space,
 	// or the entity the component is attached to is locally deleted.
-	// Used for handling behaviour when a client first deletes the component.
+	// Used for handling behavior when a client first deletes the component.
 	virtual void OnLocalDelete();
 
 	CSP_START_IGNORE

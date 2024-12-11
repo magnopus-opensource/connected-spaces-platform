@@ -299,7 +299,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -358,7 +366,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -411,7 +427,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -471,7 +495,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -555,7 +587,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -653,7 +693,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateAvatarTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -732,7 +780,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -811,7 +867,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -889,7 +953,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectCreateTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -950,7 +1022,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1059,7 +1139,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1171,7 +1259,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventEmptyTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1268,7 +1364,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, NetworkEventMultiTypeTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	InitialiseTestingConnection();
 
@@ -1549,7 +1653,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
 
@@ -1643,7 +1755,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1725,7 +1845,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1812,7 +1940,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1916,7 +2052,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InvalidComponentFieldsTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1978,7 +2122,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, FindComponentByIdTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2049,7 +2201,15 @@ void RunParentEntityReplicationTest(bool Local)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2287,7 +2447,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2390,7 +2558,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2495,7 +2671,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2603,7 +2787,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2702,7 +2894,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2829,7 +3029,15 @@ void RunParentChildDeletionTest(bool Local)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2875,12 +3083,16 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
 		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
 
 		CreatedChildEntity1->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
 	}
 
 	// Test setting the parent for the second child
@@ -2898,11 +3110,13 @@ void RunParentChildDeletionTest(bool Local)
 			});
 
 		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
-
 		CreatedChildEntity2->QueueUpdate();
 
 		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
 		EXPECT_TRUE(ChildEntityUpdated);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 3);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 1);
 	}
 
 	// Delete the first child
@@ -2921,6 +3135,8 @@ void RunParentChildDeletionTest(bool Local)
 		EXPECT_TRUE(DestroyCalled);
 
 		// Check entity is  unparented correctly
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 2);
+
 		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
 		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), CreatedParentEntity);
 
@@ -3006,7 +3222,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateObjectParentTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -3066,7 +3290,16 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, LockEntityTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -3275,12 +3508,210 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityTest)
 	// Log in
 	LogIn(UserSystem, UserId);
 
+	== == == =
+		// If local is false, test DeserialiseFromPatch functionality
+		auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+
+	// Create Entities
+	csp::common::String ParentEntityName = "ParentEntity";
+	csp::common::String ChildEntityName1 = "ChildEntity1";
+	csp::common::String ChildEntityName2 = "ChildEntity2";
+	SpaceTransform ObjectTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](SpaceEntity* Entity)
+		{
+		});
+
+	auto [CreatedParentEntity] = AWAIT(EntitySystem, CreateObject, ParentEntityName, ObjectTransform);
+	auto [CreatedChildEntity1] = AWAIT(EntitySystem, CreateObject, ChildEntityName1, ObjectTransform);
+	auto [CreatedChildEntity2] = AWAIT(EntitySystem, CreateObject, ChildEntityName2, ObjectTransform);
+
+	// Test setting the parent for the first child
+	{
+		bool ChildEntityUpdated = false;
+
+		CreatedChildEntity1->SetUpdateCallback(
+			[&ChildEntityUpdated,
+			 ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
+				{
+					ChildEntityUpdated = true;
+				}
+			});
+
+		CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
+
+		// Parents shouldn't be set until after replication
+		EXPECT_EQ(CreatedParentEntity->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
+
+		CreatedChildEntity1->QueueUpdate();
+
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
+		EXPECT_TRUE(ChildEntityUpdated);
+	}
+
+	// Test setting the parent for the second child
+	{
+		bool ChildEntityUpdated = false;
+
+		CreatedChildEntity2->SetUpdateCallback(
+			[&ChildEntityUpdated,
+			 ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				{
+					ChildEntityUpdated = true;
+				}
+			});
+
+		CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
+
+		CreatedChildEntity2->QueueUpdate();
+
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
+		EXPECT_TRUE(ChildEntityUpdated);
+	}
+
+	// Delete the parent
+	{
+		bool LocalDestroyCalled	 = false;
+		bool EntityDestroyCalled = false;
+		bool ChildEntityUpdated	 = false;
+		bool ChildEntityUpdated2 = false;
+
+		CreatedChildEntity1->SetUpdateCallback(
+			[&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](SpaceEntity* Entity,
+																							   SpaceEntityUpdateFlags Flags,
+																							   csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (ChildEntityUpdated)
+				{
+					// Prevent from being called twice when AllowSelfMessaging is on
+					return;
+				}
+
+				if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				{
+					ChildEntityUpdated = true;
+					// Ensure this is called before both destroy callbacks
+					EXPECT_FALSE(LocalDestroyCalled);
+					EXPECT_FALSE(EntityDestroyCalled);
+				}
+			});
+
+		CreatedChildEntity2->SetUpdateCallback(
+			[&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](SpaceEntity* Entity,
+																								SpaceEntityUpdateFlags Flags,
+																								csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+			{
+				if (ChildEntityUpdated2)
+				{
+					// Prevent from being called twice when AllowSelfMessaging is on
+					return;
+				}
+
+				if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+				{
+					ChildEntityUpdated2 = true;
+					// Ensure this is called before both destroy callbacks
+					EXPECT_FALSE(LocalDestroyCalled);
+					EXPECT_FALSE(EntityDestroyCalled);
+				}
+			});
+
+		CreatedParentEntity->SetDestroyCallback(
+			[&EntityDestroyCalled](bool Success)
+			{
+				EntityDestroyCalled = true;
+				EXPECT_TRUE(Success);
+			});
+
+
+		EntitySystem->DestroyEntity(CreatedParentEntity,
+									[&LocalDestroyCalled](bool Success)
+									{
+										LocalDestroyCalled = true;
+										EXPECT_TRUE(Success);
+									});
+
+		WaitForCallbackWithUpdate(LocalDestroyCalled, EntitySystem);
+		EXPECT_TRUE(LocalDestroyCalled);
+
+		WaitForCallbackWithUpdate(EntityDestroyCalled, EntitySystem);
+		EXPECT_TRUE(EntityDestroyCalled);
+
+		WaitForCallbackWithUpdate(ChildEntityUpdated, EntitySystem);
+		EXPECT_TRUE(ChildEntityUpdated);
+
+		WaitForCallbackWithUpdate(ChildEntityUpdated2, EntitySystem);
+		EXPECT_TRUE(ChildEntityUpdated2);
+
+		// Check children are unparented correctly
+		EXPECT_EQ(CreatedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 2);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+	}
+
+	// Re-enter space to ensure updates were made to the server
+	{
+		// Exit Space
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+		// Log out
+		LogOut(UserSystem);
+
+		// Log in again
+		LogIn(UserSystem, UserId);
+
+		// Enter space
+		bool EntitiesCreated = false;
+
+		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+		{
+			EntitiesCreated = true;
+			EXPECT_TRUE(Success);
+		};
+
+		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+		EXPECT_TRUE(EntitiesCreated);
+	}
+
+	// Ensure children have been unparented and are now root entities
+	{
+		auto RetrievedChildEntity1 = EntitySystem->FindSpaceEntity(ChildEntityName1);
+		auto RetrievedChildEntity2 = EntitySystem->FindSpaceEntity(ChildEntityName2);
+
+		EXPECT_EQ(RetrievedChildEntity1->GetParentEntity(), nullptr);
+		EXPECT_EQ(RetrievedChildEntity2->GetParentEntity(), nullptr);
+
+		EXPECT_EQ(EntitySystem->GetNumEntities(), 2);
+		EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 2);
+	}
+
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+>>>>>>> develop
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);
 }
+<<<<<<< HEAD
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_LOCK_REMOVE_ON_LOGOUT_TEST
@@ -3388,5 +3819,23 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityOnUserLogOutTest)
 
 	// Log out
 	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_DELETION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentLocalDeletionTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::ApplyLocalPatch functionality
+	// for deletion of child and parent entities
+	RunParentDeletionTest(true);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_PARENT_DELETION_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentDeletionTest)
+{
+	// Tests the SpaceEntity::SerializeFromPatch and SpaceEntity::DeserializeFromPatch functionality
+	// for deletion of child and parent entities
+	RunParentDeletionTest(false);
 }
 #endif

@@ -49,7 +49,7 @@ enum class GaussianSplatPropertyKeys
 
 
 /// @ingroup GaussianSplatSpaceComponent
-/// @brief Data representation of a GaussianSplatSpaceComponent.
+/// @brief Add Gaussian Splats to your space.
 /// Gaussian Splatting is a technique for real-time 3D reconstruction and rendering of an object or environment using images taken from multiple
 /// points of view. Rather than representing the object as a mesh of triangles, which has a surface but nothing inside, it is instead represented as a
 /// volume, comprising a point cloud of splats (like coloured dots), each of which has a position, colour (with alpha) and covariance (scale on 3
