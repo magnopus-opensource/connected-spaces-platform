@@ -114,7 +114,7 @@ public:
 	typedef std::function<void(const csp::common::String&)> NetworkInterruptionCallbackHandler;
 
 	// The callback to leave scopes, contains an array of strings with the scopes, and a string with the reason for leaving.
-	typedef std::function<void(const csp::common::String[], const csp::common::String&)> LeavingScopesCallbackHandler;
+	typedef std::function<void(const csp::common::Array<csp::common::String>&, const csp::common::String&)> LeavingScopesCallbackHandler;
 
 	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
 	typedef std::function<void(const AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;

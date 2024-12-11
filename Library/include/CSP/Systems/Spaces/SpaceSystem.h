@@ -57,7 +57,6 @@ namespace csp::multiplayer
 {
 
 class SignalRConnection;
-;
 
 } // namespace csp::multiplayer
 
@@ -72,6 +71,7 @@ class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
+	friend class SpaceEventHandler;
 	friend void csp::memory::Delete<SpaceSystem>(SpaceSystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -374,7 +374,7 @@ public:
 
 private:
 	SpaceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	SpaceSystem(csp::web::WebClient* InWebClient);
+	SpaceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::MultiplayerConnection* InConnection);
 	~SpaceSystem();
 
 	// Space Metadata
@@ -403,8 +403,10 @@ private:
 	csp::services::ApiBase* SpaceAPI;
 	Space CurrentSpace;
 
-	// MultiplayerConnection* MultiplayerConnectionInst;
+	csp::multiplayer::MultiplayerConnection* MultiplayerConnectionInst;
 	csp::multiplayer::SignalRConnection* Connection;
+
+	class SpaceEventHandler* EventHandler;
 };
 
 } // namespace csp::systems

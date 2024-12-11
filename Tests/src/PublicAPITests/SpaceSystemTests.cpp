@@ -2889,7 +2889,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 	// Setup Leave Scopes callback
 	bool LeaveScopesCallbackCalled = false;
 
-	auto LeaveScopesCallback = [&LeaveScopesCallbackCalled](const csp::common::String[], const csp::common::String&)
+	auto LeaveScopesCallback = [&LeaveScopesCallbackCalled](const csp::common::Array<csp::common::String>&, const csp::common::String&)
 	{
 		if (LeaveScopesCallbackCalled)
 		{
@@ -2901,14 +2901,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 
 	Connection->SetLeaveScopesCallback(LeaveScopesCallback);
 
-
-	Connection->SendNetworkEventToClient("LeaveScopes",
-										 {"DummyArg"},
-										 Connection->GetClientId(),
-										 [](csp::multiplayer::ErrorCode Error)
-										 {
-											 EXPECT_EQ(Error, csp::multiplayer::ErrorCode::None);
-										 });
+	csp::common::Array<csp::common::String> Scopes = {"Scope1", "Scope2"};
+	csp::common::String Reason					   = "Reason";
+	Connection->SendNetworkEventToClient(
+		"LeaveScopes",
+		{csp::multiplayer::ReplicatedValue(Scopes[0]), csp::multiplayer::ReplicatedValue(Scopes[1]), csp::multiplayer::ReplicatedValue(Reason)},
+		Connection->GetClientId(),
+		[](csp::multiplayer::ErrorCode Error)
+		{
+			EXPECT_EQ(Error, csp::multiplayer::ErrorCode::None);
+		});
 
 	// Wait for message
 	WaitForCallback(LeaveScopesCallbackCalled);

@@ -41,8 +41,9 @@ public:
 const EventId USERSERVICE_LOGIN_EVENT_ID  = EventId("UserService", "Login");
 const EventId USERSERVICE_LOGOUT_EVENT_ID = EventId("UserService", "Logout");
 
-const EventId SPACESYSTEM_ENTER_SPACE_EVENT_ID = EventId("SpaceSystem", "Enter");
-const EventId SPACESYSTEM_EXIT_SPACE_EVENT_ID  = EventId("SpaceSystem", "Exit");
+const EventId SPACESYSTEM_ENTER_SPACE_EVENT_ID	= EventId("SpaceSystem", "Enter");
+const EventId SPACESYSTEM_EXIT_SPACE_EVENT_ID	= EventId("SpaceSystem", "Exit");
+const EventId SPACESYSTEM_LEAVE_SCOPES_EVENT_ID = EventId("SpaceSystem", "LeaveScopes");
 
 const EventId MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID = EventId("MultiplayerSystem", "Disconnect");
 

@@ -205,7 +205,7 @@ void SystemsManager::CreateSystems()
 
 	AnalyticsSystem		  = CSP_NEW csp::systems::AnalyticsSystem();
 	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
-	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
+	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient, MultiplayerConnection);
 	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
 	AnchorSystem		  = CSP_NEW csp::systems::AnchorSystem(WebClient);
 	PointOfInterestSystem = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
