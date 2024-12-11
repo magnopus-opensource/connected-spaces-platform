@@ -65,7 +65,10 @@ enum class AnimatedModelPropertyKeys
 
 
 /// @ingroup AnimatedModelSpaceComponent
-/// @brief Data representation of an AnimatedModelSpaceComponent.
+/// @brief Adds animated skeletal meshes to a SpaceEntity.
+///
+/// These are used for objects that need to move or act within the space, such as characters or animated props.
+/// This component makes it possible to play, pause, or loop animations.
 class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
 											public ITransformComponent,
 											public IVisibleComponent,

@@ -68,7 +68,10 @@ enum class AudioPropertyKeys
 
 
 // @ingroup AudioSpaceComponent
-/// @brief Data representation of an AudioSpaceComponent.
+/// @brief Adds spatial audio to a SpaceEntity.
+///
+/// This component creates immersive soundscapes by playing audio that reacts to the user's position in the space.
+/// Whether it's background music, sound effects, or voiceovers, the AudioSpaceComponent makes sound more engaging by positioning it in 3D space.
 class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
 {
 public:

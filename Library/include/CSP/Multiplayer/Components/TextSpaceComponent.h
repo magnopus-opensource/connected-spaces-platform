@@ -50,7 +50,7 @@ enum class TextPropertyKeys
 
 
 /// @ingroup TextSpaceComponent
-/// @brief Data representation of an TextSpaceComponent.
+/// @brief Add a spatial representation of text to your space.
 class CSP_API TextSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:

@@ -101,27 +101,8 @@ public:
 	int Version;
 	csp::common::String MimeType;
 	csp::common::String ExternalMimeType;
-
-
-	/// @brief Gets the third party packaged asset identifier of this asset
-	/// @return returns a string representing the party packaged asset identifier set for this asset.
-	const csp::common::String& GetThirdPartyPackagedAssetIdentifier() const;
-
-	/// @brief Sets the party packaged asset identifier for this asset
-	/// @param InThirdPartyPackagedAssetIdentifier The third party packaged asset identifier to set.
-	void SetThirdPartyPackagedAssetIdentifier(const csp::common::String& InThirdPartyPackagedAssetIdentifier);
-
-	/// @brief Gets the third party platform type of this asset
-	/// @return returns a string representing third party platform type set for this asset.
-	const EThirdPartyPlatform GetThirdPartyPlatformType() const;
-
-	/// @brief Sets third party platform type for this asset
-	/// @param InThirdPartyPlatformType The third party platform type to set.
-	void SetThirdPartyPlatformType(const EThirdPartyPlatform InThirdPartyPlatformType);
-
-private:
 	csp::common::String ThirdPartyPackagedAssetIdentifier;
-	EThirdPartyPlatform ThirdPartyPlatform;
+	EThirdPartyPlatform ThirdPartyPlatformType;
 };
 
 /// @brief Defines a base data source for an Asset, attributing a mime type and providing functionality for uploading the data.

@@ -356,6 +356,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -374,19 +375,19 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
             Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
 
@@ -404,6 +405,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -419,19 +421,19 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
             Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
 
@@ -1395,6 +1397,8 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifierAlphanumeric = "^[a-zA-Z0-9][a-zA-Z0-9/\\s]/*^\\s]*";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
+            string thirdPartyPackagedAssetIdentifierBlank = "";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -1412,14 +1416,14 @@ namespace CSPEngine
             GetAssetsInCollection(assetSystem, assetCollection, out var assets);
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
-            Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.NONE);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierBlank);
+            Assert.AreEqual(assets[0].ThirdPartyPlatformType, Systems.EThirdPartyPlatform.NONE);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             inboundAsset.Dispose();
 
             // Create asset
@@ -1430,8 +1434,8 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 2UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifierAlphanumeric);
-            Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNITY);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierAlphanumeric);
+            Assert.AreEqual(assets[0].ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNITY);
 
         }
 #endif

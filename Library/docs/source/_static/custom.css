@@ -1,0 +1,25 @@
+@media (prefers-color-scheme: dark) {
+	/* We override the colorization of class names so that it looks good in both light and dark modes. */
+	.descclassname, .descname {
+		color: darkorange !important;
+	}
+	
+	/* We disable search result background highlighting as we feel it is visually distracting to the reader. */
+	.rst-content .highlighted {
+		background: transparent;
+	}
+	
+	/* 	Override page width default of 800px to fit more text on-screen. 1320px is chosen so that the 
+		negative space on the right is symmetric in size to the sidebar on the left (300px wide). */
+	.wy-nav-content {
+		max-width: 1320px;
+	}
+	
+	/* 
+	`width:auto` was rendering 0px wide for .svg files
+	https://stackoverflow.com/questions/59215996/how-to-add-a-logo-to-my-readthedocs-logo-rendering-at-0px-wide
+	*/
+	.wy-side-nav-search .wy-dropdown > a img.logo, .wy-side-nav-search > a img.logo {
+		width: 275px;
+	}
+}

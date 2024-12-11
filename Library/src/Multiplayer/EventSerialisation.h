@@ -29,7 +29,7 @@ namespace csp::multiplayer
 csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
 // Generic deserialiser for multiplayer events. It can be derived from and
-// its behaviour can be overridden if specialised handling is needed for
+// its behavior can be overridden if specialised handling is needed for
 // certain events.
 class EventDeserialiser
 {

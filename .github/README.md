@@ -1,30 +1,15 @@
-# 🌎 Connected Spaces Platform
+# Connected Spaces Platform
 
-[![](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-[![](https://img.shields.io/badge/License-Apache2.0-blue)](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/b40be23d-4d07-42bd-b3cb-652f261cf20b">
+</p>
 
-_"An interoperable communication library for the spatial internet."_
+## An interoperable communication library for the spatial internet
+
 
 ⚡️ Current Supported Languages : C++, C#, WebAssembly
 
-🖥️ Current Supported Platforms : Windows, Android, iOS and MacOS
-
----
-
-## Table of Contents
-
-- [Background](#background)
-- [Install](#-install)
-- [Build Instructions](#-build-instructions)
-- [Usage](#%EF%B8%8F-usage)
-- [Tenant IDs](#-tenant-ids)
-- [API Documentation](#-api-documentation)
-- [Contributions](#%EF%B8%8F-contributions)
-- [License](#%EF%B8%8F-license)
-
----
-
-## Background
+🖥️ Current Supported Platforms : Windows, Android, iOS, VisionOS and MacOS
 
 Interoperability is the foundation of the spatial internet. We need experiences to work across multiple technologies in harmony, bridging applications and devices so that we can move beyond a series of disconnected islands.
 
@@ -36,7 +21,15 @@ The Connected Spaces Platform provides developers across a range of languages an
 
 It comes in the form of an open-source client-side library, effectively encoding (in binary form) the standards by which applications can interoperably communicate with one another. Standards that we can all contribute to.
 
----
+## 📖 Learn
+
+The official documentation for CSP can be found [here](https://builds.magnoboard.com/connected-spaces-platform/index.html).
+
+* The [Learn](https://builds.magnoboard.com/connected-spaces-platform/learn/learn.html) section includes a range of modules that explain topics ranging from the basic tenets of CSP through to more advanced usage.
+
+* The [Manual](https://builds.magnoboard.com/connected-spaces-platform/manual/manual.html) covers quick start guides, tutorials, plus how to build and debug CSP locally.
+
+* The [API Documentation](https://builds.magnoboard.com/connected-spaces-platform/api/library_root.html) covers the API itself (this documentation can also be found inline in the CSP public API source).
 
 ## 📦 Install
 
@@ -45,26 +38,9 @@ NPM packages are available for Web and Unity and can be found on npmjs.
 - Web: https://www.npmjs.com/package/connected-spaces-platform.web
 
 - Unity: https://www.npmjs.com/package/connected-spaces-platform.unity.core
-  - For detailed installation instructions head over [here](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Using-CSP-For-Unity).
+  - For detailed installation instructions head over [here](https://builds.magnoboard.com/connected-spaces-platform/manual/getting_started/csharp.html).
 
 For C++ based applications, you can find headers and precompiled binaries for all platforms in [Releases](https://github.com/magnopus-opensource/connected-spaces-platform/releases).
-
-If you want to build CSP for your own use case follow the instructions below.
-
----
-
-## 🔨 Build Instructions
-
-Build instructions for each supported language are below.
-
-- [Building for Web](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Web)
-- [Building for C++](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CPP)
-- [Building for C#](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-CSharp)
-- [Building for Android](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-Android)
-- [Building for MacOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-MacOS)
-- [Building for IOS](https://github.com/magnopus-opensource/connected-spaces-platform/wiki/Building-CSP-for-IOS)
-
----
 
 ## 🔑 Tenant IDs
 
@@ -74,9 +50,7 @@ Use this [form](https://ogs.magnopus-stg.cloud/mag-user/tenants/CreateTenant) to
 
 If you are ready to use CSP in a live product, [reach out](https://www.magnopus.com/contact) to us to obtain a tenant in our production environment. 
 
-For more information about tenants and tenant IDs, visit our [FAQ.](https://www.magnopus.com/csp/faqs#tenant-IDs-faqs)
-
----
+For more information about tenants and tenant IDs, visit our [FAQ](https://www.magnopus.com/csp/faqs#tenant-IDs-faqs).
 
 ## 🖥️ Usage
 
@@ -94,23 +68,20 @@ To help you get started using the Connected Spaces Platform, we have a set of ex
   - [Unity C# Initialising Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Initialising%20Foundation/CSharp/Foundation-Unity-Example)
   - [Unity C# Basic Framework Example](https://github.com/magnopus-opensource/connected-spaces-platform/tree/Main/Examples/Basic%20Framework/CSharp/Foundation-Unity-Example)
 
----
+## 🔨 Build Instructions
 
-## 📖 API Documentation
+CSP build instructions for each supported language are below.
 
-You can always find up-to-date documentation on the API here.
-
-- [CSP API Documentation](https://builds.magnoboard.com/connected-spaces-platform/index.html)
-
----
+- [Building for Web](https://builds.magnoboard.com/connected-spaces-platform/manual/building/web.html)
+- [Building for C++](https://builds.magnoboard.com/connected-spaces-platform/manual/building/cpp.html)
+- [Building for C#](https://builds.magnoboard.com/connected-spaces-platform/manual/building/csharp.html)
+- [Building for Android](https://builds.magnoboard.com/connected-spaces-platform/manual/building/android.html)
+- [Building for MacOS](https://builds.magnoboard.com/connected-spaces-platform/manual/building/macos.html)
+- [Building for IOS](https://builds.magnoboard.com/connected-spaces-platform/manual/building/ios.html)
 
 ## 👷‍♂️ Contributions
 
-PRs are welcome! If have any ideas you would like to contribute please see our contribution page.
-
-- [Contribution](/.github/CONTRIBUTING.md)
-
----
+PRs are welcome! If have any ideas you would like to contribute please see our [contribution](/.github/CONTRIBUTING.md) page.
 
 ## ©️ License
 
