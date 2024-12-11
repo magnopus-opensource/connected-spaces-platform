@@ -131,7 +131,7 @@ int64_t EntityScriptInterface::GetParentId()
 	return 0;
 }
 
-void EntityScriptInterface::SetParentId(uint64_t ParentId)
+void EntityScriptInterface::SetParentId(int64_t ParentId)
 {
 	if (Entity)
 	{

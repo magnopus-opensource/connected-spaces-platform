@@ -54,7 +54,7 @@ public:
 	Vector4 GetGlobalRotation() const;
 
 	int64_t GetParentId();
-	void SetParentId(uint64_t ParentId);
+	void SetParentId(int64_t ParentId);
 
 	void RemoveParentEntity();
 
