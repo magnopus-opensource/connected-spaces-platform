@@ -76,7 +76,7 @@ Each fiducial marker has three key transform attributes:
 
 ## Creating a Fiducial Marker Component
 
-A fiducial marker component is expresses where a fiducial marker exists within the digital coordinate system in CSP, and what the marker image is.
+A fiducial marker component expresses both where a fiducial marker exists within the digital coordinate system and what the marker image is.
 
 This section covers the prerequisites, step-by-step creation process, and implementation details to help you configure a fiducial marker for your project.
 
