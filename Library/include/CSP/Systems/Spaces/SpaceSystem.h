@@ -108,6 +108,7 @@ public:
 	/// their emails and roles
 	/// @param Metadata csp::common::String : metadata information for the new space
 	/// @param FileThumbnail csp::systems::FileAssetDataSource : optional thumbnail image for the new space
+	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to set the metadata tags for the new space
 	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateSpace(const csp::common::String& Name,
 									  const csp::common::String& Description,
@@ -115,6 +116,7 @@ public:
 									  const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 									  const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 									  const csp::common::Optional<csp::systems::FileAssetDataSource>& FileThumbnail,
+									  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 									  SpaceResultCallback Callback);
 
 	/// @brief Creates a new space Using BufferAssetDataSource.
@@ -125,6 +127,7 @@ public:
 	/// their emails and roles
 	/// @param Metadata csp::common::String : metadata information for the new space
 	/// @param Thumbnail csp::systems::BufferAssetDataSource : thumbnail image buffer for the new space
+	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to set the metadata tags for the new space
 	/// @param Callback csp::systems::SpaceResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void CreateSpaceWithBuffer(const csp::common::String& Name,
 												const csp::common::String& Description,
@@ -132,6 +135,7 @@ public:
 												const csp::common::Optional<InviteUserRoleInfoCollection>& InviteUsers,
 												const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
 												const csp::systems::BufferAssetDataSource& Thumbnail,
+												const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 												SpaceResultCallback Callback);
 
 	/// @brief Updates the name and/or the description of a Space
@@ -260,9 +264,11 @@ public:
 	/// @brief Updates the Space metadata information with the new one provided
 	/// @param SpaceId csp::common::String : ID of Space for which the metadata will be updated
 	/// @param NewMetadata csp::common::String : New metadata information that will replace the previous one
+	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to replace the tags in the metadata
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& SpaceId,
 											  const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
+											  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 											  NullResultCallback Callback);
 
 	/// @brief Retrieves Spaces metadata information
@@ -361,6 +367,7 @@ private:
 	void GetMetadataAssetCollections(const csp::common::Array<csp::common::String>& Spaces, AssetCollectionsResultCallback Callback);
 	void AddMetadata(const csp::common::String& SpaceId,
 					 const csp::common::Map<csp::common::String, csp::common::String>& Metadata,
+					 const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 					 NullResultCallback Callback);
 	void RemoveMetadata(const csp::common::String& SpaceId, NullResultCallback Callback);
 

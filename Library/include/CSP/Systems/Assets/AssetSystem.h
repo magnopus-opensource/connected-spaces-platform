@@ -138,9 +138,11 @@ public:
 	/// @brief Updates the Metadata field of an Asset Collection
 	/// @param AssetCollection AssetCollection : asset collection to be updated
 	/// @param NewMetadata csp::common::StringMap : the new metadata information that will replace the previous
+	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to replace the tags
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
 														const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
+														const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 														AssetCollectionResultCallback Callback);
 
 	/// @brief Creates a new asset.

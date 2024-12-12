@@ -254,6 +254,9 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
 	auto Current	 = std::chrono::steady_clock::now();
 	int64_t TestTime = 0;
 
+	// Call at least once
+	EntitySystem->ProcessPendingEntityOperations();
+
 	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
 	{
 		EntitySystem->ProcessPendingEntityOperations();

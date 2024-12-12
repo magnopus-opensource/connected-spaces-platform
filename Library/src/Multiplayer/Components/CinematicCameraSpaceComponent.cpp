@@ -48,7 +48,12 @@ CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent
 
 float CinematicCameraSpaceComponent::GetFov() const
 {
-	return 2.0f * atan(GetSensorSize().X / (2.0f * GetFocalLength()));
+	float sensorAspectRatio = GetSensorSize().X / GetSensorSize().Y;
+	float aspectRatio		= GetAspectRatio();
+	// When the crop changes the width, we need to update the fov to match
+	float sensorCropFactor = aspectRatio < sensorAspectRatio ? aspectRatio / sensorAspectRatio : 1.0f;
+	// Horizontal FOV in radians
+	return 2.0f * atan((GetSensorSize().X * sensorCropFactor) / (2.0f * GetFocalLength()));
 }
 
 // transforms

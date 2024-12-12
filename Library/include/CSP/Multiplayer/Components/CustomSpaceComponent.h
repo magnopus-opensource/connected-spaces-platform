@@ -37,7 +37,7 @@ enum class CustomComponentPropertyKeys
 
 
 /// @ingroup CustomSpaceComponent
-/// @brief Data representation of an CustomSpaceComponent.
+/// @brief Can be used to prototype new component types or to support the replication of custom data.
 /// @note This class is used to replicate properties of primitive types of properties across multiple platforms.
 ///       The supported primitive types are the ones supported by the "ReplicatedValue" class.
 class CSP_API CustomSpaceComponent : public ComponentBase

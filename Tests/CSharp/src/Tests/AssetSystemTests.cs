@@ -212,9 +212,9 @@ namespace CSPEngine
             assets = result.GetAssets();
         }
 
-        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, out Common.Map<string, string> metaDataOut)
+        static void UpdateAssetCollectionMetadata(Systems.AssetSystem assetSystem, Systems.AssetCollection assetCollection, Common.Map<string, string> metaDataIn, Common.Array<string> tags, out Common.Map<string, string> metaDataOut)
         {
-            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn).Result;
+            using var result = assetSystem.UpdateAssetCollectionMetadata(assetCollection, metaDataIn, tags).Result;
             var resCode = result.GetResultCode();
 
             Assert.AreEqual(resCode, Systems.EResultCode.Success);
@@ -226,7 +226,7 @@ namespace CSPEngine
             Assert.AreNotEqual(updatedAssetCollection.UpdatedAt, assetCollection.UpdatedAt);
 
             for (var i = 0UL; i < updatedAssetCollection.Tags.Size(); i++)
-                Assert.AreEqual(updatedAssetCollection.Tags[i], assetCollection.Tags[i]);
+                Assert.AreEqual(updatedAssetCollection.Tags[i], tags[i]);
 
             metaDataOut = new Common.Map<string, string>(updatedAssetCollection.GetMetadataImmutable());
         }
@@ -255,7 +255,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out _);
@@ -276,17 +276,20 @@ namespace CSPEngine
 
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
 
+            var tags = new Common.Array<string>(1);
+            tags[0] = "test-tag";
+
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create asset collection
-            CreateAssetCollection(assetSystem, null, null, testAssetCollectionName, null, null, out _);
+            CreateAssetCollection(assetSystem, null, null, testAssetCollectionName, null, tags, out _);
 
             // Get asset collections
             GetAssetCollectionByName(assetSystem, testAssetCollectionName, out var assetCollection);
 
             Assert.AreEqual(assetCollection.Name, testAssetCollectionName);
-            Assert.IsTrue(assetCollection.SpaceId.Length > 0);
+            Assert.IsFalse(assetCollection.SpaceId.Length > 0);
         }
 #endif
 
@@ -306,7 +309,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collections
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, null, null, out var assetCollection1);
@@ -353,12 +356,13 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -371,19 +375,19 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
             Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
 
@@ -401,6 +405,7 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifier = "OKO interoperable assets Test";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
@@ -416,19 +421,19 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifier);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifier);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
 
             var updatedAsset = assetSystem.UpdateAsset(inboundAsset).Result;
             Assert.AreEqual(updatedAsset.GetResultCode(), Systems.EResultCode.Success);
 
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPackagedAssetIdentifier(), "Test");
-            Assert.AreEqual(updatedAsset.GetAsset().GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            Assert.AreEqual(updatedAsset.GetAsset().ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             updatedAsset.Dispose();
             inboundAsset.Dispose();
 
@@ -455,7 +460,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collections
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, null, null, out var assetCollection1);
@@ -511,10 +516,10 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             var tags = new Common.Array<string>(1);
-            tags[0] = space.Id;
+            tags[0] = "test-tag";
 
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName1, Systems.EAssetCollectionType.SPACE_THUMBNAIL, null, out var assetCollection1);
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName2, Systems.EAssetCollectionType.SPACE_THUMBNAIL, tags, out var assetCollection2);
@@ -531,7 +536,7 @@ namespace CSPEngine
 
             // Search by parentId
             {
-                var assetCollections = FindAssetCollections(assetSystem, ids: new[] { assetCollection1.Id });
+                var assetCollections = FindAssetCollections(assetSystem, parentId: assetCollection1.Id );
 
                 Assert.AreEqual(assetCollections.Size(), 1UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection3.Id);
@@ -542,9 +547,9 @@ namespace CSPEngine
 
             // Search by tag
             {
-                var assetCollections = FindAssetCollections(assetSystem, tags: new[] { space.Id });
+                var assetCollections = FindAssetCollections(assetSystem, tags: new[] { "test-tag" });
 
-                Assert.AreEqual(assetCollections.Size(), 1UL);
+                Assert.AreEqual(assetCollections.Size(), 2UL);
                 Assert.AreEqual(assetCollections[0].Id, assetCollection2.Id);
                 Assert.AreEqual(assetCollections[0].Name, assetCollection2.Name);
 
@@ -611,7 +616,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
 
@@ -700,7 +705,7 @@ namespace CSPEngine
 
             _ = UserSystemTests.LogIn(userSystem);
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             CreateAssetCollection(assetSystem, space, null, testFirstAssetCollectionName, null, null, out var firstAssetCollection);
             CreateAssetCollection(assetSystem, space, null, testSecondAssetCollectionName, null, null, out var secondAssetCollection);
@@ -775,7 +780,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -831,7 +836,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1006,7 +1011,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1076,7 +1081,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1144,7 +1149,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1216,7 +1221,7 @@ namespace CSPEngine
             var userId = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1295,6 +1300,9 @@ namespace CSPEngine
             string testSpaceName = GenerateUniqueString("OLY-UNITTEST-SPACE-REWIND");
             string testSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
+            var tags = new Common.Array<string>(1);
+            tags[0] = "test-tag";
+
             using var metadataIn = new Common.Map<string, string>();
             metadataIn[testSpaceName] = testSpaceName;
 
@@ -1302,12 +1310,12 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testSpaceName, null, null, out var assetCollection);
 
-            UpdateAssetCollectionMetadata(assetSystem, assetCollection, metadataIn, out var metaDataOut);
+            UpdateAssetCollectionMetadata(assetSystem, assetCollection, metadataIn, tags, out var metaDataOut);
 
             Assert.AreEqual(metadataIn[testSpaceName], metaDataOut[testSpaceName]);
 
@@ -1389,12 +1397,14 @@ namespace CSPEngine
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST-ASSETCOLLECTION-REWIND");
             string testAssetName = GenerateUniqueString("OLY-UNITTEST-ASSET-REWIND");
             string thirdPartyPackagedAssetIdentifierAlphanumeric = "^[a-zA-Z0-9][a-zA-Z0-9/\\s]/*^\\s]*";
+            string thirdPartyPackagedAssetIdentifierTest = "Test";
+            string thirdPartyPackagedAssetIdentifierBlank = "";
 
             // Log in
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create space
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             // Create asset collection
             CreateAssetCollection(assetSystem, space, null, testAssetCollectionName, null, null, out var assetCollection);
@@ -1406,14 +1416,14 @@ namespace CSPEngine
             GetAssetsInCollection(assetSystem, assetCollection, out var assets);
             Assert.AreEqual(assets.Size(), 1UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
-            Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.NONE);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierBlank);
+            Assert.AreEqual(assets[0].ThirdPartyPlatformType, Systems.EThirdPartyPlatform.NONE);
 
             var inboundAsset = assets[0];
-            inboundAsset.SetThirdPartyPackagedAssetIdentifier("Test");
-            Assert.AreEqual(inboundAsset.GetThirdPartyPackagedAssetIdentifier(), "Test");
-            inboundAsset.SetThirdPartyPlatformType(Systems.EThirdPartyPlatform.UNREAL);
-            Assert.AreEqual(inboundAsset.GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNREAL);
+            inboundAsset.ThirdPartyPackagedAssetIdentifier = thirdPartyPackagedAssetIdentifierTest;
+            Assert.AreEqual(inboundAsset.ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierTest);
+            inboundAsset.ThirdPartyPlatformType = Systems.EThirdPartyPlatform.UNREAL;
+            Assert.AreEqual(inboundAsset.ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNREAL);
             inboundAsset.Dispose();
 
             // Create asset
@@ -1424,8 +1434,8 @@ namespace CSPEngine
 
             Assert.AreEqual(assets.Size(), 2UL);
             Assert.AreEqual(assets[0].Name, testAssetName);
-            Assert.AreEqual(assets[0].GetThirdPartyPackagedAssetIdentifier(), thirdPartyPackagedAssetIdentifierAlphanumeric);
-            Assert.AreEqual(assets[0].GetThirdPartyPlatformType(), Systems.EThirdPartyPlatform.UNITY);
+            Assert.AreEqual(assets[0].ThirdPartyPackagedAssetIdentifier, thirdPartyPackagedAssetIdentifierAlphanumeric);
+            Assert.AreEqual(assets[0].ThirdPartyPlatformType, Systems.EThirdPartyPlatform.UNITY);
 
         }
 #endif
@@ -1447,7 +1457,7 @@ namespace CSPEngine
             _ = UserSystemTests.LogIn(userSystem);
 
             // Create 'source' space and asset collection
-            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var sourceSpace = SpaceSystemTests.CreateSpace(spaceSystem, sourceSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             {
                 CreateAssetCollection(assetSystem, sourceSpace, null, testAssetCollectionName, null, null, out sourceAssetCollection);
                 CreateAsset(assetSystem, sourceAssetCollection, testAssetName, null, null, out var sourceAsset);
@@ -1466,7 +1476,7 @@ namespace CSPEngine
             }
 
             // Create 'dest' space and invoke the copy
-            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var destSpace = SpaceSystemTests.CreateSpace(spaceSystem, destSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             Common.Array<Systems.AssetCollection> destAssetCollections = null;
 
             {
@@ -1481,7 +1491,7 @@ namespace CSPEngine
 
             // Validate the copied asset collection and its data
 	        {
-                Assert.AreEqual(destAssetCollections.Size(), 1UL);
+                Assert.AreEqual(destAssetCollections.Size(), 2UL);
 		        Assert.AreNotEqual(destAssetCollections[0].Id, sourceAssetCollection.Id);
 		        Assert.AreEqual(destAssetCollections[0].SpaceId, destSpace.Id);
 		        Assert.AreEqual(destAssetCollections[0].Type, sourceAssetCollection.Type);

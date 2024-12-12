@@ -57,7 +57,7 @@ enum class DisplayMode
 
 
 /// @ingroup ImageSpaceComponent
-/// @brief Data representation of an ImageSpaceComponent.
+/// @brief Add an image to your space.
 class CSP_API ImageSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:

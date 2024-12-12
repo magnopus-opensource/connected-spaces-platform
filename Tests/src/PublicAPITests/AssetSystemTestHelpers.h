@@ -76,4 +76,5 @@ void GetAssetsByCollectionIds(csp::systems::AssetSystem* AssetSystem,
 void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 								   csp::systems::AssetCollection& AssetCollection,
 								   const csp::common::Map<csp::common::String, csp::common::String>& InMetaData,
+								   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 								   csp::common::Map<csp::common::String, csp::common::String>& OutMetaData);

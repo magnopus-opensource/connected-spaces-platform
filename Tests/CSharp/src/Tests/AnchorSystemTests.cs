@@ -183,7 +183,7 @@ namespace CSPEngine
             string testSpaceDescription = "OLY-UNITTEST-DESC";
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
@@ -223,7 +223,7 @@ namespace CSPEngine
             string testAssetCollectionName1 = GenerateUniqueString("OLY-UNITTEST");
             string testAssetCollectionName2 = GenerateUniqueString("OLY-UNITTEST");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
@@ -285,7 +285,7 @@ namespace CSPEngine
             string testSpaceDescription = "OLY-UNITTEST-DESC";
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
             var spaceIds = new Common.Array<string>(1);
             spaceIds[0] = space.Id;
 
@@ -389,7 +389,7 @@ namespace CSPEngine
             string testAssetCollectionName1 = GenerateUniqueString("OLY-UNITTEST");
             string testAssetCollectionName2 = GenerateUniqueString("OLY-UNITTEST");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 
@@ -458,7 +458,7 @@ namespace CSPEngine
             string testSpaceDescription = "OLY-UNITTEST-DESC";
             string testAssetCollectionName = GenerateUniqueString("OLY-UNITTEST");
 
-            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null);
+            var space = SpaceSystemTests.CreateSpace(spaceSystem, testSpaceName, testSpaceDescription, Systems.SpaceAttributes.Private, null, null, null, null);
 
             SpaceSystemTests.EnterSpace(spaceSystem, space.Id);
 

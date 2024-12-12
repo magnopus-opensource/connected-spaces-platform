@@ -67,12 +67,13 @@ void CreateSpace(::SpaceSystem* SpaceSystem,
 				 const Optional<Map<String, String>>& Metadata,
 				 const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 				 const Optional<FileAssetDataSource>& Thumbnail,
+				 const Optional<Array<String>>& Tags,
 				 Space& OutSpace)
 {
 	Map<String, String> TestMetadata = Metadata.HasValue() ? (*Metadata) : Map<String, String>({{"site", "Void"}});
 
 	// TODO: Add tests for public spaces
-	auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail);
+	auto [Result] = AWAIT_PRE(SpaceSystem, CreateSpace, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail, Tags);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -86,12 +87,13 @@ void CreateSpaceWithBuffer(::SpaceSystem* SpaceSystem,
 						   const Optional<Map<String, String>>& Metadata,
 						   const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 						   BufferAssetDataSource& Thumbnail,
+						   const Optional<Array<String>>& Tags,
 						   Space& OutSpace)
 {
 	Map<String, String> TestMetadata = Metadata.HasValue() ? (*Metadata) : Map<String, String>({{"site", "Void"}});
 
 	auto [Result]
-		= AWAIT_PRE(SpaceSystem, CreateSpaceWithBuffer, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail);
+		= AWAIT_PRE(SpaceSystem, CreateSpaceWithBuffer, RequestPredicate, Name, Description, Attributes, InviteUsers, TestMetadata, Thumbnail, Tags);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -257,11 +259,14 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
 	}
 }
 
-void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, const Optional<Map<String, String>>& NewMetadata)
+void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem,
+						 const String& SpaceId,
+						 const Optional<Map<String, String>>& NewMetadata,
+						 const Optional<Array<String>>& Tags)
 {
 	Map<String, String> Metadata = NewMetadata.HasValue() ? *NewMetadata : Map<String, String>();
 
-	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata);
+	auto [Result] = AWAIT_PRE(SpaceSystem, UpdateSpaceMetadata, RequestPredicate, SpaceId, Metadata, Tags);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -359,7 +364,42 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_CREATESPACE_WITH_TAGS_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithTagsTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	Array<String> Tags = {"tag-test"};
+
+	String UserId;
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Tags, Space);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -393,7 +433,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, nullptr, Space);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
 	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -451,7 +491,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferTest)
 
 	// Create space
 	::Space Space;
-	CreateSpaceWithBuffer(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, BufferSource, Space);
+	CreateSpaceWithBuffer(SpaceSystem,
+						  UniqueSpaceName,
+						  TestSpaceDescription,
+						  SpaceAttributes::Private,
+						  nullptr,
+						  nullptr,
+						  BufferSource,
+						  nullptr,
+						  Space);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -500,7 +548,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
 
 	// Create space
 	::Space Space;
-	CreateSpaceWithBuffer(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, BufferSource, Space);
+	CreateSpaceWithBuffer(SpaceSystem,
+						  UniqueSpaceName,
+						  TestSpaceDescription,
+						  SpaceAttributes::Private,
+						  nullptr,
+						  InviteUsers,
+						  BufferSource,
+						  nullptr,
+						  Space);
 
 	auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
 	EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
@@ -544,7 +600,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceDescriptionTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Update space description
 	char UpdatedDescription[256];
@@ -594,7 +650,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTypeTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Update space type
 	auto UpdatedAttributes = SpaceAttributes::Public;
@@ -644,7 +700,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Get spaces
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaces, RequestPredicate);
@@ -699,7 +755,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	::Space ResultSpace;
 	GetSpace(SpaceSystem, Space.Id, ResultSpace);
@@ -738,10 +794,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesByIdsTest)
 	LogIn(UserSystem, UserId);
 
 	::Space PublicSpace;
-	CreateSpace(SpaceSystem, UniquePublicSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, PublicSpace);
+	CreateSpace(SpaceSystem, UniquePublicSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, PublicSpace);
 
 	::Space PrivateSpace;
-	CreateSpace(SpaceSystem, UniquePrivateSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, PrivateSpace);
+	CreateSpace(SpaceSystem,
+				UniquePrivateSpaceName,
+				TestSpaceDescription,
+				SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				PrivateSpace);
 
 	Array<String> SpacesIds = {PublicSpace.Id, PrivateSpace.Id};
 
@@ -806,7 +870,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
 		::Space Space;
 
-		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 		SpaceId[i] = Space.Id;
 	}
@@ -875,7 +939,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 
 		::Space Space;
 
-		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 		SpaceId[i] = Space.Id;
 	}
@@ -933,7 +997,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 
 		::Space Space;
 
-		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 		SpaceId[i] = Space.Id;
 	}
@@ -991,7 +1055,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
 		::Space Space;
 
-		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+		CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 		SpaceId[i] = Space.Id;
 	}
@@ -1040,7 +1104,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 	LogIn(UserSystem, SpaceOwnerUserId);
 
 	::Space PublicSpace;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, PublicSpace);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, PublicSpace);
 
 	LogOut(UserSystem);
 
@@ -1108,7 +1172,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, AddSiteInfoTest)
 	LogIn(UserSystem, UserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	Site SiteInfo;
 	AddSiteInfo(SpaceSystem, nullptr, Space.Id, SiteInfo);
@@ -1141,7 +1205,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
 	LogIn(UserSystem, UserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	Site SiteInfo1, SiteInfo2;
 	AddSiteInfo(SpaceSystem, "Site1", Space.Id, SiteInfo1);
@@ -1214,7 +1278,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	InviteUsers.EmailLinkUrl		= "dev.magnoverse.space";
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, nullptr, Space);
 
 	// Log out
 	LogOut(UserSystem);
@@ -1305,7 +1369,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
 	LogIn(UserSystem, SpaceOwnerUserId);
 
 	::Space PublicSpace;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, PublicSpace);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, PublicSpace);
 
 	LogOut(UserSystem);
 
@@ -1360,8 +1424,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 
 	// create a space with no other user Ids invited
 	::Space Space;
-	// CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	// CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
 	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
@@ -1399,9 +1463,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 	LogIn(UserSystem, UserId);
 
 	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
+	Array<String> Tags					  = {"tag-test"};
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space);
 
 	Map<String, String> RetrievedSpaceMetadata;
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
@@ -1411,7 +1476,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 
 	TestSpaceMetadata["site"] = "MagOffice";
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata);
+	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, Tags);
 
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
 
@@ -1445,8 +1510,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesMetadataTest)
 	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
 
 	::Space Space1, Space2;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Space1);
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Space2);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space1);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space2);
 
 	Array<String> Spaces = {Space1.Id, Space2.Id};
 	Map<String, Map<String, String>> RetrievedSpacesMetadata;
@@ -1491,7 +1556,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 
 	// Create space without a thumbnail
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
@@ -1559,7 +1624,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 
 	// Create space without a thumbnail
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
@@ -1638,7 +1703,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithEmptyMetadataTest)
 
 	::Space Space;
 	Map<String, String> Metadata;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, Metadata, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, Metadata, nullptr, nullptr, nullptr, Space);
 
 	Map<String, String> RetrievedSpaceMetadata;
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
@@ -1670,9 +1735,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
 	LogIn(UserSystem, UserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, nullptr);
+	UpdateSpaceMetadata(SpaceSystem, Space.Id, nullptr, nullptr);
 
 	Map<String, String> RetrievedSpaceMetadata;
 	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
@@ -1709,7 +1774,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 	LogIn(UserSystem, UserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
 
@@ -1755,7 +1820,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 	LogIn(UserSystem, UserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, BulkInviteToSpace, RequestPredicate, Space.Id, InviteUsers);
 
@@ -1805,7 +1870,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 
 	// Create public space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, TestSpaceMetadata, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, TestSpaceMetadata, nullptr, nullptr, nullptr, Space);
 
 	// Log out with default user and in with alt user
 	LogOut(UserSystem);
@@ -1872,7 +1937,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 	SpaceThumbnail.FilePath			= FilePath.u8string().c_str();
 	SpaceThumbnail.SetMimeType("application/json");
 
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
 
 	String InitialSpaceThumbnailUri;
 	{
@@ -1932,7 +1997,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 	SpaceThumbnail.FilePath			= FilePath.u8string().c_str();
 	SpaceThumbnail.SetMimeType("application/json");
 
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, SpaceThumbnail, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, SpaceThumbnail, nullptr, Space);
 
 	LogOut(UserSystem);
 
@@ -1987,7 +2052,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 	LogIn(UserSystem, PrimaryUserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	LogOut(UserSystem);
 
@@ -2052,7 +2117,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 	LogIn(UserSystem, PrimaryUserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	LogOut(UserSystem);
 
@@ -2116,7 +2181,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	LogIn(UserSystem, PrimaryUserId);
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	{
 		EXPECT_FALSE(SpaceSystem->IsInSpace());
@@ -2175,7 +2240,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 	LogOut(UserSystem);
 
 	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
@@ -2223,7 +2288,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	InviteUser.UserRole	 = SpaceUserRole::User;
 	InviteUserRoleInfoCollection InviteUsers;
 	InviteUsers.InviteUserRoleInfos = {InviteUser};
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteUsers, nullptr, nullptr, Space);
 
 	::UserRoleInfo NewUserRoleInfo;
 	NewUserRoleInfo.UserId	 = AltUserId;
@@ -2271,7 +2336,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	GeoLocation InitialGeoLocation;
 	InitialGeoLocation.Latitude	 = 1.1;
@@ -2399,7 +2464,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	GeoLocation ValidGeoLocation;
 	ValidGeoLocation.Latitude  = 1.1;
@@ -2562,7 +2627,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Switch to the alt user to try and update the geo location
 	LogOut(UserSystem);
@@ -2657,7 +2722,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 	String PrimaryUserId;
 	LogIn(UserSystem, PrimaryUserId);
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Switch to the alt user to try and update the geo location
 	LogOut(UserSystem);
@@ -2763,7 +2828,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 	InviteInfo.InviteUserRoleInfos = UserRoles;
 
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space);
 
 	// Log out and log in as alt user
 	LogOut(UserSystem);

@@ -27,17 +27,19 @@ namespace csp::multiplayer
 {
 
 /// @brief Enum representing the type of a replicated value.
+/// These values are serialized and stored as integers.
+/// When adding new values, always add to the end
 enum class ReplicatedValueType
 {
-	InvalidType,
-	Boolean,
-	Integer,
-	Float,
-	String,
-	Vector2,
-	Vector3,
-	Vector4,
-	Map
+	InvalidType = 0,
+	Boolean		= 1,
+	Integer		= 2,
+	Float		= 3,
+	String		= 4,
+	Vector3		= 5,
+	Vector4		= 6,
+	Vector2		= 7,
+	Map			= 8
 };
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
