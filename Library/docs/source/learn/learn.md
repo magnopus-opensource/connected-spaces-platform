@@ -132,3 +132,18 @@ You will learn how spaces are structured, how content relates to them, and gain 
    spaces/management
    spaces/entities
 ```
+
+## Physical and Digital Realities
+
+This module will teach you how to bridge the physical and digital divide through augmented reality, digital twinning, and precise anchoring methods.
+
+By the end of this module, you will learn how to use various tools for spatial positioning, including digital twinning for asset alignment, anchor management using Google Cloud Anchors (GCA), and fiducial markers. You will also understand how to establish and manage Points of Interest (POIs) in CSP, enhancing user experience by pinpointing significant locations within both physical and digital environments.
+
+```eval_rst
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+
+   physical_digital_realities/digital_twins
+   physical_digital_realities/anchoring
+```
