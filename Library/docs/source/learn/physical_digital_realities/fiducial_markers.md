@@ -1,10 +1,10 @@
 # Fiducial Markers
 
-Fiducial markers in CSP serve as a method for anchoring digital content in physical spaces. They provide a visual reference that applications can detect and use to align digital entities with the real world. Unlike cloud-hosted anchors, which are virtual points in space, fiducial markers are physical objects that applications can interact with directly.
+Fiducial markers in CSP serve as a method for anchoring digital content in physical spaces. They provide a visual reference in reality that both applications and users can detect, and can be used to align digital entities with the real world.
 
-### Comparison: Fiducial Markers vs. Cloud-Hosted Anchors
+### Fiducial Markers vs. Cloud-Hosted Anchors
 
-Both fiducial markers and cloud-hosted anchors offer distinct advantages. Choosing the right one depends on the use case.
+Fiducial markers and cloud-hosted anchors offer distinct advantages. Choosing the right one depends on the use case.
 
 1. **Precision vs. Flexibility**  
    * Cloud-hosted anchors provide high-precision localization, often with sub-centimeter accuracy. However, they rely on third-party services like Google Cloud Anchors and require an internet connection to function.
@@ -16,11 +16,9 @@ Both fiducial markers and cloud-hosted anchors offer distinct advantages. Choosi
 
    * Fiducial markers, being tangible, are easier to detect and can act as a practical tool in environments where physical interaction or visibility is necessary.
 
-### Use Cases and Benefits
+### Use Cases
 
 Fiducial markers are a practical choice in several scenarios:
-
-* **Limited Connectivity:** They work entirely on-device and do not depend on third-party services, making them ideal for offline or remote environments.
 
 * **Real-World Movement:** Their physical nature allows them to be relocated, which is useful in dynamic spaces where objects or setups frequently change.
 
@@ -30,7 +28,7 @@ Fiducial markers are a practical choice in several scenarios:
 
 ## Core Concepts of Fiducials
 
-Fiducial markers are key in spatial positioning within the Connected Spaces Platform (CSP). They help bridge the gap between physical spaces and digital coordinate systems by providing tangible reference points for aligning virtual entities with real-world environments.
+Fiducial markers are a means of localizing the digital world within the Connected Spaces Platform (CSP). They help bridge the gap between physical spaces and digital coordinate systems by providing tangible reference points for aligning virtual entities with real-world environments.
 
 ### Fiducial Markers and Digital Coordinate Spaces
 
@@ -40,7 +38,9 @@ In digital spaces, every entity has a position, rotation, and scale that defines
 
 #### Importance of Dimensions and Scale
 
-The size and scale of fiducial markers are critical for maintaining accurate spatial relationships. Since fiducial markers have real-world dimensions, their size must be defined explicitly in CSP. This ensures that:
+The size and scale of fiducial markers are critical for maintaining accurate spatial relationships. Since fiducial markers have real-world dimensions, their size must be defined explicitly in CSP.
+
+This ensures that:
 
 * The digital representation of the marker matches its physical counterpart.
 
@@ -52,17 +52,17 @@ CSP uses the metric system to measure dimensions, ensuring consistency in scale 
 
 ### Marker Resolution and Transform
 
-Resolving a fiducial marker involves detecting its physical presence and calculating its transform within the digital space. The process ensures the marker is properly aligned with CSP's coordinate system.
+Resolving a fiducial marker involves detecting its physical presence and calculating its transform within the digital space.  The process ensures the digital coordinate system is properly relative to the marker.
 
 #### Steps for Resolving Fiducial Markers
 
 1. **Detect the Marker:** The application identifies the fiducial marker using its image recognition system.
 
-2. **Compute the Marker's Transform:** CSP calculates the marker's position, rotation, and scale relative to the digital space's origin.
+2. **Compute the Marker's Transform:** Through CSP, the application determines the marker's position, rotation, and scale relative to the digital space's origin.
 
-3. **Inverse the Transform:** The inverse of the marker's transform is computed to adjust all other entities relative to the marker.
+3. **Inverse the Transform:** The inverse of the marker's transform is computed to determine the adjustment for all other entities relative to the marker.
 
-4. **Rebase the Origin:** The digital space's origin is shifted to align with the marker, ensuring all spatial content maintains the correct relationships.
+4. **Rebase the Origin:** The digital space's origin is shifted using the inverse transform to align with the marker, ensuring all content maintains the correct spatial relationship.
 
 #### Role of Marker Component Transforms
 
@@ -76,73 +76,47 @@ Each fiducial marker has three key transform attributes:
 
 ## Creating a Fiducial Marker Component
 
-A fiducial marker component is a key element for anchoring digital content to a physical marker in the Connected Spaces Platform (CSP). This section covers the prerequisites, step-by-step creation process, and implementation details to help you configure a fiducial marker for your project.
+A fiducial marker component is expresses where a fiducial marker exists within the digital coordinate system in CSP, and what the marker image is.
+
+This section covers the prerequisites, step-by-step creation process, and implementation details to help you configure a fiducial marker for your project.
 
 ### Prerequisites
 
 Before creating a fiducial marker component, ensure the following are ready:
 
-1. **Entities and Asset Collections**  
+1. **Marker Entity**  
    * An entity in CSP serves as the parent for the fiducial marker component.  
    * Ensure you have created or identified an entity to associate with the marker.  
-   * Use CSP's asset system to manage assets and collections needed for the marker.
 
 2. **Fiducial Marker Images**  
    * Prepare the marker image you will use. This image must be uploaded to CSP's asset system and associated with a collection.  
-   * Confirm that the image's dimensions reflect its real-world size, ensuring accurate spatial alignment.
+   * Confirm that the image's dimensions reflect its real-world aspect ratio to ensure accurate spatial alignment.
 
-### Step-by-Step Process
+### Adding a Fiducial Marker Component
 
-**Step 1: Create a New Entity**
-
-An entity serves as a container for the fiducial marker component. To create one, use the CreateObject method in CSP's entity system.
-
-```
-SpaceTransform MarkerEntityTransform =
-{
-    csp::common::Vector3::Zero(),
-    csp::common::Vector4::Zero(),
-    csp::common::Vector3::One()
-};
-
-// Callback to confirm entity creation.
-csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback = [](csp::multiplayer::SpaceEntity* CreatedSpaceEntity) {
-    if (CreatedSpaceEntity)
-    {
-        // Logic for handling the new entity.
-    }
-};
-
-// Create a new entity.
-SpaceEntitySystem* EntitySystem = SystemsManager.GetSpaceEntitySystem();
-EntitySystem->CreateObject("MyMarkerEntity", MarkerEntityTransform, Callback);
-```
-
-**Step 2: Add a Fiducial Marker Component**
-
-Attach a fiducial marker component to the created entity using the AddComponent method.
+Attach a fiducial marker component to a created entity using the `AddComponent` method.
 
 ```
 FiducialMarkerSpaceComponent* FiducialMarkerComponent = static_cast<FiducialMarkerSpaceComponent*>(Object->AddComponent(ComponentType::FiducialMarker));
 ```
 
-**Step 3: Associate the Marker with an Asset Collection**
+### Associating a Marker Component with an Asset Collection
 
-Specify the marker's image by linking the component to an asset collection and its corresponding asset ID. These details help the application recognize and resolve the marker.
+Specify the marker's image by linking the component to the image's asset collection and asset ID. These details will tell client applications what fiducial marker image to attempt to resolve for this component.
 
 ```
-// Assuming an asset collection and asset identifiers...
-csp::systems::AssetCollection AssetCollection = ...;
+// Assuming an asset collection and asset identifiers for a fiducial marker image...
+csp::systems::AssetCollection MarkerAssetCollection = ...;
 csp::systems::Asset MarkerAsset = ...;
 
 // Associate the marker component with the asset.
-FiducialMarkerComponent->SetAssetCollectionId(MarkerAsset.AssetCollectionId);
+FiducialMarkerComponent->SetAssetCollectionId(MarkerAssetCollection.Id);
 FiducialMarkerComponent->SetMarkerAssetId(MarkerAsset.Id);
 ```
 
-**Step 4: Set Transform Properties**
+### Setting Transform Properties
 
-The transform defines the fiducial marker's position, orientation, and scale. Ensure the scale reflects the marker's real-world dimensions.
+The transform defines the fiducial marker's position, orientation, and scale in the digital coordinate system. Ensure the scale matches the marker's real-world dimensions.
 
 ```
 // Set the transform to define position, rotation, and scale.
@@ -156,13 +130,15 @@ SpaceTransform MarkerComponentTransform =
 FiducialMarkerComponent->SetTransform(MarkerComponentTransform);
 ```
 
-**Step 5: Update the Entity**
+### Updating the Entity
 
 Queue the entity for a network update to replicate the marker's configuration across connected devices.
 
 ```
 Entity->QueueUpdate();
 ```
+
+### Example
 
 Here is a complete example of creating and configuring a fiducial marker component:
 
@@ -234,19 +210,16 @@ By managing these properties, you ensure that AR applications maintain spatial c
 
 ### Inverse Transform and Space Rebasement
 
-The **inverse transform** of a fiducial marker is a mathematical operation used to adjust the digital space origin relative to the marker. This process ensures that the marker is the reference point for all other digital entities.
+The **inverse transform** of a fiducial marker is a mathematical transformation used to adjust the digital space origin relative to the marker. This process ensures that the marker becomes the reference point for all other digital entities.
 
 **Using Inverse Transforms**
 
 1. Calculate the inverse of the marker's transform, including position, rotation, and scale.  
-2. Apply this inverse transform to the digital space origin.  
-3. Shift all other digital entities accordingly to maintain relative alignment with the marker.
-
-For example, suppose a marker's transform indicates it is 2 meters forward and 1 meter to the right of the origin. In that case, the inverse transform repositions the origin to align with the marker's location.
+2. Use this inverse transform to rebase the digital space origin.  
 
 **Rebasing the Digital Space**
 
-Rebasing adjusts the digital space's origin to the fiducial marker's position. This allows other entities to inherit their relative placement based on the marker's new location. The result is a coordinated AR environment where:
+Rebasing adjusts the digital space's origin to the fiducial marker's position. This allows other entities to implicitly inherit their relative placement based on the marker's new location. The result is a coordinated AR environment where:
 
 * Digital objects stay in the correct positions relative to the marker.  
 * Movement or rotation of the marker dynamically adjusts all related digital content.
@@ -260,13 +233,14 @@ When rebasing the digital space, the marker's transform affects all associated e
 
 ## Summary
 
-Fiducial markers are essential tools in CSP for aligning digital content with physical spaces. They provide a tangible and flexible anchoring solution, enabling accurate spatial positioning in augmented reality (AR) applications. By linking the physical and digital worlds, fiducial markers ensure AR content is displayed correctly, regardless of user perspective or device.
+Fiducial markers are useful tools in CSP for aligning digital content with physical spaces. They provide a tangible and flexible anchoring solution, enabling accurate spatial positioning in augmented reality (AR) applications.
+
+By linking the physical and digital worlds, fiducial markers ensure AR content is displayed correctly, regardless of user perspective or device.
 
 1. **Fiducial Markers and AR Spatial Coherence**  
    Fiducial markers create a consistent relationship between the physical environment and digital coordinate systems. Their transforms-comprising position, rotation, and scale-define how digital content aligns with the real world. Proper configuration ensures spatial coherence, making AR experiences intuitive and immersive.
 
 2. **Practical Applications in Real-World AR Projects**  
-   * **Offline Scenarios:** Fiducial markers work entirely on-device, making them ideal for environments without internet access.
 
    * **Dynamic Spaces:** Their physical mobility allows seamless adaptation in setups like exhibitions or training environments where markers may be relocated.
 
