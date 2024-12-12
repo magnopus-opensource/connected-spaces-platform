@@ -1,4 +1,4 @@
-# Digital Twins
+# Cross-Reality Applications
 
 Physical reality refers to the tangible world where users interact with their environment in real-time. Digital reality, in contrast, is a simulated version of physical reality recreated digitally through 3D models, textures, and spatial dimensions. Bridging these two realities is essential in creating applications that seamlessly blend digital content into physical spaces, enhancing user interactions and experiences.
 
