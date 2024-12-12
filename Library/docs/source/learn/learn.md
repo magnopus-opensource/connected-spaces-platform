@@ -144,6 +144,7 @@ By the end of this module, you will learn how to use various tools for spatial p
    :maxdepth: 1
    :titlesonly:
 
-   cross_reality_applications/cross_reality_applications
-   cross_reality_applications/anchoring
+   physical_digital_realities/cross_reality_applications
+   physical_digital_realities/anchoring
+   physical_digital_realities/fiducial_markers
 ```

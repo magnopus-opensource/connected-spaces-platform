@@ -272,7 +272,7 @@ AnchorSystem->GetAnchorsByAssetCollectionId(
 
 Google Cloud Anchors (GCA) provide high-precision anchoring for augmented reality (AR) experiences. They do not describe an associated digital transform themselves, nor a geolocation, but when used in conjunction with CSP, developers can create inversible coordinate transformations between the digital and physical world. This association ensures precise spatial positioning across applications.
 
-![image info](../../_static/anchoring/csp_gca_flow.png)
+![image info](../../_static/physical_digital/gca_flow.png)
 
 ### Using Third-Party Anchors
 
@@ -305,7 +305,7 @@ The resolution of a GCA within a CSP-enabled AR application involves these key s
 4. **Rebase the Digital Space**  
    Apply the inverse transform to adjust the entire digital space relative to the resolved anchor. This ensures that all digital content is aligned with the physical space.
 
-![image info](../../_static/anchoring/anchor_resolution.png)
+![image info](../../_static/physical_digital/anchor_resolution.png)
 
 ## Summary
 
