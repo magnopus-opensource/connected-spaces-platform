@@ -57,6 +57,7 @@ CSP allows for the creation of two types of anchors: global anchors and space-lo
 
    ```
    csp::systems::AnchorSystem* AnchorSystem = csp::systems::SystemsManager::Get().GetAnchorSystem();
+
    AnchorSystem->CreateAnchor(
        csp::systems::AnchorProvider::GoogleCloudAnchors,
        "thirdPartyAnchorId123",
@@ -82,27 +83,47 @@ This example creates a global anchor using Google Cloud Anchors, associating it 
    **Code Example**
 
    ```
-   * **SpaceId**: Identifies the CSP space where the anchor will be positioned.  
-   * SpaceEntityId: Links the anchor to a particular entity within that space.  
-     **Code Example for Space-Local Anchor Creation**
-   
-   AnchorSystem->CreateAnchorInSpace(
-       csp::systems::AnchorProvider::GoogleCloudAnchors,
-       "thirdPartyAnchorId123",
-       "spaceIdXYZ",
-       456789, // SpaceEntityId
-       "assetCollectionIdABC",
-       csp::systems::GeoLocation(34.0549, -118.2426),
-       csp::systems::OlyAnchorPosition(1.0, 2.0, 3.0),
-       csp::systems::OlyRotation(0.0, 0.0, 0.0, 1.0),
-       nullptr,
-       nullptr,
-       [](const AnchorResult& Result) {
-           if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-               // Handle successful anchor creation in space
-           }
-       }
-   );
+// The identifier of the anchor provided by the third-party cloud-hosted anchor platform.
+csp::common::String ThirdPartyAnchorID = "d8n6djkkt63lgh3";
+
+// The identifier of the space to associate this anchor with.
+csp::common::String SpaceId = "668d71217905471f0b134521";
+// The identifier of the entity within the space to assocaite ths anchor with.
+csp::common::String SpaceEntityId = "665f8cd01313833472d9d39e";
+
+// The latitude and longitude of the anchor.
+auto Geolocation = csp::systems::GeoLocation(34.0549, 118.2426);
+
+// The digital transform of the anchor.
+auto DigitalTransformPos = csp::systems::OlyAnchorPosition(1.0, 2.0, 3.0);
+auto DigitalTransformRot = csp::systems::OlyRotation(0.0, 0.0, 0.0, 1.0);
+
+// The application can optionally relate an asset collection to the anchor.
+csp::common::String AssetCollectionID = "D8N6DJKKT63LGH3";
+
+// The callback to respond to the completion of the anchor creation operation.
+csp::systems::AnchorResultCallback Callback = [](const AnchorResult& Result)
+{
+    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        // Application logic goes here.
+    };
+};
+
+csp::systems::AnchorSystem* AnchorSystem = csp::systems::SystemsManager::Get().GetAnchorSystem();
+AnchorSystem->CreateAnchorInSpace(
+    csp::systems::AnchorProvider::GoogleCloudAnchors,
+    ThirdPartyAnchorID,
+    SpaceId,
+    SpaceEntityId,
+    AssetCollectionID,
+    Geolocation,
+    DigitalTransformPos,
+    DigitalTransformRot,
+    nullptr,
+    nullptr,
+    Callback);
+
    ```
 
    This code shows the creation of a space-local anchor linked to both a specific space and an entity within that space.
@@ -124,8 +145,6 @@ CSP provides multiple methods to retrieve anchors based on location, space, or a
        }
    );
    ```
-
-  
 
 * `GetAnchorsInSpace`: Retrieves all anchors associated with a specific CSP space.
    This method is helpful when accessing all anchors tied to a defined space, such as a building or room. 
@@ -156,13 +175,20 @@ CSP allows the deletion of anchors using the `DeleteAnchors` method. This operat
 **Code Example**
 
 ```
-csp::common::Array<csp::common::String> AnchorIDsToDelete = {"anchorId123"};
+// The set of anchors that the client application wishes to delete.
+csp::common::Array<csp::common::String> AnchorIDsToDelete(1) = {"66338b7fcd13d3f163e38c25"};
 
-AnchorSystem->DeleteAnchors(AnchorIDsToDelete, [](const NullResult& Result) {
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-        // Handle successful anchor deletion
-    }
-});
+// The callback to respond to the completion of the anchor delete operation.                        
+csp::systems::NullResultCallback Callback = [](const NullResult& Result)
+{
+    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        // Application logic goes here.
+    };
+};
+                          
+csp::systems::AnchorSystem* AnchorSystem = csp::systems::SystemsManager::Get().GetAnchorSystem();
+AnchorSystem->DeleteAnchors(AnchorIDsToDelete, Callback);
 ```
 
 This code deletes a specified anchor and provides a callback to handle the result. If successful, the anchor will no longer be accessible or queryable in CSP.
@@ -281,45 +307,12 @@ The resolution of a GCA within a CSP-enabled AR application involves these key s
 
 ![image info](../../_static/anchoring/anchor_resolution.png)
 
-## Mapping GCA Anchors to Digital Coordinates for AR Alignment
-
-Mapping Google Cloud Anchors (GCA) to digital coordinates ensures accurate alignment between the physical world and augmented reality (AR) content. This process allows AR applications to place digital elements precisely where users expect them, enabling seamless integration between digital and physical spaces.
-
-### Transforming Coordinates
-
-Mapping a GCA anchor to digital coordinates involves the following steps:
-
-1. **Retrieve Anchor Data**  
-   Obtain the anchor's physical location (latitude and longitude) and digital transform (position and rotation) from the GCA service.
-
-2. **Define the Digital Transform**  
-   Map the anchor's real-world location to a position in the digital coordinate system. The digital position is a three-dimensional point (x, y, z). The digital rotation is a quaternion (x, y, z, w).
-
-3. **Apply the Transform**  
-   Use the retrieved data to place the anchor in the digital coordinate system. CSP automatically aligns the digital transform with the physical location.
-
-### Achieving Precise AR Alignment
-
-Precise alignment between digital content and physical locations depends on the following techniques.
-
-1. **High-Precision Coordinates**  
-   Use double-precision floating-point values for anchor positions and rotations. This ensures minimal error when mapping physical locations to digital coordinates.
-
-2. **Inverse Transform for Digital Alignment**  
-   Compute and apply the inverse transform of the anchor to the origin of the space. This operation shifts the digital coordinate system to align perfectly with the anchor, ensuring that all other digital entities adjust relative to the anchor's location.
-
-3. **Account for Environmental Factors**  
-   Incorporate real-world constraints like GPS accuracy, lighting conditions, and device capabilities. 
-
-4. **Test and Calibrate**  
-   Continuously test the AR alignment under different conditions to ensure optimal performance.
-
 ## Summary
 
 Managing anchors in CSP involves four key operations: creating, querying, updating, and deleting anchors.
 
 * **Creating Anchors**  
-  You can create global anchors for outdoor environments or space-local anchors for confined spaces. Global anchors associate with geographic locations, while space-local anchors link to specific spaces or entities. Use the CreateAnchor or CreateAnchorInSpace methods to define the anchor's digital transform, physical location, and optional metadata, such as asset collections or tags.
+  You can create global anchors for any space or space-local anchors. Global anchors often associate with geographic locations, whereas space-local anchors link to specific spaces and entities. Use the CreateAnchor or CreateAnchorInSpace methods to define the anchor's digital transform, physical location, and optional metadata, such as asset collections or tags.
 
 * **Querying Anchors**  
   CSP provides flexible methods to retrieve anchors based on proximity, space, or asset collection. Use GetAnchorsInArea to find anchors near a geographic location. For anchors within a specific space, use GetAnchorsInSpace. If anchors are tied to a digital asset collection, retrieve them using GetAnchorsByAssetCollectionId.
@@ -329,6 +322,22 @@ Managing anchors in CSP involves four key operations: creating, querying, updati
 
 * **Deleting Anchors**  
   The DeleteAnchors method allows you to remove anchors that are no longer needed. You can ensure anchors are deleted and handle the result programmatically by providing anchor IDs and a callback.
+
+### Achieving Precise AR Alignment
+
+Precise alignment between digital content and physical locations depends on the following techniques.
+
+1. **High-Precision Coordinates**  
+   Use double-precision floating-point values for anchor positions and rotations. This ensures minimal error when mapping physical locations to digital coordinates.
+
+2. **Inverse Transform for Digital Alignment**  
+   Compute and apply the inverse transform of the anchor to the origin of the space. This operation shifts the digital coordinate system to align perfectly with the space defined by the anchor, ensuring that all other digital entities adjust relative to the anchor's location.
+
+3. **Account for Environmental Factors**  
+   Incorporate real-world constraints like GPS accuracy, lighting conditions, and device capabilities. 
+
+4. **Test and Calibrate**  
+   Continuously test the AR alignment under different conditions to ensure optimal performance.
 
 ### Integration and Resolution Workflow
 
