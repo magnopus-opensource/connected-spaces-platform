@@ -646,6 +646,7 @@ void SpaceEntitySystem::BindOnRequestToDisconnect() const
 				   [this](const signalr::value& Params)
 				   {
 					   const std::string Reason = Params.as_array()[0].as_string();
+
 					   csp::events::Event* DisconnectEvent
 						   = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
 					   DisconnectEvent->AddString("Reason", Reason.c_str());

@@ -1998,14 +1998,14 @@ void SpaceSystem::DuplicateSpace(const String& SpaceId,
 	);
 }
 
-// expose a method to set a callback and fire it when they get it
-//  add a callback for leaving scopes
+// expose a method to set a callback (DONE) and fire it when they get it (?)
+// add a callback for leaving scopes (DONE)
 
-// spacesystem to take a multiplayerconnection in the ctor
-// in multiplayerconnection: add getspacesystem->seetconnection. 195. and create a bind there
-// create new id spacesystem leavescopes
-// duplicate onrequesttodisconnct
-// add a test in space system. enter a space, bind to the event, exit the space, add an await.
+// spacesystem to take a multiplayerconnection in the ctor (DONE)
+// in multiplayerconnection: add getspacesystem->seetconnection. 195. (DONE) and create a bind there (DONE)
+// create new id spacesystem leavescopes (DONE)
+// duplicate onrequesttodisconnct (DONE)
+// add a test in space system. enter a space, bind to the event, exit the space, add an await. (DONE??? fails. event not called)
 
 void SpaceSystem::BindOnRequestToLeaveScopes()
 {
@@ -2024,9 +2024,6 @@ void SpaceSystem::BindOnRequestToLeaveScopes()
 					   LeaveScopesEvent->AddString("Scopes", ScopesString.c_str());
 					   LeaveScopesEvent->AddString("Reason", Reason.c_str());
 					   csp::events::EventSystem::Get().EnqueueEvent(LeaveScopesEvent);
-
-					   //			   std::vector<signalr::value> const InvokeArguments = {Scopes, Reason};
-					   // Connection->Invoke("LeaveScopes", InvokeArguments);
 				   });
 }
 
