@@ -1285,7 +1285,7 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 	{
 		if (LockUserId == ClientId)
 		{
-			EntityLockResult LockResult(true, "You already have this Space Entity locked.", 200);
+			EntityLockObject LockResult(true, "You already have this Space Entity locked.", 200);
 			Callback(LockResult);
 
 			return;
@@ -1293,7 +1293,7 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 
 		csp::common::String ErrorMessage("Failed to lock Space Entity. Space Entity locked by user: ");
 		ErrorMessage.Append(std::to_string(LockUserId).c_str());
-		EntityLockResult LockResult(false, ErrorMessage, 400);
+		EntityLockObject LockResult(false, ErrorMessage, 400);
 		Callback(LockResult);
 
 		return;
@@ -1307,18 +1307,33 @@ void SpaceEntity::Lock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, ClientIdValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](EntityLockResultObject EntityLockObject)
+	const std::function LocalCallback = [this, ClientId, Callback](const signalr::value& Result, std::exception_ptr Except)
 	{
-		if (EntityLockObject.Result)
+		try
 		{
-			LockUserId = ClientId;
-			EntityLockResult LockResult(EntityLockObject.Result, EntityLockObject.ResultMessage, EntityLockObject.ErrorCode);
+			if (Except)
+			{
+				std::rethrow_exception(Except);
+			}
+		}
+		catch (const std::exception& e)
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
+			EntityLockObject LockResult(false, "You failed to acquire the lock.", 400);
 			Callback(LockResult);
-
-			return;
 		}
 
-		EntityLockResult LockResult(EntityLockObject.Result, "You failed to acquire the lock.", 400);
+		// Deserialise the signalr::value Result into an EntityLock object.
+		// if (EntityLockObject.Result)
+		//{
+		//  LockUserId = ClientId;
+		//	Callback(EntityLockObject);
+		//
+		//	return;
+		//}
+
+		// For now we assume success.
+		EntityLockObject LockResult(true, "You have successfully acquired the Space Entity lock.", 200);
 		Callback(LockResult);
 	};
 
@@ -1334,7 +1349,7 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 	// Verify that the Entity is locked by the current User.
 	if (LockUserId == 0)
 	{
-		EntityLockResult LockResult(true, "The Space Entity is not currently locked.", 200);
+		EntityLockObject LockResult(true, "The Space Entity is not currently locked.", 200);
 		Callback(LockResult);
 
 		return;
@@ -1344,7 +1359,7 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 	{
 		csp::common::String ErrorMessage("Failed to unlock Space Entity as another user has it locked. Space Entity is locked by user: ");
 		ErrorMessage.Append(std::to_string(LockUserId).c_str());
-		EntityLockResult LockResult(false, ErrorMessage, 400);
+		EntityLockObject LockResult(false, ErrorMessage, 400);
 		Callback(LockResult);
 
 		return;
@@ -1358,19 +1373,33 @@ void SpaceEntity::Unlock(EntityLockCallback Callback)
 
 	SerialisePatchForResponse(this, Serialiser, COMPONENT_KEY_VIEW_LOCKEDBYUSER, UnlockValue);
 
-	const std::function LocalCallback = [this, ClientId, Callback](EntityLockResultObject EntityLockObject)
+	const std::function LocalCallback = [this, ClientId, Callback](const signalr::value& Result, std::exception_ptr Except)
 	{
-		if (EntityLockObject.Result)
+		try
 		{
-			LockUserId = 0;
-
-			EntityLockResult LockResult(EntityLockObject.Result, EntityLockObject.ResultMessage, EntityLockObject.ErrorCode);
+			if (Except)
+			{
+				std::rethrow_exception(Except);
+			}
+		}
+		catch (const std::exception& e)
+		{
+			CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
+			EntityLockObject LockResult(false, "You failed to remove the lock.", 400);
 			Callback(LockResult);
-
-			return;
 		}
 
-		EntityLockResult LockResult(EntityLockObject.Result, "You failed to remove the lock.", 400);
+		// Deserialise the signalr::value Result into an EntityLock object.
+		// if (EntityLockObject.Result)
+		//{
+		//  LockUserId = 0;
+		//	Callback(EntityLockObject);
+		//
+		//	return;
+		//}
+
+		// For now we assume success.
+		EntityLockObject LockResult(true, "You have successfully removed the Space Entity lock.", 200);
 		Callback(LockResult);
 	};
 

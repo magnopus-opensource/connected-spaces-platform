@@ -80,10 +80,11 @@ public:
 };
 
 /// @brief Info class that captures the results of an operation ot lock or unlock a SpaceEntity.
-class CSP_API EntityLockResult
+class CSP_API EntityLockObject
 {
+
 public:
-	EntityLockResult(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
+	EntityLockObject(bool LockResult, csp::common::String LockResultMessage, uint16_t LockErrorCode)
 		: Result(LockResult), ResultMessage(LockResultMessage), ResultCode(LockErrorCode) {};
 
 	bool Result;
@@ -142,7 +143,7 @@ public:
 	typedef std::function<void(SpaceEntity*)> EntityCreatedCallback;
 
 	// Callback used for Entity Lock updates.
-	typedef std::function<void(EntityLockResult)> EntityLockCallback;
+	typedef std::function<void(EntityLockObject)> EntityLockCallback;
 
 	/// @brief Creates a default instance of a SpaceEntity.
 	SpaceEntity();

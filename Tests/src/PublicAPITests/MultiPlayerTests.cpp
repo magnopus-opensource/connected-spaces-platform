@@ -3421,7 +3421,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityTest)
 
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				InviteUsers,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [Enter1Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -3502,15 +3510,175 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityTest)
 	EXPECT_EQ(DefaultEntity->GetLockingUserId(), 0);
 	EXPECT_EQ(DefaultEntity->IsModifiable(), true);
 
+	// Log out
+	LogOut(UserSystem);
+
+	// Log in
+	LogIn(UserSystem, UserId);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_LOCK_REMOVE_ON_LOGOUT_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityOnUserLogOutTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+
+	csp::systems::InviteUserRoleInfo InviteAltUser;
+	InviteAltUser.UserEmail = AlternativeLoginEmail;
+	InviteAltUser.UserRole	= csp::systems::SpaceUserRole::User;
+
+	csp::systems::InviteUserRoleInfoCollection InviteUsers;
+	InviteUsers.InviteUserRoleInfos = {InviteAltUser};
+	InviteUsers.EmailLinkUrl		= "https://dev.magnoverse.space";
+	InviteUsers.SignupUrl			= "https://dev.magnoverse.space";
+
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				InviteUsers,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Enter space
+	auto [Enter1Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(Enter1Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Create Entity
+	csp::common::String EntityName = "ParentEntity";
+
+	SpaceTransform ObjectTransform;
+
+	bool SetEntityCreatedCallbackCalled = false;
+	EntitySystem->SetEntityCreatedCallback(
+		[&SetEntityCreatedCallbackCalled](SpaceEntity* Entity)
+		{
+			SetEntityCreatedCallbackCalled = true;
+		});
+
+	auto [CreatedDefaultEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
+
+	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
+	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
+	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+
+	// Lock the Entity
+	auto [EntityLockResult] = AWAIT(CreatedDefaultEntity, Lock);
+	EXPECT_EQ(EntityLockResult.Result, true);
+
+	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
+	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), Connection->GetClientId());
+	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
+
+	// Exit Space without first unlocking the SpaceEntity
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+	// Log out
+	LogOut(UserSystem);
+
+	// Log in as Alt User
+	csp::common::String AltUserId;
+	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+
+	SetEntityCreatedCallbackCalled = false;
+
+	// Enter space
+	auto [Enter2Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(Enter2Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	WaitForCallback(SetEntityCreatedCallbackCalled);
+	EXPECT_TRUE(SetEntityCreatedCallbackCalled);
+
+	SpaceEntity* DefaultEntity = EntitySystem->GetObjectByIndex(0);
+	EXPECT_NE(DefaultEntity, nullptr);
+
+	// Check that the Entity was unlocked when User 1 exited the Space
+	EXPECT_EQ(DefaultEntity->GetIsLocked(), false);
+	EXPECT_EQ(DefaultEntity->GetLockingUserId(), 0);
+	EXPECT_EQ(DefaultEntity->IsModifiable(), true);
+
 	// Log out Alt User
 	LogOut(UserSystem);
 
 	// Log in
 	LogIn(UserSystem, UserId);
 
-	== == == =
-		// If local is false, test DeserialiseFromPatch functionality
-		auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+void RunParentDeletionTest(bool Local)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// If local is false, test DeserialiseFromPatch functionality
+	auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, !Local);
 
 	// Create Entities
 	csp::common::String ParentEntityName = "ParentEntity";
@@ -3704,123 +3872,12 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityTest)
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
->>>>>>> develop
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);
 }
-<<<<<<< HEAD
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_ENTITY_LOCK_REMOVE_ON_LOGOUT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, UnlockEntityOnUserLogOutTest)
-{
-	SetRandSeed();
-
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	// Create space
-	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
-	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
-
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
-
-
-	csp::systems::InviteUserRoleInfo InviteAltUser;
-	InviteAltUser.UserEmail = AlternativeLoginEmail;
-	InviteAltUser.UserRole	= csp::systems::SpaceUserRole::User;
-
-	csp::systems::InviteUserRoleInfoCollection InviteUsers;
-	InviteUsers.InviteUserRoleInfos = {InviteAltUser};
-	InviteUsers.EmailLinkUrl		= "https://dev.magnoverse.space";
-	InviteUsers.SignupUrl			= "https://dev.magnoverse.space";
-
-
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, InviteUsers, nullptr, Space);
-
-	// Enter space
-	auto [Enter1Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-	EXPECT_EQ(Enter1Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-	// Create Entity
-	csp::common::String EntityName = "ParentEntity";
-
-	SpaceTransform ObjectTransform;
-
-	bool SetEntityCreatedCallbackCalled = false;
-	EntitySystem->SetEntityCreatedCallback(
-		[&SetEntityCreatedCallbackCalled](SpaceEntity* Entity)
-		{
-			SetEntityCreatedCallbackCalled = true;
-		});
-
-	auto [CreatedDefaultEntity] = AWAIT(EntitySystem, CreateObject, EntityName, ObjectTransform);
-
-	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), false);
-	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), 0);
-	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
-
-	// Lock the Entity
-	auto [EntityLockResult] = AWAIT(CreatedDefaultEntity, Lock);
-	EXPECT_EQ(EntityLockResult.Result, true);
-
-	EXPECT_EQ(CreatedDefaultEntity->GetIsLocked(), true);
-	EXPECT_EQ(CreatedDefaultEntity->GetLockingUserId(), Connection->GetClientId());
-	EXPECT_EQ(CreatedDefaultEntity->IsModifiable(), true);
-
-	// Exit Space without first unlocking the SpaceEntity
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-	// Log out
-	LogOut(UserSystem);
-
-	// Log in as Alt User
-	csp::common::String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
-
-	SetEntityCreatedCallbackCalled = false;
-
-	// Enter space
-	auto [Enter2Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-	EXPECT_EQ(Enter2Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-	WaitForCallback(SetEntityCreatedCallbackCalled);
-	EXPECT_TRUE(SetEntityCreatedCallbackCalled);
-
-	SpaceEntity* DefaultEntity = EntitySystem->GetObjectByIndex(0);
-	EXPECT_NE(DefaultEntity, nullptr);
-
-	// Check that the Entity was unlocked when User 1 exited the Space
-	EXPECT_EQ(DefaultEntity->GetIsLocked(), false);
-	EXPECT_EQ(DefaultEntity->GetLockingUserId(), 0);
-	EXPECT_EQ(DefaultEntity->IsModifiable(), true);
-
-	// Log out Alt User
-	LogOut(UserSystem);
-
-	// Log in
-	LogIn(UserSystem, UserId);
-
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
-
-	// Log out
-	LogOut(UserSystem);
-}
-#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_LOCAL_PARENT_DELETION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentLocalDeletionTest)
