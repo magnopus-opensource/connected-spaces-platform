@@ -123,7 +123,7 @@ EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
 
 int64_t EntityScriptInterface::GetParentId()
 {
-	if (const auto& Parent = Entity->GetParentEntity())
+	if (const auto Parent = Entity->GetParentEntity())
 	{
 		return Parent->GetId();
 	}
