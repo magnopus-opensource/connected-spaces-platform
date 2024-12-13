@@ -50,15 +50,33 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
 }
 
-void OnUserCreated(SpaceEntity* InUser)
+void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySystem)
 {
-	EXPECT_EQ(InUser->GetComponents()->Size(), 1);
+	const csp::common::String& UserName = "Player 1";
+	const SpaceTransform& UserTransform
+		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
+	AvatarState UserAvatarState				  = AvatarState::Idle;
+	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
+	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
+	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
-	auto* AvatarComponent = InUser->GetComponent(0);
+	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
+	EXPECT_NE(Avatar, nullptr);
 
-	EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
-	std::cout << "OnUserCreated" << std::endl;
+	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
+
+	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+	{
+		EXPECT_EQ(Avatar->GetComponents()->Size(), 1);
+
+		auto* AvatarComponent = Avatar->GetComponent(0);
+
+		EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
+
+		std::cout << "OnUserCreated" << std::endl;
+	}
 }
 
 } // namespace
@@ -117,25 +135,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -159,14 +159,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -211,6 +207,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -219,6 +216,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_EQ(Object->GetGlobalPosition(), csp::common::Vector3::One());
@@ -290,25 +288,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -332,14 +312,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4(1, 1, 1, 1), csp::common::Vector3::One()};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -384,6 +360,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -392,6 +369,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
@@ -463,25 +441,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -505,14 +465,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3(2, 2, 2)};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -557,6 +513,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -565,6 +522,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_EQ(Object->GetGlobalScale(), csp::common::Vector3(2, 2, 2));
@@ -636,25 +594,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -679,14 +619,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -730,6 +666,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -738,6 +675,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_EQ(Object, ChildObject->GetParentEntity());
@@ -808,25 +746,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -849,14 +769,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3(1, 1, 1), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -900,6 +816,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -908,6 +825,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_NE(Object, ChildObject->GetParentEntity());
@@ -978,25 +896,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-	const csp::common::String& UserName = "Player 1";
-	const SpaceTransform& UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState				  = AvatarState::Idle;
-	const csp::common::String& UserAvatarId	  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode		  = AvatarPlayMode::Default;
-	LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
-
-	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-	EXPECT_NE(Avatar, nullptr);
-
-	std::cout << "CreateAvatar Local Callback" << std::endl;
-
-	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-	if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-	{
-		OnUserCreated(Avatar);
-	}
+	CreateAvatarForLeaderElection(EntitySystem);
 
 	const std::string ScriptText = R"xx(
 		
@@ -1019,14 +919,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 		return (ScriptSystemReady == true);
 	};
 
+	// Wait until the property have been updated and correct callback has been recieved
 	EXPECT_EQ(ResponseWaiter::WaitFor(ScriptSystemIsReady, std::chrono::seconds(5)), true);
 
 	{
-		EntitySystem->SetEntityCreatedCallback(
-			[](SpaceEntity* Entity)
-			{
-			});
-
 		const csp::common::String ObjectName = "Object 1";
 		SpaceTransform ObjectTransform		 = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
 		auto [Object]						 = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
@@ -1071,6 +967,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 				}
 			});
 
+		// Create callback to process pending entity operations
 		auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
 		{
 			EntitySystem->ProcessPendingEntityOperations();
@@ -1079,6 +976,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 			return (EntityUpdated == true);
 		};
 
+		// Wait until the property have been updated and correct callback has been recieved
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
 		EXPECT_EQ(Object->GetPosition(), csp::common::Vector3::One());
