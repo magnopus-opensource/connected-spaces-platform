@@ -352,8 +352,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 		ChildObject->QueueUpdate();
 		EntitySystem->ProcessPendingEntityOperations();
 
-		// EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector3::One());
-		// EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(11, 11, 11, 11));
+		EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
+		EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(20, 20, 20, -20));
 
 		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
 		ChildObject->GetScript()->Invoke();
@@ -392,8 +392,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
 		ResponseWaiter::WaitFor(EntityUpdatedIsReady, std::chrono::seconds(5));
 
-		// EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
-		// EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(2, 2, 2, 2));
+		EXPECT_EQ(Object->GetGlobalRotation(), csp::common::Vector4::One());
+		EXPECT_EQ(ChildObject->GetGlobalRotation(), csp::common::Vector4(2, 2, 2, -2));
 	}
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
