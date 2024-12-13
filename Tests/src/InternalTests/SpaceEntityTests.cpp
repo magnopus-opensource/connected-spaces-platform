@@ -58,7 +58,7 @@ void OnUserCreated(SpaceEntity* InUser)
 
 	EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
 
-	std::cerr << "OnUserCreated" << std::endl;
+	std::cout << "OnUserCreated" << std::endl;
 }
 
 } // namespace
@@ -102,7 +102,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -127,7 +127,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -154,7 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -204,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
 					{
-						std::cerr << "Position Updated" << std::endl;
+						std::cout << "Position Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -214,7 +214,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
@@ -274,7 +274,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -299,7 +299,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -326,7 +326,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -376,7 +376,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION)
 					{
-						std::cerr << "Rotation Updated" << std::endl;
+						std::cout << "Rotation Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -386,7 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
@@ -446,7 +446,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -471,7 +471,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -498,7 +498,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -548,7 +548,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE)
 					{
-						std::cerr << "Scale Updated" << std::endl;
+						std::cout << "Scale Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -558,7 +558,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
@@ -618,7 +618,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -643,7 +643,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -671,7 +671,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -722,7 +722,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 					{
-						std::cerr << "Parent Updated" << std::endl;
+						std::cout << "Parent Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -732,7 +732,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
@@ -791,7 +791,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -816,7 +816,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -842,7 +842,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -891,7 +891,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 					{
-						std::cerr << "Parent Updated" << std::endl;
+						std::cout << "Parent Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -901,7 +901,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
@@ -960,7 +960,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
 		EXPECT_EQ(Ok, true);
-		std::cerr << "ScriptSystemReadyCallback called" << std::endl;
+		std::cout << "ScriptSystemReadyCallback called" << std::endl;
 		ScriptSystemReady = true;
 	};
 
@@ -985,7 +985,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 	auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
 	EXPECT_NE(Avatar, nullptr);
 
-	std::cerr << "CreateAvatar Local Callback" << std::endl;
+	std::cout << "CreateAvatar Local Callback" << std::endl;
 
 	EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
@@ -1011,7 +1011,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
 	auto ScriptSystemIsReady = [&ScriptSystemReady]()
 	{
-		std::cerr << "Waiting for ScriptSystemReady" << std::endl;
+		std::cout << "Waiting for ScriptSystemReady" << std::endl;
 		return (ScriptSystemReady == true);
 	};
 
@@ -1061,7 +1061,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 				{
 					if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
 					{
-						std::cerr << "Parent Updated" << std::endl;
+						std::cout << "Parent Updated" << std::endl;
 						EntityUpdated = true;
 					}
 				}
@@ -1071,7 +1071,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 		{
 			EntitySystem->ProcessPendingEntityOperations();
 
-			std::cerr << "Waiting for EntityUpdatedIsReady" << std::endl;
+			std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
 			return (EntityUpdated == true);
 		};
 
