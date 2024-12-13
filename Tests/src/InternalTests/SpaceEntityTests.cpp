@@ -114,6 +114,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
@@ -286,6 +287,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
@@ -458,6 +460,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
@@ -630,6 +633,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
@@ -693,7 +697,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
 		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(ChildObject->AddComponent(ComponentType::ScriptData));
 
-
 		ChildObject->QueueUpdate();
 		Object->QueueUpdate();
 		EntitySystem->ProcessPendingEntityOperations();
@@ -704,7 +707,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 		ChildObject->GetScript()->Invoke();
 
 		csp::CSPFoundation::Tick();
-
 
 		ChildObject->QueueUpdate();
 		Object->QueueUpdate();
@@ -803,6 +805,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
@@ -972,6 +975,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 		[](SpaceEntity* Entity)
 		{
 		});
+
 	EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
 	const csp::common::String& UserName = "Player 1";
