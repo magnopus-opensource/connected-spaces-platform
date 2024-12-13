@@ -60,7 +60,7 @@ AvatarType AvatarInfoResult::GetAvatarType() const
 	return Type;
 }
 
-const csp::common::Variant& AvatarInfoResult::GetAvatarIdentifier() const
+const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const
 {
 	return Identifier;
 }
@@ -70,7 +70,7 @@ void AvatarInfoResult::SetAvatarType(AvatarType InValue)
 	Type = InValue;
 }
 
-void AvatarInfoResult::SetAvatarIdentifier(const csp::common::Variant& InValue)
+void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue)
 {
 	Identifier = InValue;
 }
