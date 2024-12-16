@@ -156,8 +156,7 @@ csp::multiplayer::SpaceEntitySystem::EntityCreatedCallback Callback = [](csp::mu
     if (CreatedSpaceEntity)
     {
         // Add fiducial marker component.
-        FiducialMarkerSpaceComponent* MarkerComponent =
-            static_cast<FiducialMarkerSpaceComponent*>(CreatedSpaceEntity->AddComponent(ComponentType::FiducialMarker));
+        FiducialMarkerSpaceComponent* MarkerComponent = static_cast<FiducialMarkerSpaceComponent*>(CreatedSpaceEntity->AddComponent(ComponentType::FiducialMarker));
         
         // Set marker properties.
         MarkerComponent->SetAssetCollectionId("AssetCollection123");
