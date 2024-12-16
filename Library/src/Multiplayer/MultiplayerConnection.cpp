@@ -476,23 +476,6 @@ void MultiplayerConnection::StartEventMessageListening()
 				}
 			}
 		}
-		else if (EventType == "LeaveScopes")
-		{
-			if (!LeavingScopesCallback)
-			{
-				return;
-			}
-
-			// TODO: custom deserialiser??
-			// For everything else, use the generic deserialiser
-			EventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-
-			for (const auto& Callback : NetworkEventMap[EventType])
-			{
-				Callback(true, Deserialiser.GetEventData());
-			}
-		}
 		else
 		{
 			// For everything else, use the generic deserialiser

@@ -38,8 +38,6 @@
 #include <iostream>
 #include <rapidjson/rapidjson.h>
 
-using namespace std::chrono_literals;
-
 using namespace csp;
 using namespace csp::common;
 

@@ -404,8 +404,6 @@ private:
 
 	csp::multiplayer::MultiplayerConnection* MultiplayerConnectionInst;
 	csp::multiplayer::SignalRConnection* Connection;
-
-	// class SpaceEventHandler* EventHandler;
 };
 
 } // namespace csp::systems

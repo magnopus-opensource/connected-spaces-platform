@@ -2906,9 +2906,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 	// Enter space (i.e. enter scopes)
 	auto [EnterSpace1Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space1.Id);
 
-	// Attempt to enter a different space  (i.e. leave scopes)
+	// Exit space (i.e. leave scopes)
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-	// auto [EnterSpaceAgainResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	//// Attempt to re-enter the same space  (i.e. leave scopes)
+	// auto [EnterSpaceAgainResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space1.Id);
+	//// Attempt to enter a different space  (i.e. leave scopes)
 	// auto [EnterSpace2Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space2.Id);
 
 	// Wait for message
