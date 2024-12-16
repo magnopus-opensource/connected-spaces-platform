@@ -71,7 +71,6 @@ class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SystemsManager;
-	friend class SpaceEventHandler;
 	friend void csp::memory::Delete<SpaceSystem>(SpaceSystem* Ptr);
 	/** @endcond */
 	CSP_END_IGNORE
@@ -406,7 +405,7 @@ private:
 	csp::multiplayer::MultiplayerConnection* MultiplayerConnectionInst;
 	csp::multiplayer::SignalRConnection* Connection;
 
-	class SpaceEventHandler* EventHandler;
+	// class SpaceEventHandler* EventHandler;
 };
 
 } // namespace csp::systems

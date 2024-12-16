@@ -249,6 +249,8 @@ private:
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	void SetScopes(csp::common::String InSpaceId, ErrorCodeCallbackHandler Callback);
 
+	void LeaveScopes(ErrorCodeCallbackHandler Callback);
+
 	/// @brief Clears the connected user's subscription to their current set of scopes.
 	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
 	void ResetScopes(ErrorCodeCallbackHandler Callback);

@@ -651,6 +651,46 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
 	Connection->Invoke("ResetScopes", Params, LocalCallback);
 }
 
+void MultiplayerConnection::LeaveScopes(ErrorCodeCallbackHandler Callback)
+{
+	if (Connection == nullptr || !Connected)
+	{
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
+
+		return;
+	}
+
+	std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+	{
+		if (Except != nullptr)
+		{
+			auto Error = ParseError(Except);
+			INVOKE_IF_NOT_NULL(Callback, Error);
+
+			return;
+		}
+
+		INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+	};
+
+	std::vector<signalr::value> ScopesVec;
+	ScopesVec.push_back("MyScope1");
+	ScopesVec.push_back("MyScope2");
+	signalr::value ScopesReason = "MyScopeReason";
+
+	std::vector<signalr::value> ParamsVec;
+	ParamsVec.push_back(ScopesVec);
+	ParamsVec.push_back(ScopesReason);
+
+	signalr::value Params = signalr::value(std::move(ParamsVec));
+
+	// ???
+	// Connection->Invoke("LeaveScopes", Params, LocalCallback);
+	// Connection->Invoke("OnLeaveScopes", Params, LocalCallback);
+	// Connection->Invoke("RequestToLeaveScopes", Params, LocalCallback);
+	// Connection->Invoke("OnRequestToLeaveScopes", Params, LocalCallback);
+}
+
 void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)

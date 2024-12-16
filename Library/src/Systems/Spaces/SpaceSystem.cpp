@@ -77,70 +77,21 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 namespace csp::systems
 {
 
-class SpaceEventHandler : public csp::events::EventListener
-{
-public:
-	SpaceEventHandler(csp::systems::SpaceSystem* SpaceSystem);
-
-	void OnEvent(const csp::events::Event& InEvent) override;
-
-private:
-	SpaceSystem* SpaceSystem;
-};
-
-SpaceEventHandler::SpaceEventHandler(csp::systems::SpaceSystem* SpaceSystem) : SpaceSystem(SpaceSystem)
-{
-}
-
-void SpaceEventHandler::OnEvent(const csp::events::Event& InEvent)
-{
-	if (InEvent.GetId() == csp::events::SPACESYSTEM_LEAVE_SCOPES_EVENT_ID)
-	{
-		auto Connection = SpaceSystem->MultiplayerConnectionInst;
-		csp::common::String Scopes(InEvent.GetString("Scopes"));
-		csp::common::String Reason(InEvent.GetString("Reason"));
-
-		auto Done = false;
-		Connection->SendNetworkEventToClient("OnRequestToLeaveScopes",
-											 {Scopes, Reason},
-											 Connection->GetClientId(),
-											 [&Done](csp::multiplayer::ErrorCode Error)
-											 {
-												 Done = true;
-											 });
-
-		int TimeoutCounter = 2000;
-
-		while (!Done && TimeoutCounter > 0)
-		{
-			std::this_thread::sleep_for(1ms);
-
-			--TimeoutCounter;
-		}
-	}
-}
-
-
 SpaceSystem::SpaceSystem() : SystemBase(), GroupAPI(nullptr), SpaceAPI(nullptr)
 {
 }
 
 SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient, csp::multiplayer::MultiplayerConnection* InMultiplayerConnection)
-	: SystemBase(InWebClient), MultiplayerConnectionInst(InMultiplayerConnection), CurrentSpace(), EventHandler(CSP_NEW SpaceEventHandler(this))
+	: SystemBase(InWebClient), MultiplayerConnectionInst(InMultiplayerConnection), CurrentSpace()
 
 {
 	GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
 	SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
-
-	csp::events::EventSystem::Get().RegisterListener(csp::events::SPACESYSTEM_LEAVE_SCOPES_EVENT_ID, EventHandler);
 }
 
 SpaceSystem::~SpaceSystem()
 {
 	CSP_DELETE(GroupAPI);
-	CSP_DELETE(EventHandler);
-
-	csp::events::EventSystem::Get().UnRegisterListener(csp::events::SPACESYSTEM_LEAVE_SCOPES_EVENT_ID, EventHandler);
 }
 
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
@@ -387,6 +338,22 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 
 					return;
 				}
+
+				MultiplayerConnection->LeaveScopes(
+					[Callback](multiplayer::ErrorCode Error)
+					{
+						if (Error != multiplayer::ErrorCode::None)
+						{
+							CSP_LOG_ERROR_FORMAT("Error on exiting spaces whilst leaving scopes, ErrorCode: %s",
+												 multiplayer::ErrorCodeToString(Error).c_str());
+							INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+							return;
+						}
+
+						const NullResult Result(EResultCode::Success, 200);
+						INVOKE_IF_NOT_NULL(Callback, Result);
+					});
 
 				MultiplayerConnection->ResetScopes(
 					[Callback](multiplayer::ErrorCode Error)

@@ -2868,8 +2868,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 	const char* TestSpaceName		 = "CSP-TEST-SPACE";
 	const char* TestSpaceDescription = "CSP-TEST-SPACEDESC";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	char UniqueSpaceName1[256], UniqueSpaceName2[256];
+	SPRINTF(UniqueSpaceName1, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String UserId;
 
@@ -2883,8 +2884,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 	InviteUserRoleInfoCollection InviteInfo;
 	InviteInfo.InviteUserRoleInfos = UserRoles;
 
-	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space);
+	::Space Space1, Space2;
+	CreateSpace(SpaceSystem, UniqueSpaceName1, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space1);
+	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription, SpaceAttributes::Private, nullptr, InviteInfo, nullptr, nullptr, Space2);
 
 	// Setup Leave Scopes callback
 	bool LeaveScopesCallbackCalled = false;
@@ -2901,23 +2903,21 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, LeaveScopesTest)
 
 	Connection->SetLeaveScopesCallback(LeaveScopesCallback);
 
-	csp::common::Array<csp::common::String> Scopes = {"Scope1", "Scope2"};
-	csp::common::String Reason					   = "Reason";
-	Connection->SendNetworkEventToClient(
-		"LeaveScopes",
-		{csp::multiplayer::ReplicatedValue(Scopes[0]), csp::multiplayer::ReplicatedValue(Scopes[1]), csp::multiplayer::ReplicatedValue(Reason)},
-		Connection->GetClientId(),
-		[](csp::multiplayer::ErrorCode Error)
-		{
-			EXPECT_EQ(Error, csp::multiplayer::ErrorCode::None);
-		});
+	// Enter space (i.e. enter scopes)
+	auto [EnterSpace1Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space1.Id);
+
+	// Attempt to enter a different space  (i.e. leave scopes)
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+	// auto [EnterSpaceAgainResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	// auto [EnterSpace2Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space2.Id);
 
 	// Wait for message
 	WaitForCallback(LeaveScopesCallbackCalled);
 	EXPECT_TRUE(LeaveScopesCallbackCalled);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+	// Delete spaces
+	DeleteSpace(SpaceSystem, Space1.Id);
+	DeleteSpace(SpaceSystem, Space2.Id);
 
 	// Log out
 	LogOut(UserSystem);
