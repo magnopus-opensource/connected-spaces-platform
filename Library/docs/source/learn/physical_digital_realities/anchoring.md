@@ -8,7 +8,7 @@ Anchoring supports spatial positioning by accurately mapping physical locations 
 
 This alignment ensures _spatiotemporal coherence_; where all users see the same thing in the same place at the same time, creating a cohesive experience between digital and physical realities.
 
-In CSP, anchoring is used to bridge the physical-digital divide, making digital elements appear fixed in real-world locations. The precision, accuracy and stability opf anchors are critical in enabling collaborative AR applications where multiple users need a shared, unchanging view of digital content.
+In CSP, anchoring is used to bridge the physical-digital divide, making digital elements appear fixed in real-world locations. The precision, accuracy and stability of anchors are critical in enabling collaborative AR applications where multiple users need a shared, unchanging view of digital content.
 
 ### Understanding Digital Coordinates and Transforms
 
@@ -199,7 +199,7 @@ Querying anchors in CSP allows developers to locate and manage anchors based on 
 
 Anchors can be retrieved via CSP using three different methods in the Anchor System: `GetAnchorsInArea`, `GetAnchorsInSpace`, and `GetAnchorsByAssetCollectionId`.
 
-All of the anchor querying methods support paging. Each parameter allows the application to specify how many anchors to **Skip are** returning and a **Limit** to how many per invocation should be returned.
+All of the anchor querying methods support paging. The application can specify how many anchors to `Skip` returning (starting from the first anchor that would be returned by the query), and a `Limit` controlling the maximum number of anchors that the query can return.
 
 ### GetAnchorsInArea
 
@@ -219,8 +219,8 @@ AnchorSystem->GetAnchorsInArea(
     nullptr, // Optional tags
     nullptr, // Optional AllTags flag
     nullptr, // Optional space IDs
-    0,       // Skip count
-    10,      // Limit on the number of anchors to return
+    0,       // How many anchors to skip returning (starting from the zeroth anchor)
+    10,      // Limit how many anchors are returned by this query
     [](const AnchorCollectionResult& Result) {
         if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
             // Process retrieved anchors
@@ -282,7 +282,7 @@ To integrate third-party anchors like GCA, CSP provides the parameters `ThirdPar
   This parameter specifies the external cloud anchoring provider. For GCA, this value is set to `GoogleCloudAnchors`.
 
 * `ThirdPartyAnchorId`
-  This parameter is a unique identifier defined byt the third-party anchor provider. It acts as a link between the CSP anchor and the corresponding anchor on the third-party platform, enabling applications to retrieve and resolve the anchor as needed.
+  This parameter is a unique identifier defined by the third-party anchor provider. It acts as a link between the CSP anchor and the corresponding anchor on the third-party platform, enabling applications to retrieve and resolve the anchor as needed.
 
 ## Resolving a Google Cloud Anchor at Runtime
 

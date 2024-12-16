@@ -181,7 +181,7 @@ EntitySystem->CreateObject("MyFiducialMarker", MarkerEntityTransform, Callback);
 
 ## Relating Fiducial Marker Transforms to AR Spaces
 
-Fiducial markers are critical in aligning digital content with physical spaces in augmented reality (AR). Their transforms-defined by position, rotation, and scale-determine the placement and orientation of AR content. Understanding how to manage fiducial marker transforms ensures precise spatial alignment in CSP applications.
+Fiducial markers are critical in aligning digital content with physical spaces in augmented reality (AR). Their transforms determine the placement and orientation of AR content. Understanding how to manage fiducial marker transforms ensures precise spatial alignment in CSP applications.
 
 ![image info](../../_static/physical_digital/fiducial_flow.png)
 
@@ -238,7 +238,7 @@ Fiducial markers are useful tools in CSP for aligning digital content with physi
 By linking the physical and digital worlds, fiducial markers ensure AR content is displayed correctly, regardless of user perspective or device.
 
 1. **Fiducial Markers and AR Spatial Coherence**  
-   Fiducial markers create a consistent relationship between the physical environment and digital coordinate systems. Their transforms-comprising position, rotation, and scale-define how digital content aligns with the real world. Proper configuration ensures spatial coherence, making AR experiences intuitive and immersive.
+   Fiducial markers create a consistent relationship between the physical environment and digital coordinate systems. Their transforms define how digital content aligns with the real world. Proper configuration ensures spatial coherence, making AR experiences intuitive and immersive.
 
 2. **Practical Applications in Real-World AR Projects**  
 
