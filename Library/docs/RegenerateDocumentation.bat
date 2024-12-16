@@ -1,5 +1,5 @@
 rem Ensure Python prerequisites are met
-pip install --user -r requirements.txt
+python -m pip install --user -r requirements.txt
 
 rem Remove existing documentation and intermediate files
 @RD /S /Q "build"
