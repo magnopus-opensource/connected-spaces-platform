@@ -279,6 +279,24 @@ void GetSpacesMetadata(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds
 	OutMetadata = Result.GetMetadata();
 }
 
+void GetSpaceTags(::SpaceSystem* SpaceSystem, const String& SpaceId, Array<String>& OutTags)
+{
+	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceMetadata, RequestPredicate, SpaceId);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	OutTags = Result.GetTags();
+}
+
+void GetSpacesTags(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds, Map<String, Array<String>>& OutTags)
+{
+	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesMetadata, RequestPredicate, SpaceIds);
+
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	OutTags = Result.GetTags();
+}
+
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
 	// check that Uri starts with something valid
@@ -1519,6 +1537,123 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesMetadataTest)
 
 	DeleteSpace(SpaceSystem, Spaces[0]);
 	DeleteSpace(SpaceSystem, Spaces[1]);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACETAGS_METADATA_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	String UserId;
+	LogIn(UserSystem, UserId);
+
+	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
+	Array<String> Tags					  = {"tag-test"};
+
+	::Space Space;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space);
+
+	Map<String, String> RetrievedSpaceMetadata;
+	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	Array<String> RetrievedTags;
+	GetSpaceTags(SpaceSystem, Space.Id, RetrievedTags);
+
+	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata["site"], "Void");
+	EXPECT_EQ(RetrievedTags.Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[0], "tag-test");
+
+	TestSpaceMetadata["site"] = "MagOffice";
+
+	// OB-3939 fix: passing tags as nullptr should leave them unchanged
+	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, nullptr);
+
+	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	GetSpaceTags(SpaceSystem, Space.Id, RetrievedTags);
+
+	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata["site"], "MagOffice");
+	EXPECT_EQ(RetrievedTags.Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[0], "tag-test");
+
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_UPDATE_SPACESTAGS_METADATA_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	String UserId;
+	LogIn(UserSystem, UserId);
+
+	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
+	Array<String> Tags					  = {"tag-test"};
+
+	::Space Space1, Space2;
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space1);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space2);
+
+	Map<String, Map<String, String>> RetrievedSpaceMetadata;
+	GetSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedSpaceMetadata);
+	Map<String, Array<String>> RetrievedTags;
+	GetSpacesTags(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedTags);
+
+	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "Void");
+	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "Void");
+	EXPECT_EQ(RetrievedTags[Space1.Id].Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[Space2.Id].Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[Space1.Id][0], "tag-test");
+	EXPECT_EQ(RetrievedTags[Space2.Id][0], "tag-test");
+
+	TestSpaceMetadata["site"] = "MagOffice";
+
+	// OB-3939 fix: passing tags as nullptr should leave them unchanged
+	UpdateSpaceMetadata(SpaceSystem, Space1.Id, TestSpaceMetadata, nullptr);
+	UpdateSpaceMetadata(SpaceSystem, Space2.Id, TestSpaceMetadata, nullptr);
+
+	GetSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedSpaceMetadata);
+	GetSpacesTags(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedTags);
+
+	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
+	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id]["site"], "MagOffice");
+	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id]["site"], "MagOffice");
+	EXPECT_EQ(RetrievedTags[Space1.Id].Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[Space2.Id].Size(), Tags.Size());
+	EXPECT_EQ(RetrievedTags[Space1.Id][0], "tag-test");
+	EXPECT_EQ(RetrievedTags[Space2.Id][0], "tag-test");
+
+	DeleteSpace(SpaceSystem, Space1.Id);
+	DeleteSpace(SpaceSystem, Space2.Id);
+
 	LogOut(UserSystem);
 }
 #endif
