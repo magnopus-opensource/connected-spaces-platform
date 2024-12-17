@@ -31,7 +31,7 @@ const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.co
 const char GeneratedTestAccountPassword[]	 = "3R{d2}3C<x[J7=jU";
 
 
-void LoadTestAccountCredentials();
+// void LoadTestAccountCredentials();
 
 void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
@@ -45,6 +45,15 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem,
 				  csp::common::String& OutUserId,
 				  csp::systems::EResultCode ExpectedResult = csp::systems::EResultCode::Success);
 
+void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem,
+						csp::common::String& OutUserId,
+						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
+						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
+
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);
+
+csp::systems::Profile CreateTestUser();
+
+void CleanupTestUser(const csp::common::String& UserId);
 
 csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSystem, const csp::common::String& UserId);

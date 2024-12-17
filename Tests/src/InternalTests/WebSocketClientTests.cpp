@@ -39,7 +39,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
@@ -49,6 +49,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 
 	// Logout
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
@@ -61,7 +62,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
@@ -74,6 +75,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 
 	// Logout
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
@@ -86,7 +88,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Start
 	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
@@ -99,5 +101,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 
 	// Logout
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif

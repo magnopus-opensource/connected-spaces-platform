@@ -106,7 +106,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 																		  "gid://shopify/ProductVariant/46314311745809",
 																		  "gid://shopify/ProductVariant/46314311844113"};
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	auto Details = GetShopifyDetails();
 
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInformation, RequestPredicate, Details["SpaceId"], Details["ProductId"]);
@@ -154,6 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	}
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -203,7 +204,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 																		  "gid://shopify/ProductVariant/46375586398505",
 																		  "gid://shopify/ProductVariant/46375586496809"};
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	auto Details = GetShopifyDetails();
 
 	auto [Result] = AWAIT_PRE(ECommerceSystem, GetProductInfoCollectionByVariantIds, RequestPredicate, Details["SpaceId"], {Details["VariantId"]});
@@ -251,6 +252,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 	}
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -283,7 +285,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	auto Details						   = GetShopifyDetails();
 	const csp::common::String FalseSpaceId = "abcdefghijk1234567891011";
 	const csp::common::String FalseCartId  = "B1-1234567891011121314151617e8e21er";
@@ -311,6 +313,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -344,7 +347,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 	auto SpaceId = Details["SpaceId"];
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
 
@@ -369,6 +372,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 	EXPECT_EQ(Cart.TotalQuantity, 0);
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -382,7 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Not a valid space ID
 	csp::common::String SpaceId = "12a345bc6789d012efa3b45c";
@@ -393,6 +397,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 	EXPECT_EQ(CreateCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -406,7 +411,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 	auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Not a valid space ID
 	csp::common::String SpaceId = "12a345bc6789d012efa3b45c";
@@ -417,6 +422,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 	EXPECT_EQ(GetCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 
 #endif
@@ -456,7 +462,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 														  "gid://shopify/ProductVariant/46314311844113"};
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
@@ -544,7 +550,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 	const csp::common::String VariantId = "gid://shopify/ProductVariant/46314311516433";
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
@@ -666,7 +672,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 	const csp::common::String VariantIds = "gid://shopify/ProductVariant/46314311516433";
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create Cart
 	auto [CreateCartResult] = AWAIT_PRE(ECommerceSystem, CreateCart, RequestPredicate, SpaceId);
@@ -770,7 +776,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	auto PrivateAccessToken = Details["PrivateAccessToken"];
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
 
@@ -810,6 +816,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	}
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -835,7 +842,7 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	auto PrivateAccessToken = Details["PrivateAccessToken"];
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [ValidateShopifyStoreResult] = AWAIT_PRE(ECommerceSystem, ValidateShopifyStore, RequestPredicate, StoreName, PrivateAccessToken);
 
@@ -862,5 +869,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreName, ShopifyStore.StoreName);
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif

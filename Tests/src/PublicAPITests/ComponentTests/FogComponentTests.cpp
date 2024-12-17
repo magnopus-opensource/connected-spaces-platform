@@ -66,7 +66,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -143,6 +143,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -165,7 +166,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -239,6 +240,7 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
 	// Log out
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 

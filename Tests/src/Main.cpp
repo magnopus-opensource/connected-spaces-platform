@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 	Listeners.Append(Listener);
 #endif
 
-	LoadTestAccountCredentials();
+	// LoadTestAccountCredentials();
 
 	int res = RUN_ALL_TESTS();
 

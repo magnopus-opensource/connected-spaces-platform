@@ -62,7 +62,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -96,6 +96,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -116,7 +117,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -150,6 +151,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -170,7 +172,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -225,6 +227,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -245,7 +248,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -300,6 +303,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -320,7 +324,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -361,6 +365,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -381,7 +386,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -422,6 +427,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -442,7 +448,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -463,6 +469,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -483,7 +490,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -523,6 +530,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -543,7 +551,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -574,6 +582,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -594,7 +603,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -633,6 +642,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -654,7 +664,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -734,6 +744,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -756,7 +767,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space1;
 	CreateSpace(SpaceSystem,
@@ -848,6 +859,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	DeleteSpace(SpaceSystem, Space1.Id);
 	DeleteSpace(SpaceSystem, Space2.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -868,7 +880,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem,
@@ -958,6 +970,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -971,7 +984,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [TicketedEventVendorAuthInfoResult]
 		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
@@ -986,6 +999,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest
 	EXPECT_NE(VendorAuthInfo.OAuthRedirectUrl, "");
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1056,6 +1070,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 	}
 
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1100,6 +1115,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	csp::common::String EventAttendeeUserId;
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
@@ -1142,6 +1158,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log out as the creator
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 
 	// Log in as the attendee
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
@@ -1169,10 +1186,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log out as the attendee
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1203,6 +1222,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	csp::common::String EventAttendeeUserId;
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
@@ -1266,9 +1286,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Log out as the attendee
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
+	CleanupTestUser(UserId);
 }
 #endif
