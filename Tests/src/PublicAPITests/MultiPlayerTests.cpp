@@ -2884,7 +2884,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 	// Log in
 	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+	csp::systems::Profile TestUser = CreateTestUser();
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -2964,7 +2965,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
 
 	// Log in again
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 	// Enter space
 	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -3280,7 +3281,8 @@ void RunParentDeletionTest(bool Local)
 
 	// Log in
 	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+	csp::systems::Profile TestUser = CreateTestUser();
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -3466,7 +3468,7 @@ void RunParentDeletionTest(bool Local)
 
 
 		// Log in again
-		LogInAsNewTestUser(UserSystem, UserId);
+		LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 		// Enter space
 		bool EntitiesCreated = false;

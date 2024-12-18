@@ -861,7 +861,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 	String UserId;
 
 	// Log in using default test account to create spaces
-	LogInAsNewTestUser(UserSystem, UserId);
+	csp::systems::Profile SpaceCreatorUser = CreateTestUser();
+	LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
 	// Create test spaces
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -905,7 +906,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 	LogOut(UserSystem);
 
 	// Clean up
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
 	for (int i = 0; i < SPACE_COUNT; ++i)
 	{
@@ -1563,7 +1564,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
 	Array<String> Tags					  = {"tag-test"};
@@ -1614,7 +1615,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	Map<String, String> TestSpaceMetadata = {{"site", "Void"}};
 	Array<String> Tags					  = {"tag-test"};
