@@ -353,7 +353,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -393,7 +392,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -475,7 +473,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -553,7 +550,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -611,7 +607,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -705,7 +700,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -807,7 +801,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -990,7 +983,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1107,7 +1099,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1215,7 +1206,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	DeleteSpace(SpaceSystem, Space);
 
 	LogOut(UserSystem);
-
 }
 	#endif
 #endif
@@ -1344,7 +1334,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1419,7 +1408,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1524,7 +1512,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1602,7 +1589,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1680,7 +1666,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1780,7 +1765,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1878,7 +1862,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -1985,7 +1968,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -2042,7 +2024,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -2112,7 +2093,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_THIRDPARTYPACKAGEDASSETIDENTIFIER_TEST
@@ -2203,7 +2183,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -2400,7 +2379,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -2430,7 +2408,6 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -2602,6 +2579,5 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
