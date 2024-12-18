@@ -292,6 +292,25 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
+	// Log in
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINASNEWTESTUSER_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
 	// Log in
 	LogInAsNewTestUser(UserSystem, UserId);
 
