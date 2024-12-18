@@ -247,10 +247,10 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
 	}
 }
 
-void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem,
-						 const String& SpaceId,
-						 const Optional<Map<String, String>>& NewMetadata,
-						 const Optional<Array<String>>& Tags)
+void UpdateAndAssertSpaceMetadata(::SpaceSystem* SpaceSystem,
+								  const String& SpaceId,
+								  const Optional<Map<String, String>>& NewMetadata,
+								  const Optional<Array<String>>& Tags)
 {
 	Map<String, String> Metadata = NewMetadata.HasValue() ? *NewMetadata : Map<String, String>();
 
@@ -261,40 +261,40 @@ void UpdateSpaceMetadata(::SpaceSystem* SpaceSystem,
 	std::cerr << "Space metadata has been updated successfully" << std::endl;
 }
 
-void GetSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId, Map<String, String>& OutMetadata)
+Map<String, String> GetAndAssertSpaceMetadata(::SpaceSystem* SpaceSystem, const String& SpaceId)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceMetadata, RequestPredicate, SpaceId);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	OutMetadata = Result.GetMetadata();
+	return Result.GetMetadata();
 }
 
-void GetSpacesMetadata(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds, Map<String, Map<String, String>>& OutMetadata)
+Map<String, Map<String, String>> GetAndAssertSpacesMetadata(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesMetadata, RequestPredicate, SpaceIds);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	OutMetadata = Result.GetMetadata();
+	return Result.GetMetadata();
 }
 
-void GetSpaceTags(::SpaceSystem* SpaceSystem, const String& SpaceId, Array<String>& OutTags)
+Array<String> GetAndAssertSpaceTags(::SpaceSystem* SpaceSystem, const String& SpaceId)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceMetadata, RequestPredicate, SpaceId);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	OutTags = Result.GetTags();
+	return Result.GetTags();
 }
 
-void GetSpacesTags(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds, Map<String, Array<String>>& OutTags)
+Map<String, Array<String>> GetAndAssertSpacesTags(::SpaceSystem* SpaceSystem, const Array<String>& SpaceIds)
 {
 	auto [Result] = AWAIT_PRE(SpaceSystem, GetSpacesMetadata, RequestPredicate, SpaceIds);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	OutTags = Result.GetTags();
+	return Result.GetTags();
 }
 
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
@@ -1474,17 +1474,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceMetadataTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space);
 
-	Map<String, String> RetrievedSpaceMetadata;
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata["site"], "Void");
 
 	TestSpaceMetadata["site"] = "MagOffice";
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, Tags);
+	UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, Tags);
 
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata["site"], "MagOffice");
@@ -1519,9 +1518,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesMetadataTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space1);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, nullptr, Space2);
 
-	Array<String> Spaces = {Space1.Id, Space2.Id};
-	Map<String, Map<String, String>> RetrievedSpacesMetadata;
-	GetSpacesMetadata(SpaceSystem, Spaces, RetrievedSpacesMetadata);
+	Array<String> Spaces									 = {Space1.Id, Space2.Id};
+	Map<String, Map<String, String>> RetrievedSpacesMetadata = GetAndAssertSpacesMetadata(SpaceSystem, Spaces);
 
 	EXPECT_EQ(RetrievedSpacesMetadata.Size(), 2);
 
@@ -1565,10 +1563,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space);
 
-	Map<String, String> RetrievedSpaceMetadata;
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
-	Array<String> RetrievedTags;
-	GetSpaceTags(SpaceSystem, Space.Id, RetrievedTags);
+	Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
+	Array<String> RetrievedTags				   = GetAndAssertSpaceTags(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata["site"], "Void");
@@ -1578,10 +1574,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceTagsMetadataTest)
 	TestSpaceMetadata["site"] = "MagOffice";
 
 	// OB-3939 fix: passing tags as nullptr should leave them unchanged
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, nullptr);
+	UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, TestSpaceMetadata, nullptr);
 
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
-	GetSpaceTags(SpaceSystem, Space.Id, RetrievedTags);
+	RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
+	RetrievedTags		   = GetAndAssertSpaceTags(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata["site"], "MagOffice");
@@ -1619,10 +1615,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space1);
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, TestSpaceMetadata, nullptr, nullptr, Tags, Space2);
 
-	Map<String, Map<String, String>> RetrievedSpaceMetadata;
-	GetSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedSpaceMetadata);
-	Map<String, Array<String>> RetrievedTags;
-	GetSpacesTags(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedTags);
+	Map<String, Map<String, String>> RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id});
+	Map<String, Array<String>> RetrievedTags				= GetAndAssertSpacesTags(SpaceSystem, {Space1.Id, Space2.Id});
 
 	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
@@ -1636,11 +1630,11 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpacesTagsMetadataTest)
 	TestSpaceMetadata["site"] = "MagOffice";
 
 	// OB-3939 fix: passing tags as nullptr should leave them unchanged
-	UpdateSpaceMetadata(SpaceSystem, Space1.Id, TestSpaceMetadata, nullptr);
-	UpdateSpaceMetadata(SpaceSystem, Space2.Id, TestSpaceMetadata, nullptr);
+	UpdateAndAssertSpaceMetadata(SpaceSystem, Space1.Id, TestSpaceMetadata, nullptr);
+	UpdateAndAssertSpaceMetadata(SpaceSystem, Space2.Id, TestSpaceMetadata, nullptr);
 
-	GetSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedSpaceMetadata);
-	GetSpacesTags(SpaceSystem, {Space1.Id, Space2.Id}, RetrievedTags);
+	RetrievedSpaceMetadata = GetAndAssertSpacesMetadata(SpaceSystem, {Space1.Id, Space2.Id});
+	RetrievedTags		   = GetAndAssertSpacesTags(SpaceSystem, {Space1.Id, Space2.Id});
 
 	EXPECT_EQ(RetrievedSpaceMetadata[Space1.Id].Size(), TestSpaceMetadata.Size());
 	EXPECT_EQ(RetrievedSpaceMetadata[Space2.Id].Size(), TestSpaceMetadata.Size());
@@ -1828,8 +1822,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithEmptyMetadataTest)
 	Map<String, String> Metadata;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, Metadata, nullptr, nullptr, nullptr, Space);
 
-	Map<String, String> RetrievedSpaceMetadata;
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), 0UL);
 
@@ -1860,10 +1853,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceWithEmptyMetadataTest)
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	UpdateSpaceMetadata(SpaceSystem, Space.Id, nullptr, nullptr);
+	UpdateAndAssertSpaceMetadata(SpaceSystem, Space.Id, nullptr, nullptr);
 
-	Map<String, String> RetrievedSpaceMetadata;
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedSpaceMetadata);
+	Map<String, String> RetrievedSpaceMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
 	EXPECT_EQ(RetrievedSpaceMetadata.Size(), 0UL);
 
@@ -2005,8 +1997,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	ASSERT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	// Get metadata for public space
-	Map<String, String> RetrievedMetadata;
-	GetSpaceMetadata(SpaceSystem, Space.Id, RetrievedMetadata);
+	Map<String, String> RetrievedMetadata = GetAndAssertSpaceMetadata(SpaceSystem, Space.Id);
 
 	ASSERT_EQ(RetrievedMetadata.Size(), TestSpaceMetadata.Size());
 	ASSERT_TRUE(RetrievedMetadata.HasKey("site"));
