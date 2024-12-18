@@ -264,7 +264,8 @@ public:
 	/// @brief Updates the Space metadata information with the new one provided
 	/// @param SpaceId csp::common::String : ID of Space for which the metadata will be updated
 	/// @param NewMetadata csp::common::String : New metadata information that will replace the previous one
-	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to replace the tags in the metadata
+	/// @param Tags csp::common::Array<csp::common::String> : Array of strings that will replace the tags on the space. If unset, the existing tags on
+	/// the AssetCollection will be unmodified.
 	/// @param Callback NullResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void UpdateSpaceMetadata(const csp::common::String& SpaceId,
 											  const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
