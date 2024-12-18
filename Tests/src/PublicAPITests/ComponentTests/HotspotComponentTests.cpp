@@ -153,7 +153,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -258,7 +257,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 

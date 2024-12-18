@@ -207,7 +207,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CreateScriptTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -360,7 +359,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 
 #endif
@@ -469,7 +467,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AvatarScriptTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -557,7 +554,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptLogTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -676,7 +672,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -797,7 +792,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -977,7 +971,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1085,7 +1078,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 
 #endif
@@ -1233,7 +1225,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1322,7 +1313,6 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1433,7 +1423,8 @@ Space);
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
-	LogOut(UserSystem); CleanupTestUser(UserId);
+	LogOut(UserSystem);
+
 }
 #endif
 */

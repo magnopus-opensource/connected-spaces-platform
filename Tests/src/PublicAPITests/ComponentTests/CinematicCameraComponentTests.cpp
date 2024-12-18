@@ -143,7 +143,6 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -229,7 +228,6 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -326,7 +324,6 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 

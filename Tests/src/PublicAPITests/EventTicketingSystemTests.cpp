@@ -96,7 +96,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -151,7 +150,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -227,7 +225,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -303,7 +300,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -365,7 +361,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -427,7 +422,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -469,7 +463,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -530,7 +523,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -582,7 +574,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -642,7 +633,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -744,7 +734,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -859,7 +848,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	DeleteSpace(SpaceSystem, Space1.Id);
 	DeleteSpace(SpaceSystem, Space2.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -970,7 +958,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -999,7 +986,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest
 	EXPECT_NE(VendorAuthInfo.OAuthRedirectUrl, "");
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1070,7 +1056,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1080,9 +1065,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
  * To run this test we need an actual Eventbrite event and ticket and we need to pause halfway through. The tickets
  * must be created with different users.
  *
- * Create the Eventbrite event with an account using the same email as is used by DefaultLoginEmail.
+ * Create the Eventbrite event with an account using an email.
  *
- * Get a ticket for that event with an account using the same email as AlternativeLoginEmail.
+ * Get a ticket for that event with an account using a different email.
  *
  * When you have those fill in the values for TestVendorEventId, TestVendorEventUri and TestVendorTicketId.
  *
@@ -1115,7 +1100,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	csp::common::String EventAttendeeUserId;
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
@@ -1158,7 +1143,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log out as the creator
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	// Log in as the attendee
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
@@ -1186,12 +1171,11 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log out as the attendee
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1222,7 +1206,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	csp::common::String EventAttendeeUserId;
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
@@ -1286,11 +1270,10 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Log out as the attendee
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

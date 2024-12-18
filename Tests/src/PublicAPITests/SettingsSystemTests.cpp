@@ -94,7 +94,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -122,7 +121,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -152,7 +150,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -186,7 +183,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -323,7 +319,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -374,7 +369,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -389,7 +383,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	{
 		csp::systems::FileAssetDataSource AvatarPortrait;
@@ -422,7 +416,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -438,7 +431,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 
 	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
@@ -480,7 +473,6 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -516,6 +508,5 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

@@ -169,7 +169,6 @@ CSP_PUBLIC_TEST(CSPEngine, ReflectionTests, ReflectionComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 

@@ -43,46 +43,38 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 } // namespace
 
 
-csp::common::String DefaultLoginEmail;
-csp::common::String DefaultLoginPassword;
-csp::common::String AlternativeLoginEmail;
-csp::common::String AlternativeLoginPassword;
 csp::common::String SuperUserLoginEmail;
 csp::common::String SuperUserLoginPassword;
 
+void LoadTestAccountCredentials()
+{
+	if (!std::filesystem::exists("test_account_creds.txt"))
+	{
+		LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
+				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
+	}
 
-// void LoadTestAccountCredentials()
-//{
-//	if (!std::filesystem::exists("test_account_creds.txt"))
-//	{
-//		LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
-//				 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
-//	}
-//
-//	std::ifstream CredsFile;
-//	CredsFile.open("test_account_creds.txt");
-//
-//	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword, _SuperUserLoginEmail,
-//		_SuperUserLoginPassword;
-//
-//	CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
-//	CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
-//	CredsFile >> _SuperUserLoginEmail >> _SuperUserLoginPassword;
-//
-//	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
-//		|| _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty())
-//	{
-//		LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
-//				 "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
-//	}
-//
-//	DefaultLoginEmail		 = _DefaultLoginEmail.c_str();
-//	DefaultLoginPassword	 = _DefaultLoginPassword.c_str();
-//	AlternativeLoginEmail	 = _AlternativeLoginEmail.c_str();
-//	AlternativeLoginPassword = _AlternativeLoginPassword.c_str();
-//	SuperUserLoginEmail		 = _SuperUserLoginEmail.c_str();
-//	SuperUserLoginPassword	 = _SuperUserLoginPassword.c_str();
-// }
+	std::ifstream CredsFile;
+	CredsFile.open("test_account_creds.txt");
+
+	std::string _DefaultLoginEmail, _DefaultLoginPassword, _AlternativeLoginEmail, _AlternativeLoginPassword, _SuperUserLoginEmail,
+		_SuperUserLoginPassword;
+
+	CredsFile >> _DefaultLoginEmail >> _DefaultLoginPassword;
+	CredsFile >> _AlternativeLoginEmail >> _AlternativeLoginPassword;
+	CredsFile >> _SuperUserLoginEmail >> _SuperUserLoginPassword;
+
+	if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
+		|| _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty())
+	{
+		LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
+				 "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
+	}
+
+	SuperUserLoginEmail	   = _SuperUserLoginEmail.c_str();
+	SuperUserLoginPassword = _SuperUserLoginPassword.c_str();
+}
+
 
 csp::systems::Profile CreateTestUser()
 {
@@ -122,16 +114,6 @@ csp::systems::Profile CreateTestUser()
 	return CreatedProfile;
 }
 
-void CleanupTestUser(const csp::common::String& UserId)
-{
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	// Delete the test user
-	auto [DeleteDefaultUserResult] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, UserId);
-	EXPECT_EQ(DeleteDefaultUserResult.GetResultCode(), csp::systems::EResultCode::Success);
-}
-
 void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
 		   const csp::common::String& Email,
@@ -166,12 +148,13 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
 
 void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem,
 						csp::common::String& OutUserId,
+						bool AgeVerified,
 						csp::systems::EResultCode ExpectedResultCode,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode)
 {
 	csp::systems::Profile NewTestUser = CreateTestUser();
 
-	LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, true, ExpectedResultCode, ExpectedResultFailureCode);
+	LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
 }
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode)
@@ -314,7 +297,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -331,7 +313,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsGuestTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -348,7 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	// Log in
 	auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId, "badtoken");
@@ -379,15 +360,17 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// Log in
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 	// Attempt to log in again
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, true, csp::systems::EResultCode::Failed);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, csp::systems::EResultCode::Failed);
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -407,7 +390,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -431,7 +413,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -482,7 +463,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -515,7 +495,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -548,7 +527,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -626,7 +604,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -685,7 +662,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
+
 
 	csp::common::String OriginalUserId;
 	LogIn(UserSystem, OriginalUserId, UniqueEmail, GeneratedTestAccountPassword);
@@ -698,7 +675,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -758,7 +734,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -916,7 +891,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
 
 	// Log out
-	LogOut(UserSystem); CleanupTestUser(UserId);
+	LogOut(UserSystem);
+
 }
 	#endif
 
@@ -970,7 +946,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
 
 	// Log out
-	LogOut(UserSystem); CleanupTestUser(UserId);
+	LogOut(UserSystem);
+
 }
 	#endif
 
@@ -1024,7 +1001,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 	auto FullProfile = GetFullProfileByUserId(UserSystem, UserId);
 
 	// Log out
-	LogOut(UserSystem); CleanupTestUser(UserId);
+	LogOut(UserSystem);
+
 }
 	#endif
 #endif
@@ -1086,7 +1064,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1108,7 +1085,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetGuestProfileTest)
 	EXPECT_EQ(Profile.IsEmailConfirmed, false);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1120,11 +1096,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  false,
 		  csp::systems::EResultCode::Failed,
 		  csp::systems::ERequestFailureReason::UserAgeNotVerified);
@@ -1132,26 +1111,24 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	// null Log in
 	// does not use login helper function as the login helper function defaults to false.
 	auto [Result]
-		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, nullptr).Await(RequestPredicate);
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", TestUser.Email, GeneratedTestAccountPassword, nullptr).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 
 	// true Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1165,11 +1142,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);
@@ -1193,11 +1173,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);

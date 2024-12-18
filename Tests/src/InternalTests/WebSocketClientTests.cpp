@@ -49,7 +49,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 
 	// Logout
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
@@ -75,7 +74,6 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 
 	// Logout
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
@@ -101,6 +99,5 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 
 	// Logout
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

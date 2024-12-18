@@ -90,7 +90,6 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 
 	// Log Out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -110,7 +109,6 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -130,6 +128,5 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

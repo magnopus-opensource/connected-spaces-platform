@@ -191,7 +191,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 	DeletePointOfInterest(POISystem, PointOfInterest);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -218,7 +217,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 	DeletePointOfInterest(POISystem, PointOfInterest);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -289,7 +287,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	DeletePointOfInterest(POISystem, PointOfInterest);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -347,7 +344,6 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	DeletePointOfInterest(POISystem, PointOfInterest);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -498,6 +494,5 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

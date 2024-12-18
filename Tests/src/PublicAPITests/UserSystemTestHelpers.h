@@ -19,11 +19,6 @@
 #include "CSP/Systems/Users/UserSystem.h"
 
 
-
-extern csp::common::String DefaultLoginEmail;
-extern csp::common::String DefaultLoginPassword;
-extern csp::common::String AlternativeLoginEmail;
-extern csp::common::String AlternativeLoginPassword;
 extern csp::common::String SuperUserLoginEmail;
 extern csp::common::String SuperUserLoginPassword;
 
@@ -31,12 +26,12 @@ const char GeneratedTestAccountEmailFormat[] = "testnopus.pokemon+%s@magnopus.co
 const char GeneratedTestAccountPassword[]	 = "3R{d2}3C<x[J7=jU";
 
 
-// void LoadTestAccountCredentials();
+void LoadTestAccountCredentials();
 
 void LogIn(csp::systems::UserSystem* UserSystem,
 		   csp::common::String& OutUserId,
-		   const csp::common::String& Email								 = DefaultLoginEmail,
-		   const csp::common::String& Password							 = DefaultLoginPassword,
+		   const csp::common::String& Email,
+		   const csp::common::String& Password,
 		   bool AgeVerified												 = true,
 		   csp::systems::EResultCode ExpectedResultCode					 = csp::systems::EResultCode::Success,
 		   csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
@@ -47,13 +42,12 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem,
 
 void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem,
 						csp::common::String& OutUserId,
+						bool AgeVerified											  = true,
 						csp::systems::EResultCode ExpectedResultCode				  = csp::systems::EResultCode::Success,
 						csp::systems::ERequestFailureReason ExpectedResultFailureCode = csp::systems::ERequestFailureReason::None);
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode = csp::systems::EResultCode::Success);
 
 csp::systems::Profile CreateTestUser();
-
-void CleanupTestUser(const csp::common::String& UserId);
 
 csp::systems::Profile GetFullProfileByUserId(csp::systems::UserSystem* UserSystem, const csp::common::String& UserId);

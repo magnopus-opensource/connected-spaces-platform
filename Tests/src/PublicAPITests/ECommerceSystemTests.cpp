@@ -154,7 +154,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -252,7 +251,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -313,7 +311,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 	EXPECT_EQ(FalseCartResult.GetResultCode(), csp::systems::EResultCode::Failed);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -372,7 +369,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 	EXPECT_EQ(Cart.TotalQuantity, 0);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -397,7 +393,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateCartBadInputTest)
 	EXPECT_EQ(CreateCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -422,7 +417,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 	EXPECT_EQ(GetCartResult.GetHttpResultCode(), 404);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 
 #endif
@@ -816,7 +810,6 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 	}
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -869,6 +862,5 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 	EXPECT_EQ(GetShopifyStoresResult.GetShopifyStores()[0].StoreName, ShopifyStore.StoreName);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

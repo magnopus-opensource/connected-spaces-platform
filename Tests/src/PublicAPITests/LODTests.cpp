@@ -111,7 +111,6 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -194,6 +193,5 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

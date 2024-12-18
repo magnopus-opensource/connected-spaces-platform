@@ -296,7 +296,6 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 

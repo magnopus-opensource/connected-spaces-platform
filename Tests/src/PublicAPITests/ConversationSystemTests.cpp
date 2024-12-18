@@ -97,7 +97,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, CreateConversationId)
 	csp::common::String DefaultTestUserId;
 
 	// Log in
-	LogIn(UserSystem, DefaultTestUserId);
+	LogInAsNewTestUser(UserSystem, DefaultTestUserId);
 
 	const auto DefaultTestUserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
 
@@ -214,8 +214,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
 	csp::common::String DefaultTestUserId;
 
+	// Create test user
+	csp::systems::Profile SpaceCreatorUser = CreateTestUser();
+
 	// Log in
-	LogIn(UserSystem, DefaultTestUserId);
+	LogIn(UserSystem, DefaultTestUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, DefaultTestUserId).DisplayName;
 
 	// Create space
@@ -231,7 +234,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 				Space);
 
 	// add the second test user to the space
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
+	csp::systems::Profile AlternativeTestUser = CreateTestUser();
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeTestUser.Email, true, "", "");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -297,7 +301,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
 	// Log in with the second account
 	csp::common::String SecondTestUserId;
-	LogIn(UserSystem, SecondTestUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
 
 	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 	EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
@@ -350,7 +354,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 	LogOut(UserSystem);
 
 	// Log in again with the default user
-	LogIn(UserSystem, DefaultTestUserId);
+	LogIn(UserSystem, DefaultTestUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
 	auto [EnterResult3] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -430,8 +434,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile SpaceCreatorUser = CreateTestUser();
+
 	// Log in
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
@@ -446,8 +453,11 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 				nullptr,
 				Space);
 
+	// create a second test user
+	csp::systems::Profile AlternativeTestUser = CreateTestUser();
+
 	// add the second test user to the space
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeTestUser.Email, true, "", "");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -545,11 +555,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 
 	// Log in with the second account
 	csp::common::String SecondTestUserId;
-	LogIn(UserSystem, SecondTestUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
 
 	auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -715,17 +724,15 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
 	AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 
 	// Log in with the space creator in order to delete it
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -874,7 +881,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1033,7 +1039,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1189,7 +1194,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
 
 	// Log out
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1379,7 +1383,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif
 
@@ -1540,6 +1543,5 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-	CleanupTestUser(UserId);
 }
 #endif

@@ -1089,7 +1089,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 
 	// Login as an admin user in order to be able to create the test space
 	String SpaceOwnerUserId;
-	LogIn(UserSystem, SpaceOwnerUserId);
+	csp::systems::Profile SpaceOwnerUser = CreateTestUser();
+	LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
 
 	::Space PublicSpace;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, PublicSpace);
@@ -1134,7 +1135,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 	LogOut(UserSystem);
 
 	// Login as an admin user in order to be able to delete the test space
-	LogIn(UserSystem, SpaceOwnerUserId);
+	LogIn(UserSystem, SpaceOwnerUserId, SpaceOwnerUser.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, PublicSpace.Id);
 	LogOut(UserSystem);
 }
@@ -1254,12 +1255,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	String DefaultUserId;
 
+	// Create default and alternative users
+	csp::systems::Profile DefaultUser	  = CreateTestUser();
+	csp::systems::Profile AlternativeUser = CreateTestUser();
+
 	// Log in
-	LogIn(UserSystem, DefaultUserId);
+	LogIn(UserSystem, DefaultUserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Create test space
 	InviteUserRoleInfo InviteUser;
-	InviteUser.UserEmail = AlternativeLoginEmail;
+	InviteUser.UserEmail = AlternativeUser.Email;
 	InviteUser.UserRole	 = SpaceUserRole::User;
 	InviteUserRoleInfoCollection InviteUsers;
 	InviteUsers.InviteUserRoleInfos = {InviteUser};
@@ -1272,7 +1277,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 	LogOut(UserSystem);
 
 	// Log in using alt test account
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, AltUserId, AlternativeUser.Email, GeneratedTestAccountPassword);
 
 	// Ensure alt test account can join space
 	{
@@ -1285,7 +1290,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
 	// Log out and log in again using default test account
 	LogOut(UserSystem);
-	LogIn(UserSystem, DefaultUserId);
+	LogIn(UserSystem, DefaultUserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Update test account user roles for space
 	GetSpace(SpaceSystem, Space.Id, Space);
@@ -1354,7 +1359,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
 
 	// Login as an admin user in order to be able to create the test space
 	String SpaceOwnerUserId;
-	LogIn(UserSystem, SpaceOwnerUserId);
+	csp::systems::Profile AdminUser = CreateTestUser();
+	LogIn(UserSystem, SpaceOwnerUserId, AdminUser.Email, GeneratedTestAccountPassword);
 
 	::Space PublicSpace;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, PublicSpace);
@@ -1371,7 +1377,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateGuestUserRoleTest)
 	LogOut(UserSystem);
 
 	// login as an admin user
-	LogIn(UserSystem, SpaceOwnerUserId);
+	LogIn(UserSystem, SpaceOwnerUserId, AdminUser.Email, GeneratedTestAccountPassword);
 
 	::UserRoleInfo UpdatedUserRoleInfo = {GuestUserId, SpaceUserRole::Moderator};
 	UpdateUserRole(SpaceSystem, PublicSpace.Id, UpdatedUserRoleInfo);
@@ -1396,7 +1402,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 
 	// Get alt account user ID
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -1406,9 +1413,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String DefaultUserId;
+	csp::systems::Profile DefaultUser = CreateTestUser();
 
 	// Log in
-	LogIn(UserSystem, DefaultUserId);
+	LogIn(UserSystem, DefaultUserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// create a space with no other user Ids invited
 	::Space Space;
@@ -1416,7 +1424,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, SetUserRoleOnInviteTest)
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Invite second test account as a Moderator Role user
-	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AlternativeLoginEmail, true, "", "");
+	auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, AltUser.Email, true, "", "");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	::UserRoleInfo UserRoleInfo;
@@ -1540,7 +1548,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailTest)
 
 	String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space without a thumbnail
 	::Space Space;
@@ -1608,7 +1616,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateSpaceThumbnailWithBufferTest)
 
 	String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space without a thumbnail
 	::Space Space;
@@ -1854,7 +1862,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	String UserId;
 
 	// Log in with default user
-	LogInAsNewTestUser(UserSystem, UserId);
+	csp::systems::Profile DefaultUser = CreateTestUser();
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Create public space
 	::Space Space;
@@ -1863,7 +1872,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 	// Log out with default user and in with alt user
 	LogOut(UserSystem);
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	auto [Result] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -1889,7 +1899,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpaceMetadataTest)
 
 	// Log back in with default user so space can be deleted
 	LogOut(UserSystem);
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1916,7 +1926,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 
 	String PrimaryUserId;
 
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryTestUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryTestUser.Email, GeneratedTestAccountPassword);
 
 	::Space Space;
 	FileAssetDataSource SpaceThumbnail;
@@ -1942,7 +1953,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 
 	// check that a user that doesn't belong to the space can retrieve the thumbnail
 	String SecondaryUserId;
-	LogIn(UserSystem, SecondaryUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile SecondaryTestUser = CreateTestUser();
+
+	LogIn(UserSystem, SecondaryUserId, SecondaryTestUser.Email, GeneratedTestAccountPassword);
 
 	{
 		auto [Result] = AWAIT_PRE(SpaceSystem, GetSpaceThumbnail, RequestPredicate, Space.Id);
@@ -1953,7 +1966,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryTestUser.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
@@ -1975,8 +1988,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String PrimaryUserId;
-
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	::Space Space;
 	FileAssetDataSource SpaceThumbnail;
@@ -2014,7 +2027,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpaceThumbnailWithGuestUserTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
@@ -2037,7 +2050,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 
 	// Login with first user to create space
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
@@ -2055,7 +2069,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanGuestUserTest)
 	LogOut(UserSystem);
 
 	// Login again with first user to ban second user
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -2102,7 +2116,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 
 	// Login with first user to create space
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
@@ -2111,7 +2126,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 
 	// Login with second user and join space
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	auto [AddUserResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, AltUserId);
 
@@ -2120,7 +2136,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BanUserTest)
 	LogOut(UserSystem);
 
 	// Login again with first user to ban second user
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	GetSpace(SpaceSystem, Space.Id, Space);
 
@@ -2166,7 +2182,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
@@ -2188,7 +2205,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 	LogOut(UserSystem);
 
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
@@ -2198,7 +2216,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -2222,16 +2240,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
@@ -2241,7 +2261,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsNonModeratorTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -2265,14 +2285,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 	::Space Space;
 	InviteUserRoleInfo InviteUser;
-	InviteUser.UserEmail = AlternativeLoginEmail;
+	InviteUser.UserEmail = AltUser.Email;
 	InviteUser.UserRole	 = SpaceUserRole::User;
 	InviteUserRoleInfoCollection InviteUsers;
 	InviteUsers.InviteUserRoleInfos = {InviteUser};
@@ -2286,9 +2308,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
-	// Note the space is now out of date and does not have the new user in it's lists
+	// Note the space is now out of date and does not have the new user in its lists
 	{
 		auto [Result] = AWAIT(SpaceSystem, EnterSpace, Space.Id);
 
@@ -2299,7 +2321,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, EnterSpaceAsModeratorTest)
 
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
@@ -2322,7 +2344,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	LogInAsNewTestUser(UserSystem, PrimaryUserId);
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
@@ -2450,7 +2472,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationValidationTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	LogInAsNewTestUser(UserSystem, PrimaryUserId);
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
@@ -2613,14 +2635,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 
 	// Create a space as the primary user
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Switch to the alt user to try and update the geo location
 	LogOut(UserSystem);
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	GeoLocation InitialGeoLocation;
 	InitialGeoLocation.Latitude	 = 1.1;
@@ -2636,7 +2660,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 
 	// Switch back to the primary user to actually create the geo location
 	LogOut(UserSystem);
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 
 	auto [AddGeoResultAsPrimary]
@@ -2646,7 +2670,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 
 	// Switch back to the alt user again
 	LogOut(UserSystem);
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	// Test they cannot get the space geo location details since the space is private
 	auto [GetGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
@@ -2675,7 +2699,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionTest)
 
 	// Log back in as primary to clean up
 	LogOut(UserSystem);
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	auto [DeleteGeoResultAsPrimary] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
@@ -2708,14 +2732,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 
 	// Create a space as the primary user
 	String PrimaryUserId;
-	LogIn(UserSystem, PrimaryUserId);
+	csp::systems::Profile PrimaryUser = CreateTestUser();
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 	::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Switch to the alt user to try and update the geo location
 	LogOut(UserSystem);
 	String AltUserId;
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile AltUser = CreateTestUser();
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	GeoLocation InitialGeoLocation;
 	InitialGeoLocation.Latitude	 = 1.1;
@@ -2731,7 +2757,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 
 	// Switch back to the primary user to actually create the geo location
 	LogOut(UserSystem);
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	auto [AddGeoResultAsPrimary]
 		= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, InitialGeoLocation, InitialOrientation, nullptr);
@@ -2740,7 +2766,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 
 	// Switch back to the alt user again
 	LogOut(UserSystem);
-	LogIn(UserSystem, AltUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, AltUserId, AltUser.Email, GeneratedTestAccountPassword);
 
 	// Test they can get the space geo location details since the space is public
 	auto [GetGeoResultAsAlt] = AWAIT_PRE(SpaceSystem, GetSpaceGeoLocation, RequestPredicate, Space.Id);
@@ -2772,7 +2798,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationWithoutPermissionPublicS
 
 	// Log back in as primary to clean up
 	LogOut(UserSystem);
-	LogIn(UserSystem, PrimaryUserId);
+	LogIn(UserSystem, PrimaryUserId, PrimaryUser.Email, GeneratedTestAccountPassword);
 
 	auto [DeleteGeoResultAsPrimary] = AWAIT_PRE(SpaceSystem, DeleteSpaceGeoLocation, RequestPredicate, Space.Id);
 
@@ -2805,12 +2831,16 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
 	String UserId;
 
+	// Create default and alt users
+	csp::systems::Profile DefaultUser	  = CreateTestUser();
+	csp::systems::Profile AlternativeUser = CreateTestUser();
+
 	// Log in
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Create space
 	Array<InviteUserRoleInfo> UserRoles(1);
-	UserRoles[0].UserEmail = AlternativeLoginEmail;
+	UserRoles[0].UserEmail = AlternativeUser.Email;
 	UserRoles[0].UserRole  = SpaceUserRole::User;
 	InviteUserRoleInfoCollection InviteInfo;
 	InviteInfo.InviteUserRoleInfos = UserRoles;
@@ -2820,7 +2850,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
 	// Log out and log in as alt user
 	LogOut(UserSystem);
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, UserId, AlternativeUser.Email, GeneratedTestAccountPassword);
 
 	// Attempt to duplicate space
 	{
@@ -2845,7 +2875,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, DuplicateSpaceTest)
 
 	// Log out and log in as default user to clean up original space
 	LogOut(UserSystem);
-	LogInAsNewTestUser(UserSystem, UserId);
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
