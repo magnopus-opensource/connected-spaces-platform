@@ -290,9 +290,19 @@ const Map<String, String>& SpaceMetadataResult::GetMetadata() const
 	return Metadata;
 }
 
+const Array<String>& SpaceMetadataResult::GetTags() const
+{
+	return Tags;
+}
+
 void SpaceMetadataResult::SetMetadata(const Map<String, String>& InMetadata)
 {
 	Metadata = InMetadata;
+}
+
+void SpaceMetadataResult::SetTags(const Array<String>& InTags)
+{
+	Tags = InTags;
 }
 
 Array<String>& PendingInvitesResult::GetPendingInvitesEmails()
@@ -333,9 +343,19 @@ const Map<String, Map<String, String>>& SpacesMetadataResult::GetMetadata() cons
 	return Metadata;
 }
 
+const Map<String, Array<String>>& SpacesMetadataResult::GetTags() const
+{
+	return Tags;
+}
+
 void SpacesMetadataResult::SetMetadata(const Map<String, Map<String, String>>& InMetadata)
 {
 	Metadata = InMetadata;
+}
+
+void SpacesMetadataResult::SetTags(const Map<String, Array<String>>& InTags)
+{
+	Tags = InTags;
 }
 
 const bool SpaceGeoLocationResult::HasSpaceGeoLocation() const
