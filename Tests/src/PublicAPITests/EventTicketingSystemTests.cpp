@@ -999,7 +999,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// 1. Invalid vendor test
 	{
@@ -1098,12 +1098,14 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log in as attendee just to get their UserId and log out again
 	csp::common::String EventAttendeeUserId;
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile EventAttendee = CreateTestUser();
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
-	LogIn(UserSystem, EventCreatorUserId);
+	csp::systems::Profile EventCreator = CreateTestUser();
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
@@ -1144,7 +1146,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	LogOut(UserSystem);
 
 	// Log in as the attendee
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 
 	auto [SubmitEventTicketResult] = AWAIT_PRE(EventTicketingSystem,
 											   SubmitEventTicket,
@@ -1165,12 +1167,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	EXPECT_EQ(SubmittedEventTicket.VendorTicketId, TestVendorTicketId);
 	EXPECT_EQ(SubmittedEventTicket.Status, csp::systems::TicketStatus::Redeemed);
 	EXPECT_EQ(SubmittedEventTicket.UserId, EventAttendeeUserId);
-	EXPECT_EQ(SubmittedEventTicket.Email, AlternativeLoginEmail);
+	EXPECT_EQ(SubmittedEventTicket.Email, EventAttendee.Email);
 
 	// Log out as the attendee
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, EventCreatorUserId);
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
@@ -1201,12 +1203,14 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Log in as attendee just to get their UserId and log out again
 	csp::common::String EventAttendeeUserId;
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile EventAttendee = CreateTestUser();
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
-	LogIn(UserSystem, EventCreatorUserId);
+	csp::systems::Profile EventCreator = CreateTestUser();
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 
 	csp::systems::Space Space;
 	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
@@ -1262,12 +1266,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	EXPECT_EQ(SubmittedEventTicket.VendorTicketId, TestVendorTicketId);
 	EXPECT_EQ(SubmittedEventTicket.Status, csp::systems::TicketStatus::Redeemed);
 	EXPECT_EQ(SubmittedEventTicket.UserId, EventAttendeeUserId);
-	EXPECT_EQ(SubmittedEventTicket.Email, AlternativeLoginEmail);
+	EXPECT_EQ(SubmittedEventTicket.Email, EventAttendee.Email);
 
 	// Log out as the attendee
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, EventCreatorUserId);
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
