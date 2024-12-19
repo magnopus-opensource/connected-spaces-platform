@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 	Listeners.Append(Listener);
 #endif
 
-#if RUN_ORGANIZATIONSYSTEM_TESTS
+#if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS
 	LoadTestAccountCredentials(); // Needed as long as we cannot create superuser credentials on the fly
 #endif
 
