@@ -48,6 +48,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 
 } // namespace
 
+
 void GetUsersRoles(::OrganizationSystem* OrganizationSystem,
 				   const csp::common::Optional<csp::common::String>& OrganizationId,
 				   const csp::common::Array<csp::common::String>& UserIds,
@@ -78,7 +79,7 @@ InviteOrganizationRoleCollection CreateOrganizationInvites(const String& EmailUs
 	return OrganizationInvites;
 }
 
-void CleanupTestUser(const csp::common::String& UserId)
+void CleanupTestUser(const String& UserId)
 {
 	// Only the super user has the required privileges to remove users.
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
