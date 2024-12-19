@@ -27,8 +27,6 @@
 #include "Systems/Users/Authentication.h"
 
 #include <CallHelpers.h>
-#include <future>
-#include <thread>
 
 
 namespace chs_user		  = csp::services::generated::userservice;
@@ -144,35 +142,22 @@ void UserSystem::Login(const csp::common::String& UserName,
 			{
 				NotifyRefreshTokenHasChanged();
 
-				std::promise<csp::multiplayer::ErrorCode> ConnectPromise;
-				std::future<csp::multiplayer::ErrorCode> ConnectFuture = ConnectPromise.get_future();
-
 				csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-					= [Callback, LoginStateRes, &ConnectPromise](csp::multiplayer::ErrorCode ErrCode)
+					= [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
 				{
-					ConnectPromise.set_value(ErrCode);
+					if (ErrCode != csp::multiplayer::ErrorCode::None)
+					{
+						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+
+						Callback(LoginStateRes);
+						return;
+					}
+
+					Callback(LoginStateRes);
 				};
 
 				auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
 				MultiplayerConnection->Connect(ErrorCallback);
-
-				// Ensure this doesn't block to prevent wasm errors
-				std::async(std::launch::deferred,
-						   [&ConnectFuture, Callback, LoginStateRes]
-						   {
-							   csp::multiplayer::ErrorCode ErrCode = ConnectFuture.get();
-
-							   if (ErrCode != csp::multiplayer::ErrorCode::None)
-							   {
-								   CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s",
-														csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
-
-								   Callback(LoginStateRes);
-								   return;
-							   }
-
-							   Callback(LoginStateRes);
-						   });
 			}
 			else if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Failed)
 			{
@@ -210,35 +195,22 @@ void UserSystem::LoginWithRefreshToken(const csp::common::String& UserId, const 
 		{
 			if (LoginStateRes.GetResultCode() == csp::systems::EResultCode::Success)
 			{
-				std::promise<csp::multiplayer::ErrorCode> ConnectPromise;
-				std::future<csp::multiplayer::ErrorCode> ConnectFuture = ConnectPromise.get_future();
-
 				csp::multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler ErrorCallback
-					= [Callback, LoginStateRes, &ConnectPromise](csp::multiplayer::ErrorCode ErrCode)
+					= [Callback, LoginStateRes](csp::multiplayer::ErrorCode ErrCode)
 				{
-					ConnectPromise.set_value(ErrCode);
+					if (ErrCode != csp::multiplayer::ErrorCode::None)
+					{
+						CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s", csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
+
+						Callback(LoginStateRes);
+						return;
+					}
+
+					Callback(LoginStateRes);
 				};
 
 				auto* MultiplayerConnection = SystemsManager::Get().GetMultiplayerConnection();
 				MultiplayerConnection->Connect(ErrorCallback);
-
-				// Ensure this doesn't block to prevent wasm errors
-				std::async(std::launch::deferred,
-						   [&ConnectFuture, Callback, LoginStateRes]
-						   {
-							   csp::multiplayer::ErrorCode ErrCode = ConnectFuture.get();
-
-							   if (ErrCode != csp::multiplayer::ErrorCode::None)
-							   {
-								   CSP_LOG_ERROR_FORMAT("Error connecting MultiplayerConnection: %s",
-														csp::multiplayer::ErrorCodeToString(ErrCode).c_str());
-
-								   Callback(LoginStateRes);
-								   return;
-							   }
-
-							   Callback(LoginStateRes);
-						   });
 			}
 			else
 			{

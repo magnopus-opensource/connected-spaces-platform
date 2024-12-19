@@ -63,7 +63,7 @@ EM_BOOL onSocketError(int EventType, const EmscriptenWebSocketErrorEvent *Websoc
 
 	auto WebSocketClient = static_cast<CSPWebSocketClientEmscripten *>(UserData);
 
-	if (WebSocketClient->getReceiveCallback() && *WebSocketClient->getReceiveCallback())
+	if (WebSocketClient->getReceiveCallback())
 	{
 		(*WebSocketClient->getReceiveCallback())("", false);
 	}
@@ -77,7 +77,7 @@ EM_BOOL onSocketClosed(int EventType, const EmscriptenWebSocketCloseEvent *Webso
 
 	auto WebSocketClient = static_cast<CSPWebSocketClientEmscripten *>(UserData);
 
-	if (WebSocketClient->getReceiveCallback() && *WebSocketClient->getReceiveCallback())
+	if (WebSocketClient->getReceiveCallback())
 	{
 		(*WebSocketClient->getReceiveCallback())("", false);
 	}
