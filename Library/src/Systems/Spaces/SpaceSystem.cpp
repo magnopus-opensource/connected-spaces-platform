@@ -1045,6 +1045,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 		if (Result.GetResultCode() == EResultCode::Success)
 		{
 			Map<String, Map<String, String>> SpacesMetadata;
+			Map<String, Array<String>> SpacesTags;
 			const auto& AssetCollections = Result.GetAssetCollections();
 
 			for (int i = 0; i < AssetCollections.Size(); ++i)
@@ -1054,9 +1055,11 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 				auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
 				SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
+				SpacesTags[SpaceId]		= AssetCollection.Tags;
 			}
 
 			InternalResult.SetMetadata(SpacesMetadata);
+			InternalResult.SetTags(SpacesTags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1085,6 +1088,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 			const auto& AssetCollection = Result.GetAssetCollection();
 
 			InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
+			InternalResult.SetTags(AssetCollection.Tags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);

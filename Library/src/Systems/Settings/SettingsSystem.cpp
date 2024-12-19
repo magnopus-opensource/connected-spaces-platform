@@ -937,15 +937,13 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
 		InternalResult.SetAvatarType(static_cast<AvatarType>(type.GetInt()));
 
-		if (Json.HasMember("identifierType") && Json["identifierType"].IsInt()
-			&& static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
+		if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
 		{
 			// Integer type is no longer supported -- convert to string
 			InternalResult.SetAvatarIdentifier(std::to_string(Json["identifier"].GetInt()).c_str());
 			Callback(InternalResult);
 		}
-		else if (!Json.HasMember("identifierType")
-				 || (Json["identifierType"].IsInt() && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
+		else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
 		{
 			InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
 			Callback(InternalResult);
