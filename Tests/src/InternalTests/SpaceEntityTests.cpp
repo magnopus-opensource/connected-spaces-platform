@@ -35,6 +35,7 @@
 #include <Memory/Memory.h>
 #include <PublicAPITests/SpaceSystemTestHelpers.h>
 #include <PublicAPITests/UserSystemTestHelpers.h>
+#include <atomic>
 
 using namespace csp::multiplayer;
 
@@ -114,7 +115,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
@@ -267,7 +268,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
@@ -420,7 +421,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
@@ -573,7 +574,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
@@ -725,7 +726,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
@@ -875,7 +876,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 				nullptr,
 				Space);
 
-	bool ScriptSystemReady = false;
+	std::atomic_bool ScriptSystemReady = false;
 
 	auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
 	{
