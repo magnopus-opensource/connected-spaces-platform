@@ -217,7 +217,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 	DeleteAnchors(AnchorSystem, CreatedAnchorIds);
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -296,7 +295,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorInSpaceTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -398,7 +396,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, DeleteMultipleAnchorsTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -554,7 +551,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -663,7 +659,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
 	DeleteAssetCollection(AssetSystem, AssetCollection2);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -731,7 +726,6 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 	DeleteAnchors(AnchorSystem, {Anchor1.Id, Anchor2.Id});
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -812,6 +806,5 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
 	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
-
 }
 #endif

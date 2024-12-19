@@ -48,17 +48,6 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 
 } // namespace
 
-void CleanupTestUser(const csp::common::String& UserId)
-{
-	// Only the super user has the required privileges to remove users.
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	// Delete the test user
-	auto [DeleteDefaultUserResult] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, UserId);
-	EXPECT_EQ(DeleteDefaultUserResult.GetResultCode(), csp::systems::EResultCode::Success);
-}
-
 void GetUsersRoles(::OrganizationSystem* OrganizationSystem,
 				   const csp::common::Optional<csp::common::String>& OrganizationId,
 				   const csp::common::Array<csp::common::String>& UserIds,
@@ -69,6 +58,17 @@ void GetUsersRoles(::OrganizationSystem* OrganizationSystem,
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	OutOrganizationRoleInfo = Result.GetOrganizationRoleInfo();
+}
+
+void CleanupTestUser(const csp::common::String& UserId)
+{
+	// Only the super user has the required privileges to remove users.
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	// Delete the test user
+	auto [DeleteDefaultUserResult] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, UserId);
+	EXPECT_EQ(DeleteDefaultUserResult.GetResultCode(), csp::systems::EResultCode::Success);
 }
 
 InviteOrganizationRoleCollection CreateOrganizationInvites(const String& EmailUser1, const String& EmailUser2)

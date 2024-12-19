@@ -1101,7 +1101,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
 
-
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
 	LogIn(UserSystem, EventCreatorUserId);
@@ -1144,7 +1143,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	// Log out as the creator
 	LogOut(UserSystem);
 
-
 	// Log in as the attendee
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 
@@ -1171,7 +1169,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log out as the attendee
 	LogOut(UserSystem);
-
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -1206,7 +1203,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	csp::common::String EventAttendeeUserId;
 	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
 	LogOut(UserSystem);
-
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
@@ -1270,7 +1266,6 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Log out as the attendee
 	LogOut(UserSystem);
-
 
 	LogIn(UserSystem, EventCreatorUserId);
 	DeleteSpace(SpaceSystem, Space.Id);

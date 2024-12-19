@@ -153,7 +153,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioComponentTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 
@@ -291,7 +290,6 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 

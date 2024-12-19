@@ -349,7 +349,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 	// Log out
 	LogOut(UserSystem);
 
-
 	// Log in
 	auto [Result] = AWAIT_PRE(UserSystem, LoginWithRefreshToken, RequestPredicate, UserId, "badtoken");
 
@@ -682,7 +681,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 
 	LogOut(UserSystem);
 
-
 	csp::common::String OriginalUserId;
 	LogIn(UserSystem, OriginalUserId, UniqueEmail, GeneratedTestAccountPassword);
 
@@ -911,7 +909,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GoogleLogInTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 	#endif
 
@@ -966,7 +963,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DiscordLogInTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 	#endif
 
@@ -1021,7 +1017,6 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AppleLogInTest)
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 	#endif
 #endif

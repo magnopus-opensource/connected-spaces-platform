@@ -2963,7 +2963,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 	// Log out
 	LogOut(UserSystem);
 
-
 	// Log in again
 	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
@@ -3465,7 +3464,6 @@ void RunParentDeletionTest(bool Local)
 
 		// Log out
 		LogOut(UserSystem);
-
 
 		// Log in again
 		LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);

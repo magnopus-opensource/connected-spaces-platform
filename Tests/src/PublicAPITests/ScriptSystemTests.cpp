@@ -1424,7 +1424,6 @@ Space);
 
 	// Log out
 	LogOut(UserSystem);
-
 }
 #endif
 */
