@@ -39,7 +39,7 @@ enum class ReplicatedValueType
 	Vector3		= 5,
 	Vector4		= 6,
 	Vector2		= 7,
-	Map			= 8
+	StringMap	= 8
 };
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
@@ -84,9 +84,9 @@ public:
 	/// @param InVector4Value csp::common::Vector4 : Initial value.
 	ReplicatedValue(const csp::common::Vector4& InVector4Value);
 
-	/// @brief Construct a ReplicatedValue based on an csp::common::Map type.
+	/// @brief Construct a ReplicatedValue based on an csp::common::Map type with a string value as the key.
 	/// @param InMapValue csp::common::Map : Initial value.
-	ReplicatedValue(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InMapValue);
+	ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue);
 
 	/// @brief Copy constructor
 	/// @param Other csp::multiplayer::ReplicatedValue& : The value to copy.
@@ -215,19 +215,20 @@ public:
 	CSP_NO_EXPORT static const csp::common::Vector4& GetDefaultVector4();
 
 
-	/// @brief Get a csp::common::Map value from this replicated value, will assert if not a csp::common::Map type.
+	/// @brief Get a csp::common::Map value with a string value as the key.
+	/// This will assert if not a csp::common::Map type with a string value as the key.
 	///
 	/// Use ReplicatedValue::GetReplicatedValueType to ensure type before accessing.
 	///
 	/// @return csp::common::Map
-	const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetMap() const;
+	const csp::common::Map<csp::common::String, ReplicatedValue>& GetStringMap() const;
 
-	/// @brief Set a Map value for this replicated value from a csp::common::Map, will overwrite and previous value.
-	void SetMap(const csp::common::Map<ReplicatedValue, ReplicatedValue>& InValue);
+	/// @brief Set a string Map value for this replicated value from a csp::common::Map, will overwrite and previous value.
+	void SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue);
 
-	/// @brief Get a generic default Map.
-	/// @return The default Map.
-	CSP_NO_EXPORT static const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetDefaultMap();
+	/// @brief Get a generic default StringMap.
+	/// @return The default StringMap.
+	CSP_NO_EXPORT static const csp::common::Map<csp::common::String, ReplicatedValue>& GetDefaultStringMap();
 
 	/// @brief returns the size of the stored internal value.
 	/// @return size_t size of the internal value.
@@ -249,7 +250,7 @@ private:
 		csp::common::Vector2 Vector2;
 		csp::common::Vector3 Vector3;
 		csp::common::Vector4 Vector4;
-		csp::common::Map<ReplicatedValue, ReplicatedValue> Map;
+		csp::common::Map<csp::common::String, ReplicatedValue> StringMap;
 	};
 
 	InternalValue Value;

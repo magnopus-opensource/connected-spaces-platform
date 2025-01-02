@@ -255,3 +255,97 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 	LogOut(UserSystem);
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_ENTER_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
+	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	csp::common::String ObjectName = "Object 1";
+
+	{
+		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+		EntitySystem->SetEntityCreatedCallback(
+			[](csp::multiplayer::SpaceEntity* Entity)
+			{
+			});
+
+		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+		// Create static model component
+		auto* StaticModelComponent = (StaticModelSpaceComponent*) CreatedObject->AddComponent(ComponentType::StaticModel);
+
+		CreatedObject->QueueUpdate();
+		EntitySystem->ProcessPendingEntityOperations();
+
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+	}
+
+	{
+		// Re-enter space
+		bool EntitiesCreated = false;
+
+		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+		{
+			EntitiesCreated = true;
+			EXPECT_TRUE(Success);
+		};
+
+		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+		EXPECT_TRUE(EntitiesCreated);
+
+		SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+		EXPECT_TRUE(FoundEntity != nullptr);
+
+		auto* StaticModelComponent = (StaticModelSpaceComponent*) FoundEntity->GetComponent(0);
+		EXPECT_TRUE(StaticModelComponent != nullptr);
+
+		EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 0);
+
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+	}
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif

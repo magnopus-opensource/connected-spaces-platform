@@ -95,7 +95,6 @@ enum ItemComponentData : uint64_t
 	NULLABLE_UINT16_ARRAY,
 	UINT16_DICTIONARY,
 	STRING_DICTIONARY,
-	GENERIC_MAP
 };
 
 } // namespace msgpack_typeids
