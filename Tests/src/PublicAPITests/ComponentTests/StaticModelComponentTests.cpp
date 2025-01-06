@@ -306,8 +306,46 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 
 		// Create static model component
 		auto* StaticModelComponent = (StaticModelSpaceComponent*) CreatedObject->AddComponent(ComponentType::StaticModel);
+		StaticModelComponent->AddMaterialOverride("TestKey", "TestValue");
 
 		CreatedObject->QueueUpdate();
+		EntitySystem->ProcessPendingEntityOperations();
+
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+	}
+
+	{
+		// Re-enter space
+		bool EntitiesCreated = false;
+
+		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+		{
+			EntitiesCreated = true;
+			EXPECT_TRUE(Success);
+		};
+
+		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+		EXPECT_TRUE(EntitiesCreated);
+
+		SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+		EXPECT_TRUE(FoundEntity != nullptr);
+
+		auto* StaticModelComponent = (StaticModelSpaceComponent*) FoundEntity->GetComponent(0);
+		EXPECT_TRUE(StaticModelComponent != nullptr);
+
+		EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 1);
+		EXPECT_TRUE(StaticModelComponent->GetMaterialOverrides().HasKey("TestKey"));
+		EXPECT_EQ(StaticModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
+
+		// Delete material override
+		StaticModelComponent->RemoveMaterialOverride("TestKey");
+
+		FoundEntity->QueueUpdate();
 		EntitySystem->ProcessPendingEntityOperations();
 
 		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
