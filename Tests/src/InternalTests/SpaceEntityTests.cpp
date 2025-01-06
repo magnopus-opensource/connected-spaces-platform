@@ -101,7 +101,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -254,7 +254,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -407,7 +407,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -560,7 +560,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -712,7 +712,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -862,7 +862,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
