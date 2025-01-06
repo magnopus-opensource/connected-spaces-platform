@@ -223,7 +223,7 @@ public:
 	/// @return csp::common::Map
 	const csp::common::Map<csp::common::String, ReplicatedValue>& GetStringMap() const;
 
-	/// @brief Set a string Map value for this replicated value from a csp::common::Map, will overwrite and previous value.
+	/// @brief Set a string Map value for this replicated value from a csp::common::Map, will overwrite any previous value.
 	void SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue);
 
 	/// @brief Get a generic default StringMap.
