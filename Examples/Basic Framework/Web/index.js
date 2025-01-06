@@ -21,7 +21,7 @@ import {
 const ENDPOINT = "https://ogs.magnopus-stg.cloud";
 
 // Tenant defines the application scope.
-const TENANT = "FOUNDATION_HELLO_WORLD";
+const TENANT = "CSP_HELLO_WORLD";
 
 // Desired email / password combination to run the tests.
 const EMAIL = "";
