@@ -29,7 +29,7 @@ StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent) : Comp
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetId)]			  = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides)]
-		= csp::common::Map<csp::multiplayer::ReplicatedValue, csp::multiplayer::ReplicatedValue>();
+		= csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue>();
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Position)]			   = csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Rotation)]			   = csp::common::Vector4::Identity();
 	Properties[static_cast<uint32_t>(StaticModelPropertyKeys::Scale)]				   = csp::common::Vector3::One();
@@ -67,24 +67,23 @@ void StaticModelSpaceComponent::SetExternalResourceAssetCollectionId(const csp::
 csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceComponent::GetMaterialOverrides() const
 {
 	// Convert replicated values map to string values
-	common::Map<multiplayer::ReplicatedValue, multiplayer::ReplicatedValue> ReplicatedOverrides
-		= GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+	common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+		= GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
 	csp::common::Map<csp::common::String, csp::common::String> Overrides;
 
-	auto Deleter = [](const common::Array<multiplayer::ReplicatedValue>* Ptr)
+	auto Deleter = [](const common::Array<common::String>* Ptr)
 	{
 		CSP_DELETE(Ptr);
 	};
 
-	std::unique_ptr<common::Array<multiplayer::ReplicatedValue>, decltype(Deleter)> Keys(
-		const_cast<common::Array<multiplayer::ReplicatedValue>*>(ReplicatedOverrides.Keys()),
-		Deleter);
+	std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()),
+																		   Deleter);
 
 	for (size_t i = 0; i < Keys->Size(); ++i)
 	{
-		const auto& CurrentKey			  = (*Keys)[i];
-		Overrides[CurrentKey.GetString()] = ReplicatedOverrides[CurrentKey].GetString();
+		const auto& CurrentKey = (*Keys)[i];
+		Overrides[CurrentKey]  = ReplicatedOverrides[CurrentKey].GetString();
 	}
 
 	return Overrides;
@@ -92,8 +91,8 @@ csp::common::Map<csp::common::String, csp::common::String> StaticModelSpaceCompo
 
 void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
 {
-	common::Map<multiplayer::ReplicatedValue, multiplayer::ReplicatedValue> ReplicatedOverrides
-		= GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+	common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+		= GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 
 	ReplicatedOverrides[ModelPath] = MaterialId;
 
@@ -102,7 +101,7 @@ void StaticModelSpaceComponent::AddMaterialOverride(const csp::common::String& M
 
 void StaticModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
 {
-	auto ReplicatedOverrides = GetMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
+	auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides));
 	ReplicatedOverrides.Remove(ModelPath);
 
 	SetProperty(static_cast<uint32_t>(StaticModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);

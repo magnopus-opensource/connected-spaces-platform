@@ -188,42 +188,42 @@ CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, StringLiteralAssignmentTest)
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapConstructorTest)
 {
-	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
-	MyMap[1ll] = "Test1";
-	MyMap[2ll] = "Test2";
-	MyMap[3ll] = "Test3";
+	csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
+	MyMap["Key1"] = "Test1";
+	MyMap["Key2"] = "Test2";
+	MyMap["Key3"] = "Test3";
 
 	ReplicatedValue MyValue(MyMap);
 
-	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
-	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::StringMap);
+	EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, SetMapTest)
 {
 	ReplicatedValue MyValue;
-	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
-	MyMap[1ll] = "Test1";
-	MyMap[2ll] = "Test2";
-	MyMap[3ll] = "Test3";
+	csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
+	MyMap["Key1"] = "Test1";
+	MyMap["Key2"] = "Test2";
+	MyMap["Key3"] = "Test3";
 
-	MyValue.SetMap(MyMap);
+	MyValue.SetStringMap(MyMap);
 
-	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
-	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::StringMap);
+	EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
 
 CSP_PUBLIC_TEST(CSPEngine, ReplicatedValueTestsv2, MapAssignmentTest)
 {
 	ReplicatedValue MyValue;
-	csp::common::Map<ReplicatedValue, ReplicatedValue> MyMap;
-	MyMap[1ll] = "Test1";
-	MyMap[2ll] = "Test2";
-	MyMap[3ll] = "Test3";
+	csp::common::Map<csp::common::String, ReplicatedValue> MyMap;
+	MyMap["Key1"] = "Test1";
+	MyMap["Key2"] = "Test2";
+	MyMap["Key3"] = "Test3";
 
 	MyValue = MyMap;
 
-	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::Map);
-	EXPECT_TRUE(MyValue.GetMap() == MyMap);
+	EXPECT_TRUE(MyValue.GetReplicatedValueType() == ReplicatedValueType::StringMap);
+	EXPECT_TRUE(MyValue.GetStringMap() == MyMap);
 }
 #endif

@@ -74,71 +74,31 @@ std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const
 				   std::vector {signalr::value(VValue.X), signalr::value(VValue.Y), signalr::value(VValue.Z), signalr::value(VValue.W)});
 			break;
 		}
-		case ReplicatedValueType::Map:
+		case ReplicatedValueType::StringMap:
 		{
-			ValueType = ItemComponentData::GENERIC_MAP;
+			ValueType	= ItemComponentData::STRING_DICTIONARY;
+			auto MValue = Value.GetStringMap();
 
-			// Creates a custom signalr data structure to hold an array of key-value pairs
-			const auto& Map = Value.GetMap();
-			auto Keys		= Map.Keys();
+			auto Deleter = [](const common::Array<common::String>* Ptr)
+			{
+				CSP_DELETE(Ptr);
+			};
 
-			// Root of map which contains:
-			// 0 = Type information of the key
-			// 1 = Type information of value
-			// 2 = vector of key-value pairs
-			std::vector<signalr::value> MapRoot;
-			MapRoot.reserve(3);
-
-			// Array of key-value pairs
-			std::vector<signalr::value> MapArray;
-			MapArray.reserve(Keys->Size());
-
-			ItemComponentData KeyType	= ItemComponentData::UINT64;
-			ItemComponentData ValueType = ItemComponentData::UINT64;
-			bool First					= true;
+			std::map<std::string, signalr::value> Map;
+			std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(const_cast<common::Array<common::String>*>(MValue.Keys()),
+																				   Deleter);
 
 			for (size_t i = 0; i < Keys->Size(); ++i)
 			{
-				const ReplicatedValue& Key = (*Keys)[i];
+				auto ValuePair = ReplicatedValueToSignalRValue(MValue[(*Keys)[i]]);
 
-				auto KeyValue = ReplicatedValueToSignalRValue(Key);
-				auto Value	  = ReplicatedValueToSignalRValue(Map[Key]);
+				std::vector<signalr::value> Item = {signalr::value(ValuePair.second)};
+				std::vector<signalr::value> Prop = {ValuePair.first, signalr::value(Item)};
 
-				if (First)
-				{
-					First	  = false;
-					KeyType	  = KeyValue.first;
-					ValueType = Value.first;
-				}
-				else
-				{
-					// Ensure key and values are all the same type
-					if (KeyType != KeyValue.first)
-					{
-						CSP_LOG_ERROR_FORMAT("Map key types dont match! %s %s",
-											 std::to_string(KeyType).c_str(),
-											 std::to_string(KeyValue.first).c_str());
-					}
-					if (ValueType != Value.first)
-					{
-						CSP_LOG_ERROR_FORMAT("Map value types dont match! %s %s",
-											 std::to_string(ValueType).c_str(),
-											 std::to_string(Value.first).c_str());
-					}
-				}
-
-				// Add key-value pair to the signalr value
-				MapArray.push_back(signalr::value(std::vector<signalr::value> {KeyValue.second, Value.second}));
+				Map[(*Keys)[i].c_str()] = signalr::value(Prop);
 			}
 
-			CSP_DELETE(Keys);
-
-			MapRoot.push_back(signalr::value(KeyType));
-			MapRoot.push_back(signalr::value(ValueType));
-			MapRoot.push_back(MapArray);
-
-			// Create the root value with the array of key-value pairs
-			NewValue = signalr::value(MapRoot);
+			NewValue = signalr::value(Map);
 
 			break;
 		}
@@ -180,27 +140,28 @@ ReplicatedValue SignalRValueToReplicatedValue(ItemComponentData Type, const sign
 											 (float) Array[3].as_double()};
 			}
 		}
-		case ItemComponentData::GENERIC_MAP:
+		case ItemComponentData::STRING_DICTIONARY:
 		{
-			csp::common::Map<ReplicatedValue, ReplicatedValue> Map;
-			const auto& Root = Value.as_array();
+			csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue> ReplicatedMap;
 
-			// Type information of the map
-			ItemComponentData KeyType	= static_cast<ItemComponentData>(Root[0].as_uinteger());
-			ItemComponentData ValueType = static_cast<ItemComponentData>(Root[1].as_uinteger());
-			// Key-value pair array
-			const auto& Array = Root[2].as_array();
-
-			for (const auto& Item : Array)
+			// Value will be of type null if no elements exist within the map
+			if (Value.is_null())
 			{
-				const auto& KeyVal	  = Item.as_array();
-				ReplicatedValue Key	  = SignalRValueToReplicatedValue(KeyType, KeyVal[0]);
-				ReplicatedValue Value = SignalRValueToReplicatedValue(ValueType, KeyVal[1]);
-
-				Map[Key] = Value;
+				return ReplicatedMap;
 			}
 
-			return Map;
+			const auto& Map = Value.as_string_map();
+
+			for (const auto& Pair : Map)
+			{
+				auto ValuePair		   = Pair.second;
+				const auto& ValueArray = ValuePair.as_array();
+
+				ReplicatedMap[Pair.first.c_str()]
+					= SignalRValueToReplicatedValue(static_cast<ItemComponentData>(ValueArray[0].as_uinteger()), ValueArray[1].as_array()[0]);
+			}
+
+			return ReplicatedMap;
 		}
 		default:
 			throw std::runtime_error("Unsupported property type!");
