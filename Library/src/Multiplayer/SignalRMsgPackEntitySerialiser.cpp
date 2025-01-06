@@ -90,8 +90,12 @@ std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const
 
 			for (size_t i = 0; i < Keys->Size(); ++i)
 			{
-				auto ValuePair			= ReplicatedValueToSignalRValue(MValue[(*Keys)[i]]);
-				Map[(*Keys)[i].c_str()] = std::vector {signalr::value(ValuePair.first), signalr::value(ValuePair.second)};
+				auto ValuePair = ReplicatedValueToSignalRValue(MValue[(*Keys)[i]]);
+
+				std::vector<signalr::value> Item = {signalr::value(ValuePair.second)};
+				std::vector<signalr::value> Prop = {ValuePair.first, signalr::value(Item)};
+
+				Map[(*Keys)[i].c_str()] = signalr::value(Prop);
 			}
 
 			NewValue = signalr::value(Map);
@@ -138,8 +142,15 @@ ReplicatedValue SignalRValueToReplicatedValue(ItemComponentData Type, const sign
 		}
 		case ItemComponentData::STRING_DICTIONARY:
 		{
-			const auto& Map = Value.as_string_map();
 			csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue> ReplicatedMap;
+
+			// Value will be of type null if no elements exist within the map
+			if (Value.is_null())
+			{
+				return ReplicatedMap;
+			}
+
+			const auto& Map = Value.as_string_map();
 
 			for (const auto& Pair : Map)
 			{
@@ -147,7 +158,7 @@ ReplicatedValue SignalRValueToReplicatedValue(ItemComponentData Type, const sign
 				const auto& ValueArray = ValuePair.as_array();
 
 				ReplicatedMap[Pair.first.c_str()]
-					= SignalRValueToReplicatedValue(static_cast<ItemComponentData>(ValueArray[0].as_uinteger()), ValueArray[1]);
+					= SignalRValueToReplicatedValue(static_cast<ItemComponentData>(ValueArray[0].as_uinteger()), ValueArray[1].as_array()[0]);
 			}
 
 			return ReplicatedMap;
@@ -316,6 +327,10 @@ void SignalRMsgPackEntitySerialiser::EndComponent()
 	// Build our map of component properties in a format our server expects by looping over our gathered property collection
 	for (auto const& Property : Properties)
 	{
+		auto p1 = Property.first;
+		auto p2 = Property.second.first;
+		auto p3 = Property.second.second;
+
 		// Store the value of the property as a signalr value (this has to be stored as a vector even though it's only 1 index we'll ever use)
 		std::vector<signalr::value> Item = {signalr::value(Property.second.second)};
 		// Store the value with the type identifier in a vector (again, needs to be a vector)
