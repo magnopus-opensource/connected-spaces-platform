@@ -327,10 +327,6 @@ void SignalRMsgPackEntitySerialiser::EndComponent()
 	// Build our map of component properties in a format our server expects by looping over our gathered property collection
 	for (auto const& Property : Properties)
 	{
-		auto p1 = Property.first;
-		auto p2 = Property.second.first;
-		auto p3 = Property.second.second;
-
 		// Store the value of the property as a signalr value (this has to be stored as a vector even though it's only 1 index we'll ever use)
 		std::vector<signalr::value> Item = {signalr::value(Property.second.second)};
 		// Store the value with the type identifier in a vector (again, needs to be a vector)
@@ -824,7 +820,6 @@ void SignalRMsgPackEntityDeserialiser::EnterComponent(CSP_OUT uint16_t& OutId, C
 			}
 			else
 			{
-				ItemComponentData d = (ItemComponentData) PropertyData[0].as_uinteger();
 				// push to the deserialisers own property map, which represents deserialised data
 				Properties[PropertyID] = std::make_pair((ItemComponentData) PropertyData[0].as_uinteger(), PropertyData[1].as_array()[0]);
 			}
