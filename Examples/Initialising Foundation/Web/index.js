@@ -7,7 +7,7 @@ import {
 const ENDPOINT = "https://ogs.magnopus-stg.cloud";
 
 // Tenant defines the application scope.
-const TENANT = "FOUNDATION_HELLO_WORLD";
+const TENANT = "CSP_HELLO_WORLD";
 
 const runInitialisingCSPExample = () => {
   // If we should use debug version of Connected Spaces Platform (CSP).
