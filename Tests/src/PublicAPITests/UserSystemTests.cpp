@@ -75,7 +75,6 @@ void LoadTestAccountCredentials()
 	SuperUserLoginPassword = _SuperUserLoginPassword.c_str();
 }
 
-
 csp::systems::Profile CreateTestUser()
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -103,10 +102,12 @@ csp::systems::Profile CreateTestUser()
 							  nullptr,
 							  nullptr);
 
+	SCOPED_TRACE("Failed to create temporary test user in CreateTestUser.");
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
 	const auto& CreatedProfile = Result.GetProfile();
 
+	SCOPED_TRACE("CreateTestUser returned unexpected details for temporary test user.");
 	EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
 	EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
 	EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
