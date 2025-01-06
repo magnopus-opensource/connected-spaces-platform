@@ -206,6 +206,25 @@ public:
 		return ScriptInterface;
 	}
 
+	std::vector<EntityScriptInterface*> GetRootHierarchyEntities()
+	{
+		std::vector<EntityScriptInterface*> RootHierarchyEntities;
+		if (EntitySystem)
+		{
+			EntitySystem->LockEntityUpdate();
+
+			for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+			{
+				SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
+				RootHierarchyEntities.push_back(Entity->GetScriptInterface());
+			}
+
+			EntitySystem->UnlockEntityUpdate();
+		}
+
+		return RootHierarchyEntities;
+	}
+
 	std::string GetFoundationVersion()
 	{
 		return csp::CSPFoundation::GetVersion().c_str();
@@ -554,11 +573,17 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 			"getGaussianSplatComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
+		.fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
+		.property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
+		.property<&EntityScriptInterface::GetGlobalRotation>("globalRotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")
+		.property<&EntityScriptInterface::GetGlobalScale>("globalScale")
+		.property<&EntityScriptInterface::GetParentEntity>("parentEntity")
 		.property<&EntityScriptInterface::GetId>("id")
-		.property<&EntityScriptInterface::GetName>("name");
+		.property<&EntityScriptInterface::GetName>("name")
+		.property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
 
 	Module->class_<ComponentScriptInterface>("Component")
 		.constructor<>()
@@ -578,7 +603,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
 		.fun<&EntitySystemScriptInterface::GetEntityById>("getEntityById")
 		.fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
-		.fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity");
+		.fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
+		.fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
 	Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
 	Context->global()["ThisEntity"]		 = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));
