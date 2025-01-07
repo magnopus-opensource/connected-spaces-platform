@@ -24,9 +24,9 @@ Each asset type plays a unique role in crafting an interactive, engaging space t
 
 ## Understanding Asset Collections
 
-Asset collections allow applications to group related assets together for easier management. For example, in a multi-user space, all images and models for a thing that exists in the space, such as a table, might be stored in a single asset collection. This approach allows developers to ensurie assets remain logically grouped.
+Asset Collections allow applications to group related assets together for easier management. For example, in a multi-user space, all images and models for a thing that exists in the space, such as a table, might be stored in a single asset collection. This approach allows developers to ensure assets remain logically grouped.
 
-While its name reflects it's primary purpose - to represent a collection of assets - its metadata-centric design also supports the storage of **generic data** in services.
+While the name reflects the primary purpose - to represent a collection of assets - its metadata-centric design also supports the storage of **generic data** in services.
 
 As such, asset collections support a broader set of use cases. You should consider both its **asset grouping** and **generic data storage** functionalities when integrating Asset Collections into your projects.
 
@@ -218,7 +218,7 @@ In CSP, Asset Collections are associated with various components within a space 
 
 Asset Collections in CSP do not inherently reference the assets associated with them. Instead, an Asset explicitly stores the Id of the Asset Collection it belongs to. This design ensures a unidirectional relationship where assets know their respective Asset Collection, but Asset Collections do not maintain references to their associated assets.
 
-When assets are linked to components, the Asset Id and Asset Collection Id are passed to the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
+When an Asset is linked to a component, the Asset Id and Asset Collection Id are associated with the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
 
 **Examples of Component Types That Can Use Assets**
 
@@ -226,11 +226,11 @@ Various components within a CSP space rely on assets to function. Here are a few
 
 * **Static Models:** These are 3D objects that remain stationary in a space. Assets such as 3D geometry and textures are linked to static model components to define their appearance.
 
-* **Skeletal Models:** CSP supports skeletal meshes, which include a rigged skeleton structure for animation. The Skeletal Animation data is stored within the same .glb file as the skeletal mesh. Unlike traditional animation systems, CSP does not support keyframe animation on transforms. Instead, skeletal animation relies entirely on the rig structure within the mesh file.
+* **Skeletal Models:** CSP supports skeletal meshes, which include a rigged skeleton structure for animation.
 
-* **Sound Components:** Sound components enable audio interactions within a space. These components use Asset Ids to reference sound files stored in blob storage.
+* **Sound Components:** Sound components enable audio interactions within a space.
 
-* **Script Components:** Interactive elements, such as buttons, often use scripts that interact with assets to define their behavior.
+* **Script Components:** Interactive elements, such as buttons, often use scripts that interact with assets to define behavior.
 
 ## Querying for Assets
 
@@ -286,21 +286,21 @@ To manage assets effectively, you can query them based on different attributes l
     This function takes an asset ID and retrieves the corresponding asset. It is helpful when you already know the asset ID and need to fetch its details.
 
 3. **Querying Assets by Criteria**  
-    To search for assets based on multiple attributes (e.g., type, tag, or collection), use GetAssetsByCriteria. This function provides flexibility by allowing additional arguments for filtering.  
+    To search for assets based on multiple attributes (e.g., type, tag, or collection), use `GetAssetsByCriteria`. This function provides flexibility by allowing additional arguments for filtering.  
 
-    There are other methods for querying Assets and Asset Collections, which are:
+There are other methods for querying Assets and Asset Collections, which are:
     
-    * `GetAssetCollectionById` Retrieves an Asset Collection by its unique ID. It is useful when you know the specific ID of the Asset Collection you want to access.
+* `GetAssetCollectionById` Retrieves an Asset Collection by its unique ID. It is useful when you know the specific ID of the Asset Collection you want to access.
     
-    * `GetAssetCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
+* `GetAssetCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
     
-    * `FindAssetCollections` Allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
+* `FindAssetCollections` Allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
     
-    * `GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection IDs. It facilitates batch queries for multiple collections at once.
+* `GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection IDs. It facilitates batch queries for multiple collections at once.
 
 ## Automated Model Decimation
 
-If your use case includes the usage of Magnopus Cloud Services (MCS), the **automated model decimation service** in MCS reduces the complexity of 3D models by lowering their polygon count and compressing their textures. This process is known as **model decimation** and helps optimize asset performance without sacrificing visual quality.
+If your use case includes the adoption of Magnopus Cloud Services (MCS), the **automated model decimation service** in MCS reduces the complexity of 3D models by lowering their polygon count and compressing their textures. This process is known as **model decimation** and helps optimize asset performance without sacrificing visual quality.
 
 Model decimation is crucial in projects that use complex 3D models in a real-time application. The automated decimation service automatically reduces the size of 3D models, making them more manageable for delivery over the network and enables performant real-time rendering. This service ensures that the models maintain an acceptable level of detail whilst reducing the data size, leading to better performance in the virtual space.
 
@@ -312,7 +312,7 @@ Optimizing 3D models through decimation brings several key benefits:
 
 * **Reduced Load Times:** Smaller models load quicker, reducing wait times for users and improving the overall experience.
 
-* **Optimized for Multi-users:** In multi-users environments, decimation reduces the bandwidth needed to send models to multiple clients, ensuring a seamless experience for all users.
+* **Optimized for Many Users:** In multi-user environments, decimation reduces the bandwidth needed to send models to multiple clients, ensuring a seamless experience for all users.
 
 * **Memory Efficiency:** Decimated models take up less memory, making it possible to use more assets without overwhelming the system.
 
