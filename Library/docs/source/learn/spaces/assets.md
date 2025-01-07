@@ -240,7 +240,8 @@ Querying for assets in CSP allows users to search, retrieve, and manage assets w
 
 To manage assets effectively, you can query them based on different attributes like asset type, collection, or space. CSP offers several built-in methods to handle these queries.
 
-1. **Querying All Assets in a Collection**      This method retrieves all assets within a specific Asset Collection. It is useful when you need to list or manage all assets grouped together in the same collection.
+1. **Querying All Assets in a Collection**  
+    This method retrieves all assets within a specific Asset Collection. It is useful when you need to list or manage all assets grouped together in the same collection.
 
     ```
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
