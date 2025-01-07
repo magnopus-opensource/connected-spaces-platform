@@ -83,8 +83,7 @@ csp::systems::Profile CreateTestUser()
 	const char* TestUserName	= "CSP-TEST-NAME";
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
-	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
+	std::string UniqueUserName = TestUserName + GetUniqueString();
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
@@ -93,7 +92,7 @@ csp::systems::Profile CreateTestUser()
 	auto [Result] = AWAIT_PRE(UserSystem,
 							  CreateUser,
 							  RequestPredicate,
-							  UniqueUserName,
+							  UniqueUserName.c_str(),
 							  TestDisplayName,
 							  UniqueEmail,
 							  GeneratedTestAccountPassword,
@@ -108,7 +107,7 @@ csp::systems::Profile CreateTestUser()
 	const auto& CreatedProfile = Result.GetProfile();
 
 	SCOPED_TRACE("CreateTestUser returned unexpected details for temporary test user.");
-	EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
+	EXPECT_EQ(CreatedProfile.UserName, UniqueUserName.c_str());
 	EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
 	EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
 
@@ -525,7 +524,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueString(8).c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueString().substr(0, 8).c_str();
 
 	csp::common::String UserId;
 	LogInAsNewTestUser(UserSystem, UserId);
