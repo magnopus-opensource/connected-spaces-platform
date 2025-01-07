@@ -1,20 +1,18 @@
 # Assets
 
-Assets form the foundation of any Space in CSP. They bring visual elements to life and add interactivity. For instance, 3D models represent objects within a Space, video assets can be applied to surfaces to create dynamic visuals, and scripts control how objects behave when users interact with them. By combining various assets, you can create detailed environments where users can explore, interact, and engage with each other in real-time.
+Assets form the foundation of any Space in CSP. They bring visual elements to life and add interactivity. For instance, 3D models represent objects within a Space, video assets can be applied to surfaces to create dynamic visuals. By combining various assets, you can create detailed environments where users can explore, interact, and engage with each other in real-time.
 
-In CSP, an **asset** is any resource used to create and enhance virtual spaces. Assets include files such as 3D models, textures, images, sounds, and scripts. These assets are essential for building immersive, interactive environments.
+In CSP, an **asset** is any resource used to create and enhance virtual spaces. Assets include files such as 3D models, textures, images, sounds, and gaussian splats. These assets are essential for building immersive, interactive environments.
 
-An asset is a digital resource that adds content or functionality to a space. In CSP, assets help define the visual and interactive elements, enabling users to populate spaces with engaging components. Assets are managed by **asset collections**, making it easier to organize and access them.
+An asset is a digital resource that acts as content within a space. In CSP, assets help define the visual and interactive elements, enabling users to populate spaces with engaging components. Assets are managed by **asset collections**, making it easier to organize and access them.
 
-Asset management in CSP involves organizing, creating, and updating assets to ensure they are readily available for use in spaces. In multi-users environments, managing assets efficiently is critical for smooth, synchronized gameplay. When assets are properly managed:
+Asset management in CSP involves organizing, creating, and updating assets to ensure they are readily available for use in spaces. In multi-users environments, managing assets efficiently is critical for smooth, synchronized interaction. When assets are properly managed:
 
 * **Performance Improves:** Optimized assets reduce load times and prevent lag, making the space run smoothly across multiple clients.
 
 * **Consistency is Ensured:** Proper asset management ensures that all users experience the same space with identical assets, preventing discrepancies in what users see and interact with.
 
 * **Scalability Increases:** Managing assets well allows for easier updates and expansions, enabling the space to grow without performance issues.
-
-## Types of Assets and Their Use Cases
 
 There are many types of assets in CSP, each with specific uses. Some of the more common asset types are:
 
@@ -37,27 +35,27 @@ An asset collection is a group of related assets that can be managed together. T
 **Step-by-Step Guide:**
 
 * **Step 1:** Prompt the user to enter a unique name for the asset collection.  
-* **Step 2:** Use the CreateAssetCollection() function to generate the collection.  
+* **Step 2:** Use the `CreateAssetCollection` function to generate the collection.  
 * **Step 3:** Confirm the collection was successfully created.
 
 ```
 void CreateAssetCollection(const std::string& AssetCollectionName) {
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+    
     AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(),
-    nullptr, csp::systems::EAssetCollectionType::DEFAULT, nullptr,
-    [&](const csp::systems::AssetCollectionResult Result)
-    {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        nullptr, csp::systems::EAssetCollectionType::DEFAULT, nullptr,
+        [&](const csp::systems::AssetCollectionResult Result)
         {
-            auto AssetCollection = Result.GetAssetCollection();
-            cout << "Created a new Asset Collection called " << AssetCollection.Name
-            << ". ID: " << AssetCollection.Id << endl;
-        }
-        else
-        {
-            cout << "Error: Could not create a new Asset Collection. " << Result.GetResponseBody() << endl;
-        }
-    });
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                auto AssetCollection = Result.GetAssetCollection();
+                cout << "Created a new Asset Collection named " << AssetCollection.Name << ". ID: " << AssetCollection.Id << endl;
+            }
+            else
+            {
+                cout << "Error: Could not create a new Asset Collection. " << Result.GetResponseBody() << endl;
+            }
+        });
 }
 ```
 
@@ -71,7 +69,7 @@ Assets, such as images or models, must be created within an asset collection. Th
 **Step-by-Step Guide:**
 
 * **Step 1:** Request a unique name for the asset.  
-* **Step 2:** Call the CreateAsset() function to add the asset to the collection.  
+* **Step 2:** Call the `CreateAsset` function to add the asset to the collection.  
 * **Step 3:** Confirm the asset creation.
 
 ```
@@ -105,20 +103,19 @@ Uploading allows users to add data (e.g., images or 3D models) to the newly crea
 
 * **Step 1:** Define the file path for the asset.  
 * **Step 2:** Create an asset data source from the file.  
-* **Step 3:** Upload the asset data using the UploadAsset() function.
+* **Step 3:** Upload the asset data using the `UploadAsset` function.
 
 ```
 void UploadAsset()
 {
     promise<void> CallbackPromise;
     future<void> CallbackFuture = CallbackPromise.get_future();
+
     //Create Asset Data Source from file
-    string SolutionPath = _SOLUTION_DIR;
-    filesystem::path FilePath = std::filesystem::absolute(SolutionPath + "TestAsset/TestImage.png");
-    
     csp::systems::FileAssetDataSource AssetDataSource;
-    AssetDataSource.FilePath = FilePath.u8string().c_str();
+    AssetDataSource.FilePath = "TestAsset/TestImage.png";
     AssetDataSource.SetMimeType("image/png");
+
     //Upload Asset
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
     AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&](const csp::systems::UriResult& Result)
@@ -134,6 +131,7 @@ void UploadAsset()
             CallbackPromise.set_value();
         }
     });
+
     CallbackFuture.wait();
 }
 ```
@@ -147,24 +145,25 @@ Assets can be deleted from a collection if they are no longer needed. The follow
 
 **Step-by-Step Guide:**
 
-* **Step 1:** Call the DeleteAsset() function.  
+* **Step 1:** Call the `DeleteAsset` function.  
 * **Step 2:** Confirm that the asset has been successfully deleted.
 
 ```
 void DeleteAsset() {
     promise<void> CallbackPromise;
     future<void> CallbackFuture = CallbackPromise.get_future();
+
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
     AssetSystem->DeleteAsset(AssetCollection, Asset, [&](const csp::systems::NullResult Result)
     {
         if(Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            cout << "nDeleted Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
+            cout << "nDeleted Asset called " << Asset.Name << ". ID: " << Asset.Id << endl;
             CallbackPromise.set_value();
         }
         else
         {
-            cout << "nError: Could not delete Asset. " + Result.GetResponseBody() << endl;
+            cout << "nError: Could not delete Asset. " << Result.GetResponseBody() << endl;
             CallbackPromise.set_value();
         }
     });
@@ -175,18 +174,18 @@ void DeleteAsset() {
 
 **Explanation:**
 
-The DeleteAsset() function removes an asset from the collection. After the function is executed, the user is informed whether the deletion was successful or if there were any issues.
+The `DeleteAsset` function removes an asset from the collection. After the function is executed, the user is informed whether the deletion was successful or if there were any issues.
 
 ## Understanding Asset Collections
 
-An AssetCollection in CSP serves a dual purpose. While its name suggests it might exclusively represent a collection of assets, it is also designed to store **generic data** in the MCS.
+An Asset Collection in CSP serves a dual purpose. While its name suggests it might exclusively represent a collection of assets, it is also designed to store **generic data** in the MCS.
 
-Although the name "AssetCollection" emphasizes its asset-related role, its metadata-centric design supports a broader application. You should consider both its **asset grouping** and **generic data storage** functionalities when integrating Asset Collections into your projects.
+Although the name "Asset Collection" emphasizes its asset-related role, its metadata-centric design supports a broader application. You should consider both its **asset grouping** and **generic data storage** functionalities when integrating Asset Collections into your projects.
 
 ### Purpose and Flexibility
 
 1. **Asset Management**:  
-   Asset Collections group and manage multiple assets such as images, models, and textures required for virtual environments. This many-to-one relationship is defined at the asset level, where a single AssetCollection can hold multiple associated assets, but an asset is tied to only one AssetCollection.
+   Asset Collections group and manage multiple assets such as images, models, and textures required for virtual environments. This many-to-one relationship is defined at the asset level, where a single Asset Collection can hold multiple associated assets, but an asset is tied to only one Asset Collection.
 
 2. **Data Storage**:  
    Asset Collections also store non-asset data through their metadata. This enables applications to store key-value pairs in a flexible manner, making Asset Collections suitable for systems that do not rely on physical assets.
@@ -194,11 +193,11 @@ Although the name "AssetCollection" emphasizes its asset-related role, its metad
 ### Key Features
 
 * **Metadata Usage**:  
-  The Metadata property of an AssetCollection allows developers to store structured data as key-value pairs. This is particularly useful for features that require hierarchical or relational data structures.
+  The Metadata property of an Asset Collection allows developers to store structured data as key-value pairs. This is particularly useful for features that require hierarchical or relational data structures.
 
 * **Example Use Case**:  
   The **Comments System** illustrates the flexibility of Asset Collections for data storage.  
-  * **Original Comments**: Represented by an AssetCollection with the type COMMENT_CONTAINER. The comment's message is stored within the metadata.
+  * **Original Comments**: Represented by an Asset Collection with the type COMMENT_CONTAINER. The comment's message is stored within the metadata.
 
   * **Replies**: Stored as child Asset Collections with the type COMMENT, linked to the parent comment via the ParentId field. This establishes a hierarchy for threaded discussions.
 
@@ -215,13 +214,13 @@ Asset collections allow users to group related assets for easier management. For
 
 ## Relating Asset Collections to CSP Components
 
-In CSP, assets and AssetCollection are associated with various components within a space to bring visual and interactive elements to life. Components are the building blocks of a space, and assets such as 3D models, textures, and sounds are attached to these components to create rich, immersive environments.
+In CSP, assets and Asset Collection are associated with various components within a space to bring visual and interactive elements to life. Components are the building blocks of a space, and assets such as 3D models, textures, and sounds are attached to these components to create rich, immersive environments.
 
 ### How Asset Collections Are Linked to Specific Components Within a Space
 
-AssetCollection in CSP do not inherently reference the assets associated with them. Instead, an Asset explicitly stores the Id of the AssetCollection it belongs to. This design ensures a unidirectional relationship where assets know their respective AssetCollection, but Asset Collections do not maintain references to their associated assets.
+Asset Collection in CSP do not inherently reference the assets associated with them. Instead, an Asset explicitly stores the Id of the Asset Collection it belongs to. This design ensures a unidirectional relationship where assets know their respective Asset Collection, but Asset Collections do not maintain references to their associated assets.
 
-When assets are linked to components, the Asset Id and AssetCollection Id are passed to the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
+When assets are linked to components, the Asset Id and Asset Collection Id are passed to the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
 
 **Examples of Component Types That Can Use Assets**
 
@@ -243,14 +242,15 @@ Querying for assets in CSP allows users to search, retrieve, and manage assets w
 
 To manage assets effectively, you can query them based on different attributes like asset type, collection, or space. CSP offers several built-in methods to handle these queries.
 
-1. **Querying All Assets in a Collection:** This method retrieves all assets within a specific AssetCollection. It is useful when you need to list or manage all assets grouped together in the same collection.
+1. **Querying All Assets in a Collection:** This method retrieves all assets within a specific Asset Collection. It is useful when you need to list or manage all assets grouped together in the same collection.
 
    **Example Code:**
 
 ```
 csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-AssetSystem->GetAssetsInCollection(AssetCollection, [&](const csp::systems::AssetsResult& Result) {
+AssetSystem->GetAssetsInCollection(AssetCollection, [&](const csp::systems::AssetsResult& Result)
+{
     if(Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
         for (size_t i = 0; i < Result.GetAssets().Size(); i++)
@@ -274,7 +274,8 @@ This code queries all assets in a specified asset collection and prints their na
 ```
 csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-AssetSystem->GetAssetById(AssetCollectionId, AssetId, [&](const csp::systems::AssetResult& Result) {
+AssetSystem->GetAssetById(AssetCollectionId, AssetId, [&](const csp::systems::AssetResult& Result)
+{
     if(Result.GetResultCode() == csp::systems::EResultCode::Success)
     {
         cout << "Asset found: " << Result.GetAsset().Name << " (ID: " << Result.GetAsset().Id << ")" << endl; }
@@ -291,13 +292,13 @@ AssetSystem->GetAssetById(AssetCollectionId, AssetId, [&](const csp::systems::As
 
 There are other methods for querying Assets, which are 
 
-* GetAssetsCollectionById**:** Retrieves an AssetCollection by its unique ID. It is useful when you know the specific ID of the AssetCollection you want to access.
+* `GetAssetsCollectionById` Retrieves an Asset Collection by its unique ID. It is useful when you know the specific ID of the Asset Collection you want to access.
 
-* GetAssetsCollectionByName: It retrieves an AssetCollection by its name. It is ideal for situations where collections are named logically for easier identification.
+* `GetAssetsCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
 
-* FindAssetsCollections: It allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
+* `FindAssetsCollections` Allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
 
-* GetAssetsByCollectionIds: It retrieves all assets associated with an array of AssetCollection IDs. It facilitates batch queries for multiple collections at once.
+* `GetAssetsByCollectionIds` Retrieves all assets associated with an array of Asset Collection IDs. It facilitates batch queries for multiple collections at once.
 
 ## Thumbnail Generation
 
@@ -381,25 +382,23 @@ In this topic, you learned how to manage assets in the Connected Spaces Platform
 
 * **Asset Collections:** Asset Collections are versatile tools for grouping assets or storing generic data. They do not inherently reference the assets associated with them but can be used to organize related data through metadata.
 
-* **Thumbnail Generation:** Thumbnails provide visual references for assets, enhancing search and browsing.
+* **Asset-Component Relationships:** Assets are linked to components like static model components, animated model components, and script components, enabling interactive behavior in spaces.
 
 * **Automated Model Decimation**: This service optimizes large 3D models to improve performance without manual intervention.
-
-* **Asset-Component Relationships:** Assets are linked to components like static models, animated models, and scripts, enabling interactive behavior in spaces.
 
 ### Querying for Assets
 
 CSP provides multiple methods to search for and retrieve assets:
 
-* `GetAssetCollectionById` Retrieve an AssetCollection using its unique ID.
+* `GetAssetCollectionById` Retrieve an Asset Collection using its unique ID.
 
-* `GetAssetCollectionByName` Retrieve an AssetCollection by its name.
+* `GetAssetCollectionByName` Retrieve an Asset Collection by its name.
 
-* `FindAsset Collections` Search for Asset Collections using various criteria.
+* `FindAssetCollections` Search for Asset Collections using various criteria.
 
-* `GetAssetsInCollection` Retrieve all assets in a specific AssetCollection.
+* `GetAssetsInCollection` Retrieve all assets in a specific Asset Collection.
 
-* `GetAssetById` Retrieve a specific asset by its ID and associated AssetCollection ID.
+* `GetAssetById` Retrieve a specific asset by its ID and associated Asset Collection ID.
 
 * `GetAssetsByCollectionIds` Retrieve assets from multiple Asset Collections.
 
@@ -409,7 +408,7 @@ CSP provides multiple methods to search for and retrieve assets:
 
 * **Organize Assets in Collections:** To simplify management and updates, keep related assets in the same collection.
 
-* **Use Precise Queries:** When querying for assets, provide both the AssetCollection Id and Asset Id. This ensures accurate and efficient retrieval.
+* **Use Precise Queries:** When querying for assets, provide both the Asset Collection Id and Asset Id. This ensures accurate and efficient retrieval.
 
 * **Optimize Assets:** Use decimated models and compressed textures to reduce file sizes and improve performance.
 
