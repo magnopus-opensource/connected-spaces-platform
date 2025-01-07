@@ -83,7 +83,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -145,7 +145,7 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

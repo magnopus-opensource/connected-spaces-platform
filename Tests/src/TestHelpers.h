@@ -19,6 +19,7 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
+#include "uuid_v4.h"
 
 #include <chrono>
 #include <functional>
@@ -188,20 +189,12 @@ inline double RandomRangeDouble(double Min, double Max)
 }
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
-inline std::string GetUniqueString(int Length = 16)
+inline std::string GetUniqueString()
 {
-	std::string str;
-	const std::string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	const auto Epoch = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+	const UUIDv4::UUID uuid = uuidGenerator.getUUID();
 
-	for (int i = 0; i < Length / 2; i++)
-	{
-		int RandomNumber = rand();
-		str += Epoch[RandomNumber % Epoch.length()];
-		str += Characters[RandomNumber % Characters.length()];
-	}
-
-	return str;
+	return uuid.str();
 }
 
 inline void LogFatal(std::string Message)

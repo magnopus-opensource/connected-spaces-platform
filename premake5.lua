@@ -49,11 +49,11 @@ solution( "ConnectedSpacesPlatform" )
     -- Visual studio projects
     Project.AddProject()
     
-    if not CSP.IsGeneratingCSharpOnMac() then
-        Tests.AddProject()
-    end
-
     if not CSP.IsWebAssemblyGeneration() then
+
+		if not CSP.IsGeneratingCSharpOnMac() then
+			Tests.AddProject()
+		end
 
         if not CSP.IsGeneratingCPPOnMac() then
             Tests.CSharp.AddProject()

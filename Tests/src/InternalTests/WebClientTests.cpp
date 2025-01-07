@@ -604,7 +604,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 
 	auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	HttpPayload Payload;
 	RunWebClientTest<RetryResponseReceiver>("https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings",

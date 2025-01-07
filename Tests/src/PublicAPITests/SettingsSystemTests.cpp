@@ -80,7 +80,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NDAStatusTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [SetNDATrue] = AWAIT(SettingsSystem, SetNDAStatus, true);
 	EXPECT_EQ(SetNDATrue.GetResultCode(), csp::systems::EResultCode::Success);
@@ -107,7 +107,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, NewsletterStatusTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [SetNewsletterTrue] = AWAIT(SettingsSystem, SetNewsletterStatus, true);
 	EXPECT_EQ(SetNewsletterTrue.GetResultCode(), csp::systems::EResultCode::Success);
@@ -134,7 +134,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RecentSpacesTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [SetRecentSpaces] = AWAIT(SettingsSystem, AddRecentlyVisitedSpace, "RecentSpace");
 	EXPECT_EQ(SetRecentSpaces.GetResultCode(), csp::systems::EResultCode::Success);
@@ -163,7 +163,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, BlockedSpacesTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
@@ -196,7 +196,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, RemoveBlockedSpaceTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	// Clear at start in case another test left something in the list
 	{
 		auto [Result] = AWAIT(SettingsSystem, ClearBlockedSpaces);
@@ -332,7 +332,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Clear at start in case another test left something in the list
 	auto [PreClearBlockedSpaces] = AWAIT(SettingsSystem, ClearBlockedSpaces);
@@ -383,7 +383,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	{
 		csp::systems::FileAssetDataSource AvatarPortrait;
@@ -431,7 +431,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, UpdateAvatarPortraitWithBufferTe
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 
 	auto UploadFilePath		 = std::filesystem::absolute("assets/OKO.png");
@@ -486,7 +486,7 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, AvatarInfoTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto Type					   = csp::systems::AvatarType::Custom;
 	csp::common::String Identifier = "https://notarealweb.site/my_cool_avatar.glb";

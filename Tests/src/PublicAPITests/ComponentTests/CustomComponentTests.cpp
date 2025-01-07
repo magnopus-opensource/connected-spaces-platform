@@ -94,7 +94,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
