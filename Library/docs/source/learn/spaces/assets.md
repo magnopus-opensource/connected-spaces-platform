@@ -1,28 +1,10 @@
 # Assets
 
+Assets form the foundation of any Space in CSP. They bring visual elements to life and add interactivity. For instance, 3D models represent objects within a Space, video assets can be applied to surfaces to create dynamic visuals, and scripts control how objects behave when users interact with them. By combining various assets, you can create detailed environments where users can explore, interact, and engage with each other in real-time.
+
 In CSP, an **asset** is any resource used to create and enhance virtual spaces. Assets include files such as 3D models, textures, images, sounds, and scripts. These assets are essential for building immersive, interactive environments.
 
 An asset is a digital resource that adds content or functionality to a space. In CSP, assets help define the visual and interactive elements, enabling users to populate spaces with engaging components. Assets are managed by **asset collections**, making it easier to organize and access them.
-
-## The Role of Assets in Building Rich, Interactive Spaces
-
-Assets form the foundation of any Space in CSP. They bring visual elements to life and add interactivity. For instance, 3D models represent objects within a Space, video assets can be applied to surfaces to create dynamic visuals, and scripts control how objects behave when users interact with them. By combining various assets, you can create detailed environments where users can explore, interact, and engage with each other in real-time.
-
-## Types of Assets and Their Use Cases
-
-There are several types of assets in CSP, each with specific uses:
-
-* **3D Models:** These are used to create objects and environments in a space. They can be static or animated, allowing for dynamic interactions.
-
-* **Images:** These assets are used for displaying visuals like posters or other images on surfaces, such as quad meshes, within a Space.
-
-* **Sounds:** Audio files, such as music or sound effects, enhance the immersive experience by adding an auditory layer to the environment.
-
-* **Scripts:** These assets define how objects behave or interact with users. Scripts control everything from simple button actions to complex animations.
-
-Each asset type plays a unique role in crafting an interactive, engaging space that responds to user input and enhances the overall experience.
-
-## Overview of Asset Management and Its Importance in a Multi-user Environment
 
 Asset management in CSP involves organizing, creating, and updating assets to ensure they are readily available for use in spaces. In multi-users environments, managing assets efficiently is critical for smooth, synchronized gameplay. When assets are properly managed:
 
@@ -31,6 +13,18 @@ Asset management in CSP involves organizing, creating, and updating assets to en
 * **Consistency is Ensured:** Proper asset management ensures that all users experience the same space with identical assets, preventing discrepancies in what users see and interact with.
 
 * **Scalability Increases:** Managing assets well allows for easier updates and expansions, enabling the space to grow without performance issues.
+
+## Types of Assets and Their Use Cases
+
+There are many types of assets in CSP, each with specific uses. Some of the more common asset types are:
+
+* **3D Models:** These are used to create objects and environments in a space. They can be static or animated, allowing for dynamic interactions.
+
+* **Images:** These assets are used for displaying visuals like posters or other images on surfaces, such as quad meshes, within a Space.
+
+* **Sounds:** Audio files, such as music or sound effects, enhance the immersive experience by adding an auditory layer to the environment.
+
+Each asset type plays a unique role in crafting an interactive, engaging space that responds to user input and enhances the overall experience.
 
 ## Asset CRUD Operations
 
@@ -183,19 +177,19 @@ void DeleteAsset() {
 
 The DeleteAsset() function removes an asset from the collection. After the function is executed, the user is informed whether the deletion was successful or if there were any issues.
 
-## Understanding AssetCollections
+## Understanding Asset Collections
 
 An AssetCollection in CSP serves a dual purpose. While its name suggests it might exclusively represent a collection of assets, it is also designed to store **generic data** in the MCS.
 
-Although the name "AssetCollection" emphasizes its asset-related role, its metadata-centric design supports a broader application. You should consider both its **asset grouping** and **generic data storage** functionalities when integrating AssetCollections into your projects.
+Although the name "AssetCollection" emphasizes its asset-related role, its metadata-centric design supports a broader application. You should consider both its **asset grouping** and **generic data storage** functionalities when integrating Asset Collections into your projects.
 
 ### Purpose and Flexibility
 
 1. **Asset Management**:  
-   AssetCollections group and manage multiple assets such as images, models, and textures required for virtual environments. This many-to-one relationship is defined at the asset level, where a single AssetCollection can hold multiple associated assets, but an asset is tied to only one AssetCollection.
+   Asset Collections group and manage multiple assets such as images, models, and textures required for virtual environments. This many-to-one relationship is defined at the asset level, where a single AssetCollection can hold multiple associated assets, but an asset is tied to only one AssetCollection.
 
 2. **Data Storage**:  
-   AssetCollections also store non-asset data through their metadata. This enables applications to store key-value pairs in a flexible manner, making AssetCollections suitable for systems that do not rely on physical assets.
+   Asset Collections also store non-asset data through their metadata. This enables applications to store key-value pairs in a flexible manner, making Asset Collections suitable for systems that do not rely on physical assets.
 
 ### Key Features
 
@@ -203,10 +197,10 @@ Although the name "AssetCollection" emphasizes its asset-related role, its metad
   The Metadata property of an AssetCollection allows developers to store structured data as key-value pairs. This is particularly useful for features that require hierarchical or relational data structures.
 
 * **Example Use Case**:  
-  The **Comments System** illustrates the flexibility of AssetCollections for data storage.  
+  The **Comments System** illustrates the flexibility of Asset Collections for data storage.  
   * **Original Comments**: Represented by an AssetCollection with the type COMMENT_CONTAINER. The comment's message is stored within the metadata.
 
-  * **Replies**: Stored as child AssetCollections with the type COMMENT, linked to the parent comment via the ParentId field. This establishes a hierarchy for threaded discussions.
+  * **Replies**: Stored as child Asset Collections with the type COMMENT, linked to the parent comment via the ParentId field. This establishes a hierarchy for threaded discussions.
 
 ### How Asset Collections are Used to Group and Manage Multiple Assets
 
@@ -217,6 +211,93 @@ Asset collections allow users to group related assets for easier management. For
 * **Upload and Update Assets:** When updates are needed, asset collections simplify the process by allowing bulk operations. For instance, if several assets need updates, developers can easily identify and modify them within their collection.
 
 * **Query Assets:** When querying for assets, users can search within specific collections rather than across all assets, improving performance and reducing complexity.
+
+
+## Relating Asset Collections to CSP Components
+
+In CSP, assets and AssetCollection are associated with various components within a space to bring visual and interactive elements to life. Components are the building blocks of a space, and assets such as 3D models, textures, and sounds are attached to these components to create rich, immersive environments.
+
+### How Asset Collections Are Linked to Specific Components Within a Space
+
+AssetCollection in CSP do not inherently reference the assets associated with them. Instead, an Asset explicitly stores the Id of the AssetCollection it belongs to. This design ensures a unidirectional relationship where assets know their respective AssetCollection, but Asset Collections do not maintain references to their associated assets.
+
+When assets are linked to components, the Asset Id and AssetCollection Id are passed to the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
+
+**Examples of Component Types That Can Use Assets**
+
+Various components within a CSP space rely on assets to function. Here are a few examples:
+
+* **Static Models:** These are 3D objects that remain stationary in a space. Assets such as 3D geometry and textures are linked to static model components to define their appearance.
+
+* **Skeletal Models:** CSP supports skeletal meshes, which include a rigged skeleton structure for animation. The Skeletal Animation data is stored within the same .glb file as the skeletal mesh. Unlike traditional animation systems, CSP does not support keyframe animation on transforms. Instead, skeletal animation relies entirely on the rig structure within the mesh file.
+
+* **Sound Components:** Sound components enable audio interactions within a space. These components use Asset Ids to reference sound files stored in blob storage.
+
+* **Script Components:** Interactive elements, such as buttons, often use scripts that are associated with assets to define their behavior and interaction logic.
+
+## Querying for Assets
+
+Querying for assets in CSP allows users to search, retrieve, and manage assets within a space. CSP provides flexible methods for querying assets based on various criteria, ensuring that users can efficiently locate the assets they need.
+
+### Methods for Querying Assets Within a Space
+
+To manage assets effectively, you can query them based on different attributes like asset type, collection, or space. CSP offers several built-in methods to handle these queries.
+
+1. **Querying All Assets in a Collection:** This method retrieves all assets within a specific AssetCollection. It is useful when you need to list or manage all assets grouped together in the same collection.
+
+   **Example Code:**
+
+```
+csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+AssetSystem->GetAssetsInCollection(AssetCollection, [&](const csp::systems::AssetsResult& Result) {
+    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        for (size_t i = 0; i < Result.GetAssets().Size(); i++)
+        {
+            cout << "Asset found: " << Result.GetAssets()[i].Name << " (ID: " << Result.GetAssets()[i].Id << ")" << endl;
+        }
+    }
+    else
+    {
+        cout << "Error retrieving assets: " << Result.GetResponseBody() << endl;
+    }
+});
+```
+
+This code queries all assets in a specified asset collection and prints their names and IDs. It provides a straightforward way to retrieve and manage assets associated with a particular collection.
+
+2. **Querying a Single Asset by ID:** This method retrieves a specific asset using its unique ID. It is ideal when you need to access a known asset quickly.
+
+   **Example:** 
+
+```
+csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+AssetSystem->GetAssetById(AssetCollectionId, AssetId, [&](const csp::systems::AssetResult& Result) {
+    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        cout << "Asset found: " << Result.GetAsset().Name << " (ID: " << Result.GetAsset().Id << ")" << endl; }
+    else
+    {
+        cout << "Error retrieving asset: " << Result.GetResponseBody() << endl;
+    }
+});
+```
+
+   This function takes an asset ID and retrieves the corresponding asset. It is helpful when you already know the asset ID and need to fetch its details.
+
+3. **Querying Assets by Criteria:** To search for assets based on multiple attributes (e.g., type, tag, or collection), use GetAssetsByCriteria. This function provides flexibility by allowing additional arguments for filtering.  
+
+There are other methods for querying Assets, which are 
+
+* GetAssetsCollectionById**:** Retrieves an AssetCollection by its unique ID. It is useful when you know the specific ID of the AssetCollection you want to access.
+
+* GetAssetsCollectionByName: It retrieves an AssetCollection by its name. It is ideal for situations where collections are named logically for easier identification.
+
+* FindAssetsCollections: It allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
+
+* GetAssetsByCollectionIds: It retrieves all assets associated with an array of AssetCollection IDs. It facilitates batch queries for multiple collections at once.
 
 ## Thumbnail Generation
 
@@ -272,13 +353,11 @@ Both methods allow for efficient thumbnail generation, ensuring that assets in t
 
 In summary, thumbnail generation enhances the user experience by making assets visually accessible and easier to manage in large-scale projects.
 
-## Automated Model Decimation Service
+## Automated Model Decimation
 
-### Introduction to the Automated Model Decimation Service
+If your use case includes the usage of Magnopus Cloud Services (MCS), the **automated model decimation service** in MCS reduces the complexity of 3D models by lowering their polygon count and compressing their textures. This process is known as **model decimation** and helps optimize asset performance without sacrificing visual quality.
 
-The **automated model decimation service** in MCS reduces the complexity of 3D models by lowering their polygon count. This process is known as **model decimation** and helps optimize asset performance without sacrificing visual quality.
-
-Model decimation is crucial in projects that use complex 3D models in a real-time application. The automated decimation service in CSP automatically reduces the size of 3D models, making them more manageable for real-time rendering. This service ensures that the models maintain an acceptable level of detail while reducing the data size, leading to better performance in the virtual space.
+Model decimation is crucial in projects that use complex 3D models in a real-time application. The automated decimation service automatically reduces the size of 3D models, making them more manageable for delivery over the network and enables performant real-time rendering. This service ensures that the models maintain an acceptable level of detail whilst reducing the data size, leading to better performance in the virtual space.
 
 ### Benefits of Model Decimation for Optimizing Asset Performance
 
@@ -292,101 +371,15 @@ Optimizing 3D models through decimation brings several key benefits:
 
 * **Memory Efficiency:** Decimated models take up less memory, making it possible to use more assets without overwhelming the system.
 
-## Relating Asset Collections to CSP Components
-
-In CSP, assets and AssetCollection are associated with various components within a space to bring visual and interactive elements to life. Components are the building blocks of a space, and assets such as 3D models, textures, and sounds are attached to these components to create rich, immersive environments.
-
-### How AssetCollections Are Linked to Specific Components Within a Space
-
-AssetCollection in CSP do not inherently reference the assets associated with them. Instead, an Asset explicitly stores the Id of the AssetCollection it belongs to. This design ensures a unidirectional relationship where assets know their respective AssetCollection, but AssetCollections do not maintain references to their associated assets.
-
-When assets are linked to components, the Asset Id and AssetCollection Id are passed to the component. These identifiers are then used to retrieve the asset data. The asset itself does not store the actual data but provides a **URL** pointing to the asset's storage. The data (such as a 3D model mesh or sound file) is then downloaded directly from the storage.
-
-**Examples of Component Types That Can Use Assets**
-
-Various components within a CSP space rely on assets to function. Here are a few examples:
-
-* **Static Models:** These are 3D objects that remain stationary in a space. Assets such as 3D geometry and textures are linked to static model components to define their appearance.
-
-* **Skeletal Models:** CSP supports skeletal meshes, which include a rigged skeleton structure for animation. The Skeletal Animation data is stored within the same .glb file as the skeletal mesh. Unlike traditional animation systems, CSP does not support keyframe animation on transforms. Instead, skeletal animation relies entirely on the rig structure within the mesh file.
-
-* **Sound Components:** Sound components enable audio interactions within a space. These components use Asset Ids to reference sound files stored in blob storage.
-
-* **Script Components:** Interactive elements, such as buttons, often use scripts that are associated with assets to define their behavior and interaction logic.
-
-## Querying for Assets
-
-Querying for assets in CSP allows users to search, retrieve, and manage assets within a space. CSP provides flexible methods for querying assets based on various criteria, ensuring that users can efficiently locate the assets they need.
-
-### Methods for Querying Assets Within a Space
-
-To manage assets effectively, you can query them based on different attributes like asset type, collection, or space. CSP offers several built-in methods to handle these queries.
-
-1. **Querying All Assets in a Collection:** This method retrieves all assets within a specific AssetCollection. It is useful when you need to list or manage all assets grouped together in the same collection.
-
-   **Example Code:**
-
-```
-csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-
-AssetSystem->GetAssetsInCollection(AssetCollection, [&](const csp::systems::AssetsResult& Result) {
-    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
-    {
-        for (size_t i = 0; i < Result.GetAssets().Size(); i++)
-        {
-            cout << "Asset found: " << Result.GetAssets()[i].Name << " (ID: " << Result.GetAssets()[i].Id << ")" << endl;
-        }
-    }
-    else
-    {
-        cout << "Error retrieving assets: " << Result.GetResponseBody() << endl;
-    }
-    });
-```
-
-This code queries all assets in a specified asset collection and prints their names and IDs. It provides a straightforward way to retrieve and manage assets associated with a particular collection.
-
-2. **Querying a Single Asset by ID:** This method retrieves a specific asset using its unique ID. It is ideal when you need to access a known asset quickly.
-
-   **Example:** 
-
-```
-csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-
-AssetSystem->GetAssetById(AssetCollectionId, AssetId, [&](const csp::systems::AssetResult& Result) {
-    if(Result.GetResultCode() == csp::systems::EResultCode::Success)
-    {
-        cout << "Asset found: " << Result.GetAsset().Name << " (ID: " << Result.GetAsset().Id << ")" << endl; }
-    else
-    {
-        cout << "Error retrieving asset: " << Result.GetResponseBody() << endl;
-    }
-    });
-```
-
-   This function takes an asset ID and retrieves the corresponding asset. It is helpful when you already know the asset ID and need to fetch its details.
-
-3. **Querying Assets by Criteria:** To search for assets based on multiple attributes (e.g., type, tag, or collection), use GetAssetsByCriteria. This function provides flexibility by allowing additional arguments for filtering.  
-
-There are other methods for querying Assets, which are 
-
-* GetAssetsCollectionById**:** Retrieves an AssetCollection by its unique ID. It is useful when you know the specific ID of the AssetCollection you want to access.
-
-* GetAssetsCollectionByName: It retrieves an AssetCollection by its name. It is ideal for situations where collections are named logically for easier identification.
-
-* FindAssetsCollections: It allows for searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
-
-* GetAssetsByCollectionIds: It retrieves all assets associated with an array of AssetCollection IDs. It facilitates batch queries for multiple collections at once.
-
 # Summary and Best Practices
 
 In this topic, you learned how to manage assets in the Connected Spaces Platform (CSP). We covered key topics, including asset CRUD operations, asset collections, thumbnail generation, the automated model decimation service, and how asset collections relate to CSP components. We also explored methods for querying assets and handling multi-users events when assets are updated.
 
-## Recap of Key Concepts
+## Summary
 
 * **Asset CRUD Operations:** Create, read, update, and delete (CRUD) operations allow you to manage assets in a collection efficiently.
 
-* **Asset Collections:** AssetCollections are versatile tools for grouping assets or storing generic data. They do not inherently reference the assets associated with them but can be used to organize related data through metadata.
+* **Asset Collections:** Asset Collections are versatile tools for grouping assets or storing generic data. They do not inherently reference the assets associated with them but can be used to organize related data through metadata.
 
 * **Thumbnail Generation:** Thumbnails provide visual references for assets, enhancing search and browsing.
 
@@ -402,17 +395,17 @@ CSP provides multiple methods to search for and retrieve assets:
 
 * `GetAssetCollectionByName` Retrieve an AssetCollection by its name.
 
-* `FindAssetCollections` Search for AssetCollections using various criteria.
+* `FindAsset Collections` Search for Asset Collections using various criteria.
 
 * `GetAssetsInCollection` Retrieve all assets in a specific AssetCollection.
 
 * `GetAssetById` Retrieve a specific asset by its ID and associated AssetCollection ID.
 
-* `GetAssetsByCollectionIds` Retrieve assets from multiple AssetCollections.
+* `GetAssetsByCollectionIds` Retrieve assets from multiple Asset Collections.
 
 * `GetAssetsByCriteria` Query assets based on attributes such as type, tags, or collection.
 
-## Best Practices for Managing Assets Efficiently in CSP
+## Best Practices for Managing Assets Efficiently
 
 * **Organize Assets in Collections:** To simplify management and updates, keep related assets in the same collection.
 
