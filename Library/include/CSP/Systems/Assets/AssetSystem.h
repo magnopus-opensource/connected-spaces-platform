@@ -57,6 +57,12 @@ CSP_END_IGNORE
 namespace csp::systems
 {
 
+struct DownloadMaterialsJob
+{
+	int AssetsDownloaded = 0;
+	csp::common::Array<GLTFMaterial> Materials;
+};
+
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
 class CSP_API AssetSystem : public SystemBase
@@ -299,6 +305,8 @@ private:
 	csp::services::ApiBase* AssetDetailAPI;
 
 	csp::web::RemoteFileManager* FileManager;
+
+	csp::common::Map<csp::common::String, DownloadMaterialsJob> DownloadMaterialsJobs;
 };
 
 } // namespace csp::systems

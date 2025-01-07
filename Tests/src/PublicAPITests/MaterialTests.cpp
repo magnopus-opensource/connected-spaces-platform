@@ -225,20 +225,52 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 
 	// Ensure we found the right materials
 	std::vector<csp::common::String> MaterialNames {TestMaterialName1, TestMaterialName2, TestMaterialName3};
+	std::vector<csp::common::String> MaterialCollectionIds {
+		CreatedMaterial1.GetMaterialCollectionId(),
+		CreatedMaterial2.GetMaterialCollectionId(),
+		CreatedMaterial3.GetMaterialCollectionId(),
+	};
+	std::vector<csp::common::String> MaterialIds {
+		CreatedMaterial1.GetMaterialId(),
+		CreatedMaterial2.GetMaterialId(),
+		CreatedMaterial3.GetMaterialId(),
+	};
 
 	for (int i = 0; i < FoundMaterials.Size(); ++i)
 	{
-		const csp::common::String& SearchName = FoundMaterials[i].GetName();
+		const csp::common::String& SearchName		  = FoundMaterials[i].GetName();
+		const csp::common::String& SearchCollectionId = FoundMaterials[i].GetMaterialCollectionId();
+		const csp::common::String& SearchId			  = FoundMaterials[i].GetMaterialId();
 
-		auto Found = std::find_if(std::begin(MaterialNames),
-								  std::end(MaterialNames),
-								  [&SearchName](const csp::common::String& Name)
-								  {
-									  return Name == SearchName;
-								  });
+		auto FoundName = std::find_if(std::begin(MaterialNames),
+									  std::end(MaterialNames),
+									  [&SearchName](const csp::common::String& Name)
+									  {
+										  return Name == SearchName;
+									  });
 
 
-		EXPECT_TRUE(Found != MaterialNames.end());
+		EXPECT_TRUE(FoundName != MaterialNames.end());
+
+		auto FoundCollectionId = std::find_if(std::begin(MaterialCollectionIds),
+											  std::end(MaterialCollectionIds),
+											  [&SearchCollectionId](const csp::common::String& CollectionId)
+											  {
+												  return CollectionId == SearchCollectionId;
+											  });
+
+
+		EXPECT_TRUE(FoundCollectionId != MaterialCollectionIds.end());
+
+		auto FoundId = std::find_if(std::begin(MaterialIds),
+									std::end(MaterialIds),
+									[&SearchId](const csp::common::String& Id)
+									{
+										return Id == SearchId;
+									});
+
+
+		EXPECT_TRUE(FoundId != MaterialIds.end());
 	}
 
 	// Cleanup
@@ -279,6 +311,8 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 	GetMaterial(AssetSystem, CreatedMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialId(), FoundMaterial);
 
 	EXPECT_EQ(FoundMaterial.GetName(), CreatedMaterial.GetName());
+	EXPECT_EQ(FoundMaterial.GetMaterialCollectionId(), CreatedMaterial.GetMaterialCollectionId());
+	EXPECT_EQ(FoundMaterial.GetMaterialId(), CreatedMaterial.GetMaterialId());
 
 	// Cleanup
 	DeleteMaterial(AssetSystem, CreatedMaterial);
