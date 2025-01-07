@@ -69,7 +69,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
@@ -329,7 +329,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
@@ -482,7 +482,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

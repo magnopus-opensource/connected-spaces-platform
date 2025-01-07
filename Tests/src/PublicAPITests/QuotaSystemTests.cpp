@@ -96,7 +96,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpacesOwnedByUserTest)
 	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTotalSpacesOwnedByUser, RequestPredicate);
 
@@ -115,7 +115,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetCurrentUserTierTest)
 	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetCurrentUserTier, RequestPredicate);
 
@@ -139,7 +139,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
 														  TierFeatures::OpenAI,
 														  TierFeatures::TicketedSpace};
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeatureProgressForUser, RequestPredicate, TierFeaturesArray);
 
@@ -178,7 +178,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	::Space Space;
@@ -209,7 +209,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureQuota)
 	auto QuotaSystem	 = SystemsManager.GetQuotaSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// test quota queries for basic tier
 	{
@@ -250,7 +250,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
 		   FeatureQuotaInfo(TierFeatures::TicketedSpace, TierNames::Basic, 0, PeriodEnum::Total, false)};
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [Result] = AWAIT_PRE(QuotaSystem, GetTierFeaturesQuota, RequestPredicate, TierNames::Basic);
 
@@ -291,7 +291,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetConcurrentUsersInSpace)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	::Space Space;
@@ -348,7 +348,7 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTotalSpaceSizeinKilobytes)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	::Space Space;

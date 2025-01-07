@@ -68,7 +68,7 @@ CSP_PUBLIC_TEST(CSPEngine, LinkTests, ExternalLinkComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

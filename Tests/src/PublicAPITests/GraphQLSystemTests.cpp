@@ -53,7 +53,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, QueryTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::common::String testQuery = "spaces(pagination:{limit:10,skip:0},filters:{discoverable:false,requiresInvite:true}){itemTotalCount "
 									"items{groupId name discoverable requiresInvite createdAt}}";
@@ -102,7 +102,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunQueryBadInputTest)
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::common::String testQuery = "badQuery";
 	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunQuery, RequestPredicate, testQuery);
@@ -121,7 +121,7 @@ CSP_PUBLIC_TEST(CSPEngine, GraphQLSystemTests, RunRequestBadInputTest)
 	auto SpaceSystem	 = SystemsManager.GetSpaceSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::common::String testQuery = "badRequest";
 	auto [Result]				  = AWAIT_PRE(GraphQLSystem, RunRequest, RequestPredicate, testQuery);

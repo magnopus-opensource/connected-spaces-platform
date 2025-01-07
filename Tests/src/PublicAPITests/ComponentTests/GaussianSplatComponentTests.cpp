@@ -67,7 +67,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -168,7 +168,7 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

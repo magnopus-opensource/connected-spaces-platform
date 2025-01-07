@@ -65,7 +65,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -175,7 +175,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
