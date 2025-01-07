@@ -573,7 +573,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
 	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
+	SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueString().c_str());
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
@@ -646,33 +646,13 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	csp::common::String CreatedUserId;
 
 	// Create new user
-	{
-		auto [Result] = AWAIT_PRE(UserSystem,
-								  CreateUser,
-								  RequestPredicate,
-								  UniqueUserName,
-								  TestDisplayName,
-								  UniqueEmail,
-								  GeneratedTestAccountPassword,
-								  true,
-								  true,
-								  nullptr,
-								  nullptr);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-		const auto& CreatedProfile = Result.GetProfile();
-		CreatedUserId			   = CreatedProfile.UserId;
-
-		EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
-		EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
-		EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
-	}
+	csp::systems::Profile CreatedProfile = CreateTestUser();
+	CreatedUserId						 = CreatedProfile.UserId;
 
 	csp::common::String UserId;
 	LogInAsNewTestUser(UserSystem, UserId);
 
-	// Whilst logged in as default test account attempt (and fail) to delete original user
+	// Whilst logged in as new test account attempt (and fail) to delete original user
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
@@ -682,7 +662,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	LogOut(UserSystem);
 
 	csp::common::String OriginalUserId;
-	LogIn(UserSystem, OriginalUserId, UniqueEmail, GeneratedTestAccountPassword);
+	LogIn(UserSystem, OriginalUserId, CreatedProfile.Email, GeneratedTestAccountPassword);
 
 	// Whilst logged in as created account attempt to delete self
 	{
@@ -712,26 +692,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
 	// Create new user
 	{
-		auto [Result] = AWAIT_PRE(UserSystem,
-								  CreateUser,
-								  RequestPredicate,
-								  nullptr,
-								  nullptr,
-								  UniqueEmail,
-								  GeneratedTestAccountPassword,
-								  false,
-								  true,
-								  nullptr,
-								  nullptr);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-		auto CreatedProfile = Result.GetProfile();
-		CreatedUserId		= CreatedProfile.UserId;
-
-		EXPECT_TRUE(CreatedProfile.UserName.IsEmpty());
-		EXPECT_FALSE(CreatedProfile.DisplayName.IsEmpty());
-		EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
+		csp::systems::Profile CreatedProfile = CreateTestUser();
+		CreatedUserId						 = CreatedProfile.UserId;
 	}
 
 	csp::common::String UserId;
