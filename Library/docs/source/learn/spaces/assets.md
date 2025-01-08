@@ -64,7 +64,7 @@ void CreateAssetCollection(const std::string& AssetCollectionName) {
             if (Result.GetResultCode() == csp::systems::EResultCode::Success)
             {
                 auto AssetCollection = Result.GetAssetCollection();
-                cout << "Created a new Asset Collection named " << AssetCollection.Name << ". ID: " << AssetCollection.Id << endl;
+                cout << "Created a new Asset Collection named " << AssetCollection.Name << ". Id: " << AssetCollection.Id << endl;
             }
             else
             {
@@ -97,7 +97,7 @@ void CreateImageAsset(const std::string& AssetName) {
         {
             auto Asset = Result.GetAsset();
             cout << "Created a new Asset called " << Asset.Name
-            << ". ID: " << Asset.Id << endl;
+            << ". Id: " << Asset.Id << endl;
         }
         else
         {
@@ -108,7 +108,7 @@ void CreateImageAsset(const std::string& AssetName) {
 ```
 
 **Explanation:**  
-This code creates an asset within the existing asset collection. It prompts the user for a name and defines the asset type as `IMAGE`. After creation, the asset's ID and name are displayed to the user.
+This code creates an asset within the existing asset collection. It prompts the user for a name and defines the asset type as `IMAGE`. After creation, the asset's Id and name are displayed to the user.
 
 ### Uploading an Asset
 
@@ -195,7 +195,7 @@ void DeleteAsset() {
     {
         if(Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            cout << "Deleted Asset called " << Asset.Name << ". ID: " << Asset.Id << endl;
+            cout << "Deleted Asset called " << Asset.Name << ". Id: " << Asset.Id << endl;
             CallbackPromise.set_value();
         }
         else
@@ -252,7 +252,7 @@ To manage assets effectively, you can query them based on different attributes l
         {
             for (size_t i = 0; i < Result.GetAssets().Size(); i++)
             {
-                cout << "Asset found: " << Result.GetAssets()[i].Name << " (ID: " << Result.GetAssets()[i].Id << ")" << endl;
+                cout << "Asset found: " << Result.GetAssets()[i].Name << " (Id: " << Result.GetAssets()[i].Id << ")" << endl;
             }
         }
         else
@@ -263,10 +263,10 @@ To manage assets effectively, you can query them based on different attributes l
     ```
     
     **Explanation:**  
-    This code queries all assets in a specified asset collection and prints their names and IDs. It provides a straightforward way to retrieve and manage assets associated with a particular collection.
+    This code queries all assets in a specified asset collection and prints their names and Ids. It provides a straightforward way to retrieve and manage assets associated with a particular collection.
 
-2. **Querying a Single Asset by ID**  
-    This method retrieves a specific asset using its unique ID. It is ideal when you need to access a known asset quickly.
+2. **Querying a Single Asset by Id**  
+    This method retrieves a specific asset using its unique Id. It is ideal when you need to access a known asset quickly.
 
     ```
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
@@ -275,7 +275,7 @@ To manage assets effectively, you can query them based on different attributes l
     {
         if(Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            cout << "Asset found: " << Result.GetAsset().Name << " (ID: " << Result.GetAsset().Id << ")" << endl; }
+            cout << "Asset found: " << Result.GetAsset().Name << " (Id: " << Result.GetAsset().Id << ")" << endl; }
         else
         {
             cout << "Error retrieving asset: " << Result.GetResponseBody() << endl;
@@ -284,20 +284,20 @@ To manage assets effectively, you can query them based on different attributes l
     ```
     
     **Explanation:**  
-    This function takes an asset ID and retrieves the corresponding asset. It is helpful when you already know the asset ID and need to fetch its details.
+    This function takes an asset Id and retrieves the corresponding asset. It is helpful when you already know the asset Id and need to fetch its details.
 
 3. **Querying Assets by Criteria**  
     To search for assets based on multiple attributes (such as type, tag, or collection), use `GetAssetsByCriteria`. This function provides flexibility by allowing additional arguments for filtering.  
 
 There are other methods for querying Assets and Asset Collections, which are:
     
-* `GetAssetCollectionById` Retrieves an Asset Collection by its unique ID. It is useful when you know the specific ID of the Asset Collection you want to access.
+* `GetAssetCollectionById` Retrieves an Asset Collection by its unique Id. It is useful when you know the specific Id of the Asset Collection you want to access.
     
 * `GetAssetCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
     
-* `FindAssetCollections` Facilitates searching AssetsCollections by various criteria. It supports more flexible queries compared to direct ID or name lookups.
+* `FindAssetCollections` Facilitates searching AssetsCollections by various criteria. It supports more flexible queries compared to direct Id or name lookups.
     
-* `GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection IDs. It facilitates batch queries for multiple collections at once.
+* `GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection Ids. It facilitates batch queries for multiple collections at once.
 
 ## Automated Model Decimation
 
@@ -332,7 +332,7 @@ In this topic, you learned how to manage assets in the Connected Spaces Platform
 
 CSP provides multiple methods to search for and retrieve assets:
 
-* `GetAssetCollectionById` Retrieve an Asset Collection using its unique ID.
+* `GetAssetCollectionById` Retrieve an Asset Collection using its unique Id.
 
 * `GetAssetCollectionByName` Retrieve an Asset Collection by its name.
 
@@ -340,7 +340,7 @@ CSP provides multiple methods to search for and retrieve assets:
 
 * `GetAssetsInCollection` Retrieve all assets in a specific Asset Collection.
 
-* `GetAssetById` Retrieve a specific asset by its ID and associated Asset Collection ID.
+* `GetAssetById` Retrieve a specific asset by its Id and associated Asset Collection Id.
 
 * `GetAssetsByCollectionIds` Retrieve assets from multiple Asset Collections.
 
