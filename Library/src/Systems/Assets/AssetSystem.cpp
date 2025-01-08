@@ -27,10 +27,6 @@
 
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
-#include "Common/UUIDGenerator.h"
-
-#include <future>
-#include <thread>
 
 using namespace csp;
 using namespace csp::common;
@@ -1060,8 +1056,8 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				return;
 			}
 
-			csp::common::String JobUUID				 = GenerateUUID().c_str();
-			DownloadMaterialsJobs[JobUUID].Materials = csp::common::Array<GLTFMaterial>(AssetsToDownload);
+			auto DownloadedMaterials = std::make_shared<csp::common::Array<GLTFMaterial>>(AssetsToDownload);
+			auto AssetsDownloaded	 = std::make_shared<size_t>();
 
 			// 3. Download asset data for each material asset
 			for (size_t i = 0; i < Assets.Size(); ++i)
@@ -1070,10 +1066,16 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				csp::common::String AssetId			  = Assets[i].Id;
 
 				auto DownloadMaterialCallback
-					= [this, Callback, AssetsToDownload, JobUUID, i, AssetCollectionId, AssetId](const AssetDataResult& DownloadResult)
+					= [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials, AssetsDownloaded](
+						  const AssetDataResult& DownloadResult)
 				{
 					if (DownloadResult.GetResultCode() != EResultCode::Success)
 					{
+						if (DownloadResult.GetResultCode() == EResultCode::Failed)
+						{
+							(*AssetsDownloaded)++;
+						}
+
 						Callback(GLTFMaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
 						return;
 					}
@@ -1084,25 +1086,21 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 					GLTFMaterial FoundMaterial("", AssetCollectionId, AssetId);
 					bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
 
-					DownloadMaterialsJob& Job = DownloadMaterialsJobs[JobUUID];
+					(*AssetsDownloaded)++;
 
 					if (Deserialized == false)
 					{
 						CSP_LOG_ERROR_MSG("Failed to deserialize material");
-						Job.AssetsDownloaded++;
 						return;
 					}
 
-					Job.Materials[i] = FoundMaterial;
-					Job.AssetsDownloaded++;
+					(*DownloadedMaterials)[i] = FoundMaterial;
 
-					if (Job.AssetsDownloaded >= AssetsToDownload)
+					if ((*AssetsDownloaded) >= AssetsToDownload)
 					{
 						// Finish
 						GLTFMaterialsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-						Result.SetGLTFMaterials(Job.Materials);
-
-						DownloadMaterialsJobs.Remove(JobUUID);
+						Result.SetGLTFMaterials((*DownloadedMaterials));
 
 						Callback(Result);
 					}
