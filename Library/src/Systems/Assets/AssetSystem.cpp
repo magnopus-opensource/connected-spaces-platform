@@ -438,8 +438,12 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
 												const Optional<Array<String>>& Tags,
 												AssetCollectionResultCallback Callback)
 {
-	auto PrototypeInfo
-		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, Tags);
+	auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId,
+											AssetCollection.ParentId,
+											AssetCollection.Name,
+											NewMetadata,
+											AssetCollection.Type,
+											Tags.HasValue() ? Tags : AssetCollection.Tags);
 
 	services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);

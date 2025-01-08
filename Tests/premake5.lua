@@ -24,6 +24,7 @@ if not Tests then
         externalincludedirs { 
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
+            "%{wks.location}/ThirdParty/uuid-v4",
         }   
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"

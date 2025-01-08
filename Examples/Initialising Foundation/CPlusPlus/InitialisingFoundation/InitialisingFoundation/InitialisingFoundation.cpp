@@ -11,7 +11,7 @@
 using namespace std;
 
 
-const oly_common::String Tenant = "FOUNDATION_HELLO_WORLD";
+const oly_common::String Tenant = "CSP_HELLO_WORLD";
 
 
 int main()
