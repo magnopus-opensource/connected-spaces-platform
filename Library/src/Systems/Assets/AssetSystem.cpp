@@ -28,9 +28,6 @@
 // StringFormat needs to be here due to clashing headers
 #include "CSP/Common/StringFormat.h"
 
-#include <future>
-#include <thread>
-
 using namespace csp;
 using namespace csp::common;
 
@@ -1059,55 +1056,58 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				return;
 			}
 
-			csp::common::Array<GLTFMaterial> SpaceMaterials(AssetsToDownload);
-			size_t AssetsDownloaded = 0;
-			std::promise<void> CallbackPromise;
-			std::future<void> CallbackFuture = CallbackPromise.get_future();
+			auto DownloadedMaterials = std::make_shared<csp::common::Array<GLTFMaterial>>(AssetsToDownload);
+			auto AssetsDownloaded	 = std::make_shared<size_t>();
 
 			// 3. Download asset data for each material asset
-			auto DownloadMaterialCallback
-				= [this, Callback, &AssetsToDownload, &AssetsDownloaded, &SpaceMaterials, &CallbackPromise](const AssetDataResult& DownloadResult)
-			{
-				if (DownloadResult.GetResultCode() != EResultCode::Success)
-				{
-					Callback(GLTFMaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
-					return;
-				}
-
-				// Convert material json to material
-				const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
-
-				GLTFMaterial FoundMaterial;
-				bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
-
-				if (Deserialized == false)
-				{
-					CSP_LOG_ERROR_MSG("Failed to deserialize material");
-					AssetsDownloaded++;
-					return;
-				}
-
-				SpaceMaterials[AssetsDownloaded] = FoundMaterial;
-				AssetsDownloaded++;
-
-				if (AssetsDownloaded >= AssetsToDownload)
-				{
-					// Finish
-					GLTFMaterialsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
-					Result.SetGLTFMaterials(SpaceMaterials);
-
-					Callback(Result);
-					CallbackPromise.set_value();
-				}
-			};
-
 			for (size_t i = 0; i < Assets.Size(); ++i)
 			{
+				csp::common::String AssetCollectionId = Assets[i].AssetCollectionId;
+				csp::common::String AssetId			  = Assets[i].Id;
+
+				auto DownloadMaterialCallback
+					= [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials, AssetsDownloaded](
+						  const AssetDataResult& DownloadResult)
+				{
+					if (DownloadResult.GetResultCode() != EResultCode::Success)
+					{
+						if (DownloadResult.GetResultCode() == EResultCode::Failed)
+						{
+							(*AssetsDownloaded)++;
+						}
+
+						Callback(GLTFMaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
+						return;
+					}
+
+					// Convert material json to material
+					const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
+
+					GLTFMaterial FoundMaterial("", AssetCollectionId, AssetId);
+					bool Deserialized = json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
+
+					(*AssetsDownloaded)++;
+
+					if (Deserialized == false)
+					{
+						CSP_LOG_ERROR_MSG("Failed to deserialize material");
+						return;
+					}
+
+					(*DownloadedMaterials)[i] = FoundMaterial;
+
+					if ((*AssetsDownloaded) >= AssetsToDownload)
+					{
+						// Finish
+						GLTFMaterialsResult Result(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode());
+						Result.SetGLTFMaterials((*DownloadedMaterials));
+
+						Callback(Result);
+					}
+				};
+
 				DownloadAssetData(Assets[i], DownloadMaterialCallback);
 			}
-
-			// We have to wait so this function doesn't exit and destroy "AssetsDownloaded"
-			CallbackFuture.wait();
 		};
 
 		GetAssetsByCriteria(AssetCollectionIds, nullptr, nullptr, csp::common::Array {EAssetType::MATERIAL}, GetAssetsCB);
@@ -1149,7 +1149,7 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 			// 3. Download material
 			const Asset& FoundAsset = CreateAssetResult.GetAsset();
 
-			auto DownloadMaterialCallback = [this, Callback, FoundAsset](const AssetDataResult& DownloadResult)
+			auto DownloadMaterialCallback = [this, Callback, FoundAssetCollection, FoundAsset](const AssetDataResult& DownloadResult)
 			{
 				if (DownloadResult.GetResultCode() != EResultCode::Success)
 				{
@@ -1160,7 +1160,7 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 				const char* MaterialData = static_cast<const char*>(DownloadResult.GetData());
 
 				// Convert material json to material
-				GLTFMaterial FoundMaterial;
+				GLTFMaterial FoundMaterial("", FoundAssetCollection.Id, FoundAsset.Id);
 				bool Deserialized = csp::json::JsonDeserializer::Deserialize(MaterialData, FoundMaterial);
 
 				if (Deserialized == false)
