@@ -25,6 +25,8 @@ if not Tests then
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
             "%{wks.location}/ThirdParty/uuid-v4",
+			"%{wks.location}/ThirdParty/tiny-process-library/install/include",
+			"%{wks.location}/MultiplayerTestRunner/include"
         }   
         
         debugdir "%{prj.location}\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}"
@@ -133,6 +135,7 @@ if not Tests then
             }
         filter {}
 
+		links { "%{wks.location}/ThirdParty/tiny-process-library/install/lib/tiny-process-library" }
             
         filter "configurations:*DLL*"
             links {
@@ -161,12 +164,16 @@ if not Tests then
         -- The tests project depend on ConnectedSpacesPlatform first finishing in order to be able to guarantee the DLLs exist before we copy them
         -- NOTE: This will slow builds down as it effectively means we need to build ConnectedSpacesPlatform twice in a linear fashion, so we need to address this in a better manner long-term.
         dependson {"ConnectedSpacesPlatform"}
-            
+		-- We call the multiplayer test runner in our tests
+		dependson {"MultiplayerTestRunner"}
+
         filter "platforms:x64"
             postbuildcommands {
-                "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}"
+                "{COPY} %{wks.location}\\Library\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}", -- CSP
+				"{COPY} %{wks.location}\\MultiplayerTestRunner\\Binaries\\%{cfg.platform}\\%{cfg.buildcfg}\\ %{cfg.buildtarget.directory}" --MultiplayerTestRunner
             }
         filter {}
+
     end
 end
 

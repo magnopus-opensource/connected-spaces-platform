@@ -15,9 +15,31 @@
  */
 
 #pragma once
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+
+namespace
+{
+
+/*
+ * Construct a new string from the input that is lower cased (via std::tolower)
+ */
+std::string ToLowerCaseString(const std::string& input)
+{
+	std::string output = input;
+	std::transform(input.cbegin(),
+				   input.cend(),
+				   output.begin(),
+				   [](const unsigned char c)
+				   {
+					   return std::tolower(c);
+				   });
+	return output;
+}
+
+} // namespace
 
 namespace MultiplayerTestRunner::TestIdentifiers
 {
@@ -61,7 +83,7 @@ inline TestIdentifier StringToTestIdentifier(std::string identifier)
 						   TestIdentifierStringMap.end(),
 						   [&identifier](const auto& pair)
 						   {
-							   return Utils::ToLowerCaseString(pair.second) == Utils::ToLowerCaseString(identifier);
+							   return ToLowerCaseString(pair.second) == ToLowerCaseString(identifier);
 						   });
 
 	if (it != TestIdentifierStringMap.end())
