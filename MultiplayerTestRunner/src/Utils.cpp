@@ -84,17 +84,4 @@ void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI)
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
 }
 
-std::string ToLowerCaseString(const std::string& input)
-{
-	std::string output = input;
-	std::transform(input.cbegin(),
-				   input.cend(),
-				   output.begin(),
-				   [](const unsigned char c)
-				   {
-					   return std::tolower(c);
-				   });
-	return output;
-}
-
 } // namespace Utils

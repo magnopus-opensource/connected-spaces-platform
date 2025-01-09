@@ -29,6 +29,7 @@
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/SpaceEntityKeys.h"
+#include "MultiplayerTestRunnerProcess.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
@@ -38,6 +39,7 @@
 #include "gtest/gtest.h"
 #include <CSP/Multiplayer/Components/ImageSpaceComponent.h>
 #include <CSP/Multiplayer/Components/LightSpaceComponent.h>
+#include <array>
 #include <chrono>
 #include <filesystem>
 #include <thread>
@@ -842,6 +844,109 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateCreatorAvatarTest)
 }
 #endif
 
+
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CREATE_MANY_AVATAR_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
+{
+	/*
+	 * At time of writing (2025) this may seem a bit out of place.
+	 * There is no special need to test avatar creation in this multiprocess way.
+	 * It's only that creating avatars was used as the most basic example to
+	 * develop the multiplayer test runner, hence this test being here, just
+	 * as an exerciser.
+	 */
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	auto ThisProcessTestUser = CreateTestUser();
+
+	// Log in
+	LogIn(UserSystem, UserId, ThisProcessTestUser.Email, GeneratedTestAccountPassword);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Unlisted,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Enter space
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	auto TestUser1 = CreateTestUser();
+	auto TestUser2 = CreateTestUser();
+
+	MultiplayerTestRunnerProcess CreateAvatarRunner
+		= MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
+			  .SetSpaceId(Space.Id.c_str())
+			  .SetLoginEmail(TestUser1.Email.c_str())
+			  .SetPassword(GeneratedTestAccountPassword)
+			  .SetTimeoutInSeconds(60);
+
+	MultiplayerTestRunnerProcess CreateAvatarRunner2
+		= MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_AVATAR)
+			  .SetSpaceId(Space.Id.c_str())
+			  .SetLoginEmail(TestUser2.Email.c_str())
+			  .SetPassword(GeneratedTestAccountPassword)
+			  .SetTimeoutInSeconds(60);
+
+
+	std::array<MultiplayerTestRunnerProcess, 2> Runners		   = {CreateAvatarRunner, CreateAvatarRunner2};
+	std::array<std::future<void>, 2> ReadyForAssertionsFutures = {Runners[0].ReadyForAssertionsFuture(), Runners[1].ReadyForAssertionsFuture()};
+
+	// Start all the MultiplayerTestRunners
+	for (auto& Runner : Runners)
+	{
+		Runner.StartProcess();
+	}
+
+	// Wait until the processes have reached the point where we're ready to assert
+	for (auto& Future : ReadyForAssertionsFutures)
+	{
+		// Just being safe here, so we dont hang forever in case of catastrophe.
+		auto Status = Future.wait_for(std::chrono::seconds(60));
+
+		if (Status == std::future_status::timeout)
+		{
+			FAIL("CreateAvatar process timed out before it was ready for assertions.");
+		}
+	}
+
+	// We must tick the entities or our local CSP instance wont know about the changes the other processes have made.
+	EntitySystem->TickEntities();
+
+	// Check there are 2 avatars in the space.
+	// (The two external processes added one each, our process here in the test project just joined the room, didnt add an avatar)
+	EXPECT_EQ(EntitySystem->GetNumAvatars(), 2);
+
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_AVATAR_MOVEMENT_DIRECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, AvatarMovementDirectionTest)
