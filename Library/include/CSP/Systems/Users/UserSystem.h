@@ -20,6 +20,7 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
@@ -251,9 +252,24 @@ public:
 	/// @param Callback StringResultCallback : callback that contains the checkout session URL of the tier
 	CSP_ASYNC_RESULT void GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Callback);
 
+	// Callback to receive access permission changes Data when a message is sent.
+	typedef std::function<void(const csp::multiplayer::UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
+
+	/// @brief Sets a callback for an access control changed event.
+	/// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
+	CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
+
+	/// @brief Registers the system to listen for the named event.
+	void RegisterSystemCallback() override;
+	/// @brief Deregisters the system from listening for the named event.
+	void DeregisterSystemCallback() override;
+	/// @brief Deserialises the event values of the system.
+	/// @param EventValues std::vector<signalr::value> : event values to deserialise
+	CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+
 private:
 	UserSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	UserSystem(csp::web::WebClient* InWebClient);
+	UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
 	~UserSystem();
 
 	[[nodiscard]]
@@ -277,6 +293,8 @@ private:
 	csp::common::String ThirdPartyAuthStateId;
 	csp::common::String ThirdPartyAuthRedirectURL;
 	EThirdPartyAuthenticationProviders ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+
+	UserPermissionsChangedCallbackHandler UserPermissionsChangedCallback;
 };
 
 } // namespace csp::systems

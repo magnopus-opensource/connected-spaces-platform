@@ -2196,6 +2196,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
@@ -2257,7 +2258,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 		AssetDetailBlobChangedCallbackCalled = true;
 	};
 
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+	AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -2302,6 +2303,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -2352,7 +2354,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 		AssetDetailBlobChangedCallbackCalled = true;
 	};
 
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+	AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
 	ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
 	ReplicatedValue Param2 = "";
@@ -2360,13 +2362,13 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	ReplicatedValue Param4 = "";
 	ReplicatedValue Param5 = "";
 
-	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
-										 {Param1, Param2, Param3, Param4, Param5},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 EXPECT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("AssetDetailBlobChanged",
+									   {Param1, Param2, Param3, Param4, Param5},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   EXPECT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
 	WaitForCallback(AssetDetailBlobChangedCallbackCalled);

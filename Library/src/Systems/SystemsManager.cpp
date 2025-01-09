@@ -157,6 +157,11 @@ csp::multiplayer::MultiplayerConnection* SystemsManager::GetMultiplayerConnectio
 	return MultiplayerConnection;
 }
 
+csp::multiplayer::EventBus* SystemsManager::GetEventBus()
+{
+	return EventBus;
+}
+
 SystemsManager::SystemsManager()
 	: WebClient(nullptr)
 	, UserSystem(nullptr)
@@ -176,6 +181,7 @@ SystemsManager::SystemsManager()
 	, QuotaSystem(nullptr)
 	, OrganizationSystem(nullptr)
 	, MultiplayerConnection(nullptr)
+	, EventBus(nullptr)
 	, SpaceEntitySystem(nullptr)
 	, SequenceSystem(nullptr)
 	, HotspotSequenceSystem(nullptr)
@@ -202,11 +208,12 @@ void SystemsManager::CreateSystems()
 	ScriptSystem->Initialise();
 
 	MultiplayerConnection = CSP_NEW csp::multiplayer::MultiplayerConnection();
+	EventBus			  = MultiplayerConnection->EventBusPtr;
 
 	AnalyticsSystem		  = CSP_NEW csp::systems::AnalyticsSystem();
-	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient);
+	UserSystem			  = CSP_NEW csp::systems::UserSystem(WebClient, EventBus);
 	SpaceSystem			  = CSP_NEW csp::systems::SpaceSystem(WebClient);
-	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient);
+	AssetSystem			  = CSP_NEW csp::systems::AssetSystem(WebClient, EventBus);
 	AnchorSystem		  = CSP_NEW csp::systems::AnchorSystem(WebClient);
 	PointOfInterestSystem = CSP_NEW csp::systems::PointOfInterestInternalSystem(WebClient);
 	SettingsSystem		  = CSP_NEW csp::systems::SettingsSystem(WebClient);
@@ -217,8 +224,8 @@ void SystemsManager::CreateSystems()
 	ECommerceSystem		  = CSP_NEW csp::systems::ECommerceSystem(WebClient);
 	QuotaSystem			  = CSP_NEW csp::systems::QuotaSystem(WebClient);
 	OrganizationSystem	  = CSP_NEW csp::systems::OrganizationSystem(WebClient);
-	SequenceSystem		  = CSP_NEW csp::systems::SequenceSystem(WebClient);
-	HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem);
+	SequenceSystem		  = CSP_NEW csp::systems::SequenceSystem(WebClient, EventBus);
+	HotspotSequenceSystem = CSP_NEW csp::systems::HotspotSequenceSystem(SequenceSystem, SpaceSystem, EventBus);
 	SpaceEntitySystem	  = CSP_NEW csp::multiplayer::SpaceEntitySystem(MultiplayerConnection);
 }
 
@@ -227,6 +234,8 @@ void SystemsManager::DestroySystems()
 	// Systems must be shut down in reverse order to CreateSystems() to ensure that any
 	// dependencies continue to exist until each system is successfully shut down.
 	CSP_DELETE(SpaceEntitySystem);
+	CSP_DELETE(HotspotSequenceSystem);
+	CSP_DELETE(SequenceSystem);
 	CSP_DELETE(OrganizationSystem);
 	CSP_DELETE(QuotaSystem);
 	CSP_DELETE(ECommerceSystem);
@@ -238,12 +247,11 @@ void SystemsManager::DestroySystems()
 	CSP_DELETE(PointOfInterestSystem);
 	CSP_DELETE(AnchorSystem);
 	CSP_DELETE(AssetSystem);
+	CSP_DELETE(SpaceSystem);
+	CSP_DELETE(UserSystem);
 	CSP_DELETE(AnalyticsSystem);
 	CSP_DELETE(MultiplayerConnection);
 	CSP_DELETE(ScriptSystem);
-	CSP_DELETE(SpaceSystem);
-	CSP_DELETE(UserSystem);
-	CSP_DELETE(HotspotSequenceSystem);
 
 	CSP_DELETE(WebClient);
 	CSP_DELETE(LogSystem);
