@@ -15,6 +15,7 @@
  */
 
 #include "Awaitable.h"
+#include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "SpaceSystemTestHelpers.h"
@@ -410,6 +411,105 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 				RemainingMaterial,
 				csp::systems::EResultCode::Failed);
 
+	DeleteSpace(SpaceSystem, Space.Id);
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_MATERIALEVENTTEST_TEST
+
+CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = ::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+
+	// Log in
+	csp::common::String UserId;
+	LogIn(UserSystem, UserId);
+
+	// Create space to associate a material with
+	::Space Space;
+	CreateDefaultTestSpace(SpaceSystem, Space);
+
+	// Enter space so we can get the material events
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	GLTFMaterial CreatedMaterial;
+
+	// Create material and listen for event
+	{
+		bool CallbackCalled = false;
+
+		auto CB = [&CallbackCalled, &CreatedMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+		{
+			EXPECT_EQ(Params.MaterialCollectionId, CreatedMaterial.GetMaterialCollectionId());
+			EXPECT_EQ(Params.MaterialId, CreatedMaterial.GetMaterialId());
+
+			EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Created);
+
+			CallbackCalled = true;
+		};
+
+		Connection->SetMaterialChangedCallback(CB);
+
+		// Create a material associated with the space
+		CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+		WaitForCallback(CallbackCalled);
+
+		EXPECT_TRUE(CallbackCalled);
+	}
+
+	// Update material and listen for event
+	{
+		bool CallbackCalled = false;
+
+		auto CB = [&CallbackCalled, &CreatedMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+		{
+			EXPECT_EQ(Params.MaterialCollectionId, CreatedMaterial.GetMaterialCollectionId());
+			EXPECT_EQ(Params.MaterialId, CreatedMaterial.GetMaterialId());
+
+			EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Updated);
+
+			CallbackCalled = true;
+		};
+
+		Connection->SetMaterialChangedCallback(CB);
+
+		CreatedMaterial.SetAlphaCutoff(1);
+		UpdateMaterial(AssetSystem, CreatedMaterial);
+		WaitForCallback(CallbackCalled);
+
+		EXPECT_TRUE(CallbackCalled);
+	}
+
+	// Delete material and listen for event
+	{
+		bool CallbackCalled = false;
+
+		auto CB = [&CallbackCalled, &CreatedMaterial](const csp::multiplayer::MaterialChangedParams& Params)
+		{
+			EXPECT_EQ(Params.MaterialCollectionId, CreatedMaterial.GetMaterialCollectionId());
+			EXPECT_EQ(Params.MaterialId, CreatedMaterial.GetMaterialId());
+
+			EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Deleted);
+
+			CallbackCalled = true;
+		};
+
+		Connection->SetMaterialChangedCallback(CB);
+
+		DeleteMaterial(AssetSystem, CreatedMaterial);
+		WaitForCallback(CallbackCalled);
+
+		EXPECT_TRUE(CallbackCalled);
+	}
+
+	// Cleanup
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }

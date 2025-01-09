@@ -374,6 +374,11 @@ void MultiplayerConnection::SetHotspotSequenceChangedCallback(HotspotSequenceCha
 	HotspotSequenceChangedCallback = Callback;
 }
 
+void MultiplayerConnection::SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback)
+{
+	MaterialChangedCallback = Callback;
+}
+
 void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
 	if (Connection == nullptr || !Connected)
@@ -409,14 +414,30 @@ void MultiplayerConnection::StartEventMessageListening()
 
 		if (EventType == "AssetDetailBlobChanged")
 		{
-			if (!AssetDetailBlobChangedCallback)
+			if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
 			{
 				return;
 			}
 
 			AssetChangedEventDeserialiser Deserialiser;
 			Deserialiser.Parse(EventValues);
-			AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
+
+			const AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();
+
+			if (AssetDetailBlobChangedCallback)
+			{
+				AssetDetailBlobChangedCallback(AssetParams);
+			}
+
+			if (AssetParams.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+			{
+				MaterialChangedParams MaterialParams;
+				MaterialParams.ChangeType			= AssetParams.ChangeType;
+				MaterialParams.MaterialCollectionId = AssetParams.AssetCollectionId;
+				MaterialParams.MaterialId			= AssetParams.AssetId;
+
+				MaterialChangedCallback(MaterialParams);
+			}
 		}
 		else if (EventType == "ConversationSystem")
 		{
