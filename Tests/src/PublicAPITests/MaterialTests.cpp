@@ -377,7 +377,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 	::Space Space;
 	CreateDefaultTestSpace(SpaceSystem, Space);
 
-	// Create 3 materials
+	// Create 2 materials
 	constexpr const char* TestMaterialName1 = "TestMaterial1";
 	GLTFMaterial CreatedMaterial1;
 	CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, CreatedMaterial1);
