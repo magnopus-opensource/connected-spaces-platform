@@ -60,8 +60,8 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 through internal CSP infrastructure.*/
 
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
 	/*Steps needed to be performed before running this test are:
 
@@ -157,12 +157,13 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 }
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_BY_VARIANT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_BY_VARIANT_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationByVariantTest)
 {
 	/*Steps needed to be performed before running this test are:
 
-	1. Create a space (Add to Shopify Creds)
+	1. Create a space (Add to Shopify Creds) // FIXM OR: I am questioning whether this will ever be automatable, and therefore the point of keeping
+	this kind of test.
 	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
 		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
 		{
@@ -254,8 +255,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 }
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_CHECKOUT_INFORMATION_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -314,8 +315,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCheckoutInformationTest)
 }
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATEANDGETCART_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_CREATEANDGETCART_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -421,8 +422,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetCartBadInputTest)
 
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDCARTLINES_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -512,8 +513,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
 }
 
 #endif
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_UPDATECARTLINES_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -634,8 +635,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
 
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_DELETECARTLINES_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -748,8 +749,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
 
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDSHOPIFYSTORE_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_ADDSHOPIFYSTORE_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
@@ -813,8 +814,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
 }
 #endif
 
-#if RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETSHOPIFYSTORES_TEST
-CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GETSHOPIFYSTORES_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 {
 	SetRandSeed();
 	/*Steps needed to be performed before running this test are:
