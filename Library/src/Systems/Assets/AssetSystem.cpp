@@ -1057,6 +1057,7 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 			}
 
 			// These are shared references to prevent going out of scope between callbacks
+			// Note: The callbacks ARE called on the main thread
 			auto DownloadedMaterials = std::make_shared<csp::common::Array<GLTFMaterial>>(AssetsToDownload);
 			auto AssetsDownloaded	 = std::make_shared<size_t>();
 			auto Failed				 = std::make_shared<bool>();
