@@ -1316,11 +1316,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 }
 #endif
 
-// TODO: Re-instate test
-// Removing until we have a proper fix for https://magnopus.atlassian.net/browse/OB-329
-/*
 #if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_MODIFY_EXISTING_SCRIPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 {
 	SetRandSeed();
 
@@ -1341,8 +1338,15 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ModifyExistingScriptTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr,
-Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// we'll be using this in a few places below as part of the test, so we declare it upfront
 	const std::string ScriptText = R"xx(
@@ -1369,10 +1373,10 @@ Space);
 	// For our first phase of this script test, we simply an object with a script component, and assign it
 	// a valid script, tell CHS about it and then bail out of the connection
 	{
-		const csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [Object] = Awaitable(&SpaceEntitySystem::CreateObject, EntitySystem, ObjectName, ObjectTransform).Await();
-		ScriptSpaceComponent* ScriptComponent	 = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
+		const csp::common::String ObjectName  = "Object 1";
+		SpaceTransform ObjectTransform		  = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+		auto [Object]						  = Awaitable(&SpaceEntitySystem::CreateObject, EntitySystem, ObjectName, ObjectTransform).Await();
+		ScriptSpaceComponent* ScriptComponent = static_cast<ScriptSpaceComponent*>(Object->AddComponent(ComponentType::ScriptData));
 
 		ScriptComponent->SetScriptSource(csp::common::String(ScriptText.c_str()));
 		Object->QueueUpdate();
@@ -1387,23 +1391,25 @@ Space);
 	bool EntityHasBeenRecreated = false;
 	// we're gonna wanna wait till the entity is created before we can do our test
 	EntitySystem->SetEntityCreatedCallback(
-	[&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* Object)
-	{
-		EntityHasBeenRecreated = true;
-	});
+		[&EntityHasBeenRecreated](csp::multiplayer::SpaceEntity* Object)
+		{
+			EntityHasBeenRecreated = true;
+		});
 
 	// spin till we recreate the entity from phase 1 locally, having received it back from CHS
-	while(EntityHasBeenRecreated == false) {}
+	while (EntityHasBeenRecreated == false)
+	{
+	}
 
 	// interesting part of phase 2 begins!
 	{
 		csp::multiplayer::SpaceEntity* Object = EntitySystem->GetEntityByIndex(0);
 		// grab the script component we created in phase 1 (we should make this kind of thing easier)
 		const csp::common::Array<ComponentBase*>& Components = *Object->GetComponents()->Values();
-		ScriptSpaceComponent* ScriptComponent = nullptr;
-		for(size_t i = 0; Components.Size(); i++)
+		ScriptSpaceComponent* ScriptComponent				 = nullptr;
+		for (size_t i = 0; Components.Size(); i++)
 		{
-			if(Components[i]->GetComponentType() == csp::multiplayer::ComponentType::ScriptData)
+			if (Components[i]->GetComponentType() == csp::multiplayer::ComponentType::ScriptData)
 			{
 				ScriptComponent = dynamic_cast<ScriptSpaceComponent*>(Components[i]);
 				break;
@@ -1426,6 +1432,5 @@ Space);
 	LogOut(UserSystem);
 }
 #endif
-*/
 
 } // namespace

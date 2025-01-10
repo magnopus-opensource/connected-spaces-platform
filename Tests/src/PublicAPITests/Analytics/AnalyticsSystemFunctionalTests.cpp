@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*#include "AnalyticsSystemTestHelpers.h"
+
+#include "AnalyticsSystemTestHelpers.h"
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
@@ -25,8 +26,8 @@
 #include "gtest/gtest.h"
 
 
- #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_MACRO_LOG_METRIC_TEST
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
+#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_MACRO_LOG_METRIC_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 {
 	auto& SystemsManager				  = csp::systems::SystemsManager::Get();
 	csp::systems::AnalyticsSystem* System = SystemsManager.GetAnalyticsSystem();
@@ -60,7 +61,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, MacroLogMetricTest)
 #endif
 
 
-#if RUN_ANALYTICSSYSTEM_UA_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_TESTS || RUN_ANALYTICSSYSTEM_UA_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 {
 	auto& SystemsManager				  = csp::systems::SystemsManager::Get();
@@ -114,4 +115,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemTests, UATest)
 	csp::CSPFoundation::Tick();
 }
 #endif
-*/

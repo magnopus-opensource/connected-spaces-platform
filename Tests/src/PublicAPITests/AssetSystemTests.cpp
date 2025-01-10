@@ -1103,10 +1103,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 #endif
 
 
-// TODO: Fix this!
-// Disabled as for some reason it is causing C# tests failures ONLY on TC. This will be investigated in a separate ticket
-#if false
-	#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETS_FROM_MULTIPLE_ASSET_COLLECTIONS_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETS_FROM_MULTIPLE_ASSET_COLLECTIONS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectionsTest)
 {
 	SetRandSeed();
@@ -1141,19 +1138,27 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceType::Private, nullptr, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	csp::systems::AssetCollection FirstAssetCollection;
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueFirstAssetCollectionName, nullptr, nullptr, FirstAssetCollection);
 
 	csp::systems::Asset FirstAsset;
-	CreateAsset(AssetSystem, FirstAssetCollection, UniqueFirstAssetName, nullptr, FirstAsset);
+	CreateAsset(AssetSystem, FirstAssetCollection, UniqueFirstAssetName, nullptr, nullptr, FirstAsset);
 
 	csp::systems::AssetCollection SecondAssetCollection;
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSecondAssetCollectionName, nullptr, nullptr, SecondAssetCollection);
 
 	csp::systems::Asset SecondAsset;
-	CreateAsset(AssetSystem, SecondAssetCollection, UniqueSecondAssetName, nullptr, SecondAsset);
+	CreateAsset(AssetSystem, SecondAssetCollection, UniqueSecondAssetName, nullptr, nullptr, SecondAsset);
 
 	//{
 	//	// try to search but don't specify any asset collection Ids, only add one Asset Id though
@@ -1190,7 +1195,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	{
 		// search by both asset collection Ids and only one Asset Id
 		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
-		csp::common::Array<csp::common::String> AssetIds			 = {SecondAsset.Id};
+		csp::common::Array<csp::common::String> AssetIds		   = {SecondAsset.Id};
 		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, AssetIds, nullptr, nullptr);
 		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		EXPECT_EQ(Result.GetAssets().Size(), 1);
@@ -1203,11 +1208,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 	DeleteAssetCollection(AssetSystem, FirstAssetCollection);
 	DeleteAssetCollection(AssetSystem, SecondAssetCollection);
 
-	DeleteSpace(SpaceSystem, Space);
+	DeleteSpace(SpaceSystem, Space.Id);
 
 	LogOut(UserSystem);
 }
-	#endif
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_AS_FILE_TEST

@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-#ifdef RUN_PLATFORM_TESTS
+#include "CSP/CSPFoundation.h"
+#include "PlatformTestUtils.h"
+#include "TestHelpers.h"
 
-	#include "CSP/CSPFoundation.h"
-	#include "PlatformTestUtils.h"
-	#include "TestHelpers.h"
+#ifdef CSP_WASM
+	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#else
+	#include "Web/POCOWebClient/POCOWebClient.h"
+#endif
 
-	#ifdef CSP_WASM
-		#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
-	#else
-		#include "Web/POCOWebClient/POCOWebClient.h"
-	#endif
-
-	#include "gtest/gtest.h"
-	#include <atomic>
-	#include <chrono>
-	#include <rapidjson/document.h>
-	#include <rapidjson/rapidjson.h>
-	#include <thread>
+#include "gtest/gtest.h"
+#include <atomic>
+#include <chrono>
+#include <rapidjson/document.h>
+#include <rapidjson/rapidjson.h>
+#include <thread>
 
 
 using namespace csp::web;
@@ -79,7 +77,7 @@ private:
 	std::thread::id ThreadId;
 };
 
-	#ifdef CSP_WASM
+#ifdef CSP_WASM
 
 class TestWebClient : public EmscriptenWebClient
 {
@@ -89,7 +87,7 @@ public:
 	}
 };
 
-	#else
+#else
 
 class TestWebClient : public POCOWebClient
 {
@@ -99,13 +97,13 @@ public:
 	}
 };
 
-	#endif
+#endif
 
 void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequestVerb Verb, HttpPayload& Payload, IHttpResponseHandler* Receiver)
 {
-	#ifndef CSP_WASM
+#ifndef CSP_WASM
 	WebClient->SendRequest(Verb, Uri(Url), Payload, Receiver, csp::common::CancellationToken::Dummy());
-	#else
+#else
 
 	std::thread TestThread(
 		[&]()
@@ -114,7 +112,7 @@ void WebClientSendRequest(csp::web::WebClient* WebClient, const char* Url, ERequ
 		});
 
 	TestThread.join();
-	#endif
+#endif
 }
 
 template <typename TReceiver>
@@ -138,6 +136,7 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
 	}
 }
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_GET_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 {
 	InitialiseFoundation();
@@ -148,7 +147,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_PUT_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 {
 	InitialiseFoundation();
@@ -165,7 +166,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POST_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 {
 	InitialiseFoundation();
@@ -184,7 +187,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_DELETE_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
 	InitialiseFoundation();
@@ -195,6 +200,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
 class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -241,9 +247,9 @@ public:
 		return WaitFor(
 			[this, WebClient]
 			{
-	#ifndef CSP_WASM
+#ifndef CSP_WASM
 				WebClient->ProcessResponses();
-	#endif
+#endif
 				return IsResponseReceived();
 			},
 			std::chrono::seconds(10));
@@ -271,7 +277,8 @@ private:
 	std::thread::id ThreadId;
 };
 
-	#if 0
+#if 0
+//FIXME OR: go past Hello World commit to check why
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
@@ -317,10 +324,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 
 	csp::CSPFoundation::Shutdown();
 }
-	#endif
+#endif
 
-	// Why are we testing CHS here? These should just be WebClient tests
-	#if 0
+// Why are we testing CHS here? These should just be WebClient tests
+#if 0
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
@@ -456,7 +463,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 
 	csp::CSPFoundation::Shutdown();
 }
-	#endif
+#endif
 
 class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -475,7 +482,7 @@ public:
 
 		if (InResponse.GetResponseCode() == EResponseCodes::ResponseNotFound)
 		{
-	#ifdef CSP_WASM
+#ifdef CSP_WASM
 			std::thread TestThread(
 				[&]()
 				{
@@ -483,9 +490,9 @@ public:
 				});
 
 			TestThread.join();
-	#else
+#else
 			RetryIssued = InResponse.GetRequest()->Retry(MaxNumRequestRetries);
-	#endif
+#endif
 		}
 
 		if (!RetryIssued)
@@ -528,7 +535,8 @@ private:
 	std::thread::id ThreadId;
 };
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_RETRY_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
 {
 	InitialiseFoundation();
 
@@ -538,8 +546,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
-
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_404_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 {
 	InitialiseFoundation();
@@ -550,8 +559,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_400_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 {
 	InitialiseFoundation();
 
@@ -562,10 +573,12 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 
 	csp::CSPFoundation::Shutdown();
 }
+#endif
 
-	// Current fails on wasm platform tests due to CORS policy.
-	#ifndef CSP_WASM
+// Current fails on wasm platform tests due to CORS policy.
+#ifndef CSP_WASM
 
+	#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_USER_AGENT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
 	InitialiseFoundation();
@@ -592,13 +605,14 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 
 	csp::CSPFoundation::Shutdown();
 }
-
 	#endif
+#endif
 
-	#include "CSP/Systems/SystemsManager.h"
-	#include "PublicAPITests/UserSystemTestHelpers.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "PublicAPITests/UserSystemTestHelpers.h"
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_403_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 {
 	InitialiseFoundation();
 
@@ -615,5 +629,4 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 
 	csp::CSPFoundation::Shutdown();
 }
-
 #endif

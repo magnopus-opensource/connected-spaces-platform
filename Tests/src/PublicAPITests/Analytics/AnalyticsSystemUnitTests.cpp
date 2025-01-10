@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/*#include "AnalyticsSystemTestHelpers.h"
+#include "AnalyticsSystemTestHelpers.h"
 #include "CSP/Systems/Analytics/AnalyticsProvider.h"
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
@@ -26,7 +26,7 @@
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_METRIC_TEST
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 {
 	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
@@ -60,7 +60,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_MULTIPLE_METRIC_TEST
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMultipleMetricTest)
 {
 	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
@@ -147,7 +147,7 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, DeregisterProviderTest)
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_MULTIPLE_THREADS_TEST
-CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, MultipleThreadsTest)
 {
 	auto* AnalyticsSystem = csp::systems::SystemsManager::Get().GetAnalyticsSystem();
 
@@ -306,4 +306,3 @@ CSP_PUBLIC_TEST(CSPEngine, AnalyticsSystemUnitTests, UATooManyParamTest)
 	EXPECT_EQ(ExpectedEventString, EventString);
 }
 #endif
-*/
