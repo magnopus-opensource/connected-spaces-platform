@@ -51,6 +51,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 {
 	// Initialise
@@ -75,7 +76,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 	// Logout
 	LogOut(UserSystem);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_RECEIVE_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 {
 	// Initialise
@@ -100,3 +103,4 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 	// Logout
 	LogOut(UserSystem);
 }
+#endif
