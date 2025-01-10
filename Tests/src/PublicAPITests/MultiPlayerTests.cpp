@@ -1253,7 +1253,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
-    float TestTime = 0;
+    long long TestTime = 0;
 
     // Interrupt connection here
     while (!Interrupted && TestTime < 60)

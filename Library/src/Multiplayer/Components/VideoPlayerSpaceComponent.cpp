@@ -210,7 +210,7 @@ void VideoPlayerSpaceComponent::SetVideoPlayerSourceType(VideoPlayerSourceType V
 
 uint16_t VideoPlayerSpaceComponent::GetMeshComponentId() const
 {
-    return GetIntegerProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId));
+	return static_cast<uint16_t>(GetIntegerProperty(static_cast<uint16_t>(VideoPlayerPropertyKeys::MeshComponentId)));
 }
 
 void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
