@@ -277,18 +277,17 @@ private:
 	std::thread::id ThreadId;
 };
 
-#if 0
-//FIXME OR: go past Hello World commit to check why
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POLLING_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
-	DefaultWebClientFactory Factory;
+	// DefaultWebClientFactory Factory;
 	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
 	{
-		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-internal.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
-		EXPECT_TRUE(WebClient != nullptr);
+		// WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-internal.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
+		// EXPECT_TRUE(WebClient != nullptr);
 
 		HttpPayload Payload;
 
@@ -304,7 +303,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 		// in the receiver above using the std::thread::id)
 		bool AsyncResponse = false;
 
-		WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &Receiver, AsyncResponse);
+		/*WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &Receiver, AsyncResponse);
 
 		if (Receiver.WaitForResponse(WebClient))
 		{
@@ -316,7 +315,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 				EXPECT_TRUE(Receiver.GetAccessToken().length() > 0);
 			}
 		}
-		else
+		else*/
 		{
 			FAIL() << "Response timeout" << std::endl;
 		}
@@ -327,19 +326,19 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 #endif
 
 // Why are we testing CHS here? These should just be WebClient tests
-#if 0
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_AUTHORIZATION_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientAuthorizationTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
-	DefaultWebClientFactory Factory;
-	WebClientLoginResponseReceiver LoginReceiver;
+	// DefaultWebClientFactory Factory;
+	// WebClientLoginResponseReceiver LoginReceiver;
 
-	// Make sure to specify custom allocator
-	using EastlString = eastl::basic_string<char, csp::memory::EAStlAllocator>;
+	//// Make sure to specify custom allocator
+	// using EastlString = eastl::basic_string<char, csp::memory::EAStlAllocator>;
 
-	WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
-	EXPECT_TRUE(WebClient != nullptr);
+	// WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
+	// EXPECT_TRUE(WebClient != nullptr);
 
 	// Login
 	{
@@ -352,21 +351,21 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 
 		Payload.SetContent(JsonDoc);
 
-		WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &LoginReceiver);
+		// WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &LoginReceiver);
 
-		// Sleep thread until response is received
-		if (LoginReceiver.WaitForResponse())
-		{
-			bool ResponseIsValid = LoginReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
-			EXPECT_TRUE(ResponseIsValid);
+		//// Sleep thread until response is received
+		// if (LoginReceiver.WaitForResponse())
+		//{
+		//	bool ResponseIsValid = LoginReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
+		//	EXPECT_TRUE(ResponseIsValid);
 
-			if (ResponseIsValid)
-			{
-				EXPECT_TRUE(LoginReceiver.GetAccessToken().length() > 0);
-				EXPECT_TRUE(LoginReceiver.GetUserId().length() > 0);
-			}
-		}
-		else
+		//	if (ResponseIsValid)
+		//	{
+		//		EXPECT_TRUE(LoginReceiver.GetAccessToken().length() > 0);
+		//		EXPECT_TRUE(LoginReceiver.GetUserId().length() > 0);
+		//	}
+		//}
+		// else
 		{
 			FAIL() << "Response timeout" << std::endl;
 		}
@@ -379,19 +378,19 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 
 		// We're deliberately not setting the Auth Bearer token here to check response is 'Unauthorized'
 
-		EastlString GroupsApiString;
-		GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
+		// EastlString GroupsApiString;
+		// GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
 
-		WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
+		// WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
 
-		// Sleep thread until response is received
-		if (GroupsReceiver.WaitForResponse())
-		{
-			// Expect to be told we're not authorized
-			bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseUnauthorized;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
+		//// Sleep thread until response is received
+		// if (GroupsReceiver.WaitForResponse())
+		//{
+		//	// Expect to be told we're not authorized
+		//	bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseUnauthorized;
+		//	EXPECT_TRUE(ResponseIsValid);
+		// }
+		// else
 		{
 			FAIL() << "Response timeout" << std::endl;
 		}
@@ -402,24 +401,24 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 		ResponseReceiver GroupsReceiver;
 		HttpPayload Payload;
 
-		// Use the valid Auth Bearer token this time
-		EastlString BearerString;
-		BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
-		Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
+		//// Use the valid Auth Bearer token this time
+		// EastlString BearerString;
+		// BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
+		// Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
 
-		EastlString GroupsApiString;
-		GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
+		// EastlString GroupsApiString;
+		// GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
 
-		WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
+		// WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
 
-		// Sleep thread until response is received
-		if (GroupsReceiver.WaitForResponse())
-		{
-			// Response should be 'OK' now we are using a valid token
-			bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
+		//// Sleep thread until response is received
+		// if (GroupsReceiver.WaitForResponse())
+		//{
+		//	// Response should be 'OK' now we are using a valid token
+		//	bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
+		//	EXPECT_TRUE(ResponseIsValid);
+		// }
+		// else
 		{
 			FAIL() << "Response timeout" << std::endl;
 		}
@@ -432,30 +431,30 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 
 		Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json-patch+json"));
 
-		// Need to use valid Auth Bearer token to log out
-		EastlString BearerString;
-		BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
-		Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
+		//// Need to use valid Auth Bearer token to log out
+		// EastlString BearerString;
+		// BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
+		// Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
 
-		// Set userId as logout body
-		rapidjson::Document JsonDoc(rapidjson::kObjectType);
-		rapidjson::Value UserIdValue(LoginReceiver.GetUserId().c_str(), JsonDoc.GetAllocator());
-		JsonDoc.AddMember("userId", UserIdValue, JsonDoc.GetAllocator());
-		Payload.SetContent(JsonDoc);
+		//// Set userId as logout body
+		// rapidjson::Document JsonDoc(rapidjson::kObjectType);
+		// rapidjson::Value UserIdValue(LoginReceiver.GetUserId().c_str(), JsonDoc.GetAllocator());
+		// JsonDoc.AddMember("userId", UserIdValue, JsonDoc.GetAllocator());
+		// Payload.SetContent(JsonDoc);
 
-		EastlString LogoutApiString;
-		LogoutApiString.sprintf("api/v1/users/logout");
+		// EastlString LogoutApiString;
+		// LogoutApiString.sprintf("api/v1/users/logout");
 
-		WebClient->SendRequest(ERequestVerb::Post, Uri(LogoutApiString.c_str()), Payload, &LogoutReceiver);
+		// WebClient->SendRequest(ERequestVerb::Post, Uri(LogoutApiString.c_str()), Payload, &LogoutReceiver);
 
-		// Sleep thread until response is received
-		if (LogoutReceiver.WaitForResponse())
-		{
-			// Response should be 'NoContent'
-			bool ResponseIsValid = LogoutReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseNoContent;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
+		//// Sleep thread until response is received
+		// if (LogoutReceiver.WaitForResponse())
+		//{
+		//	// Response should be 'NoContent'
+		//	bool ResponseIsValid = LogoutReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseNoContent;
+		//	EXPECT_TRUE(ResponseIsValid);
+		// }
+		// else
 		{
 			FAIL() << "Response timeout" << std::endl;
 		}
