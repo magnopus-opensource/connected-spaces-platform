@@ -1505,7 +1505,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, InteractiveMovementTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
-CSP_PUBLIC_TEST(DISABLE_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
