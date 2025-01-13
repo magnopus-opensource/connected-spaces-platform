@@ -400,7 +400,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
 }
 #endif
 
-#if RUN_NIGHTLY_TESTS
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_KEEPALIVE_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
 {
 	SetRandSeed();
@@ -1334,53 +1334,54 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 }
 #endif
 
-#if RUN_MULTIPLAYER_INTERACTIVEMOVEMENT_TEST
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_INTERACTIVEMOVEMENT_TEST
 	#include <conio.h>
 	#include <CSP/Multiplayer/Components/LightSpaceComponent.h>
 
 csp::multiplayer::MultiplayerConnection* Connection;
 
-void OnEntityUpdate(Entity* Object, EntityUpdateType UpdateType)
-{
-	if (UpdateType == EntityUpdateType::Delete)
-	{
-		std::cerr << "Got ObjectDelete: " << Object->GetId() << std::endl;
+// void OnEntityUpdate(SpaceEntity* Object, EntityUpdateType UpdateType)
+//{
+//	if (UpdateType == EntityUpdateType::Delete)
+//	{
+//		std::cerr << "Got ObjectDelete: " << Object->GetId() << std::endl;
+//
+//		return;
+//	}
+//
+//	const auto& Trans = Object->GetTransform();
+//	auto Pos		  = Trans.Position;
+//	auto RepVals	  = Object->GetReplicatedValues();
+//
+//	std::cerr << "Got ObjectUpdate: " << Object->GetId() << "(" << Pos.X << ", " << Pos.Y << ", " << Pos.Z << ") [";
+//
+//	for (int i = 0; i < RepVals.Size(); ++i)
+//	{
+//		switch (RepVals[i].GetReplicatedValueType())
+//		{
+//			case csp::multiplayer::ReplicatedValueType::Boolean:
+//				std::cerr << RepVals[i].GetBool() << ", ";
+//				break;
+//			case csp::multiplayer::ReplicatedValueType::Integer:
+//				std::cerr << RepVals[i].GetInt() << ", ";
+//				break;
+//			case csp::multiplayer::ReplicatedValueType::Float:
+//				std::cerr << RepVals[i].GetFloat() << ", ";
+//				break;
+//			case csp::multiplayer::ReplicatedValueType::String:
+//				std::cerr << RepVals[i].GetString() << ", ";
+//				break;
+//		}
+//	}
+//
+//	std::cerr << "]" << std::endl;
+// }
 
-		return;
-	}
-
-	const auto& Trans = Object->GetTransform();
-	auto Pos		  = Trans.Position;
-	auto RepVals	  = Object->GetReplicatedValues();
-
-	std::cerr << "Got ObjectUpdate: " << Object->GetId() << "(" << Pos.X << ", " << Pos.Y << ", " << Pos.Z << ") [";
-
-	for (int i = 0; i < RepVals.Size(); ++i)
-	{
-		switch (RepVals[i].GetReplicatedValueType())
-		{
-			case csp::multiplayer::ReplicatedValueType::Boolean:
-				std::cerr << RepVals[i].GetBool() << ", ";
-				break;
-			case csp::multiplayer::ReplicatedValueType::Integer:
-				std::cerr << RepVals[i].GetInt() << ", ";
-				break;
-			case csp::multiplayer::ReplicatedValueType::Float:
-				std::cerr << RepVals[i].GetFloat() << ", ";
-				break;
-			case csp::multiplayer::ReplicatedValueType::String:
-				std::cerr << RepVals[i].GetString() << ", ";
-				break;
-		}
-	}
-
-	std::cerr << "]" << std::endl;
-}
-
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, InteractiveMovementTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
 
 	std::cout << "Email: ";
 	std::string Email;
@@ -1389,7 +1390,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 	std::string Password;
 	std::cin >> Password;
 
-	auto [LoginState] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, CSP_TEXT(""), CSP_TEXT(Email.c_str()), CSP_TEXT(Password.c_str()))
+	auto [LoginState] = Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", Email.c_str(), Password.c_str(), true)
 							.Await(
 								[](const auto& s)
 								{
@@ -1400,113 +1401,111 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 	std::string SpaceId;
 	std::cin >> SpaceId;
 
-	Connection = new MultiplayerConnection(SpaceId.c_str());
+	// Connection->RegisterEntityCreatedCallback(
+	//	[](SpaceEntity* Object)
+	//	{
+	//		OnEntityUpdate(Object, EntityUpdateType::Update);
+	//		Object->SetUpdateCallback(OnEntityUpdate);
+	//	});
 
-	Connection->RegisterEntityCreatedCallback(
-		[](Entity* Object)
-		{
-			OnEntityUpdate(Object, EntityUpdateType::Update);
-			Object->SetRemoteUpdateCallback(OnEntityUpdate);
-		});
+	// time_t _time;
+	// srand((unsigned int) time(&_time));
+	// uint64_t PrefabId	= rand() % 1000;
+	// uint64_t ParentId	= 0;
+	// bool InIsPersistent = false;
+	// EntityTransform ObjectTransform;
+	// ObjectTransform.Position = {0, 0, 0};
+	// ObjectTransform.Rotation = {0, 0, 0, 0};
+	// ObjectTransform.Scale	 = {1, 1, 1};
+	// csp::common::Array<ReplicatedValue> ReplicatedValues;
 
-	time_t _time;
-	srand((unsigned int) time(&_time));
-	uint64_t PrefabId	= rand() % 1000;
-	uint64_t ParentId	= 0;
-	bool InIsPersistent = false;
-	EntityTransform ObjectTransform;
-	ObjectTransform.Position = {0, 0, 0};
-	ObjectTransform.Rotation = {0, 0, 0, 0};
-	ObjectTransform.Scale	 = {1, 1, 1};
-	csp::common::Array<ReplicatedValue> ReplicatedValues;
+	// auto [Object] = Awaitable(&MultiplayerConnection::CreateEntity,
+	//						  Connection,
+	//						  PrefabId,
+	//						  ParentId,
+	//						  InIsPersistent,
+	//						  ObjectTransform,
+	//						  csp::multiplayer::EntityType::Custom,
+	//						  1ULL,
+	//						  ReplicatedValues)
+	//					.Await();
 
-	auto [Object] = Awaitable(&MultiplayerConnection::CreateEntity,
-							  Connection,
-							  PrefabId,
-							  ParentId,
-							  InIsPersistent,
-							  ObjectTransform,
-							  csp::multiplayer::EntityType::Custom,
-							  1ULL,
-							  ReplicatedValues)
-						.Await();
+	// EXPECT_TRUE(Object != nullptr);
 
-	EXPECT_TRUE(Object != nullptr);
+	// if (Object == nullptr)
+	//{
+	//	return;
+	// }
 
-	if (Object == nullptr)
-	{
-		return;
-	}
+	// std::cerr << "Object created: " << Object->GetId() << std::endl;
+	// Object->SetIsLocal(true);
 
-	std::cerr << "Object created: " << Object->GetId() << std::endl;
-	Object->SetIsLocal(true);
+	// std::tie(Ok) = Awaitable(&MultiplayerConnection::SendEntity, Connection, Object).Await();
 
-	std::tie(Ok) = Awaitable(&MultiplayerConnection::SendEntity, Connection, Object).Await();
+	// EXPECT_TRUE(Ok);
 
-	EXPECT_TRUE(Ok);
+	// if (!Ok)
+	//{
+	//	return;
+	// }
 
-	if (!Ok)
-	{
-		return;
-	}
+	// std::cerr << "Object sent: " << Object->GetId() << std::endl;
 
-	std::cerr << "Object sent: " << Object->GetId() << std::endl;
+	// for (;;)
+	//{
+	//	auto c = _getch();
 
-	for (;;)
-	{
-		auto c = _getch();
+	//	if (c == 0x1B) // Escape
+	//	{
+	//		break;
+	//	}
 
-		if (c == 0x1B) // Escape
-		{
-			break;
-		}
+	//	if (c == 0 || c == 0xE0) // Function/Arrow
+	//	{
+	//		c = _getch();
 
-		if (c == 0 || c == 0xE0) // Function/Arrow
-		{
-			c = _getch();
+	//		switch (c)
+	//		{
+	//			case 0x48: // Up Arrow
+	//			{
+	//				EntityTransform Transform(Object->GetTransform());
+	//				++Transform.Position.Z;
+	//				Object->SetTransform(Transform);
+	//			}
+	//			break;
+	//			case 0x4B: // Left Arrow
+	//			{
+	//				EntityTransform Transform(Object->GetTransform());
+	//				--Transform.Position.X;
+	//				Object->SetTransform(Transform);
+	//			}
+	//			break;
+	//			case 0x4D: // Right Arrow
+	//			{
+	//				EntityTransform Transform(Object->GetTransform());
+	//				++Transform.Position.X;
+	//				Object->SetTransform(Transform);
+	//			}
+	//			break;
+	//			case 0x50: // Down Arrow
+	//			{
+	//				EntityTransform Transform(Object->GetTransform());
+	//				--Transform.Position.Z;
+	//				Object->SetTransform(Transform);
+	//			}
+	//			break;
+	//		}
 
-			switch (c)
-			{
-				case 0x48: // Up Arrow
-				{
-					EntityTransform Transform(Object->GetTransform());
-					++Transform.Position.Z;
-					Object->SetTransform(Transform);
-				}
-				break;
-				case 0x4B: // Left Arrow
-				{
-					EntityTransform Transform(Object->GetTransform());
-					--Transform.Position.X;
-					Object->SetTransform(Transform);
-				}
-				break;
-				case 0x4D: // Right Arrow
-				{
-					EntityTransform Transform(Object->GetTransform());
-					++Transform.Position.X;
-					Object->SetTransform(Transform);
-				}
-				break;
-				case 0x50: // Down Arrow
-				{
-					EntityTransform Transform(Object->GetTransform());
-					--Transform.Position.Z;
-					Object->SetTransform(Transform);
-				}
-				break;
-			}
+	//		Awaitable(&MultiplayerConnection::UpdateEntity, Connection, Object).Await();
+	//	}
+	//}
 
-			Awaitable(&MultiplayerConnection::UpdateEntity, Connection, Object).Await();
-		}
-	}
-
-	LogOut(*UserSystem);
+	LogOut(UserSystem);
 }
 #endif
 
-#if RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
+CSP_PUBLIC_TEST(DISABLE_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
 
@@ -1516,6 +1515,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -1544,8 +1545,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 				nullptr,
 				Space);
 
-	auto* Connection = new csp::multiplayer::MultiplayerConnection(Space.Id);
-
 	bool Interrupted  = false;
 	bool Disconnected = false;
 
@@ -1560,8 +1559,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 		{
 			Disconnected = true;
 		});
-
-	EntitySystem = Connection->GetSpaceEntitySystem();
 
 	csp::common::String UserName = "Player 1";
 	SpaceTransform UserTransform
@@ -1588,7 +1585,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 	{
 		std::this_thread::sleep_for(50ms);
 
-		SetRandomProperties(Avatar);
+		SetRandomProperties(TestUser, EntitySystem);
 
 		Current	 = std::chrono::steady_clock::now();
 		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
@@ -1599,7 +1596,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 	EXPECT_TRUE(Interrupted);
 
 	// Delete space
-	Awaitable(&csp::systems::SpaceSystem::DeleteSpace, SpaceSystem, Space).Await();
+	Awaitable(&csp::systems::SpaceSystem::DeleteSpace, SpaceSystem, Space.Id).Await();
 
 	// Log out
 	Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await();

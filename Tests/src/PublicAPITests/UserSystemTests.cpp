@@ -411,7 +411,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 }
 #endif
 
-#if RUN_USERSYSTEM_REFRESH_TEST
+#if RUN_NIGHTLY_TESTS || RUN_USERSYSTEM_REFRESH_TEST
 CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
