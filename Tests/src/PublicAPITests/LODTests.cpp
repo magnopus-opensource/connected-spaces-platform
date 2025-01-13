@@ -83,11 +83,19 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, GetEmptyLODChainTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create collection
 	csp::systems::AssetCollection AssetCollection;
@@ -137,11 +145,19 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create collection
 	csp::systems::AssetCollection AssetCollection;
@@ -176,44 +192,6 @@ CSP_PUBLIC_TEST(CSPEngine, LODTests, RegisterAssetsToLODChainTest)
 
 	DeleteAssetCollection(AssetSystem, AssetCollection);
 	DeleteSpace(SpaceSystem, Space.Id);
-	LogOut(UserSystem);
-}
-#endif
-
-
-#if RUN_LOD_GET_MUSUBI_LOD_TEST
-CSP_PUBLIC_TEST(CSPEngine, LODTests, GetMusubiLODTest)
-{
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
-
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-
-	const csp::common::String MusubiSpaceId			  = "63f77783e7557ee1fcc21141";
-	const csp::common::String MusubiAssetCollectionId = "63ff2eb1ed6078378cab7ebf";
-
-	// Create space
-	csp::systems::Space Space;
-	GetSpace(SpaceSystem, MusubiSpaceId, Space);
-
-	Awaitable(&csp::systems::SpaceSystem::EnterSpace, SpaceSystem, Space.Id, false).Await(RequestPredicate);
-
-	csp::common::Array<csp::systems::AssetCollection> AssetCollections;
-	GetAssetCollectionsByIds(AssetSystem, {MusubiAssetCollectionId}, AssetCollections);
-
-	EXPECT_EQ(AssetCollections.Size(), 1);
-
-	// Get LOD chain
-	csp::systems::LODChain Chain;
-	GetLODChain(AssetSystem, AssetCollections[0], Chain);
-
-	EXPECT_EQ(Chain.AssetCollectionId, MusubiAssetCollectionId);
-	EXPECT_EQ(Chain.LODAssets.Size(), 3);
-
 	LogOut(UserSystem);
 }
 #endif

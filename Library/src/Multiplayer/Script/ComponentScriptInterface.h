@@ -31,6 +31,7 @@ constexpr int64_t INVALID_COMPONENT_ID = -1;
 class CSP_API ComponentScriptInterface
 {
 public:
+	using Vector2 = std::vector<float>;
 	using Vector3 = std::vector<float>;
 	using Vector4 = std::vector<float>;
 
@@ -42,6 +43,9 @@ public:
 
 	int64_t GetComponentId() const;
 	int64_t GetComponentType() const;
+
+	void SetComponentName(std::string name);
+	std::string GetComponentName() const;
 
 	void SendPropertyUpdate();
 

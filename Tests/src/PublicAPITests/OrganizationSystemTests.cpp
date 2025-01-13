@@ -28,10 +28,10 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <PublicAPITests/AssetSystemTestHelpers.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <PublicAPITests/AssetSystemTestHelpers.h>
 
 
 using namespace csp::common;
@@ -79,47 +79,10 @@ InviteOrganizationRoleCollection CreateOrganizationInvites(const String& EmailUs
 	return OrganizationInvites;
 }
 
-Profile CreateTestUser()
-{
-	auto& SystemsManager = ::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-
-	const char* TestUserName	= "CSP-TEST-NAME";
-	const char* TestDisplayName = "CSP-TEST-DISPLAY";
-
-	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
-
-	char UniqueEmail[256];
-	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
-
-	// Create new user
-	auto [Result] = AWAIT_PRE(UserSystem,
-							  CreateUser,
-							  RequestPredicate,
-							  UniqueUserName,
-							  TestDisplayName,
-							  UniqueEmail,
-							  GeneratedTestAccountPassword,
-							  false,
-							  true,
-							  nullptr,
-							  nullptr);
-
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-	const auto& CreatedProfile = Result.GetProfile();
-
-	EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
-	EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
-	EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
-
-	return CreatedProfile;
-}
-
 void CleanupTestUser(const String& UserId)
 {
-	auto& SystemsManager = ::SystemsManager::Get();
+	// Only the super user has the required privileges to remove users.
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	// Delete the test user
@@ -554,7 +517,7 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, CreateOrganisationSpaceTest)
 
 	// Create space
 	::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Get the Id of the Organization the user is authenticated against. Users can currently only
 	// belong to a single Organization so we just use the first one.
@@ -620,7 +583,15 @@ CSP_PUBLIC_TEST(CSPEngine, OrganizationSystemTests, OrganizationIdTest)
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;

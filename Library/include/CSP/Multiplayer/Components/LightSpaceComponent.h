@@ -63,7 +63,7 @@ enum class LightCookieType
 /// @brief Enumerates the list of properties that can be replicated for a light component.
 enum class LightPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	LightType,
 	Color,
 	Intensity,
@@ -84,7 +84,9 @@ enum class LightPropertyKeys
 
 
 /// @ingroup LightSpaceComponent
-/// @brief Data representation of an LightSpaceComponent.
+/// @brief Adds various types of lighting to a SpaceEntity, such as directional, point, or spotlights.
+///
+/// This component is essential for creating realistic lighting effects and controlling how objects are illuminated within the space.
 class CSP_API LightSpaceComponent : public ComponentBase,
 									public IPositionComponent,
 									public IRotationComponent,

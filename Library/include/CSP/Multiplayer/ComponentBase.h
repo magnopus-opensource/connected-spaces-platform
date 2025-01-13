@@ -68,7 +68,8 @@ enum class ComponentType
 	FiducialMarker,
 	GaussianSplat,
 	Text,
-	Hotspot
+	Hotspot,
+	CinematicCamera
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
@@ -77,6 +78,7 @@ class CSP_API ComponentBase
 	CSP_START_IGNORE
 	/** @cond DO_NOT_DOCUMENT */
 	friend class SpaceEntity;
+	friend class SpaceEntitySystem;
 	friend class EntityScriptInterface;
 #ifdef CSP_TESTS
 	friend class ::CSPEngine_SerialisationTests_SpaceEntityUserSignalRSerialisationTest_Test;
@@ -139,6 +141,12 @@ public:
 	/// @param InActionParams csp::common::String : Parameters for the action that will be passed to the action handler callback.
 	void InvokeAction(const csp::common::String& InAction, const csp::common::String& InActionParams);
 
+	/// @brief Gets the name of the component.
+	const csp::common::String& GetComponentName() const;
+	/// @brief Sets the name for the component.
+	/// @param Value - The new name to assign to the componenent.
+	void SetComponentName(const csp::common::String& Value);
+
 protected:
 	ComponentBase();
 	ComponentBase(ComponentType Type, SpaceEntity* Parent);
@@ -148,8 +156,10 @@ protected:
 	const int64_t GetIntegerProperty(uint32_t Key) const;
 	const float GetFloatProperty(uint32_t Key) const;
 	const csp::common::String& GetStringProperty(uint32_t Key) const;
+	const csp::common::Vector2& GetVector2Property(uint32_t Key) const;
 	const csp::common::Vector3& GetVector3Property(uint32_t Key) const;
 	const csp::common::Vector4& GetVector4Property(uint32_t Key) const;
+	const csp::common::Map<ReplicatedValue, ReplicatedValue>& GetMapProperty(uint32_t Key) const;
 
 	void SetProperty(uint32_t Key, const ReplicatedValue& Value);
 	void RemoveProperty(uint32_t Key);
@@ -157,7 +167,14 @@ protected:
 
 	virtual void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value);
 
+	// Called whenever an entity is removed from the system.
+	// Used to shutdown any behavior managed by the entity.
 	virtual void OnRemove();
+
+	// Called when the component is locally deleted from the space,
+	// or the entity the component is attached to is locally deleted.
+	// Used for handling behavior when a client first deletes the component.
+	virtual void OnLocalDelete();
 
 	CSP_START_IGNORE
 	void SetScriptInterface(ComponentScriptInterface* ScriptInterface);
@@ -173,6 +190,9 @@ protected:
 	ComponentScriptInterface* ScriptInterface;
 
 	csp::common::Map<csp::common::String, EntityActionHandler> ActionMap;
+
+private:
+	void InitialiseProperties();
 };
 
 } // namespace csp::multiplayer

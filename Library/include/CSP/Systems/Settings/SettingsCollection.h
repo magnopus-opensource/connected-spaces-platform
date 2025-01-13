@@ -98,21 +98,23 @@ class CSP_API AvatarInfoResult : public csp::systems::ResultBase
 
 public:
 	/// @brief A getter which returns the String passed via the result.
-	[[nodiscard]] AvatarType GetAvatarType() const;
-	[[nodiscard]] const csp::common::Variant& GetAvatarIdentifier() const;
+	[[nodiscard]]
+	AvatarType GetAvatarType() const;
+	[[nodiscard]]
+	const csp::common::String& GetAvatarIdentifier() const;
 
 	CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-		: Type(AvatarType::None), csp::systems::ResultBase(ResCode, HttpResCode) {};
+		: csp::systems::ResultBase(ResCode, HttpResCode), Type(AvatarType::None) {};
 
 private:
 	AvatarInfoResult() : Type(AvatarType::None) {};
 	AvatarInfoResult(void*) : Type(AvatarType::None) {};
 
 	void SetAvatarType(AvatarType InValue);
-	void SetAvatarIdentifier(const csp::common::Variant& InValue);
+	void SetAvatarIdentifier(const csp::common::String& InValue);
 
 	AvatarType Type;
-	csp::common::Variant Identifier;
+	csp::common::String Identifier;
 };
 
 

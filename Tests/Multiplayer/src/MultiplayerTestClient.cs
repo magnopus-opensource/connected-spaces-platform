@@ -24,7 +24,7 @@ namespace MultiplayerTestClient
 
     public class MultiplayerTestClient : IMultiplayerTestClient
     {
-        public static readonly string CHSEndpointBaseUri = "https://ogs-odev.magnoboard.com";
+        public static readonly string CHSEndpointBaseUri = "https://ogs.magnopus-dev.cloud";
 
         private NpHost nphost;
         private bool isRunning = false;
@@ -37,6 +37,7 @@ namespace MultiplayerTestClient
         private Multiplayer.SpaceEntity scriptEntity;
 
         private Csp.Multiplayer.MultiplayerConnection connection;
+        private Csp.Multiplayer.EventBus eventBus;
         private Csp.Systems.LogSystem logSystem;
 
         public struct LogEvent
@@ -307,7 +308,7 @@ namespace MultiplayerTestClient
         {
             Log("Simulate Leader Lost");
             var array = new Common.Array<Multiplayer.ReplicatedValue>();
-            connection.SendNetworkEvent("DebugLeaderDropoutMessage", array);
+            eventBus.SendNetworkEvent("DebugLeaderDropoutMessage", array);
             array.Dispose();
         }
 

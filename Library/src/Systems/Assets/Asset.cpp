@@ -50,7 +50,7 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 		return csp::systems::EAssetType::HOLOCAP_AUDIO;
 	else if (DTOAssetDetailType == "Audio")
 		return csp::systems::EAssetType::AUDIO;
-    else if(DTOAssetDetailType == "GaussianSplat")
+	else if (DTOAssetDetailType == "GaussianSplat")
 		return csp::systems::EAssetType::GAUSSIAN_SPLAT;
 	else
 	{
@@ -139,24 +139,24 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 		const auto& InAddressableId = Dto.GetAddressableId().Split('|');
 		if (InAddressableId.Size() == 2)
 		{
-			Asset.SetThirdPartyPlatformType(static_cast<EThirdPartyPlatform>(std::stoi(InAddressableId[1].c_str())));
-			Asset.SetThirdPartyPackagedAssetIdentifier(InAddressableId[0]);
+			Asset.ThirdPartyPlatformType			= static_cast<EThirdPartyPlatform>(std::stoi(InAddressableId[1].c_str()));
+			Asset.ThirdPartyPackagedAssetIdentifier = InAddressableId[0];
 		}
 		else
 		{
-			Asset.SetThirdPartyPackagedAssetIdentifier(Dto.GetAddressableId());
-			Asset.SetThirdPartyPlatformType(EThirdPartyPlatform::NONE);
+			Asset.ThirdPartyPackagedAssetIdentifier = Dto.GetAddressableId();
+			Asset.ThirdPartyPlatformType			= EThirdPartyPlatform::NONE;
 		}
 	}
 	else
 	{
-		Asset.SetThirdPartyPackagedAssetIdentifier("");
-		Asset.SetThirdPartyPlatformType(EThirdPartyPlatform::NONE);
+		Asset.ThirdPartyPackagedAssetIdentifier = "";
+		Asset.ThirdPartyPlatformType			= EThirdPartyPlatform::NONE;
 	}
 
 	if (Dto.HasUri())
 	{
-		Asset.Uri = web::Uri::Encode(Dto.GetUri());
+		Asset.Uri = Dto.GetUri();
 	}
 
 	if (Dto.HasChecksum())
@@ -180,7 +180,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 namespace csp::systems
 {
 
-Asset::Asset() : Type(EAssetType::MODEL), Version(0), ThirdPartyPackagedAssetIdentifier(""), ThirdPartyPlatform(EThirdPartyPlatform::NONE)
+Asset::Asset() : Type(EAssetType::MODEL), Version(0), ThirdPartyPackagedAssetIdentifier(""), ThirdPartyPlatformType(EThirdPartyPlatform::NONE)
 {
 }
 
@@ -360,23 +360,4 @@ void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiRespon
 	ResultBase::OnResponse(ApiResponse);
 }
 
-const csp::common::String& Asset::GetThirdPartyPackagedAssetIdentifier() const
-{
-	return ThirdPartyPackagedAssetIdentifier;
-}
-
-void Asset::SetThirdPartyPackagedAssetIdentifier(const csp::common::String& InThirdPartyPackagedAssetIdentifier)
-{
-	ThirdPartyPackagedAssetIdentifier = InThirdPartyPackagedAssetIdentifier;
-}
-
-void Asset::SetThirdPartyPlatformType(const EThirdPartyPlatform InThirdPartyPlatformType)
-{
-	ThirdPartyPlatform = InThirdPartyPlatformType;
-}
-
-const EThirdPartyPlatform Asset::GetThirdPartyPlatformType() const
-{
-	return ThirdPartyPlatform;
-}
 } // namespace csp::systems

@@ -18,10 +18,12 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/UUIDGenerator.h"
 #include "Multiplayer/ErrorCodeStrings.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Systems/Users/Authentication.h"
@@ -82,17 +84,21 @@ csp::common::String FormatScopesForURL(csp::common::Array<csp::common::String> S
 	return FormattedScopes;
 }
 
-UserSystem::UserSystem() : SystemBase(), AuthenticationAPI(nullptr), ProfileAPI(nullptr), PingAPI(nullptr), ExternalServiceProxyApi(nullptr)
+UserSystem::UserSystem()
+	: SystemBase(nullptr, nullptr), AuthenticationAPI(nullptr), ProfileAPI(nullptr), PingAPI(nullptr), ExternalServiceProxyApi(nullptr)
 {
 }
 
-UserSystem::UserSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient), RefreshTokenChangedCallback(nullptr)
+UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus)
+	: SystemBase(InWebClient, InEventBus), RefreshTokenChangedCallback(nullptr)
 {
 	AuthenticationAPI		= CSP_NEW chs_user::AuthenticationApi(InWebClient);
 	ProfileAPI				= CSP_NEW chs_user::ProfileApi(InWebClient);
 	PingAPI					= CSP_NEW chs_user::PingApi(InWebClient);
 	ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
 	StripeAPI				= CSP_NEW chs_user::StripeApi(InWebClient);
+
+	RegisterSystemCallback();
 }
 
 UserSystem::~UserSystem()
@@ -102,6 +108,8 @@ UserSystem::~UserSystem()
 	CSP_DELETE(AuthenticationAPI);
 	CSP_DELETE(ExternalServiceProxyApi);
 	CSP_DELETE(StripeAPI);
+
+	DeregisterSystemCallback();
 }
 
 const LoginState& UserSystem::GetLoginState() const
@@ -717,8 +725,9 @@ void UserSystem::GetAgoraUserToken(const AgoraUserTokenParams& Params, StringRes
 
 	std::map<csp::common::String, csp::common::String> Parameters;
 	Parameters["userId"]	  = Params.AgoraUserId;
-	Parameters["lifespan"]	  = std::to_string(Params.Lifespan).c_str();
 	Parameters["channelName"] = Params.ChannelName;
+	Parameters["referenceId"] = Params.ReferenceId;
+	Parameters["lifespan"]	  = std::to_string(Params.Lifespan).c_str();
 	Parameters["readOnly"]	  = BoolToApiString(Params.ReadOnly);
 	Parameters["shareAudio"]  = BoolToApiString(Params.ShareAudio);
 	Parameters["shareVideo"]  = BoolToApiString(Params.ShareVideo);
@@ -789,6 +798,42 @@ void UserSystem::ResetAuthenticationState()
 	CurrentLoginState.State			= ELoginState::LoggedOut;
 	ThirdPartyAuthStateId			= "";
 	ThirdPartyRequestedAuthProvider = EThirdPartyAuthenticationProviders::Invalid;
+}
+
+void UserSystem::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
+{
+	UserPermissionsChangedCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void UserSystem::RegisterSystemCallback()
+{
+	if (!UserPermissionsChangedCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenNetworkEvent("AccessControlChanged", this);
+}
+
+void UserSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+	{
+		EventBusPtr->StopListenNetworkEvent("AccessControlChanged");
+	}
+}
+
+void UserSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+	if (!UserPermissionsChangedCallback)
+	{
+		return;
+	}
+
+	csp::multiplayer::UserPermissionsChangedEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	UserPermissionsChangedCallback(Deserialiser.GetEventParams());
 }
 
 } // namespace csp::systems

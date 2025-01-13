@@ -34,7 +34,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a button component.
 enum class ButtonPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	LabelText,
 	IconAssetId,
 	AssetCollectionId,
@@ -49,7 +49,7 @@ enum class ButtonPropertyKeys
 
 
 /// @ingroup ButtonSpaceComponent
-/// @brief Data representation of an ButtonSpaceComponent.
+/// @brief Add a clickable button to your space. Button click events can be responded to via scripts.
 class CSP_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:

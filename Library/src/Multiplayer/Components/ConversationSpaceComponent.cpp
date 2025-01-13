@@ -218,7 +218,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 		const csp::systems::NullResultCallback NullResultCallback
 			= [Callback, ConversationId, this](const csp::systems::NullResult& NullResultCallbackResult)
 		{
-			const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error)
+			const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error)
 			{
 				if (Error != ErrorCode::None)
 				{
@@ -232,10 +232,10 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 				INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
 			};
 
-			auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-													{ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
-													signalRCallback);
+			auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+			EventBus->SendNetworkEvent("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
+									   SignalRCallback);
 		};
 
 		auto Messages = GetMessagesResult.GetAssetCollections();
@@ -290,7 +290,7 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 
 	const MessageResultCallback MessageResultCallback = [Callback, ConversationId, this](const MessageResult& MessageResultCallbackResult)
 	{
-		const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error)
+		const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error)
 		{
 			if (Error != ErrorCode::None)
 			{
@@ -306,10 +306,10 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
 			INVOKE_IF_NOT_NULL(Callback, MessageResultCallbackResult);
 		};
 
-		auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-		MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-												{ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
-												signalRCallback);
+		auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+		EventBus->SendNetworkEvent("ConversationSystem",
+								   {ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
+								   SignalRCallback);
 	};
 
 	StoreConversationMessage(CurrentSpace, UserId, Message, MessageResultCallback);
@@ -322,7 +322,7 @@ void ConversationSpaceComponent::DeleteMessage(const csp::common::String& Messag
 
 	const csp::systems::NullResultCallback NullCallback = [Callback, MessageId, this](const csp::systems::NullResult& NullCallbackResult)
 	{
-		const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullCallbackResult](ErrorCode Error)
+		const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, NullCallbackResult](ErrorCode Error)
 		{
 			if (Error != ErrorCode::None)
 			{
@@ -338,10 +338,10 @@ void ConversationSpaceComponent::DeleteMessage(const csp::common::String& Messag
 			INVOKE_IF_NOT_NULL(Callback, Result);
 		};
 
-		auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-		MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-												{ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
-												signalRCallback);
+		auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+		EventBus->SendNetworkEvent("ConversationSystem",
+								   {ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
+								   SignalRCallback);
 	};
 
 	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
@@ -539,7 +539,7 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
 				return;
 			}
 
-			const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedConversationResult](ErrorCode Error)
+			const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, GetUpdatedConversationResult](ErrorCode Error)
 			{
 				if (Error != ErrorCode::None)
 				{
@@ -555,10 +555,10 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
 				INVOKE_IF_NOT_NULL(Callback, Result);
 			};
 
-			auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-													{ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
-													signalRCallback);
+			auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+			EventBus->SendNetworkEvent("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
+									   SignalRCallback);
 		};
 
 		MessageInfo NewConversationData(ConversationData);
@@ -572,6 +572,7 @@ void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& Conversa
 
 		AssetSystem->UpdateAssetCollectionMetadata(GetConversationResult.GetAssetCollection(),
 												   ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(NewConversationData),
+												   nullptr,
 												   GetUpdatedConversationCallback);
 	};
 
@@ -638,7 +639,7 @@ void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& Messa
 				return;
 			}
 
-			const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedMessageResult](ErrorCode Error)
+			const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, GetUpdatedMessageResult](ErrorCode Error)
 			{
 				if (Error != ErrorCode::None)
 				{
@@ -654,10 +655,10 @@ void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& Messa
 				INVOKE_IF_NOT_NULL(Callback, Result);
 			};
 
-			auto MultiPlayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
-			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-													{ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
-													signalRCallback);
+			auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+			EventBus->SendNetworkEvent("ConversationSystem",
+									   {ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
+									   SignalRCallback);
 		};
 
 		if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -688,6 +689,7 @@ void ConversationSpaceComponent::SetMessageInfo(const csp::common::String& Messa
 
 		AssetSystem->UpdateAssetCollectionMetadata(GetMessageResult.GetAssetCollection(),
 												   ConversationSystemHelpers::GenerateMessageAssetCollectionMetadata(NewMessageData),
+												   nullptr,
 												   GetUpdatedMessageCallback);
 	};
 

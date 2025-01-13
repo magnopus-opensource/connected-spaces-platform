@@ -88,13 +88,25 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 	char UniqueSpaceName2[256];
 	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName2, GetUniqueString().c_str());
 
+	// Current default properties:
+	// - ComponentName
+	const int DefaultComponentProps = 1;
+
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -167,16 +179,16 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 
 		// Key Size
 		{
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 7);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 7 + DefaultComponentProps);
 		}
 
 		// Remove Key
 		{
 			CustomComponent->RemoveCustomProperty("Boolean");
 
-			// Custom properties including application origin
-			EXPECT_EQ(CustomComponent->GetNumProperties(), 6);
+			// Custom properties including application origin + default props
+			EXPECT_EQ(CustomComponent->GetNumProperties(), 6 + DefaultComponentProps);
 		}
 
 		// List Check
@@ -190,10 +202,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 		EntitySystem->QueueEntityUpdate(CreatedObject);
 		EntitySystem->ProcessPendingEntityOperations();
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Re-Enter space and verify contents
@@ -279,10 +288,7 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
 			}
 		}
 
-		SpaceSystem->ExitSpace(
-			[](const csp::systems::NullResult& Result)
-			{
-			});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Delete space

@@ -2,6 +2,8 @@ import {
   commonArrayToJSArray,
   dataUrlToFile,
   fileToBuffer,
+  jsArrayToCommonArrayofAssetCollectionType,
+  jsArrayToCommonArrayofString,
   resultState as resultStatus,
   testImage,
 } from "./helpers.js";
@@ -16,10 +18,10 @@ import {
 } from "./node_modules/connected-spaces-platform.web/connectedspacesplatform.js";
 
 // Magnopus Services Endpoint to connect to.
-const ENDPOINT = "https://ogs-ostage.magnoboard.com";
+const ENDPOINT = "https://ogs.magnopus-stg.cloud";
 
 // Tenant defines the application scope.
-const TENANT = "FOUNDATION_HELLO_WORLD";
+const TENANT = "CSP_HELLO_WORLD";
 
 // Desired email / password combination to run the tests.
 const EMAIL = "";
@@ -61,6 +63,7 @@ const runAllExamples = () => {
     const userSystem = systemsManager.getUserSystem();
     const spaceSystem = systemsManager.getSpaceSystem();
     const assetSystem = systemsManager.getAssetSystem();
+    const spaceEntitySystem = systemsManager.getSpaceEntitySystem();
     const graphQLSystem = systemsManager.getGraphQLSystem();
 
     // For CSP to process updates, we can call `Tick` and a given rate.
@@ -75,12 +78,13 @@ const runAllExamples = () => {
       EMAIL,
       PASSWORD,
       false,
+      true,
       null,
       null
     );
     if (signupResult.getResultCode() === Systems.EResultCode.Success) {
       console.log(
-        "Signup successful, please check you email and re-run this example when verified."
+        "Signup successful, please check your email and re-run this example when verified."
       );
       return;
     }
@@ -175,12 +179,15 @@ const runAllExamples = () => {
     freeBuffer(buffer.buffer);
 
     // Retrieve asset
-    const assetListResult = await assetSystem.getAssetCollectionsByCriteria(
-      SPACE_ID,
-      null,
-      Systems.EAssetCollectionType.DEFAULT,
+    const assetListResult = await assetSystem.findAssetCollections(
       null,
       null,
+      null,
+      jsArrayToCommonArrayofAssetCollectionType([
+        Systems.EAssetCollectionType.DEFAULT,
+      ]),
+      null,
+      jsArrayToCommonArrayofString([SPACE_ID]),
       null,
       null
     );
@@ -228,22 +235,6 @@ const runAllExamples = () => {
     );
     graphQLResult.delete();
 
-    // Enter space
-    const enterSpaceResult = await spaceSystem.enterSpace(SPACE_ID, false);
-    console.log("Enter Space", resultStatus(enterSpaceResult));
-    enterSpaceResult.delete();
-
-    // Multiplayer
-    // Create a multiplayer connection associated with our test space
-    const connection =
-      Multiplayer.MultiplayerConnection.create_spaceId(SPACE_ID);
-
-    // Store reference to the SpaceEntitySystem
-    const spaceEntitySystem = connection.getSpaceEntitySystem();
-
-    // Connect
-    await connection.connect();
-
     // Set up callbacks for entity events,
     // first we listen to when entities are created
     spaceEntitySystem.setEntityCreatedCallback((newEntity) => {
@@ -268,9 +259,10 @@ const runAllExamples = () => {
       });
     });
 
-    // Initialise connection allows us to get the above callbacks for entities that are in the space when we join.
-    await connection.initialiseConnection();
-    console.log("Connection to space successful");
+    // Enter space
+    const enterSpaceResult = await spaceSystem.enterSpace(SPACE_ID, false);
+    console.log("Enter Space", resultStatus(enterSpaceResult));
+    enterSpaceResult.delete();
 
     // Creating an avatar
     const myEntity = await spaceEntitySystem.createAvatar(
@@ -312,10 +304,9 @@ const runAllExamples = () => {
 
     // After a few seconds we can disconnect, delete the space and logout.
     setTimeout(async () => {
-      // Disconnect and release the connection
-      await connection.disconnect();
-      connection.delete();
-      console.log("Multiplayer connection closed.");
+      const exitSpaceResult = await spaceSystem.exitSpace();
+      console.log("Exit Space", resultStatus(exitSpaceResult));
+      exitSpaceResult.delete();
 
       // Delete this space
       if (createAndRemoveSpace) {

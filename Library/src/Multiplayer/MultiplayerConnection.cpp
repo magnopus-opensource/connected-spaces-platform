@@ -16,6 +16,7 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -23,7 +24,7 @@
 #include "Debug/Logging.h"
 #include "Events/EventSystem.h"
 #include "Multiplayer/EventSerialisation.h"
-#include "Multiplayer/MultiplayerKeyConstants.h"
+#include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
@@ -110,18 +111,14 @@ ErrorCode ParseError(std::exception_ptr Exception)
 
 
 constexpr const uint64_t ALL_ENTITIES_ID	 = -1;
-constexpr const uint64_t ALL_CLIENTS_ID		 = -1;
 constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 
 /// @brief MultiplayerConnection
 MultiplayerConnection::MultiplayerConnection()
-	: Connection(nullptr)
-	, WebSocketClient(nullptr)
-	, NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this))
-	, ClientId(0)
-	, Connected(false)
+	: Connection(nullptr), WebSocketClient(nullptr), NetworkEventManager(CSP_NEW NetworkEventManagerImpl(this)), ClientId(0), Connected(false)
 {
+	EventBusPtr = CSP_NEW EventBus(this);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -145,21 +142,21 @@ MultiplayerConnection::~MultiplayerConnection()
 		CSP_DELETE(Connection);
 		CSP_DELETE(WebSocketClient);
 		CSP_DELETE(NetworkEventManager);
+		CSP_DELETE(EventBusPtr);
 	}
 }
 
 MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoundConnection)
 {
-	Connection					   = InBoundConnection.Connection;
-	WebSocketClient				   = InBoundConnection.WebSocketClient;
-	NetworkEventManager			   = InBoundConnection.NetworkEventManager;
-	ClientId					   = InBoundConnection.ClientId;
-	DisconnectionCallback		   = InBoundConnection.DisconnectionCallback;
-	ConnectionCallback			   = InBoundConnection.ConnectionCallback;
-	NetworkInterruptionCallback	   = InBoundConnection.NetworkInterruptionCallback;
-	AssetDetailBlobChangedCallback = InBoundConnection.AssetDetailBlobChangedCallback;
-	ConversationSystemCallback	   = InBoundConnection.ConversationSystemCallback;
-	Connected					   = (InBoundConnection.Connected) ? true : false;
+	Connection					= InBoundConnection.Connection;
+	WebSocketClient				= InBoundConnection.WebSocketClient;
+	NetworkEventManager			= InBoundConnection.NetworkEventManager;
+	ClientId					= InBoundConnection.ClientId;
+	DisconnectionCallback		= InBoundConnection.DisconnectionCallback;
+	ConnectionCallback			= InBoundConnection.ConnectionCallback;
+	NetworkInterruptionCallback = InBoundConnection.NetworkInterruptionCallback;
+	EventBusPtr					= InBoundConnection.EventBusPtr;
+	Connected					= (InBoundConnection.Connected) ? true : false;
 }
 
 void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
@@ -189,7 +186,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
 	NetworkEventManager->SetConnection(Connection);
 	csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
 
-	StartEventMessageListening();
+	EventBusPtr->StartEventMessageListening();
 
 	// Initialise
 	Start(
@@ -314,21 +311,6 @@ void MultiplayerConnection::Stop(const ExceptionCallbackHandler Callback) const
 	Connection->Stop(Callback);
 }
 
-void MultiplayerConnection::SendNetworkEvent(const csp::common::String& EventName,
-											 const csp::common::Array<ReplicatedValue>& Args,
-											 ErrorCodeCallbackHandler Callback)
-{
-	SendNetworkEventToClient(EventName, Args, ALL_CLIENTS_ID, Callback);
-}
-
-void MultiplayerConnection::SendNetworkEventToClient(const csp::common::String& EventName,
-													 const csp::common::Array<ReplicatedValue>& Args,
-													 uint64_t TargetClientId,
-													 ErrorCodeCallbackHandler Callback)
-{
-	NetworkEventManager->SendNetworkEvent(EventName, Args, TargetClientId, Callback);
-}
-
 void MultiplayerConnection::SetDisconnectionCallback(DisconnectionCallbackHandler Callback)
 {
 	DisconnectionCallback = Callback;
@@ -344,123 +326,6 @@ CSP_EVENT void MultiplayerConnection::SetNetworkInterruptionCallback(NetworkInte
 	NetworkInterruptionCallback = Callback;
 }
 
-CSP_EVENT void MultiplayerConnection::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
-{
-	AssetDetailBlobChangedCallback = Callback;
-}
-
-CSP_EVENT void MultiplayerConnection::SetConversationSystemCallback(ConversationSystemCallbackHandler Callback)
-{
-	ConversationSystemCallback = Callback;
-}
-
-void MultiplayerConnection::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback)
-{
-	UserPermissionsChangedCallback = Callback;
-}
-
-void MultiplayerConnection::SetSequenceChangedCallback(SequenceChangedCallbackHandler Callback)
-{
-	SequenceChangedCallback = Callback;
-}
-
-void MultiplayerConnection::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
-{
-	if (Connection == nullptr || !Connected)
-	{
-		return;
-	}
-
-	NetworkEventMap[EventName].push_back(Callback);
-}
-
-void MultiplayerConnection::StopListenNetworkEvent(const csp::common::String& EventName)
-{
-	NetworkEventMap.erase(EventName);
-}
-
-// Begin listening to EventMessages from CHS. Must be called before Connection->Start.
-void MultiplayerConnection::StartEventMessageListening()
-{
-	if (Connection == nullptr)
-	{
-		return;
-	}
-
-	std::function<void(signalr::value)> LocalCallback = [this](signalr::value Result)
-	{
-		if (Result.is_null())
-		{
-			return;
-		}
-
-		std::vector<signalr::value> EventValues = Result.as_array()[0].as_array();
-		const csp::common::String EventType(EventValues[0].as_string().c_str());
-
-		if (EventType == "AssetDetailBlobChanged")
-		{
-			if (!AssetDetailBlobChangedCallback)
-			{
-				return;
-			}
-
-			AssetChangedEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "ConversationSystem")
-		{
-			if (!ConversationSystemCallback)
-			{
-				return;
-			}
-
-			ConversationEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			ConversationSystemCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "AccessControlChanged")
-		{
-			if (!UserPermissionsChangedCallback)
-			{
-				return;
-			}
-
-			UserPermissionsChangedEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			UserPermissionsChangedCallback(Deserialiser.GetEventParams());
-		}
-		else if (EventType == "OrganizationMemberAdded")
-		{
-			CSP_LOG_MSG(systems::LogLevel::Log, "Custom deserialiser for OrganizationMemberAdded event not yet implemented.")
-			// todo: Implement custom deserialiser for OrganizationMemberAdded event as part of OF-1238.
-		}
-		else if (EventType == "SequenceChanged")
-		{
-			if (!SequenceChangedCallback)
-			{
-				return;
-			}
-
-			SequenceChangedEventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-			SequenceChangedCallback(Deserialiser.GetEventParams());
-		}
-		else
-		{
-			// For everything else, use the generic deserialiser
-			EventDeserialiser Deserialiser;
-			Deserialiser.Parse(EventValues);
-
-			for (const auto& Callback : NetworkEventMap[EventType])
-			{
-				Callback(true, Deserialiser.GetEventData());
-			}
-		}
-	};
-
-	Connection->On("OnEventMessage", LocalCallback);
-}
 
 void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, ErrorCodeCallbackHandler Callback) const
 {

@@ -13,7 +13,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "develop", "main", "staging" ]
+    branches: [ "develop", "Main", "staging" ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "develop" ]
@@ -22,6 +22,7 @@ on:
 
 jobs:
   analyze:
+    if: github.repository == 'magnopus-opensource/connected-spaces-platform'
     name: Analyze
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql

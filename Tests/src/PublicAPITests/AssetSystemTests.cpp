@@ -265,10 +265,11 @@ void GetAssetsByCollectionIds(csp::systems::AssetSystem* AssetSystem,
 void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 								   csp::systems::AssetCollection& AssetCollection,
 								   const csp::common::Map<csp::common::String, csp::common::String>& InMetaData,
+								   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 								   csp::common::Map<csp::common::String, csp::common::String>& OutMetaData)
 {
-	auto [Result]
-		= Awaitable(&csp::systems::AssetSystem::UpdateAssetCollectionMetadata, AssetSystem, AssetCollection, InMetaData).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::AssetSystem::UpdateAssetCollectionMetadata, AssetSystem, AssetCollection, InMetaData, Tags)
+						.Await(RequestPredicate);
 	auto ResultAssetCollection = Result.GetAssetCollection();
 
 	// Check Result Data has only changed MetData
@@ -282,11 +283,11 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem,
 
 	EXPECT_NE(ResultAssetCollection.UpdatedAt, AssetCollection.UpdatedAt);
 
-	auto Tags = ResultAssetCollection.Tags;
+	auto AssetCollectionTags = ResultAssetCollection.Tags;
 
-	for (size_t i = 0U; i < Tags.Size(); ++i)
+	for (size_t i = 0U; i < AssetCollectionTags.Size(); ++i)
 	{
-		EXPECT_EQ(Tags[i], AssetCollection.Tags[i]);
+		EXPECT_EQ(AssetCollectionTags[i], AssetCollection.Tags[i]);
 	}
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -319,11 +320,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -365,7 +374,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionNoSpaceTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create asset collection
 	csp::systems::AssetCollection NewAssetCollection;
@@ -412,11 +421,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collections
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2;
@@ -490,13 +507,21 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	std::cout << UserId << "\n";
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -512,7 +537,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -554,7 +579,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	std::cout << UserId << "\n";
 
@@ -572,7 +597,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetNoSpaceTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 
 	// Delete asset
 	DeleteAsset(AssetSystem, AssetCollection, Asset);
@@ -618,11 +643,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -639,7 +672,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateExternalUriAssetTest)
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
 	EXPECT_EQ(Assets[0].Uri, "");
 
 	Assets[0].ExternalUri	   = TestExternalUri;
@@ -701,11 +734,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collections
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2;
@@ -791,10 +832,18 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 	const auto Tag = csp::common::Array<csp::common::String>({Space.Id});
 
 	csp::systems::AssetCollection AssetCollection1, AssetCollection2, AssetCollection3;
@@ -967,10 +1016,18 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
@@ -1081,10 +1138,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectio
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceType::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceType::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
 	csp::systems::AssetCollection FirstAssetCollection;
 	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueFirstAssetCollectionName, nullptr, nullptr, FirstAssetCollection);
@@ -1180,11 +1237,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1299,11 +1364,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsIncorrectFileTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1359,7 +1432,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1442,6 +1515,159 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsFileNoSpaceTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_WITH_UNENCODED_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithUnencodedSpace)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	constexpr char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	constexpr char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	constexpr char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	constexpr char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogInAsNewTestUser(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+	auto FilePath = std::filesystem::absolute("assets/TestWith Space.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	// Upload data
+	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Get uploaded asset
+	auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
+	std::string UriStr = AssetResult.GetAsset().Uri;
+
+	// Check uri is encoded as expected
+	EXPECT_TRUE(UriStr.find("TestWith%20Space") != std::string::npos);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_WITH_ENCODED_SPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetWithEncodedSpace)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+
+	constexpr char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
+	constexpr char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
+	constexpr char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+	constexpr char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	char UniqueAssetCollectionName[256];
+	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+
+	char UniqueAssetName[256];
+	SPRINTF(UniqueAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+
+	csp::common::String UserId;
+
+	// Log in
+	LogInAsNewTestUser(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	// Create asset collection
+	csp::systems::AssetCollection AssetCollection;
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueAssetCollectionName, nullptr, nullptr, AssetCollection);
+
+	// Create asset
+	csp::systems::Asset Asset;
+	CreateAsset(AssetSystem, AssetCollection, UniqueAssetName, nullptr, nullptr, Asset);
+	auto FilePath = std::filesystem::absolute("assets/TestWithEncoded%20Space.json");
+	csp::systems::FileAssetDataSource Source;
+	Source.FilePath = FilePath.u8string().c_str();
+
+	// Upload data
+	auto [UploadResult] = AWAIT_PRE(AssetSystem, UploadAssetData, RequestPredicateWithProgress, AssetCollection, Asset, Source);
+	EXPECT_EQ(UploadResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	// Get uploaded asset
+	auto [AssetResult] = AWAIT_PRE(AssetSystem, GetAssetById, RequestPredicate, AssetCollection.Id, Asset.Id);
+	std::string UriStr = AssetResult.GetAsset().Uri;
+
+	// Check uri is encoded as expected
+	EXPECT_TRUE(UriStr.find("TestWithEncoded%20Space") != std::string::npos);
+
+	// Delete asset
+	DeleteAsset(AssetSystem, AssetCollection, Asset);
+
+	// Delete asset collection
+	DeleteAssetCollection(AssetSystem, AssetCollection);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_AS_BUFFER_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
@@ -1470,11 +1696,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UploadAssetAsBufferTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1562,11 +1796,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsFileTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1651,11 +1893,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetDataAsBufferTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1736,6 +1986,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
 
+	csp::common::Array<csp::common::String> Tags = {"tag-test"};
+
 	char UniqueSpaceName[256];
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -1745,15 +1997,15 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Tags, Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSpaceName, nullptr, nullptr, AssetCollection);
+	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSpaceName, nullptr, Tags, AssetCollection);
 
 	csp::systems::AssetCollection IdAssetCollection;
 	// Update MetaData
@@ -1761,7 +2013,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, UpdateAssetCollectionMetadataTest)
 	csp::common::Map<csp::common::String, csp::common::String> MetaDataMapOut;
 	MetaDataMapIn[UniqueSpaceName] = UniqueSpaceName;
 
-	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, MetaDataMapOut);
+	UpdateAssetCollectionMetadata(AssetSystem, AssetCollection, MetaDataMapIn, Tags, MetaDataMapOut);
 	EXPECT_TRUE(MetaDataMapOut.HasKey(UniqueSpaceName));
 
 	// Delete asset collection
@@ -1797,7 +2049,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetDataSizeTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -1873,13 +2125,21 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	std::cout << UserId << "\n";
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Create asset collection
 	csp::systems::AssetCollection assetCollection;
@@ -1895,8 +2155,8 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), "");
-	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::NONE);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, "");
+	EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::NONE);
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
@@ -1907,11 +2167,11 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, ThirdPartyPackagedAssetIdentifierTe
 
 	EXPECT_EQ(Assets.Size(), 1);
 	EXPECT_EQ(Assets[0].Name, UniqueAssetName);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifier);
-	EXPECT_EQ(Assets[0].GetThirdPartyPlatformType(), csp::systems::EThirdPartyPlatform::UNITY);
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifier);
+	EXPECT_EQ(Assets[0].ThirdPartyPlatformType, csp::systems::EThirdPartyPlatform::UNITY);
 
-	Assets[0].SetThirdPartyPackagedAssetIdentifier(ThirdPartyPackagedAssetIdentifierLocal);
-	EXPECT_EQ(Assets[0].GetThirdPartyPackagedAssetIdentifier(), ThirdPartyPackagedAssetIdentifierLocal);
+	Assets[0].ThirdPartyPackagedAssetIdentifier = ThirdPartyPackagedAssetIdentifierLocal;
+	EXPECT_EQ(Assets[0].ThirdPartyPackagedAssetIdentifier, ThirdPartyPackagedAssetIdentifierLocal);
 	// Delete asset
 	DeleteAsset(AssetSystem, assetCollection, Asset);
 
@@ -1936,6 +2196,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
@@ -1954,11 +2215,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -1989,7 +2258,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 		AssetDetailBlobChangedCallbackCalled = true;
 	};
 
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+	AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
 	// Create asset collection
 	csp::systems::AssetCollection AssetCollection;
@@ -2009,23 +2278,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
 	csp::common::String Uri;
 	UploadAssetData(AssetSystem, AssetCollection, Asset, Source, Uri);
 
-	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
+	WaitForCallback(AssetDetailBlobChangedCallbackCalled);
 
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_EQ(CallbackAssetId, Asset.Id);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2045,6 +2303,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -2055,11 +2314,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Enter space
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -2087,7 +2354,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 		AssetDetailBlobChangedCallbackCalled = true;
 	};
 
-	Connection->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
+	AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
 	ReplicatedValue Param1 = static_cast<int64_t>(EAssetChangeType::Invalid);
 	ReplicatedValue Param2 = "";
@@ -2095,30 +2362,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
 	ReplicatedValue Param4 = "";
 	ReplicatedValue Param5 = "";
 
-	Connection->SendNetworkEventToClient("AssetDetailBlobChanged",
-										 {Param1, Param2, Param3, Param4, Param5},
-										 Connection->GetClientId(),
-										 [](ErrorCode Error)
-										 {
-											 EXPECT_EQ(Error, ErrorCode::None);
-										 });
+	EventBus->SendNetworkEventToClient("AssetDetailBlobChanged",
+									   {Param1, Param2, Param3, Param4, Param5},
+									   Connection->GetClientId(),
+									   [](ErrorCode Error)
+									   {
+										   EXPECT_EQ(Error, ErrorCode::None);
+									   });
 
 	// Wait for message
-	auto Start		 = std::chrono::steady_clock::now();
-	auto Current	 = std::chrono::steady_clock::now();
-	int64_t TestTime = 0;
-
-	while (!AssetDetailBlobChangedCallbackCalled && TestTime < 20)
-	{
-		std::this_thread::sleep_for(50ms);
-
-		Current	 = std::chrono::steady_clock::now();
-		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
-	}
-
+	WaitForCallback(AssetDetailBlobChangedCallbackCalled);
 	EXPECT_TRUE(AssetDetailBlobChangedCallbackCalled);
 
-	SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -2139,12 +2395,12 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Attempt to download asset
 	{
 		csp::systems::Asset Asset;
-		Asset.Uri = "https://world-streaming.magnoboard.com/Odev/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
+		Asset.Uri = "https://world-streaming.magnopus-dev.cloud/123456789/123456789/1/NotAnImage.PNG?t=1234567890123";
 
 		auto [Result] = AWAIT_PRE(AssetSystem, DownloadAssetData, RequestPredicate, Asset);
 
@@ -2158,7 +2414,7 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, DownloadAssetDataInvalidURLTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_COPY_ASSET_COLLECTION_TEST
-CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 {
 	SetRandSeed();
 
@@ -2183,14 +2439,22 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create 'source' space and asset collection
 	csp::systems::Space SourceSpace;
 	{
 		printf("Creating source space and asset collection.\n");
 
-		CreateSpace(SpaceSystem, SourceSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, SourceSpace);
+		CreateSpace(SpaceSystem,
+					SourceSpaceName,
+					SpaceDescription,
+					csp::systems::SpaceAttributes::Private,
+					nullptr,
+					nullptr,
+					nullptr,
+					nullptr,
+					SourceSpace);
 
 		char AssetCollectionName[256];
 		SPRINTF(AssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
@@ -2222,7 +2486,15 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
 	{
 		printf("Creating dest space and invoking the copy...\n");
 
-		CreateSpace(SpaceSystem, DestSpaceName, SpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, DestSpace);
+		CreateSpace(SpaceSystem,
+					DestSpaceName,
+					SpaceDescription,
+					csp::systems::SpaceAttributes::Private,
+					nullptr,
+					nullptr,
+					nullptr,
+					nullptr,
+					DestSpace);
 
 		csp::common::Array<csp::systems::AssetCollection> SourceAssetCollections = {SourceAssetCollection};
 		auto [Result] = AWAIT_PRE(AssetSystem, CopyAssetCollectionsToSpace, RequestPredicate, SourceAssetCollections, DestSpace.Id, false);

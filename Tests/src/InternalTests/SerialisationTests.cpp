@@ -21,6 +21,7 @@
 	#include "CSP/Multiplayer/SpaceEntity.h"
 	#include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 	#include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
+	#include "CSP/Multiplayer/Components/CustomSpaceComponent.h"
 	#include "Multiplayer/SpaceEntityKeys.h"
 	#include "TestHelpers.h"
 
@@ -45,6 +46,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	User->OwnerId		 = 1337;
 	User->IsTransferable = false;
 	User->IsPersistant	 = false;
+	User->ParentId		 = 9999;
 
 	auto* AvatarComponent = (AvatarSpaceComponent*) User->AddComponent(ComponentType::AvatarData);
 
@@ -84,8 +86,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	EXPECT_TRUE(Array[2].is_bool() && !Array[2].as_bool()); // IsTransferable
 	EXPECT_TRUE(Array[3].is_bool() && !Array[3].as_bool()); // IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == User->OwnerId);
-	EXPECT_TRUE(Array[5].is_null());										   // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8); // Components
+	EXPECT_TRUE(Array[5].as_uinteger() && Array[5].as_uinteger() == *User->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() == 8);		  // Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -159,6 +161,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 	}
 
 	CSP_DELETE(User);
+
+	csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeserialisationTest)
@@ -173,6 +177,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	User->OwnerId		 = 1337;
 	User->IsTransferable = false;
 	User->IsPersistant	 = false;
+	User->ParentId		 = 9999;
 
 	auto* AvatarComponent = (AvatarSpaceComponent*) User->AddComponent(ComponentType::AvatarData);
 
@@ -192,6 +197,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 	EXPECT_EQ(DeserialisedUser->Transform.Position, User->Transform.Position);
 	EXPECT_EQ(DeserialisedUser->Transform.Rotation, User->Transform.Rotation);
 	EXPECT_EQ(DeserialisedUser->OwnerId, User->OwnerId);
+	EXPECT_EQ(*DeserialisedUser->ParentId, *User->ParentId);
 
 	EXPECT_EQ(DeserialisedUser->Components.Size(), 1);
 
@@ -222,6 +228,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	Object->Name		   = "MyObject";
 	Object->Transform	   = {Vector3 {1.2f, 2.34f, 3.45f}, Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, Vector3 {1, 1, 1}};
 	Object->OwnerId		   = 42;
+	Object->ParentId	   = 9999;
 
 	auto Type										   = (ComponentType) ((int) ComponentType::Custom + 1);
 	Object->Components[COMPONENT_KEY_START_COMPONENTS] = CSP_NEW ComponentBase(Type, Object);
@@ -242,7 +249,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	 *     false,									-- IsTransferable
 	 *     true,									-- IsPersistant
 	 *     1337,									-- OwnerId
-	 *     null,									-- ParentId
+	 *     9999,									-- ParentId
 	 *     {										-- Components
 	 *       1: [ 6, [ <raw> ] ],					---- Properties
 	 *       2: [ 6, [ <raw> ] ],					---- Custom component
@@ -262,8 +269,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	EXPECT_TRUE(Array[2].is_bool() && Array[2].as_bool());				// IsTransferable
 	EXPECT_TRUE(Array[3].is_bool());									// IsPersistant
 	EXPECT_TRUE(Array[4].is_uinteger() && Array[4].as_uinteger() == Object->OwnerId);
-	EXPECT_TRUE(Array[5].is_null());										   // ParentId
-	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4); // Components
+	EXPECT_TRUE(Array[5].is_uinteger() && Array[5].as_uinteger() == *Object->ParentId); // ParentId
+	EXPECT_TRUE(Array[6].is_uint_map() && Array[6].as_uint_map().size() >= 4);			// Components
 
 	auto& Components = Array[6].as_uint_map();
 
@@ -332,11 +339,17 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 	}
 
 	CSP_DELETE(Object);
+
+	csp::CSPFoundation::Shutdown();
 }
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeserialisationTest)
 {
 	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+
+	// Current default properties:
+	// - ComponentName
+	const int DefaultComponentProps = 1;
 
 	SignalRMsgPackEntitySerialiser Serialiser;
 	auto Object			   = CSP_NEW SpaceEntity();
@@ -347,6 +360,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	Object->Name		   = "MyObject";
 	Object->Transform	   = {Vector3 {1.2f, 2.34f, 3.45f}, Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, Vector3 {1, 1, 1}};
 	Object->OwnerId		   = 42;
+	Object->ParentId	   = 9999;
 
 	auto* NewComponent = (StaticModelSpaceComponent*) Object->AddComponent(ComponentType::StaticModel);
 	NewComponent->SetExternalResourceAssetCollectionId("blah");
@@ -366,6 +380,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 	EXPECT_EQ(DeserialisedObject->Transform.Rotation, Object->Transform.Rotation);
 	EXPECT_EQ(DeserialisedObject->Transform.Scale, Object->Transform.Scale);
 	EXPECT_EQ(DeserialisedObject->OwnerId, Object->OwnerId);
+	EXPECT_EQ(*DeserialisedObject->ParentId, *Object->ParentId);
 
 	EXPECT_EQ(DeserialisedObject->Components.Size(), 1);
 
@@ -373,12 +388,70 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 
 	EXPECT_EQ(DeserialisedComponent->GetComponentType(), ComponentType::StaticModel);
 
-	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1);
+	// -1 as Name_DEPRECATED was never in use
+	EXPECT_EQ(DeserialisedComponent->Properties.Size(), ((size_t) StaticModelPropertyKeys::Num) - 1 + DefaultComponentProps);
 	EXPECT_EQ(DeserialisedComponent->GetExternalResourceAssetCollectionId(), "blah");
 	EXPECT_EQ(DeserialisedComponent->GetIsVisible(), true);
 
 	CSP_DELETE(DeserialisedObject);
 	CSP_DELETE(Object);
+
+	csp::CSPFoundation::Shutdown();
 }
+
+CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
+{
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+
+	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	MySpaceEntity->Type		   = SpaceEntityType::Object;
+	MySpaceEntity->Id		   = 1337;
+
+	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+
+	int64_t Prop1 = 10ll;
+	MyCustomComponent.SetCustomProperty("Prop1", Prop1);
+
+	// Create replicated maps
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map1;
+	Map1["Key1"] = "Test1";
+	Map1["Key2"] = "Test2";
+	Map1["Key3"] = "Test3";
+
+	csp::common::Map<ReplicatedValue, ReplicatedValue> Map2;
+	Map2[0ll] = 0.1f;
+	Map2[1ll] = 0.2f;
+	Map2[2ll] = 0.3f;
+
+	// Store map in a custom property
+	MyCustomComponent.SetCustomProperty("MyMap1", Map1);
+	MyCustomComponent.SetCustomProperty("MyMap2", Map2);
+
+	csp::common::String Prop2 = "Test";
+	MyCustomComponent.SetCustomProperty("Prop2", Prop2);
+
+	// Serialize
+	SignalRMsgPackEntitySerialiser Serialiser;
+	MySpaceEntity->Serialise(Serialiser);
+	auto SerialisedObject = Serialiser.Finalise();
+
+	// Deserialize
+	SignalRMsgPackEntityDeserialiser Deserialiser(SerialisedObject);
+	auto DeserialisedObject = CSP_NEW SpaceEntity();
+	DeserialisedObject->Deserialise(Deserialiser);
+
+	auto* DeserializedComponent = static_cast<CustomSpaceComponent*>(DeserialisedObject->GetComponent(0));
+
+	// Ensure deserialized values are correct
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop1"), Prop1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap1"), Map1);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("MyMap2"), Map2);
+	EXPECT_EQ(DeserializedComponent->GetCustomProperty("Prop2"), Prop2);
+
+	delete MySpaceEntity;
+
+	csp::CSPFoundation::Shutdown();
+}
+
 
 #endif

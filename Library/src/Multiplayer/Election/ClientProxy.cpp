@@ -15,6 +15,7 @@
  */
 #include "Multiplayer/Election/ClientProxy.h"
 
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "Debug/Logging.h"
 #include "Multiplayer/Election/ClientElectionManager.h"
@@ -195,8 +196,9 @@ void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
 	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
+	EventBus* EventBus				  = SystemsManager.GetEventBus();
 
 	const int64_t MessageId = Eid++;
 
@@ -210,16 +212,17 @@ void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t C
 
 	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "SendNetworkEventToClient Target=%d Source=%d Type=%d", TargetClientId, ClientId, EventType);
 
-	Connection->SendNetworkEventToClient(ClientElectionMessage,
-										 {ReplicatedValue(EventType), ReplicatedValue(ClientId), ReplicatedValue(MessageId)},
-										 TargetClientId,
-										 SignalRCallback);
+	EventBus->SendNetworkEventToClient(ClientElectionMessage,
+									   {ReplicatedValue(EventType), ReplicatedValue(ClientId), ReplicatedValue(MessageId)},
+									   TargetClientId,
+									   SignalRCallback);
 }
 
 void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
 {
 	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
 	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
+	EventBus* EventBus				  = SystemsManager.GetEventBus();
 
 	const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [](ErrorCode Error)
 	{
@@ -235,10 +238,10 @@ void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t Conte
 				   ContextId,
 				   ScriptText.c_str());
 
-	Connection->SendNetworkEventToClient(RemoteRunScriptMessage,
-										 {ReplicatedValue(ContextId), ReplicatedValue(ScriptText)},
-										 TargetClientId,
-										 SignalRCallback);
+	EventBus->SendNetworkEventToClient(RemoteRunScriptMessage,
+									   {ReplicatedValue(ContextId), ReplicatedValue(ScriptText)},
+									   TargetClientId,
+									   SignalRCallback);
 }
 
 void ClientProxy::HandleElectionEvent(int64_t ClientId)

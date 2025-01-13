@@ -35,7 +35,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a static model component.
 enum class StaticModelPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	ExternalResourceAssetId,
 	ExternalResourceAssetCollectionId,
 	Position,
@@ -50,7 +50,10 @@ enum class StaticModelPropertyKeys
 
 
 /// @ingroup StaticModelSpaceComponent
-/// @brief Data representation of an StaticModelSpaceComponent.
+/// @brief Adds static 3D models to a SpaceEntity.
+///
+/// It displays non-animated objects, such as furniture, buildings, or decorative items within a space.
+/// The static model defines the visual appearance but has no animations or dynamic behaviors.
 class CSP_API StaticModelSpaceComponent : public ComponentBase,
 										  public IExternalResourceComponent,
 										  public IShadowCasterComponent,

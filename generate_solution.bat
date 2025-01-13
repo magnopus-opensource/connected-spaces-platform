@@ -31,10 +31,20 @@ IF NOT EXIST "modules/googletest/build/ALL_BUILD.vcxproj" (
 	cd ../../..
 )
 
+REM Tiny process library used in tests project (statically linked) to invoke multiplayer test runner.
+REM We install to thirdparty, i'm not sure this is the best idea, but i'm not sure why modules and thirdparty are split.
+IF NOT EXIST "ThirdParty/tiny-process-library/install/lib/tiny-process-library.lib" (
+	cd Thirdparty/tiny-process-library
+	mkdir build
+	call cmake -S . -B build -G "Visual Studio 17 2022" -DCMAKE_INSTALL_PREFIX=install
+	call cmake --build build --config Release
+	call cmake --install build --config Release
+	cd ../..
+)
+
 cd tools/wrappergenerator
 call npm install
-
 cd ../..
 
-"modules/premake/bin/release/premake5.exe" vs2019 %*
+"modules/premake/bin/release/premake5.exe" vs2022 %*
 pause

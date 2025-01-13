@@ -183,7 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::PointOfInterest PointOfInterest;
 	CreatePointOfInterest(POISystem, nullptr, nullptr, nullptr, PointOfInterest);
@@ -205,7 +205,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::common::Optional<csp::common::Array<csp::common::String>> Tags(2);
 	(*Tags)[0] = "POITag1";
@@ -231,7 +231,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::GeoLocation POILocation;
 	POILocation.Latitude  = 45.0;
@@ -248,8 +248,12 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 	SearchLocationOrigin.Longitude = 160.0;
 	double SearchRadius			   = 130000;
 
-	auto [Result]
-		= Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea, POISystem, SearchLocationOrigin, SearchRadius, csp::systems::EPointOfInterestType::DEFAULT).Await(RequestPredicate);
+	auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::GetPOIsInArea,
+							  POISystem,
+							  SearchLocationOrigin,
+							  SearchRadius,
+							  csp::systems::EPointOfInterestType::DEFAULT)
+						.Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -299,7 +303,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -312,7 +316,15 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 	SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	csp::systems::AssetCollection AssetCollection;
 	CreateAssetCollection(AssetSystem, Space, UniqueAssetCollectionName, AssetCollection);
@@ -346,7 +358,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	const char* TestSpaceName			= "CSP-TEST-SPACE";
 	const char* TestSpaceDescription	= "CSP-TEST-SPACEDESC";
@@ -359,14 +371,22 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	csp::systems::GeoLocation SpaceGeolocation;
 
 	// Create a space POI and a default POI.
 	{
-		SpaceGeolocation.Latitude	= RandomRangeDouble(-90.0f, 90.0f);
-		SpaceGeolocation.Longitude	= RandomRangeDouble(-180.0f, 180.0f);
+		SpaceGeolocation.Latitude  = RandomRangeDouble(-90.0f, 90.0f);
+		SpaceGeolocation.Longitude = RandomRangeDouble(-180.0f, 180.0f);
 
 		float SpaceOrientation = 90.0f;
 
@@ -389,7 +409,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 		SpaceGeofence[2]	= GeoFence2;
 
 		// Create space POI via the space system.
-		auto [AddSpacePOIGeoResult] = AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SpaceGeolocation, SpaceOrientation, SpaceGeofence);
+		auto [AddSpacePOIGeoResult]
+			= AWAIT_PRE(SpaceSystem, UpdateSpaceGeoLocation, RequestPredicate, Space.Id, SpaceGeolocation, SpaceOrientation, SpaceGeofence);
 		EXPECT_EQ(AddSpacePOIGeoResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		// Create default POI through the POI system at the same location.
@@ -398,7 +419,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
 	// Test retrieving the space POI only.
 	{
-		auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::SPACE);
+		auto [GetPOIsResult]
+			= AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::SPACE);
 		EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
@@ -406,11 +428,11 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
 		// There may be more than one POI at this location, so we search for the one we have created and expect to find it.
 		bool FoundSpacePOI = false;
-		for(uint32_t i = 0; i < POIs.Size(); i++)
+		for (uint32_t i = 0; i < POIs.Size(); i++)
 		{
 			// All the returned POIs should be of type SPACE, since that is what we searched for.
 			EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::SPACE);
-			if(POIs[i].SpaceId == Space.Id)
+			if (POIs[i].SpaceId == Space.Id)
 			{
 				FoundSpacePOI = true;
 				break;
@@ -421,7 +443,8 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
 	// Test retrieving the default POI only.
 	{
-		auto [GetPOIsResult] = AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::DEFAULT);
+		auto [GetPOIsResult]
+			= AWAIT_PRE(POISystem, GetPOIsInArea, RequestPredicate, SpaceGeolocation, 5.0f, csp::systems::EPointOfInterestType::DEFAULT);
 		EXPECT_EQ(GetPOIsResult.GetResultCode(), csp::systems::EResultCode::Success);
 
 		const csp::common::Array<csp::systems::PointOfInterest>& POIs = GetPOIsResult.GetPOIs();
@@ -429,11 +452,11 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
 		// There may be more than one POI at this location, so we search for the one we have created and expect to find it.
 		bool FoundDefaultPOI = false;
-		for(uint32_t i = 0; i < POIs.Size(); i++)
+		for (uint32_t i = 0; i < POIs.Size(); i++)
 		{
 			// All the returned POIs should be of type DEFAULT, since that is what we searched for.
 			EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::DEFAULT);
-			if(POIs[i].Id == DefaultPOI.Id)
+			if (POIs[i].Id == DefaultPOI.Id)
 			{
 				FoundDefaultPOI = true;
 				break;
@@ -451,16 +474,16 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 		EXPECT_GE(POIs.Size(), 1);
 
 		// There may be more than one POI at this location, so we search for the one we have created and expect to find it.
-		bool FoundSpacePOI = false;
+		bool FoundSpacePOI	 = false;
 		bool FoundDefaultPOI = false;
-		for(uint32_t i = 0; i < POIs.Size(); i++)
+		for (uint32_t i = 0; i < POIs.Size(); i++)
 		{
-			if(POIs[i].Id == DefaultPOI.Id)
+			if (POIs[i].Id == DefaultPOI.Id)
 			{
 				FoundDefaultPOI = true;
 			}
 
-			if(POIs[i].SpaceId == Space.Id)
+			if (POIs[i].SpaceId == Space.Id)
 			{
 				FoundSpacePOI = true;
 			}

@@ -37,7 +37,7 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
 namespace csp::systems
 {
 
-EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
+EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr)
 {
 	EventTicketingAPI = CSP_NEW chs::TicketedSpaceApi(InWebClient);
 }

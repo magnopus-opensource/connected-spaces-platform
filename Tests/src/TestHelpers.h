@@ -16,15 +16,19 @@
 #pragma once
 
 #include "CSP/CSPFoundation.h"
+#include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "CSP/Systems/WebService.h"
 #include "PublicTestBase.h"
+#include "uuid_v4.h"
 
 #include <chrono>
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <thread>
 #include <random>
+#include <thread>
+
+using namespace std::chrono_literals;
 
 inline const char* TESTS_CLIENT_SKU = "CPPTest";
 
@@ -166,40 +170,31 @@ inline void SetRandSeed()
 
 inline double RandomUniformDouble()
 {
-	 std::uniform_real_distribution<double> UniformDouble;
+	std::uniform_real_distribution<double> UniformDouble;
 
 	// Seed using the current time.
 	std::mt19937_64 Rand;
 	auto CurrentTime		= std::chrono::high_resolution_clock::now();
 	auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
 	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-	
 	return UniformDouble(Rand);
 }
 
 inline double RandomRangeDouble(double Min, double Max)
 {
 	const double RandomUniform = RandomUniformDouble();
-	const double Range = Max - Min;
+	const double Range		   = Max - Min;
 
 	return (RandomUniform * Range) + Min;
 }
 
 // This function creates a unique string by randomly selecting a values from a epoch time stamp and random values from a string
-inline std::string GetUniqueString(int Length = 16)
+inline std::string GetUniqueString()
 {
-	std::string str;
-	const std::string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	const auto Epoch = std::to_string(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+	UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
+	const UUIDv4::UUID uuid = uuidGenerator.getUUID();
 
-	for (int i = 0; i < Length / 2; i++)
-	{
-		int RandomNumber = rand();
-		str += Epoch[RandomNumber % Epoch.length()];
-		str += Characters[RandomNumber % Characters.length()];
-	}
-
-	return str;
+	return uuid.str();
 }
 
 inline void LogFatal(std::string Message)
@@ -221,4 +216,52 @@ inline void InitialiseFoundationWithUserAgentInfo(const csp::common::String& End
 	ClientHeaderInfo.CHSEnvironment	   = "oDev";
 
 	csp::CSPFoundation::SetClientUserAgentInfo(ClientHeaderInfo);
+}
+
+
+inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+	{
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	if (CallbackCalled == false)
+	{
+		printf("Test timed out - Callback wasn't called\n");
+	}
+}
+
+inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::SpaceEntitySystem* EntitySystem, int MaxTextTimeSeconds = 20)
+{
+	// Wait for message
+	auto Start		 = std::chrono::steady_clock::now();
+	auto Current	 = std::chrono::steady_clock::now();
+	int64_t TestTime = 0;
+
+	// Call at least once
+	EntitySystem->ProcessPendingEntityOperations();
+
+	while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+	{
+		EntitySystem->ProcessPendingEntityOperations();
+
+		std::this_thread::sleep_for(50ms);
+
+		Current	 = std::chrono::steady_clock::now();
+		TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
+	}
+
+	if (CallbackCalled == false)
+	{
+		printf("Test timed out - Callback wasn't called\n");
+	}
 }

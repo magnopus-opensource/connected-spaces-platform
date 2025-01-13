@@ -11,13 +11,13 @@
 using namespace std;
 
 
-const oly_common::String Tenant = "FOUNDATION_HELLO_WORLD";
+const oly_common::String Tenant = "CSP_HELLO_WORLD";
 
 
 int main()
 {
 	//Initialise Foundation
-	const oly_common::String EndpointRootURI = "https://ogs-ostage.magnoboard.com";
+	const oly_common::String EndpointRootURI = "https://ogs.magnopus-stg.cloud";
 	if (oly::OlympusFoundation::Initialise(EndpointRootURI, Tenant))
 	{
 		cout << "Foundation initalised" << endl; 

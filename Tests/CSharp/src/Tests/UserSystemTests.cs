@@ -520,7 +520,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            var redirectURL = "https://odev.magnoverse.space/oauth";
+            var redirectURL = "https://dev.magnoverse.space/oauth";
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Google, redirectURL).Result;
@@ -537,7 +537,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            var redirectURL = "https://odev.magnoverse.space/oauth";
+            var redirectURL = "https://dev.magnoverse.space/oauth";
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Discord, redirectURL).Result;
@@ -554,7 +554,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            var redirectURL = "https://odev.magnoverse.space/oauth";
+            var redirectURL = "https://dev.magnoverse.space/oauth";
 
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Apple, redirectURL).Result;
@@ -573,7 +573,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            var redirectURL = "https://odev.magnoverse.space/oauth";
+            var redirectURL = "https://dev.magnoverse.space/oauth";
             
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Google, redirectURL).Result;
@@ -619,7 +619,7 @@ namespace CSPEngine
         {
             GetFoundationSystems(out var userSystem, out _, out _, out _, out _, out _, out _, out _, out _);
 
-            var redirectURL = "https://odev.magnoverse.space/oauth";
+            var redirectURL = "https://dev.magnoverse.space/oauth";
             
             // Retrieve Authorise URL for Google
             using var result = userSystem.GetThirdPartyProviderAuthoriseURL(Systems.EThirdPartyAuthenticationProviders.Discord, redirectURL).Result;

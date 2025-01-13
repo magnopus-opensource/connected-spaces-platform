@@ -25,6 +25,9 @@
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPSSessionInstantiator.h>
+#include <Poco/Net/HTTPSessionFactory.h>
+#include <Poco/Net/HTTPSessionInstantiator.h>
 #include <Poco/Net/SSLManager.h>
 #include <Poco/Net/StringPartSource.h>
 #include <Poco/StreamCopier.h>
@@ -68,6 +71,9 @@ POCOWebClient::POCOWebClient(const Port InPort, const ETransferProtocol Tp, bool
 
 	PocoContext
 		= Poco::makeAuto<Poco::Net::Context>(Poco::Net::Context::CLIENT_USE, "", Poco::Net::Context::VerificationMode::VERIFY_RELAXED, 9, true);
+
+	Poco::Net::HTTPSessionFactory::defaultFactory().registerProtocol("http", new Poco::Net::HTTPSessionInstantiator);
+	Poco::Net::HTTPSessionFactory::defaultFactory().registerProtocol("https", new Poco::Net::HTTPSSessionInstantiator);
 
 	// TODO: Get rid of singleton usage entirely. Until then, we can't create multiple instances of Connected Spaces Platform.
 	Poco::Net::SSLManager::instance().initializeClient(PrivateKeyHandler, CertHandler, PocoContext);
@@ -119,7 +125,7 @@ void POCOWebClient::Get(HttpRequest& Request)
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-	Poco::Net::HTTPSClientSession ClientSession(Uri.getHost(), Uri.getPort(), PocoContext);
+	Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
 	Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
 	for (auto Header : Request.GetPayload().GetHeaders())
@@ -129,10 +135,10 @@ void POCOWebClient::Get(HttpRequest& Request)
 
 	AddCookie(PocoRequest);
 
-	ClientSession.sendRequest(PocoRequest);
+	ClientSession->sendRequest(PocoRequest);
 
 	Poco::Net::HTTPResponse PocoResponse;
-	std::istream& ResponseStream = ClientSession.receiveResponse(PocoResponse);
+	std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
 	Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
 
 	{
@@ -143,7 +149,7 @@ void POCOWebClient::Get(HttpRequest& Request)
 
 	if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
 	{
-		ProcessResponseAsync(ClientSession, PocoResponse, ResponseStream, Request);
+		ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
 	}
 }
 
@@ -181,7 +187,7 @@ void POCOWebClient::Post(HttpRequest& Request)
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-	Poco::Net::HTTPSClientSession ClientSession(Uri.getHost(), Uri.getPort(), PocoContext);
+	Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
 	Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_POST, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
 	for (auto Header : Request.GetPayload().GetHeaders())
@@ -193,8 +199,8 @@ void POCOWebClient::Post(HttpRequest& Request)
 
 	size_t ContentLength = Request.GetPayload().GetContent().Length();
 	PocoRequest.setContentLength(ContentLength);
-	std::ostream& RequestStream = ClientSession.sendRequest(PocoRequest);
-	ProcessRequestAsync(ClientSession, PocoRequest, RequestStream, Request);
+	std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
+	ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
 
 	if (Request.Cancelled())
 	{
@@ -202,7 +208,7 @@ void POCOWebClient::Post(HttpRequest& Request)
 	}
 
 	Poco::Net::HTTPResponse PocoResponse;
-	std::istream& ResponseStream = ClientSession.receiveResponse(PocoResponse);
+	std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
 	Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
 
 	{
@@ -248,7 +254,7 @@ void POCOWebClient::Put(HttpRequest& Request)
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-	Poco::Net::HTTPSClientSession ClientSession(Uri.getHost(), Uri.getPort(), PocoContext);
+	Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
 	Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
 	for (auto Header : Request.GetPayload().GetHeaders())
@@ -260,8 +266,8 @@ void POCOWebClient::Put(HttpRequest& Request)
 
 	size_t ContentLength = Request.GetPayload().GetContent().Length();
 	PocoRequest.setContentLength(ContentLength);
-	std::ostream& RequestStream = ClientSession.sendRequest(PocoRequest);
-	ProcessRequestAsync(ClientSession, PocoRequest, RequestStream, Request);
+	std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
+	ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
 
 	if (Request.Cancelled())
 	{
@@ -269,7 +275,7 @@ void POCOWebClient::Put(HttpRequest& Request)
 	}
 
 	Poco::Net::HTTPResponse PocoResponse;
-	std::istream& ResponseStream = ClientSession.receiveResponse(PocoResponse);
+	std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
 	Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
 
 	{
@@ -292,7 +298,7 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-	Poco::Net::HTTPSClientSession ClientSession(Uri.getHost(), Uri.getPort(), PocoContext);
+	Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
 	Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
 	for (auto Header : Request.GetPayload().GetHeaders())
@@ -304,10 +310,10 @@ void POCOWebClient::Delete(HttpRequest& Request)
 
 	const std::string Body(Request.GetPayload().GetContent().c_str());
 	PocoRequest.setContentLength(Body.length());
-	ClientSession.sendRequest(PocoRequest) << Body;
+	ClientSession->sendRequest(PocoRequest) << Body;
 
 	Poco::Net::HTTPResponse PocoResponse;
-	std::istream& ResponseStream = ClientSession.receiveResponse(PocoResponse);
+	std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
 	Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
 
 	{
@@ -330,7 +336,7 @@ void POCOWebClient::Head(HttpRequest& Request)
 
 	Poco::URI Uri(Request.GetUri().GetAsStdString());
 
-	Poco::Net::HTTPSClientSession ClientSession(Uri.getHost(), Uri.getPort(), PocoContext);
+	Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
 	Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
 	for (auto Header : Request.GetPayload().GetHeaders())
@@ -340,10 +346,10 @@ void POCOWebClient::Head(HttpRequest& Request)
 
 	AddCookie(PocoRequest);
 
-	ClientSession.sendRequest(PocoRequest);
+	ClientSession->sendRequest(PocoRequest);
 
 	Poco::Net::HTTPResponse PocoResponse;
-	std::istream& ResponseStream = ClientSession.receiveResponse(PocoResponse);
+	std::istream& ResponseStream = ClientSession->receiveResponse(PocoResponse);
 	Request.SetResponseCode(GetOlyResponseCode(PocoResponse.getStatus()));
 
 	{
@@ -354,7 +360,7 @@ void POCOWebClient::Head(HttpRequest& Request)
 
 	if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
 	{
-		ProcessResponseAsync(ClientSession, PocoResponse, ResponseStream, Request);
+		ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
 	}
 }
 

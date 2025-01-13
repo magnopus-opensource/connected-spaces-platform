@@ -18,6 +18,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -75,11 +76,11 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 namespace csp::systems
 {
 
-SpaceSystem::SpaceSystem() : SystemBase(), GroupAPI(nullptr), SpaceAPI(nullptr)
+SpaceSystem::SpaceSystem() : SystemBase(nullptr, nullptr), GroupAPI(nullptr), SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient), CurrentSpace()
+SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr), CurrentSpace()
 {
 	GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
 	SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
@@ -92,6 +93,8 @@ SpaceSystem::~SpaceSystem()
 
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
+	CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace");
+
 	SpaceResultCallback GetSpaceCallback = [Callback, SpaceId, this](const SpaceResult& GetSpaceResult)
 	{
 		if (GetSpaceResult.GetResultCode() == EResultCode::InProgress)
@@ -101,20 +104,25 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 
 		if (GetSpaceResult.GetResultCode() == EResultCode::Failed)
 		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace fail");
 			NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
 			INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
 			return;
 		}
 
+		CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace success");
+
 		const auto& RefreshedSpace = GetSpaceResult.GetSpace();
 
-		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s", RefreshedSpace.Name.c_str());
+		CSP_LOG_FORMAT(LogLevel::Log, "Entering Space %s %s", RefreshedSpace.Name.c_str(), RefreshedSpace.Id.c_str());
 
 		const String UserId = SystemsManager::Get().GetUserSystem()->GetLoginState().UserId;
 
 		if (!HasFlag(RefreshedSpace.Attributes, SpaceAttributes::RequiresInvite))
 		{
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, "!HasFlag");
+
 			AddUserToSpace(SpaceId,
 						   UserId,
 						   [Callback, SpaceId, GetSpaceResult, RefreshedSpace, this](const SpaceResult& Result)
@@ -124,16 +132,23 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   return;
 							   }
 
+							   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace");
+
 							   NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
 							   if (Result.GetResultCode() == EResultCode::Success)
 							   {
+								   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace success");
 								   CurrentSpace = RefreshedSpace;
 
 								   csp::events::Event* EnterSpaceEvent
 									   = csp::events::EventSystem::Get().AllocateEvent(csp::events::SPACESYSTEM_ENTER_SPACE_EVENT_ID);
 								   EnterSpaceEvent->AddString("SpaceId", SpaceId);
 								   csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
+							   }
+							   else
+							   {
+								   CSP_LOG_MSG(csp::systems::LogLevel::Log, "AddUserToSpace fail!!!!");
 							   }
 
 							   auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -147,11 +162,14 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								   {
 									   if (Error != csp::multiplayer::ErrorCode::None)
 									   {
+										   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening error");
 										   CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
 																csp::multiplayer::ErrorCodeToString(Error).c_str());
 										   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										   return;
 									   }
+
+									   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening success");
 
 									   MultiplayerConnection->SetScopes(
 										   SpaceId,
@@ -159,10 +177,15 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 										   {
 											   if (Error != csp::multiplayer::ErrorCode::None)
 											   {
+												   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes error");
 												   CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s",
 																		csp::multiplayer::ErrorCodeToString(Error).c_str());
 												   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 												   return;
+											   }
+											   else
+											   {
+												   CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 											   }
 
 											   MultiplayerConnection->StartListening(
@@ -170,11 +193,14 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 												   {
 													   if (Error != csp::multiplayer::ErrorCode::None)
 													   {
+														   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
 														   CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
 																				csp::multiplayer::ErrorCodeToString(Error).c_str());
 														   INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 														   return;
 													   }
+
+													   CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
 													   // TODO: Support getting errors from RetrieveAllEntities
 													   csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
@@ -190,16 +216,22 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 			// First check if the user is the owner
 			bool EnterSuccess = RefreshedSpace.OwnerId == UserId;
 
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, " EnterSuccess:");
+			CSP_LOG_MSG(csp::systems::LogLevel::Log, std::to_string(EnterSuccess).c_str());
+
 			// If the user is not the owner check are they a moderator
 			if (!EnterSuccess)
 			{
 				EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.ModeratorIds);
+
+				CSP_LOG_MSG(csp::systems::LogLevel::Log, "ModeratorIds: fail");
 			}
 
 			// Finally check all users in the group
 			if (!EnterSuccess)
 			{
 				EnterSuccess = systems::SpaceSystemHelpers::IdCheck(UserId, RefreshedSpace.UserIds);
+				CSP_LOG_MSG(csp::systems::LogLevel::Log, "UserIds: fail");
 			}
 
 			NullResult InternalResult(GetSpaceResult.GetResultCode(), GetSpaceResult.GetHttpResultCode());
@@ -211,6 +243,10 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				EnterSpaceEvent->AddString("SpaceId", SpaceId);
 				csp::events::EventSystem::Get().EnqueueEvent(EnterSpaceEvent);
 			}
+			else
+			{
+				CSP_LOG_MSG(csp::systems::LogLevel::Log, "EnterSuccess fail");
+			}
 
 			auto* MultiplayerConnection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
@@ -221,11 +257,14 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 				{
 					if (Error != csp::multiplayer::ErrorCode::None)
 					{
+						CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 error");
 						CSP_LOG_ERROR_FORMAT("Error stopping listening in order to set scopes, ErrorCode: %s",
 											 csp::multiplayer::ErrorCodeToString(Error).c_str());
 						INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 						return;
 					}
+
+					CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StopListening2 success");
 
 					MultiplayerConnection->SetScopes(
 						SpaceId,
@@ -233,9 +272,14 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 						{
 							if (Error != csp::multiplayer::ErrorCode::None)
 							{
+								CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->SetScopes2 fail");
 								CSP_LOG_ERROR_FORMAT("Error setting scopes, ErrorCode: %s", csp::multiplayer::ErrorCodeToString(Error).c_str());
 								INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 								return;
+							}
+							else
+							{
+								CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "SetScopes was called successfully");
 							}
 
 							auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -246,11 +290,14 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 								{
 									if (Error != csp::multiplayer::ErrorCode::None)
 									{
+										CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening fail");
 										CSP_LOG_ERROR_FORMAT("Error starting listening in order to set scopes, ErrorCode: %s",
 															 csp::multiplayer::ErrorCodeToString(Error).c_str());
 										INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
 										return;
 									}
+
+									CSP_LOG_MSG(csp::systems::LogLevel::Log, " MultiplayerConnection->StartListening success");
 
 									// TODO: Support getting errors from RetrieveAllEntities
 									csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->RetrieveAllEntities();
@@ -331,11 +378,12 @@ void SpaceSystem::CreateSpace(const String& Name,
 							  const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 							  const Map<String, String>& Metadata,
 							  const Optional<FileAssetDataSource>& Thumbnail,
+							  const Optional<Array<String>>& Tags,
 							  SpaceResultCallback Callback)
 {
 	CSP_PROFILE_SCOPED();
 
-	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, this](const SpaceResult& CreateSpaceResult)
+	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
 	{
 		if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
 		{
@@ -445,7 +493,7 @@ void SpaceSystem::CreateSpace(const String& Name,
 			}
 		};
 
-		AddMetadata(Space.Id, Metadata, AddMetadataCallback);
+		AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
 	};
 
 	::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
@@ -457,11 +505,12 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 										const Optional<InviteUserRoleInfoCollection>& InviteUsers,
 										const Map<String, String>& Metadata,
 										const BufferAssetDataSource& Thumbnail,
+										const Optional<Array<String>>& Tags,
 										SpaceResultCallback Callback)
 {
 	CSP_PROFILE_SCOPED();
 
-	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, this](const SpaceResult& CreateSpaceResult)
+	SpaceResultCallback CreateSpaceCallback = [Callback, InviteUsers, Thumbnail, Metadata, Tags, this](const SpaceResult& CreateSpaceResult)
 	{
 		if (CreateSpaceResult.GetResultCode() == EResultCode::InProgress)
 		{
@@ -557,7 +606,7 @@ void SpaceSystem::CreateSpaceWithBuffer(const String& Name,
 			AddSpaceThumbnailWithBuffer(SpaceId, Thumbnail, UploadSpaceThumbnailCallback);
 		};
 
-		AddMetadata(Space.Id, Metadata, AddMetadataCallback);
+		AddMetadata(Space.Id, Metadata, Tags, AddMetadataCallback);
 	};
 
 	::CreateSpace(static_cast<chs::GroupApi*>(GroupAPI), Name, Description, Attributes, CreateSpaceCallback);
@@ -943,7 +992,10 @@ void SpaceSystem::GetUsersRoles(const String& SpaceId, const Array<String>& Requ
 	GetSpace(SpaceId, GetSpaceCallback);
 }
 
-void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, String>& NewMetadata, NullResultCallback Callback)
+void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId,
+									  const Map<String, String>& NewMetadata,
+									  const Optional<Array<String>>& Tags,
+									  NullResultCallback Callback)
 {
 	if (SpaceId.IsEmpty())
 	{
@@ -954,7 +1006,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 		return;
 	}
 
-	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata](const AssetCollectionResult& Result)
+	AssetCollectionResultCallback MetadataAssetCollCallback = [Callback, NewMetadata, Tags](const AssetCollectionResult& Result)
 	{
 		if (Result.GetResultCode() == EResultCode::InProgress)
 		{
@@ -978,7 +1030,7 @@ void SpaceSystem::UpdateSpaceMetadata(const String& SpaceId, const Map<String, S
 		};
 
 		const auto& AssetCollection = Result.GetAssetCollection();
-		AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, UpdateAssetCollCallback);
+		AssetSystem->UpdateAssetCollectionMetadata(AssetCollection, NewMetadata, Tags, UpdateAssetCollCallback);
 	};
 
 	GetMetadataAssetCollection(SpaceId, MetadataAssetCollCallback);
@@ -993,6 +1045,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 		if (Result.GetResultCode() == EResultCode::Success)
 		{
 			Map<String, Map<String, String>> SpacesMetadata;
+			Map<String, Array<String>> SpacesTags;
 			const auto& AssetCollections = Result.GetAssetCollections();
 
 			for (int i = 0; i < AssetCollections.Size(); ++i)
@@ -1002,9 +1055,11 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 				auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
 				SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
+				SpacesTags[SpaceId]		= AssetCollection.Tags;
 			}
 
 			InternalResult.SetMetadata(SpacesMetadata);
+			InternalResult.SetTags(SpacesTags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1033,6 +1088,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 			const auto& AssetCollection = Result.GetAssetCollection();
 
 			InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
+			InternalResult.SetTags(AssetCollection.Tags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1272,7 +1328,10 @@ void SpaceSystem::GetMetadataAssetCollections(const Array<csp::common::String>& 
 	AssetSystem->FindAssetCollections(nullptr, nullptr, PrototypeNames, nullptr, nullptr, nullptr, nullptr, nullptr, Callback);
 }
 
-void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<String, String>& Metadata, NullResultCallback Callback)
+void SpaceSystem::AddMetadata(const csp::common::String& SpaceId,
+							  const Map<String, String>& Metadata,
+							  const Optional<Array<String>>& Tags,
+							  NullResultCallback Callback)
 {
 	AssetCollectionResultCallback CreateAssetCollCallback = [Callback](const AssetCollectionResult& Result)
 	{
@@ -1289,7 +1348,7 @@ void SpaceSystem::AddMetadata(const csp::common::String& SpaceId, const Map<Stri
 									   MetadataAssetCollectionName,
 									   Metadata,
 									   EAssetCollectionType::FOUNDATION_INTERNAL,
-									   nullptr,
+									   Tags,
 									   CreateAssetCollCallback);
 }
 
@@ -1851,6 +1910,44 @@ void SpaceSystem::DeleteSpaceGeoLocation(const csp::common::String& SpaceId, Nul
 	};
 
 	GetSpace(SpaceId, GetSpaceCallback);
+}
+
+void SpaceSystem::DuplicateSpace(const String& SpaceId,
+								 const String& NewName,
+								 SpaceAttributes NewAttributes,
+								 const Optional<Array<String>>& MemberGroupIds,
+								 bool ShallowCopy,
+								 SpaceResultCallback Callback)
+{
+	auto Request = std::make_shared<chsaggregation::DuplicateSpaceRequest>();
+	Request->SetSpaceId(SpaceId);
+	Request->SetNewGroupOwnerId(SystemsManager::Get().GetUserSystem()->GetLoginState().UserId);
+	Request->SetNewUniqueName(NewName);
+	Request->SetDiscoverable(HasFlag(NewAttributes, csp::systems::SpaceAttributes::IsDiscoverable));
+	Request->SetRequiresInvite(HasFlag(NewAttributes, csp::systems::SpaceAttributes::RequiresInvite));
+	Request->SetShallowCopy(ShallowCopy);
+
+	if (MemberGroupIds.HasValue())
+	{
+		std::vector<String> GroupIds;
+		GroupIds.reserve(MemberGroupIds->Size());
+
+		for (int i = 0; i < MemberGroupIds->Size(); ++i)
+		{
+			GroupIds.push_back(MemberGroupIds->operator[](i));
+		}
+
+		Request->SetMemberGroupIds(GroupIds);
+	}
+
+	csp::services::ResponseHandlerPtr ResponseHandler
+		= SpaceAPI->CreateHandler<csp::systems::SpaceResultCallback, csp::systems::SpaceResult, void, chs::GroupDto>(Callback, nullptr);
+
+	static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDuplicatePost(SpaceId,		  // spaceId
+																					  false,		  // asyncCall
+																					  Request,		  // RequestBody
+																					  ResponseHandler // ResponseHandler
+	);
 }
 
 } // namespace csp::systems

@@ -29,7 +29,7 @@
 using namespace csp::systems;
 
 // Dummy EventBrite-formatted data used throughout the tests.
-static const csp::common::String TestVendorEventId  = "123456789123";
+static const csp::common::String TestVendorEventId	= "123456789123";
 static const csp::common::String TestVendorEventUri = "https://www.eventbrite.com/e/csp-test-event-tickets-123456789123";
 
 static const csp::common::String AlternativeTestVendorEventId  = "234567891234";
@@ -62,10 +62,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [TicketedEventResult] = AWAIT_PRE(EventTicketingSystem,
 										   CreateTicketedEvent,
@@ -108,10 +116,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventActiveF
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [TicketedEventResult] = AWAIT_PRE(EventTicketingSystem,
 										   CreateTicketedEvent,
@@ -154,10 +170,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, CreateTicketedEventTwiceTe
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [TicketedEventResult1] = AWAIT_PRE(EventTicketingSystem,
 											CreateTicketedEvent,
@@ -221,10 +245,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
 									 CreateTicketedEvent,
@@ -288,10 +320,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadSpaceT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
 									 CreateTicketedEvent,
@@ -341,10 +381,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, UpdateTicketEventBadEventI
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreatedResult] = AWAIT_PRE(EventTicketingSystem,
 									 CreateTicketedEvent,
@@ -394,10 +442,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsNoEventsT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetTicketedEvents, RequestPredicate, {Space.Id}, nullptr, nullptr);
 
@@ -427,10 +483,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsOneEventT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreateEventResult] = AWAIT_PRE(EventTicketingSystem,
 										 CreateTicketedEvent,
@@ -479,10 +543,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedTest)
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreateEventResult] = AWAIT_PRE(EventTicketingSystem,
 										 CreateTicketedEvent,
@@ -522,10 +594,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetIsSpaceTicketedFailureT
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	// Test for IsTicketedEvent prior to creating an event, ensure it returns false
 	auto [Result] = AWAIT_PRE(EventTicketingSystem, GetIsSpaceTicketed, RequestPredicate, Space.Id);
@@ -574,10 +654,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
 										  CreateTicketedEvent,
@@ -668,12 +756,28 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
 	SPRINTF(UniqueSpaceName2, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space1;
-	CreateSpace(SpaceSystem, UniqueSpaceName1, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space1);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName1,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space1);
 	csp::systems::Space Space2;
-	CreateSpace(SpaceSystem, UniqueSpaceName2, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space2);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName2,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space2);
 
 	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
 										  CreateTicketedEvent,
@@ -764,10 +868,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [CreateEventResult1] = AWAIT_PRE(EventTicketingSystem,
 										  CreateTicketedEvent,
@@ -859,7 +971,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoTest
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [TicketedEventVendorAuthInfoResult]
 		= AWAIT_PRE(EventTicketingSystem, GetVendorAuthorizeInfo, RequestPredicate, csp::systems::EventTicketingVendor::Eventbrite, UserId);
@@ -887,7 +999,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 	auto* EventTicketingSystem = SystemsManager.GetEventTicketingSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// 1. Invalid vendor test
 	{
@@ -953,9 +1065,9 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
  * To run this test we need an actual Eventbrite event and ticket and we need to pause halfway through. The tickets
  * must be created with different users.
  *
- * Create the Eventbrite event with an account using the same email as is used by DefaultLoginEmail.
+ * Create the Eventbrite event with an account using an email.
  *
- * Get a ticket for that event with an account using the same email as AlternativeLoginEmail.
+ * Get a ticket for that event with an account using a different email.
  *
  * When you have those fill in the values for TestVendorEventId, TestVendorEventUri and TestVendorTicketId.
  *
@@ -986,15 +1098,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 
 	// Log in as attendee just to get their UserId and log out again
 	csp::common::String EventAttendeeUserId;
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile EventAttendee = CreateTestUser();
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
-	LogIn(UserSystem, EventCreatorUserId);
+	csp::systems::Profile EventCreator = CreateTestUser();
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Add the attendee to the space
 	auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
@@ -1032,7 +1146,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	LogOut(UserSystem);
 
 	// Log in as the attendee
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 
 	auto [SubmitEventTicketResult] = AWAIT_PRE(EventTicketingSystem,
 											   SubmitEventTicket,
@@ -1053,12 +1167,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 	EXPECT_EQ(SubmittedEventTicket.VendorTicketId, TestVendorTicketId);
 	EXPECT_EQ(SubmittedEventTicket.Status, csp::systems::TicketStatus::Redeemed);
 	EXPECT_EQ(SubmittedEventTicket.UserId, EventAttendeeUserId);
-	EXPECT_EQ(SubmittedEventTicket.Email, AlternativeLoginEmail);
+	EXPECT_EQ(SubmittedEventTicket.Email, EventAttendee.Email);
 
 	// Log out as the attendee
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, EventCreatorUserId);
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }
@@ -1089,15 +1203,17 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 
 	// Log in as attendee just to get their UserId and log out again
 	csp::common::String EventAttendeeUserId;
-	LogIn(UserSystem, EventAttendeeUserId, AlternativeLoginEmail, AlternativeLoginPassword);
+	csp::systems::Profile EventAttendee = CreateTestUser();
+	LogIn(UserSystem, EventAttendeeUserId, EventAttendee.Email, GeneratedTestAccountPassword);
 	LogOut(UserSystem);
 
 	// Log in as the creator
 	csp::common::String EventCreatorUserId;
-	LogIn(UserSystem, EventCreatorUserId);
+	csp::systems::Profile EventCreator = CreateTestUser();
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Public, nullptr, nullptr, nullptr, nullptr, Space);
 
 	// Add the attendee to the space
 	auto [AddUserToSpaceResult] = AWAIT_PRE(SpaceSystem, AddUserToSpace, RequestPredicate, Space.Id, EventAttendeeUserId);
@@ -1150,12 +1266,12 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfO
 	EXPECT_EQ(SubmittedEventTicket.VendorTicketId, TestVendorTicketId);
 	EXPECT_EQ(SubmittedEventTicket.Status, csp::systems::TicketStatus::Redeemed);
 	EXPECT_EQ(SubmittedEventTicket.UserId, EventAttendeeUserId);
-	EXPECT_EQ(SubmittedEventTicket.Email, AlternativeLoginEmail);
+	EXPECT_EQ(SubmittedEventTicket.Email, EventAttendee.Email);
 
 	// Log out as the attendee
 	LogOut(UserSystem);
 
-	LogIn(UserSystem, EventCreatorUserId);
+	LogIn(UserSystem, EventCreatorUserId, EventCreator.Email, GeneratedTestAccountPassword);
 	DeleteSpace(SpaceSystem, Space.Id);
 	LogOut(UserSystem);
 }

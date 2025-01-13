@@ -41,7 +41,7 @@ enum class ExternalLinkActions
 /// @brief The list of properties defined within an external link component.
 enum class ExternalLinkPropertyKeys
 {
-	Name = 0,
+	Name_DEPRECATED = 0,
 	LinkUrl,
 	Position,
 	Rotation,
@@ -55,8 +55,7 @@ enum class ExternalLinkPropertyKeys
 
 
 /// @ingroup ExternalLinkSpaceComponent
-/// @brief Data representation of an ExternalLinkSpaceComponent.
-/// @note This component can be used to handle external URLs that can be opened in game from a space.
+/// @brief Used to handle external URLs that can be opened from within a space.
 class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
 {
 public:
@@ -65,9 +64,11 @@ public:
 	ExternalLinkSpaceComponent(SpaceEntity* Parent);
 
 	/// @brief Gets the name of this external link component.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 	/// @brief Sets the name for this external link component.
 	/// @param Value - The new name to assign to this external link componenent.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Gets the URL address to which this external link component redirects the user on trigger.

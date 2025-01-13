@@ -54,7 +54,7 @@ enum class ConversationPropertyKeys
 
 
 /// @ingroup ConversationSpaceComponent
-/// @brief Data representation of an ConversationSpaceComponent.
+/// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
 class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
 {
 public:
@@ -165,7 +165,7 @@ private:
 								  const csp::common::String& Message,
 								  MessageResultCallback Callback) const;
 
-    void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
+	void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 };
 
 } // namespace csp::multiplayer

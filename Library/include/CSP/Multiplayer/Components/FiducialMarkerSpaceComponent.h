@@ -32,7 +32,7 @@ namespace csp::multiplayer
 /// @brief Enumerates the list of properties that can be replicated for a fiducial marker space component.
 enum class FiducialMarkerPropertyKeys
 {
-	Name,
+	Name_DEPRECATED,
 	MarkerAssetId,
 	AssetCollectionId,
 	Position,
@@ -45,7 +45,7 @@ enum class FiducialMarkerPropertyKeys
 
 
 /// @ingroup FiducialMarkerSpaceComponent
-/// @brief Data representation of a FiducialMarkerSpaceComponent.
+/// @brief As an alternative to cloud-based anchors, fiducial markers can be used to anchor your space to a physical location.
 class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
 {
 public:
@@ -55,10 +55,12 @@ public:
 
 	/// @brief Gets the name of this fiducial marker space component.
 	/// @return The name of this fiducial marker space component.
+	[[deprecated("Deprecated in favour of ComponentBase::GetComponentName()")]]
 	const csp::common::String& GetName() const;
 
 	/// @brief Sets the name of this fiducial marker space component.
 	/// @param Value The name of this fiducial marker space component.
+	[[deprecated("Deprecated in favour of ComponentBase::SetComponentName()")]]
 	void SetName(const csp::common::String& Value);
 
 	/// @brief Gets the ID of the image asset this image component refers to.

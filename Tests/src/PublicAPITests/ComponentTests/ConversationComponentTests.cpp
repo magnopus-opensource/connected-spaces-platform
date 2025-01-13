@@ -53,6 +53,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -69,12 +70,19 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
-	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	const csp::common::String UserName		= "Player 1";
 	const SpaceTransform UserTransform		= {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
@@ -201,7 +209,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		{
 			MessageInfo NewData;
 			SpaceTransform CameraTransformValue(csp::common::Vector3().One(), csp::common::Vector4().One(), csp::common::Vector3().One());
-			NewData.IsConversation	   = true;
+			NewData.IsConversation = true;
 			NewData.Message		   = "TestMessage1";
 
 			auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, NewData);
@@ -213,14 +221,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		}
 
 		auto TestMessage = "test123";
-		Connection->ListenNetworkEvent("ConversationSystem:NewMessage",
-									   [=](bool ok, csp::common::Array<ReplicatedValue> Data)
-									   {
-										   EXPECT_TRUE(ok);
+		EventBus->ListenNetworkEvent("ConversationSystem:NewMessage",
+									 [=](bool ok, csp::common::Array<ReplicatedValue> Data)
+									 {
+										 EXPECT_TRUE(ok);
 
-										   ConversationId == Data[0].GetString();
-										   std::cerr << "Test Event Received " << ok << std::endl;
-									   });
+										 ConversationId == Data[0].GetString();
+										 std::cerr << "Test Event Received " << ok << std::endl;
+									 });
 
 		{
 			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
@@ -258,7 +266,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 			EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 		}
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	}
 
 	// Delete space
@@ -288,11 +296,19 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	{
 		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
@@ -359,7 +375,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 		EXPECT_EQ(ConversationComponent->GetRotation().Y, NewRotation.Y);
 		EXPECT_EQ(ConversationComponent->GetRotation().Z, NewRotation.Z);
 
-		SpaceSystem->ExitSpace([](const csp::systems::NullResult& Result){});
+		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 	};
 
 	// Delete space

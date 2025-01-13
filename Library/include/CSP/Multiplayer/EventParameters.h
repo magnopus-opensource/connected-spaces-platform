@@ -95,7 +95,9 @@ enum class ESequenceUpdateType
 {
 	Create,
 	Update,
-	Delete
+	Rename,
+	Delete,
+	Invalid
 };
 
 class CSP_API SequenceChangedParams
@@ -109,6 +111,22 @@ public:
 
 	/// @brief If a sequence is renamed using the RenameSequence function, this will be the new key.
 	csp::common::String NewKey;
+};
+
+class CSP_API SequenceHotspotChangedParams
+{
+public:
+	/// @brief The type of update to the sequence.
+	ESequenceUpdateType UpdateType;
+
+	/// @brief The unique identifier of the space that this hotspot sequence belongs to.
+	csp::common::String SpaceId;
+
+	/// @brief The name of the hotspot group that has been changed.
+	csp::common::String Name;
+
+	/// @brief If a hotspot sequence is renamed, this will be the new name.
+	csp::common::String NewName;
 };
 
 } // namespace csp::multiplayer

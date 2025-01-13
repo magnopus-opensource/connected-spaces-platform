@@ -20,6 +20,10 @@ def main():
         help="NPM release command, pack and publish are available.",
         default="pack",
     )
+    arg_parser.add_argument(
+        "--npm_publish_flag",
+        help="Whether the package should be published to NPM. Default == True",
+        default="True")
 
     PrepareUnityPackage.add_args(arg_parser)
 
@@ -30,10 +34,11 @@ def main():
     # Create and publish NPM package
     root_dir = PrepareUnityPackage.get_git_root()
     os.chdir(args.output_directory)
-    subprocess.call(
-        f'npm {args.release_mode} --userconfig="{root_dir}/unity.npmrc" --"@magnopus-opensource:registry={args.registry}"',
-        shell=True,
-    )
+    if eval(args.npm_publish_flag):
+        subprocess.call(
+            f'npm {args.release_mode} --userconfig="{root_dir}/unity.npmrc" --"@magnopus-opensource:registry={args.registry}"',
+            shell=True,
+        )
 
 
 if __name__ == "__main__":

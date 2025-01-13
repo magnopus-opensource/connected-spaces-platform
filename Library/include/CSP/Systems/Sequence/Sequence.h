@@ -28,6 +28,7 @@ public:
 	csp::common::String ReferenceType;
 	csp::common::String ReferenceId;
 	csp::common::Array<csp::common::String> Items;
+	csp::common::Map<csp::common::String, csp::common::String> MetaData;
 };
 
 /// @ingroup Sequence System
@@ -42,6 +43,9 @@ class CSP_API SequenceResult : public csp::systems::ResultBase
 
 public:
 	const Sequence& GetSequence() const;
+	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
 	SequenceResult(void*) {};
@@ -65,6 +69,8 @@ public:
 	const csp::common::Array<Sequence>& GetSequences() const;
 
 	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
 	SequencesResult(void*) {};
@@ -82,7 +88,4 @@ typedef std::function<void(const SequenceResult& Result)> SequenceResultCallback
 /// @param Result SequenceResult : result class
 typedef std::function<void(const SequencesResult& Result)> SequencesResultCallback;
 
-/// @brief Callback containing array of sequences.
-/// @param Result SequenceResult : result class
-typedef std::function<void(const SequencesResult& Result)> SequenceUpdatedResultCallback;
 } // namespace csp::systems

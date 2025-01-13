@@ -26,8 +26,10 @@
 namespace csp::multiplayer
 {
 
+csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
+
 // Generic deserialiser for multiplayer events. It can be derived from and
-// its behaviour can be overridden if specialised handling is needed for
+// its behavior can be overridden if specialised handling is needed for
 // certain events.
 class EventDeserialiser
 {
@@ -124,6 +126,25 @@ public:
 
 private:
 	SequenceChangedParams EventParams;
+};
+
+/// A deserialiser for getting SequenceHotspot data from an event:
+/// UpdateType - The update type for the Sequence Hierarchy: Create, Update, Rename, Delete
+/// SpaceId - The unique identifer of the space this hotspot sequence relates to.
+/// Name - The name of the hotspot which has been changed.
+/// NewName - In the case of renames, describes the new name of the sequence.
+class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
+{
+public:
+	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+
+	const SequenceHotspotChangedParams& GetEventParams() const
+	{
+		return EventParams;
+	}
+
+private:
+	SequenceHotspotChangedParams EventParams;
 };
 
 } // namespace csp::multiplayer

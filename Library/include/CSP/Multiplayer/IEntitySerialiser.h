@@ -63,6 +63,10 @@ public:
 	/// @param Value csp::common::String : The value to write.
 	virtual void WriteString(const csp::common::String& Value) = 0;
 
+	/// @brief Write a vector2 field of the entity.
+	/// @param Value Vector2 : The value to write.
+	virtual void WriteVector2(const csp::common::Vector2& Value) = 0;
+
 	/// @brief Write a vector3 field of the entity.
 	/// @param Value Vector3 : The value to write.
 	virtual void WriteVector3(const csp::common::Vector3& Value) = 0;
@@ -150,6 +154,10 @@ public:
 	/// @return The deserialised string.
 	virtual csp::common::String ReadString() = 0;
 
+	/// @brief Reads a vector2 from the deserialiser.
+	/// @return The deserialised vector2.
+	virtual csp::common::Vector2 ReadVector2() = 0;
+
 	/// @brief Reads a vector3 from the deserialiser.
 	/// @return The deserialised vector3.
 	virtual csp::common::Vector3 ReadVector3() = 0;
@@ -161,6 +169,10 @@ public:
 	/// @brief Checks if the next value is null.
 	/// @return True if the next value is null, false otherwise.
 	virtual bool NextValueIsNull() = 0;
+
+	/// @brief Checks if the next value is an array.
+	/// @return True if the next value is null, false otherwise.
+	virtual bool NextValueIsArray() = 0;
 
 	/// @brief Puts the deserialiser into array processing mode to begin reading from an array.
 	/// @param OutLength uint32_t : A reference to variable to store the length of the array.

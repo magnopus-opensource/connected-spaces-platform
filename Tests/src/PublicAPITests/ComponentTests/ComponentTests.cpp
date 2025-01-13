@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#include "../SpaceSystemTestHelpers.h"
+#include "../UserSystemTestHelpers.h"
+#include "Awaitable.h"
 #include "CSP/Multiplayer/Components/AnimatedModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ButtonSpaceComponent.h"
@@ -23,15 +26,27 @@
 #include "CSP/Multiplayer/Components/ImageSpaceComponent.h"
 #include "CSP/Multiplayer/Components/LightSpaceComponent.h"
 #include "CSP/Multiplayer/Components/ReflectionSpaceComponent.h"
+#include "CSP/Multiplayer/Components/ScriptSpaceComponent.h"
 #include "CSP/Multiplayer/Components/StaticModelSpaceComponent.h"
 #include "CSP/Multiplayer/Components/VideoPlayerSpaceComponent.h"
+#include "CSP/Multiplayer/Script/EntityScript.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
 
 
 using namespace csp::multiplayer;
+
+namespace
+{
+
+bool RequestPredicate(const csp::systems::ResultBase& Result)
+{
+	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
+}
+} // namespace
 
 
 #if RUN_ALL_UNIT_TESTS || RUN_COMPONENT_TESTS
@@ -183,5 +198,97 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
 
 		delete Component;
 	}
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseTest)
+{
+	SpaceEntity* MySpaceEntity = new SpaceEntity();
+	CustomSpaceComponent MyCustomComponent(MySpaceEntity);
+
+	EXPECT_EQ(MyCustomComponent.GetComponentName(), "");
+
+	MyCustomComponent.SetComponentName("ComponentName");
+
+	EXPECT_EQ(MyCustomComponent.GetComponentName(), "ComponentName");
+}
+
+CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ComponentBaseScriptTest)
+{
+	SetRandSeed();
+
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+
+	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
+	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+	char UniqueSpaceName[256];
+	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+	// Log in
+	csp::common::String UserId;
+	LogInAsNewTestUser(UserSystem, UserId);
+
+	// Create space
+	csp::systems::Space Space;
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
+
+	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+	EntitySystem->SetEntityCreatedCallback(
+		[](csp::multiplayer::SpaceEntity* Entity)
+		{
+		});
+
+	// Create object to represent the custom
+	csp::common::String ObjectName = "Object 1";
+	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
+	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+	// Create custom component
+	auto* CustomComponent = (CustomSpaceComponent*) CreatedObject->AddComponent(ComponentType::Custom);
+	// Create script component
+	auto* ScriptComponent = (ScriptSpaceComponent*) CreatedObject->AddComponent(ComponentType::ScriptData);
+	CreatedObject->QueueUpdate();
+	EntitySystem->ProcessPendingEntityOperations();
+
+	// Setup script
+	std::string CustomScriptText = R"xx(
+	
+		var custom = ThisEntity.getCustomComponents()[0];
+		custom.name = "ComponentName";
+    )xx";
+
+	EXPECT_EQ(CustomComponent->GetComponentName(), "");
+
+	ScriptComponent->SetScriptSource(CustomScriptText.c_str());
+	CreatedObject->GetScript()->Invoke();
+	const bool ScriptHasErrors = CreatedObject->GetScript()->HasError();
+	EXPECT_FALSE(ScriptHasErrors);
+	EntitySystem->ProcessPendingEntityOperations();
+
+	// Ensure values are set correctly
+	EXPECT_EQ(CustomComponent->GetComponentName(), "ComponentName");
+
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+	// Delete space
+	DeleteSpace(SpaceSystem, Space.Id);
+
+	// Log out
+	LogOut(UserSystem);
 }
 #endif

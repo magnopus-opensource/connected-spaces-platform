@@ -19,6 +19,7 @@
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Services/PrototypeService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/RemoteFileManager.h"
@@ -148,16 +149,18 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 namespace csp::systems
 {
 
-AssetSystem::AssetSystem() : SystemBase(), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
+AssetSystem::AssetSystem() : SystemBase(nullptr, nullptr), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus) : SystemBase(InWebClient, InEventBus)
 {
 	PrototypeAPI   = CSP_NEW chs::PrototypeApi(InWebClient);
 	AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
 
 	FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+
+	RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
@@ -166,6 +169,8 @@ AssetSystem::~AssetSystem()
 
 	CSP_DELETE(AssetDetailAPI);
 	CSP_DELETE(PrototypeAPI);
+
+	DeregisterSystemCallback();
 }
 
 void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId,
@@ -241,9 +246,7 @@ void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollect
 	}
 
 	csp::services::ResponseHandlerPtr ResponseHandler
-		= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(
-			Callback,
-			nullptr);
+		= PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesDelete(AssetCollectionIds, ResponseHandler, csp::common::CancellationToken::Dummy());
@@ -302,6 +305,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGroupOwnedOriginalGroupIdDuplicateNewGroupIdPost(
 			std::nullopt,							// Tags
+			std::nullopt,							// ExcludedTags
 			std::nullopt,							// TagsAll
 			AssetCollectionIds,						// const std::optional<std::vector<utility::string_t>>& Ids
 			std::nullopt,							// Names
@@ -313,6 +317,7 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 			std::nullopt,							// Types
 			true,									// HasGroup
 			std::nullopt,							// CreatedBy
+			std::nullopt,							// CreatedAfter
 			std::nullopt,							// PrototypeOwnerIds
 			std::nullopt,							// ReadAccessFilters
 			std::nullopt,							// WriteAccessFilters
@@ -441,6 +446,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGet(PrototypeTags,		// Tags
+							 std::nullopt,		// ExcludedTags
 							 std::nullopt,		// TagsAll
 							 PrototypeIds,		// Ids
 							 PrototypeNames,	// Names
@@ -452,6 +458,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 							 PrototypeTypes,	// Types
 							 std::nullopt,		// HasGroup
 							 std::nullopt,		// CreatedBy
+							 std::nullopt,		// CreatedAfter
 							 std::nullopt,		// PrototypeOwnerIds
 							 std::nullopt,		// ReadAccessFilters
 							 std::nullopt,		// WriteAccessFilters
@@ -465,10 +472,15 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 
 void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
 												const Map<String, String>& NewMetadata,
+												const Optional<Array<String>>& Tags,
 												AssetCollectionResultCallback Callback)
 {
-	auto PrototypeInfo
-		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, nullptr);
+	auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId,
+											AssetCollection.ParentId,
+											AssetCollection.Name,
+											NewMetadata,
+											AssetCollection.Type,
+											Tags.HasValue() ? Tags : AssetCollection.Tags);
 
 	services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
@@ -548,7 +560,7 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
 	}
 
 	AssetInfo->SetAddressableId(
-		StringFormat("%s|%d", Asset.GetThirdPartyPackagedAssetIdentifier().c_str(), static_cast<int>(Asset.GetThirdPartyPlatformType())));
+		StringFormat("%s|%d", Asset.ThirdPartyPackagedAssetIdentifier.c_str(), static_cast<int>(Asset.ThirdPartyPlatformType)));
 
 	AssetInfo->SetAssetType(ConvertAssetTypeToString(Asset.Type));
 	services::ResponseHandlerPtr ResponseHandler
@@ -588,6 +600,7 @@ void AssetSystem::GetAssetsInCollection(const AssetCollection& AssetCollection, 
 										 std::nullopt, // PrototypeNames
 										 std::nullopt, // PrototypeParentNames
 										 std::nullopt, // Tags
+										 std::nullopt, // ExcludedTags
 										 std::nullopt, // TagsAll
 										 ResponseHandler);
 }
@@ -667,17 +680,18 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds,
 		= AssetDetailAPI->CreateHandler<AssetsResultCallback, AssetsResult, void, services::DtoArray<chs::AssetDetailDto>>(Callback, nullptr);
 
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,
-										 std::nullopt,
-										 AssetDetailTypes,
-										 std::nullopt,
-										 AssetDetailNames,
-										 std::nullopt,
-										 PrototypeIds,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
+		->apiV1PrototypesAssetDetailsGet(AssetDetailIds,   // Ids
+										 std::nullopt,	   // SupportedPlatforms
+										 AssetDetailTypes, // AssetTypes
+										 std::nullopt,	   // Styles
+										 AssetDetailNames, // Names
+										 std::nullopt,	   // CreatedAfter
+										 PrototypeIds,	   // PrototypeIds
+										 std::nullopt,	   // PrototypeNames
+										 std::nullopt,	   // PrototypeParentNames
+										 std::nullopt,	   // Tags
+										 std::nullopt,	   // ExcludedTags
+										 std::nullopt,	   // TagsAll
 										 ResponseHandler);
 }
 
@@ -704,17 +718,18 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
 	// Use `GET /api/v1/prototypes/asset-details` and only pass asset collection IDs
 	static_cast<chs::AssetDetailApi*>(AssetDetailAPI)
-		->apiV1PrototypesAssetDetailsGet(std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 Ids,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
-										 std::nullopt,
+		->apiV1PrototypesAssetDetailsGet(std::nullopt, // Ids
+										 std::nullopt, // SupportedPlatforms
+										 std::nullopt, // AssetTypes
+										 std::nullopt, // Styles
+										 std::nullopt, // Names
+										 std::nullopt, // CreatedAfter
+										 Ids,		   // PrototypeIds
+										 std::nullopt, // PrototypeNames
+										 std::nullopt, // PrototypeParentNames
+										 std::nullopt, // Tags
+										 std::nullopt, // ExcludedTags
+										 std::nullopt, // TagsAll
 										 ResponseHandler);
 }
 
@@ -872,6 +887,42 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void
 	};
 
 	GetAssetsByCriteria({InAsset.AssetCollectionId}, nullptr, nullptr, Array<EAssetType> {EAssetType::MODEL}, GetAssetsCallback);
+}
+
+CSP_EVENT void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+{
+	AssetDetailBlobChangedCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void AssetSystem::RegisterSystemCallback()
+{
+	if (!AssetDetailBlobChangedCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
+}
+
+void AssetSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+	{
+		EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
+	}
+}
+
+void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+	if (!AssetDetailBlobChangedCallback)
+	{
+		return;
+	}
+
+	csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
 }
 
 } // namespace csp::systems

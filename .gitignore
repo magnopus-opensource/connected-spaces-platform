@@ -20,6 +20,7 @@ ARM64/*
 **/node_modules/**
 *.log
 *.npmrc
+app.config
 
 # Allows Project files for Examples
 !/Examples/**/**.sln
@@ -99,6 +100,7 @@ UnitTesting/src/**/*
 UnitTesting/tests/*_test_results.xml
 UnitTesting/tests/csharp/Assets/Tests/generated/**/*
 UnitTesting/tests/javascript/tests.js
+Tests/assets/test_account_creds.txt
 
 # Ignore generated package directories
 package/

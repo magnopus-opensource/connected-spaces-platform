@@ -280,7 +280,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
 	{
-		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-odev.magnoboard.com/mag-user"), 80, ETransferProtocol::HTTPS);
+		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-internal.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
 		EXPECT_TRUE(WebClient != nullptr);
 
 		HttpPayload Payload;
@@ -331,7 +331,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 	// Make sure to specify custom allocator
 	using EastlString = eastl::basic_string<char, csp::memory::EAStlAllocator>;
 
-	WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-odev.magnoboard.com/mag-user"), 80, ETransferProtocol::HTTPS);
+	WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
 	EXPECT_TRUE(WebClient != nullptr);
 
 	// Login
@@ -604,10 +604,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 
 	auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	HttpPayload Payload;
-	RunWebClientTest<RetryResponseReceiver>("https://ogs-odev-internal.magnoboard.com/mag-user/appsettings",
+	RunWebClientTest<RetryResponseReceiver>("https://ogs-internal.magnopus-dev.cloud/mag-user/appsettings",
 											ERequestVerb::Get,
 											80,
 											Payload,

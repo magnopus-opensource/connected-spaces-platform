@@ -60,7 +60,7 @@ enum class FogMode
 
 
 /// @ingroup FogSpaceComponent
-/// @brief Data representation of an FogSpaceComponent.
+/// @brief Add a depth-based fog volume to your space.
 class CSP_API FogSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IVisibleComponent
 {
 public:

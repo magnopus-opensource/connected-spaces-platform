@@ -20,12 +20,13 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/CancellationToken.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
-
 
 namespace csp::services
 {
@@ -42,6 +43,12 @@ class RemoteFileManager;
 
 } // namespace csp::web
 
+namespace csp::multiplayer
+{
+
+class EventBus;
+
+} // namespace csp::multiplayer
 
 namespace csp::memory
 {
@@ -142,9 +149,11 @@ public:
 	/// @brief Updates the Metadata field of an Asset Collection
 	/// @param AssetCollection AssetCollection : asset collection to be updated
 	/// @param NewMetadata csp::common::StringMap : the new metadata information that will replace the previous
+	/// @param Tags csp::common::Array<csp::common::String : optional array of strings to replace the tags
 	/// @param Callback AssetCollectionResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void UpdateAssetCollectionMetadata(const AssetCollection& AssetCollection,
 														const csp::common::Map<csp::common::String, csp::common::String>& NewMetadata,
+														const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 														AssetCollectionResultCallback Callback);
 
 	/// @brief Creates a new asset.
@@ -256,15 +265,32 @@ public:
 	CSP_ASYNC_RESULT_WITH_PROGRESS void
 		RegisterAssetToLODChain(const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
 
+	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
+	typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+
+	/// @brief Sets a callback for an asset changed event.
+	/// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
+	CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
+
+	/// @brief Registers the system to listen for the named event.
+	void RegisterSystemCallback() override;
+	/// @brief Deregisters the system from listening for the named event.
+	void DeregisterSystemCallback() override;
+	/// @brief Deserialises the event values of the system.
+	/// @param EventValues std::vector<signalr::value> : event values to deserialise
+	CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
+	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
 	~AssetSystem();
 
 	csp::services::ApiBase* PrototypeAPI;
 	csp::services::ApiBase* AssetDetailAPI;
 
 	csp::web::RemoteFileManager* FileManager;
+
+	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
 };
 
 } // namespace csp::systems

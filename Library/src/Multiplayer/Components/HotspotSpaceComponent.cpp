@@ -16,6 +16,8 @@
 #include "CSP/Multiplayer/Components/HotspotSpaceComponent.h"
 
 #include "CSP/Multiplayer/SpaceEntity.h"
+#include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
+#include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
@@ -28,7 +30,7 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBas
 {
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Position)]		= csp::common::Vector3::Zero();
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Rotation)]		= csp::common::Vector4 {0, 0, 0, 1};
-	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name)]			= "";
+	Properties[static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED)] = "";
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsTeleportPoint)] = true;
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint)]	= false;
 	Properties[static_cast<uint32_t>(HotspotPropertyKeys::IsVisible)]		= true;
@@ -39,12 +41,12 @@ HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent) : ComponentBas
 
 const csp::common::String& HotspotSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name));
+	return GetStringProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED));
 }
 
 void HotspotSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name), Value);
+	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::Name_DEPRECATED), Value);
 }
 
 bool HotspotSpaceComponent::GetIsTeleportPoint() const
@@ -67,9 +69,9 @@ void HotspotSpaceComponent::SetIsSpawnPoint(bool Value)
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsSpawnPoint), Value);
 }
 
-const csp::common::String& HotspotSpaceComponent::GetUniqueComponentId() const
+csp::common::String HotspotSpaceComponent::GetUniqueComponentId() const
 {
-	static csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
+	csp::common::String UniqueComponentId = std::to_string(Parent->GetId()).c_str();
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(Id).c_str();
 
@@ -121,4 +123,15 @@ void HotspotSpaceComponent::SetIsARVisible(bool Value)
 {
 	SetProperty(static_cast<uint32_t>(HotspotPropertyKeys::IsARVisible), Value);
 }
+
+void HotspotSpaceComponent::OnLocalDelete()
+{
+	auto CB = [](const csp::systems::NullResult& Result)
+	{
+
+	};
+
+	systems::SystemsManager::Get().GetHotspotSequenceSystem()->RemoveItemFromGroups(GetUniqueComponentId(), CB);
+}
+
 } // namespace csp::multiplayer

@@ -65,11 +65,19 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -101,15 +109,19 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	EXPECT_EQ(HotspotComponent->GetRotation().Z, 0);
 	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), true);
 	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), false);
-	EXPECT_EQ(HotspotComponent->GetName(), "");
 
 	csp::common::String UniqueComponentId = std::to_string(CreatedObject->GetId()).c_str();
 	UniqueComponentId += ":";
 	UniqueComponentId += std::to_string(HotspotComponent->GetId()).c_str();
 
-	const csp::common::String& HotspotUniqueComponentId = HotspotComponent->GetUniqueComponentId();
+	const csp::common::String HotspotUniqueComponentId = HotspotComponent->GetUniqueComponentId();
 
 	EXPECT_EQ(HotspotUniqueComponentId, UniqueComponentId);
+
+	// Test again to ensure getter works with multiple calls.
+	const csp::common::String HotspotUniqueComponentId2 = HotspotComponent->GetUniqueComponentId();
+
+	EXPECT_EQ(HotspotUniqueComponentId2, UniqueComponentId);
 
 	// Set new values
 
@@ -120,7 +132,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	HotspotComponent->SetRotation(csp::common::Vector4 {1, 1, 1, 1});
 	HotspotComponent->SetIsTeleportPoint(false);
 	HotspotComponent->SetIsSpawnPoint(true);
-	HotspotComponent->SetName("HotspotName");
 
 	// Ensure values are set correctly
 	EXPECT_FLOAT_EQ(HotspotComponent->GetPosition().X, 1.0f);
@@ -134,12 +145,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Z, 1.0f);
 	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), false);
 	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), true);
-	EXPECT_EQ(HotspotComponent->GetName(), "HotspotName");
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);
@@ -168,11 +175,19 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, Space);
+	CreateSpace(SpaceSystem,
+				UniqueSpaceName,
+				TestSpaceDescription,
+				csp::systems::SpaceAttributes::Private,
+				nullptr,
+				nullptr,
+				nullptr,
+				nullptr,
+				Space);
 
 	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -206,7 +221,6 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 		hotspot.isARVisible = false;
 		hotspot.isVisible = false;
 		hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
-		hotspot.name = "HotspotName";
 		hotspot.isSpawnPoint = true;
 		hotspot.isTeleportPoint = false;
 
@@ -235,12 +249,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 	EXPECT_FLOAT_EQ(HotspotComponent->GetRotation().Z, 1.0f);
 	EXPECT_EQ(HotspotComponent->GetIsSpawnPoint(), true);
 	EXPECT_EQ(HotspotComponent->GetIsTeleportPoint(), false);
-	EXPECT_EQ(HotspotComponent->GetName(), "HotspotName");
 
-	SpaceSystem->ExitSpace(
-		[](const csp::systems::NullResult& Result)
-		{
-		});
+	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
 	// Delete space
 	DeleteSpace(SpaceSystem, Space.Id);

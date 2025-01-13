@@ -28,6 +28,7 @@
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
+#include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ConversationSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/CustomSpaceComponentScriptInterface.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
@@ -47,6 +48,7 @@
 #include "Multiplayer/Script/EntityScriptInterface.h"
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
+
 
 namespace csp::multiplayer
 {
@@ -204,6 +206,25 @@ public:
 		return ScriptInterface;
 	}
 
+	std::vector<EntityScriptInterface*> GetRootHierarchyEntities()
+	{
+		std::vector<EntityScriptInterface*> RootHierarchyEntities;
+		if (EntitySystem)
+		{
+			EntitySystem->LockEntityUpdate();
+
+			for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+			{
+				SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
+				RootHierarchyEntities.push_back(Entity->GetScriptInterface());
+			}
+
+			EntitySystem->UnlockEntityUpdate();
+		}
+
+		return RootHierarchyEntities;
+	}
+
 	std::string GetFoundationVersion()
 	{
 		return csp::CSPFoundation::GetVersion().c_str();
@@ -359,6 +380,23 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(FogSpaceComponent, MaxOpacity, "maxOpacity")
 		.PROPERTY_GET_SET(FogSpaceComponent, IsVolumetric, "isVolumetric");
 
+	Module->class_<CinematicCameraSpaceComponentScriptInterface>("CinematicCameraSpaceComponent")
+		.constructor<>()
+		.base<ComponentScriptInterface>()
+		.fun<&CinematicCameraSpaceComponentScriptInterface::GetFov>("getFov")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Position, "position")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Rotation, "rotation")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, FocalLength, "focalLength")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, AspectRatio, "aspectRatio")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, SensorSize, "sensorSize")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, NearClip, "nearClip")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, FarClip, "farClip")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Iso, "iso")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, ShutterSpeed, "shutterSpeed")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, Aperture, "aperture")
+		.PROPERTY_GET_SET(CinematicCameraSpaceComponent, IsViewerCamera, "isViewerCamera");
+
+
 	Module->class_<ImageSpaceComponentScriptInterface>("ImageSpaceComponent")
 		.constructor<>()
 		.base<ComponentScriptInterface>()
@@ -484,7 +522,6 @@ void BindComponents(qjs::Context::Module* Module)
 		.PROPERTY_GET_SET(HotspotSpaceComponent, Rotation, "rotation")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsVisible, "isVisible")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsARVisible, "isARVisible")
-		.PROPERTY_GET_SET(HotspotSpaceComponent, Name, "name")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsTeleportPoint, "isTeleportPoint")
 		.PROPERTY_GET_SET(HotspotSpaceComponent, IsSpawnPoint, "isSpawnPoint");
 }
@@ -527,6 +564,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntityScriptInterface::GetComponentsOfType<AudioSpaceComponentScriptInterface, ComponentType::Audio>>("getAudioComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<SplineSpaceComponentScriptInterface, ComponentType::Spline>>("getSplineComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FogSpaceComponentScriptInterface, ComponentType::Fog>>("getFogComponents")
+		.fun<&EntityScriptInterface::GetComponentsOfType<CinematicCameraSpaceComponentScriptInterface, ComponentType::CinematicCamera>>(
+			"getCinematicCameraComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<ECommerceSpaceComponentScriptInterface, ComponentType::ECommerce>>("getECommerceComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<FiducialMarkerSpaceComponentScriptInterface, ComponentType::FiducialMarker>>(
 			"getFiducialMarkerComponents")
@@ -534,16 +573,23 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 			"getGaussianSplatComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<TextSpaceComponentScriptInterface, ComponentType::Text>>("getTextComponents")
 		.fun<&EntityScriptInterface::GetComponentsOfType<HotspotSpaceComponentScriptInterface, ComponentType::Hotspot>>("getHotspotComponents")
+		.fun<&EntityScriptInterface::RemoveParentEntity>("removeParentEntity")
 		.property<&EntityScriptInterface::GetPosition, &EntityScriptInterface::SetPosition>("position")
+		.property<&EntityScriptInterface::GetGlobalPosition>("globalPosition")
 		.property<&EntityScriptInterface::GetRotation, &EntityScriptInterface::SetRotation>("rotation")
+		.property<&EntityScriptInterface::GetGlobalRotation>("globalRotation")
 		.property<&EntityScriptInterface::GetScale, &EntityScriptInterface::SetScale>("scale")
+		.property<&EntityScriptInterface::GetGlobalScale>("globalScale")
+		.property<&EntityScriptInterface::GetParentEntity>("parentEntity")
 		.property<&EntityScriptInterface::GetId>("id")
-		.property<&EntityScriptInterface::GetName>("name");
+		.property<&EntityScriptInterface::GetName>("name")
+		.property<&EntityScriptInterface::GetParentId, &EntityScriptInterface::SetParentId>("parentId");
 
 	Module->class_<ComponentScriptInterface>("Component")
 		.constructor<>()
 		.property<&ComponentScriptInterface::GetComponentId>("id")
 		.property<&ComponentScriptInterface::GetComponentType>("type")
+		.property<&ComponentScriptInterface::GetComponentName, &ComponentScriptInterface::SetComponentName>("name")
 		.fun<&ComponentScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
 		.fun<&ComponentScriptInterface::InvokeAction>("invokeAction");
 
@@ -557,7 +603,8 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
 		.fun<&EntitySystemScriptInterface::GetAvatars>("getAvatars")
 		.fun<&EntitySystemScriptInterface::GetEntityById>("getEntityById")
 		.fun<&EntitySystemScriptInterface::GetEntityByName>("getEntityByName")
-		.fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity");
+		.fun<&EntitySystemScriptInterface::GetIndexOfEntity>("getIndexOfEntity")
+		.fun<&EntitySystemScriptInterface::GetRootHierarchyEntities>("getRootHierarchyEntities");
 
 	Context->global()["TheEntitySystem"] = CSP_NEW EntitySystemScriptInterface(EntitySystem);
 	Context->global()["ThisEntity"]		 = CSP_NEW EntityScriptInterface(EntitySystem->FindSpaceEntityById(ContextId));

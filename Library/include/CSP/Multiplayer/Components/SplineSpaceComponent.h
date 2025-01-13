@@ -35,9 +35,7 @@ enum class SplinePropertyKeys
 
 /**
  * @ingroup SplineSpaceComponent
- * @brief Data representation of a SplineSpaceComponent.
- *
- * SplineSpaceComponent allows for the calculation of Cubic splines and a point along the position of that spline.
+ * @brief Add a spline curve to your space. This can be used in conjunction with Scripts to align/animate objects along its length.
  */
 class CSP_API SplineSpaceComponent : public ComponentBase
 {

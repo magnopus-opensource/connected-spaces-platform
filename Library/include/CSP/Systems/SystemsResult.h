@@ -59,6 +59,8 @@ class CSP_API NullResult : public csp::systems::ResultBase
 
 public:
 	CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+	CSP_NO_EXPORT NullResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 protected:
 	CSP_NO_EXPORT NullResult(const csp::systems::ResultBase& InResult)

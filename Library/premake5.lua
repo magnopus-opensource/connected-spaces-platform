@@ -49,6 +49,7 @@ if not Project then
         files {
             "%{wks.location}/Library/**.h",
             "%{wks.location}/Library/**.cpp",
+			"%{wks.location}/Library/docs/source/**.md",
             "%{wks.location}/modules/csp-services/generated/**.h",
             "%{wks.location}/modules/csp-services/generated/**.cpp"
         }
@@ -76,6 +77,7 @@ if not Project then
             "%{wks.location}/ThirdParty/rapidjson/include",
             "%{wks.location}/ThirdParty/msgpack/include",
             "%{wks.location}/ThirdParty/quickjs/include",
+            "%{wks.location}/ThirdParty/glm",
             "%{wks.location}/ThirdParty/atomic_queue/include",
             "%{wks.location}/modules/csp-services/generated",
 			"%{wks.location}/modules/tinyspline/src"

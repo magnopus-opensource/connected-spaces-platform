@@ -17,7 +17,7 @@
 
 #include "Memory/Memory.h"
 #include "Multiplayer/SpaceEntityKeys.h"
-#include "MultiplayerKeyConstants.h"
+#include "MultiplayerConstants.h"
 
 #include <Debug/Logging.h>
 #include <cassert>
@@ -26,6 +26,188 @@
 namespace csp::multiplayer
 {
 using namespace msgpack_typeids;
+
+namespace
+{
+std::pair<ItemComponentData, signalr::value> ReplicatedValueToSignalRValue(const ReplicatedValue& Value)
+{
+	ItemComponentData ValueType;
+	signalr::value NewValue;
+
+	switch (Value.GetReplicatedValueType())
+	{
+		case ReplicatedValueType::Boolean:
+			ValueType = ItemComponentData::BOOL;
+			NewValue  = signalr::value(Value.GetBool());
+			break;
+		case ReplicatedValueType::Integer:
+			ValueType = ItemComponentData::INT64;
+			NewValue  = signalr::value(Value.GetInt());
+			break;
+		case ReplicatedValueType::Float:
+			ValueType = ItemComponentData::FLOAT;
+			NewValue  = signalr::value(Value.GetFloat());
+			break;
+		case ReplicatedValueType::String:
+			ValueType = ItemComponentData::STRING;
+			NewValue  = signalr::value(Value.GetString().c_str(), Value.GetString().Length());
+			break;
+		case ReplicatedValueType::Vector2:
+		{
+			ValueType	= ItemComponentData::FLOAT_ARRAY;
+			auto VValue = Value.GetVector2();
+			NewValue	= signalr::value(std::vector {signalr::value(VValue.X), signalr::value(VValue.Y)});
+			break;
+		}
+		case ReplicatedValueType::Vector3:
+		{
+			ValueType	= ItemComponentData::FLOAT_ARRAY;
+			auto VValue = Value.GetVector3();
+			NewValue	= signalr::value(std::vector {signalr::value(VValue.X), signalr::value(VValue.Y), signalr::value(VValue.Z)});
+			break;
+		}
+		case ReplicatedValueType::Vector4:
+		{
+			ValueType	= ItemComponentData::FLOAT_ARRAY;
+			auto VValue = Value.GetVector4();
+			NewValue	= signalr::value(
+				   std::vector {signalr::value(VValue.X), signalr::value(VValue.Y), signalr::value(VValue.Z), signalr::value(VValue.W)});
+			break;
+		}
+		case ReplicatedValueType::Map:
+		{
+			ValueType = ItemComponentData::GENERIC_MAP;
+
+			// Creates a custom signalr data structure to hold an array of key-value pairs
+			const auto& Map = Value.GetMap();
+			auto Keys		= Map.Keys();
+
+			// Root of map which contains:
+			// 0 = Type information of the key
+			// 1 = Type information of value
+			// 2 = vector of key-value pairs
+			std::vector<signalr::value> MapRoot;
+			MapRoot.reserve(3);
+
+			// Array of key-value pairs
+			std::vector<signalr::value> MapArray;
+			MapArray.reserve(Keys->Size());
+
+			ItemComponentData KeyType	= ItemComponentData::UINT64;
+			ItemComponentData ValueType = ItemComponentData::UINT64;
+			bool First					= true;
+
+			for (size_t i = 0; i < Keys->Size(); ++i)
+			{
+				const ReplicatedValue& Key = (*Keys)[i];
+
+				auto KeyValue = ReplicatedValueToSignalRValue(Key);
+				auto Value	  = ReplicatedValueToSignalRValue(Map[Key]);
+
+				if (First)
+				{
+					First	  = false;
+					KeyType	  = KeyValue.first;
+					ValueType = Value.first;
+				}
+				else
+				{
+					// Ensure key and values are all the same type
+					if (KeyType != KeyValue.first)
+					{
+						CSP_LOG_ERROR_FORMAT("Map key types dont match! %s %s",
+											 std::to_string(KeyType).c_str(),
+											 std::to_string(KeyValue.first).c_str());
+					}
+					if (ValueType != Value.first)
+					{
+						CSP_LOG_ERROR_FORMAT("Map value types dont match! %s %s",
+											 std::to_string(ValueType).c_str(),
+											 std::to_string(Value.first).c_str());
+					}
+				}
+
+				// Add key-value pair to the signalr value
+				MapArray.push_back(signalr::value(std::vector<signalr::value> {KeyValue.second, Value.second}));
+			}
+
+			CSP_DELETE(Keys);
+
+			MapRoot.push_back(signalr::value(KeyType));
+			MapRoot.push_back(signalr::value(ValueType));
+			MapRoot.push_back(MapArray);
+
+			// Create the root value with the array of key-value pairs
+			NewValue = signalr::value(MapRoot);
+
+			break;
+		}
+	}
+
+	return std::make_pair(ValueType, NewValue);
+}
+
+ReplicatedValue SignalRValueToReplicatedValue(ItemComponentData Type, const signalr::value& Value)
+{
+	switch (Type)
+	{
+		case ItemComponentData::BOOL:
+			return Value.as_bool();
+		case ItemComponentData::INT64:
+			return (Value.is_integer()) ? ReplicatedValue(Value.as_integer()) : ReplicatedValue((int64_t) Value.as_uinteger());
+		case ItemComponentData::DOUBLE:
+		case ItemComponentData::FLOAT:
+			return (float) Value.as_double();
+		case ItemComponentData::STRING:
+			return csp::common::String(Value.as_string().c_str(), Value.as_string().length());
+		case ItemComponentData::FLOAT_ARRAY:
+		{
+			auto& Array = Value.as_array();
+
+			if (Array.size() == 3)
+			{
+				return csp::common::Vector3 {(float) Array[0].as_double(), (float) Array[1].as_double(), (float) Array[2].as_double()};
+			}
+			else if (Array.size() == 2)
+			{
+				return csp::common::Vector2 {(float) Array[0].as_double(), (float) Array[1].as_double()};
+			}
+			else
+			{
+				return csp::common::Vector4 {(float) Array[0].as_double(),
+											 (float) Array[1].as_double(),
+											 (float) Array[2].as_double(),
+											 (float) Array[3].as_double()};
+			}
+		}
+		case ItemComponentData::GENERIC_MAP:
+		{
+			csp::common::Map<ReplicatedValue, ReplicatedValue> Map;
+			const auto& Root = Value.as_array();
+
+			// Type information of the map
+			ItemComponentData KeyType	= static_cast<ItemComponentData>(Root[0].as_uinteger());
+			ItemComponentData ValueType = static_cast<ItemComponentData>(Root[1].as_uinteger());
+			// Key-value pair array
+			const auto& Array = Root[2].as_array();
+
+			for (const auto& Item : Array)
+			{
+				const auto& KeyVal	  = Item.as_array();
+				ReplicatedValue Key	  = SignalRValueToReplicatedValue(KeyType, KeyVal[0]);
+				ReplicatedValue Value = SignalRValueToReplicatedValue(ValueType, KeyVal[1]);
+
+				Map[Key] = Value;
+			}
+
+			return Map;
+		}
+		default:
+			throw std::runtime_error("Unsupported property type!");
+	}
+}
+
+} // namespace
 
 SignalRMsgPackEntitySerialiser::SignalRMsgPackEntitySerialiser() : CurrentState(SerialiserState::Initial), CurrentComponentId(0)
 {
@@ -84,9 +266,18 @@ void SignalRMsgPackEntitySerialiser::WriteInt64(int64_t Value)
 
 void SignalRMsgPackEntitySerialiser::WriteUInt64(uint64_t Value)
 {
-	assert(CurrentState == SerialiserState::InEntity && "WriteUInt64() function not supported in current state!");
 
-	Fields.push_back(signalr::value(Value));
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+			Fields.push_back(signalr::value(Value));
+			break;
+		case SerialiserState::InArray:
+			CurrentArray.push_back(signalr::value(Value));
+			break;
+		default:
+			throw std::runtime_error("WriteUInt64() function not supported in current state!");
+	}
 }
 
 void SignalRMsgPackEntitySerialiser::WriteString(const csp::common::String& Value)
@@ -94,6 +285,14 @@ void SignalRMsgPackEntitySerialiser::WriteString(const csp::common::String& Valu
 	assert(CurrentState == SerialiserState::InEntity && "WriteString() function not supported in current state!");
 
 	Fields.push_back(signalr::value(Value));
+}
+
+void SignalRMsgPackEntitySerialiser::WriteVector2(const csp::common::Vector2& Value)
+{
+	assert(CurrentState == SerialiserState::InEntity && "WriteVector2() function not supported in current state!");
+
+	double ArrayValue[] = {Value.X, Value.Y};
+	Fields.push_back(signalr::value(ArrayValue));
 }
 
 void SignalRMsgPackEntitySerialiser::WriteVector3(const csp::common::Vector3& Value)
@@ -214,46 +413,10 @@ void SignalRMsgPackEntitySerialiser::WriteProperty(uint64_t Id, const Replicated
 {
 	assert(CurrentState == SerialiserState::InComponent && "Component not yet begun!");
 
-	signalr::value NewValue;
-	ItemComponentData ValueType;
-
-	switch (Value.GetReplicatedValueType())
-	{
-		case ReplicatedValueType::Boolean:
-			ValueType = ItemComponentData::BOOL;
-			NewValue  = signalr::value(Value.GetBool());
-			break;
-		case ReplicatedValueType::Integer:
-			ValueType = ItemComponentData::INT64;
-			NewValue  = signalr::value(Value.GetInt());
-			break;
-		case ReplicatedValueType::Float:
-			ValueType = ItemComponentData::FLOAT;
-			NewValue  = signalr::value(Value.GetFloat());
-			break;
-		case ReplicatedValueType::String:
-			ValueType = ItemComponentData::STRING;
-			NewValue  = signalr::value(Value.GetString().c_str(), Value.GetString().Length());
-			break;
-		case ReplicatedValueType::Vector3:
-		{
-			ValueType	= ItemComponentData::FLOAT_ARRAY;
-			auto VValue = Value.GetVector3();
-			NewValue	= signalr::value(std::vector {signalr::value(VValue.X), signalr::value(VValue.Y), signalr::value(VValue.Z)});
-			break;
-		}
-		case ReplicatedValueType::Vector4:
-		{
-			ValueType	= ItemComponentData::FLOAT_ARRAY;
-			auto VValue = Value.GetVector4();
-			NewValue	= signalr::value(
-				   std::vector {signalr::value(VValue.X), signalr::value(VValue.Y), signalr::value(VValue.Z), signalr::value(VValue.W)});
-			break;
-		}
-	}
+	auto SignalRValue = ReplicatedValueToSignalRValue(Value);
 
 	// Place the data into the properties map to be converted into a correct SignalR formatted structure when we call EndComponent()
-	Properties[static_cast<uint16_t>(Id)] = std::make_pair(ValueType, NewValue);
+	Properties[static_cast<uint16_t>(Id)] = SignalRValue;
 }
 
 /// <summary>
@@ -274,6 +437,14 @@ void SignalRMsgPackEntitySerialiser::AddViewComponent(uint16_t Id, const Replica
 			Type   = ItemComponentData::STRING;
 			SValue = Value.GetString().c_str();
 			break;
+		case csp::multiplayer::ReplicatedValueType::Vector2:
+		{
+			Type							  = ItemComponentData::FLOAT_ARRAY;
+			auto Vector						  = Value.GetVector2();
+			std::vector<signalr::value> Array = {Vector.X, Vector.Y};
+			SValue							  = Array;
+			break;
+		}
 		case csp::multiplayer::ReplicatedValueType::Vector3:
 		{
 			Type							  = ItemComponentData::FLOAT_ARRAY;
@@ -434,6 +605,10 @@ uint64_t SignalRMsgPackEntityDeserialiser::ReadUInt64()
 			assert(PropertyObjectHandle.get().type == msgpack::type::object_type::POSITIVE_INTEGER);
 
 			return PropertyObjectHandle.get().via.u64;
+		case SerialiserState::InArray:
+			assert(CurrentArrayIterator->is_uinteger() && "Current array is not an unsigned integer!");
+
+			return (CurrentArrayIterator++)->as_uinteger();
 		default:
 			throw std::runtime_error("ReadUInt64() function not supported in current state!");
 	}
@@ -459,6 +634,35 @@ csp::common::String SignalRMsgPackEntityDeserialiser::ReadString()
 			return csp::common::String(PropertyObjectHandle.get().via.str.ptr, PropertyObjectHandle.get().via.str.size);
 		default:
 			throw std::runtime_error("ReadString() function not supported in current state!");
+	}
+}
+
+csp::common::Vector2 SignalRMsgPackEntityDeserialiser::ReadVector2()
+{
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+		{
+			assert(CurrentFieldIterator->is_array() && CurrentFieldIterator->as_array().size() == 2 && CurrentFieldIterator->as_array()[0].is_double()
+				   && "Current field is not a Vector2!");
+
+			auto Value = (CurrentFieldIterator++)->as_array();
+
+			return {(float) Value[0].as_double(), (float) Value[1].as_double()};
+		}
+		case SerialiserState::InComponent:
+		{
+			PropertyUnpacker.next(PropertyObjectHandle);
+
+			assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 2
+				   && PropertyObjectHandle.get().via.array.ptr[0].type == msgpack::type::object_type::FLOAT64);
+
+			auto* Array = PropertyObjectHandle.get().via.array.ptr;
+
+			return {(float) Array[0].via.f64, (float) Array[1].via.f64};
+		}
+		default:
+			throw std::runtime_error("ReadVector2() function not supported in current state!");
 	}
 }
 
@@ -533,6 +737,19 @@ bool SignalRMsgPackEntityDeserialiser::NextValueIsNull()
 	}
 }
 
+bool SignalRMsgPackEntityDeserialiser::NextValueIsArray()
+{
+	switch (CurrentState)
+	{
+		case SerialiserState::InEntity:
+			return CurrentFieldIterator->is_array();
+		case SerialiserState::InArray:
+			return CurrentArrayIterator->is_array();
+		default:
+			throw std::runtime_error("NextValueIsArray() function not supported in current state!");
+	}
+}
+
 void SignalRMsgPackEntityDeserialiser::EnterArray(CSP_OUT uint32_t& OutLength)
 {
 	assert(CurrentState == SerialiserState::InEntity && "Entity not entered or array already entered!");
@@ -551,6 +768,8 @@ void SignalRMsgPackEntityDeserialiser::LeaveArray()
 	CurrentState		 = SerialiserState::InEntity;
 	CurrentArrayIterator = CurrentArray->cend();
 	CurrentArray		 = nullptr;
+
+	CurrentFieldIterator++;
 }
 
 void SignalRMsgPackEntityDeserialiser::EnterComponents()
@@ -733,6 +952,15 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::STR);
 
 				return csp::common::String(PropertyObjectHandle.get().via.str.ptr, PropertyObjectHandle.get().via.str.size);
+			case ReplicatedValueType::Vector2:
+			{
+				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 2
+					   && PropertyObjectHandle.get().via.array.ptr[0].type == msgpack::type::object_type::FLOAT64);
+
+				auto* Array = PropertyObjectHandle.get().via.array.ptr;
+
+				return csp::common::Vector2 {(float) Array[0].via.f64, (float) Array[1].via.f64};
+			}
 			case ReplicatedValueType::Vector3:
 			{
 				assert(PropertyObjectHandle.get().type == msgpack::type::object_type::ARRAY && PropertyObjectHandle.get().via.array.size == 3
@@ -767,36 +995,7 @@ ReplicatedValue SignalRMsgPackEntityDeserialiser::ReadProperty(CSP_OUT uint64_t&
 		// We grab the Value data here, for simplicity of code.
 		auto Value = KeyValue.second.second;
 
-		switch (ValueType)
-		{
-			case ItemComponentData::BOOL:
-				return Value.as_bool();
-			case ItemComponentData::INT64:
-				return (Value.is_integer()) ? ReplicatedValue(Value.as_integer()) : ReplicatedValue((int64_t) Value.as_uinteger());
-			case ItemComponentData::DOUBLE:
-			case ItemComponentData::FLOAT:
-				return (float) Value.as_double();
-			case ItemComponentData::STRING:
-				return csp::common::String(Value.as_string().c_str(), Value.as_string().length());
-			case ItemComponentData::FLOAT_ARRAY:
-			{
-				auto& Array = Value.as_array();
-
-				if (Array.size() == 3)
-				{
-					return csp::common::Vector3 {(float) Array[0].as_double(), (float) Array[1].as_double(), (float) Array[2].as_double()};
-				}
-				else
-				{
-					return csp::common::Vector4 {(float) Array[0].as_double(),
-												 (float) Array[1].as_double(),
-												 (float) Array[2].as_double(),
-												 (float) Array[3].as_double()};
-				}
-			}
-			default:
-				throw std::runtime_error("Unsupported property type!");
-		}
+		return SignalRValueToReplicatedValue(ValueType, Value);
 	}
 }
 
@@ -857,6 +1056,9 @@ void SignalRMsgPackEntityDeserialiser::Skip()
 	{
 		case SerialiserState::InEntity:
 			++CurrentFieldIterator;
+			break;
+		case SerialiserState::InArray:
+			++CurrentArrayIterator;
 			break;
 		default:
 			throw std::runtime_error("Skip() function not supported in current state!");
