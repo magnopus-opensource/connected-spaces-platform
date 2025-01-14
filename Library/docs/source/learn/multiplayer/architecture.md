@@ -26,17 +26,15 @@ Within the realm of connected spaces, spatiotemporal coherence amongst users is 
 
 SignalR is a powerful real-time communication protocol that is used by CSP to facilitate these multi-user interactions. Unlike traditional communication methods, SignalR maintains an active connection, enabling real-time updates with low latency between server and client.
 
-### Differences between SignalR and WebSockets
-
 While WebSockets enables bidirectional, long-lived communication channels, SignalR builds on this with added features and fallbacks. SignalR can automatically switch to other communication techniques, such as Server-Sent Events (SSE) or Long Polling when WebSockets are unavailable. This ensures that SignalR can function in environments with restricted WebSocket support, providing greater flexibility and compatibility.
 
 ### How SignalR is Used in CSP
 
 In CSP's multiplayer architecture, SignalR handles real-time data transmission for users' actions, events, and state synchronization (both inside and outside of spaces).
 
-For instance, when a user moves or interacts within a space, the information is transferred via SignalR to ensure that other connected users immediately receive the updates. This process happens in real-time, so all users see a synchronized and consistent state with minimal lag or data loss.
+For instance, when a user moves or interacts within a space, the information is transferred via SignalR to ensure that other users within the space immediately receive the updates. This process happens in real-time, so all users see a synchronized and consistent state with minimal lag or data loss.
 
-Instead of using traditional polling, where clients must constantly request updates from the server, SignalR pushes updates as soon as changes occur.
+Instead of traditional polling, where clients must constantly request updates from the server, SignalR pushes updates as soon as changes occur.
 
 ### Advantages of Using SignalR
 
