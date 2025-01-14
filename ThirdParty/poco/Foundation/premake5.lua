@@ -13,6 +13,7 @@ if not POCO.Foundation then
         kind "StaticLib"
         language "C++"
         cppdialect "C++17"
+		warnings "Off"
 
         files {
             "%{prj.location}/**.h",
