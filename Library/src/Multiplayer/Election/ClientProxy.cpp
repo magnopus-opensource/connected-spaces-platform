@@ -136,6 +136,10 @@ void ClientProxy::HandleEvent(int64_t EventType, int64_t ClientId)
         break;
     case ClientElectionMessageType::ElectionNotifyLeader:
         HandleElectionNotifyLeaderEvent(ClientId);
+        break;
+    case ClientElectionMessageType::NumElectionMessages:
+        // Do nothing
+        break;
     }
 }
 
