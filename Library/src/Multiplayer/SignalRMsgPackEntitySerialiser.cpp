@@ -98,6 +98,9 @@ namespace
 
             break;
         }
+        case ReplicatedValueType::InvalidType:
+            CSP_LOG_ERROR_MSG("Recieved Invalid Type as SignalR Replicated Value");
+            return std::make_pair(ValueType, signalr::value {});
         }
 
         return std::make_pair(ValueType, NewValue);
