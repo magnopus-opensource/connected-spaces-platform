@@ -49,9 +49,11 @@ An asset collection is a group of related assets that can be managed together. T
 
 **Step-by-Step Guide:**
 
-* **Step 1:** Prompt the user to enter a unique name for the asset collection.  
-* **Step 2:** Use the `CreateAssetCollection` function to generate the collection.  
+```eval_rst
+* **Step 1:** Prompt the user to enter a unique name for the asset collection.
+* **Step 2:** Use the :func:`csp::systems::AssetSystem::CreateAssetCollection` function to generate the collection.
 * **Step 3:** Confirm the collection was successfully created.
+```
 
 ```
 void CreateAssetCollection(const std::string& AssetCollectionName) {
@@ -83,9 +85,11 @@ Assets, such as images or models, must be created within an asset collection. Th
 
 **Step-by-Step Guide:**
 
+```eval_rst
 * **Step 1:** Request a unique name for the asset.  
-* **Step 2:** Call the `CreateAsset` function to add the asset to the collection.  
+* **Step 2:** Call the :func:`csp::systems::AssetSystem::CreateAsset` function to add the asset to the collection.  
 * **Step 3:** Confirm the asset creation.
+```
 
 ```
 void CreateImageAsset(const std::string& AssetName) {
@@ -138,9 +142,11 @@ In CSP, you can upload assets either via a `FileAssetDataSource` or a `BufferAss
 #### Step-by-Step Guide
 The following example demonstrates an entire flow for uploading an asset from a file.
 
+```eval_rst
 * **Step 1:** Define the file path for the asset.  
 * **Step 2:** Create a file asset data source.
-* **Step 3:** Upload the asset data using the `UploadAssetData` function.
+* **Step 3:** Upload the asset data using the :func:`csp::systems::AssetSystem::UploadAssetData` function.
+```
 
 ```
 void UploadAsset()
@@ -182,8 +188,10 @@ Assets can be deleted from a collection if they are no longer needed. The follow
 
 **Step-by-Step Guide:**
 
-* **Step 1:** Call the `DeleteAsset` function.  
+```eval_rst
+* **Step 1:** Call the :func:`csp::systems::AssetSystem::DeleteAsset` function.  
 * **Step 2:** Confirm that the asset has been successfully deleted.
+```
 
 ```
 void DeleteAsset() {
@@ -290,14 +298,16 @@ To manage assets effectively, you can query them based on different attributes l
     To search for assets based on multiple attributes (such as type, tag, or collection), use `GetAssetsByCriteria`. This function provides flexibility by allowing additional arguments for filtering.  
 
 There are other methods for querying Assets and Asset Collections, which are:
-    
-* `GetAssetCollectionById` Retrieves an Asset Collection by its unique Id. It is useful when you know the specific Id of the Asset Collection you want to access.
-    
-* `GetAssetCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
-    
-* `FindAssetCollections` Facilitates searching AssetsCollections by various criteria. It supports more flexible queries compared to direct Id or name lookups.
-    
-* `GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection Ids. It facilitates batch queries for multiple collections at once.
+
+```eval_rst
+* :func:`csp::systems::AssetSystem::GetAssetCollectionById` Retrieves an Asset Collection by its unique Id. It is useful when you know the specific Id of the Asset Collection you want to access.
+
+* :func:`csp::systems::AssetSystem::GetAssetCollectionByName` Retrieves an Asset Collection by its name. It is ideal for situations where collections are named logically for easier identification.
+
+* :func:`csp::systems::AssetSystem::FindAssetCollections` Facilitates searching AssetsCollections by various criteria. It supports more flexible queries compared to direct Id or name lookups.
+
+* :func:`csp::systems::AssetSystem::GetAssetsByCollectionIds` Retrieves all Assets associated with an array of Asset Collection Ids. It facilitates batch queries for multiple collections at once.
+```
 
 ## Automated Model Decimation
 
@@ -332,19 +342,21 @@ In this topic, you learned how to manage assets in the Connected Spaces Platform
 
 CSP provides multiple methods to search for and retrieve assets:
 
-* `GetAssetCollectionById` Retrieve an Asset Collection using its unique Id.
+```eval_rst
+* :func:`csp::systems::AssetSystem::GetAssetCollectionById` Retrieve an Asset Collection using its unique Id.
 
-* `GetAssetCollectionByName` Retrieve an Asset Collection by its name.
+* :func:`csp::systems::AssetSystem::GetAssetCollectionByName` Retrieve an Asset Collection by its name.
 
-* `FindAssetCollections` Search for Asset Collections using various criteria.
+* :func:`csp::systems::AssetSystem::FindAssetCollections` Search for Asset Collections using various criteria.
 
-* `GetAssetsInCollection` Retrieve all assets in a specific Asset Collection.
+* :func:`csp::systems::AssetSystem::GetAssetsInCollection` Retrieve all assets in a specific Asset Collection.
 
-* `GetAssetById` Retrieve a specific asset by its Id and associated Asset Collection Id.
+* :func:`csp::systems::AssetSystem::GetAssetById` Retrieve a specific asset by its Id and associated Asset Collection Id.
 
-* `GetAssetsByCollectionIds` Retrieve assets from multiple Asset Collections.
+* :func:`csp::systems::AssetSystem::GetAssetsByCollectionIds` Retrieve assets from multiple Asset Collections.
 
-* `GetAssetsByCriteria` Query assets based on attributes such as type, tags, or collection.
+* :func:`csp::systems::AssetSystem::GetAssetsByCriteria` Query assets based on attributes such as type, tags, or collection.
+```
 
 ### Best Practices for Managing Assets Efficiently
 
