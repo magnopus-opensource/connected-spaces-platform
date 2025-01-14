@@ -17,60 +17,54 @@
 
 #include "Memory/Memory.h"
 
+namespace csp::memory {
 
-
-namespace csp::memory
+SimpleBufferPool::SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize)
+    : BufferSize(BufferSize)
 {
+    Buffers.reserve(InitialPoolSize);
 
-SimpleBufferPool::SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize) : BufferSize(BufferSize)
-{
-	Buffers.reserve(InitialPoolSize);
-
-	for (int i = 0; i < InitialPoolSize; ++i)
-	{
-		Buffers[i] = CSP_NEW unsigned char[BufferSize];
-	}
+    for (int i = 0; i < InitialPoolSize; ++i) {
+        Buffers[i] = CSP_NEW unsigned char[BufferSize];
+    }
 }
 
 SimpleBufferPool::~SimpleBufferPool()
 {
-	for (auto Buffer : Buffers)
-	{
-		CSP_DELETE_ARRAY(Buffer);
-	}
+    for (auto Buffer : Buffers) {
+        CSP_DELETE_ARRAY(Buffer);
+    }
 
-	Buffers.clear();
+    Buffers.clear();
 }
 
 unsigned char* SimpleBufferPool::Rent()
 {
-	unsigned char* Buffer = nullptr;
+    unsigned char* Buffer = nullptr;
 
-	LockMutex.lock();
-	{
-		if (Buffers.size() > 0)
-		{
-			Buffer = Buffers.back();
-			Buffers.pop_back();
-		}
-	}
-	LockMutex.unlock();
+    LockMutex.lock();
+    {
+        if (Buffers.size() > 0) {
+            Buffer = Buffers.back();
+            Buffers.pop_back();
+        }
+    }
+    LockMutex.unlock();
 
-	if (Buffer == nullptr)
-	{
-		return CSP_NEW unsigned char[BufferSize];
-	}
+    if (Buffer == nullptr) {
+        return CSP_NEW unsigned char[BufferSize];
+    }
 
-	return Buffer;
+    return Buffer;
 }
 
 void SimpleBufferPool::Return(unsigned char* Buffer)
 {
-	LockMutex.lock();
-	{
-		Buffers.push_back(Buffer);
-	}
-	LockMutex.unlock();
+    LockMutex.lock();
+    {
+        Buffers.push_back(Buffer);
+    }
+    LockMutex.unlock();
 }
 
 } // namespace csp::memory

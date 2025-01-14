@@ -18,16 +18,14 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/DtoBase/DtoBase.h"
 
-namespace csp::services
-{
+namespace csp::services {
 
-class AssetFileDto : public csp::services::DtoBase
-{
+class AssetFileDto : public csp::services::DtoBase {
 public:
-	AssetFileDto();
-	virtual ~AssetFileDto();
+    AssetFileDto();
+    virtual ~AssetFileDto();
 
-	void FromJson(const csp::common::String& Json) override;
+    void FromJson(const csp::common::String& Json) override;
 };
 
 } // namespace csp::services

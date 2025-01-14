@@ -20,37 +20,33 @@
 #include <Poco/Net/WebSocket.h>
 #include <atomic>
 #include <mutex>
-#include <signalrclient/signalr_client_config.h>
 #include <signalrclient/hub_exception.h>
+#include <signalrclient/signalr_client_config.h>
 #include <thread>
 
+namespace csp::multiplayer {
 
-
-namespace csp::multiplayer
-{
-
-class CSPWebSocketClientPOCO : public IWebSocketClient
-{
+class CSPWebSocketClientPOCO : public IWebSocketClient {
 public:
-	CSPWebSocketClientPOCO() noexcept;
-	~CSPWebSocketClientPOCO();
+    CSPWebSocketClientPOCO() noexcept;
+    ~CSPWebSocketClientPOCO();
 
-	void Start(const std::string& Url, CallbackHandler Callback) override;
-	void Stop(CallbackHandler Callback) override;
-	void Send(const std::string& Message, CallbackHandler Callback) override;
-	void Receive(ReceiveHandler Callback) override;
+    void Start(const std::string& Url, CallbackHandler Callback) override;
+    void Stop(CallbackHandler Callback) override;
+    void Send(const std::string& Message, CallbackHandler Callback) override;
+    void Receive(ReceiveHandler Callback) override;
 
 private:
-	void ReceiveThreadFunc();
-	void HandleReceiveError(const std::string& Message);
+    void ReceiveThreadFunc();
+    void HandleReceiveError(const std::string& Message);
 
-	Poco::Net::WebSocket* PocoWebSocket;
+    Poco::Net::WebSocket* PocoWebSocket;
 
-	std::thread ReceiveThread;
-	std::mutex Mutex;
-	std::atomic_bool ReceiveReady;
-	ReceiveHandler ReceiveCallback;
-	std::atomic_bool StopFlag;
+    std::thread ReceiveThread;
+    std::mutex Mutex;
+    std::atomic_bool ReceiveReady;
+    ReceiveHandler ReceiveCallback;
+    std::atomic_bool StopFlag;
 };
 
 } // namespace csp::multiplayer

@@ -29,188 +29,154 @@
 #include <sstream>
 #include <thread>
 
-
-namespace csp
-{
+namespace csp {
 
 using ScheduledTaskId = uint32_t;
 
-struct FunctionTimer
-{
-	std::function<void()> Func;
-	std::chrono::system_clock::time_point Time;
-	ScheduledTaskId Id;
+struct FunctionTimer {
+    std::function<void()> Func;
+    std::chrono::system_clock::time_point Time;
+    ScheduledTaskId Id;
 
-	FunctionTimer()
-	{
-	}
+    FunctionTimer() { }
 
-	FunctionTimer(std::function<void()>&& InFunc, const std::chrono::system_clock::time_point& InTime, ScheduledTaskId InId)
-		: Func(InFunc), Time(InTime), Id(InId)
-	{
-	}
+    FunctionTimer(std::function<void()>&& InFunc, const std::chrono::system_clock::time_point& InTime, ScheduledTaskId InId)
+        : Func(InFunc)
+        , Time(InTime)
+        , Id(InId)
+    {
+    }
 
-	bool operator<(const FunctionTimer& Rhs) const
-	{
-		return Time > Rhs.Time;
-	}
+    bool operator<(const FunctionTimer& Rhs) const { return Time > Rhs.Time; }
 
-	bool operator==(const FunctionTimer& Rhs) const
-	{
-		return Id == Rhs.Id;
-	}
+    bool operator==(const FunctionTimer& Rhs) const { return Id == Rhs.Id; }
 
-	void Get()
-	{
-		Func();
-	}
+    void Get() { Func(); }
 
-	void operator()()
-	{
-		Func();
-	}
+    void operator()() { Func(); }
 
-	uint32_t GetId() const
-	{
-		return Id;
-	}
+    uint32_t GetId() const { return Id; }
 };
 
-class Scheduler
-{
+class Scheduler {
 public:
-	Scheduler() : Thread(nullptr), IdCounter(1), ShouldExit(false)
-	{
-	}
+    Scheduler()
+        : Thread(nullptr)
+        , IdCounter(1)
+        , ShouldExit(false)
+    {
+    }
 
-	~Scheduler()
-	{
-		Shutdown();
-	}
+    ~Scheduler() { Shutdown(); }
 
-	void Initialise()
-	{
-		assert(Thread == nullptr);
-		ShouldExit = false;
-		Thread	   = CSP_NEW std::thread(
-			[this]()
-			{
-				ThreadLoop();
-			});
-	}
+    void Initialise()
+    {
+        assert(Thread == nullptr);
+        ShouldExit = false;
+        Thread = CSP_NEW std::thread([this]() { ThreadLoop(); });
+    }
 
-	void Shutdown()
-	{
-		if (Thread != nullptr)
-		{
-			ShouldExit = true;
-			Thread->join();
-			CSP_DELETE(Thread);
-			Thread = nullptr;
-		}
-	}
+    void Shutdown()
+    {
+        if (Thread != nullptr) {
+            ShouldExit = true;
+            Thread->join();
+            CSP_DELETE(Thread);
+            Thread = nullptr;
+        }
+    }
 
-	ScheduledTaskId ScheduleAt(const std::chrono::system_clock::time_point& Time, std::function<void()> Func)
-	{
-		std::function<void()> threadFunc = [Func]()
-		{
-			std::thread Thread(Func);
-			Thread.detach();
-		};
+    ScheduledTaskId ScheduleAt(const std::chrono::system_clock::time_point& Time, std::function<void()> Func)
+    {
+        std::function<void()> threadFunc = [Func]() {
+            std::thread Thread(Func);
+            Thread.detach();
+        };
 
-		return ScheduleAtIntern(Time, std::move(threadFunc));
-	}
+        return ScheduleAtIntern(Time, std::move(threadFunc));
+    }
 
-	void ScheduleEvery(std::chrono::system_clock::duration Interval, std::function<void()> Func)
-	{
-		std::function<void()> threadFunc = [Func]()
-		{
-			std::thread Thread(Func);
-			Thread.detach();
-		};
+    void ScheduleEvery(std::chrono::system_clock::duration Interval, std::function<void()> Func)
+    {
+        std::function<void()> threadFunc = [Func]() {
+            std::thread Thread(Func);
+            Thread.detach();
+        };
 
-		this->ScheduleEveryIntern(Interval, threadFunc);
-	}
+        this->ScheduleEveryIntern(Interval, threadFunc);
+    }
 
-	ScheduledTaskId ScheduleAt(const csp::common::DateTime& Time, std::function<void()> Func)
-	{
-		return ScheduleAt(Time.GetTimePoint(), std::move(Func));
-	}
+    ScheduledTaskId ScheduleAt(const csp::common::DateTime& Time, std::function<void()> Func)
+    {
+        return ScheduleAt(Time.GetTimePoint(), std::move(Func));
+    }
 
-	void CancelTask(ScheduledTaskId Id)
-	{
-		std::scoped_lock<std::mutex> ListLocker(ListLock);
+    void CancelTask(ScheduledTaskId Id)
+    {
+        std::scoped_lock<std::mutex> ListLocker(ListLock);
 
-		auto it = std::remove_if(Tasks.begin(),
-								 Tasks.end(),
-								 [Id](const FunctionTimer& Func)
-								 {
-									 return Func.Id == Id;
-								 });
+        auto it = std::remove_if(Tasks.begin(), Tasks.end(), [Id](const FunctionTimer& Func) { return Func.Id == Id; });
 
-		Tasks.erase(it, Tasks.end());
-	}
+        Tasks.erase(it, Tasks.end());
+    }
 
 private:
-	ScheduledTaskId ScheduleAtIntern(const std::chrono::system_clock::time_point& Time, std::function<void()>&& Func)
-	{
-		ScheduledTaskId Id = IdCounter++;
+    ScheduledTaskId ScheduleAtIntern(const std::chrono::system_clock::time_point& Time, std::function<void()>&& Func)
+    {
+        ScheduledTaskId Id = IdCounter++;
 
-		{
-			std::scoped_lock<std::mutex> ListLocker(ListLock);
-			Tasks.push_back(FunctionTimer(std::move(Func), Time, Id));
-			Tasks.sort();
-		}
+        {
+            std::scoped_lock<std::mutex> ListLocker(ListLock);
+            Tasks.push_back(FunctionTimer(std::move(Func), Time, Id));
+            Tasks.sort();
+        }
 
-		return Id;
-	}
+        return Id;
+    }
 
-	void ScheduleEveryIntern(std::chrono::system_clock::duration Interval, std::function<void()> Func)
-	{
-		std::function<void()> waitFunc = [this, Interval, Func]()
-		{
-			Func();
-			this->ScheduleEveryIntern(Interval, Func);
-		};
+    void ScheduleEveryIntern(std::chrono::system_clock::duration Interval, std::function<void()> Func)
+    {
+        std::function<void()> waitFunc = [this, Interval, Func]() {
+            Func();
+            this->ScheduleEveryIntern(Interval, Func);
+        };
 
-		ScheduleAtIntern(std::chrono::system_clock::now() + Interval, std::move(waitFunc));
-	}
+        ScheduleAtIntern(std::chrono::system_clock::now() + Interval, std::move(waitFunc));
+    }
 
-	void ThreadLoop()
-	{
-		while (!ShouldExit)
-		{
-			{
-				std::scoped_lock<std::mutex> ListLocker(ListLock);
+    void ThreadLoop()
+    {
+        while (!ShouldExit) {
+            {
+                std::scoped_lock<std::mutex> ListLocker(ListLock);
 
-				auto now = std::chrono::system_clock::now();
+                auto now = std::chrono::system_clock::now();
 
-				if (Tasks.size() > 0 && Tasks.front().Time <= now)
-				{
-					FunctionTimer Func;
+                if (Tasks.size() > 0 && Tasks.front().Time <= now) {
+                    FunctionTimer Func;
 
-					{
-						Func = Tasks.front();
-						Tasks.pop_front();
-					}
+                    {
+                        Func = Tasks.front();
+                        Tasks.pop_front();
+                    }
 
-					Func.Get();
-				}
-			}
+                    Func.Get();
+                }
+            }
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		}
-	}
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
 
 private:
-	std::mutex ListLock;
-	std::list<FunctionTimer, csp::memory::StlAllocator<FunctionTimer>> Tasks;
-	std::thread* Thread;
-	std::atomic_uint32_t IdCounter;
-	bool ShouldExit;
+    std::mutex ListLock;
+    std::list<FunctionTimer, csp::memory::StlAllocator<FunctionTimer>> Tasks;
+    std::thread* Thread;
+    std::atomic_uint32_t IdCounter;
+    bool ShouldExit;
 
-	Scheduler& operator=(const Scheduler& Rhs) = delete;
-	Scheduler(const Scheduler& Rhs)			   = delete;
+    Scheduler& operator=(const Scheduler& Rhs) = delete;
+    Scheduler(const Scheduler& Rhs) = delete;
 };
 
 Scheduler* GetScheduler();

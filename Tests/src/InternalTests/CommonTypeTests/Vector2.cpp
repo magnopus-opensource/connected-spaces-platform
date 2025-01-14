@@ -16,106 +16,86 @@
 
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_VECTOR2_TESTS)
 
-	#include "CSP/Common/Vector.h"
+#include "CSP/Common/Vector.h"
 
-	#include "TestHelpers.h"
+#include "TestHelpers.h"
 
-	#include <gtest/gtest.h>
-
+#include <gtest/gtest.h>
 
 using namespace csp::common;
 
-
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2DefaultInitialisationTest)
 {
-	try
-	{
-		Vector2 Instance;
+    try {
+        Vector2 Instance;
 
-		EXPECT_EQ(Instance.X, 0);
-		EXPECT_EQ(Instance.Y, 0);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 0);
+        EXPECT_EQ(Instance.Y, 0);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2ValueInitialisationTest)
 {
-	try
-	{
-		Vector2 Instance(1, 2);
+    try {
+        Vector2 Instance(1, 2);
 
-		EXPECT_EQ(Instance.X, 1);
-		EXPECT_EQ(Instance.Y, 2);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 1);
+        EXPECT_EQ(Instance.Y, 2);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2EqualityTest)
 {
-	try
-	{
-		Vector2 Instance1(1, 2);
-		Vector2 Instance2(1, 2);
+    try {
+        Vector2 Instance1(1, 2);
+        Vector2 Instance2(1, 2);
 
-		EXPECT_TRUE(Instance1 == Instance2);
-		EXPECT_FALSE(Instance1 != Instance2);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_TRUE(Instance1 == Instance2);
+        EXPECT_FALSE(Instance1 != Instance2);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2NonEqualityTest)
 {
-	try
-	{
-		Vector2 Instance1(1, 2);
-		Vector2 Instance2(3, 2);
+    try {
+        Vector2 Instance1(1, 2);
+        Vector2 Instance2(3, 2);
 
-		EXPECT_FALSE(Instance1 == Instance2);
-		EXPECT_TRUE(Instance1 != Instance2);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_FALSE(Instance1 == Instance2);
+        EXPECT_TRUE(Instance1 != Instance2);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2ZeroTest)
 {
-	try
-	{
-		Vector2 Instance = Vector2::Zero();
+    try {
+        Vector2 Instance = Vector2::Zero();
 
-		EXPECT_EQ(Instance.X, 0);
-		EXPECT_EQ(Instance.Y, 0);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 0);
+        EXPECT_EQ(Instance.Y, 0);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector2OneTest)
 {
-	try
-	{
-		Vector2 Instance = Vector2::One();
+    try {
+        Vector2 Instance = Vector2::One();
 
-		EXPECT_EQ(Instance.X, 1);
-		EXPECT_EQ(Instance.Y, 1);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 1);
+        EXPECT_EQ(Instance.Y, 1);
+    } catch (...) {
+        FAIL();
+    }
 }
 
 #endif

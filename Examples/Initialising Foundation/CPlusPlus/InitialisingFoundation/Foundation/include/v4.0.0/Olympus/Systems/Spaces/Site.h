@@ -7,9 +7,7 @@
 #include "Olympus/Systems/Spatial/SpatialDataTypes.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-
-namespace oly_services
-{
+namespace oly_services {
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -17,77 +15,71 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-
-
-namespace oly_systems
-{
+namespace oly_systems {
 
 /// @ingroup Space System
 /// @brief Data representation of a Site associated with a Space.
-class OLY_API Site
-{
+class OLY_API Site {
 public:
-	Site() {};
+    Site() {};
 
-	/** @name Data Values
-	 *   A Site contains some basic information that define it
-	 *
-	 *   @{ */
-	oly_common::String Id;
-	oly_common::String Name;
-	oly_common::String SpaceId;
-	GeoLocation Location;
-	OlyRotation Rotation;
-	/** @} */
+    /** @name Data Values
+     *   A Site contains some basic information that define it
+     *
+     *   @{ */
+    oly_common::String Id;
+    oly_common::String Name;
+    oly_common::String SpaceId;
+    GeoLocation Location;
+    OlyRotation Rotation;
+    /** @} */
 };
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to retrieve Site information.
-class OLY_API SiteResult : public oly_services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	OLY_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
-	OLY_END_IGNORE
-	/** @endcond */
+class OLY_API SiteResult : public oly_services::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    OLY_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
+    OLY_END_IGNORE
+    /** @endcond */
 
 public:
-	Site& GetSite();
-	const Site& GetSite() const;
+    Site& GetSite();
+    const Site& GetSite() const;
 
 private:
-	SiteResult(void*) {};
+    SiteResult(void*) {};
 
-	void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
 
-	Site Site;
+    Site Site;
 };
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of Site information.
-class OLY_API SitesCollectionResult : public oly_services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	OLY_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
-	OLY_END_IGNORE
-	/** @endcond */
+class OLY_API SitesCollectionResult : public oly_services::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    OLY_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
+    OLY_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the Site info array being stored.
-	/// @return oly_common::Array<Site> : reference to Site info array
-	oly_common::Array<Site>& GetSites();
+    /// @brief Retrieves the Site info array being stored.
+    /// @return oly_common::Array<Site> : reference to Site info array
+    oly_common::Array<Site>& GetSites();
 
-	/// @brief Retrieves the Site info array being stored.
-	/// @return oly_common::Array<Site> : reference to Site info array
-	const oly_common::Array<Site>& GetSites() const;
+    /// @brief Retrieves the Site info array being stored.
+    /// @return oly_common::Array<Site> : reference to Site info array
+    const oly_common::Array<Site>& GetSites() const;
 
 private:
-	SitesCollectionResult(void*) {};
+    SitesCollectionResult(void*) {};
 
-	void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
 
-	oly_common::Array<Site> Sites;
+    oly_common::Array<Site> Sites;
 };
 
 /// @brief Callback containing a Site and enum result used when adding Site information.

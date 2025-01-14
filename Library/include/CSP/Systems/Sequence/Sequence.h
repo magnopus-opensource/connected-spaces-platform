@@ -17,67 +17,65 @@
 
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::systems
-{
+namespace csp::systems {
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
-class CSP_API Sequence
-{
+class CSP_API Sequence {
 public:
-	csp::common::String Key;
-	csp::common::String ReferenceType;
-	csp::common::String ReferenceId;
-	csp::common::Array<csp::common::String> Items;
-	csp::common::Map<csp::common::String, csp::common::String> MetaData;
+    csp::common::String Key;
+    csp::common::String ReferenceType;
+    csp::common::String ReferenceId;
+    csp::common::Array<csp::common::String> Items;
+    csp::common::Map<csp::common::String, csp::common::String> MetaData;
 };
 
 /// @ingroup Sequence System
 /// @brief Result structure for a sequence result
-class CSP_API SequenceResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API SequenceResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	const Sequence& GetSequence() const;
-	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    const Sequence& GetSequence() const;
+    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT SequenceResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
-	SequenceResult(void*) {};
+    SequenceResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	Sequence Sequence;
+    Sequence Sequence;
 };
 
 /// @ingroup Sequence System
 /// @brief Data class used to contain information when attempting to get an array of sequences.
-class CSP_API SequencesResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API SequencesResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	const csp::common::Array<Sequence>& GetSequences() const;
+    const csp::common::Array<Sequence>& GetSequences() const;
 
-	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
-		: csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
+    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT SequencesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason)
+        : csp::systems::ResultBase(ResCode, HttpResCode, Reason) {};
 
 private:
-	SequencesResult(void*) {};
+    SequencesResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<Sequence> Sequences;
+    csp::common::Array<Sequence> Sequences;
 };
 
 /// @brief Callback containing a sequence.

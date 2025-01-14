@@ -21,11 +21,10 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 CollisionSpaceComponentScriptInterface::CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

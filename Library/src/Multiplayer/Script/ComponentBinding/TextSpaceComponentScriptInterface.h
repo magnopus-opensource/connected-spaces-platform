@@ -20,27 +20,25 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class TextSpaceComponent;
 
-class TextSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class TextSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	TextSpaceComponentScriptInterface(TextSpaceComponent* InComponent = nullptr);
-	DECLARE_SCRIPT_PROPERTY(std::string, Text);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-	DECLARE_SCRIPT_PROPERTY(Vector3, TextColor);
-	DECLARE_SCRIPT_PROPERTY(Vector3, BackgroundColor);
-	DECLARE_SCRIPT_PROPERTY(bool, IsBackgroundVisible);
-	DECLARE_SCRIPT_PROPERTY(uint32_t, Width);
-	DECLARE_SCRIPT_PROPERTY(uint32_t, Height);
-	DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-	DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
+    TextSpaceComponentScriptInterface(TextSpaceComponent* InComponent = nullptr);
+    DECLARE_SCRIPT_PROPERTY(std::string, Text);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, TextColor);
+    DECLARE_SCRIPT_PROPERTY(Vector3, BackgroundColor);
+    DECLARE_SCRIPT_PROPERTY(bool, IsBackgroundVisible);
+    DECLARE_SCRIPT_PROPERTY(uint32_t, Width);
+    DECLARE_SCRIPT_PROPERTY(uint32_t, Height);
+    DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };
 
 } // namespace csp::multiplayer

@@ -17,13 +17,10 @@
 
 #include <gtest/gtest.h>
 
-
 constexpr char* EndpointBaseURI = "https://ogs-internal.magnopus-dev.cloud";
 
-
-class PublicTestBase : public ::testing::Test
-{
+class PublicTestBase : public ::testing::Test {
 protected:
-	void SetUp() override;
-	void TearDown() override;
+    void SetUp() override;
+    void TearDown() override;
 };

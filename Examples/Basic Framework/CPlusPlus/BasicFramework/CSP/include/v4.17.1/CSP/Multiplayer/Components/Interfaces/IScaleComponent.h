@@ -19,34 +19,31 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Vector.h"
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 /// @brief Controls the 3D scale of the component.
-CSP_INTERFACE class CSP_API IScaleComponent
-{
+CSP_INTERFACE class CSP_API IScaleComponent {
 public:
-	/// @brief Gets the scale of the origin of this component in world space.
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @return csp::common::Vector3 : The 3D scale as a vector (left, up, forward).
-	virtual const csp::common::Vector3& GetScale() const = 0;
+    /// @brief Gets the scale of the origin of this component in world space.
+    /// @note The coordinate system used follows the glTF 2.0 specification.
+    ///       - Right handed coordinate system
+    ///       - +Y is UP
+    ///       - +X is left (facing forward)
+    ///       - +Z is forward
+    /// @return csp::common::Vector3 : The 3D scale as a vector (left, up, forward).
+    virtual const csp::common::Vector3& GetScale() const = 0;
 
-	/// @brief Sets the scale of the origin of this component in world space to the specified value.
-	/// @note The coordinate system used follows the glTF 2.0 specification.
-	///       - Right handed coordinate system
-	///       - +Y is UP
-	///       - +X is left (facing forward)
-	///       - +Z is forward
-	/// @param InValue csp::common::Vector3 : The new value expressed as a vector (left, up, forward).
-	virtual void SetScale(const csp::common::Vector3& InValue) = 0;
+    /// @brief Sets the scale of the origin of this component in world space to the specified value.
+    /// @note The coordinate system used follows the glTF 2.0 specification.
+    ///       - Right handed coordinate system
+    ///       - +Y is UP
+    ///       - +X is left (facing forward)
+    ///       - +Z is forward
+    /// @param InValue csp::common::Vector3 : The new value expressed as a vector (left, up, forward).
+    virtual void SetScale(const csp::common::Vector3& InValue) = 0;
 
 protected:
-	virtual ~IScaleComponent() = default;
+    virtual ~IScaleComponent() = default;
 };
 
 } // namespace csp::multiplayer

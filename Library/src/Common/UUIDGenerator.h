@@ -21,38 +21,36 @@
 #include <sstream>
 #include <string>
 
-namespace csp
-{
+namespace csp {
 
 /// @brief Generates a uuid
 /// @return std::string
 inline std::string GenerateUUID()
 {
-	// Generate a random UUID by combining 2 64-bit unsigned integers
-	uint8_t Uuid[16];
+    // Generate a random UUID by combining 2 64-bit unsigned integers
+    uint8_t Uuid[16];
 
-	// Use this as rand() only offers 15 bits of randomness
-	std::mt19937_64 Rand;
-	auto CurrentTime		= std::chrono::high_resolution_clock::now();
-	auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
-	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-	*reinterpret_cast<uint64_t*>(&Uuid[0]) = Rand();
-	// Re-seed for extra randomness
-	CurrentTime		   = std::chrono::high_resolution_clock::now();
-	CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
-	Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-	auto SkippedVal						   = Rand(); // Skip one pseudo-random number
-	*reinterpret_cast<uint64_t*>(&Uuid[8]) = Rand();
+    // Use this as rand() only offers 15 bits of randomness
+    std::mt19937_64 Rand;
+    auto CurrentTime = std::chrono::high_resolution_clock::now();
+    auto CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
+    Rand.seed(CurrentNanoseconds.time_since_epoch().count());
+    *reinterpret_cast<uint64_t*>(&Uuid[0]) = Rand();
+    // Re-seed for extra randomness
+    CurrentTime = std::chrono::high_resolution_clock::now();
+    CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
+    Rand.seed(CurrentNanoseconds.time_since_epoch().count());
+    auto SkippedVal = Rand(); // Skip one pseudo-random number
+    *reinterpret_cast<uint64_t*>(&Uuid[8]) = Rand();
 
-	// Convert to hex string
-	std::ostringstream UUIDStringStream;
-	UUIDStringStream << std::hex << std::uppercase << std::setfill('0');
+    // Convert to hex string
+    std::ostringstream UUIDStringStream;
+    UUIDStringStream << std::hex << std::uppercase << std::setfill('0');
 
-	for (const auto uuid : Uuid)
-	{
-		UUIDStringStream << std::setw(2) << static_cast<int>(uuid);
-	}
+    for (const auto uuid : Uuid) {
+        UUIDStringStream << std::setw(2) << static_cast<int>(uuid);
+    }
 
-	return UUIDStringStream.str();
+    return UUIDStringStream.str();
 }
 }; // namespace csp

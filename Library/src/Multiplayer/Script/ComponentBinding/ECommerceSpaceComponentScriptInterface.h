@@ -17,17 +17,15 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 class ECommerceSpaceComponent;
 
-class ECommerceSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class ECommerceSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent = nullptr);
+    ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(std::string, ProductId);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(std::string, ProductId);
 };
 
 } // namespace csp::multiplayer

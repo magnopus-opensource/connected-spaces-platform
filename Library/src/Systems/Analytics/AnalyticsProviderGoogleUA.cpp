@@ -16,132 +16,114 @@
 #include "CSP/Systems/Analytics/AnalyticsProviderGoogleUA.h"
 
 #ifdef CSP_WASM
-	#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
+#include "Web/EmscriptenWebClient/EmscriptenWebClient.h"
 #else
-	#include "Web/POCOWebClient/POCOWebClient.h"
+#include "Web/POCOWebClient/POCOWebClient.h"
 #endif
 
-namespace
-{
+namespace {
 #ifdef CSP_WASM
-class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient
-{
+class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient {
 public:
-	UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp) : csp::web::EmscriptenWebClient(InPort, Tp)
-	{
-	}
+    UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
+        : csp::web::EmscriptenWebClient(InPort, Tp)
+    {
+    }
 };
 #else
-class UAPOCOWebClient : public csp::web::POCOWebClient
-{
+class UAPOCOWebClient : public csp::web::POCOWebClient {
 public:
-	UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp) : csp::web::POCOWebClient(InPort, Tp)
-	{
-	}
+    UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
+        : csp::web::POCOWebClient(InPort, Tp)
+    {
+    }
 };
 #endif
 
-class ResponseReceiver : public csp::web::IHttpResponseHandler
-{
+class ResponseReceiver : public csp::web::IHttpResponseHandler {
 public:
-	void OnHttpResponse(csp::web::HttpResponse& InResponse) override
-	{
-	}
+    void OnHttpResponse(csp::web::HttpResponse& InResponse) override { }
 
-	bool ShouldDelete() const override
-	{
-		return true;
-	}
+    bool ShouldDelete() const override { return true; }
 };
 } // namespace
 
-namespace csp::systems
-{
+namespace csp::systems {
 csp::common::String CreateUAEventString(const csp::common::String& ClientId, const csp::common::String& Property, csp::systems::AnalyticsEvent* Event)
 {
-	static constexpr const char* VersionTag	 = "v=1";
-	static constexpr const char* PropertyTag = "&tid=";
-	static constexpr const char* ClientIdTag = "&cid=";
-	static constexpr const char* EventTag	 = "&t=event";
-	static constexpr const char* CategoryTag = "&ec=event";
-	static constexpr const char* ActionTag	 = "&ea=";
-	static constexpr const char* LabelTag	 = "&el=";
-	static constexpr const char* ValueTag	 = "&ev=";
+    static constexpr const char* VersionTag = "v=1";
+    static constexpr const char* PropertyTag = "&tid=";
+    static constexpr const char* ClientIdTag = "&cid=";
+    static constexpr const char* EventTag = "&t=event";
+    static constexpr const char* CategoryTag = "&ec=event";
+    static constexpr const char* ActionTag = "&ea=";
+    static constexpr const char* LabelTag = "&el=";
+    static constexpr const char* ValueTag = "&ev=";
 
-	csp::common::String EventString
-		= csp::common::String(VersionTag) + PropertyTag + Property + ClientIdTag + ClientId + EventTag + CategoryTag + ActionTag + Event->GetTag();
+    csp::common::String EventString
+        = csp::common::String(VersionTag) + PropertyTag + Property + ClientIdTag + ClientId + EventTag + CategoryTag + ActionTag + Event->GetTag();
 
-	const csp::common::Map<csp::common::String, csp::systems::MetricValue>& Params = Event->GetParams();
-	auto* Values																   = Params.Values();
+    const csp::common::Map<csp::common::String, csp::systems::MetricValue>& Params = Event->GetParams();
+    auto* Values = Params.Values();
 
-	if (Values->Size() > 2)
-	{
-		return "";
-	}
+    if (Values->Size() > 2) {
+        return "";
+    }
 
-	// UA only has specific event params so we are limited to 1 string param and 1 int param
-	bool HasIntegerParam = false;
-	bool HasStringParam	 = false;
+    // UA only has specific event params so we are limited to 1 string param and 1 int param
+    bool HasIntegerParam = false;
+    bool HasStringParam = false;
 
-	for (int i = 0; i < Values->Size(); ++i)
-	{
-		if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
-		{
-			if (HasIntegerParam)
-			{
-				return "";
-			}
+    for (int i = 0; i < Values->Size(); ++i) {
+        if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer) {
+            if (HasIntegerParam) {
+                return "";
+            }
 
-			HasIntegerParam = true;
-			EventString += ValueTag;
-			EventString += std::to_string(Values->operator[](i).GetInt()).c_str();
-		}
-		else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String)
-		{
-			if (HasStringParam)
-			{
-				return "";
-			}
+            HasIntegerParam = true;
+            EventString += ValueTag;
+            EventString += std::to_string(Values->operator[](i).GetInt()).c_str();
+        } else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String) {
+            if (HasStringParam) {
+                return "";
+            }
 
-			HasStringParam = true;
-			EventString += LabelTag + Values->operator[](i).GetString();
-		}
-		else
-		{
-			return "";
-		}
-	}
+            HasStringParam = true;
+            EventString += LabelTag + Values->operator[](i).GetString();
+        } else {
+            return "";
+        }
+    }
 
-	return EventString;
+    return EventString;
 }
 
 AnalyticsProviderGoogleUA::AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag)
-	: ClientId {ClientId}, PropertyTag {PropertyTag}, Start {std::chrono::steady_clock::now()}
+    : ClientId { ClientId }
+    , PropertyTag { PropertyTag }
+    , Start { std::chrono::steady_clock::now() }
 {
 #ifdef CSP_WASM
-	WebClient = CSP_NEW UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = CSP_NEW UAEmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #else
-	WebClient = CSP_NEW UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
+    WebClient = CSP_NEW UAPOCOWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
 }
 
 void AnalyticsProviderGoogleUA::Log(AnalyticsEvent* Event)
 {
-	csp::common::String EventString = CreateUAEventString(ClientId, PropertyTag, Event);
+    csp::common::String EventString = CreateUAEventString(ClientId, PropertyTag, Event);
 
-	auto Current = std::chrono::steady_clock::now();
-	uint64_t MS	 = std::chrono::duration_cast<std::chrono::milliseconds>(Current - Start).count();
-	EventString += csp::common::String("&cm1=") + std::to_string(MS).c_str();
+    auto Current = std::chrono::steady_clock::now();
+    uint64_t MS = std::chrono::duration_cast<std::chrono::milliseconds>(Current - Start).count();
+    EventString += csp::common::String("&cm1=") + std::to_string(MS).c_str();
 
-	auto* Receiver = CSP_NEW ResponseReceiver;
+    auto* Receiver = CSP_NEW ResponseReceiver;
 
-	csp::web::HttpPayload Payload;
-	Payload.SetContent(EventString);
+    csp::web::HttpPayload Payload;
+    Payload.SetContent(EventString);
 
-	WebClient->SendRequest(csp::web::ERequestVerb::POST,
-						   csp::web::Uri("https://www.google-analytics.com/collect"),
-						   Payload,
-						   Receiver,
-						   csp::common::CancellationToken::Dummy());
+    WebClient->SendRequest(csp::web::ERequestVerb::POST, csp::web::Uri("https://www.google-analytics.com/collect"), Payload, Receiver,
+        csp::common::CancellationToken::Dummy());
 }
 } // namespace csp::systems

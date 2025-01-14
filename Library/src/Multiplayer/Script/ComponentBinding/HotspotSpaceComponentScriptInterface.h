@@ -20,25 +20,23 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class HotspotSpaceComponent;
 
-class HotspotSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class HotspotSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent = nullptr);
+    HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent = nullptr);
 
-	std::string GetUniqueComponentId();
+    std::string GetUniqueComponentId();
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
-	DECLARE_SCRIPT_PROPERTY(bool, IsTeleportPoint);
-	DECLARE_SCRIPT_PROPERTY(bool, IsSpawnPoint);
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-	DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(bool, IsTeleportPoint);
+    DECLARE_SCRIPT_PROPERTY(bool, IsSpawnPoint);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };
 
 } // namespace csp::multiplayer

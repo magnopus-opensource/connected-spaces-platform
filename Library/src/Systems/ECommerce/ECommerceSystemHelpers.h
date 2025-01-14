@@ -21,13 +21,11 @@
 
 using namespace csp::common;
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-namespace ECommerceSystemHelpers
-{
-std::shared_ptr<csp::services::generated::aggregationservice::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo();
+namespace ECommerceSystemHelpers {
+    std::shared_ptr<csp::services::generated::aggregationservice::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo();
 
-std::shared_ptr<csp::services::generated::aggregationservice::ShopifyStorefrontValidationRequest> DefaultShopifyStorefrontValidationRequest();
+    std::shared_ptr<csp::services::generated::aggregationservice::ShopifyStorefrontValidationRequest> DefaultShopifyStorefrontValidationRequest();
 } // namespace ECommerceSystemHelpers
 } // namespace csp::systems

@@ -21,128 +21,112 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-
 using namespace csp::systems;
 
-
-namespace
-{
+namespace {
 
 const uint8_t ValueType_Integer = 0;
-const uint8_t ValueType_Float	= 1;
-const uint8_t ValueType_String	= 2;
-const uint8_t ValueType_Vector	= 3;
+const uint8_t ValueType_Float = 1;
+const uint8_t ValueType_String = 2;
+const uint8_t ValueType_Vector = 3;
 const uint8_t ValueType_Boolean = 4;
 
 } // namespace
 
+namespace csp::multiplayer {
 
-namespace csp::multiplayer
-{
-
-CustomSpaceComponentScriptInterface::CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent) : ComponentScriptInterface(InComponent)
+CustomSpaceComponentScriptInterface::CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
 uint32_t CustomSpaceComponentScriptInterface::GetCustomPropertySubscriptionKey(const std::string& Key)
 {
-	return static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertySubscriptionKey(Key.c_str());
+    return static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertySubscriptionKey(Key.c_str());
 }
 
 bool CustomSpaceComponentScriptInterface::HasCustomProperty(const std::string& Key) const
 {
-	return static_cast<CustomSpaceComponent*>(Component)->HasCustomProperty(Key.c_str());
+    return static_cast<CustomSpaceComponent*>(Component)->HasCustomProperty(Key.c_str());
 }
 
 void CustomSpaceComponentScriptInterface::RemoveCustomProperty(const std::string& Key)
 {
-	static_cast<CustomSpaceComponent*>(Component)->RemoveCustomProperty(Key.c_str());
+    static_cast<CustomSpaceComponent*>(Component)->RemoveCustomProperty(Key.c_str());
 }
 
-const std::variant<bool, int64_t, float, std::string, std::vector<float>>
-	CustomSpaceComponentScriptInterface::GetCustomProperty(const std::string& Key)
+const std::variant<bool, int64_t, float, std::string, std::vector<float>> CustomSpaceComponentScriptInterface::GetCustomProperty(
+    const std::string& Key)
 {
-	ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
+    ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
 
-	switch (ReturnValue.GetReplicatedValueType())
-	{
-		case ReplicatedValueType::Boolean:
-			return ReturnValue.GetBool();
-		case ReplicatedValueType::Integer:
-			return ReturnValue.GetInt();
-		case ReplicatedValueType::Float:
-			return ReturnValue.GetFloat();
-		case ReplicatedValueType::String:
-			return ReturnValue.GetString().c_str();
-		case ReplicatedValueType::Vector3:
-		{
-			std::vector<float> ReturnVector;
-			ReturnVector = {ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z};
-			return ReturnVector;
-		}
-		case ReplicatedValueType::Vector4:
-		{
-			std::vector<float> ReturnVector;
-			ReturnVector = {ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z};
-			return ReturnVector;
-		}
-		default:
-			throw std::runtime_error("Unknown ReplicatedValue type!");
-	}
+    switch (ReturnValue.GetReplicatedValueType()) {
+    case ReplicatedValueType::Boolean:
+        return ReturnValue.GetBool();
+    case ReplicatedValueType::Integer:
+        return ReturnValue.GetInt();
+    case ReplicatedValueType::Float:
+        return ReturnValue.GetFloat();
+    case ReplicatedValueType::String:
+        return ReturnValue.GetString().c_str();
+    case ReplicatedValueType::Vector3: {
+        std::vector<float> ReturnVector;
+        ReturnVector = { ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z };
+        return ReturnVector;
+    }
+    case ReplicatedValueType::Vector4: {
+        std::vector<float> ReturnVector;
+        ReturnVector = { ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z };
+        return ReturnVector;
+    }
+    default:
+        throw std::runtime_error("Unknown ReplicatedValue type!");
+    }
 }
 
 std::vector<std::string> CustomSpaceComponentScriptInterface::GetCustomPropertyKeys()
 {
-	std::vector<std::string> ReturnValue;
-	csp::common::List<csp::common::String> Keys = static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertyKeys();
+    std::vector<std::string> ReturnValue;
+    csp::common::List<csp::common::String> Keys = static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertyKeys();
 
-	for (int i = 0; i < Keys.Size(); ++i)
-	{
-		ReturnValue.push_back(Keys[i].c_str());
-	}
+    for (int i = 0; i < Keys.Size(); ++i) {
+        ReturnValue.push_back(Keys[i].c_str());
+    }
 
-	return ReturnValue;
+    return ReturnValue;
 }
 
-void CustomSpaceComponentScriptInterface::SetCustomProperty(const std::string& Key,
-															const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value)
+void CustomSpaceComponentScriptInterface::SetCustomProperty(
+    const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value)
 {
-	ReplicatedValue SetValue;
+    ReplicatedValue SetValue;
 
-	switch (Value.index())
-	{
-		case ValueType_Boolean:
-			SetValue.SetBool(std::get<ValueType_Boolean>(Value));
-			break;
-		case ValueType_Integer:
-			SetValue.SetInt(std::get<ValueType_Integer>(Value));
-			break;
-		case ValueType_Float:
-			SetValue.SetFloat(std::get<ValueType_Float>(Value));
-			break;
-		case ValueType_String:
-			SetValue.SetString(std::get<ValueType_String>(Value).c_str());
-			break;
-		case ValueType_Vector:
-			if (std::get<ValueType_Vector>(Value).size() == 3)
-			{
-				SetValue.SetVector3(
-					{std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2]});
-			}
-			else
-			{
-				SetValue.SetVector4({std::get<ValueType_Vector>(Value)[0],
-									 std::get<ValueType_Vector>(Value)[1],
-									 std::get<ValueType_Vector>(Value)[2],
-									 std::get<ValueType_Vector>(Value)[3]});
-			}
-			break;
-	}
+    switch (Value.index()) {
+    case ValueType_Boolean:
+        SetValue.SetBool(std::get<ValueType_Boolean>(Value));
+        break;
+    case ValueType_Integer:
+        SetValue.SetInt(std::get<ValueType_Integer>(Value));
+        break;
+    case ValueType_Float:
+        SetValue.SetFloat(std::get<ValueType_Float>(Value));
+        break;
+    case ValueType_String:
+        SetValue.SetString(std::get<ValueType_String>(Value).c_str());
+        break;
+    case ValueType_Vector:
+        if (std::get<ValueType_Vector>(Value).size() == 3) {
+            SetValue.SetVector3({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2] });
+        } else {
+            SetValue.SetVector4({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2],
+                std::get<ValueType_Vector>(Value)[3] });
+        }
+        break;
+    }
 
-	static_cast<CustomSpaceComponent*>(Component)->SetCustomProperty(Key.c_str(), SetValue);
-	SendPropertyUpdate();
+    static_cast<CustomSpaceComponent*>(Component)->SetCustomProperty(Key.c_str(), SetValue);
+    SendPropertyUpdate();
 }
-
 
 DEFINE_SCRIPT_PROPERTY_STRING(CustomSpaceComponent, ApplicationOrigin);
 

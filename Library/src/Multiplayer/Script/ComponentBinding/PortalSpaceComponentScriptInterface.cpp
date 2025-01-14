@@ -18,11 +18,10 @@
 #include "CSP/Multiplayer/Components/PortalSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 csp::multiplayer::PortalSpaceComponentScriptInterface::PortalSpaceComponentScriptInterface(PortalSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

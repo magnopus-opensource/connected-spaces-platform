@@ -16,31 +16,26 @@
 
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_STRINGFORMAT_TESTS)
 
-	#include "CSP/Common/StringFormat.h"
-	#include "CSP/Common/List.h"
+#include "CSP/Common/StringFormat.h"
+#include "CSP/Common/List.h"
 
-	#include "TestHelpers.h"
+#include "TestHelpers.h"
 
-	#include <gtest/gtest.h>
-
+#include <gtest/gtest.h>
 
 using namespace csp::common;
 
-
 CSP_INTERNAL_TEST(CSPEngine, CommonStringFormatTests, StringFormatTest)
 {
-	try
-	{
-		String Instance = StringFormat("%c %d %i %.1f %s", '1', 2, 3, 4.0f, "five");
+    try {
+        String Instance = StringFormat("%c %d %i %.1f %s", '1', 2, 3, 4.0f, "five");
 
-		EXPECT_FALSE(Instance.IsEmpty());
-		EXPECT_NE(Instance.c_str(), nullptr);
-		EXPECT_EQ(Instance, "1 2 3 4.0 five");
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_FALSE(Instance.IsEmpty());
+        EXPECT_NE(Instance.c_str(), nullptr);
+        EXPECT_EQ(Instance, "1 2 3 4.0 five");
+    } catch (...) {
+        FAIL();
+    }
 }
 
 #endif

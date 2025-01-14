@@ -21,64 +21,53 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/PortalSpaceComponentScriptInterface.h"
 
-csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Portal, Parent)
+csp::multiplayer::PortalSpaceComponent::PortalSpaceComponent(SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Portal, Parent)
 {
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::IsVisible)]   = true;
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::IsActive)]	   = true;
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::SpaceId)]	   = "";
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::IsARVisible)] = true;
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)]   = true;
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::Position)]	   = csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(PortalPropertyKeys::Radius)]	   = 1.5f;
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsVisible)] = true;
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsActive)] = true;
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::SpaceId)] = "";
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)] = true;
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
+    Properties[static_cast<uint32_t>(PortalPropertyKeys::Radius)] = 1.5f;
 
-	SetScriptInterface(CSP_NEW PortalSpaceComponentScriptInterface(this));
+    SetScriptInterface(CSP_NEW PortalSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& csp::multiplayer::PortalSpaceComponent::GetSpaceId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId));
+    return GetStringProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetSpaceId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value);
+    SetProperty(static_cast<uint32_t>(PortalPropertyKeys::SpaceId), Value);
 }
 
 void csp::multiplayer::PortalSpaceComponent::GetSpaceThumbnail(csp::systems::UriResultCallback Callback) const
 {
-	csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
+    csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
-	SpaceSystem->GetSpaceThumbnail(GetSpaceId(), Callback);
+    SpaceSystem->GetSpaceThumbnail(GetSpaceId(), Callback);
 }
 
 /* IPositionComponent */
 
 const csp::common::Vector3& csp::multiplayer::PortalSpaceComponent::GetPosition() const
 {
-	return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
+    return GetVector3Property(static_cast<uint32_t>(PortalPropertyKeys::Position));
 }
 
 void csp::multiplayer::PortalSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Position), Value);
 }
 
-float csp::multiplayer::PortalSpaceComponent::GetRadius() const
-{
-	return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius));
-}
+float csp::multiplayer::PortalSpaceComponent::GetRadius() const { return GetFloatProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius)); }
 
-void csp::multiplayer::PortalSpaceComponent::SetRadius(float Value)
-{
-	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value);
-}
+void csp::multiplayer::PortalSpaceComponent::SetRadius(float Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::Radius), Value); }
 
-bool csp::multiplayer::PortalSpaceComponent::GetIsEnabled() const
-{
-	return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled));
-}
+bool csp::multiplayer::PortalSpaceComponent::GetIsEnabled() const { return GetBooleanProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled)); }
 
-void csp::multiplayer::PortalSpaceComponent::SetIsEnabled(bool Value)
-{
-	SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value);
-}
+void csp::multiplayer::PortalSpaceComponent::SetIsEnabled(bool Value) { SetProperty(static_cast<uint32_t>(PortalPropertyKeys::IsEnabled), Value); }

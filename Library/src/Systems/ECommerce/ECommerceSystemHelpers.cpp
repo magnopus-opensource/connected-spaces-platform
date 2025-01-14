@@ -21,31 +21,29 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-namespace ECommerceSystemHelpers
-{
-std::shared_ptr<chs::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo()
-{
-	auto DefaultStoreInfo = std::make_shared<chs::ShopifyStorefrontDto>();
+namespace ECommerceSystemHelpers {
+    std::shared_ptr<chs::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo()
+    {
+        auto DefaultStoreInfo = std::make_shared<chs::ShopifyStorefrontDto>();
 
-	DefaultStoreInfo->SetStoreName("ShopifyStore");
-	DefaultStoreInfo->SetIsEcommerceActive(false);
-	DefaultStoreInfo->SetPrivateAccessToken("");
+        DefaultStoreInfo->SetStoreName("ShopifyStore");
+        DefaultStoreInfo->SetIsEcommerceActive(false);
+        DefaultStoreInfo->SetPrivateAccessToken("");
 
-	return DefaultStoreInfo;
-}
+        return DefaultStoreInfo;
+    }
 
-std::shared_ptr<chs::ShopifyStorefrontValidationRequest> DefaultShopifyStorefrontValidationRequest()
-{
-	auto DefaultShopifyStorefrontValidationInfo = std::make_shared<chs::ShopifyStorefrontValidationRequest>();
+    std::shared_ptr<chs::ShopifyStorefrontValidationRequest> DefaultShopifyStorefrontValidationRequest()
+    {
+        auto DefaultShopifyStorefrontValidationInfo = std::make_shared<chs::ShopifyStorefrontValidationRequest>();
 
-	DefaultShopifyStorefrontValidationInfo->SetStoreName("");
-	DefaultShopifyStorefrontValidationInfo->SetPrivateAccessToken("");
+        DefaultShopifyStorefrontValidationInfo->SetStoreName("");
+        DefaultShopifyStorefrontValidationInfo->SetPrivateAccessToken("");
 
-	return DefaultShopifyStorefrontValidationInfo;
-}
+        return DefaultShopifyStorefrontValidationInfo;
+    }
 
 } // namespace ECommerceSystemHelpers
 } // namespace csp::systems

@@ -21,47 +21,39 @@
 #include <signalrclient/signalr_client_config.h>
 #include <signalrclient/websocket_client.h>
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 
 class LoginState;
 class UserSystem;
 
 }
 
+namespace csp::multiplayer {
 
-namespace csp::multiplayer
-{
-
-class CSPWebsocketClient : public signalr::websocket_client
-{
+class CSPWebsocketClient : public signalr::websocket_client {
 public:
-	CSPWebsocketClient() noexcept;
+    CSPWebsocketClient() noexcept;
 
-	void start(const std::string& url, std::function<void(std::exception_ptr)> callback) override;
-	void stop(std::function<void(std::exception_ptr)> callback) override;
-	void send(const std::string& payload, signalr::transfer_format format, std::function<void(std::exception_ptr)> callback) override;
-	void receive(std::function<void(const std::string&, std::exception_ptr)> callback) override;
+    void start(const std::string& url, std::function<void(std::exception_ptr)> callback) override;
+    void stop(std::function<void(std::exception_ptr)> callback) override;
+    void send(const std::string& payload, signalr::transfer_format format, std::function<void(std::exception_ptr)> callback) override;
+    void receive(std::function<void(const std::string&, std::exception_ptr)> callback) override;
 
 private:
-	csp::systems::UserSystem* UserSystem;
-	const csp::systems::LoginState* LoginState;
-	std::atomic_bool RefreshInitialised;
+    csp::systems::UserSystem* UserSystem;
+    const csp::systems::LoginState* LoginState;
+    std::atomic_bool RefreshInitialised;
 };
 
-
-class CSPHttpClient : public signalr::http_client
-{
+class CSPHttpClient : public signalr::http_client {
 public:
-	CSPHttpClient();
+    CSPHttpClient();
 
-	void send(const std::string& url,
-			  const signalr::http_request& request,
-			  std::function<void(const signalr::http_response&, std::exception_ptr)> callback) override;
+    void send(const std::string& url, const signalr::http_request& request,
+        std::function<void(const signalr::http_response&, std::exception_ptr)> callback) override;
 
 private:
-	csp::web::WebClient* WebClientHttps;
+    csp::web::WebClient* WebClientHttps;
 };
 
 } // namespace csp::multiplayer

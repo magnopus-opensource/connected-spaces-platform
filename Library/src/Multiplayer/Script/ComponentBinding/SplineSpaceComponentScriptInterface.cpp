@@ -19,46 +19,42 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 csp::multiplayer::SplineSpaceComponentScriptInterface::SplineSpaceComponentScriptInterface(SplineSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
 ComponentScriptInterface::Vector3 SplineSpaceComponentScriptInterface::GetLocationAlongSpline(float NormalisedDistance)
 {
-	auto Result = static_cast<SplineSpaceComponent*>(Component)->GetLocationAlongSpline(NormalisedDistance);
+    auto Result = static_cast<SplineSpaceComponent*>(Component)->GetLocationAlongSpline(NormalisedDistance);
 
-	return {Result.X, Result.Y, Result.Z};
+    return { Result.X, Result.Y, Result.Z };
 }
 
 std::vector<ComponentScriptInterface::Vector3> SplineSpaceComponentScriptInterface::GetWaypoints()
 {
-	std::vector<Vector3> ReturnList;
+    std::vector<Vector3> ReturnList;
 
-	auto Result = static_cast<SplineSpaceComponent*>(Component)->GetWaypoints();
+    auto Result = static_cast<SplineSpaceComponent*>(Component)->GetWaypoints();
 
-	for (int i = 0; i < Result.Size(); ++i)
-	{
-		ReturnList.push_back({Result[i].X, Result[i].Y, Result[i].Z});
-	}
+    for (int i = 0; i < Result.Size(); ++i) {
+        ReturnList.push_back({ Result[i].X, Result[i].Y, Result[i].Z });
+    }
 
-	return ReturnList;
+    return ReturnList;
 }
 
 void SplineSpaceComponentScriptInterface::SetWaypoints(std::vector<Vector3> Waypoints)
 {
-	csp::common::List<csp::common::Vector3> ConvertedList;
+    csp::common::List<csp::common::Vector3> ConvertedList;
 
-	for (int i = 0; i < Waypoints.size(); ++i)
-	{
-		ConvertedList.Append({Waypoints[i][0], Waypoints[i][1], Waypoints[i][2]});
-	}
+    for (int i = 0; i < Waypoints.size(); ++i) {
+        ConvertedList.Append({ Waypoints[i][0], Waypoints[i][1], Waypoints[i][2] });
+    }
 
-	static_cast<SplineSpaceComponent*>(Component)->SetWaypoints(ConvertedList);
+    static_cast<SplineSpaceComponent*>(Component)->SetWaypoints(ConvertedList);
 }
 
 } // namespace csp::multiplayer

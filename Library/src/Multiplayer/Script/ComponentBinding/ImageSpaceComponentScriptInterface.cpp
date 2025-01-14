@@ -21,10 +21,10 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
-ImageSpaceComponentScriptInterface::ImageSpaceComponentScriptInterface(ImageSpaceComponent* InComponent) : ComponentScriptInterface(InComponent)
+ImageSpaceComponentScriptInterface::ImageSpaceComponentScriptInterface(ImageSpaceComponent* InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

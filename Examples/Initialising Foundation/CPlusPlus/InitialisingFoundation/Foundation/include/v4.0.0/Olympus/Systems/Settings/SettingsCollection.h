@@ -9,9 +9,7 @@
 
 #include <functional>
 
-
-namespace oly_services
-{
+namespace oly_services {
 
 class ApiResponseBase;
 
@@ -21,48 +19,40 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-
-
-namespace oly_systems
-{
+namespace oly_systems {
 
 /// @ingroup Settings System
 /// @brief Data representation of a Settings collection which maps to a UserService::Settings.
-class OLY_API SettingsCollection
-{
+class OLY_API SettingsCollection {
 public:
-	SettingsCollection() = default;
+    SettingsCollection() = default;
 
-	oly_common::String UserId;
-	oly_common::String Context;
-	oly_common::Map<oly_common::String, oly_common::String> Settings;
+    oly_common::String UserId;
+    oly_common::String Context;
+    oly_common::Map<oly_common::String, oly_common::String> Settings;
 };
-
-
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
-class OLY_API SettingsCollectionResult : public oly_services::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	OLY_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
-	OLY_END_IGNORE
-	/** @endcond */
+class OLY_API SettingsCollectionResult : public oly_services::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    OLY_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
+    OLY_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the settings collection result.
-	/// @return SettingsCollection : const ref of settings collection class
-	const SettingsCollection& GetSettingsCollection() const;
+    /// @brief Retrieves the settings collection result.
+    /// @return SettingsCollection : const ref of settings collection class
+    const SettingsCollection& GetSettingsCollection() const;
 
 private:
-	SettingsCollectionResult(void*) {};
+    SettingsCollectionResult(void*) {};
 
-	void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
 
-	SettingsCollection SettingsCollection;
+    SettingsCollection SettingsCollection;
 };
-
 
 /// @brief Callback containing Settings collection.
 /// @param Result SettingsCollectionResult : result class

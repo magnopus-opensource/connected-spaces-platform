@@ -15,28 +15,24 @@
  */
 #pragma once
 
-
 #include "CSP/Common/String.h"
 
-namespace csp::common
-{
-	/// @brief Utility class containing static helper functions for encoding data.
-    class Encode
-    {
-    public:
-        /// @brief URI-encodes the given string by escaping reserved and non-ASCII characters.
-        /// @param UriToEncode const csp::common::String&: The string to encode.
-        /// @param DoubleEncode bool: Whether to doubly encode the string. Typically necessary for GET requests that include a URL-like parameter.
-        static csp::common::String URI(const csp::common::String& UriToEncode, bool DoublEncode = false);
-    };
+namespace csp::common {
+/// @brief Utility class containing static helper functions for encoding data.
+class Encode {
+public:
+    /// @brief URI-encodes the given string by escaping reserved and non-ASCII characters.
+    /// @param UriToEncode const csp::common::String&: The string to encode.
+    /// @param DoubleEncode bool: Whether to doubly encode the string. Typically necessary for GET requests that include a URL-like parameter.
+    static csp::common::String URI(const csp::common::String& UriToEncode, bool DoublEncode = false);
+};
 
-	/// @brief Utility class containing static helper functions for decoding data.
-    class Decode
-    {
-    public:
-        /// @brief URI-decodes the given string by replacing percent-encoded characters with the actual character.
-        /// @param UriToDecode const csp::common::String&: The string to decode.
-        /// @param DoubleDecode bool: Whether to doubly decode the string.
-        static csp::common::String URI(const csp::common::String& UriToDecode, bool DoubleDecode = false);
-    };
+/// @brief Utility class containing static helper functions for decoding data.
+class Decode {
+public:
+    /// @brief URI-decodes the given string by replacing percent-encoded characters with the actual character.
+    /// @param UriToDecode const csp::common::String&: The string to decode.
+    /// @param DoubleDecode bool: Whether to doubly decode the string.
+    static csp::common::String URI(const csp::common::String& UriToDecode, bool DoubleDecode = false);
+};
 };

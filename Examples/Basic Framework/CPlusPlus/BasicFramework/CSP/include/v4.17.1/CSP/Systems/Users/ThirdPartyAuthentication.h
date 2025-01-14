@@ -18,52 +18,42 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @brief FDN supported Authentication Providers, the ones that can be used are the ones above Num
 /// Note: it's important for this enum to start with 0
 /// Note2: make sure to keep all enum values *above* Num
-enum EThirdPartyAuthenticationProviders
-{
-	Google = 0,
-	Discord,
-	Apple,
-	Num,
-	Invalid = Num
-};
+enum EThirdPartyAuthenticationProviders { Google = 0, Discord, Apple, Num, Invalid = Num };
 
 /// @ingroup User System
 /// @brief Data class used in the GetThirdPartyProviderAuthoriseURL authentication step
-class CSP_API ThirdPartyProviderDetails
-{
+class CSP_API ThirdPartyProviderDetails {
 public:
-	csp::common::String ProviderName;
-	csp::common::String ProviderClientId;
-	csp::common::Array<csp::common::String> ProviderAuthScopes;
-	csp::common::String AuthoriseURL;
+    csp::common::String ProviderName;
+    csp::common::String ProviderClientId;
+    csp::common::Array<csp::common::String> ProviderAuthScopes;
+    csp::common::String AuthoriseURL;
 };
 
 /// @brief Result structure for a third party auth provider details request
-class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API ProviderDetailsResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	ProviderDetailsResult() = default;
-	ProviderDetailsResult(void*) {};
+    ProviderDetailsResult() = default;
+    ProviderDetailsResult(void*) {};
 
-	[[nodiscard]] ThirdPartyProviderDetails& GetDetails();
-	[[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
+    [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
+    [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	ThirdPartyProviderDetails ProviderDetails;
+    ThirdPartyProviderDetails ProviderDetails;
 };
 
 typedef std::function<void(const ProviderDetailsResult& Result)> ProviderDetailsResultCallback;

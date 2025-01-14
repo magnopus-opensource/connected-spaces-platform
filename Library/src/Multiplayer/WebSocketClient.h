@@ -20,26 +20,20 @@
 #include <functional>
 #include <string>
 
+namespace csp::multiplayer {
 
-
-namespace csp::multiplayer
-{
-
-class IWebSocketClient
-{
+class IWebSocketClient {
 public:
-	virtual ~IWebSocketClient() = default;
+    virtual ~IWebSocketClient() = default;
 
-	using CallbackHandler = std::function<void(bool)>;
-	using ReceiveHandler  = std::function<void(const std::string&, bool)>;
+    using CallbackHandler = std::function<void(bool)>;
+    using ReceiveHandler = std::function<void(const std::string&, bool)>;
 
-	virtual void Start(const std::string& Url, CallbackHandler Callback)	= 0;
-	virtual void Stop(CallbackHandler Callback)								= 0;
-	virtual void Send(const std::string& Message, CallbackHandler Callback) = 0;
-	virtual void Receive(ReceiveHandler Callback)							= 0;
+    virtual void Start(const std::string& Url, CallbackHandler Callback) = 0;
+    virtual void Stop(CallbackHandler Callback) = 0;
+    virtual void Send(const std::string& Message, CallbackHandler Callback) = 0;
+    virtual void Receive(ReceiveHandler Callback) = 0;
 };
-
-
 
 void SetWebSocketClient(IWebSocketClient* CSPWebSocketClientPtr);
 

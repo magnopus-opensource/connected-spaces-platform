@@ -15,15 +15,14 @@
  */
 #ifndef SKIP_INTERNAL_TESTS
 
-	#include "Memory/Memory.h"
-	#include "Memory/MemoryHelpers.h"
-	#include "Memory/StlAllocator.h"
-	#include "CSP/CSPFoundation.h"
-	#include "TestHelpers.h"
+#include "CSP/CSPFoundation.h"
+#include "Memory/Memory.h"
+#include "Memory/MemoryHelpers.h"
+#include "Memory/StlAllocator.h"
+#include "TestHelpers.h"
 
-	#include "gtest/gtest.h"
-	#include <list>
-
+#include "gtest/gtest.h"
+#include <list>
 
 using namespace csp::memory;
 
@@ -31,70 +30,67 @@ typedef csp::memory::StandardAllocator<csp::memory::MutexLockTrait> MemoryAlloca
 typedef csp::memory::StlAllocator<int> ListAllocator;
 typedef std::list<int, ListAllocator> StlList;
 
-
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, AllocationTest)
 {
-	struct TestObject
-	{
-		int32_t IntMember;
-	};
+    struct TestObject {
+        int32_t IntMember;
+    };
 
-	TestObject* Obj = CSP_NEW TestObject();
-	EXPECT_TRUE(Obj != nullptr);
-	CSP_DELETE(Obj);
+    TestObject* Obj = CSP_NEW TestObject();
+    EXPECT_TRUE(Obj != nullptr);
+    CSP_DELETE(Obj);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, NewCustomAllocatorTest)
 {
-	MemoryAllocator MyAllocator;
+    MemoryAllocator MyAllocator;
 
-	struct TestObject
-	{
-		int32_t IntMember;
-	};
+    struct TestObject {
+        int32_t IntMember;
+    };
 
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
 
-	TestObject* Obj = CSP_NEW_P(&MyAllocator) TestObject();
-	EXPECT_TRUE(Obj != nullptr);
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == sizeof(TestObject));
+    TestObject* Obj = CSP_NEW_P(&MyAllocator) TestObject();
+    EXPECT_TRUE(Obj != nullptr);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == sizeof(TestObject));
 
-	CSP_DELETE_P(Obj, &MyAllocator);
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
+    CSP_DELETE_P(Obj, &MyAllocator);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, StlCustomAllocatorTest)
 {
-	MemoryAllocator MyAllocator;
-	ListAllocator AllocatorWrapper(&MyAllocator);
+    MemoryAllocator MyAllocator;
+    ListAllocator AllocatorWrapper(&MyAllocator);
 
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == 0);
 
-	StlList MyList(AllocatorWrapper);
+    StlList MyList(AllocatorWrapper);
 
-	size_t InitialAllocatedBytes = MyAllocator.GetAllocatedBytes();
-	EXPECT_TRUE(InitialAllocatedBytes >= 0);
+    size_t InitialAllocatedBytes = MyAllocator.GetAllocatedBytes();
+    EXPECT_TRUE(InitialAllocatedBytes >= 0);
 
-	for (int i = 0; i < 10; ++i)
-		MyList.push_back(i);
+    for (int i = 0; i < 10; ++i)
+        MyList.push_back(i);
 
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() > InitialAllocatedBytes);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() > InitialAllocatedBytes);
 
-	MyList.clear();
+    MyList.clear();
 
-	EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == InitialAllocatedBytes);
+    EXPECT_TRUE(MyAllocator.GetAllocatedBytes() == InitialAllocatedBytes);
 }
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, ReallocationTest)
 {
-	auto* Buffer		= CSP_ALLOC(16);
-	*(uint64_t*) Buffer = 0x0123456789ABCDEF;
+    auto* Buffer = CSP_ALLOC(16);
+    *(uint64_t*)Buffer = 0x0123456789ABCDEF;
 
-	Buffer = CSP_REALLOC(Buffer, 32);
-	EXPECT_TRUE(*(uint64_t*) Buffer == 0x0123456789ABCDEF);
+    Buffer = CSP_REALLOC(Buffer, 32);
+    EXPECT_TRUE(*(uint64_t*)Buffer == 0x0123456789ABCDEF);
 
-	Buffer = CSP_REALLOC(Buffer, 128 * 1024);
-	EXPECT_TRUE(*(uint64_t*) Buffer == 0x0123456789ABCDEF);
+    Buffer = CSP_REALLOC(Buffer, 128 * 1024);
+    EXPECT_TRUE(*(uint64_t*)Buffer == 0x0123456789ABCDEF);
 }
 
 #endif

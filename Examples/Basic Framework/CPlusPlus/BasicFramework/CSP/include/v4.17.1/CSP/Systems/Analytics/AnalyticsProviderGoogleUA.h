@@ -19,34 +19,31 @@
 
 #include <chrono>
 
-namespace csp::web
-{
+namespace csp::web {
 class WebClient;
 }
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @ingroup Analytics System
 /// @brief Analytics Provider implementation for Google Universal Analytics
-class AnalyticsProviderGoogleUA : public IAnalyticsProvider
-{
+class AnalyticsProviderGoogleUA : public IAnalyticsProvider {
 public:
-	AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag);
+    AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag);
 
-	CSP_START_IGNORE
-	void Log(AnalyticsEvent* Event) override;
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    void Log(AnalyticsEvent* Event) override;
+    CSP_END_IGNORE
 
 private:
-	csp::common::String ClientId;
-	csp::common::String PropertyTag;
+    csp::common::String ClientId;
+    csp::common::String PropertyTag;
 
-	csp::web::WebClient* WebClient;
+    csp::web::WebClient* WebClient;
 
-	std::chrono::steady_clock::time_point Start;
+    std::chrono::steady_clock::time_point Start;
 };
 
-csp::common::String
-	CreateUAEventString(const csp::common::String& ClientId, const csp::common::String& PropertyTag, csp::systems::AnalyticsEvent* Event);
+csp::common::String CreateUAEventString(
+    const csp::common::String& ClientId, const csp::common::String& PropertyTag, csp::systems::AnalyticsEvent* Event);
 } // namespace csp::systems

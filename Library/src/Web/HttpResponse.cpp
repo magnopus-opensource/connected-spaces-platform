@@ -15,60 +15,40 @@
  */
 #include "Web/HttpResponse.h"
 
-namespace csp::web
-{
+namespace csp::web {
 
-HttpResponse::HttpResponse() : ResponseCode(EResponseCodes::ResponseNotFound), Request(nullptr)
+HttpResponse::HttpResponse()
+    : ResponseCode(EResponseCodes::ResponseNotFound)
+    , Request(nullptr)
 {
 }
 
-HttpResponse::HttpResponse(HttpRequest* InRequest) : ResponseCode(EResponseCodes::ResponseNotFound), Request(InRequest)
+HttpResponse::HttpResponse(HttpRequest* InRequest)
+    : ResponseCode(EResponseCodes::ResponseNotFound)
+    , Request(InRequest)
 {
 }
 
-HttpResponse::~HttpResponse()
-{
-}
+HttpResponse::~HttpResponse() { }
 
-void HttpResponse::SetResponseCode(EResponseCodes InReponseCode)
-{
-	ResponseCode = InReponseCode;
-}
+void HttpResponse::SetResponseCode(EResponseCodes InReponseCode) { ResponseCode = InReponseCode; }
 
-EResponseCodes HttpResponse::GetResponseCode() const
-{
-	return ResponseCode;
-}
+EResponseCodes HttpResponse::GetResponseCode() const { return ResponseCode; }
 
-HttpPayload& HttpResponse::GetMutablePayload()
-{
-	return Payload;
-}
+HttpPayload& HttpResponse::GetMutablePayload() { return Payload; }
 
-const HttpPayload& HttpResponse::GetPayload() const
-{
-	return Payload;
-}
+const HttpPayload& HttpResponse::GetPayload() const { return Payload; }
 
-HttpRequest* HttpResponse::GetRequest() const
-{
-	return Request;
-}
+HttpRequest* HttpResponse::GetRequest() const { return Request; }
 
 void HttpResponse::Reset()
 {
-	ResponseCode = EResponseCodes::ResponseNotFound;
-	Payload.Reset();
+    ResponseCode = EResponseCodes::ResponseNotFound;
+    Payload.Reset();
 }
 
-HttpProgress& HttpResponse::GetProgress()
-{
-	return Progress;
-}
+HttpProgress& HttpResponse::GetProgress() { return Progress; }
 
-const HttpProgress& HttpResponse::GetProgress() const
-{
-	return Progress;
-}
+const HttpProgress& HttpResponse::GetProgress() const { return Progress; }
 
 } // namespace csp::web

@@ -23,10 +23,7 @@
 
 #include <functional>
 
-
-
-namespace csp::services
-{
+namespace csp::services {
 
 class ApiResponseBase;
 
@@ -36,160 +33,140 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::systems {
 
-
-namespace csp::systems
-{
-
-enum class EAssetCollectionType
-{
-	DEFAULT,
-	FOUNDATION_INTERNAL,
-	COMMENT_CONTAINER,
-	COMMENT,
-	SPACE_THUMBNAIL
-};
-
-
+enum class EAssetCollectionType { DEFAULT, FOUNDATION_INTERNAL, COMMENT_CONTAINER, COMMENT, SPACE_THUMBNAIL };
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset collection which maps to a PrototypeService::Prototype.
-class CSP_API AssetCollection
-{
+class CSP_API AssetCollection {
 public:
-	AssetCollection();
-	AssetCollection(const AssetCollection& Other);
-	~AssetCollection();
-	AssetCollection& operator=(const AssetCollection& Other);
+    AssetCollection();
+    AssetCollection(const AssetCollection& Other);
+    ~AssetCollection();
+    AssetCollection& operator=(const AssetCollection& Other);
 
-	/// @brief Retrieves a mutable version of the asset collection's metadata. To be used when it is necessary to mutate the asset collection's
-	/// metadata.
-	/// @return AssetCollection : mutable reference
-	csp::common::Map<csp::common::String, csp::common::String>& GetMetadataMutable();
+    /// @brief Retrieves a mutable version of the asset collection's metadata. To be used when it is necessary to mutate the asset collection's
+    /// metadata.
+    /// @return AssetCollection : mutable reference
+    csp::common::Map<csp::common::String, csp::common::String>& GetMetadataMutable();
 
-	/// @brief Retrieves an immutable version of the asset collection's metadata. To be used with const references to asset collections.
-	/// @return AssetCollection : immutable reference
-	const csp::common::Map<csp::common::String, csp::common::String>& GetMetadataImmutable() const;
+    /// @brief Retrieves an immutable version of the asset collection's metadata. To be used with const references to asset collections.
+    /// @return AssetCollection : immutable reference
+    const csp::common::Map<csp::common::String, csp::common::String>& GetMetadataImmutable() const;
 
-	// The unique identifier of this asset collection.
-	csp::common::String Id;
+    // The unique identifier of this asset collection.
+    csp::common::String Id;
 
-	// The unique name of this asset collection.
-	csp::common::String Name;
+    // The unique name of this asset collection.
+    csp::common::String Name;
 
-	// The type of this asset collection.
-	EAssetCollectionType Type;
+    // The type of this asset collection.
+    EAssetCollectionType Type;
 
-	// The set of tag strings that have been associated with this asset collection. Note that asset collections can be searched by tag.
-	csp::common::Array<csp::common::String> Tags;
+    // The set of tag strings that have been associated with this asset collection. Note that asset collections can be searched by tag.
+    csp::common::Array<csp::common::String> Tags;
 
-	// The unique identifier of the POI this asset collection relates to. Empty if it does not relate to a POI.
-	csp::common::String PointOfInterestId;
+    // The unique identifier of the POI this asset collection relates to. Empty if it does not relate to a POI.
+    csp::common::String PointOfInterestId;
 
-	// The unique ID of the asset collection that is a parent to this asset collection. Empty if there is no parent relationship.
-	csp::common::String ParentId;
+    // The unique ID of the asset collection that is a parent to this asset collection. Empty if there is no parent relationship.
+    csp::common::String ParentId;
 
-	// Where the asset collection belongs to a space, the unique ID of the space that this asset collection belongs to. Empty otherwise.
-	csp::common::String SpaceId;
+    // Where the asset collection belongs to a space, the unique ID of the space that this asset collection belongs to. Empty otherwise.
+    csp::common::String SpaceId;
 
-	// The unique ID of the user who created the asset collection.
-	csp::common::String CreatedBy;
+    // The unique ID of the user who created the asset collection.
+    csp::common::String CreatedBy;
 
-	// The UTC string representing when this asset collection was created.
-	csp::common::String CreatedAt;
+    // The UTC string representing when this asset collection was created.
+    csp::common::String CreatedAt;
 
-	// The unique ID of the user who last updated the asset collection.
-	csp::common::String UpdatedBy;
+    // The unique ID of the user who last updated the asset collection.
+    csp::common::String UpdatedBy;
 
-	// The UTC string representing when this asset collection was last updated.
-	csp::common::String UpdatedAt;
-	bool IsUnique;
+    // The UTC string representing when this asset collection was last updated.
+    csp::common::String UpdatedAt;
+    bool IsUnique;
 
-	// NOTE: Why is this here?
-	csp::common::String Version;
+    // NOTE: Why is this here?
+    csp::common::String Version;
 
     // The ID of the organization which owns this asset collection
-	csp::common::String OrganizationId;
+    csp::common::String OrganizationId;
 
 private:
-	// Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
-	// internal STL map's destructor invokes client application's deallocators when they override 'delete'
-	// in their codebase.
-	csp::common::Map<csp::common::String, csp::common::String>* Metadata;
+    // Metadata is managed via a private pointer with public accessors because it has been found that csp::common::Map's
+    // internal STL map's destructor invokes client application's deallocators when they override 'delete'
+    // in their codebase.
+    csp::common::Map<csp::common::String, csp::common::String>* Metadata;
 };
-
-
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset collection.
-class CSP_API AssetCollectionResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API AssetCollectionResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the asset collection result.
-	/// @return AssetCollection : const ref of asset collection class
-	AssetCollection& GetAssetCollection();
+    /// @brief Retrieves the asset collection result.
+    /// @return AssetCollection : const ref of asset collection class
+    AssetCollection& GetAssetCollection();
 
-	/// @brief Retrieves the asset collection result.
-	/// @return AssetCollection : const ref of asset collection class
-	const AssetCollection& GetAssetCollection() const;
+    /// @brief Retrieves the asset collection result.
+    /// @return AssetCollection : const ref of asset collection class
+    const AssetCollection& GetAssetCollection() const;
 
 private:
-	AssetCollectionResult(void*) {};
+    AssetCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	AssetCollection AssetCollection;
+    AssetCollection AssetCollection;
 };
-
-
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of asset collections.
-class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	friend class AssetSystem;
+class CSP_API AssetCollectionsResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the asset collection array being stored as a pointer.
-	/// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-	csp::common::Array<AssetCollection>& GetAssetCollections();
+    /// @brief Retrieves the asset collection array being stored as a pointer.
+    /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
+    csp::common::Array<AssetCollection>& GetAssetCollections();
 
-	/// @brief Retrieves the asset collection array being stored as a pointer.
-	/// @return csp::common::Array<AssetCollection> : pointer to asset collection array
-	const csp::common::Array<AssetCollection>& GetAssetCollections() const;
+    /// @brief Retrieves the asset collection array being stored as a pointer.
+    /// @return csp::common::Array<AssetCollection> : pointer to asset collection array
+    const csp::common::Array<AssetCollection>& GetAssetCollections() const;
 
-	/// @brief Retrieves the async operation total number of result asset collections.
-	/// If the async operation was using pagination this count number represents the sum of asset collection sizes from every page.
-	/// If the async operation is not using pagination this count number will be equal to the AssetCollections array size.
-	/// @return uint64_t : count number as described above
-	uint64_t GetTotalCount() const;
+    /// @brief Retrieves the async operation total number of result asset collections.
+    /// If the async operation was using pagination this count number represents the sum of asset collection sizes from every page.
+    /// If the async operation is not using pagination this count number will be equal to the AssetCollections array size.
+    /// @return uint64_t : count number as described above
+    uint64_t GetTotalCount() const;
 
-	CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT AssetCollectionsResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	AssetCollectionsResult(void*) {};
+    AssetCollectionsResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	void FillResultTotalCount(const csp::common::String& JsonContent);
+    void FillResultTotalCount(const csp::common::String& JsonContent);
 
-	csp::common::Array<AssetCollection> AssetCollections;
-	uint64_t ResultTotalCount = 0;
+    csp::common::Array<AssetCollection> AssetCollections;
+    uint64_t ResultTotalCount = 0;
 };
-
-
 
 /// @brief Callback containing asset collection.
 /// @param Result AssetCollectionResult : result class

@@ -16,84 +16,74 @@
 
 #pragma once
 
-
 #include "CSP/Systems/Users/Authentication.h"
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @brief Result structure for a logout state request.
-class CSP_API LogoutResult : public NullResult
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API LogoutResult : public NullResult {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 private:
-	LogoutResult();
-	LogoutResult(LoginState* InStatePtr);
+    LogoutResult();
+    LogoutResult(LoginState* InStatePtr);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	LoginState* State;
+    LoginState* State;
 };
-
 
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public StringResult
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API AgoraUserTokenResult : public StringResult {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 private:
-	AgoraUserTokenResult() = default;
-	AgoraUserTokenResult(void*) {};
+    AgoraUserTokenResult() = default;
+    AgoraUserTokenResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
-
 
 /// @brief Result url for a tier checkout session request
-class CSP_API CheckoutSessionUrlResult : public StringResult
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API CheckoutSessionUrlResult : public StringResult {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	CheckoutSessionUrlResult() = default;
-	CheckoutSessionUrlResult(void*) {};
+    CheckoutSessionUrlResult() = default;
+    CheckoutSessionUrlResult(void*) {};
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
-
 /// @brief Result url for a user customer portal request
-class CSP_API CustomerPortalUrlResult : public StringResult
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API CustomerPortalUrlResult : public StringResult {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	CustomerPortalUrlResult() = default;
-	CustomerPortalUrlResult(void*) {};
+    CustomerPortalUrlResult() = default;
+    CustomerPortalUrlResult(void*) {};
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 } // namespace csp::systems

@@ -17,60 +17,45 @@
 
 #include "CSP/Systems/Spaces/Site.h"
 #include "CSP/Systems/Spatial/PointOfInterestSystem.h"
-#include "Web/WebClient.h"
 #include "Debug/Logging.h"
+#include "Web/WebClient.h"
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-class PointOfInterestInternalSystem : public PointOfInterestSystem
-{
+class PointOfInterestInternalSystem : public PointOfInterestSystem {
 public:
-    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient) : PointOfInterestSystem(InWebClient) {};
+    PointOfInterestInternalSystem(csp::web::WebClient* InWebClient)
+        : PointOfInterestSystem(InWebClient) {};
 
-	void CreateSite(const Site& Site, SiteResultCallback Callback)
-	{
-		PointOfInterestSystem::CreateSite(Site, Callback);
-	};
+    void CreateSite(const Site& Site, SiteResultCallback Callback) { PointOfInterestSystem::CreateSite(Site, Callback); };
 
-	void DeleteSite(const Site& Site, NullResultCallback Callback)
-	{
-		PointOfInterestSystem::DeleteSite(Site, Callback);
-	};
+    void DeleteSite(const Site& Site, NullResultCallback Callback) { PointOfInterestSystem::DeleteSite(Site, Callback); };
 
-	void GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback)
-	{
-		PointOfInterestSystem::GetSites(SpaceId, Callback);
-	};
+    void GetSites(const csp::common::String& SpaceId, SitesCollectionResultCallback Callback) { PointOfInterestSystem::GetSites(SpaceId, Callback); };
 
-	void AddSpaceGeoLocation(const csp::common::String& SpaceId,
-							 const csp::common::Optional<GeoLocation>& Location,
-							 const csp::common::Optional<float>& Orientation,
-							 const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-							 SpaceGeoLocationResultCallback Callback)
-	{
-		PointOfInterestSystem::AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
-	}
+    void AddSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::Optional<GeoLocation>& Location,
+        const csp::common::Optional<float>& Orientation, const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
+        SpaceGeoLocationResultCallback Callback)
+    {
+        PointOfInterestSystem::AddSpaceGeoLocation(SpaceId, Location, Orientation, GeoFence, Callback);
+    }
 
-	void UpdateSpaceGeoLocation(const csp::common::String& SpaceId,
-								const csp::common::String& SpaceGeoLocationId,
-								const csp::common::Optional<GeoLocation>& Location,
-								const csp::common::Optional<float>& Orientation,
-								const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence,
-								SpaceGeoLocationResultCallback Callback)
-	{
-		PointOfInterestSystem::UpdateSpaceGeoLocation(SpaceId, SpaceGeoLocationId, Location, Orientation, GeoFence, Callback);
-	}
+    void UpdateSpaceGeoLocation(const csp::common::String& SpaceId, const csp::common::String& SpaceGeoLocationId,
+        const csp::common::Optional<GeoLocation>& Location, const csp::common::Optional<float>& Orientation,
+        const csp::common::Optional<csp::common::Array<GeoLocation>>& GeoFence, SpaceGeoLocationResultCallback Callback)
+    {
+        PointOfInterestSystem::UpdateSpaceGeoLocation(SpaceId, SpaceGeoLocationId, Location, Orientation, GeoFence, Callback);
+    }
 
-	void GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
-	{
-		PointOfInterestSystem::GetSpaceGeoLocation(SpaceId, Callback);
-	}
+    void GetSpaceGeoLocation(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback)
+    {
+        PointOfInterestSystem::GetSpaceGeoLocation(SpaceId, Callback);
+    }
 
-	void DeleteSpaceGeoLocation(const csp::common::String& SpaceGeoLocationId, NullResultCallback Callback)
-	{
-		PointOfInterestSystem::DeleteSpaceGeoLocation(SpaceGeoLocationId, Callback);
-	}
+    void DeleteSpaceGeoLocation(const csp::common::String& SpaceGeoLocationId, NullResultCallback Callback)
+    {
+        PointOfInterestSystem::DeleteSpaceGeoLocation(SpaceGeoLocationId, Callback);
+    }
 };
 
 } // namespace csp::systems

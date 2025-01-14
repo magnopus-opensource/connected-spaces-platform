@@ -20,48 +20,44 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 using MetricValue = csp::multiplayer::ReplicatedValue;
 
-class CSP_API AnalyticsEvent
-{
-	friend class AnalyticsEventInitialiser;
+class CSP_API AnalyticsEvent {
+    friend class AnalyticsEventInitialiser;
 
 public:
-	void AddInt(csp::common::String Key, int64_t Value);
-	void AddString(csp::common::String Key, const csp::common::String& Value);
-	void AddFloat(csp::common::String Key, float Value);
-	void AddBool(csp::common::String Key, bool Value);
+    void AddInt(csp::common::String Key, int64_t Value);
+    void AddString(csp::common::String Key, const csp::common::String& Value);
+    void AddFloat(csp::common::String Key, float Value);
+    void AddBool(csp::common::String Key, bool Value);
 
-	const int64_t GetInt(csp::common::String Key) const;
-	const csp::common::String& GetString(csp::common::String Key) const;
-	const float GetFloat(csp::common::String Key) const;
-	bool GetBool(csp::common::String Key) const;
+    const int64_t GetInt(csp::common::String Key) const;
+    const csp::common::String& GetString(csp::common::String Key) const;
+    const float GetFloat(csp::common::String Key) const;
+    bool GetBool(csp::common::String Key) const;
 
-	const csp::common::String& GetTag() const;
+    const csp::common::String& GetTag() const;
 
-	CSP_START_IGNORE
-	const csp::common::Map<csp::common::String, MetricValue>& GetParams() const;
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    const csp::common::Map<csp::common::String, MetricValue>& GetParams() const;
+    CSP_END_IGNORE
 
 private:
-	AnalyticsEvent(const csp::common::String& Tag);
+    AnalyticsEvent(const csp::common::String& Tag);
 
-	csp::common::String Tag;
+    csp::common::String Tag;
 
-	csp::common::Map<csp::common::String, MetricValue> Parameters;
+    csp::common::Map<csp::common::String, MetricValue> Parameters;
 };
 
-class CSP_API AnalyticsEventInitialiser
-{
+class CSP_API AnalyticsEventInitialiser {
 public:
-	static AnalyticsEvent* Initialise(const csp::common::String Tag);
-	static void DeInitialise(AnalyticsEvent* Event);
+    static AnalyticsEvent* Initialise(const csp::common::String Tag);
+    static void DeInitialise(AnalyticsEvent* Event);
 };
 
-#define INIT_EVENT(T)	csp::systems::AnalyticsEventInitialiser::Initialise(T)
+#define INIT_EVENT(T) csp::systems::AnalyticsEventInitialiser::Initialise(T)
 #define DEINIT_EVENT(E) csp::systems::AnalyticsEventInitialiser::DeInitialise(E)
 
 } // namespace csp::systems

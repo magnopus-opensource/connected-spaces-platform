@@ -17,22 +17,12 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::memory
-{
+namespace csp::memory {
 
-void* DllAlloc(size_t Size, size_t Alignment)
-{
-	return CSP_ALLOC_ALIGN(Size, (std::align_val_t) Alignment);
-}
+void* DllAlloc(size_t Size, size_t Alignment) { return CSP_ALLOC_ALIGN(Size, (std::align_val_t)Alignment); }
 
-void* DllRealloc(void* Ptr, size_t NewSize, size_t Alignment)
-{
-	return CSP_REALLOC_ALIGN(Ptr, NewSize, (std::align_val_t) Alignment);
-}
+void* DllRealloc(void* Ptr, size_t NewSize, size_t Alignment) { return CSP_REALLOC_ALIGN(Ptr, NewSize, (std::align_val_t)Alignment); }
 
-void DllFree(void* Ptr)
-{
-	CSP_FREE(Ptr);
-}
+void DllFree(void* Ptr) { CSP_FREE(Ptr); }
 
 } // namespace csp::memory

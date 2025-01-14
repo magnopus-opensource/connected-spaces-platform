@@ -15,26 +15,24 @@
  */
 #include "Common/Scheduler.h"
 
-namespace csp
-{
+namespace csp {
 
 static Scheduler* SchedulerPtr = nullptr;
 
 Scheduler* GetScheduler()
 {
-	if (SchedulerPtr == nullptr)
-	{
-		SchedulerPtr = CSP_NEW Scheduler();
-		SchedulerPtr->Initialise();
-	}
+    if (SchedulerPtr == nullptr) {
+        SchedulerPtr = CSP_NEW Scheduler();
+        SchedulerPtr->Initialise();
+    }
 
-	return SchedulerPtr;
+    return SchedulerPtr;
 }
 
 void DestroyScheduler()
 {
-	CSP_DELETE(SchedulerPtr);
-	SchedulerPtr = nullptr;
+    CSP_DELETE(SchedulerPtr);
+    SchedulerPtr = nullptr;
 }
 
 } // namespace csp

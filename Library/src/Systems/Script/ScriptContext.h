@@ -22,51 +22,48 @@
 #include <map>
 #include <string>
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-struct ScriptModule
-{
-	std::string ModuleName;
-	qjs::Context::Module* Module;
+struct ScriptModule {
+    std::string ModuleName;
+    qjs::Context::Module* Module;
 };
 
-class ScriptContext
-{
-	friend class ScriptSystem;
+class ScriptContext {
+    friend class ScriptSystem;
 
 public:
-	ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId);
-	~ScriptContext();
+    ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* Runtime, uint64_t InContextId);
+    ~ScriptContext();
 
-	void AddModule(const csp::common::String& ModuleName);
-	ScriptModule* GetModule(const csp::common::String& ModuleName);
+    void AddModule(const csp::common::String& ModuleName);
+    ScriptModule* GetModule(const csp::common::String& ModuleName);
 
-	uint64_t GetId() const;
+    uint64_t GetId() const;
 
-	bool ExistsInContext(const csp::common::String& ObjectName);
+    bool ExistsInContext(const csp::common::String& ObjectName);
 
-	size_t GetNumImportedModules() const;
-	const char* GetImportedModule(size_t Index) const;
+    size_t GetNumImportedModules() const;
+    const char* GetImportedModule(size_t Index) const;
 
-	void Reset();
+    void Reset();
 
 private:
-	void Initialise();
-	void Shutdown();
+    void Initialise();
+    void Shutdown();
 
-	void AddImport(const csp::common::String& Url);
+    void AddImport(const csp::common::String& Url);
 
-	using ModuleMap		  = std::map<std::string, ScriptModule*>;
-	using ImportedModules = std::vector<std::string>;
+    using ModuleMap = std::map<std::string, ScriptModule*>;
+    using ImportedModules = std::vector<std::string>;
 
-	uint64_t ContextId;
-	ScriptSystem* TheScriptSystem;
+    uint64_t ContextId;
+    ScriptSystem* TheScriptSystem;
 
-	qjs::Context* Context;
-	qjs::Runtime* Runtime;
-	ModuleMap Modules;
-	ImportedModules Imports;
+    qjs::Context* Context;
+    qjs::Runtime* Runtime;
+    ModuleMap Modules;
+    ImportedModules Imports;
 };
 
 } // namespace csp::systems

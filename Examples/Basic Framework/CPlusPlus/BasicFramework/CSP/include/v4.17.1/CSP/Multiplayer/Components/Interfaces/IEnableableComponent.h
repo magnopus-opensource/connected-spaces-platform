@@ -20,24 +20,21 @@
 
 #include "CSP/CSPCommon.h"
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 /// @brief Controls whether a component is enabled or disabled.
-CSP_INTERFACE class CSP_API IEnableableComponent
-{
+CSP_INTERFACE class CSP_API IEnableableComponent {
 public:
-	/// @brief Checks if the component is enabled.
-	/// @return True if the component is enabled, false otherwise.
-	virtual bool GetIsEnabled() const = 0;
+    /// @brief Checks if the component is enabled.
+    /// @return True if the component is enabled, false otherwise.
+    virtual bool GetIsEnabled() const = 0;
 
-	/// @brief Sets if the component is enabled.
-	/// @param InValue True to set the component to enabled, false otherwise.
-	virtual void SetIsEnabled(bool InValue) = 0;
+    /// @brief Sets if the component is enabled.
+    /// @param InValue True to set the component to enabled, false otherwise.
+    virtual void SetIsEnabled(bool InValue) = 0;
 
 protected:
-	virtual ~IEnableableComponent() = default;
+    virtual ~IEnableableComponent() = default;
 };
 
 } // namespace csp::multiplayer

@@ -21,65 +21,49 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
-
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 /// @brief Enumerates the supported scopes of a script.
-enum class ScriptScope
-{
-	Local = 0,
-	Owner,
-	Num
-};
+enum class ScriptScope { Local = 0, Owner, Num };
 
 /// @brief Enumerates the list of properties that can be replicated for a script component.
-enum class ScriptComponentPropertyKeys
-{
-	ScriptSource = 1,
-	OwnerId,
-	ScriptScope,
-	Num
-};
-
+enum class ScriptComponentPropertyKeys { ScriptSource = 1, OwnerId, ScriptScope, Num };
 
 /// @ingroup ScriptSpaceComponent
 /// @brief Data representation of a ScriptSpaceComponent.
-class CSP_API ScriptSpaceComponent : public ComponentBase
-{
+class CSP_API ScriptSpaceComponent : public ComponentBase {
 public:
-	/// @brief Constructs the script space component, and associates it with the specified Parent space entity.
-	/// @param Parent The Space entity that owns this component.
-	ScriptSpaceComponent(SpaceEntity* Parent);
+    /// @brief Constructs the script space component, and associates it with the specified Parent space entity.
+    /// @param Parent The Space entity that owns this component.
+    ScriptSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Retrieves the source of the script of this script component.
-	/// @return The script source of this script component.
-	const csp::common::String& GetScriptSource() const;
+    /// @brief Retrieves the source of the script of this script component.
+    /// @return The script source of this script component.
+    const csp::common::String& GetScriptSource() const;
 
-	/// @brief Sets the source of the script of this script component.
-	/// @param ScriptSource The script source of this script component.
-	void SetScriptSource(const csp::common::String& ScriptSource);
+    /// @brief Sets the source of the script of this script component.
+    /// @param ScriptSource The script source of this script component.
+    void SetScriptSource(const csp::common::String& ScriptSource);
 
-	/// @brief Gets the ID of the owner of this script component.
-	/// @return The ID of the owner of this script.
-	int64_t GetOwnerId() const;
+    /// @brief Gets the ID of the owner of this script component.
+    /// @return The ID of the owner of this script.
+    int64_t GetOwnerId() const;
 
-	/// @brief Sets the ID of the owner of this script component.
-	/// @param OwnerId The ID of the owner of this script.
-	void SetOwnerId(int64_t OwnerId);
+    /// @brief Sets the ID of the owner of this script component.
+    /// @param OwnerId The ID of the owner of this script.
+    void SetOwnerId(int64_t OwnerId);
 
-	/// @brief Gets the scope within which this script operates.
-	/// @return The scope of this script.
-	ScriptScope GetScriptScope() const;
+    /// @brief Gets the scope within which this script operates.
+    /// @return The scope of this script.
+    ScriptScope GetScriptScope() const;
 
-	/// @brief Sets the scope within which this script operates.
-	/// @param Scope The scope of this script.
-	void SetScriptScope(ScriptScope Scope);
+    /// @brief Sets the scope within which this script operates.
+    /// @param Scope The scope of this script.
+    void SetScriptScope(ScriptScope Scope);
 
 protected:
-	void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
-	void OnRemove() override;
+    void SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value) override;
+    void OnRemove() override;
 };
 
 } // namespace csp::multiplayer

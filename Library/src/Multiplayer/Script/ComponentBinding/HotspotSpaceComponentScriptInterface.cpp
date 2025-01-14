@@ -19,16 +19,16 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
-HotspotSpaceComponentScriptInterface::HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent) : ComponentScriptInterface(InComponent)
+HotspotSpaceComponentScriptInterface::HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
 std::string HotspotSpaceComponentScriptInterface::GetUniqueComponentId()
 {
-	return static_cast<HotspotSpaceComponent*>(Component)->GetUniqueComponentId().c_str();
+    return static_cast<HotspotSpaceComponent*>(Component)->GetUniqueComponentId().c_str();
 }
 
 DEFINE_SCRIPT_PROPERTY_VEC3(HotspotSpaceComponent, Position);

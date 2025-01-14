@@ -18,15 +18,13 @@
 #include "CSP/CSPCommon.h"
 #include "Events/Event.h"
 
-namespace csp::events
-{
+namespace csp::events {
 
-class CSP_API EventListener
-{
+class CSP_API EventListener {
 public:
-	virtual ~EventListener() = default;
+    virtual ~EventListener() = default;
 
-	virtual void OnEvent(const Event& InEvent) = 0;
+    virtual void OnEvent(const Event& InEvent) = 0;
 };
 
 } // namespace csp::events

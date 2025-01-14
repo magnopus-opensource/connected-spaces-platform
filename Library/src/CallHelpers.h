@@ -16,8 +16,7 @@
 
 #pragma once
 
-#define INVOKE_IF_NOT_NULL(_ARG_Function__, ...) \
-	if (_ARG_Function__)                         \
-	{                                            \
-		_ARG_Function__(__VA_ARGS__);            \
-	}
+#define INVOKE_IF_NOT_NULL(_ARG_Function__, ...)                                                                                                     \
+    if (_ARG_Function__) {                                                                                                                           \
+        _ARG_Function__(__VA_ARGS__);                                                                                                                \
+    }

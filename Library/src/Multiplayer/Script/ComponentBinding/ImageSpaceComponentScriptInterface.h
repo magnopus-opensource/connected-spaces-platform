@@ -20,28 +20,26 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class ImageSpaceComponent;
 
-class ImageSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class ImageSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	ImageSpaceComponentScriptInterface(ImageSpaceComponent* InComponent = nullptr);
+    ImageSpaceComponentScriptInterface(ImageSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
-	DECLARE_SCRIPT_PROPERTY(std::string, ImageAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(std::string, ImageAssetId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
-	DECLARE_SCRIPT_PROPERTY(int64_t, DisplayMode);
-	DECLARE_SCRIPT_PROPERTY(bool, IsEmissive);
+    DECLARE_SCRIPT_PROPERTY(int64_t, BillboardMode);
+    DECLARE_SCRIPT_PROPERTY(int64_t, DisplayMode);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEmissive);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 };
 
 } // namespace csp::multiplayer

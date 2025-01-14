@@ -21,127 +21,114 @@
 #include <cstdint>
 #include <functional>
 
-namespace csp::services
-{
+namespace csp::services {
 class ApiBase;
 class ApiResponseBase;
 } // namespace csp::services
 
-namespace csp::systems
-{
-
+namespace csp::systems {
 
 /// @brief Code to indicate the result of a request.
 /// Request results should be checked for a success by clients before using any other accessors.
-enum class EResultCode : uint8_t
-{
-	Init,
-	InProgress,
-	Success,
-	Failed
+enum class EResultCode : uint8_t { Init, InProgress, Success, Failed };
+
+enum class ERequestFailureReason {
+    Unknown = -1,
+    None = 0,
+    AddUserToSpaceDenied,
+    UserSpaceAccessDenied,
+    UserSpaceBannedAccessDenied,
+    UserSpaceFullAccessDenied,
+    UserSpaceInviteExpired,
+    SpacePublicNameDuplicate,
+    UserMaxSpaceLimitReached,
+    UserAccountLocked,
+    UserMissingPassword,
+    UserUnverifiedEmail,
+    UserBannedFromSpace,
+    UserInvalidEmailDomain,
+    UserInvalidThirdPartyAuth,
+    UserAgeNotVerified,
+    UserGuestLoginDisallowed,
+    UserAgoraLimitReached,
+    UserOpenAILimitReached,
+    UserTicketedSpacesLimitReached,
+    UserSpaceConcurrentUsersLimitReached,
+    PrototypeReservedKeysNotAllowed,
+    AssetInvalidFileContents,
+    AssetInvalidFileType,
+    AssetAudioVideoLimitReached,
+    AssetObjectCaptureLimitReached,
+    AssetTotalUploadSizeLimitReached,
+    TicketUnknownNumber,
+    TicketEmailMismatch,
+    TicketVendorOAuthFailure,
+    TicketOAuthTokenInvalid,
+    TicketAlreadyApplied,
+    ShopifyConnectionBroken,
+    ShopifyInvalidStoreName,
+    UserShopifyLimitReached,
+    UserTokenRefreshFailed,
+    InvalidSequenceKey,
 };
-
-
-enum class ERequestFailureReason
-{
-	Unknown = -1,
-	None	= 0,
-	AddUserToSpaceDenied,
-	UserSpaceAccessDenied,
-	UserSpaceBannedAccessDenied,
-	UserSpaceFullAccessDenied,
-	UserSpaceInviteExpired,
-	SpacePublicNameDuplicate,
-	UserMaxSpaceLimitReached,
-	UserAccountLocked,
-	UserMissingPassword,
-	UserUnverifiedEmail,
-	UserBannedFromSpace,
-	UserInvalidEmailDomain,
-	UserInvalidThirdPartyAuth,
-	UserAgeNotVerified,
-	UserGuestLoginDisallowed,
-	UserAgoraLimitReached,
-	UserOpenAILimitReached,
-	UserTicketedSpacesLimitReached,
-	UserSpaceConcurrentUsersLimitReached,
-	PrototypeReservedKeysNotAllowed,
-	AssetInvalidFileContents,
-	AssetInvalidFileType,
-	AssetAudioVideoLimitReached,
-	AssetObjectCaptureLimitReached,
-	AssetTotalUploadSizeLimitReached,
-	TicketUnknownNumber,
-	TicketEmailMismatch,
-	TicketVendorOAuthFailure,
-	TicketOAuthTokenInvalid,
-	TicketAlreadyApplied,
-	ShopifyConnectionBroken,
-	ShopifyInvalidStoreName,
-	UserShopifyLimitReached,
-	UserTokenRefreshFailed,
-	InvalidSequenceKey,
-};
-
 
 /// @brief Base class for a HTTP request result.
-class CSP_API ResultBase
-{
+class CSP_API ResultBase {
 public:
-	/// @brief Constructs an empty result.
-	ResultBase();
+    /// @brief Constructs an empty result.
+    ResultBase();
 
-	/// @brief Virtual destructor.
-	virtual ~ResultBase() = default;
+    /// @brief Virtual destructor.
+    virtual ~ResultBase() = default;
 
-	/// @brief Called when progress has been updated.
-	/// @param ApiResponse const ApiResponseBase* : Response received from the request
-	CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);
+    /// @brief Called when progress has been updated.
+    /// @param ApiResponse const ApiResponseBase* : Response received from the request
+    CSP_NO_EXPORT virtual void OnProgress(const services::ApiResponseBase* ApiResponse);
 
-	/// @brief Called when a response has been received.
-	/// @param ApiResponse const ApiResponseBase* : Response received from the request
-	CSP_NO_EXPORT virtual void OnResponse(const services::ApiResponseBase* ApiResponse);
+    /// @brief Called when a response has been received.
+    /// @param ApiResponse const ApiResponseBase* : Response received from the request
+    CSP_NO_EXPORT virtual void OnResponse(const services::ApiResponseBase* ApiResponse);
 
-	/// @brief Status of this response.
-	/// @return EResultCode
-	const EResultCode GetResultCode() const;
+    /// @brief Status of this response.
+    /// @return EResultCode
+    const EResultCode GetResultCode() const;
 
-	/// @brief Result of http request.
-	/// @return uint16_t
-	const uint16_t GetHttpResultCode() const;
+    /// @brief Result of http request.
+    /// @return uint16_t
+    const uint16_t GetHttpResultCode() const;
 
-	/// @brief Body of the response.
-	const csp::common::String& GetResponseBody() const;
+    /// @brief Body of the response.
+    const csp::common::String& GetResponseBody() const;
 
-	/// @brief Percentage of POST/PUT request completion.
-	/// @return float
-	float GetRequestProgress() const;
+    /// @brief Percentage of POST/PUT request completion.
+    /// @return float
+    float GetRequestProgress() const;
 
-	/// @brief Percentage of GET/HEAD response completion.
-	/// @return float
-	float GetResponseProgress() const;
+    /// @brief Percentage of GET/HEAD response completion.
+    /// @return float
+    float GetResponseProgress() const;
 
-	/// @brief Get a code representing the failure reason, if relevant.
-	/// @return ERequestFailureReason
-	ERequestFailureReason GetFailureReason() const;
+    /// @brief Get a code representing the failure reason, if relevant.
+    /// @return ERequestFailureReason
+    ERequestFailureReason GetFailureReason() const;
 
 protected:
-	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
-	ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
+    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+    ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, csp::systems::ERequestFailureReason Reason);
 
-	void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
+    void SetResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode);
 
-	EResultCode Result		  = EResultCode::Init;
-	uint16_t HttpResponseCode = 0;
+    EResultCode Result = EResultCode::Init;
+    uint16_t HttpResponseCode = 0;
 
-	float RequestProgress  = 0.0f;
-	float ResponseProgress = 0.0f;
+    float RequestProgress = 0.0f;
+    float ResponseProgress = 0.0f;
 
-	csp::common::String ResponseBody;
-	ERequestFailureReason FailureReason;
+    csp::common::String ResponseBody;
+    ERequestFailureReason FailureReason;
 
 private:
-	ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
+    ERequestFailureReason ParseErrorCode(const csp::common::String& Value);
 };
 
 } // namespace csp::systems

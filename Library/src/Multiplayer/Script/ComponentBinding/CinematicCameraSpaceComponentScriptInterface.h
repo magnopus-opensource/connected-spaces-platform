@@ -17,35 +17,33 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class CinematicCameraSpaceComponent;
 
-class CinematicCameraSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class CinematicCameraSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent = nullptr);
+    CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent = nullptr);
 
-	float GetFov();
+    float GetFov();
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(float, FocalLength);
-	DECLARE_SCRIPT_PROPERTY(float, AspectRatio);
+    DECLARE_SCRIPT_PROPERTY(float, FocalLength);
+    DECLARE_SCRIPT_PROPERTY(float, AspectRatio);
 
-	DECLARE_SCRIPT_PROPERTY(Vector2, SensorSize);
+    DECLARE_SCRIPT_PROPERTY(Vector2, SensorSize);
 
-	DECLARE_SCRIPT_PROPERTY(float, NearClip);
-	DECLARE_SCRIPT_PROPERTY(float, FarClip);
-	DECLARE_SCRIPT_PROPERTY(float, Iso);
-	DECLARE_SCRIPT_PROPERTY(float, ShutterSpeed);
-	DECLARE_SCRIPT_PROPERTY(float, Aperture);
+    DECLARE_SCRIPT_PROPERTY(float, NearClip);
+    DECLARE_SCRIPT_PROPERTY(float, FarClip);
+    DECLARE_SCRIPT_PROPERTY(float, Iso);
+    DECLARE_SCRIPT_PROPERTY(float, ShutterSpeed);
+    DECLARE_SCRIPT_PROPERTY(float, Aperture);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsViewerCamera);
+    DECLARE_SCRIPT_PROPERTY(bool, IsViewerCamera);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
 };
 
 } // namespace csp::multiplayer

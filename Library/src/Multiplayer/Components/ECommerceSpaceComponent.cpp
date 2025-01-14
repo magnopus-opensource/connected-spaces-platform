@@ -20,39 +20,34 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
+namespace csp::multiplayer {
 
-namespace csp::multiplayer
+ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent)
+    : ComponentBase(ComponentType::ECommerce, Parent)
 {
+    Properties[static_cast<uint32_t>(ECommercePropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
+    Properties[static_cast<uint32_t>(ECommercePropertyKeys::ProductId)] = "";
 
-ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::ECommerce, Parent)
-{
-	Properties[static_cast<uint32_t>(ECommercePropertyKeys::Position)]	= csp::common::Vector3 {0, 0, 0};
-	Properties[static_cast<uint32_t>(ECommercePropertyKeys::ProductId)] = "";
-
-	SetScriptInterface(CSP_NEW ECommerceSpaceComponentScriptInterface(this));
+    SetScriptInterface(CSP_NEW ECommerceSpaceComponentScriptInterface(this));
 }
-
 
 /* IPositionComponent */
 
 const csp::common::Vector3& ECommerceSpaceComponent::GetPosition() const
 {
-	return GetVector3Property(static_cast<uint32_t>(ECommercePropertyKeys::Position));
+    return GetVector3Property(static_cast<uint32_t>(ECommercePropertyKeys::Position));
 }
 
 void ECommerceSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::Position), Value);
 }
 
 csp::common::String ECommerceSpaceComponent::GetProductId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
+    return GetStringProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId));
 }
 
-void ECommerceSpaceComponent::SetProductId(csp::common::String Value)
-{
-	SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), Value);
-}
+void ECommerceSpaceComponent::SetProductId(csp::common::String Value) { SetProperty(static_cast<uint32_t>(ECommercePropertyKeys::ProductId), Value); }
 
 } // namespace csp::multiplayer

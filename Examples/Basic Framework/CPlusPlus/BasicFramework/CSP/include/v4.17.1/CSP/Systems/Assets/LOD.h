@@ -23,8 +23,7 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services
-{
+namespace csp::services {
 
 class ApiResponseBase;
 
@@ -34,57 +33,54 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @ingroup Asset System
 /// @brief An LODAsset represents an asset for a singular LOD level, and contains both the data and the specified LOD level.
-class CSP_API LODAsset
-{
+class CSP_API LODAsset {
 public:
-	Asset Asset;
-	int Level = 0;
+    Asset Asset;
+    int Level = 0;
 };
 
 /// @ingroup Asset System
 /// @brief An LODChain represents a set of Asset Levels of Detail, with the intention of operating similarly to that of video game LOD systems.
 /// It stores an ID for the asset collection containing the assets, and an array of LODAssets that represent the LOD structure.
-class CSP_API LODChain
-{
+class CSP_API LODChain {
 public:
-	csp::common::String AssetCollectionId;
-	csp::common::Array<LODAsset> LODAssets;
+    csp::common::String AssetCollectionId;
+    csp::common::Array<LODAsset> LODAssets;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
-class CSP_API LODChainResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	friend class AssetSystem;
+class CSP_API LODChainResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retreives the LODChain from the result.
-	const LODChain& GetLODChain() const;
+    /// @brief Retreives the LODChain from the result.
+    const LODChain& GetLODChain() const;
 
 protected:
 private:
-	LODChainResult(void*) {};
-	LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-	CSP_NO_EXPORT LODChainResult(const csp::systems::ResultBase& InResult)
-		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    LODChainResult(void*) {};
+    LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT LODChainResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
-	void SetLODChain(const LODChain& Chain);
-	void SetLODChain(LODChain&& Chain);
+    void SetLODChain(const LODChain& Chain);
+    void SetLODChain(LODChain&& Chain);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	LODChain Chain;
+    LODChain Chain;
 };
 
 /// @brief Callback containing LOD chain data.

@@ -18,37 +18,35 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp::events
-{
+namespace csp::events {
 
-class CSP_API EventId
-{
+class CSP_API EventId {
 public:
-	EventId(const char* EventNameSpace, const char* EventName);
+    EventId(const char* EventNameSpace, const char* EventName);
 
-	bool operator==(const EventId& other) const;
+    bool operator==(const EventId& other) const;
 
 #if DEBUG
-	char EventNamespaceDebug[64];
-	char EventNameDebug[64];
+    char EventNamespaceDebug[64];
+    char EventNameDebug[64];
 #endif
 
-	size_t EventNamespace;
-	size_t EventName;
+    size_t EventNamespace;
+    size_t EventName;
 };
 
 // Pre-defined Global Events
-const EventId USERSERVICE_LOGIN_EVENT_ID  = EventId("UserService", "Login");
+const EventId USERSERVICE_LOGIN_EVENT_ID = EventId("UserService", "Login");
 const EventId USERSERVICE_LOGOUT_EVENT_ID = EventId("UserService", "Logout");
 
 const EventId SPACESYSTEM_ENTER_SPACE_EVENT_ID = EventId("SpaceSystem", "Enter");
-const EventId SPACESYSTEM_EXIT_SPACE_EVENT_ID  = EventId("SpaceSystem", "Exit");
+const EventId SPACESYSTEM_EXIT_SPACE_EVENT_ID = EventId("SpaceSystem", "Exit");
 
 const EventId MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID = EventId("MultiplayerSystem", "Disconnect");
 
 const EventId FOUNDATION_TICK_EVENT_ID = EventId("Foundation", "Tick");
 
-const EventId ENTITYSYSTEM_ADD_ENTITY_EVENT_ID	  = EventId("EntitySystem", "AddEntity");
+const EventId ENTITYSYSTEM_ADD_ENTITY_EVENT_ID = EventId("EntitySystem", "AddEntity");
 const EventId ENTITYSYSTEM_REMOVE_ENTITY_EVENT_ID = EventId("EntitySystem", "RemoveEntity");
 
 } // namespace csp::events

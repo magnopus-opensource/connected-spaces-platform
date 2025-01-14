@@ -4,30 +4,28 @@
 
 class EventPayloadImpl;
 
-namespace oly_systems
-{
+namespace oly_systems {
 
 using MetricValue = oly_multiplayer::ReplicatedValue;
 
 /// @ingroup Analytics System
 /// @brief Interface for an Analytics Provider
-class OLY_API IAnalyticsProvider
-{
+class OLY_API IAnalyticsProvider {
 public:
-	OLY_START_IGNORE
-	IAnalyticsProvider(const IAnalyticsProvider&) = delete;
-	IAnalyticsProvider(IAnalyticsProvider&&)	  = delete;
+    OLY_START_IGNORE
+    IAnalyticsProvider(const IAnalyticsProvider&) = delete;
+    IAnalyticsProvider(IAnalyticsProvider&&) = delete;
 
-	IAnalyticsProvider& operator=(const IAnalyticsProvider&) = delete;
-	IAnalyticsProvider& operator=(IAnalyticsProvider&&)		 = delete;
+    IAnalyticsProvider& operator=(const IAnalyticsProvider&) = delete;
+    IAnalyticsProvider& operator=(IAnalyticsProvider&&) = delete;
 
-	virtual ~IAnalyticsProvider() = default;
+    virtual ~IAnalyticsProvider() = default;
 
-	virtual void Log(AnalyticsEvent* Event) = 0;
-	OLY_END_IGNORE
+    virtual void Log(AnalyticsEvent* Event) = 0;
+    OLY_END_IGNORE
 
 protected:
-	IAnalyticsProvider() = default;
+    IAnalyticsProvider() = default;
 };
 
 } // namespace oly_systems

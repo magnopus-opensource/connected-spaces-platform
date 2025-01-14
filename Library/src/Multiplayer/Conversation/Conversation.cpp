@@ -18,98 +18,72 @@
 #include "ConversationSystemHelpers.h"
 #include "Web/HttpResponse.h"
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
-MessageInfo& MessageResult::GetMessageInfo()
-{
-	return MsgInfo;
-}
+MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
 
-const MessageInfo& MessageResult::GetMessageInfo() const
-{
-	return MsgInfo;
-}
+const MessageInfo& MessageResult::GetMessageInfo() const { return MsgInfo; }
 
 MessageInfo::MessageInfo(const MessageInfo& MessageData)
 {
-	Id				= MessageData.Id;
-	ConversationId	= MessageData.ConversationId;
-	Timestamp		= MessageData.Timestamp;
-	UserID			= MessageData.UserID;
-	UserDisplayName = MessageData.UserDisplayName;
-	Message			= MessageData.Message;
-	Edited			= MessageData.Edited;
+    Id = MessageData.Id;
+    ConversationId = MessageData.ConversationId;
+    Timestamp = MessageData.Timestamp;
+    UserID = MessageData.UserID;
+    UserDisplayName = MessageData.UserDisplayName;
+    Message = MessageData.Message;
+    Edited = MessageData.Edited;
 }
 
 ConversationInfo::ConversationInfo(const ConversationInfo& ConversationData)
 {
-	ConversationId	= ConversationData.ConversationId;
-	Timestamp		= ConversationData.Timestamp;
-	UserID			= ConversationData.UserID;
-	UserDisplayName = ConversationData.UserDisplayName;
-	Message			= ConversationData.Message;
-	Edited			= ConversationData.Edited;
-	Resolved		= ConversationData.Resolved;
-	CameraPosition	= ConversationData.CameraPosition;
+    ConversationId = ConversationData.ConversationId;
+    Timestamp = ConversationData.Timestamp;
+    UserID = ConversationData.UserID;
+    UserDisplayName = ConversationData.UserDisplayName;
+    Message = ConversationData.Message;
+    Edited = ConversationData.Edited;
+    Resolved = ConversationData.Resolved;
+    CameraPosition = ConversationData.CameraPosition;
 }
 
 void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& MessageAssetCollection)
 {
-	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-	MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+    MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
 }
 
-csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages()
-{
-	return ConversationMessages;
-}
+csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return ConversationMessages; }
 
-const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() const
-{
-	return ConversationMessages;
-}
+const csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() const { return ConversationMessages; }
 
-uint64_t MessageCollectionResult::GetTotalCount() const
-{
-	return ResultTotalCount;
-}
+uint64_t MessageCollectionResult::GetTotalCount() const { return ResultTotalCount; }
 
-void MessageCollectionResult::SetTotalCount(uint64_t Value)
-{
-	ResultTotalCount = Value;
-}
+void MessageCollectionResult::SetTotalCount(uint64_t Value) { ResultTotalCount = Value; }
 
 void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array<csp::systems::AssetCollection>& MessagesAssetCollections)
 {
-	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-	ConversationMessages = csp::common::Array<MessageInfo>(MessagesAssetCollections.Size());
+    ConversationMessages = csp::common::Array<MessageInfo>(MessagesAssetCollections.Size());
 
-	MessageInfo MsgInfo;
+    MessageInfo MsgInfo;
 
-	for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
-	{
-		MsgInfo					  = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
-		ConversationMessages[idx] = MsgInfo;
-	}
+    for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx) {
+        MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
+        ConversationMessages[idx] = MsgInfo;
+    }
 }
 
-ConversationInfo& ConversationResult::GetConversationInfo()
-{
-	return ConvoInfo;
-}
+ConversationInfo& ConversationResult::GetConversationInfo() { return ConvoInfo; }
 
-const ConversationInfo& ConversationResult::GetConversationInfo() const
-{
-	return ConvoInfo;
-}
+const ConversationInfo& ConversationResult::GetConversationInfo() const { return ConvoInfo; }
 
 void ConversationResult::FillConversationInfo(const csp::systems::AssetCollection& ConversationAssetCollection)
 {
-	SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
+    SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-	ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
+    ConvoInfo = ConversationSystemHelpers::GetConvosationInfoFromConvosationAssetCollection(ConversationAssetCollection);
 }
 } // namespace csp::multiplayer

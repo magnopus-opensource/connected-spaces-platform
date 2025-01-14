@@ -22,33 +22,27 @@
 
 #include <functional>
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class MultiplayerConnection;
 class ReplicatedValue;
 class SignalRConnection;
 enum class ErrorCode;
 
-
-class NetworkEventManagerImpl
-{
+class NetworkEventManagerImpl {
 public:
-	NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection);
+    NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection);
 
-	typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
+    typedef std::function<void(ErrorCode)> ErrorCodeCallbackHandler;
 
-	void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
+    void SetConnection(csp::multiplayer::SignalRConnection* InConnection);
 
-	CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName,
-										const csp::common::Array<ReplicatedValue>& Arguments,
-										uint64_t TargetClientId,
-										ErrorCodeCallbackHandler Callback);
+    CSP_NO_EXPORT void SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Arguments,
+        uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
 private:
-	MultiplayerConnection* MultiplayerConnectionInst;
-	csp::multiplayer::SignalRConnection* Connection;
+    MultiplayerConnection* MultiplayerConnectionInst;
+    csp::multiplayer::SignalRConnection* Connection;
 };
 
 } // namespace csp::multiplayer

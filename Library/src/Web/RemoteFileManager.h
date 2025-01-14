@@ -20,23 +20,19 @@
 #include "Services/PrototypeService/AssetFileDto.h"
 #include "Web/WebClient.h"
 
+namespace csp::web {
 
-namespace csp::web
-{
-
-class RemoteFileManager
-{
+class RemoteFileManager {
 public:
-	RemoteFileManager(csp::web::WebClient* InWebClient);
-	~RemoteFileManager();
+    RemoteFileManager(csp::web::WebClient* InWebClient);
+    ~RemoteFileManager();
 
-	void GetFile(const csp::common::String& FileUrl,
-				 csp::services::ResponseHandlerPtr ResponseHandler,
-				 csp::common::CancellationToken& CancellationToken);
-	void GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler);
+    void GetFile(
+        const csp::common::String& FileUrl, csp::services::ResponseHandlerPtr ResponseHandler, csp::common::CancellationToken& CancellationToken);
+    void GetResponseHeaders(const csp::common::String& Url, csp::services::ResponseHandlerPtr ResponseHandler);
 
 private:
-	csp::web::WebClient* WebClient;
+    csp::web::WebClient* WebClient;
 };
 
 } // namespace csp::web

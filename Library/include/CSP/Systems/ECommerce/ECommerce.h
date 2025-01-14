@@ -19,8 +19,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services
-{
+namespace csp::services {
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -28,363 +27,354 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems
-{
+namespace csp::systems {
 /// @ingroup ECommerce System
 /// @brief Represents currency information for a product
-class CSP_API CurrencyInfo
-{
+class CSP_API CurrencyInfo {
 public:
-	CurrencyInfo()
-    : Amount(0.0)
-	{}
+    CurrencyInfo()
+        : Amount(0.0)
+    {
+    }
 
-	/// @brief Currency Amount.
-	double Amount;
-	/// @brief Currency type
-	csp::common::String CurrencyCode;
+    /// @brief Currency Amount.
+    double Amount;
+    /// @brief Currency type
+    csp::common::String CurrencyCode;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents media information for a product
-class CSP_API ProductMediaInfo
-{
+class CSP_API ProductMediaInfo {
 public:
-	ProductMediaInfo()
-    : Width(0)
-	, Height(0)
-	{}
+    ProductMediaInfo()
+        : Width(0)
+        , Height(0)
+    {
+    }
 
-	/// @brief Type of media content used.
-	csp::common::String MediaContentType;
-	/// @brief Alternative description of the media.
-	csp::common::String Alt;
-	/// @brief Url of the media.
-	csp::common::String Url;
-	/// @brief Width of the media.
-	int32_t Width;
-	/// @brief Height of the media.
-	int32_t Height;
+    /// @brief Type of media content used.
+    csp::common::String MediaContentType;
+    /// @brief Alternative description of the media.
+    csp::common::String Alt;
+    /// @brief Url of the media.
+    csp::common::String Url;
+    /// @brief Width of the media.
+    int32_t Width;
+    /// @brief Height of the media.
+    int32_t Height;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents option for a variant
-class CSP_API VariantOptionInfo
-{
+class CSP_API VariantOptionInfo {
 public:
-	VariantOptionInfo() = default;
+    VariantOptionInfo() = default;
 
-	/// @brief Id of the variant option.
-	csp::common::String Name;
-	/// @brief Value of variant option.
-	csp::common::String Value;
+    /// @brief Id of the variant option.
+    csp::common::String Name;
+    /// @brief Value of variant option.
+    csp::common::String Value;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents variant information for a product
-class CSP_API ProductVariantInfo
-{
+class CSP_API ProductVariantInfo {
 public:
-	ProductVariantInfo() : AvailableForSale(false), AvailableStock(0)
-	{}
+    ProductVariantInfo()
+        : AvailableForSale(false)
+        , AvailableStock(0)
+    {
+    }
 
-	/// @brief Id of the variant.
-	csp::common::String Id;
-	/// @brief Title of the variant.
-	csp::common::String Title;
-	/// @brief Url of variant.
-	csp::common::String Url;
-	/// @brief Is variant available for sale.
-	bool AvailableForSale;
-	/// @brief Media for a variant
-	ProductMediaInfo Media;
-	/// @brief Additional options for variant
-	csp::common::Array<VariantOptionInfo> Options;
-	/// @brief Unit price for the variant
-	CurrencyInfo UnitPrice;
+    /// @brief Id of the variant.
+    csp::common::String Id;
+    /// @brief Title of the variant.
+    csp::common::String Title;
+    /// @brief Url of variant.
+    csp::common::String Url;
+    /// @brief Is variant available for sale.
+    bool AvailableForSale;
+    /// @brief Media for a variant
+    ProductMediaInfo Media;
+    /// @brief Additional options for variant
+    csp::common::Array<VariantOptionInfo> Options;
+    /// @brief Unit price for the variant
+    CurrencyInfo UnitPrice;
     /// @brief Quantity of variant available
-	int32_t AvailableStock;
+    int32_t AvailableStock;
 };
-
 
 /// @ingroup ECommerce System
 /// @brief Represents a single product and the information associated with it.
-class CSP_API ProductInfo
-{
+class CSP_API ProductInfo {
 public:
-	ProductInfo() = default;
+    ProductInfo() = default;
 
-	/// @brief Id of the product.
-	csp::common::String Id;
-	/// @brief Title of the product.
-	csp::common::String Title;
-	/// @brief Time the product was created.
-	csp::common::String CreatedAt;
-	/// @brief Description of the product.
-	csp::common::String Description;
-	/// @brief Array of product variants.
-	csp::common::Array<ProductVariantInfo> Variants;
-	/// @brief Array of product tags.
-	csp::common::Array<csp::common::String> Tags;
-	/// @brief This array holds media for the product
-	csp::common::Array<ProductMediaInfo> Media;
+    /// @brief Id of the product.
+    csp::common::String Id;
+    /// @brief Title of the product.
+    csp::common::String Title;
+    /// @brief Time the product was created.
+    csp::common::String CreatedAt;
+    /// @brief Description of the product.
+    csp::common::String Description;
+    /// @brief Array of product variants.
+    csp::common::Array<ProductVariantInfo> Variants;
+    /// @brief Array of product tags.
+    csp::common::Array<csp::common::String> Tags;
+    /// @brief This array holds media for the product
+    csp::common::Array<ProductMediaInfo> Media;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents Checkout information for a product
-class CSP_API CheckoutInfo
-{
+class CSP_API CheckoutInfo {
 public:
-	CheckoutInfo() = default;
+    CheckoutInfo() = default;
 
-	/// @brief Url of the Store.
-	csp::common::String StoreUrl;
-	/// @brief Url of Checkout.
-	csp::common::String CheckoutUrl;
+    /// @brief Url of the Store.
+    csp::common::String StoreUrl;
+    /// @brief Url of Checkout.
+    csp::common::String CheckoutUrl;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents a line in a cart.
-class CSP_API CartLine
-{
+class CSP_API CartLine {
 public:
-	CartLine()
-    : Quantity(0)
-	{}
+    CartLine()
+        : Quantity(0)
+    {
+    }
 
-	/// @brief ID of the line in the cart.
-	csp::common::String CartLineId;
+    /// @brief ID of the line in the cart.
+    csp::common::String CartLineId;
 
-	/// @brief ID of the variant of the product.
-	csp::common::String ProductVariantId;
+    /// @brief ID of the variant of the product.
+    csp::common::String ProductVariantId;
 
-	/// @brief Quantity of the product in the cart.
-	int Quantity;
+    /// @brief Quantity of the product in the cart.
+    int Quantity;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents a cart.
-class CSP_API CartInfo
-{
+class CSP_API CartInfo {
 public:
-	CartInfo()
-    : TotalQuantity(0)
-	{}
+    CartInfo()
+        : TotalQuantity(0)
+    {
+    }
 
-	/// @brief Space that the cart is associated with.
-	csp::common::String SpaceId;
+    /// @brief Space that the cart is associated with.
+    csp::common::String SpaceId;
 
-	/// @brief ID of the cart.
-	csp::common::String CartId;
+    /// @brief ID of the cart.
+    csp::common::String CartId;
 
-	/// @brief An array of the lines in the cart.
-	csp::common::Array<CartLine> CartLines;
+    /// @brief An array of the lines in the cart.
+    csp::common::Array<CartLine> CartLines;
 
-	/// @brief Total quantity of all lines in the cart.
-	int TotalQuantity;
+    /// @brief Total quantity of all lines in the cart.
+    int TotalQuantity;
 };
 
 /// @ingroup ECommerce System
 /// @brief Represents a shopify store.
-class CSP_API ShopifyStoreInfo
-{
+class CSP_API ShopifyStoreInfo {
 public:
-	ShopifyStoreInfo()
-    : IsEcommerceActive(false)
-	{}
+    ShopifyStoreInfo()
+        : IsEcommerceActive(false)
+    {
+    }
 
-	/// @brief ID of the store.
-	csp::common::String StoreId;
+    /// @brief ID of the store.
+    csp::common::String StoreId;
 
-	/// @brief Name of the store.
-	csp::common::String StoreName;
+    /// @brief Name of the store.
+    csp::common::String StoreName;
 
-	/// @brief ID of the store owner.
-	csp::common::String SpaceOwnerId;
+    /// @brief ID of the store owner.
+    csp::common::String SpaceOwnerId;
 
-	/// @brief Space that the cart is associated with.
-	csp::common::String SpaceId;
+    /// @brief Space that the cart is associated with.
+    csp::common::String SpaceId;
 
-	/// @brief Is Ecommerce active.
-	bool IsEcommerceActive;
+    /// @brief Is Ecommerce active.
+    bool IsEcommerceActive;
 };
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
-class CSP_API ProductInfoResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API ProductInfoResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the Product Info being stored.
-	/// @return ProductInfo : reference to the ProductInfo
-	const ProductInfo& GetProductInfo() const;
+    /// @brief Retrieves the Product Info being stored.
+    /// @return ProductInfo : reference to the ProductInfo
+    const ProductInfo& GetProductInfo() const;
 
-	/// @brief Retrieves the Product Info being stored.
-	/// @return ProductInfo : reference to the ProductInfo
-	ProductInfo& GetProductInfo();
+    /// @brief Retrieves the Product Info being stored.
+    /// @return ProductInfo : reference to the ProductInfo
+    ProductInfo& GetProductInfo();
 
 private:
-	ProductInfoResult(void*) {};
+    ProductInfoResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	ProductInfo ProductInformation;
+    ProductInfo ProductInformation;
 };
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Arrays of Product Info.
-class CSP_API ProductInfoCollectionResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API ProductInfoCollectionResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the Product Info Array being stored.
-	/// @return csp::common::Array<ProductInfo> : reference to the ProductInfos
-	const csp::common::Array<ProductInfo>& GetProducts() const;
+    /// @brief Retrieves the Product Info Array being stored.
+    /// @return csp::common::Array<ProductInfo> : reference to the ProductInfos
+    const csp::common::Array<ProductInfo>& GetProducts() const;
 
-	/// @brief Retrieves the Product Info Array being stored.
-	/// @return csp::common::Array<ProductInfo> : reference to the ProductInfos
-	csp::common::Array<ProductInfo>& GetProducts();
+    /// @brief Retrieves the Product Info Array being stored.
+    /// @return csp::common::Array<ProductInfo> : reference to the ProductInfos
+    csp::common::Array<ProductInfo>& GetProducts();
 
 private:
-	ProductInfoCollectionResult(void*) {};
+    ProductInfoCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<ProductInfo> Products;
+    csp::common::Array<ProductInfo> Products;
 };
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Checkout Info.
-class CSP_API CheckoutInfoResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API CheckoutInfoResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the Checkout Info being stored.
-	/// @return ProductInfo : reference to the CheckoutInfo
-	const CheckoutInfo& GetCheckoutInfo() const;
+    /// @brief Retrieves the Checkout Info being stored.
+    /// @return ProductInfo : reference to the CheckoutInfo
+    const CheckoutInfo& GetCheckoutInfo() const;
 
-	/// @brief Retrieves the Checkout Info being stored.
-	/// @return ProductInfo : reference to the CheckoutInfo
-	CheckoutInfo& GetCheckoutInfo();
+    /// @brief Retrieves the Checkout Info being stored.
+    /// @return ProductInfo : reference to the CheckoutInfo
+    CheckoutInfo& GetCheckoutInfo();
 
-    CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT CheckoutInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	CheckoutInfoResult(void*) {};
+    CheckoutInfoResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	CheckoutInfo CheckoutInformation;
+    CheckoutInfo CheckoutInformation;
 };
-
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get a Cart.
-class CSP_API CartInfoResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	friend class ECommerceSystem;
+class CSP_API CartInfoResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    friend class ECommerceSystem;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-	/// @brief Retrieves the Cart Info being stored.
-	/// @return ProductInfo : reference to the CartInfo
-	const CartInfo& GetCartInfo() const;
-
-	/// @brief Retrieves the Cart Info being stored.
-	/// @return ProductInfo : reference to the CartInfo
-	CartInfo& GetCartInfo();
-
-	CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-
-private:
-	CartInfoResult(void*) {};
-
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	CartInfo Cart;
-};
-
-class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	const ShopifyStoreInfo& GetShopifyStoreInfo() const;
+    /// @brief Retrieves the Cart Info being stored.
+    /// @return ProductInfo : reference to the CartInfo
+    const CartInfo& GetCartInfo() const;
 
-	ShopifyStoreInfo& GetShopifyStoreInfo();
+    /// @brief Retrieves the Cart Info being stored.
+    /// @return ProductInfo : reference to the CartInfo
+    CartInfo& GetCartInfo();
+
+    CSP_NO_EXPORT CartInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	AddShopifyStoreResult(void*) {};
+    CartInfoResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	ShopifyStoreInfo Store;
+    CartInfo Cart;
 };
 
-class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    const ShopifyStoreInfo& GetShopifyStoreInfo() const;
+
+    ShopifyStoreInfo& GetShopifyStoreInfo();
+
+private:
+    AddShopifyStoreResult(void*) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    ShopifyStoreInfo Store;
+};
+
+class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
     /// @brief Retrieves the ShopifyStoreInfo Array being stored.
-	/// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
-	const csp::common::Array<ShopifyStoreInfo>& GetShopifyStores() const;
+    /// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
+    const csp::common::Array<ShopifyStoreInfo>& GetShopifyStores() const;
 
-	/// @brief Retrieves the ShopifyStoreInfo Array being stored.
-	/// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
-	csp::common::Array<ShopifyStoreInfo>& GetShopifyStores();
+    /// @brief Retrieves the ShopifyStoreInfo Array being stored.
+    /// @return csp::common::Array<ShopifyStoreInfo> : reference to the ShopifyStoreInfos
+    csp::common::Array<ShopifyStoreInfo>& GetShopifyStores();
 
 private:
-	GetShopifyStoresResult(void*) {};
+    GetShopifyStoresResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<ShopifyStoreInfo> Stores;
+    csp::common::Array<ShopifyStoreInfo> Stores;
 };
 
-class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	bool ValidateResult;
+    bool ValidateResult;
 
 private:
-	ValidateShopifyStoreResult(void*) {};
+    ValidateShopifyStoreResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
 typedef std::function<void(const ProductInfoResult& Result)> ProductInfoResultCallback;
@@ -402,6 +392,5 @@ typedef std::function<void(const AddShopifyStoreResult& Result)> SetECommerceAct
 typedef std::function<void(const ValidateShopifyStoreResult& Result)> ValidateShopifyStoreResultCallback;
 
 typedef std::function<void(const GetShopifyStoresResult& Result)> GetShopifyStoresResultCallback;
-
 
 } // namespace csp::systems

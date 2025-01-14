@@ -18,34 +18,26 @@
 #include "CSP/Common/CancellationToken.h"
 #include "Services/ApiBase/ApiBase.h"
 
-
-namespace csp::services
-{
+namespace csp::services {
 
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 
 } // namespace csp::services
 
-
-namespace csp::web
-{
+namespace csp::web {
 
 class WebClient;
 
 }
 
+namespace csp::systems::graphqlservice {
 
-namespace csp::systems::graphqlservice
-{
-
-class GraphQLApi : public csp::services::ApiBase
-{
+class GraphQLApi : public csp::services::ApiBase {
 public:
-	GraphQLApi(csp::web::WebClient* InWebClient);
-	~GraphQLApi();
+    GraphQLApi(csp::web::WebClient* InWebClient);
+    ~GraphQLApi();
 
-	void Query(csp::common::String QueryText,
-			   csp::services::ApiResponseHandlerBase* ResponseHandler,
-			   csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
+    void Query(csp::common::String QueryText, csp::services::ApiResponseHandlerBase* ResponseHandler,
+        csp::common::CancellationToken& CancellationToken = csp::common::CancellationToken::Dummy()) const;
 };
 } // namespace csp::systems::graphqlservice

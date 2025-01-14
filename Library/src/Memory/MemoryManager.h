@@ -18,29 +18,27 @@
 #include "Allocator.h"
 #include "Allocators/StandardAllocator.h"
 
-namespace csp::memory
-{
+namespace csp::memory {
 
 /// Manager class for memory handling
 ///
 /// Provides access to vaious allocators and heaps that are optimised
 /// for different situations
 ///
-class MemoryManager
-{
+class MemoryManager {
 public:
-	static void Initialise();
-	static void Shutdown();
+    static void Initialise();
+    static void Shutdown();
 
-	static csp::memory::Allocator& GetDefaultAllocator();
+    static csp::memory::Allocator& GetDefaultAllocator();
 
-	// To do :- More Allocator types here. E.g. optimised for Small, Medium, Large allocations.
-	// Stack/Frame allocators.  Scratch Memory etc
+    // To do :- More Allocator types here. E.g. optimised for Small, Medium, Large allocations.
+    // Stack/Frame allocators.  Scratch Memory etc
 
 private:
-	using MultiThreadStandardAllocator = csp::memory::StandardAllocator<MutexLockTrait>;
+    using MultiThreadStandardAllocator = csp::memory::StandardAllocator<MutexLockTrait>;
 
-	static MultiThreadStandardAllocator OlyDefaultAllocator;
+    static MultiThreadStandardAllocator OlyDefaultAllocator;
 };
 
 } // namespace csp::memory

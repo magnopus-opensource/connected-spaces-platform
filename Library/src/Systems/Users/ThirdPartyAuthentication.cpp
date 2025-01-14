@@ -22,64 +22,50 @@
 using namespace std::chrono;
 namespace chs = csp::services::generated::userservice;
 
-namespace
-{
+namespace {
 void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, csp::systems::ThirdPartyProviderDetails& ProviderDetails)
 {
-	if (Dto.HasProviderName())
-	{
-		ProviderDetails.ProviderName = Dto.GetProviderName();
-	}
+    if (Dto.HasProviderName()) {
+        ProviderDetails.ProviderName = Dto.GetProviderName();
+    }
 
-	if (Dto.HasClientId())
-	{
-		ProviderDetails.ProviderClientId = Dto.GetClientId();
-	}
+    if (Dto.HasClientId()) {
+        ProviderDetails.ProviderClientId = Dto.GetClientId();
+    }
 
-	if (Dto.HasScopes())
-	{
-		const auto& Scopes				   = Dto.GetScopes();
-		ProviderDetails.ProviderAuthScopes = csp::common::Array<csp::common::String>(Scopes.size());
+    if (Dto.HasScopes()) {
+        const auto& Scopes = Dto.GetScopes();
+        ProviderDetails.ProviderAuthScopes = csp::common::Array<csp::common::String>(Scopes.size());
 
-		for (size_t idx = 0; idx < Scopes.size(); ++idx)
-		{
-			ProviderDetails.ProviderAuthScopes[idx] = Scopes[idx];
-		}
-	}
+        for (size_t idx = 0; idx < Scopes.size(); ++idx) {
+            ProviderDetails.ProviderAuthScopes[idx] = Scopes[idx];
+        }
+    }
 
-	if (Dto.HasAuthorizeEndpoint())
-	{
-		ProviderDetails.AuthoriseURL = Dto.GetAuthorizeEndpoint();
-	}
+    if (Dto.HasAuthorizeEndpoint()) {
+        ProviderDetails.AuthoriseURL = Dto.GetAuthorizeEndpoint();
+    }
 }
 }; // namespace
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails()
-{
-	return ProviderDetails;
-}
+ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() { return ProviderDetails; }
 
-const ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() const
-{
-	return ProviderDetails;
-}
+const ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() const { return ProviderDetails; }
 
 void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(ApiResponse);
 
-	auto* InfoResponse					   = static_cast<chs::SocialProviderInfo*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* InfoResponse = static_cast<chs::SocialProviderInfo*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		// Build the Dto from the response Json
-		InfoResponse->FromJson(Response->GetPayload().GetContent());
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+        // Build the Dto from the response Json
+        InfoResponse->FromJson(Response->GetPayload().GetContent());
 
-		SocialProviderInfoDtoToProviderDetails(*InfoResponse, ProviderDetails);
-	}
+        SocialProviderInfoDtoToProviderDetails(*InfoResponse, ProviderDetails);
+    }
 }
 } // namespace csp::systems

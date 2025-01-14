@@ -20,15 +20,12 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-
 using namespace csp::systems;
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 GaussianSplatSpaceComponentScriptInterface::GaussianSplatSpaceComponentScriptInterface(GaussianSplatSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

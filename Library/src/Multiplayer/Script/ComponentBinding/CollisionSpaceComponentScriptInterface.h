@@ -19,23 +19,21 @@
 
 #include <string>
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class CollisionSpaceComponent;
 
-class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent = nullptr);
+    CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-	DECLARE_SCRIPT_PROPERTY(int64_t, CollisionShape);
-	DECLARE_SCRIPT_PROPERTY(int64_t, CollisionMode);
-	DECLARE_SCRIPT_PROPERTY(std::string, CollisionAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(int64_t, CollisionShape);
+    DECLARE_SCRIPT_PROPERTY(int64_t, CollisionMode);
+    DECLARE_SCRIPT_PROPERTY(std::string, CollisionAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
 };
 
 } // namespace csp::multiplayer

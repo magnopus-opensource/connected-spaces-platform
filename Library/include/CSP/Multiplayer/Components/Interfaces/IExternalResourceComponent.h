@@ -19,32 +19,29 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 /// @brief Controls the asset and asset collection IDs used for storing external data.
-CSP_INTERFACE class CSP_API IExternalResourceComponent
-{
+CSP_INTERFACE class CSP_API IExternalResourceComponent {
 public:
-	/// @brief Gets the ID for the asset used to store external data for this component.
-	/// @return csp::common::String : The asset ID.
-	virtual const csp::common::String& GetExternalResourceAssetId() const = 0;
+    /// @brief Gets the ID for the asset used to store external data for this component.
+    /// @return csp::common::String : The asset ID.
+    virtual const csp::common::String& GetExternalResourceAssetId() const = 0;
 
-	/// @brief Sets the ID for the asset used to store external data for this component.
-	/// @param InValue csp::common::String : The new value.
-	virtual void SetExternalResourceAssetId(const csp::common::String& InValue) = 0;
+    /// @brief Sets the ID for the asset used to store external data for this component.
+    /// @param InValue csp::common::String : The new value.
+    virtual void SetExternalResourceAssetId(const csp::common::String& InValue) = 0;
 
-	/// @brief Gets the ID of the asset collection for the asset used to store external data for this component.
-	/// @return csp::common::String : The asset ID.
-	virtual const csp::common::String& GetExternalResourceAssetCollectionId() const = 0;
+    /// @brief Gets the ID of the asset collection for the asset used to store external data for this component.
+    /// @return csp::common::String : The asset ID.
+    virtual const csp::common::String& GetExternalResourceAssetCollectionId() const = 0;
 
-	/// @brief Sets the ID of the asset collection for the asset used to store external data for this component.
-	/// @param InValue csp::common::String : The new value.
-	virtual void SetExternalResourceAssetCollectionId(const csp::common::String& InValue) = 0;
+    /// @brief Sets the ID of the asset collection for the asset used to store external data for this component.
+    /// @param InValue csp::common::String : The new value.
+    virtual void SetExternalResourceAssetCollectionId(const csp::common::String& InValue) = 0;
 
 protected:
-	virtual ~IExternalResourceComponent() = default;
+    virtual ~IExternalResourceComponent() = default;
 };
 
 } // namespace csp::multiplayer

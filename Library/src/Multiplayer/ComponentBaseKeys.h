@@ -18,14 +18,11 @@
 #include <climits>
 #include <cstdint>
 
-
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 constexpr const uint32_t MAX_RESERVED_COMPONENT_COUNT = 1024;
 
 constexpr const uint32_t COMPONENT_BASE_KEYS_START = USHRT_MAX - MAX_RESERVED_COMPONENT_COUNT;
-constexpr const uint32_t COMPONENT_BASE_KEYS_END   = USHRT_MAX;
+constexpr const uint32_t COMPONENT_BASE_KEYS_END = USHRT_MAX;
 
 constexpr const uint32_t COMPONENT_KEY_NAME = COMPONENT_BASE_KEYS_START; // 64511
 } // namespace csp::multiplayer

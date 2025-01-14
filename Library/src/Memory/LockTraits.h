@@ -17,34 +17,21 @@
 
 #include <mutex>
 
-namespace csp::memory
-{
+namespace csp::memory {
 
-class NoLockTrait
-{
+class NoLockTrait {
 public:
-	inline void Lock()
-	{
-	}
-	inline void Unlock()
-	{
-	}
+    inline void Lock() { }
+    inline void Unlock() { }
 };
 
-class MutexLockTrait
-{
+class MutexLockTrait {
 public:
-	inline void Lock()
-	{
-		Mutex.lock();
-	}
-	inline void Unlock()
-	{
-		Mutex.unlock();
-	}
+    inline void Lock() { Mutex.lock(); }
+    inline void Unlock() { Mutex.unlock(); }
 
 private:
-	std::mutex Mutex;
+    std::mutex Mutex;
 };
 
 /** Example usage
@@ -53,24 +40,24 @@ private:
    {
    public:
 
-		void* Allocate(size_t Bytes)
-		{
-				void* Ptr;
-				Mutex.Lock();
-				// Allocation here
-				Mutex.Unlock();
-				return Ptr;
-		}
+                void* Allocate(size_t Bytes)
+                {
+                                void* Ptr;
+                                Mutex.Lock();
+                                // Allocation here
+                                Mutex.Unlock();
+                                return Ptr;
+                }
 
-		void Deallocate(void* Ptr)
-		{
-				Mutex.Lock();
-				// De-allocation here
-				Mutex.Unlock();
-		}
+                void Deallocate(void* Ptr)
+                {
+                                Mutex.Lock();
+                                // De-allocation here
+                                Mutex.Unlock();
+                }
 
    private:
-		TLockTrait Mutex;
+                TLockTrait Mutex;
    };
 
    using SingleThreadAllocator = CustomAllocator<NoLockTrait>;

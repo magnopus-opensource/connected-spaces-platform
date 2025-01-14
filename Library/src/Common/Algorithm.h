@@ -22,9 +22,7 @@
 #include <algorithm>
 #include <functional>
 
-
-namespace csp::common
-{
+namespace csp::common {
 
 /// @brief Finds a given value in an array.
 /// @param Array const csp::common::Array<T>& : Array to search
@@ -32,15 +30,13 @@ namespace csp::common
 /// @return int : Index of first found element or -1 if not found
 template <typename T> int Find(const Array<T>& Array, const T& Value)
 {
-	for (size_t i = 0; i < Array.Size(); ++i)
-	{
-		if (Array[i] == Value)
-		{
-			return i;
-		}
-	}
+    for (size_t i = 0; i < Array.Size(); ++i) {
+        if (Array[i] == Value) {
+            return i;
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 /// @brief Finds a value in the array by using the provided callback.
@@ -51,15 +47,13 @@ template <typename T> int Find(const Array<T>& Array, const T& Value)
 /// @return int : Index of first found element or -1 if not found
 template <typename T, typename F> int FindIf(const Array<T>& Array, const F& Callback)
 {
-	for (size_t i = 0; i < Array.Size(); ++i)
-	{
-		if (Callback(Array[i]))
-		{
-			return static_cast<int>(i);
-		}
-	}
+    for (size_t i = 0; i < Array.Size(); ++i) {
+        if (Callback(Array[i])) {
+            return static_cast<int>(i);
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 /// @brief Sorts array using the provided callback.
@@ -69,9 +63,9 @@ template <typename T, typename F> int FindIf(const Array<T>& Array, const F& Cal
 /// @param Callback const F& : Function used to singal whether value 1 should come before value 2
 template <typename T, typename F> void Sort(Array<T>& Array, const F& Callback)
 {
-	std::vector<T> Vec = Convert(Array);
-	std::sort(Vec.begin(), Vec.end(), Callback);
+    std::vector<T> Vec = Convert(Array);
+    std::sort(Vec.begin(), Vec.end(), Callback);
 
-	Array = Convert(Vec);
+    Array = Convert(Vec);
 }
 } // namespace csp::common

@@ -20,28 +20,23 @@
 #include "Web/HttpPayload.h"
 #include "Web/WebClient.h"
 
-
-namespace csp::systems::maintenanceservice
-{
-MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient) : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)
-{
-}
-
-MaintenanceApi::~MaintenanceApi()
+namespace csp::systems::maintenanceservice {
+MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient)
+    : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)
 {
 }
 
-void MaintenanceApi::Query(const csp::common::String& MaintenanceURL,
-						   csp::services::ApiResponseHandlerBase* ResponseHandler,
-						   csp::common::CancellationToken& CancellationToken) const
+MaintenanceApi::~MaintenanceApi() { }
+
+void MaintenanceApi::Query(const csp::common::String& MaintenanceURL, csp::services::ApiResponseHandlerBase* ResponseHandler,
+    csp::common::CancellationToken& CancellationToken) const
 {
 
+    std::string MaintenanceURLLower = std::string(MaintenanceURL.c_str());
+    csp::web::Uri Uri = csp::web::Uri(MaintenanceURLLower.c_str());
 
-	std::string MaintenanceURLLower = std::string(MaintenanceURL.c_str());
-	csp::web::Uri Uri				= csp::web::Uri(MaintenanceURLLower.c_str());
-
-	csp::web::HttpPayload Payload;
-	Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
-	WebClient->SendRequest(csp::web::ERequestVerb::GET, Uri, Payload, ResponseHandler, CancellationToken);
+    csp::web::HttpPayload Payload;
+    Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/octet-stream"));
+    WebClient->SendRequest(csp::web::ERequestVerb::GET, Uri, Payload, ResponseHandler, CancellationToken);
 }
 } // namespace csp::systems::maintenanceservice

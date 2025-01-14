@@ -31,149 +31,122 @@
 #include <chrono>
 #include <thread>
 
-
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
+namespace {
 
-namespace
-{
-
-bool RequestPredicate(const csp::systems::ResultBase& Result)
-{
-	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
-}
-
+bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 #if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	// Create object to represent the ECommerce
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    // Create object to represent the ECommerce
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create ECommerce component
-	auto* ECommerceComponent = static_cast<ECommerceSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ECommerce));
+    // Create ECommerce component
+    auto* ECommerceComponent = static_cast<ECommerceSpaceComponent*>(CreatedObject->AddComponent(ComponentType::ECommerce));
 
-	// Ensure defaults are set
-	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(ECommerceComponent->GetProductId(), "");
+    // Ensure defaults are set
+    EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(ECommerceComponent->GetProductId(), "");
 
-	// Set new values
-	csp::common::String ProductId = "TEST_PRODUCT_ID";
+    // Set new values
+    csp::common::String ProductId = "TEST_PRODUCT_ID";
 
-	ECommerceComponent->SetPosition(csp::common::Vector3::One());
-	ECommerceComponent->SetProductId(ProductId);
+    ECommerceComponent->SetPosition(csp::common::Vector3::One());
+    ECommerceComponent->SetProductId(ProductId);
 
-	// Ensure values are set correctly
-	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
+    // Ensure values are set correctly
+    EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	// Create object to represent the ECommerce
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    // Create object to represent the ECommerce
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create ECommerce component
-	auto* ECommerceComponent = (ECommerceSpaceComponent*) CreatedObject->AddComponent(ComponentType::ECommerce);
+    // Create ECommerce component
+    auto* ECommerceComponent = (ECommerceSpaceComponent*)CreatedObject->AddComponent(ComponentType::ECommerce);
 
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	// Setup script
-	std::string ECommerceScriptText = R"xx(
+    // Setup script
+    std::string ECommerceScriptText = R"xx(
 	
 		const productId			= "TEST_PRODUCT_ID";
 
@@ -182,24 +155,24 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 		ECommerce.productId = productId;
     )xx";
 
-	CreatedObject->GetScript()->SetScriptSource(ECommerceScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript()->SetScriptSource(ECommerceScriptText.c_str());
+    CreatedObject->GetScript()->Invoke();
 
-	EntitySystem->ProcessPendingEntityOperations();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	// Ensure values are set correctly
-	csp::common::String ProductId = "TEST_PRODUCT_ID";
+    // Ensure values are set correctly
+    csp::common::String ProductId = "TEST_PRODUCT_ID";
 
-	EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
+    EXPECT_EQ(ECommerceComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(ECommerceComponent->GetProductId(), ProductId);
 
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 

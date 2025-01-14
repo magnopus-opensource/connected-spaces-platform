@@ -26,66 +26,55 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace
-{
+namespace {
 void SequenceDtoToSequence(const chs::SequenceDto& Dto, systems::Sequence& Sequence)
 {
-	Sequence.Key		   = csp::common::Decode::URI(Dto.GetKey());
-	Sequence.ReferenceType = Dto.GetReferenceType();
-	Sequence.ReferenceId   = Dto.GetReferenceId();
-	Sequence.Items		   = Convert(Dto.GetItems());
-	Sequence.MetaData	   = Convert(Dto.GetMetadata());
+    Sequence.Key = csp::common::Decode::URI(Dto.GetKey());
+    Sequence.ReferenceType = Dto.GetReferenceType();
+    Sequence.ReferenceId = Dto.GetReferenceId();
+    Sequence.Items = Convert(Dto.GetItems());
+    Sequence.MetaData = Convert(Dto.GetMetadata());
 }
 
 } // namespace
 
-namespace csp::systems
-{
-const Sequence& csp::systems::SequenceResult::GetSequence() const
-{
-	return Sequence;
-}
+namespace csp::systems {
+const Sequence& csp::systems::SequenceResult::GetSequence() const { return Sequence; }
 
 void SequenceResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(ApiResponse);
 
-	auto* SequenceResponse				   = static_cast<chs::SequenceDto*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* SequenceResponse = static_cast<chs::SequenceDto*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		// Build the Dto from the response Json
-		SequenceResponse->FromJson(Response->GetPayload().GetContent());
-		SequenceDtoToSequence(*SequenceResponse, Sequence);
-	}
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+        // Build the Dto from the response Json
+        SequenceResponse->FromJson(Response->GetPayload().GetContent());
+        SequenceDtoToSequence(*SequenceResponse, Sequence);
+    }
 }
 
-const csp::common::Array<Sequence>& SequencesResult::GetSequences() const
-{
-	return Sequences;
-}
+const csp::common::Array<Sequence>& SequencesResult::GetSequences() const { return Sequences; }
 
 void SequencesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(ApiResponse);
 
-	auto* SequencesResponse				   = static_cast<csp::services::DtoArray<chs::SequenceDto>*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* SequencesResponse = static_cast<csp::services::DtoArray<chs::SequenceDto>*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		// Build the Dto from the response Json
-		SequencesResponse->FromJson(Response->GetPayload().GetContent());
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+        // Build the Dto from the response Json
+        SequencesResponse->FromJson(Response->GetPayload().GetContent());
 
-		const std::vector<chs::SequenceDto>& SequenceArray = SequencesResponse->GetArray();
-		Sequences										   = Array<systems::Sequence>(SequenceArray.size());
+        const std::vector<chs::SequenceDto>& SequenceArray = SequencesResponse->GetArray();
+        Sequences = Array<systems::Sequence>(SequenceArray.size());
 
-		for (size_t i = 0; i < SequenceArray.size(); ++i)
-		{
-			SequenceDtoToSequence(SequenceArray[i], Sequences[i]);
-		}
-	}
+        for (size_t i = 0; i < SequenceArray.size(); ++i) {
+            SequenceDtoToSequence(SequenceArray[i], Sequences[i]);
+        }
+    }
 }
 
 } // namespace csp::systems

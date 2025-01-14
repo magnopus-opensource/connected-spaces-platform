@@ -17,31 +17,27 @@
 
 #include <new>
 
-namespace csp::memory
-{
+namespace csp::memory {
 
 /// Allocator base class
 ///
 /// Base class for memory allocators intended to be overriden
 /// to provide different allocator models
 ///
-class Allocator
-{
+class Allocator {
 public:
-	Allocator()
-	{
-	}
+    Allocator() { }
 
-	virtual ~Allocator() = default;
+    virtual ~Allocator() = default;
 
-	virtual void* Allocate(size_t Bytes)										  = 0;
-	virtual void* Allocate(size_t Bytes, std::align_val_t Alignment)			  = 0;
-	virtual void* Reallocate(void* Ptr, size_t Bytes)							  = 0;
-	virtual void* Reallocate(void* Ptr, size_t Bytes, std::align_val_t Alignment) = 0;
-	virtual void Deallocate(void* Ptr)											  = 0;
-	virtual void Deallocate(void* Ptr, size_t Bytes)							  = 0;
+    virtual void* Allocate(size_t Bytes) = 0;
+    virtual void* Allocate(size_t Bytes, std::align_val_t Alignment) = 0;
+    virtual void* Reallocate(void* Ptr, size_t Bytes) = 0;
+    virtual void* Reallocate(void* Ptr, size_t Bytes, std::align_val_t Alignment) = 0;
+    virtual void Deallocate(void* Ptr) = 0;
+    virtual void Deallocate(void* Ptr, size_t Bytes) = 0;
 
-	virtual const size_t GetAllocatedBytes() const = 0;
+    virtual const size_t GetAllocatedBytes() const = 0;
 };
 
 } // namespace csp::memory

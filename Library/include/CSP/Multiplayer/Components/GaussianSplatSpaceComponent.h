@@ -27,26 +27,22 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 /// @brief Enumerates the list of properties that can be replicated for a Gaussian Splat component.
-enum class GaussianSplatPropertyKeys
-{
-	Name_DEPRECATED = 0,
-	ExternalResourceAssetId,
-	ExternalResourceAssetCollectionId,
-	Position,
-	Rotation,
-	Scale,
-	IsVisible,
-	IsARVisible,
-	IsShadowCaster,
-	Tint,
-	Num
+enum class GaussianSplatPropertyKeys {
+    Name_DEPRECATED = 0,
+    ExternalResourceAssetId,
+    ExternalResourceAssetCollectionId,
+    Position,
+    Rotation,
+    Scale,
+    IsVisible,
+    IsARVisible,
+    IsShadowCaster,
+    Tint,
+    Num
 };
-
 
 /// @ingroup GaussianSplatSpaceComponent
 /// @brief Add Gaussian Splats to your space.
@@ -55,88 +51,85 @@ enum class GaussianSplatPropertyKeys
 /// volume, comprising a point cloud of splats (like coloured dots), each of which has a position, colour (with alpha) and covariance (scale on 3
 /// axis).
 class CSP_API GaussianSplatSpaceComponent : public ComponentBase,
-											public IExternalResourceComponent,
-											public IShadowCasterComponent,
-											public ITransformComponent,
-											public IVisibleComponent
-
+                                            public IExternalResourceComponent,
+                                            public IShadowCasterComponent,
+                                            public ITransformComponent,
+                                            public IVisibleComponent
 
 {
 public:
-	/// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
-	/// @param Parent The Space entity that owns this component.
-	GaussianSplatSpaceComponent(SpaceEntity* Parent);
+    /// @brief Constructs the Gaussian Splat component, and associates it with the specified Parent space entity.
+    /// @param Parent The Space entity that owns this component.
+    GaussianSplatSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Gets the ID of the asset associated with this component.
-	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
-	/// @return The ID of the asset associated with this component.
-	const csp::common::String& GetExternalResourceAssetId() const override;
+    /// @brief Gets the ID of the asset associated with this component.
+    /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
+    /// @return The ID of the asset associated with this component.
+    const csp::common::String& GetExternalResourceAssetId() const override;
 
-	/// @brief Sets the ID of the asset associated with this component.
-	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
-	/// @param Value The ID of the asset associated with this component.
-	void SetExternalResourceAssetId(const csp::common::String& Value) override;
+    /// @brief Sets the ID of the asset associated with this component.
+    /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
+    /// @param Value The ID of the asset associated with this component.
+    void SetExternalResourceAssetId(const csp::common::String& Value) override;
 
-	/// @brief Gets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
-	/// @return The ID of the asset collection associated with this component.
-	const csp::common::String& GetExternalResourceAssetCollectionId() const override;
+    /// @brief Gets the ID of the asset collection associated with this component.
+    /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
+    /// @return The ID of the asset collection associated with this component.
+    const csp::common::String& GetExternalResourceAssetCollectionId() const override;
 
-	/// @brief Sets the ID of the asset collection associated with this component.
-	/// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
-	/// @param Value The ID of the asset collection associated with this component.
-	void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
+    /// @brief Sets the ID of the asset collection associated with this component.
+    /// @note To retrieve this component's gaussian splat asset, both the Asset ID and the Asset Collection ID are required.
+    /// @param Value The ID of the asset collection associated with this component.
+    void SetExternalResourceAssetCollectionId(const csp::common::String& Value) override;
 
-	/// \addtogroup ITransformComponent
-	/// @{
-	/// @copydoc IPositionComponent::GetPosition()
-	const csp::common::Vector3& GetPosition() const override;
-	/// @copydoc IPositionComponent::SetPosition()
-	void SetPosition(const csp::common::Vector3& InValue) override;
-	/// @copydoc IRotationComponent::GetRotation()
-	const csp::common::Vector4& GetRotation() const override;
-	/// @copydoc IRotationComponent::SetRotation()
-	void SetRotation(const csp::common::Vector4& InValue) override;
-	/// @copydoc IScaleComponent::GetScale()
-	const csp::common::Vector3& GetScale() const override;
-	/// @copydoc IScaleComponent::SetScale()
-	void SetScale(const csp::common::Vector3& InValue) override;
-	/// @copydoc ITransformComponent::GetTransform()
-	SpaceTransform GetTransform() const override;
-	/// @copydoc ITransformComonent::SetTransform()
-	void SetTransform(const SpaceTransform& InValue) override;
-	/// @}
+    /// \addtogroup ITransformComponent
+    /// @{
+    /// @copydoc IPositionComponent::GetPosition()
+    const csp::common::Vector3& GetPosition() const override;
+    /// @copydoc IPositionComponent::SetPosition()
+    void SetPosition(const csp::common::Vector3& InValue) override;
+    /// @copydoc IRotationComponent::GetRotation()
+    const csp::common::Vector4& GetRotation() const override;
+    /// @copydoc IRotationComponent::SetRotation()
+    void SetRotation(const csp::common::Vector4& InValue) override;
+    /// @copydoc IScaleComponent::GetScale()
+    const csp::common::Vector3& GetScale() const override;
+    /// @copydoc IScaleComponent::SetScale()
+    void SetScale(const csp::common::Vector3& InValue) override;
+    /// @copydoc ITransformComponent::GetTransform()
+    SpaceTransform GetTransform() const override;
+    /// @copydoc ITransformComonent::SetTransform()
+    void SetTransform(const SpaceTransform& InValue) override;
+    /// @}
 
-	/// \addtogroup IVisibleComponent
-	/// @{
-	/// @copydoc IVisibleComponent::GetIsVisible()
-	bool GetIsVisible() const override;
-	/// @copydoc IVisibleComponent::SetIsVisible()
-	void SetIsVisible(bool InValue) override;
-	/// @copydoc IVisibleComponent::GetIsARVisible()
-	bool GetIsARVisible() const override;
-	/// @copydoc IVisibleComponent::SetIsARVisible()
-	void SetIsARVisible(bool InValue) override;
-	/// @}
+    /// \addtogroup IVisibleComponent
+    /// @{
+    /// @copydoc IVisibleComponent::GetIsVisible()
+    bool GetIsVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsVisible()
+    void SetIsVisible(bool InValue) override;
+    /// @copydoc IVisibleComponent::GetIsARVisible()
+    bool GetIsARVisible() const override;
+    /// @copydoc IVisibleComponent::SetIsARVisible()
+    void SetIsARVisible(bool InValue) override;
+    /// @}
 
-	/// \addtogroup IShadowCasterComponent
-	/// @{
-	/// @copydoc IShadowCasterComponent::GetIsShadowCaster()
-	[[deprecated]]
-	bool GetIsShadowCaster() const override;
-	/// @copydoc IShadowCasterComponent::SetIsShadowCaster()
-	[[deprecated]]
-	void SetIsShadowCaster(bool Value) override;
-	/// @}
+    /// \addtogroup IShadowCasterComponent
+    /// @{
+    /// @copydoc IShadowCasterComponent::GetIsShadowCaster()
+    [[deprecated]] bool GetIsShadowCaster() const override;
+    /// @copydoc IShadowCasterComponent::SetIsShadowCaster()
+    [[deprecated]] void SetIsShadowCaster(bool Value) override;
+    /// @}
 
-	/// @brief Gets the tint that should be globally applied to the Gaussian Splat associated with this component.
-	/// @return The global tint value, expected to be in RGB color space, with each value normalised between 0...1.
-	const csp::common::Vector3& GetTint() const;
+    /// @brief Gets the tint that should be globally applied to the Gaussian Splat associated with this component.
+    /// @return The global tint value, expected to be in RGB color space, with each value normalised between 0...1.
+    const csp::common::Vector3& GetTint() const;
 
-	/// @brief Sets the tint that should be globally applied to the Gaussian Splat.
-	/// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
-	/// Defaults to 1,1,1.
-	void SetTint(const csp::common::Vector3& TintValue);
+    /// @brief Sets the tint that should be globally applied to the Gaussian Splat.
+    /// @param Value The tint value, expected to be in RGB color space, with each value normalised between 0...1.
+    /// Defaults to 1,1,1.
+    void SetTint(const csp::common::Vector3& TintValue);
 };
 
 } // namespace csp::multiplayer

@@ -21,64 +21,45 @@
 #include <functional>
 #include <signalrclient/hub_connection_builder.h>
 
+namespace csp::multiplayer {
 
-namespace csp::multiplayer
-{
-
-class SignalRConnection
-{
+class SignalRConnection {
 public:
-	typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
+    typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
 
-	SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient);
-	virtual ~SignalRConnection();
+    SignalRConnection(const std::string& url, const uint32_t KeepAliveSeconds, std::shared_ptr<signalr::websocket_client> WebSocketClient);
+    virtual ~SignalRConnection();
 
-	void Start(std::function<void(std::exception_ptr)> Callback);
-	void Stop(std::function<void(std::exception_ptr)> Callback);
+    void Start(std::function<void(std::exception_ptr)> Callback);
+    void Stop(std::function<void(std::exception_ptr)> Callback);
 
-	enum class ConnectionState
-	{
-		Connecting,
-		Connected,
-		Disconnecting,
-		Disconnected
-	};
+    enum class ConnectionState { Connecting, Connected, Disconnecting, Disconnected };
 
-	ConnectionState GetConnectionState() const;
+    ConnectionState GetConnectionState() const;
 
-	std::string GetConnectionId() const;
+    std::string GetConnectionId() const;
 
-	void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback);
+    void SetDisconnected(const std::function<void(std::exception_ptr)>& DisconnectedCallback);
 
+    void On(const std::string& EventName, const MethodInvokedHandler& Handler);
 
+    void Invoke(
+        const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
+        std::function<void(const signalr::value&, std::exception_ptr)> Callback = [](const signalr::value&, std::exception_ptr) {});
 
-	void On(const std::string& EventName, const MethodInvokedHandler& Handler);
-
-	void Invoke(
-		const std::string& MethodName,
-		const signalr::value& Arguments = signalr::value(),
-		std::function<void(const signalr::value&, std::exception_ptr)> Callback =
-			[](const signalr::value&, std::exception_ptr)
-		{
-		});
-
-	void Send(
-		const std::string& MethodName,
-		const signalr::value& Arguments = signalr::value(),
-		std::function<void(std::exception_ptr)> Callback =
-			[](std::exception_ptr)
-		{
-		});
+    void Send(
+        const std::string& MethodName, const signalr::value& Arguments = signalr::value(),
+        std::function<void(std::exception_ptr)> Callback = [](std::exception_ptr) {});
 
 private:
-	signalr::hub_connection Connection;
+    signalr::hub_connection Connection;
 
-	// We tracking pending invocations so that we can guarantee that the connection is not stopped until all
-	// invocations have completed. This is important for situations such as when the player exits a space, invokes a deletion of their
-	// avatar entity, and we need to ensure that message has gone through before destroying the connection.
-	std::atomic_uint PendingInvocations;
-	std::function<void(std::exception_ptr)> PendingStopCallback;
-	signalr::signalr_client_config config;
+    // We tracking pending invocations so that we can guarantee that the connection is not stopped until all
+    // invocations have completed. This is important for situations such as when the player exits a space, invokes a deletion of their
+    // avatar entity, and we need to ensure that message has gone through before destroying the connection.
+    std::atomic_uint PendingInvocations;
+    std::function<void(std::exception_ptr)> PendingStopCallback;
+    signalr::signalr_client_config config;
 };
 
 } // namespace csp::multiplayer

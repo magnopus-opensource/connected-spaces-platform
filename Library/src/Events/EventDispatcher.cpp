@@ -15,32 +15,28 @@
  */
 #include "Events/EventDispatcher.h"
 
-namespace csp::events
-{
+namespace csp::events {
 
-EventDispatcher::EventDispatcher(const EventId& InId) : Id(InId)
+EventDispatcher::EventDispatcher(const EventId& InId)
+    : Id(InId)
 {
 }
 
 void EventDispatcher::RegisterListener(EventListener* InListener)
 {
-	// Check it's not there already
-	CallbackList.remove(InListener);
+    // Check it's not there already
+    CallbackList.remove(InListener);
 
-	CallbackList.push_back(InListener);
+    CallbackList.push_back(InListener);
 }
 
-void EventDispatcher::UnRegisterListener(EventListener* InListener)
-{
-	CallbackList.remove(InListener);
-}
+void EventDispatcher::UnRegisterListener(EventListener* InListener) { CallbackList.remove(InListener); }
 
 void EventDispatcher::Dispatch(const Event& InEvent)
 {
-	for (auto Callback : CallbackList)
-	{
-		Callback->OnEvent(InEvent);
-	}
+    for (auto Callback : CallbackList) {
+        Callback->OnEvent(InEvent);
+    }
 }
 
 } // namespace csp::events

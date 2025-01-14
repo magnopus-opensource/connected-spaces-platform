@@ -23,12 +23,9 @@
 #include <functional>
 #include <memory>
 
-
 CSP_NO_EXPORT
 
-
-namespace csp::common
-{
+namespace csp::common {
 
 /// @brief Builds a string with the specified format and arguments.
 /// Based on sprintf:
@@ -38,20 +35,19 @@ namespace csp::common
 /// @return String : String built from arguments
 template <typename... Args> static String StringFormat(const String& Format, Args... args)
 {
-	int SizeS = std::snprintf(nullptr, 0, Format.c_str(), args...) + 1; // Extra space for '\0'
+    int SizeS = std::snprintf(nullptr, 0, Format.c_str(), args...) + 1; // Extra space for '\0'
 
-	if (SizeS <= 0)
-	{
-		return String();
-	}
+    if (SizeS <= 0) {
+        return String();
+    }
 
-	auto Size = static_cast<size_t>(SizeS);
+    auto Size = static_cast<size_t>(SizeS);
 
-	std::unique_ptr<char[], csp::memory::DllDeleter<char>> Buf((char*) csp::memory::DllAlloc(Size));
+    std::unique_ptr<char[], csp::memory::DllDeleter<char>> Buf((char*)csp::memory::DllAlloc(Size));
 
-	std::snprintf(Buf.get(), Size, Format.c_str(), args...);
+    std::snprintf(Buf.get(), Size, Format.c_str(), args...);
 
-	return String(Buf.get(), Size - 1); // We don't want the '\0' inside
+    return String(Buf.get(), Size - 1); // We don't want the '\0' inside
 };
 
 } // namespace csp::common

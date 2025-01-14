@@ -19,51 +19,45 @@
 #include "HttpPayload.h"
 #include "HttpProgress.h"
 
-namespace csp::web
-{
+namespace csp::web {
 
 class HttpRequest;
 class HttpResponse;
 
-struct IHttpResponseHandler
-{
-	virtual void OnHttpProgress(HttpRequest& Request) {};
-	virtual void OnHttpResponse(HttpResponse& Response) = 0;
-	virtual bool ShouldDelete() const
-	{
-		return false;
-	}
+struct IHttpResponseHandler {
+    virtual void OnHttpProgress(HttpRequest& Request) {};
+    virtual void OnHttpResponse(HttpResponse& Response) = 0;
+    virtual bool ShouldDelete() const { return false; }
 
-	virtual ~IHttpResponseHandler() = default;
+    virtual ~IHttpResponseHandler() = default;
 };
 
-class HttpResponse
-{
+class HttpResponse {
 public:
-	HttpResponse();
-	HttpResponse(HttpRequest* InRequest);
-	~HttpResponse();
+    HttpResponse();
+    HttpResponse(HttpRequest* InRequest);
+    ~HttpResponse();
 
-	void SetResponseCode(EResponseCodes InReponseCode);
-	EResponseCodes GetResponseCode() const;
+    void SetResponseCode(EResponseCodes InReponseCode);
+    EResponseCodes GetResponseCode() const;
 
-	HttpPayload& GetMutablePayload();
-	const HttpPayload& GetPayload() const;
+    HttpPayload& GetMutablePayload();
+    const HttpPayload& GetPayload() const;
 
-	HttpRequest* GetRequest() const;
+    HttpRequest* GetRequest() const;
 
-	void Reset();
+    void Reset();
 
-	HttpProgress& GetProgress();
-	const HttpProgress& GetProgress() const;
+    HttpProgress& GetProgress();
+    const HttpProgress& GetProgress() const;
 
 private:
-	EResponseCodes ResponseCode;
+    EResponseCodes ResponseCode;
 
-	HttpRequest* Request;
-	HttpPayload Payload;
+    HttpRequest* Request;
+    HttpPayload Payload;
 
-	HttpProgress Progress;
+    HttpProgress Progress;
 };
 
 } // namespace csp::web

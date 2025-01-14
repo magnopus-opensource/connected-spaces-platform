@@ -17,56 +17,49 @@
 
 #include "Debug/Logging.h"
 
-namespace csp::systems
-{
+namespace csp::systems {
 
-class PointOfInterestHelpers
-{
+class PointOfInterestHelpers {
 public:
     // Enum to string conversion utilities. This rovides a centralized mechanism for mapping between the two
     // and should be used for all POI type/string conversions internally.
     static csp::common::String TypeToString(EPointOfInterestType Type)
-	{
-		csp::common::String String;
+    {
+        csp::common::String String;
 
-	    switch(Type)
-	    {
-    		case EPointOfInterestType::SPACE:
-    		{
-	            String = "SpaceGeoLocation";
-    			break;
-    		}
-	        case EPointOfInterestType::DEFAULT:
-    		{
-	            String = "Default";
-    			break;
-    		}
-    		default:
-    		{
-	            CSP_LOG_ERROR_MSG("Unkwnown POI type detected when attempting to derive its string representation. The type string being returned will be empty.");
-    			break;
-    		}
-	    }
+        switch (Type) {
+        case EPointOfInterestType::SPACE: {
+            String = "SpaceGeoLocation";
+            break;
+        }
+        case EPointOfInterestType::DEFAULT: {
+            String = "Default";
+            break;
+        }
+        default: {
+            CSP_LOG_ERROR_MSG(
+                "Unkwnown POI type detected when attempting to derive its string representation. The type string being returned will be empty.");
+            break;
+        }
+        }
 
-	    return String;
-	}
+        return String;
+    }
 
-	static EPointOfInterestType StringToType(const csp::common::String& String)
-	{
-	    EPointOfInterestType Type = EPointOfInterestType::DEFAULT;
+    static EPointOfInterestType StringToType(const csp::common::String& String)
+    {
+        EPointOfInterestType Type = EPointOfInterestType::DEFAULT;
 
-		if(String == "Default")
-		{
-			Type = csp::systems::EPointOfInterestType::DEFAULT;
-		}
-	    // Two terms map to space geolocation, because `OKOSpaceGeoLocation` is a legacy term, preserved for compatibility reasons.
-		else if((String == csp::common::String("SpaceGeoLocation")) || (String == csp::common::String("OKOSpaceGeoLocation")))
-		{
-			Type = csp::systems::EPointOfInterestType::SPACE;
-		}
+        if (String == "Default") {
+            Type = csp::systems::EPointOfInterestType::DEFAULT;
+        }
+        // Two terms map to space geolocation, because `OKOSpaceGeoLocation` is a legacy term, preserved for compatibility reasons.
+        else if ((String == csp::common::String("SpaceGeoLocation")) || (String == csp::common::String("OKOSpaceGeoLocation"))) {
+            Type = csp::systems::EPointOfInterestType::SPACE;
+        }
 
-	    return Type;
-	}
+        return Type;
+    }
 };
 
 } // namespace csp::systems

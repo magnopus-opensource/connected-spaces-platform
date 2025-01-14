@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-
 /// @file BillBoardModeEnum.h
 /// @brief Definition of Billboard modes for various components
 
 #pragma once
 
-namespace csp::multiplayer
-{
-enum class BillboardMode
-{
-	Off = 0,
-	Billboard,
-	YawLockedBillboard
-};
+namespace csp::multiplayer {
+enum class BillboardMode { Off = 0, Billboard, YawLockedBillboard };
 }

@@ -20,19 +20,14 @@
 
 using namespace csp::systems::graphqlservice;
 
-namespace csp::systems
-{
-const csp::common::String& GraphQLResult::GetResponse()
-{
-	return GraphQLResponse;
-}
+namespace csp::systems {
+const csp::common::String& GraphQLResult::GetResponse() { return GraphQLResponse; }
 void GraphQLResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(ApiResponse);
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		GraphQLResponse = ApiResponse->GetResponse()->GetPayload().GetContent();
-	}
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+        GraphQLResponse = ApiResponse->GetResponse()->GetPayload().GetContent();
+    }
 };
 } // namespace csp::systems

@@ -20,57 +20,40 @@
 
 #include <atomic>
 
+namespace csp::common {
 
-namespace csp::common
-{
-
-class CancellationToken::Impl
-{
+class CancellationToken::Impl {
 public:
-	Impl() : IsCancelled(false)
-	{
-	}
+    Impl()
+        : IsCancelled(false)
+    {
+    }
 
-	~Impl() = default;
+    ~Impl() = default;
 
-	void Cancel()
-	{
-		IsCancelled = true;
-	}
+    void Cancel() { IsCancelled = true; }
 
-	bool Cancelled() const
-	{
-		return IsCancelled;
-	}
+    bool Cancelled() const { return IsCancelled; }
 
 private:
-	std::atomic_bool IsCancelled;
+    std::atomic_bool IsCancelled;
 };
 
-
-CancellationToken::CancellationToken() : ImplPtr(CSP_NEW Impl())
+CancellationToken::CancellationToken()
+    : ImplPtr(CSP_NEW Impl())
 {
 }
 
-CancellationToken::~CancellationToken()
-{
-	CSP_DELETE(ImplPtr);
-}
+CancellationToken::~CancellationToken() { CSP_DELETE(ImplPtr); }
 
-void CancellationToken::Cancel()
-{
-	ImplPtr->Cancel();
-}
+void CancellationToken::Cancel() { ImplPtr->Cancel(); }
 
-bool CancellationToken::Cancelled() const
-{
-	return ImplPtr->Cancelled();
-}
+bool CancellationToken::Cancelled() const { return ImplPtr->Cancelled(); }
 
 CancellationToken& CancellationToken::Dummy()
 {
-	static CancellationToken Token;
-	return Token;
+    static CancellationToken Token;
+    return Token;
 }
 
 } // namespace csp::common

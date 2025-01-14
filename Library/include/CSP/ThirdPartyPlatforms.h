@@ -15,16 +15,10 @@
  */
 #pragma once
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @brief Enum for setting csp::systems::Asset third party platform type.
 /// NONE indicates that the asset will work on any platform.
 /// Any other value indicates it will only work with this platform.
-enum class EThirdPartyPlatform
-{
-	NONE,
-	UNREAL,
-	UNITY
-};
+enum class EThirdPartyPlatform { NONE, UNREAL, UNITY };
 } // namespace csp::systems

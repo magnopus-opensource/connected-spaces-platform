@@ -17,8 +17,7 @@
 
 #include "CSP/Systems/Assets/LOD.h"
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 csp::common::String CreateLODStyleVar(int LODLevel);
 int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& Styles);

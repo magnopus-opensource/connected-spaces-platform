@@ -20,30 +20,28 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class LightSpaceComponent;
 
-class LightSpaceComponentScriptInterface : public ComponentScriptInterface
-{
+class LightSpaceComponentScriptInterface : public ComponentScriptInterface {
 public:
-	LightSpaceComponentScriptInterface(LightSpaceComponent* InComponent = nullptr);
+    LightSpaceComponentScriptInterface(LightSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, LightType);
-	DECLARE_SCRIPT_PROPERTY(float, Intensity);
-	DECLARE_SCRIPT_PROPERTY(float, Range);
-	DECLARE_SCRIPT_PROPERTY(float, InnerConeAngle);
-	DECLARE_SCRIPT_PROPERTY(float, OuterConeAngle);
+    DECLARE_SCRIPT_PROPERTY(int64_t, LightType);
+    DECLARE_SCRIPT_PROPERTY(float, Intensity);
+    DECLARE_SCRIPT_PROPERTY(float, Range);
+    DECLARE_SCRIPT_PROPERTY(float, InnerConeAngle);
+    DECLARE_SCRIPT_PROPERTY(float, OuterConeAngle);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Color);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Color);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, LightCookieAssetId);
-	DECLARE_SCRIPT_PROPERTY(int64_t, LightCookieType);
+    DECLARE_SCRIPT_PROPERTY(std::string, LightCookieAssetId);
+    DECLARE_SCRIPT_PROPERTY(int64_t, LightCookieType);
 };
 
 } // namespace csp::multiplayer

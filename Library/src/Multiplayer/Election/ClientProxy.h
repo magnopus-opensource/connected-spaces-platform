@@ -22,115 +22,97 @@
 #include <list>
 #include <map>
 
-
-namespace csp::common
-{
+namespace csp::common {
 
 class CancellationToken;
 
 }
 
-
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class ClientElectionManager;
 
 class SpaceEntity;
 
+enum class ClientElectionState { Idle, Electing };
 
-enum class ClientElectionState
-{
-	Idle,
-	Electing
-};
-
-
-constexpr const char* ClientElectionMessage	 = "ClientElectionMessage";
+constexpr const char* ClientElectionMessage = "ClientElectionMessage";
 constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 
 // Default time to wait for a response from an election message
 constexpr const std::chrono::system_clock::duration DefaultElectionTimeOut = std::chrono::milliseconds(2000);
 
+enum class ClientElectionMessageType {
+    Election = 0,
+    ElectionResponse,
+    ElectionLeader,
+    ElectionNotifyLeader,
 
-enum class ClientElectionMessageType
-{
-	Election = 0,
-	ElectionResponse,
-	ElectionLeader,
-	ElectionNotifyLeader,
-
-	NumElectionMessages
+    NumElectionMessages
 };
-
 
 using ClientScore = int64_t;
-using ClientId	  = int64_t;
-using EventId	  = int64_t;
+using ClientId = int64_t;
+using EventId = int64_t;
 
-
-struct ElectionEvent
-{
-	std::atomic<EventId> Id;
-	std::atomic<ClientId> TargetClient;
-	std::atomic<ClientElectionMessageType> Type;
+struct ElectionEvent {
+    std::atomic<EventId> Id;
+    std::atomic<ClientId> TargetClient;
+    std::atomic<ClientElectionMessageType> Type;
 };
 
-
 using ClientList = std::list<class ClientProxy*>;
-using ClientMap	 = std::map<ClientId, class ClientProxy*>;
+using ClientMap = std::map<ClientId, class ClientProxy*>;
 
-
-class ClientProxy
-{
+class ClientProxy {
 public:
-	ClientProxy(ClientId Id, ClientElectionManager* ElectionManager);
+    ClientProxy(ClientId Id, ClientElectionManager* ElectionManager);
 
-	void UpdateState();
+    void UpdateState();
 
-	[[nodiscard]] ClientId GetId() const;
+    [[nodiscard]] ClientId GetId() const;
 
-	void StartLeaderElection(const ClientMap& Clients);
+    void StartLeaderElection(const ClientMap& Clients);
 
-	void HandleEvent(int64_t EventType, int64_t ClientId);
+    void HandleEvent(int64_t EventType, int64_t ClientId);
 
-	void NotifyLeader(int64_t TargetClientId, int64_t LeaderClientId);
+    void NotifyLeader(int64_t TargetClientId, int64_t LeaderClientId);
 
-	void RunScript(int64_t ContextId, const csp::common::String& ScriptText);
+    void RunScript(int64_t ContextId, const csp::common::String& ScriptText);
 
 private:
-	void HandleIdleState();
-	void HandleElectingState();
+    void HandleIdleState();
+    void HandleElectingState();
 
-	void SendElectionEvent(int64_t TargetClientId);
-	void SendElectionResponseEvent(int64_t TargetClientId);
-	void SendElectionLeaderEvent(int64_t TargetClientId);
+    void SendElectionEvent(int64_t TargetClientId);
+    void SendElectionResponseEvent(int64_t TargetClientId);
+    void SendElectionLeaderEvent(int64_t TargetClientId);
 
-	void SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId);
+    void SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId);
 
-	void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
+    void SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText);
 
-	void HandleElectionEvent(int64_t ClientId);
-	void HandleElectionResponseEvent(int64_t ClientId);
-	void HandleElectionLeaderEvent(int64_t ClientId);
-	void HandleElectionNotifyLeaderEvent(int64_t ClientId);
+    void HandleElectionEvent(int64_t ClientId);
+    void HandleElectionResponseEvent(int64_t ClientId);
+    void HandleElectionLeaderEvent(int64_t ClientId);
+    void HandleElectionNotifyLeaderEvent(int64_t ClientId);
 
-	bool IsThisClientLeader(const ClientMap& Clients) const;
+    bool IsThisClientLeader(const ClientMap& Clients) const;
 
-	ClientElectionManager* ElectionManagerPtr;
+    ClientElectionManager* ElectionManagerPtr;
 
-	ClientElectionState State;
-	ClientId Id;
-	ClientId HighestResponseId;
-	EventId Eid;
+    ClientElectionState State;
+    ClientId Id;
+    ClientId HighestResponseId;
+    EventId Eid;
 
-	ElectionEvent PendingEvent;
+    ElectionEvent PendingEvent;
 
-	std::atomic_int PendingElections;
+    std::atomic_int PendingElections;
 
-	std::chrono::system_clock::time_point ElectionStartTime;
+    std::chrono::system_clock::time_point ElectionStartTime;
 
-	csp::common::CancellationToken* CancellationToken;
+    csp::common::CancellationToken* CancellationToken;
 };
 
 } // namespace csp::multiplayer

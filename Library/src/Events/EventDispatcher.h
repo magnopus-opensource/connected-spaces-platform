@@ -21,25 +21,22 @@
 
 #include <list>
 
-
-namespace csp::events
-{
+namespace csp::events {
 
 using EventCallbackList = std::list<csp::events::EventListener*, csp::memory::StlAllocator<csp::events::EventListener*>>;
 
-class EventDispatcher
-{
+class EventDispatcher {
 public:
-	EventDispatcher(const EventId& InId);
+    EventDispatcher(const EventId& InId);
 
-	void RegisterListener(EventListener* InListener);
-	void UnRegisterListener(EventListener* InListener);
+    void RegisterListener(EventListener* InListener);
+    void UnRegisterListener(EventListener* InListener);
 
-	void Dispatch(const Event& InEvent);
+    void Dispatch(const Event& InEvent);
 
 private:
-	EventId Id;
-	EventCallbackList CallbackList;
+    EventId Id;
+    EventCallbackList CallbackList;
 };
 
 } // namespace csp::events

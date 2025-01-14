@@ -19,30 +19,20 @@
 #include "CSP/CSPCommon.h"
 #include "Memory.h"
 
-
-namespace csp::memory
-{
+namespace csp::memory {
 
 #if defined(CSP_WINDOWS)
-	#pragma init_seg(lib)
+#pragma init_seg(lib)
 #else
 __attribute__((init_priority(101)))
 #endif
 
 MemoryManager::MultiThreadStandardAllocator MemoryManager::OlyDefaultAllocator;
 
-void MemoryManager::Initialise()
-{
-}
+void MemoryManager::Initialise() { }
 
-void MemoryManager::Shutdown()
-{
-}
+void MemoryManager::Shutdown() { }
 
-csp::memory::Allocator& MemoryManager::GetDefaultAllocator()
-{
-	return OlyDefaultAllocator;
-}
-
+csp::memory::Allocator& MemoryManager::GetDefaultAllocator() { return OlyDefaultAllocator; }
 
 } // namespace csp::memory

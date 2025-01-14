@@ -22,44 +22,39 @@
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
-
 using namespace csp::common;
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 
 class AssetCollection;
 
 }
 
-namespace csp::multiplayer
-{
+namespace csp::multiplayer {
 
 class MessageInfo;
 class ConversationInfo;
 
-class ConversationSystemHelpers
-{
+class ConversationSystemHelpers {
 
 public:
-	static String GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
-	static String GetUniqueMessageAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
-	static Map<String, String> GenerateMessageAssetCollectionMetadata(const MessageInfo& MessageData);
-	static Map<String, String> GenerateConversationAssetCollectionMetadata(const ConversationInfo& ConversationData);
-	static ConversationInfo GetConvosationInfoFromConvosationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection);
-	static MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection);
-	static String BoolToString(const bool value);
-	static bool StringToBool(const String& value);
-	static String Vector3ToString(const Vector3& value);
-	static Vector3 StringToVector3(const String& value);
-	static String Vector4ToString(const Vector4& value);
-	static Vector4 StringToVector4(const String& value);
-	static SpaceTransform StringToSpaceTransform(const String& value);
-	static String SpaceTransformToString(const SpaceTransform& value);
+    static String GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
+    static String GetUniqueMessageAssetCollectionName(const String& SpaceId, const String& CreatorUserId);
+    static Map<String, String> GenerateMessageAssetCollectionMetadata(const MessageInfo& MessageData);
+    static Map<String, String> GenerateConversationAssetCollectionMetadata(const ConversationInfo& ConversationData);
+    static ConversationInfo GetConvosationInfoFromConvosationAssetCollection(const csp::systems::AssetCollection& ConversationAssetCollection);
+    static MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::systems::AssetCollection& MessageAssetCollection);
+    static String BoolToString(const bool value);
+    static bool StringToBool(const String& value);
+    static String Vector3ToString(const Vector3& value);
+    static Vector3 StringToVector3(const String& value);
+    static String Vector4ToString(const Vector4& value);
+    static Vector4 StringToVector4(const String& value);
+    static SpaceTransform StringToSpaceTransform(const String& value);
+    static String SpaceTransformToString(const SpaceTransform& value);
 
 private:
-	static String GetUniqueAssetCollectionSuffix(const String& SpaceId, const String& CreatorUserId);
+    static String GetUniqueAssetCollectionSuffix(const String& SpaceId, const String& CreatorUserId);
 
 }; // ConversationSystemHelpers
 

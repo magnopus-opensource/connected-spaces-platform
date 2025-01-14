@@ -20,22 +20,15 @@
 
 #include <chrono>
 
-class TestAnalyticsProvider : public csp::systems::IAnalyticsProvider
-{
+class TestAnalyticsProvider : public csp::systems::IAnalyticsProvider {
 public:
-	const std::vector<csp::systems::AnalyticsEvent>& GetMetrics() const
-	{
-		return Metrics;
-	}
+    const std::vector<csp::systems::AnalyticsEvent>& GetMetrics() const { return Metrics; }
 
 protected:
-	void Log(csp::systems::AnalyticsEvent* Event) override
-	{
-		Metrics.push_back(*Event);
-	}
+    void Log(csp::systems::AnalyticsEvent* Event) override { Metrics.push_back(*Event); }
 
 private:
-	std::vector<csp::systems::AnalyticsEvent> Metrics;
+    std::vector<csp::systems::AnalyticsEvent> Metrics;
 };
 
-static constexpr const std::chrono::milliseconds TestWaitTime {250};
+static constexpr const std::chrono::milliseconds TestWaitTime { 250 };

@@ -21,35 +21,33 @@
 
 #include <functional>
 
-namespace csp::events
-{
+namespace csp::events {
 
-class CSP_API Event
-{
-	friend class EventSystem;
+class CSP_API Event {
+    friend class EventSystem;
 
 public:
-	~Event();
+    ~Event();
 
-	// Add Payload params
-	void AddInt(const char* Key, const int Value);
-	void AddString(const char* Key, const char* Value);
-	void AddFloat(const char* Key, const float Value);
-	void AddBool(const char* Key, const bool Value);
+    // Add Payload params
+    void AddInt(const char* Key, const int Value);
+    void AddString(const char* Key, const char* Value);
+    void AddFloat(const char* Key, const float Value);
+    void AddBool(const char* Key, const bool Value);
 
-	// Get Payload params
-	const int GetInt(const char* Key) const;
-	const char* GetString(const char* Key) const;
-	const float GetFloat(const char* Key) const;
-	bool GetBool(const char* Key) const;
+    // Get Payload params
+    const int GetInt(const char* Key) const;
+    const char* GetString(const char* Key) const;
+    const float GetFloat(const char* Key) const;
+    bool GetBool(const char* Key) const;
 
-	const EventId& GetId() const;
+    const EventId& GetId() const;
 
 private:
-	Event(const EventId& InId);
+    Event(const EventId& InId);
 
-	EventId Id;
-	class EventPayloadImpl* Impl;
+    EventId Id;
+    class EventPayloadImpl* Impl;
 };
 
 } // namespace csp::events

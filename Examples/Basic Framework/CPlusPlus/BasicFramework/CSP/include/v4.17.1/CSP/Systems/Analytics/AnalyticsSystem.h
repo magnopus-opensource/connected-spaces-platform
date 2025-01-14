@@ -25,8 +25,7 @@
 #include <thread>
 #include <vector>
 
-namespace csp::systems
-{
+namespace csp::systems {
 
 class AnalyticsSystemImpl;
 
@@ -35,34 +34,33 @@ class AnalyticsSystemImpl;
 /// Offers methods for sending events to the provider
 /// Events are added to a queue to be processewd on a different thread
 /// If events are unable to be send to the provider, then they will be held in the queue
-class CSP_API CSP_NO_DISPOSE AnalyticsSystem
-{
+class CSP_API CSP_NO_DISPOSE AnalyticsSystem {
 public:
-	AnalyticsSystem();
-	~AnalyticsSystem();
+    AnalyticsSystem();
+    ~AnalyticsSystem();
 
-	CSP_START_IGNORE
-	AnalyticsSystem(const AnalyticsSystem&) = delete;
-	AnalyticsSystem(AnalyticsSystem&&)		= delete;
+    CSP_START_IGNORE
+    AnalyticsSystem(const AnalyticsSystem&) = delete;
+    AnalyticsSystem(AnalyticsSystem&&) = delete;
 
-	AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
-	AnalyticsSystem& operator=(AnalyticsSystem&&)	   = delete;
-	CSP_END_IGNORE
+    AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
+    AnalyticsSystem& operator=(AnalyticsSystem&&) = delete;
+    CSP_END_IGNORE
 
-	/// @brief Send an event
-	/// @param Event AnalyticsEvent
-	void Log(AnalyticsEvent* Event);
+    /// @brief Send an event
+    /// @param Event AnalyticsEvent
+    void Log(AnalyticsEvent* Event);
 
-	CSP_START_IGNORE
-	void RegisterProvider(IAnalyticsProvider* Provider);
-	void DeregisterProvider(IAnalyticsProvider* Provider);
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    void RegisterProvider(IAnalyticsProvider* Provider);
+    void DeregisterProvider(IAnalyticsProvider* Provider);
+    CSP_END_IGNORE
 
-	CSP_START_IGNORE
-	static const int QueueSize = 1024;
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    static const int QueueSize = 1024;
+    CSP_END_IGNORE
 
 private:
-	AnalyticsSystemImpl* Impl;
+    AnalyticsSystemImpl* Impl;
 };
 } // namespace csp::systems

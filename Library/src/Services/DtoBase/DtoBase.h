@@ -22,13 +22,11 @@
 #include <memory>
 #include <vector>
 
-namespace csp::services
-{
+namespace csp::services {
 
-namespace utility
-{
-using string_t = csp::common::String;
-using datetime = csp::common::String;
+namespace utility {
+    using string_t = csp::common::String;
+    using datetime = csp::common::String;
 } // namespace utility
 
 /// @brief Abstract base class for Dto objects
@@ -36,56 +34,35 @@ using datetime = csp::common::String;
 /// Data Transfer objects represent the data being send with each web service call
 /// and this base class defines the functions that convert this data to and from
 /// Json to be sent or recieved as http content
-class DtoBase
-{
+class DtoBase {
 public:
-	DtoBase()
-	{
-	}
-	virtual ~DtoBase()
-	{
-	}
+    DtoBase() { }
+    virtual ~DtoBase() { }
 
-	virtual utility::string_t ToJson() const;
-	virtual void FromJson(const utility::string_t& Json)
-	{
-	}
+    virtual utility::string_t ToJson() const;
+    virtual void FromJson(const utility::string_t& Json) { }
 };
 
-class EnumBase
-{
+class EnumBase {
 public:
-	EnumBase()
-	{
-	}
-	virtual ~EnumBase()
-	{
-	}
+    EnumBase() { }
+    virtual ~EnumBase() { }
 
-	virtual utility::string_t ToJson() const;
-	virtual void FromJson(const utility::string_t& Json)
-	{
-	}
+    virtual utility::string_t ToJson() const;
+    virtual void FromJson(const utility::string_t& Json) { }
 };
 
 /// @brief Null Dto object
 ///
 /// Used in templated functions when we don't need a Dto object for a CHS method
 /// or the method does not return and content
-class NullDto : public DtoBase
-{
+class NullDto : public DtoBase {
 public:
-	NullDto()
-	{
-	}
-	virtual ~NullDto()
-	{
-	}
+    NullDto() { }
+    virtual ~NullDto() { }
 
-	utility::string_t ToJson() const override;
-	void FromJson(const utility::string_t& Json) override
-	{
-	}
+    utility::string_t ToJson() const override;
+    void FromJson(const utility::string_t& Json) override { }
 };
 
 } // namespace csp::services

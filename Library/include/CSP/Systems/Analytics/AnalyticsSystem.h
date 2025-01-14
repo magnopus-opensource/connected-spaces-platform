@@ -26,9 +26,7 @@
 #include <thread>
 #include <vector>
 
-
-namespace csp::memory
-{
+namespace csp::memory {
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -36,53 +34,49 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 
 class AnalyticsSystemImpl;
-
 
 /// @ingroup Analytics System
 /// @brief Public facing system that allows interfacing with an analytics provider.
 /// Offers methods for sending events to the provider
 /// Events are added to a queue to be processewd on a different thread
 /// If events are unable to be send to the provider, then they will be held in the queue
-class CSP_API AnalyticsSystem
-{
-	CSP_START_IGNORE
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	friend void csp::memory::Delete<AnalyticsSystem>(AnalyticsSystem* Ptr);
-	/** @endcond */
-	CSP_END_IGNORE
+class CSP_API AnalyticsSystem {
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    friend void csp::memory::Delete<AnalyticsSystem>(AnalyticsSystem* Ptr);
+    /** @endcond */
+    CSP_END_IGNORE
 
 public:
-	CSP_START_IGNORE
-	AnalyticsSystem(const AnalyticsSystem&) = delete;
-	AnalyticsSystem(AnalyticsSystem&&)		= delete;
+    CSP_START_IGNORE
+    AnalyticsSystem(const AnalyticsSystem&) = delete;
+    AnalyticsSystem(AnalyticsSystem&&) = delete;
 
-	AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
-	AnalyticsSystem& operator=(AnalyticsSystem&&)	   = delete;
-	CSP_END_IGNORE
+    AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
+    AnalyticsSystem& operator=(AnalyticsSystem&&) = delete;
+    CSP_END_IGNORE
 
-	/// @brief Send an event
-	/// @param Event AnalyticsEvent
-	void Log(AnalyticsEvent* Event);
+    /// @brief Send an event
+    /// @param Event AnalyticsEvent
+    void Log(AnalyticsEvent* Event);
 
-	CSP_START_IGNORE
-	void RegisterProvider(IAnalyticsProvider* Provider);
-	void DeregisterProvider(IAnalyticsProvider* Provider);
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    void RegisterProvider(IAnalyticsProvider* Provider);
+    void DeregisterProvider(IAnalyticsProvider* Provider);
+    CSP_END_IGNORE
 
-	CSP_START_IGNORE
-	static const int QueueSize = 1024;
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    static const int QueueSize = 1024;
+    CSP_END_IGNORE
 
 private:
-	AnalyticsSystem();
-	~AnalyticsSystem();
+    AnalyticsSystem();
+    ~AnalyticsSystem();
 
-	AnalyticsSystemImpl* Impl;
+    AnalyticsSystemImpl* Impl;
 };
 } // namespace csp::systems

@@ -22,39 +22,34 @@
 #pragma once
 #include "CSP/Systems/WebService.h"
 
-
-namespace csp::services
-{
+namespace csp::services {
 
 class ApiResponseBase;
 
 } // namespace csp::services
 
-
-namespace csp::systems
-{
+namespace csp::systems {
 
 /// @ingroup GraphQL System
 /// @brief Data class used to contain information when a Response is received from GraphQL
 
-class CSP_API GraphQLResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class GraphQLSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+class CSP_API GraphQLResult : public csp::systems::ResultBase {
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    friend class GraphQLSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 public:
-	GraphQLResult() {};
-	GraphQLResult(void*) {};
+    GraphQLResult() {};
+    GraphQLResult(void*) {};
 
-	/// @brief Retrieves response data from the GraphQL Server
-	/// @return String : Data String as described above
-	[[nodiscard]] const csp::common::String& GetResponse();
+    /// @brief Retrieves response data from the GraphQL Server
+    /// @return String : Data String as described above
+    [[nodiscard]] const csp::common::String& GetResponse();
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-	csp::common::String GraphQLResponse;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    csp::common::String GraphQLResponse;
 };
 // callback signatures
 typedef std::function<void(GraphQLResult& Result)> GraphQLReceivedCallback;

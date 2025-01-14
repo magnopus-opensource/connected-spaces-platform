@@ -4,21 +4,10 @@
 #include "Olympus/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "Olympus/Systems/Assets/Asset.h"
 
-namespace oly_multiplayer
-{
+namespace oly_multiplayer {
 
 // IsVisible, IsARVisible and IsActive are no longer exposed but retained for backwards compatibility
-enum class PortalPropertyKeys
-{
-	SpaceId = 0,
-	IsVisible,
-	IsActive,
-	IsARVisible,
-	IsEnabled,
-	Position,
-	Radius,
-	Num
-};
+enum class PortalPropertyKeys { SpaceId = 0, IsVisible, IsActive, IsARVisible, IsEnabled, Position, Radius, Num };
 
 /**
  * @ingroup PortalSpaceComponent
@@ -32,25 +21,24 @@ enum class PortalPropertyKeys
  * 4. Follow the standard procedure to re-connect to a space
  */
 
-class OLY_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent
-{
+class OLY_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent {
 public:
-	PortalSpaceComponent(SpaceEntity* Parent);
+    PortalSpaceComponent(SpaceEntity* Parent);
 
-	const oly_common::String& GetSpaceId() const;
-	void SetSpaceId(const oly_common::String& Value);
+    const oly_common::String& GetSpaceId() const;
+    void SetSpaceId(const oly_common::String& Value);
 
-	const oly_common::Vector3& GetPosition() const;
-	void SetPosition(const oly_common::Vector3& Value);
+    const oly_common::Vector3& GetPosition() const;
+    void SetPosition(const oly_common::Vector3& Value);
 
-	float GetRadius() const;
-	void SetRadius(float Value);
+    float GetRadius() const;
+    void SetRadius(float Value);
 
-	/* IEnableableComponent */
-	bool GetIsEnabled() const override;
-	void SetIsEnabled(bool InValue) override;
+    /* IEnableableComponent */
+    bool GetIsEnabled() const override;
+    void SetIsEnabled(bool InValue) override;
 
-	OLY_ASYNC_RESULT void GetSpaceThumbnail(oly_systems::UriResultCallback Callback) const;
+    OLY_ASYNC_RESULT void GetSpaceThumbnail(oly_systems::UriResultCallback Callback) const;
 };
 
 } // namespace oly_multiplayer
