@@ -42,7 +42,6 @@ if not MultiplayerTestRunner then
 			   
 		 -- Conditionally link google test, not the standard _d stuff so we need to do it per config
 	   filter "configurations:*Debug*"
-		  defines { "RUN_MULTIPLAYER_RUNNER_TESTS" } -- Run tests by default in debug configs
 		  links { "gtestd_md" } -- Debug versions
 		  libdirs {"%{wks.location}/ThirdParty/googletest/lib/%{cfg.platform}/Debug"}
 		  staticruntime "off"
