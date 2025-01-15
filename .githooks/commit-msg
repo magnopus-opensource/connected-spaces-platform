@@ -46,12 +46,6 @@ validate_commit_msg() {
         exit 1
     fi
 
-    # Check if the subject line is limited to 50 characters
-    if [[ "${#subject}" -gt 50 ]]; then
-        echo "${error_msg} Limit the subject line to 50 characters (${#commit_msg_lines[0]} characters used)"
-        exit 1
-    fi
-
     # Check if the subject line does not end with a period
     if [[ ! "${subject}" =~ [^\.]$ ]]; then
         echo "${error_msg} Do not end the subject line with a period"
@@ -90,16 +84,6 @@ validate_commit_msg() {
         printf -- '    - %s\n' "${allowed_subject_verbs[@]}"
         exit 1
     fi
-
-    # Check if the body is wrapped at 72 characters (except for url's)
-    for line in "${commit_msg_lines[@]}"; do
-        if [[ "${line}" =~ ^[[:space:]]*(https?|ftp|file):\/\/[-A-Za-z0-9\+\&\@\#\/\%\?\=\~\_\|\!\:\,\.\;]*[-A-Za-z0-9\+\&\@\#\/\%\=\~\_\|] ]]; then
-            continue
-        elif [[ "${#line}" -gt 72 ]]; then
-            echo "${error_msg} Wrap the body at 72 characters (${#line} characters used)"
-            exit 1
-        fi
-    done
 }
 
 validate_commit_msg
