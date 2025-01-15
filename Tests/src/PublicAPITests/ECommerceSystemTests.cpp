@@ -164,7 +164,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
 {
 	/*Steps needed to be performed before running this test are:
 
-	1. Create a space (Add to Shopify Creds) // FIXM OR: I am questioning whether this will ever be automatable, and therefore the point of keeping
+	1. Create a space (Add to Shopify Creds)
 	this kind of test.
 	2. Connected your shopify.dev account to your space using the "Private Access Token" and store name
 		Endpoint : /api/v1/spaces/{spaceId}/vendors/shopify
