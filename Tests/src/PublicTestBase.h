@@ -29,7 +29,7 @@ const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const ch
 }
 } // namespace
 
-static const char* EndpointBaseURI()
+inline const char* EndpointBaseURI()
 {
 	return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud");
 }
