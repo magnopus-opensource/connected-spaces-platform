@@ -22,22 +22,11 @@
 #include "TestHelpers.h"
 
 
-namespace
-{
-const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
-{
-	const auto EnvironmentVariable = std::getenv(EnvironmentKey);
-	return (EnvironmentVariable) ? EnvironmentVariable : DefaultValue;
-}
-} // namespace
-
-const char* EndpointBaseURI = GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud");
-
 void PublicTestBase::SetUp()
 {
 	::testing::Test::SetUp();
 
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 

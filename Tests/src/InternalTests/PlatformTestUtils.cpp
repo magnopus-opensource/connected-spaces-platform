@@ -37,7 +37,7 @@ namespace
 {
 void InitialiseFoundationInternal()
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 }
 } // namespace
 

@@ -17,8 +17,22 @@
 
 #include <gtest/gtest.h>
 
+
+namespace
+{
 constexpr char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
-extern const char* EndpointBaseURI;
+
+const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
+{
+	const auto EnvironmentVariable = std::getenv(EnvironmentKey);
+	return (EnvironmentVariable) ? EnvironmentVariable : DefaultValue;
+}
+} // namespace
+
+static const char* EndpointBaseURI()
+{
+	return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud");
+}
 
 
 class PublicTestBase : public ::testing::Test

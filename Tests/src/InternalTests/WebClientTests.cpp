@@ -274,7 +274,7 @@ private:
 	#if 0
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	DefaultWebClientFactory Factory;
 	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
@@ -323,7 +323,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
 	#if 0
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	DefaultWebClientFactory Factory;
 	WebClientLoginResponseReceiver LoginReceiver;
