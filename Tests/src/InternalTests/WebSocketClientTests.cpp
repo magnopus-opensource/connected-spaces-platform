@@ -25,6 +25,8 @@
 
 using namespace csp::multiplayer;
 
+// The WebSocketClientTests will be reviewed as part of OF-1532.
+
 const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
 
 #if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_START_STOP_TEST

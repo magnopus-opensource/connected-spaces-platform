@@ -1059,6 +1059,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
 }
 #endif
 
+// This test currently requires manual steps and will be reviewed as part of OF-1535.
 /*
  * This test is disabled by default as it requires human interaction but is provided as a means to test ticket redemption.
  *
@@ -1078,8 +1079,8 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetVendorAuthorizeInfoBadD
  *
  * When done testing, make sure to delete the event in Eventbrite.
  */
-#if RUN_EVENTTICKETING_SUBMITEVENTTICKET_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_SUBMITEVENTTICKET_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 {
 	SetRandSeed();
 
@@ -1178,13 +1179,13 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketTest)
 }
 #endif
 
-
+// This test currently requires manual steps and will be reviewed as part of OF-1535.
 /*
  * This test is disabled by default and works the same as the previous test with one difference in that the ticket
  * is submitted by the superuser on behalf of the alternative user.
  */
-#if RUN_EVENTTICKETING_SUBMITEVENTTICKET_ONBEHALFOF_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfOfTest)
+#if RUN_ALL_UNIT_TESTS || RUN_EVENTTICKETING_TESTS || RUN_EVENTTICKETING_SUBMITEVENTTICKET_ONBEHALFOF_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventTicketingSystemTests, SubmitEventTicketOnBehalfOfTest)
 {
 	SetRandSeed();
 

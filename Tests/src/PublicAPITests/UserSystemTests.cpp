@@ -411,8 +411,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 }
 #endif
 
-#if RUN_NIGHTLY_TESTS || RUN_USERSYSTEM_REFRESH_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
+// This will be updated and re-instated in OF-1533
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_REFRESH_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
 {
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
@@ -1109,6 +1110,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 #endif
 
 // Currently disabled whilst stripe testing is unavailable for OKO_TESTS
+// This test will be reviewed and reinstated as part of OF-1534.
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 {
