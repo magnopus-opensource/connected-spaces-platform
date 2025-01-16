@@ -81,10 +81,10 @@ DateTime::DateTime(const csp::common::String& DateString)
     int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
     char OffsetModifier;
 #ifdef _MSC_VER
-    int _ = sscanf_s(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier, 1,
+    sscanf_s(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier, 1,
         &OffsetHours, &OffsetMinutes);
 #else
-    int _ = std::sscanf(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier,
+    std::sscanf(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier,
         &OffsetHours, &OffsetMinutes);
 #endif
 

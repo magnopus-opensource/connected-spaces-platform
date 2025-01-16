@@ -41,7 +41,7 @@ inline std::string GenerateUUID()
     CurrentTime = std::chrono::high_resolution_clock::now();
     CurrentNanoseconds = std::chrono::time_point_cast<std::chrono::nanoseconds>(CurrentTime);
     Rand.seed(CurrentNanoseconds.time_since_epoch().count());
-    auto SkippedVal = Rand(); // Skip one pseudo-random number
+    [[maybe_unused]] auto SkippedVal = Rand(); // Skip one pseudo-random number
     *reinterpret_cast<uint64_t*>(&Uuid[8]) = Rand();
 
     // Convert to hex string
