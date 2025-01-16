@@ -156,6 +156,15 @@ public:
 														const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 														AssetCollectionResultCallback Callback);
 
+	/// TODO: comment
+	CSP_ASYNC_RESULT void GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+												  const csp::common::Optional<csp::common::String>& ParentId,
+												  const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+												  const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
+												  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+												  const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
+												  csp::systems::NumberOfRepliesResultCallback Callback);
+
 	/// @brief Creates a new asset.
 	/// @param AssetCollection AssetCollection : the parent collection for the asset to be associated with
 	/// @param Name csp::common::String : name of the asset collection

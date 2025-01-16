@@ -441,8 +441,7 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids,
 	int32_t Limit = ResultsMaxNumber.HasValue() ? *ResultsMaxNumber : DEFAULT_RESULT_MAX_NUMBER;
 
 	services::ResponseHandlerPtr ResponseHandler
-		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, services::DtoArray<chs::PrototypeDto>>(Callback,
-																																		   nullptr);
+		= PrototypeAPI->CreateHandler<AssetCollectionsResultCallback, AssetCollectionsResult, void, chs::PrototypeDto>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)
 		->apiV1PrototypesGet(PrototypeTags,		// Tags
@@ -486,6 +485,63 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
 
 	static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdPut(AssetCollection.Id, PrototypeInfo, ResponseHandler);
+}
+
+void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
+										  const csp::common::Optional<csp::common::String>& ParentId,
+										  const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
+										  const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
+										  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
+										  const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
+										  csp::systems::NumberOfRepliesResultCallback Callback)
+{
+	std::optional<std::vector<String>> PrototypeIds	  = Convert(Ids);
+	std::optional<String> ParentPrototypeId			  = Convert(ParentId);
+	std::optional<std::vector<String>> PrototypeNames = Convert(Names);
+
+
+	std::optional<std::vector<String>> PrototypeTypes;
+
+	if (Types.HasValue())
+	{
+		std::vector<String> Vals;
+
+		for (size_t i = 0; i < Types->Size(); ++i)
+		{
+			Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
+		}
+
+		PrototypeTypes = std::move(Vals);
+	}
+
+	std::optional<std::vector<String>> PrototypeTags = Convert(Tags);
+	std::optional<std::vector<String>> GroupIds		 = Convert(SpaceIds);
+
+	services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<csp::systems::NumberOfRepliesResultCallback,
+																			   csp::systems::NumberOfRepliesResult,
+																			   void,
+																			   services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
+
+	static_cast<chs::PrototypeApi*>(PrototypeAPI)
+		->apiV1PrototypesCountGet(PrototypeTags,	 // Tags
+								  std::nullopt,		 // ExcludedTags
+								  std::nullopt,		 // TagsAll
+								  PrototypeIds,		 // Ids
+								  PrototypeNames,	 // Names
+								  std::nullopt,		 // PartialNames
+								  std::nullopt,		 // ExcludedIds
+								  std::nullopt,		 // PointOfInterestIds
+								  ParentPrototypeId, // ParentId
+								  GroupIds,			 // GroupIds
+								  PrototypeTypes,	 // Types
+								  std::nullopt,		 // HasGroup
+								  std::nullopt,		 // CreatedBy
+								  std::nullopt,		 // CreatedAfter
+								  std::nullopt,		 // PrototypeOwnerIds
+								  std::nullopt,		 // ReadAccessFilters
+								  std::nullopt,		 // WriteAccessFilters
+								  std::nullopt,		 // OrganizationIds
+								  ResponseHandler);
 }
 
 void AssetSystem::CreateAsset(const AssetCollection& AssetCollection,

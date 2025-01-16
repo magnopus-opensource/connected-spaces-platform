@@ -153,7 +153,8 @@ public:
 	const csp::common::Vector3& GetConversationCameraPosition() const;
 
 	/// @brief Gets the Number Of Replies of the conversation.
-	const int64_t GetNumberOfReplies() const;
+	/// TODO: comment
+	const void GetNumberOfReplies(csp::systems::UInt64Result Callback) const;
 
 private:
 	void SetConversationId(const csp::common::String& Value);

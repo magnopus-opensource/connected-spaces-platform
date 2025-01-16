@@ -731,10 +731,9 @@ const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPos
 	return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
 }
 
-const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
+const void ConversationSpaceComponent::GetNumberOfReplies(UInt64Result Callback) const
 {
-	// TODO: Implement getNumberOfReplies - OF-1385
-	return 0;
+	return void();
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)

@@ -174,6 +174,7 @@ void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& 
 		Asset.MimeType = Dto.GetMimeType();
 	}
 }
+
 } // namespace csp::systems
 
 
@@ -358,6 +359,23 @@ size_t AssetDataResult::GetDataLength() const
 void AssetDataResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
 	ResultBase::OnResponse(ApiResponse);
+}
+
+uint64_t NumberOfRepliesResult::GetCount() const
+{
+	return Count;
+}
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const auto* Response = ApiResponse->GetResponse();
+	const auto& Headers	 = Response->GetPayload().GetHeaders();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Count = std::stoull(Response->GetPayload().GetContent().c_str());
+	}
 }
 
 } // namespace csp::systems
