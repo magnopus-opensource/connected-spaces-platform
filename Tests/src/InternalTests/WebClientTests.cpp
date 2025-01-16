@@ -283,7 +283,7 @@ private:
 #if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POLLING_TEST
 CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 

@@ -1338,7 +1338,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	SetRandSeed();
 
@@ -1442,7 +1442,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 	// Test for OB-1046
 	// If the rate limiter hasn't processed all PendingOutgoingUpdates after SpaceEntity deletion it will crash when trying to process them
 
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	SetRandSeed();
 
