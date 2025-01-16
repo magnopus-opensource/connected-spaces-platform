@@ -20,7 +20,6 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-
 namespace csp::services
 {
 
@@ -30,7 +29,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
 namespace csp::systems
 {
 // enum class TierNames;
@@ -39,9 +37,9 @@ namespace csp::systems
 /// @brief Data representation of User Role in Organization.
 enum class EOrganizationRole
 {
-	Member,
-	Administrator,
-	Owner
+    Member,
+    Administrator,
+    Owner
 };
 
 /// @ingroup Organization System
@@ -49,10 +47,10 @@ enum class EOrganizationRole
 class CSP_API InviteOrganizationRoleInfo
 {
 public:
-	InviteOrganizationRoleInfo() = default;
+    InviteOrganizationRoleInfo() = default;
 
-	csp::common::String UserEmail;
-	csp::common::Array<EOrganizationRole> OrganizationRoles;
+    csp::common::String UserEmail;
+    csp::common::Array<EOrganizationRole> OrganizationRoles;
 };
 
 /// @ingroup Organization System
@@ -60,11 +58,11 @@ public:
 class CSP_API InviteOrganizationRoleCollection
 {
 public:
-	InviteOrganizationRoleCollection() = default;
+    InviteOrganizationRoleCollection() = default;
 
-	csp::common::String EmailLinkUrl;
-	csp::common::String SignupUrl;
-	csp::common::Array<InviteOrganizationRoleInfo> InvitedUserRoles;
+    csp::common::String EmailLinkUrl;
+    csp::common::String SignupUrl;
+    csp::common::Array<InviteOrganizationRoleInfo> InvitedUserRoles;
 };
 
 /// @ingroup Organization System
@@ -72,10 +70,10 @@ public:
 class CSP_API OrganizationRoleInfo
 {
 public:
-	OrganizationRoleInfo() = default;
+    OrganizationRoleInfo() = default;
 
-	csp::common::String UserId;
-	csp::common::Array<EOrganizationRole> OrganizationRoles;
+    csp::common::String UserId;
+    csp::common::Array<EOrganizationRole> OrganizationRoles;
 };
 
 /// @ingroup Organization System
@@ -83,68 +81,70 @@ public:
 class CSP_API Organization
 {
 public:
-	Organization() = default;
-	Organization(const Organization& Other) = default;
+    Organization() = default;
+    Organization(const Organization& Other) = default;
 
-	csp::common::String Id;
-	csp::common::String OwnerId;
-	csp::common::String CreatedAt;
-	csp::common::String CreatedBy;
-	csp::common::String Name;
-	csp::common::Array<OrganizationRoleInfo> Members;
-	int32_t SpaceCount;
+    csp::common::String Id;
+    csp::common::String OwnerId;
+    csp::common::String CreatedAt;
+    csp::common::String CreatedBy;
+    csp::common::String Name;
+    csp::common::Array<OrganizationRoleInfo> Members;
+    int32_t SpaceCount;
 };
 
 /// @ingroup Organization System
 /// @brief Data class used to contain Organization object.
 class CSP_API OrganizationResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-    CSP_NO_EXPORT OrganizationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT OrganizationResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-	/// @brief Retrieves the Organization result.
-	/// @return const Organization& : Organization object.
-	const Organization& GetOrganization() const;
+    /// @brief Retrieves the Organization result.
+    /// @return const Organization& : Organization object.
+    const Organization& GetOrganization() const;
 
 private:
-	OrganizationResult(void*) {};
+    OrganizationResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	Organization Organization;
+    Organization Organization;
 };
 
 /// @ingroup Organization System
 /// @brief Data class used to contain a Users Organization Role Info object.
 class CSP_API OrganizationRolesResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	CSP_NO_EXPORT OrganizationRolesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT OrganizationRolesResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
-	/// @brief Retrieves the Organization Role Info result.
-	/// @return const common::Array<OrganizationRoleInfo>& : Array of Organization Role Info objects.
-	const csp::common::Array<OrganizationRoleInfo>& GetOrganizationRoleInfo() const;
+    /// @brief Retrieves the Organization Role Info result.
+    /// @return const common::Array<OrganizationRoleInfo>& : Array of Organization Role Info objects.
+    const csp::common::Array<OrganizationRoleInfo>& GetOrganizationRoleInfo() const;
 
 protected:
     CSP_NO_EXPORT OrganizationRolesResult(const csp::systems::ResultBase& InResult)
-		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
 private:
-	OrganizationRolesResult(void*) {};
+    OrganizationRolesResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
     csp::common::Array<OrganizationRoleInfo> OrganizationRoleInfos;
 };
@@ -156,6 +156,5 @@ typedef std::function<void(const OrganizationResult& Result)> OrganizationResult
 /// @brief Callback Organization Role Result object.
 /// @param Result OrganizationRoleResult : result class
 typedef std::function<void(const OrganizationRolesResult& Result)> OrganizationRolesResultCallback;
-
 
 } // namespace csp::systems

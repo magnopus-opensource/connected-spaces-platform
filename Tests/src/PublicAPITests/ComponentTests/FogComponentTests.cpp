@@ -33,174 +33,148 @@
 #include <filesystem>
 #include <thread>
 
-
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
-
 
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result)
-{
-	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
-}
-
+bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 #if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	// Create object to represent the fog
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    // Create object to represent the fog
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create fog component
-	auto* FogComponent = static_cast<FogSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Fog));
+    // Create fog component
+    auto* FogComponent = static_cast<FogSpaceComponent*>(CreatedObject->AddComponent(ComponentType::Fog));
 
-	// Ensure defaults are set
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Linear);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::Zero());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 0.f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 0.f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3({0.8f, 0.9f, 1.0f}));
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.2f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 0.2f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 1.f);
-	EXPECT_FALSE(FogComponent->GetIsVolumetric());
+    // Ensure defaults are set
+    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Linear);
+    EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::Zero());
+    EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
+    EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3::One());
+    EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 0.f);
+    EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 0.f);
+    EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3({ 0.8f, 0.9f, 1.0f }));
+    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 0.2f);
+    EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 0.2f);
+    EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 1.f);
+    EXPECT_FALSE(FogComponent->GetIsVolumetric());
 
-	// Set new values
-	FogComponent->SetFogMode(FogMode::Exponential);
-	FogComponent->SetPosition(csp::common::Vector3::One());
-	FogComponent->SetRotation(csp::common::Vector4(0, 0, 0, 1));
-	FogComponent->SetScale(csp::common::Vector3(2, 2, 2));
-	FogComponent->SetStartDistance(1.1f);
-	FogComponent->SetEndDistance(2.2f);
-	FogComponent->SetColor(csp::common::Vector3::One());
-	FogComponent->SetDensity(3.3f);
-	FogComponent->SetHeightFalloff(4.4f);
-	FogComponent->SetMaxOpacity(5.5f);
-	FogComponent->SetIsVolumetric(true);
+    // Set new values
+    FogComponent->SetFogMode(FogMode::Exponential);
+    FogComponent->SetPosition(csp::common::Vector3::One());
+    FogComponent->SetRotation(csp::common::Vector4(0, 0, 0, 1));
+    FogComponent->SetScale(csp::common::Vector3(2, 2, 2));
+    FogComponent->SetStartDistance(1.1f);
+    FogComponent->SetEndDistance(2.2f);
+    FogComponent->SetColor(csp::common::Vector3::One());
+    FogComponent->SetDensity(3.3f);
+    FogComponent->SetHeightFalloff(4.4f);
+    FogComponent->SetMaxOpacity(5.5f);
+    FogComponent->SetIsVolumetric(true);
 
-	// Ensure values are set correctly
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
-	EXPECT_TRUE(FogComponent->GetIsVolumetric());
+    // Ensure values are set correctly
+    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
+    EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(0, 0, 0, 1));
+    EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
+    EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
+    EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
+    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
+    EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
+    EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
+    EXPECT_TRUE(FogComponent->GetIsVolumetric());
 
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogInAsNewTestUser(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	// Create object to represent the fog
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    // Create object to represent the fog
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create fog component
-	auto* FogComponent = (FogSpaceComponent*) CreatedObject->AddComponent(ComponentType::Fog);
+    // Create fog component
+    auto* FogComponent = (FogSpaceComponent*)CreatedObject->AddComponent(ComponentType::Fog);
 
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	// Setup script
-	const std::string FogScriptText = R"xx(
+    // Setup script
+    const std::string FogScriptText = R"xx(
 		var fog = ThisEntity.getFogComponents()[0];
 		fog.fogMode = 1;
 		fog.position = [1, 1, 1];
@@ -215,30 +189,30 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 		fog.isVolumetric = true;
     )xx";
 
-	CreatedObject->GetScript()->SetScriptSource(FogScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript()->SetScriptSource(FogScriptText.c_str());
+    CreatedObject->GetScript()->Invoke();
 
-	EntitySystem->ProcessPendingEntityOperations();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
-	EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(1, 1, 1, 2));
-	EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
-	EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
-	EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
-	EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
-	EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
-	EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
-	EXPECT_TRUE(FogComponent->GetIsVolumetric());
+    EXPECT_EQ(FogComponent->GetFogMode(), FogMode::Exponential);
+    EXPECT_EQ(FogComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(FogComponent->GetRotation(), csp::common::Vector4(1, 1, 1, 2));
+    EXPECT_EQ(FogComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_FLOAT_EQ(FogComponent->GetStartDistance(), 1.1f);
+    EXPECT_FLOAT_EQ(FogComponent->GetEndDistance(), 2.2f);
+    EXPECT_EQ(FogComponent->GetColor(), csp::common::Vector3::One());
+    EXPECT_FLOAT_EQ(FogComponent->GetDensity(), 3.3f);
+    EXPECT_FLOAT_EQ(FogComponent->GetHeightFalloff(), 4.4f);
+    EXPECT_FLOAT_EQ(FogComponent->GetMaxOpacity(), 5.5f);
+    EXPECT_TRUE(FogComponent->GetIsVolumetric());
 
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 

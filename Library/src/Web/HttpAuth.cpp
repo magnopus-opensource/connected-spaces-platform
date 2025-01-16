@@ -21,92 +21,88 @@ namespace csp::web
 {
 
 // @RossB: TODO: Temporarily hanged from static to pointers due to iOS runtime issues
-HttpAuth::AccessToken* HttpAuth::Token			  = nullptr;
-HttpAuth::AccessToken* HttpAuth::RefreshToken	  = nullptr;
-csp::common::String* HttpAuth::TokenExpiry		  = nullptr;
+HttpAuth::AccessToken* HttpAuth::Token = nullptr;
+HttpAuth::AccessToken* HttpAuth::RefreshToken = nullptr;
+csp::common::String* HttpAuth::TokenExpiry = nullptr;
 csp::common::String* HttpAuth::RefreshTokenExpiry = nullptr;
 
-HttpAuth::HttpAuth()
+HttpAuth::HttpAuth() { }
+
+void HttpAuth::SetAccessToken(const AccessToken& InToken, const csp::common::String& InTokenExpiry, const AccessToken& InRefreshToken,
+    const csp::common::String& InRefreshTokenExpiry)
 {
-}
+    if (Token == nullptr)
+    {
+        Token = new HttpAuth::AccessToken();
+    }
 
-void HttpAuth::SetAccessToken(const AccessToken& InToken,
-							  const csp::common::String& InTokenExpiry,
-							  const AccessToken& InRefreshToken,
-							  const csp::common::String& InRefreshTokenExpiry)
-{
-	if (Token == nullptr)
-	{
-		Token = new HttpAuth::AccessToken();
-	}
+    if (RefreshToken == nullptr)
+    {
+        RefreshToken = new HttpAuth::AccessToken();
+    }
 
-	if (RefreshToken == nullptr)
-	{
-		RefreshToken = new HttpAuth::AccessToken();
-	}
+    if (TokenExpiry == nullptr)
+    {
+        TokenExpiry = new csp::common::String();
+    }
 
-	if (TokenExpiry == nullptr)
-	{
-		TokenExpiry = new csp::common::String();
-	}
+    if (RefreshTokenExpiry == nullptr)
+    {
+        RefreshTokenExpiry = new csp::common::String();
+    }
 
-	if (RefreshTokenExpiry == nullptr)
-	{
-		RefreshTokenExpiry = new csp::common::String();
-	}
-
-	// @Todo Need to be cautious about multi-threading here
-	*Token				= InToken;
-	*RefreshToken		= InRefreshToken;
-	*TokenExpiry		= InTokenExpiry;
-	*RefreshTokenExpiry = InRefreshTokenExpiry;
+    // @Todo Need to be cautious about multi-threading here
+    *Token = InToken;
+    *RefreshToken = InRefreshToken;
+    *TokenExpiry = InTokenExpiry;
+    *RefreshTokenExpiry = InRefreshTokenExpiry;
 }
 
 const HttpAuth::AccessToken& HttpAuth::GetAccessToken()
 {
-	if (Token == nullptr)
-	{
-		Token = new HttpAuth::AccessToken();
-	}
+    if (Token == nullptr)
+    {
+        Token = new HttpAuth::AccessToken();
+    }
 
-	return *Token;
+    return *Token;
 }
 
 const csp::common::String& HttpAuth::GetTokenExpiry()
 {
-	if (TokenExpiry == nullptr)
-	{
-		TokenExpiry = new csp::common::String();
-	}
+    if (TokenExpiry == nullptr)
+    {
+        TokenExpiry = new csp::common::String();
+    }
 
-	return *TokenExpiry;
+    return *TokenExpiry;
 }
 
 const csp::common::String& HttpAuth::GetRefreshTokenExpiry()
 {
-	if (RefreshTokenExpiry == nullptr)
-	{
-		RefreshTokenExpiry = new csp::common::String();
-	}
+    if (RefreshTokenExpiry == nullptr)
+    {
+        RefreshTokenExpiry = new csp::common::String();
+    }
 
-	return *RefreshTokenExpiry;
+    return *RefreshTokenExpiry;
 }
 
 const HttpAuth::AccessToken& HttpAuth::GetRefreshToken()
 {
-	if (RefreshToken == nullptr)
-	{
-		RefreshToken = new HttpAuth::AccessToken();
-	}
+    if (RefreshToken == nullptr)
+    {
+        RefreshToken = new HttpAuth::AccessToken();
+    }
 
-	return *RefreshToken;
+    return *RefreshToken;
 }
 
 bool HttpAuth::HasTokenExpired()
 {
-	csp::common::DateTime Expiry(*TokenExpiry);
-	bool Expired = Expiry >= csp::common::DateTime::TimeNow();
-	return Expired;
+    csp::common::DateTime Expiry(*TokenExpiry);
+    bool Expired = Expiry >= csp::common::DateTime::TimeNow();
+    return Expired;
 }
 
 } // namespace csp::web

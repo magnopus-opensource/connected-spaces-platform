@@ -21,37 +21,36 @@
 #include <emscripten/websocket.h>
 #include <thread>
 
-
 namespace csp::multiplayer
 {
 
 class CSPWebSocketClientEmscripten : public IWebSocketClient
 {
 public:
-	CSPWebSocketClientEmscripten() noexcept;
-	~CSPWebSocketClientEmscripten() {};
+    CSPWebSocketClientEmscripten() noexcept;
+    ~CSPWebSocketClientEmscripten() {};
 
-	void Start(const std::string& Url, CallbackHandler Callback) override;
-	void Stop(CallbackHandler Callback) override;
-	void Send(const std::string& Message, CallbackHandler Callback) override;
-	void Receive(ReceiveHandler Callback) override;
+    void Start(const std::string& Url, CallbackHandler Callback) override;
+    void Stop(CallbackHandler Callback) override;
+    void Send(const std::string& Message, CallbackHandler Callback) override;
+    void Receive(ReceiveHandler Callback) override;
 
-	std::thread& GetStartCallbackThread();
-	void StartCallbackThreadFunc(bool CallbackResult);
+    std::thread& GetStartCallbackThread();
+    void StartCallbackThreadFunc(bool CallbackResult);
 
-	size_t ProcessReceivedMessage(uint8_t* RecvData, uint32_t NumBytes, EM_BOOL IsPlainText);
+    size_t ProcessReceivedMessage(uint8_t* RecvData, uint32_t NumBytes, EM_BOOL IsPlainText);
 
-	ReceiveHandler* getReceiveCallback();
+    ReceiveHandler* getReceiveCallback();
 
 private:
-	std::string GetWebSocketConnectURL(const std::string& InitialUrl);
+    std::string GetWebSocketConnectURL(const std::string& InitialUrl);
 
-	EMSCRIPTEN_WEBSOCKET_T Socket;
+    EMSCRIPTEN_WEBSOCKET_T Socket;
 
-	std::thread StartCallbackThread;
-	CallbackHandler StartCallback;
-	ReceiveHandler ReceiveCallback;
-	bool ReceivedHandshake;
+    std::thread StartCallbackThread;
+    CallbackHandler StartCallback;
+    ReceiveHandler ReceiveCallback;
+    bool ReceivedHandshake;
 };
 
 } // namespace csp::multiplayer

@@ -20,15 +20,13 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-
 using namespace csp::systems;
-
 
 namespace csp::multiplayer
 {
 
 AnimatedModelSpaceComponentScriptInterface::AnimatedModelSpaceComponentScriptInterface(AnimatedModelSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

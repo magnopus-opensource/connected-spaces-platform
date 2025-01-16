@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 VideoPlayerSpaceComponentScriptInterface::VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

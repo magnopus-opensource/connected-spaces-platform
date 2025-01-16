@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 #pragma once
 
 #include "TestIdentifiers.h"
@@ -43,83 +42,83 @@ class Process;
 class MultiplayerTestRunnerProcess
 {
 public:
-	MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier _TestToRun);
-	~MultiplayerTestRunnerProcess();
+    MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier _TestToRun);
+    ~MultiplayerTestRunnerProcess();
 
-	/* Copying this object copies all the configuration data, but does nothing
-	   about the process. You still need to call `StartProcess` to start
-	   a new process, even if you copied from an already running process. */
-	MultiplayerTestRunnerProcess(const MultiplayerTestRunnerProcess& other);
-	MultiplayerTestRunnerProcess& operator=(const MultiplayerTestRunnerProcess& other);
+    /* Copying this object copies all the configuration data, but does nothing
+       about the process. You still need to call `StartProcess` to start
+       a new process, even if you copied from an already running process. */
+    MultiplayerTestRunnerProcess(const MultiplayerTestRunnerProcess& other);
+    MultiplayerTestRunnerProcess& operator=(const MultiplayerTestRunnerProcess& other);
 
-	/* Moving steals all the internals, so any already running process stays running. */
-	MultiplayerTestRunnerProcess(MultiplayerTestRunnerProcess&& other);
-	MultiplayerTestRunnerProcess& operator=(MultiplayerTestRunnerProcess&& other);
+    /* Moving steals all the internals, so any already running process stays running. */
+    MultiplayerTestRunnerProcess(MultiplayerTestRunnerProcess&& other);
+    MultiplayerTestRunnerProcess& operator=(MultiplayerTestRunnerProcess&& other);
 
-	/* Chained methods (fluent interface pattern) to set the parameters.
-	   All of these are optional.
-	   Reminder that if either login or password is not found, then the
-	   MultiplayerTestRunner will attempt to look for a credentials file.
-	   If a space is not specified, the MultiplayerTestRunner makes a
-	   temporary one. You'll almost certainly want to specify a spaceID
-	   when doing multi-client tests, or you'll get lots of clients in
-	   isolated spaces.
-	   */
-	MultiplayerTestRunnerProcess& SetLoginEmail(std::string Email);
-	MultiplayerTestRunnerProcess& SetPassword(std::string Password);
-	MultiplayerTestRunnerProcess& SetSpaceId(std::string SpaceId);
-	MultiplayerTestRunnerProcess& SetTimeoutInSeconds(int TimeoutInSeconds);
-	MultiplayerTestRunnerProcess& SetEndpoint(std::string Endpoint);
+    /* Chained methods (fluent interface pattern) to set the parameters.
+       All of these are optional.
+       Reminder that if either login or password is not found, then the
+       MultiplayerTestRunner will attempt to look for a credentials file.
+       If a space is not specified, the MultiplayerTestRunner makes a
+       temporary one. You'll almost certainly want to specify a spaceID
+       when doing multi-client tests, or you'll get lots of clients in
+       isolated spaces.
+       */
+    MultiplayerTestRunnerProcess& SetLoginEmail(std::string Email);
+    MultiplayerTestRunnerProcess& SetPassword(std::string Password);
+    MultiplayerTestRunnerProcess& SetSpaceId(std::string SpaceId);
+    MultiplayerTestRunnerProcess& SetTimeoutInSeconds(int TimeoutInSeconds);
+    MultiplayerTestRunnerProcess& SetEndpoint(std::string Endpoint);
 
-	/* Getters. Mostly for testing, but handy.
-	   Return null optionals if values have not been set. */
-	MultiplayerTestRunner::TestIdentifiers::TestIdentifier GetTestToRun() const;
-	std::optional<std::string> GetLoginEmail() const;
-	std::optional<std::string> GetPassword() const;
-	std::optional<std::string> GetSpaceId() const;
-	std::optional<int> GetTimeoutInSeconds() const;
-	std::optional<std::string> GetEndpoint() const;
+    /* Getters. Mostly for testing, but handy.
+       Return null optionals if values have not been set. */
+    MultiplayerTestRunner::TestIdentifiers::TestIdentifier GetTestToRun() const;
+    std::optional<std::string> GetLoginEmail() const;
+    std::optional<std::string> GetPassword() const;
+    std::optional<std::string> GetSpaceId() const;
+    std::optional<int> GetTimeoutInSeconds() const;
+    std::optional<std::string> GetEndpoint() const;
 
-	/* Return the vector of strings that will be used to invoke the multiplayer test runner.
-	   Depending on what values you've set, will look something like :
-	   {"MultiplayerTestRunner", "--test", "CreateAvatar", "--timeout", "10"} */
-	std::vector<std::string> GetInvocationArgs() const;
+    /* Return the vector of strings that will be used to invoke the multiplayer test runner.
+       Depending on what values you've set, will look something like :
+       {"MultiplayerTestRunner", "--test", "CreateAvatar", "--timeout", "10"} */
+    std::vector<std::string> GetInvocationArgs() const;
 
-	/* Invoke the process with the provided parameters */
-	void StartProcess();
+    /* Invoke the process with the provided parameters */
+    void StartProcess();
 
-	/* Hard terminate the process. This happens in destruction anyway,
-	   but this method provided to support alternate styles. */
-	void TerminateProcess();
+    /* Hard terminate the process. This happens in destruction anyway,
+       but this method provided to support alternate styles. */
+    void TerminateProcess();
 
-	/* You can acquire the future that the process desriptor
-	   promises via these methods.
-	   We set the promise when we parse the appropriate
-	   process descriptor when it is recieved through stdout. */
-	std::future<void> LoggedInFuture();
-	std::future<void> JoinedSpaceFuture();
-	std::future<void> ReadyForAssertionsFuture();
-	std::future<void> ExitSpaceFuture();
-	std::future<void> LoggedOutFuture();
+    /* You can acquire the future that the process desriptor
+       promises via these methods.
+       We set the promise when we parse the appropriate
+       process descriptor when it is recieved through stdout. */
+    std::future<void> LoggedInFuture();
+    std::future<void> JoinedSpaceFuture();
+    std::future<void> ReadyForAssertionsFuture();
+    std::future<void> ExitSpaceFuture();
+    std::future<void> LoggedOutFuture();
 
 private:
-	// These promises set via parsing stdout for process descriptors.
-	std::promise<void> LoggedInPromise;
-	std::promise<void> JoinedSpacePromise;
-	std::promise<void> ReadyForAssertionsPromise;
-	std::promise<void> ExitSpacePromise;
-	std::promise<void> LoggedOutPromise;
+    // These promises set via parsing stdout for process descriptors.
+    std::promise<void> LoggedInPromise;
+    std::promise<void> JoinedSpacePromise;
+    std::promise<void> ReadyForAssertionsPromise;
+    std::promise<void> ExitSpacePromise;
+    std::promise<void> LoggedOutPromise;
 
-	// The test we are telling the multiplayer test runner to invoke. Set on construction. Non-optional.
-	MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun;
+    // The test we are telling the multiplayer test runner to invoke. Set on construction. Non-optional.
+    MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun;
 
-	// Optional parameters, MultiplayerTestRunner has default behaviour if not set
-	std::optional<std::string> LoginEmail;
-	std::optional<std::string> Password;
-	std::optional<std::string> SpaceId;
-	std::optional<int> TimeoutInSeconds;
-	std::optional<std::string> Endpoint;
+    // Optional parameters, MultiplayerTestRunner has default behaviour if not set
+    std::optional<std::string> LoginEmail;
+    std::optional<std::string> Password;
+    std::optional<std::string> SpaceId;
+    std::optional<int> TimeoutInSeconds;
+    std::optional<std::string> Endpoint;
 
-	// Created in StartProcess
-	std::unique_ptr<TinyProcessLib::Process> ProcessHandle = nullptr;
+    // Created in StartProcess
+    std::unique_ptr<TinyProcessLib::Process> ProcessHandle = nullptr;
 };

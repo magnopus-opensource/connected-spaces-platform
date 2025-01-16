@@ -18,8 +18,6 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-
-
 namespace csp
 {
 

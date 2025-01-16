@@ -20,16 +20,14 @@
 #include <sstream>
 #include <stdio.h>
 
-
 namespace
 {
 
 #ifdef CSP_WINDOWS
-	#define timegm _mkgmtime
+#define timegm _mkgmtime
 #endif
 
 } // namespace
-
 
 namespace csp::common
 {
@@ -43,90 +41,66 @@ namespace csp::common
 
 time_t CSPTimeGM(struct tm* Time)
 {
-	// note - we use this constant array for calculating days into the year instead of
-	// relying on tm::tm_yday, as we expect calling code to more reliably provide values for `tm::tm_mon`
-	constexpr long long CumulativeDaysInYear[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+    // note - we use this constant array for calculating days into the year instead of
+    // relying on tm::tm_yday, as we expect calling code to more reliably provide values for `tm::tm_mon`
+    constexpr long long CumulativeDaysInYear[] = { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
-	const long long Year = 1900LL + Time->tm_year;
-	time_t Result		 = (Year - 1970) * 365 + CumulativeDaysInYear[Time->tm_mon];
+    const long long Year = 1900LL + Time->tm_year;
+    time_t Result = (Year - 1970) * 365 + CumulativeDaysInYear[Time->tm_mon];
 
-	// leap year offsets
-	{
-		Result += (Year - 1968) / 4;
-		Result -= (Year - 1900) / 100;
-		Result += (Year - 1600) / 400;
+    // leap year offsets
+    {
+        Result += (Year - 1968) / 4;
+        Result -= (Year - 1900) / 100;
+        Result += (Year - 1600) / 400;
 
-		if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2)
-		{
-			Result--;
-		}
-	}
+        if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2)
+        {
+            Result--;
+        }
+    }
 
-	Result += static_cast<time_t>(Time->tm_mday) - 1;
-	Result *= 24;
-	Result += Time->tm_hour;
-	Result *= 60;
-	Result += Time->tm_min;
-	Result *= 60;
-	Result += Time->tm_sec;
+    Result += static_cast<time_t>(Time->tm_mday) - 1;
+    Result *= 24;
+    Result += Time->tm_hour;
+    Result *= 60;
+    Result += Time->tm_min;
+    Result *= 60;
+    Result += Time->tm_sec;
 
-	if (Time->tm_isdst == 1)
-	{
-		Result -= 3600;
-	}
+    if (Time->tm_isdst == 1)
+    {
+        Result -= 3600;
+    }
 
-	return Result;
+    return Result;
 }
 
 DateTime::DateTime(const csp::common::String& DateString)
 {
-	int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
-	char OffsetModifier;
+    int Year, Day, Month, Hour, Minute, Second, Fraction, OffsetHours, OffsetMinutes;
+    char OffsetModifier;
 #ifdef _MSC_VER
-	int _ = sscanf_s(DateString.c_str(),
-					 "%d-%d-%dT%d:%d:%d.%d%c%d:%d",
-					 &Year,
-					 &Month,
-					 &Day,
-					 &Hour,
-					 &Minute,
-					 &Second,
-					 &Fraction,
-					 &OffsetModifier,
-					 1,
-					 &OffsetHours,
-					 &OffsetMinutes);
+    int _ = sscanf_s(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier, 1,
+        &OffsetHours, &OffsetMinutes);
 #else
-	int _ = std::sscanf(DateString.c_str(),
-						"%d-%d-%dT%d:%d:%d.%d%c%d:%d",
-						&Year,
-						&Month,
-						&Day,
-						&Hour,
-						&Minute,
-						&Second,
-						&Fraction,
-						&OffsetModifier,
-						&OffsetHours,
-						&OffsetMinutes);
+    int _ = std::sscanf(DateString.c_str(), "%d-%d-%dT%d:%d:%d.%d%c%d:%d", &Year, &Month, &Day, &Hour, &Minute, &Second, &Fraction, &OffsetModifier,
+        &OffsetHours, &OffsetMinutes);
 #endif
 
-	std::tm TM	= {Second, Minute, Hour, Day, Month - 1, Year - 1900};
-	TM.tm_isdst = -1;
+    std::tm TM = { Second, Minute, Hour, Day, Month - 1, Year - 1900 };
+    TM.tm_isdst = -1;
 
-	if (OffsetModifier == '-')
-	{
-		OffsetHours = 0 - OffsetHours;
-	}
+    if (OffsetModifier == '-')
+    {
+        OffsetHours = 0 - OffsetHours;
+    }
 
-	// TODO: Use OffsetHours and OffsetMinutes in case CHS decides not to send datetimes in UTC in the future
-	const std::time_t Time = CSPTimeGM(&TM);
-	TimePoint			   = std::chrono::system_clock::from_time_t(Time);
+    // TODO: Use OffsetHours and OffsetMinutes in case CHS decides not to send datetimes in UTC in the future
+    const std::time_t Time = CSPTimeGM(&TM);
+    TimePoint = std::chrono::system_clock::from_time_t(Time);
 }
 
-const DateTime::Clock::time_point& DateTime::GetTimePoint() const
-{
-	return TimePoint;
-}
+const DateTime::Clock::time_point& DateTime::GetTimePoint() const { return TimePoint; }
 
 } // namespace csp::common

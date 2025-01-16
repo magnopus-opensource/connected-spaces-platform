@@ -70,8 +70,5 @@ constexpr const char* EXIT_SPACE_DESCRIPTOR = "EXIT_SPACE_DESCRIPTOR";
 // This method exists to encode the decision about there always being a newline,
 // as well as to make sure we flush, which we need to do when using stdout as
 // an async channel of communication.
-inline void PrintProcessDescriptor(const char* Descriptor)
-{
-	std::cout << Descriptor << "\n" << std::flush;
-}
+inline void PrintProcessDescriptor(const char* Descriptor) { std::cout << Descriptor << "\n" << std::flush; }
 } // namespace MultiplayerTestRunner::ProcessDescriptors

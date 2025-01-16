@@ -18,8 +18,6 @@
 #include <mutex>
 #include <vector>
 
-
-
 namespace csp::memory
 {
 
@@ -28,16 +26,16 @@ namespace csp::memory
 class SimpleBufferPool
 {
 public:
-	SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize = 5);
-	~SimpleBufferPool();
+    SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize = 5);
+    ~SimpleBufferPool();
 
-	unsigned char* Rent();
-	void Return(unsigned char* Buffer);
+    unsigned char* Rent();
+    void Return(unsigned char* Buffer);
 
 private:
-	size_t BufferSize;
-	std::vector<unsigned char*> Buffers;
-	std::mutex LockMutex;
+    size_t BufferSize;
+    std::vector<unsigned char*> Buffers;
+    std::mutex LockMutex;
 };
 
 } // namespace csp::memory

@@ -19,27 +19,25 @@
 
 #include "gtest/gtest.h"
 
-
 using namespace csp::common;
-
 
 #if RUN_ALL_UNIT_TESTS || RUN_VECTOR_TESTS
 CSP_PUBLIC_TEST(CSPEngine, VectorTests, IsNearlyEqualTest)
 {
-	const Vector3 MyVector	= {0, 0, 0};
-	const Vector3 MyVector2 = {0.0001f, 0, 0};
-	const Vector3 MyVector3 = {0.002f, 0, 0};
+    const Vector3 MyVector = { 0, 0, 0 };
+    const Vector3 MyVector2 = { 0.0001f, 0, 0 };
+    const Vector3 MyVector3 = { 0.002f, 0, 0 };
 
-	EXPECT_TRUE(MyVector == MyVector2);
+    EXPECT_TRUE(MyVector == MyVector2);
 
-	EXPECT_TRUE(MyVector != MyVector3);
+    EXPECT_TRUE(MyVector != MyVector3);
 
-	const Vector4 MyVector4_A = {0, 0, 0, 0};
-	const Vector4 MyVector4_B = {0, 0, 0.0001f, 0};
-	const Vector4 MyVector4_C = {0, 0, 0, 0.002f};
+    const Vector4 MyVector4_A = { 0, 0, 0, 0 };
+    const Vector4 MyVector4_B = { 0, 0, 0.0001f, 0 };
+    const Vector4 MyVector4_C = { 0, 0, 0, 0.002f };
 
-	EXPECT_TRUE(MyVector4_A == MyVector4_B);
+    EXPECT_TRUE(MyVector4_A == MyVector4_B);
 
-	EXPECT_TRUE(MyVector4_A != MyVector4_C);
+    EXPECT_TRUE(MyVector4_A != MyVector4_C);
 }
 #endif
