@@ -25,31 +25,31 @@ namespace csp::events
 class CSP_API EventSystem
 {
 public:
-	EventSystem();
-	~EventSystem();
+    EventSystem();
+    ~EventSystem();
 
-	static EventSystem& Get();
+    static EventSystem& Get();
 
-	/// @brief Create a new event instance
-	/// @note The event will be deleted after it has been processed in ProcessEvents
-	Event* AllocateEvent(const EventId& Id);
+    /// @brief Create a new event instance
+    /// @note The event will be deleted after it has been processed in ProcessEvents
+    Event* AllocateEvent(const EventId& Id);
 
-	/// @brief Enqueue an event to be sent later
-	/// @note This call is thread safe
-	/// @param InEvent
-	void EnqueueEvent(const Event* InEvent);
+    /// @brief Enqueue an event to be sent later
+    /// @note This call is thread safe
+    /// @param InEvent
+    void EnqueueEvent(const Event* InEvent);
 
-	void RegisterListener(const EventId& Id, EventListener* InListener);
-	void UnRegisterListener(const EventId& Id, EventListener* InListener);
+    void RegisterListener(const EventId& Id, EventListener* InListener);
+    void UnRegisterListener(const EventId& Id, EventListener* InListener);
 
-	void UnRegisterAllListeners();
+    void UnRegisterAllListeners();
 
-	/// @brief Process all queued events and send them to any listeners
-	void ProcessEvents();
+    /// @brief Process all queued events and send them to any listeners
+    void ProcessEvents();
 
 private:
-	// Internal implementation
-	class EventSystemImpl* Impl;
+    // Internal implementation
+    class EventSystemImpl* Impl;
 };
 
 } // namespace csp::events

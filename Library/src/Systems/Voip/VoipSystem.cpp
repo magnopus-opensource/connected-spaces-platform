@@ -18,24 +18,19 @@
 namespace csp::systems
 {
 
+VoipSystem::VoipSystem() { }
 
-VoipSystem::VoipSystem()
-{
-}
-
-VoipSystem::~VoipSystem()
-{
-}
+VoipSystem::~VoipSystem() { }
 
 void VoipSystem::MuteLocalUser(bool IsMuted)
 {
-	// Not implemented
+    // Not implemented
 }
 
 bool VoipSystem::IsLocalUserMuted() const
 {
-	// Not implemented
-	return false;
+    // Not implemented
+    return false;
 }
 
 } // namespace csp::systems

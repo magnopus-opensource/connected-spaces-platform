@@ -35,14 +35,14 @@ namespace
 /* Some tests only run if there's a credentials file */
 std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
 {
-	try
-	{
-		return Utils::LoadTestAccountCredentials();
-	}
-	catch (...)
-	{
-		return {};
-	}
+    try
+    {
+        return Utils::LoadTestAccountCredentials();
+    }
+    catch (...)
+    {
+        return {};
+    }
 }
 } // namespace
 
@@ -50,24 +50,21 @@ std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
 class RunnableTests : public ::testing::Test
 {
 protected:
-	static void SetUpTestSuite()
-	{
-		Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT);
-	}
+    static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
 };
 
 TEST_F(RunnableTests, CreateAvatar)
 {
-	std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-	if (!Credentials.has_value())
-	{
-		GTEST_SKIP() << "No credentials file found, Skipping Test.";
-	}
+    std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
+    if (!Credentials.has_value())
+    {
+        GTEST_SKIP() << "No credentials file found, Skipping Test.";
+    }
 
-	// Login
-	LoginRAII login {Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword};
-	// Make a throwaway space
-	SpaceRAII Space({});
+    // Login
+    LoginRAII login { Credentials.value().DefaultLoginEmail, Credentials.value().DefaultLoginPassword };
+    // Make a throwaway space
+    SpaceRAII Space({});
 
-	CreateAvatar::RunTest();
+    CreateAvatar::RunTest();
 }

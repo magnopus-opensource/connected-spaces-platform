@@ -20,7 +20,7 @@
 namespace csp::multiplayer
 {
 csp::multiplayer::AudioSpaceComponentScriptInterface::AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

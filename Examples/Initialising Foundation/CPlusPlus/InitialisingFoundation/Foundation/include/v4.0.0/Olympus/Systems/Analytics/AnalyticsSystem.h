@@ -23,31 +23,31 @@ class AnalyticsSystemImpl;
 class OLY_API OLY_NO_DISPOSE AnalyticsSystem
 {
 public:
-	AnalyticsSystem();
-	~AnalyticsSystem();
+    AnalyticsSystem();
+    ~AnalyticsSystem();
 
-	OLY_START_IGNORE
-	AnalyticsSystem(const AnalyticsSystem&) = delete;
-	AnalyticsSystem(AnalyticsSystem&&)		= delete;
+    OLY_START_IGNORE
+    AnalyticsSystem(const AnalyticsSystem&) = delete;
+    AnalyticsSystem(AnalyticsSystem&&) = delete;
 
-	AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
-	AnalyticsSystem& operator=(AnalyticsSystem&&)	   = delete;
-	OLY_END_IGNORE
+    AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
+    AnalyticsSystem& operator=(AnalyticsSystem&&) = delete;
+    OLY_END_IGNORE
 
-	/// @brief Send an event
-	/// @param Event AnalyticsEvent
-	void Log(AnalyticsEvent* Event);
+    /// @brief Send an event
+    /// @param Event AnalyticsEvent
+    void Log(AnalyticsEvent* Event);
 
-	OLY_START_IGNORE
-	void RegisterProvider(IAnalyticsProvider* Provider);
-	void DeregisterProvider(IAnalyticsProvider* Provider);
-	OLY_END_IGNORE
+    OLY_START_IGNORE
+    void RegisterProvider(IAnalyticsProvider* Provider);
+    void DeregisterProvider(IAnalyticsProvider* Provider);
+    OLY_END_IGNORE
 
-	OLY_START_IGNORE
-	static const int QueueSize = 1024;
-	OLY_END_IGNORE
+    OLY_START_IGNORE
+    static const int QueueSize = 1024;
+    OLY_END_IGNORE
 
 private:
-	AnalyticsSystemImpl* Impl;
+    AnalyticsSystemImpl* Impl;
 };
 } // namespace oly_systems

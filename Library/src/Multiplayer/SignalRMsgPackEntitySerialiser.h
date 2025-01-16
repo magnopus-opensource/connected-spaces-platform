@@ -24,20 +24,17 @@
 #include <msgpack/unpack.hpp>
 #include <signalrclient/signalr_value.h>
 
-
-
 namespace csp::multiplayer
 {
 
 enum class SerialiserState
 {
-	Initial,
-	InEntity,
-	InComponents,
-	InComponent,
-	InArray,
+    Initial,
+    InEntity,
+    InComponents,
+    InComponent,
+    InArray,
 };
-
 
 /// <summary>
 /// The serialiser is responsible for converting a SpaceEntity instance into a data structure that both SignalR and our
@@ -52,41 +49,40 @@ enum class SerialiserState
 class SignalRMsgPackEntitySerialiser : public IEntitySerialiser
 {
 public:
-	SignalRMsgPackEntitySerialiser();
+    SignalRMsgPackEntitySerialiser();
 
-	void BeginEntity() override;
-	void EndEntity() override;
-	void WriteBool(bool Value) override;
-	void WriteByte(uint8_t Value) override;
-	void WriteDouble(double Value) override;
-	void WriteInt64(int64_t Value) override;
-	void WriteUInt64(uint64_t Value) override;
-	void WriteString(const csp::common::String& Value) override;
-	void WriteVector2(const csp::common::Vector2& Value) override;
-	void WriteVector3(const csp::common::Vector3& Value) override;
-	void WriteVector4(const csp::common::Vector4& Value) override;
-	void WriteNull() override;
-	void BeginComponents() override;
-	void EndComponents() override;
-	void BeginComponent(uint16_t Id, uint64_t Type) override;
-	void EndComponent() override;
-	void BeginArray() override;
-	void EndArray() override;
-	void WriteProperty(uint64_t Id, const ReplicatedValue& Value) override;
-	void AddViewComponent(uint16_t Id, const ReplicatedValue& Value) override;
+    void BeginEntity() override;
+    void EndEntity() override;
+    void WriteBool(bool Value) override;
+    void WriteByte(uint8_t Value) override;
+    void WriteDouble(double Value) override;
+    void WriteInt64(int64_t Value) override;
+    void WriteUInt64(uint64_t Value) override;
+    void WriteString(const csp::common::String& Value) override;
+    void WriteVector2(const csp::common::Vector2& Value) override;
+    void WriteVector3(const csp::common::Vector3& Value) override;
+    void WriteVector4(const csp::common::Vector4& Value) override;
+    void WriteNull() override;
+    void BeginComponents() override;
+    void EndComponents() override;
+    void BeginComponent(uint16_t Id, uint64_t Type) override;
+    void EndComponent() override;
+    void BeginArray() override;
+    void EndArray() override;
+    void WriteProperty(uint64_t Id, const ReplicatedValue& Value) override;
+    void AddViewComponent(uint16_t Id, const ReplicatedValue& Value) override;
 
-	signalr::value Finalise();
+    signalr::value Finalise();
 
 private:
-	SerialiserState CurrentState;
-	std::vector<signalr::value> Fields;
-	std::map<uint64_t, signalr::value> Components;
-	std::vector<signalr::value> CurrentArray;
-	uint64_t CurrentComponentId;
+    SerialiserState CurrentState;
+    std::vector<signalr::value> Fields;
+    std::map<uint64_t, signalr::value> Components;
+    std::vector<signalr::value> CurrentArray;
+    uint64_t CurrentComponentId;
 
-	std::map<uint16_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
+    std::map<uint16_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
 };
-
 
 /// <summary>
 /// The deserialiser is used to take recieved signalr message data and turn it into values you can use to populate a SpaceEntity.
@@ -97,60 +93,60 @@ private:
 class SignalRMsgPackEntityDeserialiser : public IEntityDeserialiser
 {
 public:
-	SignalRMsgPackEntityDeserialiser(const signalr::value& Object);
+    SignalRMsgPackEntityDeserialiser(const signalr::value& Object);
 
-	void EnterEntity() override;
-	void LeaveEntity() override;
-	bool ReadBool() override;
-	uint8_t ReadByte() override;
-	double ReadDouble() override;
-	int64_t ReadInt64() override;
-	uint64_t ReadUInt64() override;
-	csp::common::String ReadString() override;
-	csp::common::Vector2 ReadVector2() override;
-	csp::common::Vector3 ReadVector3() override;
-	csp::common::Vector4 ReadVector4() override;
-	bool NextValueIsNull() override;
-	bool NextValueIsArray() override;
-	void EnterComponents() override;
-	void LeaveComponents() override;
-	void EnterArray(CSP_OUT uint32_t& OutLength) override;
-	void LeaveArray() override;
-	/** Returns total number of components, including view components. If iterating components by this count, subtract number of view components. */
-	uint64_t GetNumComponents() override;
-	/** Returns number of components that are not view components. */
-	uint64_t GetNumRealComponents() override;
-	/** Ignores view components. */
-	void EnterComponent(CSP_OUT uint16_t& OutId, CSP_OUT uint64_t& OutType) override;
-	void LeaveComponent() override;
-	uint64_t GetNumProperties() override;
-	ReplicatedValue ReadProperty(CSP_OUT uint64_t& OutId) override;
-	ReplicatedValue GetViewComponent(uint16_t Id) override;
-	bool HasViewComponent(uint16_t Id) override;
-	void Skip() override;
+    void EnterEntity() override;
+    void LeaveEntity() override;
+    bool ReadBool() override;
+    uint8_t ReadByte() override;
+    double ReadDouble() override;
+    int64_t ReadInt64() override;
+    uint64_t ReadUInt64() override;
+    csp::common::String ReadString() override;
+    csp::common::Vector2 ReadVector2() override;
+    csp::common::Vector3 ReadVector3() override;
+    csp::common::Vector4 ReadVector4() override;
+    bool NextValueIsNull() override;
+    bool NextValueIsArray() override;
+    void EnterComponents() override;
+    void LeaveComponents() override;
+    void EnterArray(CSP_OUT uint32_t& OutLength) override;
+    void LeaveArray() override;
+    /** Returns total number of components, including view components. If iterating components by this count, subtract number of view components. */
+    uint64_t GetNumComponents() override;
+    /** Returns number of components that are not view components. */
+    uint64_t GetNumRealComponents() override;
+    /** Ignores view components. */
+    void EnterComponent(CSP_OUT uint16_t& OutId, CSP_OUT uint64_t& OutType) override;
+    void LeaveComponent() override;
+    uint64_t GetNumProperties() override;
+    ReplicatedValue ReadProperty(CSP_OUT uint64_t& OutId) override;
+    ReplicatedValue GetViewComponent(uint16_t Id) override;
+    bool HasViewComponent(uint16_t Id) override;
+    void Skip() override;
 
 private:
-	const signalr::value* Object;
-	SerialiserState CurrentState;
-	const std::vector<signalr::value>* Fields;
-	std::vector<signalr::value>::const_iterator CurrentFieldIterator;
-	const std::vector<signalr::value>* CurrentArray;
-	std::vector<signalr::value>::const_iterator CurrentArrayIterator;
-	const std::map<uint64_t, signalr::value>* Components;
-	std::map<uint64_t, signalr::value>::const_iterator CurrentComponentIterator;
-	size_t ComponentPropertyCount;
+    const signalr::value* Object;
+    SerialiserState CurrentState;
+    const std::vector<signalr::value>* Fields;
+    std::vector<signalr::value>::const_iterator CurrentFieldIterator;
+    const std::vector<signalr::value>* CurrentArray;
+    std::vector<signalr::value>::const_iterator CurrentArrayIterator;
+    const std::map<uint64_t, signalr::value>* Components;
+    std::map<uint64_t, signalr::value>::const_iterator CurrentComponentIterator;
+    size_t ComponentPropertyCount;
 
 // These are variables used in the legacy serialisation path used to deserialise any existing MsgPacked components
 #pragma region MsgPackVariables
-	msgpack::unpacker ComponentUnpacker;
-	msgpack::object_handle ComponentObjectHandle;
-	msgpack::unpacker PropertyUnpacker;
-	msgpack::object_handle PropertyObjectHandle;
+    msgpack::unpacker ComponentUnpacker;
+    msgpack::object_handle ComponentObjectHandle;
+    msgpack::unpacker PropertyUnpacker;
+    msgpack::object_handle PropertyObjectHandle;
 #pragma endregion
 
-	bool IsMsgPackSerialiser = false;
-	std::map<uint64_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
-	std::map<uint64_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>>::const_iterator CurrentPropertyIterator;
+    bool IsMsgPackSerialiser = false;
+    std::map<uint64_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>> Properties;
+    std::map<uint64_t, std::pair<msgpack_typeids::ItemComponentData, signalr::value>>::const_iterator CurrentPropertyIterator;
 };
 
 } // namespace csp::multiplayer

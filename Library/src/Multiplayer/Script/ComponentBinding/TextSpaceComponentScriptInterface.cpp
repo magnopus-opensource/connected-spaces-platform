@@ -24,7 +24,8 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-TextSpaceComponentScriptInterface::TextSpaceComponentScriptInterface(TextSpaceComponent* InComponent) : ComponentScriptInterface(InComponent)
+TextSpaceComponentScriptInterface::TextSpaceComponentScriptInterface(TextSpaceComponent* InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

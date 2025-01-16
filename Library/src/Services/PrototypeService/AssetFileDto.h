@@ -24,10 +24,10 @@ namespace csp::services
 class AssetFileDto : public csp::services::DtoBase
 {
 public:
-	AssetFileDto();
-	virtual ~AssetFileDto();
+    AssetFileDto();
+    virtual ~AssetFileDto();
 
-	void FromJson(const csp::common::String& Json) override;
+    void FromJson(const csp::common::String& Json) override;
 };
 
 } // namespace csp::services

@@ -17,57 +17,62 @@
 
 #include "Multiplayer/EventSerialisation.h"
 
-
 namespace csp::systems
 {
 
-SystemBase::SystemBase() : WebClient(nullptr), EventBusPtr(nullptr)
+SystemBase::SystemBase()
+    : WebClient(nullptr)
+    , EventBusPtr(nullptr)
 {
 }
 
-SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus) : WebClient(InWebClient), EventBusPtr(InEventBus)
+SystemBase::SystemBase(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus)
+    : WebClient(InWebClient)
+    , EventBusPtr(InEventBus)
 {
-	RegisterSystemCallback();
+    RegisterSystemCallback();
 }
 
-SystemBase::SystemBase(csp::multiplayer::EventBus* InEventBus) : WebClient(nullptr), EventBusPtr(InEventBus)
+SystemBase::SystemBase(csp::multiplayer::EventBus* InEventBus)
+    : WebClient(nullptr)
+    , EventBusPtr(InEventBus)
 {
-	RegisterSystemCallback();
+    RegisterSystemCallback();
 }
 
 SystemBase::~SystemBase()
 {
-	DeregisterSystemCallback();
-	EventBusPtr = nullptr;
+    DeregisterSystemCallback();
+    EventBusPtr = nullptr;
 }
 
 void SystemBase::RegisterSystemCallback()
 {
-	// Do nothing.
+    // Do nothing.
 }
 
 void SystemBase::DeregisterSystemCallback()
 {
-	// Do nothing.
+    // Do nothing.
 }
 
 void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-	if (!SystemCallback)
-	{
-		return;
-	}
+    if (!SystemCallback)
+    {
+        return;
+    }
 
-	csp::multiplayer::EventDeserialiser Deserialiser;
-	Deserialiser.Parse(EventValues);
+    csp::multiplayer::EventDeserialiser Deserialiser;
+    Deserialiser.Parse(EventValues);
 
-	SystemCallback(true, Deserialiser.GetEventData());
+    SystemCallback(true, Deserialiser.GetEventData());
 }
 
 CSP_EVENT void SystemBase::SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
 {
-	SystemCallback = Callback;
-	RegisterSystemCallback();
+    SystemCallback = Callback;
+    RegisterSystemCallback();
 }
 
 } // namespace csp::systems

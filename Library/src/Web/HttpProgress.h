@@ -24,21 +24,21 @@ namespace csp::web
 class HttpProgress
 {
 public:
-	HttpProgress();
-	~HttpProgress();
+    HttpProgress();
+    ~HttpProgress();
 
-	void SetProgressPercentage(float Progress);
-	float GetProgressPercentage() const;
+    void SetProgressPercentage(float Progress);
+    float GetProgressPercentage() const;
 
-	// Explicit assignment operator because of atomic member
-	HttpProgress& operator=(const HttpProgress& other) noexcept
-	{
-		Progress = other.Progress.load();
-		return *this;
-	}
+    // Explicit assignment operator because of atomic member
+    HttpProgress& operator=(const HttpProgress& other) noexcept
+    {
+        Progress = other.Progress.load();
+        return *this;
+    }
 
 private:
-	std::atomic<uint32_t> Progress;
+    std::atomic<uint32_t> Progress;
 };
 
 } // namespace csp::web

@@ -22,94 +22,80 @@
 
 // #include <atomic_queue/atomic_queue.h>
 
-
 namespace csp::systems
 {
 
 class AnalyticsSystemImpl : public csp::events::EventListener
 {
 public:
-	AnalyticsSystemImpl() : Provider {nullptr}
-	{
-	}
+    AnalyticsSystemImpl()
+        : Provider { nullptr }
+    {
+    }
 
-	~AnalyticsSystemImpl()
-	{
-	}
+    ~AnalyticsSystemImpl() { }
 
-	void OnEvent(const csp::events::Event& InEvent) override
-	{
-		/* std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
+    void OnEvent(const csp::events::Event& InEvent) override
+    {
+        /* std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
 
-		if (Provider == nullptr)
-		{
-			return;
-		}
+        if (Provider == nullptr)
+        {
+                return;
+        }
 
-		while (Queue.was_size() > 0)
-		{
-			auto Event = Queue.pop();
-			Provider->Log(Event);
+        while (Queue.was_size() > 0)
+        {
+                auto Event = Queue.pop();
+                Provider->Log(Event);
 
-			DEINIT_EVENT(Event);
-		}*/
-	}
+                DEINIT_EVENT(Event);
+        }*/
+    }
 
-	void Log(AnalyticsEvent* Event)
-	{
-		/* if (Provider)
-		{
-			Queue.push(Event);
-		}*/
-	}
+    void Log(AnalyticsEvent* Event)
+    {
+        /* if (Provider)
+        {
+                Queue.push(Event);
+        }*/
+    }
 
-	void RegisterProvider(IAnalyticsProvider* InProvider)
-	{
-		Provider = InProvider;
-	}
+    void RegisterProvider(IAnalyticsProvider* InProvider) { Provider = InProvider; }
 
-	void DeregisterProvider(IAnalyticsProvider* InProvider)
-	{
-		/* if (Provider == InProvider)
-		{
-			std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
-			Provider = nullptr;
-		}*/
-	}
+    void DeregisterProvider(IAnalyticsProvider* InProvider)
+    {
+        /* if (Provider == InProvider)
+        {
+                std::scoped_lock<std::mutex> ProviderLock(ProviderMutex);
+                Provider = nullptr;
+        }*/
+    }
 
 private:
-	// using AnalyticsSystemQueue = atomic_queue::AtomicQueue<AnalyticsEvent*, AnalyticsSystem::QueueSize>;
+    // using AnalyticsSystemQueue = atomic_queue::AtomicQueue<AnalyticsEvent*, AnalyticsSystem::QueueSize>;
 
-	IAnalyticsProvider* Provider;
-	std::mutex ProviderMutex;
-	// AnalyticsSystemQueue Queue;
+    IAnalyticsProvider* Provider;
+    std::mutex ProviderMutex;
+    // AnalyticsSystemQueue Queue;
 };
 
-
-AnalyticsSystem::AnalyticsSystem() : Impl {CSP_NEW AnalyticsSystemImpl()}
+AnalyticsSystem::AnalyticsSystem()
+    : Impl { CSP_NEW AnalyticsSystemImpl() }
 {
-	csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
+    csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
 }
 
 AnalyticsSystem::~AnalyticsSystem()
 {
-	csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
-	CSP_DELETE(Impl);
+    csp::events::EventSystem::Get().UnRegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, Impl);
+    CSP_DELETE(Impl);
 }
 
-void AnalyticsSystem::Log(AnalyticsEvent* Event)
-{
-	Impl->Log(Event);
-}
+void AnalyticsSystem::Log(AnalyticsEvent* Event) { Impl->Log(Event); }
 
-void AnalyticsSystem::RegisterProvider(IAnalyticsProvider* InProvider)
-{
-	Impl->RegisterProvider(InProvider);
-}
+void AnalyticsSystem::RegisterProvider(IAnalyticsProvider* InProvider) { Impl->RegisterProvider(InProvider); }
 
-void AnalyticsSystem::DeregisterProvider(IAnalyticsProvider* InProvider)
-{
-	Impl->DeregisterProvider(InProvider);
-}
+void AnalyticsSystem::DeregisterProvider(IAnalyticsProvider* InProvider) { Impl->DeregisterProvider(InProvider); }
 
 } // namespace csp::systems

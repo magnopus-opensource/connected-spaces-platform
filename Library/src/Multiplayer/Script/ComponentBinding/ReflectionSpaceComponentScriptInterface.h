@@ -28,16 +28,16 @@ class ReflectionSpaceComponent;
 class ReflectionSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent = nullptr);
+    ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
-	DECLARE_SCRIPT_PROPERTY(std::string, ReflectionAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(std::string, ReflectionAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, ReflectionShape);
+    DECLARE_SCRIPT_PROPERTY(int64_t, ReflectionShape);
 };
 
 } // namespace csp::multiplayer

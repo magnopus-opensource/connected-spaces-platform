@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 ReflectionSpaceComponentScriptInterface::ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
