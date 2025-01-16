@@ -24,13 +24,14 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 
 #include <iostream>
+#include <limits>
 
 namespace csp::multiplayer
 {
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
+constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
     : MultiplayerConnectionInst(InMultiplayerConnection)
