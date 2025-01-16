@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#ifdef RUN_PLATFORM_TESTS
-
 #include "CSP/CSPFoundation.h"
 #include "PlatformTestUtils.h"
 #include "TestHelpers.h"
@@ -34,6 +32,8 @@
 #include <thread>
 
 using namespace csp::web;
+
+// The WebClientTests will be reviewed as part of OF-1532.
 
 class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
 {
@@ -125,6 +125,7 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
     }
 }
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_GET_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 {
     InitialiseFoundation();
@@ -135,7 +136,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientGetTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_PUT_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 {
     InitialiseFoundation();
@@ -152,7 +155,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPutTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POST_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 {
     InitialiseFoundation();
@@ -171,7 +176,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPostTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_DELETE_TEST_EXT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 {
     InitialiseFoundation();
@@ -182,6 +189,7 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
 class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
 {
@@ -251,190 +259,58 @@ private:
     std::thread::id ThreadId;
 };
 
-#if 0
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientPollingTest)
+// This test will be fixed and reenabled as part of OF-1536
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_POLLING_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientPollingTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-	DefaultWebClientFactory Factory;
-	PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
+    PollingLoginResponseReceiver Receiver(std::this_thread::get_id());
 
-	{
-		WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs-internal.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
-		EXPECT_TRUE(WebClient != nullptr);
+    {
 
-		HttpPayload Payload;
-
-		Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json-patch+json"));
-
-		rapidjson::Document JsonDoc(rapidjson::kObjectType);
-		JsonDoc.AddMember("deviceId", "CSPEngine", JsonDoc.GetAllocator());
-
-		Payload.SetContent(JsonDoc);
-
-		// Tell request not to callback until we poll with WebClient::ProcessResponses
-		// This ensures that callbacks are issued from this thread (which we check
-		// in the receiver above using the std::thread::id)
-		bool AsyncResponse = false;
-
-		WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &Receiver, AsyncResponse);
-
-		if (Receiver.WaitForResponse(WebClient))
-		{
-			bool ResponseIsValid = Receiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
-			EXPECT_TRUE(ResponseIsValid);
-
-			if (ResponseIsValid)
-			{
-				EXPECT_TRUE(Receiver.GetAccessToken().length() > 0);
-			}
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
-
-	csp::CSPFoundation::Shutdown();
-}
+        WebClient* Client;
+#ifdef CSP_WASM
+        Client = CSP_NEW csp::web::EmscriptenWebClient(80, csp::web::ETransferProtocol::HTTPS);
+#else
+        Client = CSP_NEW TestWebClient(80, csp::web::ETransferProtocol::HTTPS);
 #endif
+        EXPECT_TRUE(Client != nullptr);
 
-// Why are we testing CHS here? These should just be WebClient tests
-#if 0
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
-{
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+        HttpPayload Payload;
 
-	DefaultWebClientFactory Factory;
-	WebClientLoginResponseReceiver LoginReceiver;
+        Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json-patch+json"));
 
-	// Make sure to specify custom allocator
-	using EastlString = eastl::basic_string<char, csp::memory::EAStlAllocator>;
+        rapidjson::Document JsonDoc(rapidjson::kObjectType);
+        JsonDoc.AddMember("deviceId", "CSPEngine", JsonDoc.GetAllocator());
 
-	WebClientSharedPtr WebClient = Factory.CreateClient(Uri("https://ogs.magnopus-dev.cloud/mag-user"), 80, ETransferProtocol::HTTPS);
-	EXPECT_TRUE(WebClient != nullptr);
+        Payload.SetContent(JsonDoc);
 
-	// Login
-	{
-		HttpPayload Payload;
+        // Tell request not to callback until we poll with WebClient::ProcessResponses
+        // This ensures that callbacks are issued from this thread (which we check
+        // in the receiver above using the std::thread::id)
+        bool AsyncResponse = false;
 
-		Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json-patch+json"));
+        Client->SendRequest(
+            ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &Receiver, csp::common::CancellationToken::Dummy(), AsyncResponse);
 
-		rapidjson::Document JsonDoc(rapidjson::kObjectType);
-		JsonDoc.AddMember("deviceId", "CSPEngine", JsonDoc.GetAllocator());
+        if (Receiver.WaitForResponse(Client))
+        {
+            bool ResponseIsValid = Receiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
+            EXPECT_TRUE(ResponseIsValid);
 
-		Payload.SetContent(JsonDoc);
+            if (ResponseIsValid)
+            {
+                EXPECT_TRUE(Receiver.GetAccessToken().length() > 0);
+            }
+        }
+        else
+        {
+            FAIL() << "Response timeout" << std::endl;
+        }
+    }
 
-		WebClient->SendRequest(ERequestVerb::Post, Uri("api/v1/users/login"), Payload, &LoginReceiver);
-
-		// Sleep thread until response is received
-		if (LoginReceiver.WaitForResponse())
-		{
-			bool ResponseIsValid = LoginReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
-			EXPECT_TRUE(ResponseIsValid);
-
-			if (ResponseIsValid)
-			{
-				EXPECT_TRUE(LoginReceiver.GetAccessToken().length() > 0);
-				EXPECT_TRUE(LoginReceiver.GetUserId().length() > 0);
-			}
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
-
-	// Attempt access without token, expecting it to fail
-	{
-		ResponseReceiver GroupsReceiver;
-		HttpPayload Payload;
-
-		// We're deliberately not setting the Auth Bearer token here to check response is 'Unauthorized'
-
-		EastlString GroupsApiString;
-		GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
-
-		WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
-
-		// Sleep thread until response is received
-		if (GroupsReceiver.WaitForResponse())
-		{
-			// Expect to be told we're not authorized
-			bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseUnauthorized;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
-
-	// Access with valid token obtained from login
-	{
-		ResponseReceiver GroupsReceiver;
-		HttpPayload Payload;
-
-		// Use the valid Auth Bearer token this time
-		EastlString BearerString;
-		BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
-		Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
-
-		EastlString GroupsApiString;
-		GroupsApiString.sprintf("api/v1/users/%s/groups", LoginReceiver.GetUserId().c_str());
-
-		WebClient->SendRequest(ERequestVerb::Get, Uri(GroupsApiString.c_str()), Payload, &GroupsReceiver);
-
-		// Sleep thread until response is received
-		if (GroupsReceiver.WaitForResponse())
-		{
-			// Response should be 'OK' now we are using a valid token
-			bool ResponseIsValid = GroupsReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseOK;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
-
-	// Logout
-	{
-		ResponseReceiver LogoutReceiver;
-		HttpPayload Payload;
-
-		Payload.AddHeader(CSP_TEXT("Content-Type"), CSP_TEXT("application/json-patch+json"));
-
-		// Need to use valid Auth Bearer token to log out
-		EastlString BearerString;
-		BearerString.sprintf("Bearer %s", HttpAuth::GetAccessToken().c_str());
-		Payload.AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(BearerString.c_str()));
-
-		// Set userId as logout body
-		rapidjson::Document JsonDoc(rapidjson::kObjectType);
-		rapidjson::Value UserIdValue(LoginReceiver.GetUserId().c_str(), JsonDoc.GetAllocator());
-		JsonDoc.AddMember("userId", UserIdValue, JsonDoc.GetAllocator());
-		Payload.SetContent(JsonDoc);
-
-		EastlString LogoutApiString;
-		LogoutApiString.sprintf("api/v1/users/logout");
-
-		WebClient->SendRequest(ERequestVerb::Post, Uri(LogoutApiString.c_str()), Payload, &LogoutReceiver);
-
-		// Sleep thread until response is received
-		if (LogoutReceiver.WaitForResponse())
-		{
-			// Response should be 'NoContent'
-			bool ResponseIsValid = LogoutReceiver.GetResponse().GetResponseCode() == EResponseCodes::ResponseNoContent;
-			EXPECT_TRUE(ResponseIsValid);
-		}
-		else
-		{
-			FAIL() << "Response timeout" << std::endl;
-		}
-	}
-
-	csp::CSPFoundation::Shutdown();
+    csp::CSPFoundation::Shutdown();
 }
 #endif
 
@@ -495,7 +371,8 @@ private:
     std::thread::id ThreadId;
 };
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_RETRY_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, WebClientRetryTest)
 {
     InitialiseFoundation();
 
@@ -505,7 +382,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientRetryTest)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_404_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 {
     InitialiseFoundation();
@@ -516,8 +395,10 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail404Test)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_400_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail400Test)
 {
     InitialiseFoundation();
 
@@ -528,10 +409,12 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail400Test)
 
     csp::CSPFoundation::Shutdown();
 }
+#endif
 
 // Current fails on wasm platform tests due to CORS policy.
 #ifndef CSP_WASM
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_WEB_CLIENT_USER_AGENT_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 {
     InitialiseFoundation();
@@ -558,13 +441,14 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
 
     csp::CSPFoundation::Shutdown();
 }
-
+#endif
 #endif
 
 #include "CSP/Systems/SystemsManager.h"
 #include "PublicAPITests/UserSystemTestHelpers.h"
 
-CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_FAIL_403_TEST
+CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
 {
     InitialiseFoundation();
 
@@ -578,5 +462,4 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpFail403Test)
 
     csp::CSPFoundation::Shutdown();
 }
-
 #endif

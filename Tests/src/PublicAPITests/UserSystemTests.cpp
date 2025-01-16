@@ -390,8 +390,9 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 }
 #endif
 
-#if RUN_USERSYSTEM_REFRESH_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
+// This will be updated and re-instated in OF-1533
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_REFRESH_TEST
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, RefreshTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
@@ -1050,37 +1051,31 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 }
 #endif
 
-#if 0
 // Currently disabled whilst stripe testing is unavailable for OKO_TESTS
+// This test will be reviewed and reinstated as part of OF-1534.
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CUSTOMER_PORTAL_URL_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 {
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	csp::common::String UserId;
+    csp::common::String UserId;
 
-	// Create test user
-	csp::systems::Profile TestUser = CreateTestUser();
+    // Create test user
+    csp::systems::Profile TestUser = CreateTestUser();
 
-	// False Log in
-	LogIn(UserSystem,
-		  UserId,
-		  TestUser.Email,
-		  GeneratedTestAccountPassword,
-		  true,
-		  csp::systems::EResultCode::Success,
-		  csp::systems::ERequestFailureReason::None);
+    // False Log in
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, csp::systems::EResultCode::Success,
+        csp::systems::ERequestFailureReason::None);
 
-	auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
+    auto [Result] = AWAIT_PRE(UserSystem, GetCustomerPortalUrl, RequestPredicate, UserId);
 
-	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
+    EXPECT_EQ(Result.GetFailureReason(), csp::systems::ERequestFailureReason::None);
 
-	EXPECT_NE(Result.GetUrl(), "");
+    EXPECT_NE(Result.GetValue(), "");
 }
-#endif
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_CHECKOUT_SESSION_URL_TEST

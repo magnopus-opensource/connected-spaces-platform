@@ -971,111 +971,108 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 }
 #endif
 
-// TODO: Fix this!
-// Disabled as for some reason it is causing C# tests failures ONLY on TC. This will be investigated in a separate ticket
-#if false
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_GETASSETS_FROM_MULTIPLE_ASSET_COLLECTIONS_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsFromMultipleAssetCollectionsTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* AssetSystem	 = SystemsManager.GetAssetSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
-	const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
-	const char* TestAssetName			= "OLY-UNITTEST-ASSET-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
+    const char* TestAssetName = "OLY-UNITTEST-ASSET-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	char UniqueFirstAssetCollectionName[256];
-	SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char UniqueFirstAssetCollectionName[256];
+    SPRINTF(UniqueFirstAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
-	char UniqueSecondAssetCollectionName[256];
-	SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
+    char UniqueSecondAssetCollectionName[256];
+    SPRINTF(UniqueSecondAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
-	char UniqueFirstAssetName[256];
-	SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+    char UniqueFirstAssetName[256];
+    SPRINTF(UniqueFirstAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
-	char UniqueSecondAssetName[256];
-	SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
+    char UniqueSecondAssetName[256];
+    SPRINTF(UniqueSecondAssetName, "%s-%s", TestAssetName, GetUniqueString().c_str());
 
-	csp::common::String UserId;
+    csp::common::String UserId;
 
-	LogInAsNewTestUser(UserSystem, UserId);
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceType::Private, nullptr, nullptr, nullptr, nullptr, Space);
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	csp::systems::AssetCollection FirstAssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueFirstAssetCollectionName, nullptr, nullptr, FirstAssetCollection);
+    csp::systems::AssetCollection FirstAssetCollection;
+    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueFirstAssetCollectionName, nullptr, nullptr, FirstAssetCollection);
 
-	csp::systems::Asset FirstAsset;
-	CreateAsset(AssetSystem, FirstAssetCollection, UniqueFirstAssetName, nullptr, FirstAsset);
+    csp::systems::Asset FirstAsset;
+    CreateAsset(AssetSystem, FirstAssetCollection, UniqueFirstAssetName, nullptr, nullptr, FirstAsset);
 
-	csp::systems::AssetCollection SecondAssetCollection;
-	CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSecondAssetCollectionName, nullptr, nullptr, SecondAssetCollection);
+    csp::systems::AssetCollection SecondAssetCollection;
+    CreateAssetCollection(AssetSystem, Space.Id, nullptr, UniqueSecondAssetCollectionName, nullptr, nullptr, SecondAssetCollection);
 
-	csp::systems::Asset SecondAsset;
-	CreateAsset(AssetSystem, SecondAssetCollection, UniqueSecondAssetName, nullptr, SecondAsset);
+    csp::systems::Asset SecondAsset;
+    CreateAsset(AssetSystem, SecondAssetCollection, UniqueSecondAssetName, nullptr, nullptr, SecondAsset);
 
-	//{
-	//	// try to search but don't specify any asset collection Ids, only add one Asset Id though
-	//	csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
-	//	csp::common::Array<csp::common::String> AssetCollIds;
-	//	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollIds, AssetIds, nullptr, nullptr);
-	//	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
-	//}
-	{
-		// search by both asset collection Ids at the same time
-		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
-		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, nullptr, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetAssets().Size(), 2);
-		const auto& RetrievedAssets = Result.GetAssets();
+    //{
+    //	// try to search but don't specify any asset collection Ids, only add one Asset Id though
+    //	csp::common::Array<csp::common::String> AssetIds = {FirstAsset.Id};
+    //	csp::common::Array<csp::common::String> AssetCollIds;
+    //	auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollIds, AssetIds, nullptr, nullptr);
+    //	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Failed);
+    //}
+    {
+        // search by both asset collection Ids at the same time
+        csp::common::Array<csp::common::String> AssetCollectionIds = { FirstAssetCollection.Id, SecondAssetCollection.Id };
+        auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, nullptr, nullptr, nullptr);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetAssets().Size(), 2);
+        const auto& RetrievedAssets = Result.GetAssets();
 
-		bool FoundFirstAsset = false, FoundSecondAsset = false;
-		for (size_t idx = 0; idx < RetrievedAssets.Size(); ++idx)
-		{
-			auto& CurrentAsset = RetrievedAssets[idx];
+        bool FoundFirstAsset = false, FoundSecondAsset = false;
+        for (size_t idx = 0; idx < RetrievedAssets.Size(); ++idx)
+        {
+            auto& CurrentAsset = RetrievedAssets[idx];
 
-			if (CurrentAsset.Id == FirstAsset.Id)
-			{
-				FoundFirstAsset = true;
-			}
-			else if (CurrentAsset.Id == SecondAsset.Id)
-			{
-				FoundSecondAsset = true;
-			}
-		}
+            if (CurrentAsset.Id == FirstAsset.Id)
+            {
+                FoundFirstAsset = true;
+            }
+            else if (CurrentAsset.Id == SecondAsset.Id)
+            {
+                FoundSecondAsset = true;
+            }
+        }
 
-		EXPECT_EQ(FoundFirstAsset && FoundSecondAsset, true);
-	}
-	{
-		// search by both asset collection Ids and only one Asset Id
-		csp::common::Array<csp::common::String> AssetCollectionIds = {FirstAssetCollection.Id, SecondAssetCollection.Id};
-		csp::common::Array<csp::common::String> AssetIds			 = {SecondAsset.Id};
-		auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, AssetIds, nullptr, nullptr);
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-		EXPECT_EQ(Result.GetAssets().Size(), 1);
-		EXPECT_EQ(Result.GetAssets()[0].Id, SecondAsset.Id);
-		EXPECT_EQ(Result.GetAssets()[0].Name, SecondAsset.Name);
-	}
+        EXPECT_EQ(FoundFirstAsset && FoundSecondAsset, true);
+    }
+    {
+        // search by both asset collection Ids and only one Asset Id
+        csp::common::Array<csp::common::String> AssetCollectionIds = { FirstAssetCollection.Id, SecondAssetCollection.Id };
+        csp::common::Array<csp::common::String> AssetIds = { SecondAsset.Id };
+        auto [Result] = AWAIT_PRE(AssetSystem, GetAssetsByCriteria, RequestPredicate, AssetCollectionIds, AssetIds, nullptr, nullptr);
+        EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(Result.GetAssets().Size(), 1);
+        EXPECT_EQ(Result.GetAssets()[0].Id, SecondAsset.Id);
+        EXPECT_EQ(Result.GetAssets()[0].Name, SecondAsset.Name);
+    }
 
-	DeleteAsset(AssetSystem, FirstAssetCollection, FirstAsset);
-	DeleteAsset(AssetSystem, SecondAssetCollection, SecondAsset);
-	DeleteAssetCollection(AssetSystem, FirstAssetCollection);
-	DeleteAssetCollection(AssetSystem, SecondAssetCollection);
+    DeleteAsset(AssetSystem, FirstAssetCollection, FirstAsset);
+    DeleteAsset(AssetSystem, SecondAssetCollection, SecondAsset);
+    DeleteAssetCollection(AssetSystem, FirstAssetCollection);
+    DeleteAssetCollection(AssetSystem, SecondAssetCollection);
 
-	DeleteSpace(SpaceSystem, Space);
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	LogOut(UserSystem);
+    LogOut(UserSystem);
 }
-#endif
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_UPLOADASSET_AS_FILE_TEST

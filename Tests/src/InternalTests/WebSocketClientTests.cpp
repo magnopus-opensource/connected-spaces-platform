@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#ifdef RUN_PLATFORM_TESTS
-
 #include "../PublicAPITests/UserSystemTestHelpers.h"
 #include "CSP/CSPFoundation.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -27,8 +25,11 @@
 
 using namespace csp::multiplayer;
 
+// The WebSocketClientTests will be reviewed as part of OF-1532.
+
 const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_START_STOP_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
     // Initialise
@@ -50,7 +51,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
     // Logout
     LogOut(UserSystem);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 {
     // Initialise
@@ -75,7 +78,9 @@ CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
     // Logout
     LogOut(UserSystem);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_RECEIVE_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 {
     // Initialise
