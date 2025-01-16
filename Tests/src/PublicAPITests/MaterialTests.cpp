@@ -93,7 +93,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to associate a material with
 	::Space Space;
@@ -123,7 +123,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to associate a material with
 	::Space Space;
@@ -168,7 +168,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetEmptyMaterialsTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to search for materials
 	::Space Space;
@@ -199,7 +199,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to search for materials
 	::Space Space;
@@ -297,7 +297,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to associate a material with
 	::Space Space;
@@ -336,7 +336,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to associate a material with
 	::Space Space;
@@ -371,7 +371,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to search for materials
 	::Space Space;
@@ -430,7 +430,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space to associate a material with
 	::Space Space;
@@ -455,7 +455,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 			CallbackCalled = true;
 		};
 
-		Connection->SetMaterialChangedCallback(CB);
+		AssetSystem->SetMaterialChangedCallback(CB);
 
 		// Create a material associated with the space
 		CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
@@ -478,7 +478,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 			CallbackCalled = true;
 		};
 
-		Connection->SetMaterialChangedCallback(CB);
+		AssetSystem->SetMaterialChangedCallback(CB);
 
 		CreatedMaterial.SetAlphaCutoff(1);
 		UpdateMaterial(AssetSystem, CreatedMaterial);
@@ -501,7 +501,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
 			CallbackCalled = true;
 		};
 
-		Connection->SetMaterialChangedCallback(CB);
+		AssetSystem->SetMaterialChangedCallback(CB);
 
 		DeleteMaterial(AssetSystem, CreatedMaterial);
 		WaitForCallback(CallbackCalled);
