@@ -24,6 +24,7 @@
 
 #include "gtest/gtest.h"
 
+// All the analytics tests will be reviewed, and the disabled tests reenabled, as part of OF-1538.
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANALYTICSSYSTEM_UNIT_TESTS || RUN_ANALYTICSSYSTEM_LOG_METRIC_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, AnalyticsSystemUnitTests, LogMetricTest)
