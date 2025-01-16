@@ -15,36 +15,31 @@
  */
 
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_SCHEDULER_TESTS)
-	#include "Common/DateTime.h"
-	#include "Common/Scheduler.h"
-	#include "TestHelpers.h"
+#include "Common/DateTime.h"
+#include "Common/Scheduler.h"
+#include "TestHelpers.h"
 
-	#include "gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::chrono_literals;
 
-
 CSP_INTERNAL_TEST(CSPEngine, SchedulerTests, SchedulerTest)
 {
-	int WaitForTestTimeoutCountMs = 0;
-	int KeepAliveInterval		  = 10000;
-	bool ScheduleCallback		  = false;
+    int WaitForTestTimeoutCountMs = 0;
+    int KeepAliveInterval = 10000;
+    bool ScheduleCallback = false;
 
-	std::chrono::system_clock::time_point test = std::chrono::system_clock::now() + std::chrono::system_clock::duration(5s);
-	csp::common::DateTime RefreshTime(test);
+    std::chrono::system_clock::time_point test = std::chrono::system_clock::now() + std::chrono::system_clock::duration(5s);
+    csp::common::DateTime RefreshTime(test);
 
-	csp::GetScheduler()->ScheduleAt(RefreshTime,
-									[this, &ScheduleCallback]()
-									{
-										ScheduleCallback = true;
-									});
+    csp::GetScheduler()->ScheduleAt(RefreshTime, [this, &ScheduleCallback]() { ScheduleCallback = true; });
 
-	while (WaitForTestTimeoutCountMs < KeepAliveInterval)
-	{
-		std::this_thread::sleep_for(20ms);
-		WaitForTestTimeoutCountMs += 20;
-	}
+    while (WaitForTestTimeoutCountMs < KeepAliveInterval)
+    {
+        std::this_thread::sleep_for(20ms);
+        WaitForTestTimeoutCountMs += 20;
+    }
 
-	EXPECT_TRUE(ScheduleCallback);
+    EXPECT_TRUE(ScheduleCallback);
 }
 #endif

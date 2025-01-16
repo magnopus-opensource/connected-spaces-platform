@@ -18,7 +18,6 @@
 
 #include "CSP/CSPCommon.h"
 
-
 namespace csp::common
 {
 
@@ -27,43 +26,43 @@ namespace csp::common
 class CSP_API CancellationToken
 {
 public:
-	/// Constructs a CancellationToken.
-	CancellationToken();
-	/// @brief Copy constructor.
-	/// @param rhs const CancellationToken&
-	CSP_NO_EXPORT CancellationToken(const CancellationToken& rhs) = delete;
-	/// @brief Move constructor.
-	/// @param rhs CancellationToken&&
-	CSP_NO_EXPORT CancellationToken(CancellationToken&& rhs) = delete;
+    /// Constructs a CancellationToken.
+    CancellationToken();
+    /// @brief Copy constructor.
+    /// @param rhs const CancellationToken&
+    CSP_NO_EXPORT CancellationToken(const CancellationToken& rhs) = delete;
+    /// @brief Move constructor.
+    /// @param rhs CancellationToken&&
+    CSP_NO_EXPORT CancellationToken(CancellationToken&& rhs) = delete;
 
-	/// @brief Destructor.
-	~CancellationToken();
+    /// @brief Destructor.
+    ~CancellationToken();
 
-	/// @brief Copy assignment.
-	/// @param rhs const CancellationToken&
-	/// @return CancellationToken&
-	CancellationToken& operator=(const CancellationToken& rhs) = delete;
+    /// @brief Copy assignment.
+    /// @param rhs const CancellationToken&
+    /// @return CancellationToken&
+    CancellationToken& operator=(const CancellationToken& rhs) = delete;
 
-	/// @brief Move assignment.
-	/// @param rhs CancellationToken&&
-	/// @return CancellationToken&
-	CancellationToken& operator=(CancellationToken&& rhs) = delete;
+    /// @brief Move assignment.
+    /// @param rhs CancellationToken&&
+    /// @return CancellationToken&
+    CancellationToken& operator=(CancellationToken&& rhs) = delete;
 
-	/// @brief Sets the cancellation state to cancelled.
-	// This will stop the request being sent by the web client.
-	void Cancel();
+    /// @brief Sets the cancellation state to cancelled.
+    // This will stop the request being sent by the web client.
+    void Cancel();
 
-	/// @brief Check if a request has been cancelled.
-	/// @return bool
-	bool Cancelled() const;
+    /// @brief Check if a request has been cancelled.
+    /// @return bool
+    bool Cancelled() const;
 
-	/// @brief Constructs a blank token.
-	/// @return CancellationToken&
-	static CancellationToken& Dummy();
+    /// @brief Constructs a blank token.
+    /// @return CancellationToken&
+    static CancellationToken& Dummy();
 
 private:
-	class Impl;
-	Impl* ImplPtr;
+    class Impl;
+    Impl* ImplPtr;
 };
 
 } // namespace csp::common

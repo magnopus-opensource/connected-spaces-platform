@@ -29,14 +29,14 @@ class CustomSpaceComponent;
 class CustomSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent = nullptr);
-	DECLARE_SCRIPT_PROPERTY(std::string, ApplicationOrigin);
-	uint32_t GetCustomPropertySubscriptionKey(const std::string& Key);
-	bool HasCustomProperty(const std::string& Key) const;
-	void RemoveCustomProperty(const std::string& Key);
-	const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetCustomProperty(const std::string& Key);
-	std::vector<std::string> GetCustomPropertyKeys();
-	void SetCustomProperty(const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value);
+    CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent = nullptr);
+    DECLARE_SCRIPT_PROPERTY(std::string, ApplicationOrigin);
+    uint32_t GetCustomPropertySubscriptionKey(const std::string& Key);
+    bool HasCustomProperty(const std::string& Key) const;
+    void RemoveCustomProperty(const std::string& Key);
+    const std::variant<bool, int64_t, float, std::string, std::vector<float>> GetCustomProperty(const std::string& Key);
+    std::vector<std::string> GetCustomPropertyKeys();
+    void SetCustomProperty(const std::string& Key, const std::variant<int64_t, float, std::string, std::vector<float>, bool>& Value);
 };
 
 } // namespace csp::multiplayer

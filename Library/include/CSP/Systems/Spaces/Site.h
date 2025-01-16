@@ -22,7 +22,6 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 
-
 namespace csp::services
 {
 
@@ -32,8 +31,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
-
 namespace csp::systems
 {
 
@@ -42,69 +39,69 @@ namespace csp::systems
 class CSP_API Site
 {
 public:
-	Site() {};
+    Site() {};
 
-	/** @name Data Values
-	 *   A Site contains some basic information that define it
-	 *
-	 *   @{ */
-	csp::common::String Id;
-	csp::common::String Name;
-	csp::common::String SpaceId;
-	GeoLocation Location;
-	OlyRotation Rotation;
-	/** @} */
+    /** @name Data Values
+     *   A Site contains some basic information that define it
+     *
+     *   @{ */
+    csp::common::String Id;
+    csp::common::String Name;
+    csp::common::String SpaceId;
+    GeoLocation Location;
+    OlyRotation Rotation;
+    /** @} */
 };
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to retrieve Site information.
 class CSP_API SiteResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Get the Site data from the Result.
-	Site& GetSite();
-	/// @brief Get the Site data from the Result.
-	const Site& GetSite() const;
+    /// @brief Get the Site data from the Result.
+    Site& GetSite();
+    /// @brief Get the Site data from the Result.
+    const Site& GetSite() const;
 
 private:
-	SiteResult(void*) {};
+    SiteResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	Site Site;
+    Site Site;
 };
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of Site information.
 class CSP_API SitesCollectionResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the Site info array being stored.
-	/// @return csp::common::Array<Site> : reference to Site info array
-	csp::common::Array<Site>& GetSites();
+    /// @brief Retrieves the Site info array being stored.
+    /// @return csp::common::Array<Site> : reference to Site info array
+    csp::common::Array<Site>& GetSites();
 
-	/// @brief Retrieves the Site info array being stored.
-	/// @return csp::common::Array<Site> : reference to Site info array
-	const csp::common::Array<Site>& GetSites() const;
+    /// @brief Retrieves the Site info array being stored.
+    /// @return csp::common::Array<Site> : reference to Site info array
+    const csp::common::Array<Site>& GetSites() const;
 
 private:
-	SitesCollectionResult(void*) {};
+    SitesCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<Site> Sites;
+    csp::common::Array<Site> Sites;
 };
 
 /// @brief Callback containing a Site and enum result used when adding Site information.

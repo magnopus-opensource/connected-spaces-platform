@@ -24,7 +24,8 @@ using namespace csp::systems;
 namespace csp::multiplayer
 {
 
-FogSpaceComponentScriptInterface::FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent) : ComponentScriptInterface(InComponent)
+FogSpaceComponentScriptInterface::FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

@@ -11,11 +11,11 @@ namespace oly_systems
 /// Note2: make sure to keep all enum values *above* Num
 enum EThirdPartyAuthenticationProviders
 {
-	Google = 0,
-	Discord,
-	Apple,
-	Num,
-	Invalid = Num
+    Google = 0,
+    Discord,
+    Apple,
+    Num,
+    Invalid = Num
 };
 
 /// @ingroup User System
@@ -23,31 +23,31 @@ enum EThirdPartyAuthenticationProviders
 class OLY_API ThirdPartyProviderDetails
 {
 public:
-	oly_common::String ProviderName;
-	oly_common::String ProviderClientId;
-	oly_common::Array<oly_common::String> ProviderAuthScopes;
-	oly_common::String AuthoriseURL;
+    oly_common::String ProviderName;
+    oly_common::String ProviderClientId;
+    oly_common::Array<oly_common::String> ProviderAuthScopes;
+    oly_common::String AuthoriseURL;
 };
 
 class OLY_API ProviderDetailsResult : public oly_services::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	OLY_START_IGNORE
-	friend class UserSystem;
-	OLY_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    OLY_START_IGNORE
+    friend class UserSystem;
+    OLY_END_IGNORE
+    /** @endcond */
 
 public:
-	ProviderDetailsResult() = default;
-	ProviderDetailsResult(void*) {};
+    ProviderDetailsResult() = default;
+    ProviderDetailsResult(void*) {};
 
-	[[nodiscard]] ThirdPartyProviderDetails& GetDetails();
-	[[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
+    [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
+    [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-	void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
 
-	ThirdPartyProviderDetails ProviderDetails;
+    ThirdPartyProviderDetails ProviderDetails;
 };
 
 typedef std::function<void(const ProviderDetailsResult& Result)> ProviderDetailsResultCallback;

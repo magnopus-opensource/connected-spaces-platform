@@ -25,266 +25,235 @@
 
 #include <array>
 
-
 using namespace csp;
 
 namespace chs = csp::services::generated::aggregationservice;
-
 
 namespace
 {
 
 void RemoveUrl(csp::common::String& Url)
 {
-	if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1];
-	}
-	else if (std::string(Url.c_str()).find("?cart=") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1].c_str();
-	}
-	else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos)
-	{
-		Url = Url.Split('/')[Url.Split('/').Size() - 1];
-	}
+    if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos)
+    {
+        Url = Url.Split('/')[Url.Split('/').Size() - 1];
+    }
+    else if (std::string(Url.c_str()).find("?cart=") != std::string::npos)
+    {
+        Url = Url.Split('/')[Url.Split('/').Size() - 1].c_str();
+    }
+    else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos)
+    {
+        Url = Url.Split('/')[Url.Split('/').Size() - 1];
+    }
 }
 
 } // namespace
 
-
 namespace csp::systems
 {
 
-ECommerceSystem::ECommerceSystem() : SystemBase(nullptr, nullptr), ShopifyAPI(nullptr)
+ECommerceSystem::ECommerceSystem()
+    : SystemBase(nullptr, nullptr)
+    , ShopifyAPI(nullptr)
 {
 }
 
-ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr)
+ECommerceSystem::ECommerceSystem(csp::web::WebClient* InWebClient)
+    : SystemBase(InWebClient, nullptr)
 {
-	ShopifyAPI = CSP_NEW chs::ShopifyApi(InWebClient);
+    ShopifyAPI = CSP_NEW chs::ShopifyApi(InWebClient);
 }
 
-ECommerceSystem::~ECommerceSystem()
-{
-	CSP_DELETE(ShopifyAPI);
-}
+ECommerceSystem::~ECommerceSystem() { CSP_DELETE(ShopifyAPI); }
 
 void ECommerceSystem::GetProductInformation(const common::String& SpaceId, const common::String& ProductId, ProductInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<ProductInfoResultCallback, ProductInfoResult, void, chs::ShopifyProductDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsProductIdGet(SpaceId, ProductId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsProductIdGet(SpaceId, ProductId, ResponseHandler);
 }
 
-void ECommerceSystem::GetProductInfoCollectionByVariantIds(const common::String& SpaceId,
-														   const Array<common::String>& InVariantIds,
-														   ProductInfoCollectionResultCallback Callback)
+void ECommerceSystem::GetProductInfoCollectionByVariantIds(
+    const common::String& SpaceId, const Array<common::String>& InVariantIds, ProductInfoCollectionResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<ProductInfoCollectionResultCallback,
-									ProductInfoCollectionResult,
-									void,
-									csp::services::DtoArray<chs::ShopifyProductDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<ProductInfoCollectionResultCallback, ProductInfoCollectionResult,
+        void, csp::services::DtoArray<chs::ShopifyProductDto>>(Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	const std::vector<common::String> VariantIds = common::Convert(InVariantIds);
+    const std::vector<common::String> VariantIds = common::Convert(InVariantIds);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsVariantsGet(SpaceId, VariantIds, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyProductsVariantsGet(SpaceId, VariantIds, ResponseHandler);
 }
 
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
 {
-	std::string CharacterCheck = CartId.c_str();
-	if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
-	{
-		CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
+    std::string CharacterCheck = CartId.c_str();
+    if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
+    {
+        CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
 
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CheckoutInfoResult>());
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CheckoutInfoResult>());
 
-		return;
-	}
+        return;
+    }
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<CheckoutInfoResultCallback, CheckoutInfoResult, void, chs::ShopifyCheckoutDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet(SpaceId, CartId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdCheckoutInfoGet(SpaceId, CartId, ResponseHandler);
 }
 
 void ECommerceSystem::CreateCart(const common::String& SpaceId, CartInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
-																									   nullptr,
-																									   csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
+        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsPost(SpaceId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsPost(SpaceId, ResponseHandler);
 }
 
 void ECommerceSystem::GetCart(const common::String& SpaceId, const common::String& CartId, CartInfoResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
-																									   nullptr,
-																									   csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
+        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdGet(SpaceId, CartId, ResponseHandler);
 }
 
 void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActive, GetShopifyStoresResultCallback Callback)
 {
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<GetShopifyStoresResultCallback, GetShopifyStoresResult, void, csp::services::DtoArray<chs::ShopifyStorefrontDto>>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<GetShopifyStoresResultCallback, GetShopifyStoresResult, void, csp::services::DtoArray<chs::ShopifyStorefrontDto>>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	std::optional<bool> ActiveParam;
+    std::optional<bool> ActiveParam;
 
-	if (IsActive.HasValue())
-	{
-		ActiveParam = *IsActive;
-	}
+    if (IsActive.HasValue())
+    {
+        ActiveParam = *IsActive;
+    }
 
-	auto& SystemsManager   = SystemsManager::Get();
-	const auto* UserSystem = SystemsManager.GetUserSystem();
+    auto& SystemsManager = SystemsManager::Get();
+    const auto* UserSystem = SystemsManager.GetUserSystem();
 
-	const auto& UserId = UserSystem->GetLoginState().UserId;
+    const auto& UserId = UserSystem->GetLoginState().UserId;
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)
-		->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)
+        ->apiV1VendorsShopifyUsersUserIdStorefrontsGet(UserId, ActiveParam, std::nullopt, std::nullopt, ResponseHandler);
 }
 
-void ECommerceSystem::AddShopifyStore(const common::String& StoreName,
-									  const common::String& SpaceId,
-									  const bool IsEcommerceActive,
-									  const common::String& PrivateAccessToken,
-									  AddShopifyStoreResultCallback Callback)
+void ECommerceSystem::AddShopifyStore(const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive,
+    const common::String& PrivateAccessToken, AddShopifyStoreResultCallback Callback)
 {
-	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
-	ShopifyStorefrontInfo->SetStoreName(StoreName);
-	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
-	ShopifyStorefrontInfo->SetPrivateAccessToken(PrivateAccessToken);
+    auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
+    ShopifyStorefrontInfo->SetStoreName(StoreName);
+    ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
+    ShopifyStorefrontInfo->SetPrivateAccessToken(PrivateAccessToken);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<AddShopifyStoreResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<AddShopifyStoreResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
 }
 
-void ECommerceSystem::SetECommerceActiveInSpace(const common::String& StoreName,
-												const common::String& SpaceId,
-												const bool IsEcommerceActive,
-												SetECommerceActiveResultCallback Callback)
+void ECommerceSystem::SetECommerceActiveInSpace(
+    const common::String& StoreName, const common::String& SpaceId, const bool IsEcommerceActive, SetECommerceActiveResultCallback Callback)
 {
-	auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
-	ShopifyStorefrontInfo->SetStoreName(StoreName);
-	ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
+    auto ShopifyStorefrontInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontInfo();
+    ShopifyStorefrontInfo->SetStoreName(StoreName);
+    ShopifyStorefrontInfo->SetIsEcommerceActive(IsEcommerceActive);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<SetECommerceActiveResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<SetECommerceActiveResultCallback, AddShopifyStoreResult, void, chs::ShopifyStorefrontDto>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1SpacesSpaceIdVendorsShopifyPut(SpaceId, ShopifyStorefrontInfo, ResponseHandler);
 }
 
-void ECommerceSystem::ValidateShopifyStore(const common::String& StoreName,
-										   const common::String& PrivateAccessToken,
-										   ValidateShopifyStoreResultCallback Callback)
+void ECommerceSystem::ValidateShopifyStore(
+    const common::String& StoreName, const common::String& PrivateAccessToken, ValidateShopifyStoreResultCallback Callback)
 {
-	auto ShopifyStorefrontValidationInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontValidationRequest();
-	ShopifyStorefrontValidationInfo->SetStoreName(StoreName);
-	ShopifyStorefrontValidationInfo->SetPrivateAccessToken(PrivateAccessToken);
+    auto ShopifyStorefrontValidationInfo = systems::ECommerceSystemHelpers::DefaultShopifyStorefrontValidationRequest();
+    ShopifyStorefrontValidationInfo->SetStoreName(StoreName);
+    ShopifyStorefrontValidationInfo->SetPrivateAccessToken(PrivateAccessToken);
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<ValidateShopifyStoreResultCallback, ValidateShopifyStoreResult, void, chs::ShopifyStorefrontValidationRequest>(
-			Callback,
-			nullptr,
-			csp::web::EResponseCodes::ResponseCreated);
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = ShopifyAPI->CreateHandler<ValidateShopifyStoreResultCallback, ValidateShopifyStoreResult, void, chs::ShopifyStorefrontValidationRequest>(
+            Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1VendorsShopifyValidatePut(ShopifyStorefrontValidationInfo, ResponseHandler);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)->apiV1VendorsShopifyValidatePut(ShopifyStorefrontValidationInfo, ResponseHandler);
 }
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
 {
-	if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
-	{
-		CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
+    if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
+    {
+        CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
 
-		INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
 
-		return;
-	}
+        return;
+    }
 
-	auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
+    auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
 
-	if (!CartInformation.CartLines.IsEmpty())
-	{
-		auto CartLinesRemoval	= std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
-		auto CartLinesUpdate	= std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
-		auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+    if (!CartInformation.CartLines.IsEmpty())
+    {
+        auto CartLinesRemoval = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+        auto CartLinesUpdate = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
+        auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
 
-		for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
-		{
+        for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
+        {
 
-			csp::common::String CartLineId		 = CartInformation.CartLines[i].CartLineId;
-			csp::common::String ProductVariantId = CartInformation.CartLines[i].ProductVariantId;
-			RemoveUrl(CartLineId);
-			RemoveUrl(ProductVariantId);
+            csp::common::String CartLineId = CartInformation.CartLines[i].CartLineId;
+            csp::common::String ProductVariantId = CartInformation.CartLines[i].ProductVariantId;
+            RemoveUrl(CartLineId);
+            RemoveUrl(ProductVariantId);
 
-			if (CartInformation.CartLines[i].Quantity == 0)
-			{
-				auto CartLineRemoval = std::make_shared<chs::ShopifyCartLineDto>();
+            if (CartInformation.CartLines[i].Quantity == 0)
+            {
+                auto CartLineRemoval = std::make_shared<chs::ShopifyCartLineDto>();
 
-				CartLineRemoval->SetShopifyCartLineId(CartLineId);
-				CartLineRemoval->SetProductVariantId(ProductVariantId);
+                CartLineRemoval->SetShopifyCartLineId(CartLineId);
+                CartLineRemoval->SetProductVariantId(ProductVariantId);
 
-				CartLinesRemoval.push_back(CartLineRemoval);
-			}
-			else if (CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity != 0)
-			{
-				auto CartLineAdditions = std::make_shared<chs::ShopifyCartLineDto>();
+                CartLinesRemoval.push_back(CartLineRemoval);
+            }
+            else if (CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity != 0)
+            {
+                auto CartLineAdditions = std::make_shared<chs::ShopifyCartLineDto>();
 
-				CartLineAdditions->SetQuantity(CartInformation.CartLines[i].Quantity);
-				CartLineAdditions->SetShopifyCartLineId(CartLineId);
-				CartLineAdditions->SetProductVariantId(ProductVariantId);
+                CartLineAdditions->SetQuantity(CartInformation.CartLines[i].Quantity);
+                CartLineAdditions->SetShopifyCartLineId(CartLineId);
+                CartLineAdditions->SetProductVariantId(ProductVariantId);
 
-				CartLinesAdditions.push_back(CartLineAdditions);
-			}
-			else
-			{
-				auto CartLineUpdate = std::make_shared<chs::ShopifyCartLineDto>();
+                CartLinesAdditions.push_back(CartLineAdditions);
+            }
+            else
+            {
+                auto CartLineUpdate = std::make_shared<chs::ShopifyCartLineDto>();
 
-				CartLineUpdate->SetQuantity(CartInformation.CartLines[i].Quantity);
-				CartLineUpdate->SetShopifyCartLineId(CartLineId);
-				CartLineUpdate->SetProductVariantId(ProductVariantId);
+                CartLineUpdate->SetQuantity(CartInformation.CartLines[i].Quantity);
+                CartLineUpdate->SetShopifyCartLineId(CartLineId);
+                CartLineUpdate->SetProductVariantId(ProductVariantId);
 
-				CartLinesUpdate.push_back(CartLineUpdate);
-			}
-		}
+                CartLinesUpdate.push_back(CartLineUpdate);
+            }
+        }
 
-		CartUpdateInfo->SetAddLineCartChanges(CartLinesAdditions);
-		CartUpdateInfo->SetRemoveLineCartChanges(CartLinesRemoval);
-		CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
-	}
+        CartUpdateInfo->SetAddLineCartChanges(CartLinesAdditions);
+        CartUpdateInfo->SetRemoveLineCartChanges(CartLinesRemoval);
+        CartUpdateInfo->SetUpdateLineQtyCartChanges(CartLinesUpdate);
+    }
 
-	csp::services::ResponseHandlerPtr ResponseHandler
-		= ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(Callback,
-																									   nullptr,
-																									   csp::web::EResponseCodes::ResponseCreated);
-	static_cast<chs::ShopifyApi*>(ShopifyAPI)
-		->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
+    csp::services::ResponseHandlerPtr ResponseHandler = ShopifyAPI->CreateHandler<CartInfoResultCallback, CartInfoResult, void, chs::ShopifyCartDto>(
+        Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
+    static_cast<chs::ShopifyApi*>(ShopifyAPI)
+        ->apiV1SpacesSpaceIdVendorsShopifyCartsCartIdPut(CartInformation.SpaceId, CartInformation.CartId, CartUpdateInfo, ResponseHandler);
 }
 
 } // namespace csp::systems

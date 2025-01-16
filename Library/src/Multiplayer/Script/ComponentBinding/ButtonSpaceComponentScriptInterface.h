@@ -28,18 +28,18 @@ class ButtonSpaceComponent;
 class ButtonSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	ButtonSpaceComponentScriptInterface(ButtonSpaceComponent* InComponent = nullptr);
+    ButtonSpaceComponentScriptInterface(ButtonSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, LabelText);
-	DECLARE_SCRIPT_PROPERTY(std::string, IconAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(std::string, LabelText);
+    DECLARE_SCRIPT_PROPERTY(std::string, IconAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
 };
 
 } // namespace csp::multiplayer

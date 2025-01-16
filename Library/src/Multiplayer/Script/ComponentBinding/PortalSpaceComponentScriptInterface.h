@@ -24,11 +24,11 @@ class PortalSpaceComponent;
 class PortalSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	PortalSpaceComponentScriptInterface(PortalSpaceComponent* InComponent = nullptr);
+    PortalSpaceComponentScriptInterface(PortalSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, SpaceId);
-	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(float, Radius);
+    DECLARE_SCRIPT_PROPERTY(std::string, SpaceId);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(float, Radius);
 };
 } // namespace csp::multiplayer

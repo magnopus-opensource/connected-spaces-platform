@@ -15,40 +15,40 @@
  */
 #ifndef SKIP_INTERNAL_TESTS
 
-	#include "Services/ApiBase/ApiBase.h"
+#include "Services/ApiBase/ApiBase.h"
 
-	#include "TestHelpers.h"
+#include "TestHelpers.h"
 
 using namespace csp::services;
 
 CSP_INTERNAL_TEST(CSPEngine, ServicesTests, IsValidResponseCodeTest)
 {
-	DtoBase* InDto				 = nullptr;
-	ApiResponseBase ResponseBase = ApiResponseBase(InDto);
+    DtoBase* InDto = nullptr;
+    ApiResponseBase ResponseBase = ApiResponseBase(InDto);
 
-	// 201 SUCCESS
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseCreated, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseSuccess);
+    // 201 SUCCESS
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseCreated, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseSuccess);
 
-	// 226 SUCCESS
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseImUsed, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseSuccess);
+    // 226 SUCCESS
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseImUsed, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseSuccess);
 
-	// 100 FAILURE
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseContinue, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
+    // 100 FAILURE
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseContinue, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
 
-	// 300 FAILURE
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseMultipleChoices, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
+    // 300 FAILURE
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseMultipleChoices, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
 
-	// 400 FAILURE
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseBadRequest, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
+    // 400 FAILURE
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseBadRequest, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
 
-	// 500 FAILURE
-	ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseInternalServerError, csp::web::EResponseCodes::ResponseOK);
-	EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
+    // 500 FAILURE
+    ResponseBase.SetResponseCode(csp::web::EResponseCodes::ResponseInternalServerError, csp::web::EResponseCodes::ResponseOK);
+    EXPECT_TRUE(ResponseBase.GetResponseCode() == EResponseCode::ResponseFailed);
 }
 
 #endif

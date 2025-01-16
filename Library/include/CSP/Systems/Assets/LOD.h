@@ -42,8 +42,8 @@ namespace csp::systems
 class CSP_API LODAsset
 {
 public:
-	Asset Asset;
-	int Level = 0;
+    Asset Asset;
+    int Level = 0;
 };
 
 /// @ingroup Asset System
@@ -52,37 +52,38 @@ public:
 class CSP_API LODChain
 {
 public:
-	csp::common::String AssetCollectionId;
-	csp::common::Array<LODAsset> LODAssets;
+    csp::common::String AssetCollectionId;
+    csp::common::Array<LODAsset> LODAssets;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
 class CSP_API LODChainResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class AssetSystem;
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retreives the LODChain from the result.
-	const LODChain& GetLODChain() const;
+    /// @brief Retreives the LODChain from the result.
+    const LODChain& GetLODChain() const;
 
-	CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    CSP_NO_EXPORT LODChainResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
 
 private:
-	LODChainResult(void*) {};
+    LODChainResult(void*) {};
 
-	void SetLODChain(const LODChain& Chain);
-	void SetLODChain(LODChain&& Chain);
+    void SetLODChain(const LODChain& Chain);
+    void SetLODChain(LODChain&& Chain);
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	LODChain Chain;
+    LODChain Chain;
 };
 
 /// @brief Callback containing LOD chain data.

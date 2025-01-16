@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 CollisionSpaceComponentScriptInterface::CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

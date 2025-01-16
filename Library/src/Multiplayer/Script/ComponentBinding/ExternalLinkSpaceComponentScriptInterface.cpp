@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 ExternalLinkSpaceComponentScriptInterface::ExternalLinkSpaceComponentScriptInterface(ExternalLinkSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

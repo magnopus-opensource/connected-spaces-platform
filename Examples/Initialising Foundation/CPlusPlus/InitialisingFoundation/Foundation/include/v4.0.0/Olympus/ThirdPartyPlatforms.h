@@ -4,8 +4,8 @@ namespace oly_systems
 {
 enum class EThirdPartyPlatform
 {
-	NONE,
-	UNREAL,
-	UNITY
+    NONE,
+    UNREAL,
+    UNITY
 };
 }
