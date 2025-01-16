@@ -21,22 +21,27 @@
 
 namespace chs = csp::services::generated::userservice;
 
-namespace {
+namespace
+{
 
 void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::systems::SettingsCollection& SettingsCollection)
 {
-    if (Dto.HasUserId()) {
+    if (Dto.HasUserId())
+    {
         SettingsCollection.UserId = Dto.GetUserId();
     }
 
-    if (Dto.HasContext()) {
+    if (Dto.HasContext())
+    {
         SettingsCollection.Context = Dto.GetContext();
     }
 
-    if (Dto.HasSettings()) {
+    if (Dto.HasSettings())
+    {
         const auto& Settings = Dto.GetSettings();
 
-        for (auto& Pair : Settings) {
+        for (auto& Pair : Settings)
+        {
             SettingsCollection.Settings[Pair.first] = Pair.second;
         }
     }
@@ -44,7 +49,8 @@ void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::systems::
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 AvatarType AvatarInfoResult::GetAvatarType() const { return Type; }
 
@@ -63,8 +69,10 @@ void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* 
     auto* SettingsResponse = static_cast<chs::SettingsDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
-        if (Response->GetPayload().GetContent().Length() > 0) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        if (Response->GetPayload().GetContent().Length() > 0)
+        {
             // Build the Dto from the response Json
             SettingsResponse->FromJson(Response->GetPayload().GetContent());
 

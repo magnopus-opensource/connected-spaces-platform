@@ -27,18 +27,22 @@ using namespace csp::common;
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayDefaultInitialisationTest)
 {
-    try {
+    try
+    {
         Array<int> Instance;
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Size(), 0);
         EXPECT_EQ(Instance.Data(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
-class ArrayTestClass {
+class ArrayTestClass
+{
 public:
     ArrayTestClass()
         : SomeField(42) {};
@@ -50,7 +54,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
 {
     constexpr int ARRAY_SIZE = 5;
 
-    try {
+    try
+    {
         Array<ArrayTestClass> Instance(ARRAY_SIZE);
 
         EXPECT_FALSE(Instance.IsEmpty());
@@ -58,10 +63,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeInitialisationTest)
         EXPECT_NE(Instance.Data(), nullptr);
 
         // All elements should be default-initialised
-        for (int i = 0; i < ARRAY_SIZE; ++i) {
+        for (int i = 0; i < ARRAY_SIZE; ++i)
+        {
             EXPECT_EQ(Instance[i].SomeField, 42);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -70,10 +78,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArraySizeTooLargeInitialisationTe
 {
     constexpr size_t ARRAY_SIZE = SIZE_MAX;
 
-    try {
+    try
+    {
         // This should throw an overflow exception because `sizeof(T) * ARRAY_SIZE` is greater than `SIZE_MAX`
         Array<ArrayTestClass> Instance(ARRAY_SIZE);
-    } catch (...) {
+    }
+    catch (...)
+    {
         return;
     }
 
@@ -84,7 +95,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
 {
     constexpr int ARRAY_SIZE = 5;
 
-    try {
+    try
+    {
         int Values[] = { 1, 2, 3, 4, 5 };
         Array<int> Instance(Values, ARRAY_SIZE);
 
@@ -93,24 +105,30 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferInitialisationTest)
         EXPECT_NE(Instance.Data(), nullptr);
 
         // All elements should match those in the provided buffer, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i) {
+        for (int i = 0; i < ARRAY_SIZE; ++i)
+        {
             EXPECT_EQ(Instance[i], Values[i]);
             EXPECT_NE(&Instance[i], &Values[i]);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayBufferNullptrInitialisationTest)
 {
-    try {
+    try
+    {
         Array<int> Instance(nullptr, 5);
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Size(), 0);
         EXPECT_EQ(Instance.Data(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -119,7 +137,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyInitialisationTest)
 {
     constexpr int ARRAY_SIZE = 2;
 
-    try {
+    try
+    {
         Array<int> OtherInstance(ARRAY_SIZE);
         OtherInstance[0] = 1337;
         OtherInstance[1] = 1338;
@@ -131,11 +150,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyInitialisationTest)
         EXPECT_NE(Instance.Data(), nullptr);
 
         // All elements should match those in the other array, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i) {
+        for (int i = 0; i < ARRAY_SIZE; ++i)
+        {
             EXPECT_EQ(Instance[i], OtherInstance[i]);
             EXPECT_NE(&Instance[i], &OtherInstance[i]);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -144,7 +166,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayInitializerListInitialisatio
 {
     constexpr int ARRAY_SIZE = 5;
 
-    try {
+    try
+    {
         int Values[] = { 1, 2, 3, 4, 5 };
         Array<int> Instance = { 1, 2, 3, 4, 5 };
 
@@ -153,10 +176,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayInitializerListInitialisatio
         EXPECT_NE(Instance.Data(), nullptr);
 
         // All elements should match those in the previously-declared array
-        for (int i = 0; i < ARRAY_SIZE; ++i) {
+        for (int i = 0; i < ARRAY_SIZE; ++i)
+        {
             EXPECT_EQ(Instance[i], Values[i]);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -165,7 +191,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyAssignmentTest)
 {
     constexpr int ARRAY_SIZE = 2;
 
-    try {
+    try
+    {
         Array<int> OtherInstance(ARRAY_SIZE);
         OtherInstance[0] = 1337;
         OtherInstance[1] = 1338;
@@ -178,11 +205,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayCopyAssignmentTest)
         EXPECT_NE(Instance.Data(), nullptr);
 
         // All elements should match those in the other array, but should not have the same address
-        for (int i = 0; i < ARRAY_SIZE; ++i) {
+        for (int i = 0; i < ARRAY_SIZE; ++i)
+        {
             EXPECT_EQ(Instance[i], OtherInstance[i]);
             EXPECT_NE(&Instance[i], &OtherInstance[i]);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -191,7 +221,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOfOptionalTest)
 {
     constexpr int ARRAY_SIZE = 2;
 
-    try {
+    try
+    {
         Array<Optional<int>> Instance(ARRAY_SIZE);
         Instance[0] = nullptr;
         Instance[1] = 1337;
@@ -203,7 +234,9 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOfOptionalTest)
         EXPECT_FALSE(Instance[0].HasValue());
         EXPECT_TRUE(Instance[1].HasValue());
         EXPECT_EQ(*Instance[1], 1337);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -212,10 +245,13 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOutOfBoundsTest)
 {
     constexpr int ARRAY_SIZE = 5;
 
-    try {
+    try
+    {
         Array<Optional<int>> Instance(ARRAY_SIZE);
         auto& Element = Instance[ARRAY_SIZE];
-    } catch (const std::out_of_range&) {
+    }
+    catch (const std::out_of_range&)
+    {
         return;
     }
 
@@ -224,7 +260,8 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOutOfBoundsTest)
 
 CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
 {
-    try {
+    try
+    {
         Array<String> Instance = { "asd", "fgh", "jkl", "123" };
 
         auto ConvertedList = Instance.ToList();
@@ -232,11 +269,14 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayToListTest)
         EXPECT_EQ(ConvertedList.Size(), Instance.Size());
 
         // All elements should match those in the array, but should not have the same address
-        for (int i = 0; i < Instance.Size(); ++i) {
+        for (int i = 0; i < Instance.Size(); ++i)
+        {
             EXPECT_EQ(ConvertedList[i], Instance[i]);
             EXPECT_NE(&ConvertedList[i], &Instance[i]);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }

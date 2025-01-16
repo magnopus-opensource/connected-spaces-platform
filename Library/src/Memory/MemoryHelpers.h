@@ -17,7 +17,8 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 template <class T> void ObjectDeleter(T* Obj) { CSP_DELETE(Obj); }
 

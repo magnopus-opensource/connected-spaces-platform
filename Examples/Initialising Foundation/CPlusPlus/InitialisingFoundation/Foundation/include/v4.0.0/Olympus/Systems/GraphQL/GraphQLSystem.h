@@ -4,25 +4,29 @@
 #include "Olympus/Systems/SystemBase.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiBase;
 
 }
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup GraphQL System
 /// @brief Public facing system that allows interfacing with CHS's GraphQL Server.
 /// Offers methods for sending and receiving GraphQL Queries.
 
-class OLY_API OLY_NO_DISPOSE GraphQLSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE GraphQLSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

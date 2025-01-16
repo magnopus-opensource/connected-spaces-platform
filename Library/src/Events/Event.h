@@ -21,9 +21,11 @@
 
 #include <functional>
 
-namespace csp::events {
+namespace csp::events
+{
 
-class CSP_API Event {
+class CSP_API Event
+{
     friend class EventSystem;
 
 public:

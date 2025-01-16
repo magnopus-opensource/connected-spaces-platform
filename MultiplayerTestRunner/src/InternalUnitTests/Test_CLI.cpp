@@ -41,12 +41,17 @@ TEST(CLITest, TestIdentifierRequired)
     std::vector<char*> args = { "MultiplayerTestRunner", "--email", "test@example.com", "--password", "password123", "--space", "space-id-123",
         "--timeout", "60", "--endpoint", "https://example.com" };
 
-    try {
+    try
+    {
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
         EXPECT_EQ(std::string(Exception.what()), std::string("--test is required"));
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 }
@@ -56,12 +61,17 @@ TEST(CLITest, WhenInvalidTestIdentiferThenExceptionThrow)
     std::vector<char*> args
         = { "MultiplayerTestRunner", "--test", "NotARealTestIdentifier", "--email", "test@example.com", "--password", "password123" };
 
-    try {
+    try
+    {
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::INVALID_TEST_SPECIFIER);
         EXPECT_EQ(std::string(Exception.what()), std::string("String `NotARealTestIdentifier` does not match any TestIdentifier"));
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 }
@@ -89,15 +99,20 @@ TEST(CLITest, WhenNoEmailThenError)
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
     std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--password", "password123" };
 
-    try {
+    try
+    {
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         // If there's no credentials file, we'll throw an error.
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
         EXPECT_EQ(std::string(Exception.what()),
             std::string("Both email and password must be provided together. Missing one likely indicates a mistake. Omit both if you "
                         "wish to use the credentials file."));
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 }
@@ -109,14 +124,19 @@ TEST(CLITest, WhenNoPasswordThenError)
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
     std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com" };
 
-    try {
+    try
+    {
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR);
         EXPECT_EQ(std::string(Exception.what()),
             std::string("Both email and password must be provided together. Missing one likely indicates a mistake. Omit both if you "
                         "wish to use the credentials file."));
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 }
@@ -128,19 +148,24 @@ TEST(CLITest, WhenNoCredentialsOnCLIThenCredentialsFileIsQueried)
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
     std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data() };
 
-    try {
+    try
+    {
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
         // If there is a credentials file, we'll now have a username and a password
         EXPECT_TRUE(Settings.LoginEmailAndPassword.first.length() > 0);
         EXPECT_TRUE(Settings.LoginEmailAndPassword.second.length() > 0);
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         // If there's no credentials file, we'll throw an error.
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::COULD_NOT_FIND_CREDENTIALS_FILE);
         EXPECT_EQ(std::string(Exception.what()),
             std::string(
                 "test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
                 "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>"));
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 }

@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/FiducialMarkerSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 FiducialMarkerSpaceComponent::FiducialMarkerSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::FiducialMarker, Parent)

@@ -29,9 +29,11 @@
 #include "Memory/Memory.h"
 #include "signalrclient/signalr_value.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class ClientElectionEventHandler : public csp::events::EventListener {
+class ClientElectionEventHandler : public csp::events::EventListener
+{
 public:
     ClientElectionEventHandler(ClientElectionManager* ElectionManager);
 
@@ -48,9 +50,12 @@ ClientElectionEventHandler::ClientElectionEventHandler(ClientElectionManager* El
 
 void ClientElectionEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
-    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && ElectionManager->IsConnected()) {
+    if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && ElectionManager->IsConnected())
+    {
         ElectionManager->Update();
-    } else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID) {
+    }
+    else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
+    {
     }
 }
 
@@ -76,7 +81,8 @@ ClientElectionManager::~ClientElectionManager()
     csp::events::EventSystem::Get().UnRegisterListener(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID, EventHandler);
     CSP_DELETE(EventHandler);
 
-    for (const auto& Client : Clients) {
+    for (const auto& Client : Clients)
+    {
         ClientProxy* Proxy = Client.second;
         CSP_DELETE(Proxy);
     }
@@ -88,7 +94,8 @@ void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& 
 
     BindNetworkEvents();
 
-    if (Avatars.Size() > 0) {
+    if (Avatars.Size() > 0)
+    {
         // On connect, the first client to enter a space is set as leader
 
         // @note we also assume first client to enter is the last avatar in the array.
@@ -103,7 +110,8 @@ void ClientElectionManager::OnConnect(const SpaceEntitySystem::SpaceEntityList& 
 
 void ClientElectionManager::OnDisconnect()
 {
-    for (const auto& Client : Clients) {
+    for (const auto& Client : Clients)
+    {
         ClientProxy* Proxy = Client.second;
         CSP_DELETE(Proxy);
     }
@@ -117,21 +125,25 @@ void ClientElectionManager::OnLocalClientAdd(const SpaceEntity* ClientAvatar, co
 
     bool IsFirstClient = false;
 
-    if (Avatars.Size() == 1) {
+    if (Avatars.Size() == 1)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "IsFirstClient=true");
 
         // If there is just one avatar, then it should be us,
         // So we we'll will assume the leadership role for now
         // pending negotiation if/when other clients connect
         IsFirstClient = true;
-    } else {
+    }
+    else
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "IsFirstClient=false : Num Avatars %d", Avatars.Size());
     }
 
     ClientProxy* Client = AddClientUsingAvatar(ClientAvatar);
     LocalClient = Client;
 
-    if (IsFirstClient) {
+    if (IsFirstClient)
+    {
         // We are the first (and currently only client), so just start acting as leader
         SetLeader(LocalClient);
     }
@@ -163,7 +175,8 @@ void ClientElectionManager::OnObjectRemove(const SpaceEntity* Object, const Spac
 
 ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* ClientAvatar)
 {
-    if (ClientAvatar == nullptr) {
+    if (ClientAvatar == nullptr)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Error, "Invalid entity pointer");
         return nullptr;
     }
@@ -174,7 +187,8 @@ ClientProxy* ClientElectionManager::AddClientUsingAvatar(const SpaceEntity* Clie
 
 void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar)
 {
-    if (ClientAvatar == nullptr) {
+    if (ClientAvatar == nullptr)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Error, "Invalid entity pointer");
         return;
     }
@@ -186,7 +200,8 @@ void ClientElectionManager::RemoveClientUsingAvatar(const SpaceEntity* ClientAva
 
 ClientProxy* ClientElectionManager::FindClientUsingAvatar(const SpaceEntity* ClientAvatar)
 {
-    if (ClientAvatar == nullptr) {
+    if (ClientAvatar == nullptr)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Error, "Invalid entity pointer");
         return nullptr;
     }
@@ -201,16 +216,20 @@ ClientProxy* ClientElectionManager::AddClientUsingId(int64_t ClientId)
 
     ClientProxy* Client = nullptr;
 
-    if (Clients.find(ClientId) == Clients.end()) {
+    if (Clients.find(ClientId) == Clients.end())
+    {
         Client = CSP_NEW ClientProxy(ClientId, this);
         Clients.insert(ClientMap::value_type(ClientId, Client));
 
-        if ((LocalClient != nullptr) && (Leader != nullptr)) {
+        if ((LocalClient != nullptr) && (Leader != nullptr))
+        {
             // If a new client connects when we have a valid leader then notify them who it is
             // If it receives conflicting information then it will trigger a re-negotiation
             LocalClient->NotifyLeader(ClientId, Leader->GetId());
         }
-    } else {
+    }
+    else
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Warning, "Client already exists");
     }
 
@@ -223,20 +242,26 @@ void ClientElectionManager::RemoveClientUsingId(int64_t ClientId)
 
     const auto ClientIt = Clients.find(ClientId);
 
-    if (ClientIt != Clients.end()) {
+    if (ClientIt != Clients.end())
+    {
         ClientProxy* Client = ClientIt->second;
 
-        if ((Client == Leader) && (Client != LocalClient)) {
+        if ((Client == Leader) && (Client != LocalClient))
+        {
             // Handle the current leader being removed
             OnLeaderRemoved();
-        } else if (Client == LocalClient) {
+        }
+        else if (Client == LocalClient)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "Local Client %d removed", ClientId);
             LocalClient = nullptr;
         }
 
         CSP_DELETE(Client);
         Clients.erase(ClientId);
-    } else {
+    }
+    else
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Warning, "Client not found");
     }
 }
@@ -245,10 +270,13 @@ ClientProxy* ClientElectionManager::FindClientUsingId(int64_t ClientId)
 {
     const auto ClientIt = Clients.find(ClientId);
 
-    if (ClientIt != Clients.end()) {
+    if (ClientIt != Clients.end())
+    {
         ClientProxy* Client = ClientIt->second;
         return Client;
-    } else {
+    }
+    else
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Warning, "ClientElectionManager::FindClientById Client %d not found", ClientId);
     }
 
@@ -259,7 +287,8 @@ void ClientElectionManager::Update()
 {
     //	CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::Update called");
 
-    switch (TheElectionState) {
+    switch (TheElectionState)
+    {
     case ElectionState::Idle:
         HandleElectionStateIdle();
         break;
@@ -273,7 +302,8 @@ void ClientElectionManager::Update()
         break;
     }
 
-    if (LocalClient) {
+    if (LocalClient)
+    {
         LocalClient->UpdateState();
     }
 
@@ -281,9 +311,11 @@ void ClientElectionManager::Update()
 
     static ClientProxy* LastLeader = nullptr;
 
-    if (Leader != LastLeader) {
+    if (Leader != LastLeader)
+    {
         // Leader has changed
-        if (Leader != nullptr) {
+        if (Leader != nullptr)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "ClientElectionManager::Update - Leader is %d", Leader->GetId());
         }
         LastLeader = Leader;
@@ -298,16 +330,20 @@ ClientProxy* ClientElectionManager::GetLeader() const { return Leader; }
 
 void ClientElectionManager::SetLeader(ClientProxy* Client)
 {
-    if (Client != nullptr) {
+    if (Client != nullptr)
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::SetLeader ClientId=%d", Client->GetId());
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_MSG("ClientElectionManager::SetLeader Client is null");
     }
 
     Leader = Client;
 
     // Notify Scripts ready callback now we have a valid leader
-    if (ScriptSystemReadyCallback) {
+    if (ScriptSystemReadyCallback)
+    {
         ScriptSystemReadyCallback(true);
     }
 }
@@ -321,7 +357,8 @@ void ClientElectionManager::OnLeaderRemoved()
 {
     Leader = nullptr;
 
-    if (LocalClient != nullptr) {
+    if (LocalClient != nullptr)
+    {
         // The current leader has left, so we may need to find a new one
         AsyncNegotiateLeader();
     }
@@ -329,17 +366,20 @@ void ClientElectionManager::OnLeaderRemoved()
 
 void ClientElectionManager::AsyncNegotiateLeader()
 {
-    if (Clients.size() < 2) {
+    if (Clients.size() < 2)
+    {
         CSP_LOG_WARN_MSG("AsyncNegotiateLeader called when no other clients");
         return;
     }
 
-    if (LocalClient == nullptr) {
+    if (LocalClient == nullptr)
+    {
         CSP_LOG_ERROR_MSG("AsyncNegotiateLeader called when no local client");
         return;
     }
 
-    if (TheElectionState != ElectionState::Idle) {
+    if (TheElectionState != ElectionState::Idle)
+    {
         CSP_LOG_ERROR_MSG("AsyncNegotiateLeader called when election already in progress");
         return;
     }
@@ -367,7 +407,8 @@ void ClientElectionManager::HandleElectionStateIdle()
 void ClientElectionManager::HandleElectionStateRequested()
 {
     // Start negotiating with other clients on who should be leader
-    if (LocalClient != nullptr) {
+    if (LocalClient != nullptr)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::VeryVerbose, "HandleElectionStateRequested");
         SetElectionState(ElectionState::Electing);
         LocalClient->StartLeaderElection(Clients);
@@ -381,33 +422,43 @@ void ClientElectionManager::HandleElectionStateElecting()
 
 void ClientElectionManager::OnElectionComplete(int64_t LeaderId)
 {
-    if (TheElectionState != ElectionState::Electing) {
+    if (TheElectionState != ElectionState::Electing)
+    {
         CSP_LOG_WARN_FORMAT("ClientElectionManager::OnElectionComplete called when no election in progress (State=%d)", TheElectionState.load());
     }
 
     SetElectionState(ElectionState::Idle);
 
-    if (Clients.find(LeaderId) != Clients.end()) {
+    if (Clients.find(LeaderId) != Clients.end())
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "OnElectionComplete: Elected Leader is %d", LeaderId);
         SetLeader(Clients[LeaderId]);
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("OnElectionComplete: Unknown leader %d", LeaderId);
     }
 }
 
 void ClientElectionManager::OnLeaderNotification(int64_t LeaderId)
 {
-    if (Leader) {
-        if (Leader->GetId() != LeaderId) {
+    if (Leader)
+    {
+        if (Leader->GetId() != LeaderId)
+        {
             CSP_LOG_ERROR_FORMAT("ClientElectionManager::OnLeaderNotification - Unexpected LeaderId %d", LeaderId);
 
             // Leader Id was not what we were expecting
             // Resolve the conflict by re-negotiating
             AsyncNegotiateLeader();
-        } else {
+        }
+        else
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnLeaderNotification ClientId=%d is as expected", LeaderId);
         }
-    } else {
+    }
+    else
+    {
         ClientProxy* Client = FindClientUsingId(LeaderId);
         SetLeader(Client);
     }
@@ -418,7 +469,8 @@ bool ClientElectionManager::IsConnected() const
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
 
-    if (Connection == nullptr) {
+    if (Connection == nullptr)
+    {
         return false;
     }
 
@@ -454,7 +506,8 @@ void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<Repli
 
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnClientElectionEvent called. Event=%d, Id=%d", EventType, ClientId);
 
-    if (LocalClient != nullptr) {
+    if (LocalClient != nullptr)
+    {
         LocalClient->HandleEvent(EventType, ClientId);
     }
 }
@@ -468,11 +521,15 @@ void ClientElectionManager::OnRemoteRunScriptEvent(const csp::common::Array<Repl
     CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "ClientElectionManager::OnRemoteRunScriptEvent called. ContextId=%lld, Script='%s'",
         ContextId, ScriptText.c_str());
 
-    if (LocalClient != nullptr) {
-        if (IsLocalClientLeader()) {
+    if (LocalClient != nullptr)
+    {
+        if (IsLocalClientLeader())
+        {
             csp::systems::ScriptSystem* TheScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
             TheScriptSystem->RunScript(ContextId, ScriptText);
-        } else {
+        }
+        else
+        {
             CSP_LOG_ERROR_FORMAT("Client %d has received remote script event but is not the Leader", LocalClient->GetId());
         }
     }

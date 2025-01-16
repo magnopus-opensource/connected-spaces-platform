@@ -21,17 +21,20 @@
 #include <map>
 #include <string>
 
-namespace qjs {
+namespace qjs
+{
 class Runtime;
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class ScriptSystem;
 class ScriptContext;
 class IScriptBinding;
 
-class ScriptRuntime {
+class ScriptRuntime
+{
 public:
     using ContextMap = std::map<int64_t, ScriptContext*>;
     using BindingList = std::list<IScriptBinding*>;

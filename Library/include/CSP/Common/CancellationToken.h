@@ -18,11 +18,13 @@
 
 #include "CSP/CSPCommon.h"
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Used with Http requests to managed cancellation states atomically.
 /// Allows a request to be cancelled within the web client if connection is shutdown.
-class CSP_API CancellationToken {
+class CSP_API CancellationToken
+{
 public:
     /// Constructs a CancellationToken.
     CancellationToken();

@@ -20,7 +20,8 @@
 #include "Web/HttpPayload.h"
 #include "Web/WebClient.h"
 
-namespace csp::systems::maintenanceservice {
+namespace csp::systems::maintenanceservice
+{
 MaintenanceApi::MaintenanceApi(csp::web::WebClient* InWebClient)
     : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)
 {

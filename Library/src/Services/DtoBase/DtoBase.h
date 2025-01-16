@@ -22,9 +22,11 @@
 #include <memory>
 #include <vector>
 
-namespace csp::services {
+namespace csp::services
+{
 
-namespace utility {
+namespace utility
+{
     using string_t = csp::common::String;
     using datetime = csp::common::String;
 } // namespace utility
@@ -34,7 +36,8 @@ namespace utility {
 /// Data Transfer objects represent the data being send with each web service call
 /// and this base class defines the functions that convert this data to and from
 /// Json to be sent or recieved as http content
-class DtoBase {
+class DtoBase
+{
 public:
     DtoBase() { }
     virtual ~DtoBase() { }
@@ -43,7 +46,8 @@ public:
     virtual void FromJson(const utility::string_t& Json) { }
 };
 
-class EnumBase {
+class EnumBase
+{
 public:
     EnumBase() { }
     virtual ~EnumBase() { }
@@ -56,7 +60,8 @@ public:
 ///
 /// Used in templated functions when we don't need a Dto object for a CHS method
 /// or the method does not return and content
-class NullDto : public DtoBase {
+class NullDto : public DtoBase
+{
 public:
     NullDto() { }
     virtual ~NullDto() { }

@@ -11,25 +11,37 @@
 #include <map>
 #include <vector>
 
-namespace oly_systems {
+namespace oly_systems
+{
 class SpaceSystem;
 }
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
 
 } // namespace oly_multiplayer
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 class ReplicatedValue;
 class SpaceEntitySystem;
 class ConversationSystem;
 
-enum class EAssetChangeType { Created, Updated, Deleted, MusubiFailed, Invalid, Num };
+enum class EAssetChangeType
+{
+    Created,
+    Updated,
+    Deleted,
+    MusubiFailed,
+    Invalid,
+    Num
+};
 
-class OLY_API AssetDetailBlobParams {
+class OLY_API AssetDetailBlobParams
+{
 public:
     EAssetChangeType ChangeType;
     oly_common::String AssetId;
@@ -38,19 +50,27 @@ public:
     oly_common::String AssetCollectionId;
 };
 
-class OLY_API ConversationSystemParams {
+class OLY_API ConversationSystemParams
+{
 public:
     ConversationMessageType MessageType;
     oly_common::String MessageValue;
 };
 
-enum class ConnectionState { Connecting, Connected, Disconnecting, Disconnected };
+enum class ConnectionState
+{
+    Connecting,
+    Connected,
+    Disconnecting,
+    Disconnected
+};
 
 /**
  * @ingroup Multiplayer
  * @brief Handling of all multiplayer connection functionality, such as connect, disconnect, Entity replication and network events.
  */
-class OLY_API MultiplayerConnection {
+class OLY_API MultiplayerConnection
+{
 public:
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;

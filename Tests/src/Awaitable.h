@@ -28,19 +28,22 @@ using namespace std::chrono_literals;
 
 constexpr std::chrono::duration<int> DefaultTimeout = 40s;
 
-class timeout_exception : public std::runtime_error {
+class timeout_exception : public std::runtime_error
+{
 public:
     using std::runtime_error::runtime_error;
 };
 
-template <typename... CallbackArgs> class Awaitable {
+template <typename... CallbackArgs> class Awaitable
+{
 public:
     typedef std::function<void(CallbackArgs...)> CallbackType;
     typedef std::tuple<typename std::remove_reference_t<CallbackArgs>...> ResultType;
 
     template <typename ClassType> Awaitable(void (ClassType::*Function)(CallbackType), ClassType* Context)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -50,7 +53,8 @@ public:
 
     template <typename ClassType, typename T0> Awaitable(void (ClassType::*Function)(T0, CallbackType), ClassType* Context, const STRIP(T0) & Arg0)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -61,7 +65,8 @@ public:
     template <typename ClassType, typename T0, typename T1>
     Awaitable(void (ClassType::*Function)(T0, T1, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -74,7 +79,8 @@ public:
     Awaitable(
         void (ClassType::*Function)(T0, T1, T2, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1, const DT& Arg2)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -87,7 +93,8 @@ public:
     Awaitable(
         void (ClassType::*Function)(T0, T1, T2, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1, const DT& Arg2)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -99,7 +106,8 @@ public:
     Awaitable(void (ClassType::*Function)(T0, T1, T2, T3, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1,
         const STRIP(T2) & Arg2, const STRIP(T3) & Arg3)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -111,7 +119,8 @@ public:
     Awaitable(void (ClassType::*Function)(T0, T1, T2, T3, T4, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1,
         const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -123,7 +132,8 @@ public:
     Awaitable(void (ClassType::*Function)(T0, T1, T2, T3, T4, T5, CallbackType), ClassType* Context, const STRIP(T0) & Arg0, const STRIP(T1) & Arg1,
         const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4, const STRIP(T5) & Arg5)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -136,7 +146,8 @@ public:
         const STRIP(T1) & Arg1, const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4, const STRIP(T5) & Arg5,
         const STRIP(T6) & Arg6)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -149,7 +160,8 @@ public:
         const STRIP(T1) & Arg1, const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4, const STRIP(T5) & Arg5,
         const STRIP(T6) & Arg6, const STRIP(T7) & Arg7)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -162,7 +174,8 @@ public:
         const STRIP(T1) & Arg1, const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4, const STRIP(T5) & Arg5,
         const STRIP(T6) & Arg6, const STRIP(T7) & Arg7, const STRIP(T8) & Arg8)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -176,7 +189,8 @@ public:
         const STRIP(T1) & Arg1, const STRIP(T2) & Arg2, const STRIP(T3) & Arg3, const STRIP(T4) & Arg4, const STRIP(T5) & Arg5,
         const STRIP(T6) & Arg6, const STRIP(T7) & Arg7, const STRIP(T8) & Arg8, const STRIP(T9) & Arg9)
     {
-        Callback = [this](CallbackArgs... _Args) {
+        Callback = [this](CallbackArgs... _Args)
+        {
             Result = new ResultType(_Args...);
             Completed = true;
         };
@@ -186,7 +200,8 @@ public:
 
     ~Awaitable()
     {
-        if (Result) {
+        if (Result)
+        {
             delete Result;
         }
     }
@@ -209,27 +224,37 @@ public:
     {
 #ifdef CSP_WASM
         // Spawn thread on wasm to prevent wait loop from blocking the async operation
-        std::thread TestThread([&]() {
+        std::thread TestThread(
+            [&]()
+            {
 #endif
-            if (Predicate != nullptr) {
-                Function([this, Predicate](CallbackArgs... _Args) {
-                    if (Predicate(_Args...)) {
-                        Callback(_Args...);
-                    }
-                });
-            } else {
-                Function(Callback);
-            }
+                if (Predicate != nullptr)
+                {
+                    Function(
+                        [this, Predicate](CallbackArgs... _Args)
+                        {
+                            if (Predicate(_Args...))
+                            {
+                                Callback(_Args...);
+                            }
+                        });
+                }
+                else
+                {
+                    Function(Callback);
+                }
 
 #ifdef CSP_WASM
-        });
+            });
 #endif
 
         auto StartTime = std::chrono::system_clock::now();
         auto EndTime = StartTime + Timeout;
 
-        while (!Completed) {
-            if (std::chrono::system_clock::now() >= EndTime) {
+        while (!Completed)
+        {
+            if (std::chrono::system_clock::now() >= EndTime)
+            {
                 throw timeout_exception("Await(): wait exceeded specified timeout");
             }
 

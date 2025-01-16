@@ -15,17 +15,24 @@ int main()
 {
     // Initialise Foundation
     const oly_common::String EndpointRootURI = "https://ogs.magnopus-stg.cloud";
-    if (oly::OlympusFoundation::Initialise(EndpointRootURI, Tenant)) {
+    if (oly::OlympusFoundation::Initialise(EndpointRootURI, Tenant))
+    {
         cout << "Foundation initalised" << endl;
-    } else {
+    }
+    else
+    {
         cout << "Foundation failed to initialise" << endl;
     }
 
-    if (oly::OlympusFoundation::GetIsInitialised()) {
+    if (oly::OlympusFoundation::GetIsInitialised())
+    {
         // Shut down Foundation
-        if (oly::OlympusFoundation::Shutdown) {
+        if (oly::OlympusFoundation::Shutdown)
+        {
             cout << "Foundation shutdown" << endl;
-        } else {
+        }
+        else
+        {
 
             cout << "Foundation failed to shutdown" << endl;
         }

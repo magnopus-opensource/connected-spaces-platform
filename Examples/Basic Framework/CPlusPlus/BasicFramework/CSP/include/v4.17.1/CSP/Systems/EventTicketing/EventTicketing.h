@@ -18,20 +18,31 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Event Ticketing System
 /// @brief Enum representing the third party vendor used for ticketing.
-enum class EventTicketingVendor { Eventbrite = 0, Unknown };
+enum class EventTicketingVendor
+{
+    Eventbrite = 0,
+    Unknown
+};
 
 /// @ingroup Event Ticketing System
 /// @brief Enum representing the status of a ticket where purchased means a ticket has not yet been redeemd
 ///        and redeemed means the ticket has been submitted already.
-enum class TicketStatus { Purchased = 0, Redeemed, Unknown };
+enum class TicketStatus
+{
+    Purchased = 0,
+    Redeemed,
+    Unknown
+};
 
 /// @ingroup Event Ticketing System
 /// @brief Data representation of a ticketed event
-class CSP_API TicketedEvent {
+class CSP_API TicketedEvent
+{
 public:
     TicketedEvent()
         : Vendor(EventTicketingVendor::Unknown)
@@ -53,7 +64,8 @@ public:
 
 /// @ingroup Event Ticketing System
 /// @brief Data representation of a ticket for an event
-class CSP_API EventTicket {
+class CSP_API EventTicket
+{
 public:
     EventTicket()
         : Vendor(EventTicketingVendor::Unknown)
@@ -80,7 +92,8 @@ public:
 
 /// @ingroup Event Ticketing System
 /// @brief Data representation of a third party vendor for ticketed events
-class CSP_API TicketedEventVendorAuthInfo {
+class CSP_API TicketedEventVendorAuthInfo
+{
 public:
     TicketedEventVendorAuthInfo()
         : Vendor(EventTicketingVendor::Unknown)
@@ -99,7 +112,8 @@ public:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a TicketedEvent.
-class CSP_API TicketedEventResult : public csp::systems::ResultBase {
+class CSP_API TicketedEventResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -125,7 +139,8 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
-class CSP_API TicketedEventCollectionResult : public csp::systems::ResultBase {
+class CSP_API TicketedEventCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -151,7 +166,8 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a ticket for an event.
-class CSP_API EventTicketResult : public csp::systems::ResultBase {
+class CSP_API EventTicketResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -177,7 +193,8 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class holding a collection (array) of TicketedEvents.
-class CSP_API SpaceIsTicketedResult : public csp::systems::ResultBase {
+class CSP_API SpaceIsTicketedResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -204,7 +221,8 @@ private:
 
 /// @ingroup Event Ticketing System
 /// @brief Result class providing the oauth2 information required to start authenticating with a ticketed event vendor.
-class CSP_API TicketedEventVendorAuthInfoResult : public csp::systems::ResultBase {
+class CSP_API TicketedEventVendorAuthInfoResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

@@ -24,16 +24,29 @@
 #include "CSP/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the possible playback states for a video player.
-enum class VideoPlayerPlaybackState { Reset = 0, Pause, Play, Num };
+enum class VideoPlayerPlaybackState
+{
+    Reset = 0,
+    Pause,
+    Play,
+    Num
+};
 
 /// @brief Enumerates the actions that can be performed on a video player.
-enum class VideoPlayerActions { VideoBegin, VideoEnd, Num };
+enum class VideoPlayerActions
+{
+    VideoBegin,
+    VideoEnd,
+    Num
+};
 
 /// @brief Enumerates the type of video sources the video player supports.
-enum class VideoPlayerSourceType {
+enum class VideoPlayerSourceType
+{
     /// A video hosted online on a specific URL address.
     URLSource = 0,
     /// A video asset file that can be loaded and played at runtime.
@@ -43,7 +56,8 @@ enum class VideoPlayerSourceType {
 };
 
 /// @brief Enumerates the list of properties that can be replicated for a video player component.
-enum class VideoPlayerPropertyKeys {
+enum class VideoPlayerPropertyKeys
+{
     Name = 0,
     VideoAssetId,
     VideoAssetURL,
@@ -69,7 +83,8 @@ enum class VideoPlayerPropertyKeys {
 
 /// @ingroup VideoPlayerSpaceComponent
 /// @brief Data representation of an VideoPlayerSpaceComponent.
-class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent, public IEnableableComponent {
+class CSP_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent, public IEnableableComponent
+{
 public:
     /// @brief Constructs the video player component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

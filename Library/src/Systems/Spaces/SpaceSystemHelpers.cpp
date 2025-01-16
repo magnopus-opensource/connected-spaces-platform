@@ -25,9 +25,11 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::userservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-namespace SpaceSystemHelpers {
+namespace SpaceSystemHelpers
+{
 
     String GetSpaceMetadataAssetCollectionName(const String& SpaceId) { return String(SPACE_METADATA_ASSET_COLLECTION_NAME_PREFIX) + SpaceId; }
 
@@ -68,7 +70,8 @@ namespace SpaceSystemHelpers {
             return ".svg";
         else if (MimeType == "image/webp")
             return ".webp";
-        else {
+        else
+        {
             CSP_LOG_MSG(LogLevel::Error, "Mimetype File Extension Not Supported");
             return ".buffer";
         }
@@ -79,7 +82,8 @@ namespace SpaceSystemHelpers {
         rapidjson::Document Json;
         Json.Parse(JsonMetadata.c_str());
 
-        if (!Json.IsObject()) {
+        if (!Json.IsObject())
+        {
             CSP_LOG_MSG(LogLevel::Verbose, "Space JSON metadata is not an object! Returning default metadata values...");
 
             OutMapMetadata["site"] = "Void";
@@ -89,14 +93,22 @@ namespace SpaceSystemHelpers {
             return;
         }
 
-        for (const auto& Member : Json.GetObject()) {
-            if (Member.value.IsString()) {
+        for (const auto& Member : Json.GetObject())
+        {
+            if (Member.value.IsString())
+            {
                 OutMapMetadata[Member.name.GetString()] = Member.value.GetString();
-            } else if (Member.value.IsInt()) {
+            }
+            else if (Member.value.IsInt())
+            {
                 OutMapMetadata[Member.name.GetString()] = std::to_string(Member.value.GetInt()).c_str();
-            } else if (Member.value.IsNull()) {
+            }
+            else if (Member.value.IsNull())
+            {
                 OutMapMetadata[Member.name.GetString()] = "";
-            } else {
+            }
+            else
+            {
                 CSP_LOG_FORMAT(LogLevel::Error, "Unsupported JSON type in space metadata! (Key = %s, Value Type = %d)", Member.name.GetString(),
                     Member.value.GetType());
             }
@@ -119,8 +131,10 @@ namespace SpaceSystemHelpers {
     {
         bool IdFound = false;
 
-        for (int i = 0; i < Ids.Size(); ++i) {
-            if (Ids[i] == UserId) {
+        for (int i = 0; i < Ids.Size(); ++i)
+        {
+            if (Ids[i] == UserId)
+            {
                 IdFound = true;
                 break;
             }
@@ -138,7 +152,8 @@ namespace SpaceSystemHelpers {
         auto SpaceId = systems::SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
         // Convert old JSON metadata to key-value metadata
-        if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site")) {
+        if (Metadata.HasKey(systems::SpaceSystemHelpers::SPACE_METADATA_KEY) && !Metadata.HasKey("site"))
+        {
             CSP_LOG_FORMAT(systems::LogLevel::Verbose, "Converting old space metadata (Space ID: %s)", SpaceId.c_str());
 
             const auto& Json = Metadata[systems::SpaceSystemHelpers::SPACE_METADATA_KEY];
@@ -146,7 +161,9 @@ namespace SpaceSystemHelpers {
             ConvertJsonMetadataToMapMetadata(Json, NewMetadata);
 
             SpacesMetadata = NewMetadata;
-        } else {
+        }
+        else
+        {
             SpacesMetadata = Metadata;
         }
 
@@ -158,7 +175,8 @@ namespace SpaceSystemHelpers {
         std::vector<std::shared_ptr<chs::GroupInviteDto>> GroupInvites;
         GroupInvites.reserve(InviteUsers.Size());
 
-        for (auto i = 0; i < InviteUsers.Size(); ++i) {
+        for (auto i = 0; i < InviteUsers.Size(); ++i)
+        {
             auto InviteUser = InviteUsers[i];
 
             auto GroupInvite = std::make_shared<chs::GroupInviteDto>();

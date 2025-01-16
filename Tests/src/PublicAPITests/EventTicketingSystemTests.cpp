@@ -35,7 +35,8 @@ static const csp::common::String TestVendorEventUri = "https://www.eventbrite.co
 static const csp::common::String AlternativeTestVendorEventId = "234567891234";
 static const csp::common::String AlternativeTestVendorEventUri = "https://www.eventbrite.com/e/csp-test-event-tickets-234567891234";
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -526,23 +527,29 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     bool FoundSecond = false;
     bool FoundUnexpected = false;
 
-    for (auto i = 0; i < Events.Size(); ++i) {
+    for (auto i = 0; i < Events.Size(); ++i)
+    {
         auto Event = Result.GetTicketedEvents()[i];
 
         EXPECT_EQ(Event.SpaceId, Space.Id);
         EXPECT_EQ(Event.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
 
-        if (Event.Id == Event1.Id) {
+        if (Event.Id == Event1.Id)
+        {
             EXPECT_EQ(Event.VendorEventId, TestVendorEventId);
             EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri);
             EXPECT_TRUE(Event.IsTicketingActive);
             FoundFirst = true;
-        } else if (Event.Id == Event2.Id) {
+        }
+        else if (Event.Id == Event2.Id)
+        {
             EXPECT_EQ(Event.VendorEventId, AlternativeTestVendorEventId);
             EXPECT_EQ(Event.VendorEventUri, AlternativeTestVendorEventUri);
             EXPECT_FALSE(Event.IsTicketingActive);
             FoundSecond = true;
-        } else {
+        }
+        else
+        {
             FoundUnexpected = true;
         }
     }
@@ -606,24 +613,30 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsTwoEvents
     bool FoundSecond = false;
     bool FoundUnexpected = false;
 
-    for (auto i = 0; i < Events.Size(); ++i) {
+    for (auto i = 0; i < Events.Size(); ++i)
+    {
         auto Event = Result.GetTicketedEvents()[i];
 
         EXPECT_EQ(Event.Vendor, csp::systems::EventTicketingVendor::Eventbrite);
 
-        if (Event.Id == Event1.Id) {
+        if (Event.Id == Event1.Id)
+        {
             EXPECT_EQ(Event.SpaceId, Space1.Id);
             EXPECT_EQ(Event.VendorEventId, TestVendorEventId);
             EXPECT_EQ(Event.VendorEventUri, TestVendorEventUri);
             EXPECT_TRUE(Event.IsTicketingActive);
             FoundFirst = true;
-        } else if (Event.Id == Event2.Id) {
+        }
+        else if (Event.Id == Event2.Id)
+        {
             EXPECT_EQ(Event.SpaceId, Space2.Id);
             EXPECT_EQ(Event.VendorEventId, AlternativeTestVendorEventId);
             EXPECT_EQ(Event.VendorEventUri, AlternativeTestVendorEventUri);
             EXPECT_FALSE(Event.IsTicketingActive);
             FoundSecond = true;
-        } else {
+        }
+        else
+        {
             FoundUnexpected = true;
         }
     }
@@ -682,11 +695,16 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
     auto GetEvent1 = GetResult1.GetTicketedEvents()[0];
 
-    if (GetEvent1.Id == Event1.Id) {
+    if (GetEvent1.Id == Event1.Id)
+    {
         FoundFirst = true;
-    } else if (GetEvent1.Id == Event2.Id) {
+    }
+    else if (GetEvent1.Id == Event2.Id)
+    {
         FoundSecond = true;
-    } else {
+    }
+    else
+    {
         FoundUnexpected = true;
     }
 
@@ -697,11 +715,16 @@ CSP_PUBLIC_TEST(CSPEngine, EventTicketingSystemTests, GetTicketedEventsPaginatio
 
     auto GetEvent2 = GetResult2.GetTicketedEvents()[0];
 
-    if (GetEvent2.Id == Event1.Id) {
+    if (GetEvent2.Id == Event1.Id)
+    {
         FoundFirst = true;
-    } else if (GetEvent2.Id == Event2.Id) {
+    }
+    else if (GetEvent2.Id == Event2.Id)
+    {
         FoundSecond = true;
-    } else {
+    }
+    else
+    {
         FoundUnexpected = true;
     }
 

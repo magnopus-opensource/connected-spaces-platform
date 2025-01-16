@@ -16,7 +16,8 @@
 
 #include "Multiplayer/MultiplayerConstants.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 csp::common::String SequenceConstants::GetHierarchyName()
 {

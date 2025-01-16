@@ -11,24 +11,28 @@
 #include "Olympus/Systems/Spaces/UserRoles.h"
 #include "Olympus/Systems/SystemBase.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiBase;
 
 }
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with CHS's concept of a Group.
 /// Offers methods for creating, deleting and joining spaces.
-class OLY_API OLY_NO_DISPOSE SpaceSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE SpaceSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

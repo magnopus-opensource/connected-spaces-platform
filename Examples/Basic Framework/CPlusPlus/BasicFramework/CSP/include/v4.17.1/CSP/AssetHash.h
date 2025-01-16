@@ -18,7 +18,8 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp {
+namespace csp
+{
 
 /// @brief Generates an asset hash for a given asset id.
 /// Can be used to create a unique integer for an Asset for fast comparison or containers which require hashing.

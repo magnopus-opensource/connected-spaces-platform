@@ -7,7 +7,8 @@
 #include "Olympus/Services/WebService.h"
 #include "Olympus/Systems/Spatial/SpatialDataTypes.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -15,13 +16,18 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-enum class EPointOfInterestType { DEFAULT };
+enum class EPointOfInterestType
+{
+    DEFAULT
+};
 
 /// @ingroup Point Of Interest System
 /// @brief Data representation of a Point Of Interest
-class OLY_API PointOfInterest {
+class OLY_API PointOfInterest
+{
 public:
     PointOfInterest();
 
@@ -45,7 +51,8 @@ public:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information after creating or retrieving a POI.
-class OLY_API POIResult : public oly_services::ResultBase {
+class OLY_API POIResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -66,7 +73,8 @@ private:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information when attempting to get an array of POIs.
-class OLY_API POICollectionResult : public oly_services::ResultBase {
+class OLY_API POICollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

@@ -33,7 +33,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 

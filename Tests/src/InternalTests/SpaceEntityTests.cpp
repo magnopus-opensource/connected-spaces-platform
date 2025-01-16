@@ -39,7 +39,8 @@
 
 using namespace csp::multiplayer;
 
-namespace {
+namespace
+{
 
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
@@ -63,7 +64,8 @@ void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySy
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         EXPECT_EQ(Avatar->GetComponents()->Size(), 1);
 
         auto* AvatarComponent = Avatar->GetComponent(0);
@@ -105,7 +107,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -137,7 +140,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -177,17 +181,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION) {
-                    std::cout << "Position Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+                    {
+                        std::cout << "Position Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
@@ -241,7 +250,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -273,7 +283,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -313,17 +324,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION) {
-                    std::cout << "Rotation Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION)
+                    {
+                        std::cout << "Rotation Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
@@ -377,7 +393,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -409,7 +426,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -449,17 +467,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE) {
-                    std::cout << "Scale Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE)
+                    {
+                        std::cout << "Scale Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
@@ -513,7 +536,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -546,7 +570,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -585,17 +610,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                    std::cout << "Parent Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    {
+                        std::cout << "Parent Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
@@ -648,7 +678,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -679,7 +710,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -718,17 +750,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                    std::cout << "Parent Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    {
+                        std::cout << "Parent Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;
@@ -781,7 +818,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     std::atomic_bool ScriptSystemReady = false;
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cout << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -812,7 +850,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
 	)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cout << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -852,17 +891,22 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
         bool EntityUpdated = false;
 
-        ChildObject->SetUpdateCallback([&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&) {
-            if (Entity->GetName() == "Child Object 1") {
-                if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                    std::cout << "Parent Updated" << std::endl;
-                    EntityUpdated = true;
+        ChildObject->SetUpdateCallback(
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>&)
+            {
+                if (Entity->GetName() == "Child Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                    {
+                        std::cout << "Parent Updated" << std::endl;
+                        EntityUpdated = true;
+                    }
                 }
-            }
-        });
+            });
 
         // Create callback to process pending entity operations
-        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]() {
+        auto EntityUpdatedIsReady = [&EntityUpdated, &EntitySystem]()
+        {
             EntitySystem->ProcessPendingEntityOperations();
 
             std::cout << "Waiting for EntityUpdatedIsReady" << std::endl;

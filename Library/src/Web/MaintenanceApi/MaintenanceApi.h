@@ -18,20 +18,24 @@
 #include "CSP/Common/CancellationToken.h"
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
 
 } // namespace csp::services
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems::maintenanceservice {
-class MaintenanceApi : public csp::services::ApiBase {
+namespace csp::systems::maintenanceservice
+{
+class MaintenanceApi : public csp::services::ApiBase
+{
 public:
     MaintenanceApi(csp::web::WebClient* InWebClient);
     ~MaintenanceApi();

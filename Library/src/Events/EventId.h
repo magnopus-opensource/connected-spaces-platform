@@ -18,9 +18,11 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp::events {
+namespace csp::events
+{
 
-class CSP_API EventId {
+class CSP_API EventId
+{
 public:
     EventId(const char* EventNameSpace, const char* EventName);
 

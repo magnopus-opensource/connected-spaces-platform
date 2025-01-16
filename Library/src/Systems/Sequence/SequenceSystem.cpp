@@ -29,7 +29,8 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace {
+namespace
+{
 std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId,
     const Array<String>& Items, const csp::common::Map<csp::common::String, csp::common::String>& MetaData)
 {
@@ -46,13 +47,16 @@ std::shared_ptr<chs::SequenceDto> CreateSequenceDto(const String& SequenceKey, c
 bool ValidateKey(const String& Key)
 {
     std::string str = Key.c_str();
-    if (str.find("/") != std::string::npos) {
+    if (str.find("/") != std::string::npos)
+    {
         return false;
     }
-    if (str.find("#") != std::string::npos) {
+    if (str.find("#") != std::string::npos)
+    {
         return false;
     }
-    if (str.find("%") != std::string::npos) {
+    if (str.find("%") != std::string::npos)
+    {
         return false;
     }
     return true;
@@ -60,11 +64,13 @@ bool ValidateKey(const String& Key)
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 void SequenceSystem::CreateSequence(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items,
     const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback)
 {
-    if (!ValidateKey(SequenceKey)) {
+    if (!ValidateKey(SequenceKey))
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
             "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -87,7 +93,8 @@ void SequenceSystem::CreateSequence(const String& SequenceKey, const String& Ref
 void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& ReferenceType, const String& ReferenceId, const Array<String>& Items,
     const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequenceResultCallback Callback)
 {
-    if (!ValidateKey(SequenceKey)) {
+    if (!ValidateKey(SequenceKey))
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
             "Cannot create Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -109,21 +116,25 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
 
 void SequenceSystem::RenameSequence(const String& OldSequenceKey, const String& NewSequenceKey, SequenceResultCallback Callback)
 {
-    if (!ValidateKey(OldSequenceKey)) {
+    if (!ValidateKey(OldSequenceKey))
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
             "Cannot rename Sequence. Old Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", OldSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
-    if (!ValidateKey(NewSequenceKey)) {
+    if (!ValidateKey(NewSequenceKey))
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
             "Cannot rename Sequence. New Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", NewSequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
     }
 
-    auto CB = [Callback, NewSequenceKey, this](const SequenceResult& Result) {
-        if (Result.GetResultCode() != csp::systems::EResultCode::Success) {
+    auto CB = [Callback, NewSequenceKey, this](const SequenceResult& Result)
+    {
+        if (Result.GetResultCode() != csp::systems::EResultCode::Success)
+        {
             Callback(Result);
             return;
         }
@@ -150,8 +161,10 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
     const csp::common::Map<csp::common::String, csp::common::String>& MetaData, SequencesResultCallback Callback)
 {
     Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
-    for (size_t i = 0; i < InSequenceKeys.Size(); i++) {
-        if (!ValidateKey(InSequenceKeys[i])) {
+    for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+    {
+        if (!ValidateKey(InSequenceKeys[i]))
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
                 "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", InSequenceKeys[i].c_str());
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -164,11 +177,13 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
 
     // Regexes may also include reserved characters which require encoding.
     Optional<String> Regex;
-    if (InKeyRegex.HasValue()) {
+    if (InKeyRegex.HasValue())
+    {
         Regex = csp::common::Encode::URI(*InKeyRegex);
     }
 
-    if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue()) {
+    if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
+    {
         CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
         return;
@@ -222,7 +237,8 @@ void SequenceSystem::GetAllSequencesContainingItems(
 
 void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallback Callback)
 {
-    if (!ValidateKey(SequenceKey)) {
+    if (!ValidateKey(SequenceKey))
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
             "Cannot get Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"", SequenceKey.c_str());
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequenceResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -241,8 +257,10 @@ void SequenceSystem::GetSequence(const String& SequenceKey, SequenceResultCallba
 void SequenceSystem::DeleteSequences(const Array<String>& InSequenceKeys, NullResultCallback Callback)
 {
     Array<String> EncodedSequenceKeys(InSequenceKeys.Size());
-    for (size_t i = 0; i < InSequenceKeys.Size(); i++) {
-        if (!ValidateKey(InSequenceKeys[i])) {
+    for (size_t i = 0; i < InSequenceKeys.Size(); i++)
+    {
+        if (!ValidateKey(InSequenceKeys[i]))
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error,
                 "Cannot delete Sequence. Key: %s contains invalid characters. Invalid characters are \"/\", \"#\", \"%%\"",
                 InSequenceKeys[i].c_str());
@@ -293,7 +311,8 @@ void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler C
 
 void SequenceSystem::RegisterSystemCallback()
 {
-    if (!SequenceChangedCallback) {
+    if (!SequenceChangedCallback)
+    {
         return;
     }
 
@@ -302,7 +321,8 @@ void SequenceSystem::RegisterSystemCallback()
 
 void SequenceSystem::DeregisterSystemCallback()
 {
-    if (EventBusPtr) {
+    if (EventBusPtr)
+    {
         EventBusPtr->StopListenNetworkEvent("SequenceChanged");
     }
 }
@@ -312,7 +332,8 @@ void SequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
     csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
     SequenceDeserialiser.Parse(EventValues);
 
-    if (SequenceChangedCallback) {
+    if (SequenceChangedCallback)
+    {
         SequenceChangedCallback(SequenceDeserialiser.GetEventParams());
     }
 }

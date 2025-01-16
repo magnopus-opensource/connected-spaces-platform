@@ -4,15 +4,18 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly {
+namespace oly
+{
 
 class OlympusFoundation;
 
 }
 
-namespace oly_common {
+namespace oly_common
+{
 
-class OLY_API MimeTypes {
+class OLY_API MimeTypes
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MimeTypeHelper;
     /** @endcond */
@@ -329,7 +332,8 @@ private:
     MimeTypes();
 };
 
-class OLY_API FileExtensions {
+class OLY_API FileExtensions
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MimeTypeHelper;
     /** @endcond */
@@ -787,7 +791,8 @@ private:
     FileExtensions();
 };
 
-class OLY_API MimeTypeHelper {
+class OLY_API MimeTypeHelper
+{
 public:
     static MimeTypeHelper& Get();
 

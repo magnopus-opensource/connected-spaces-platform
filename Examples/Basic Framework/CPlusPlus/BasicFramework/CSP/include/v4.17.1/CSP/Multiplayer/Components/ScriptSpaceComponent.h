@@ -21,17 +21,30 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the supported scopes of a script.
-enum class ScriptScope { Local = 0, Owner, Num };
+enum class ScriptScope
+{
+    Local = 0,
+    Owner,
+    Num
+};
 
 /// @brief Enumerates the list of properties that can be replicated for a script component.
-enum class ScriptComponentPropertyKeys { ScriptSource = 1, OwnerId, ScriptScope, Num };
+enum class ScriptComponentPropertyKeys
+{
+    ScriptSource = 1,
+    OwnerId,
+    ScriptScope,
+    Num
+};
 
 /// @ingroup ScriptSpaceComponent
 /// @brief Data representation of a ScriptSpaceComponent.
-class CSP_API ScriptSpaceComponent : public ComponentBase {
+class CSP_API ScriptSpaceComponent : public ComponentBase
+{
 public:
     /// @brief Constructs the script space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

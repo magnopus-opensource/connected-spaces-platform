@@ -39,7 +39,8 @@ class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_T
 #endif
 CSP_END_IGNORE
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class SpaceEntitySystem;
 class EntityScript;
 class EntityScriptInterface;
@@ -48,20 +49,23 @@ class EntityScriptInterface;
 ///
 /// Note that this specifically starts from 1 as 0 is reserved for internal purposes.
 /// Any additions should not use 0.
-enum class SpaceEntityType {
+enum class SpaceEntityType
+{
     Avatar = 1,
     Object,
 };
 
 /// @brief Enum used to specify the type of an update operation
-enum class ComponentUpdateType {
+enum class ComponentUpdateType
+{
     Update,
     Add,
     Delete,
 };
 
 // TODO: OF-1005 This is referenced in an unused array in ComponentUpdateInfo but otherwise not used, can we remove?
-class CSP_API PropertyUpdateInfo {
+class CSP_API PropertyUpdateInfo
+{
 public:
     uint32_t PropertyId;
     ComponentUpdateType UpdateType;
@@ -69,7 +73,8 @@ public:
 
 // TODO: OF-1005 The PropertyInfo here seems like it's been commented out and unused for a long time, can we remove this?
 /// @brief Info class that specifies a type of update and the ID of a component the update is applied to.
-class CSP_API ComponentUpdateInfo {
+class CSP_API ComponentUpdateInfo
+{
 public:
     uint16_t ComponentId;
     ComponentUpdateType UpdateType;
@@ -78,7 +83,8 @@ public:
 };
 
 // @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.
-enum SpaceEntityUpdateFlags {
+enum SpaceEntityUpdateFlags
+{
     UPDATE_FLAGS_NAME = 1,
     UPDATE_FLAGS_POSITION = 2,
     UPDATE_FLAGS_ROTATION = 4,
@@ -90,7 +96,8 @@ enum SpaceEntityUpdateFlags {
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
-class CSP_API SpaceEntity {
+class CSP_API SpaceEntity
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;
@@ -294,7 +301,8 @@ public:
     bool Deselect();
 
 private:
-    class DirtyComponent {
+    class DirtyComponent
+    {
     public:
         ComponentBase* Component;
         ComponentUpdateType UpdateType;

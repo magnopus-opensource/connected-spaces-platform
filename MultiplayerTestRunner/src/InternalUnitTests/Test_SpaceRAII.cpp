@@ -26,20 +26,25 @@
 #include <gtest/gtest.h>
 #include <optional>
 
-namespace {
+namespace
+{
 /* Some tests only run if there's a credentials file */
 std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
 {
-    try {
+    try
+    {
         return Utils::LoadTestAccountCredentials();
-    } catch (...) {
+    }
+    catch (...)
+    {
         return {};
     }
 }
 } // namespace
 
 /* Initialze CSP before the suite begins with a fixture */
-class SpaceRAIITest : public ::testing::Test {
+class SpaceRAIITest : public ::testing::Test
+{
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
 };
@@ -47,7 +52,8 @@ protected:
 TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
 {
     std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value()) {
+    if (!Credentials.has_value())
+    {
         GTEST_SKIP() << "No credentials file found, Skipping Test.";
     }
     ::testing::internal::CaptureStdout();
@@ -77,13 +83,18 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenLoggedIn)
 
 TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 {
-    try {
+    try
+    {
         ::testing::internal::CaptureStdout();
         SpaceRAII Space({});
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::FAILED_TO_CREATE_SPACE);
         EXPECT_NE(std::string(Exception.what()).find("HTTP Code: 401 Body: "), std::string::npos);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 
@@ -98,7 +109,8 @@ TEST_F(SpaceRAIITest, TestCreateNewSpaceWhenNotLoggedIn)
 TEST_F(SpaceRAIITest, TestUseExistingSpace)
 {
     std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value()) {
+    if (!Credentials.has_value())
+    {
         GTEST_SKIP() << "No credentials file found, Skipping Test.";
     }
 
@@ -133,14 +145,19 @@ TEST_F(SpaceRAIITest, TestUseInvalidExistingSpace)
 {
     constexpr const char* Invalid_SpaceID = "a-b-c-d-not-a-real-space-id";
 
-    try {
+    try
+    {
         ::testing::internal::CaptureStdout();
         SpaceRAII Space({ Invalid_SpaceID });
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         const std::string what = Exception.what();
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::FAILED_TO_ENTER_SPACE);
         EXPECT_NE(std::string(Exception.what()).find("HTTP Code: 401 Body: "), std::string::npos);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 

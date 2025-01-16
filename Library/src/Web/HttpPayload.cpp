@@ -27,13 +27,15 @@
 #include <regex>
 #include <sstream>
 
-namespace csp::web {
+namespace csp::web
+{
 
 HttpPayload::HttpPayload()
 {
     std::string ResponseContent = csp::CSPFoundation::GetClientUserAgentString().c_str();
 
-    if (ResponseContent.find("Unset") != std::string::npos) {
+    if (ResponseContent.find("Unset") != std::string::npos)
+    {
         CSP_LOG_MSG(csp::systems::LogLevel::Warning,
             "ClientUserAgentInfo was not provided by the client. Please call CSPFoundation::SetClientUserAgentInfo() after initialisation.");
     }
@@ -76,7 +78,8 @@ void HttpPayload::WriteContent(size_t Offset, const char* Data, size_t DataLengt
 {
     const size_t Length = Content.AllocatedMemorySize();
 
-    if (Offset > Length) {
+    if (Offset > Length)
+    {
         // RWD_ASSERT_MSG(false, "Invalid offset %ld in HttpPayload::WriteContent, Len=%ld", Offset, Length);
         return;
     }
@@ -98,7 +101,8 @@ size_t HttpPayload::ReadContent(size_t Offset, void* Data, size_t DataLength) co
 {
     const size_t Length = Content.Length();
 
-    if (Offset > Length) {
+    if (Offset > Length)
+    {
         // RWD_ASSERT_MSG(false, "Invalid offset %ld in HttpPayload::ReadContent, Len=%ld", Offset, Length);
         return 0;
     }
@@ -115,9 +119,12 @@ size_t HttpPayload::ReadContent(size_t Offset, void* Data, size_t DataLength) co
 
 void HttpPayload::AddHeader(const csp::common::String& Key, const csp::common::String& Value)
 {
-    if (Headers.find(Key.c_str()) == Headers.end()) {
+    if (Headers.find(Key.c_str()) == Headers.end())
+    {
         Headers.insert(HeadersMap::value_type(Key.c_str(), Value.c_str()));
-    } else {
+    }
+    else
+    {
         Headers[Key.c_str()] = Value.c_str();
     }
 }
@@ -136,11 +143,13 @@ bool HttpPayload::GetRequiresBearerToken() const { return RequiresBearerToken; }
 
 void HttpPayload::RefreshBearerToken()
 {
-    if (!RequiresBearerToken) {
+    if (!RequiresBearerToken)
+    {
         return;
     }
 
-    if (HttpAuth::GetAccessToken().c_str() != nullptr) {
+    if (HttpAuth::GetAccessToken().c_str() != nullptr)
+    {
         char Str[1024];
         snprintf(Str, 1024, "Bearer %s", HttpAuth::GetAccessToken().c_str());
         AddHeader(CSP_TEXT("Authorization"), CSP_TEXT(Str));
@@ -169,9 +178,12 @@ void HttpPayload::SetBoundary(const csp::common::String& InBoundary) { Boundary 
 bool HttpPayload::IsJsonPayload() const
 {
     const auto& ContentTypeHeader = Headers.find("content-type");
-    if (ContentTypeHeader == Headers.end()) {
+    if (ContentTypeHeader == Headers.end())
+    {
         return false;
-    } else {
+    }
+    else
+    {
         std::regex Regex("^application\\/([a-z]+\\+)?json");
         return std::regex_search(ContentTypeHeader->second.c_str(), Regex);
     }

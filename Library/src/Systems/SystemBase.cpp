@@ -17,7 +17,8 @@
 
 #include "Multiplayer/EventSerialisation.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 SystemBase::SystemBase()
     : WebClient(nullptr)
@@ -57,7 +58,8 @@ void SystemBase::DeregisterSystemCallback()
 
 void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    if (!SystemCallback) {
+    if (!SystemCallback)
+    {
         return;
     }
 

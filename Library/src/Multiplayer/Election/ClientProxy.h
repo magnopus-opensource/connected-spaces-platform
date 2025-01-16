@@ -22,19 +22,25 @@
 #include <list>
 #include <map>
 
-namespace csp::common {
+namespace csp::common
+{
 
 class CancellationToken;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ClientElectionManager;
 
 class SpaceEntity;
 
-enum class ClientElectionState { Idle, Electing };
+enum class ClientElectionState
+{
+    Idle,
+    Electing
+};
 
 constexpr const char* ClientElectionMessage = "ClientElectionMessage";
 constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
@@ -42,7 +48,8 @@ constexpr const char* RemoteRunScriptMessage = "RemoteRunScriptMessage";
 // Default time to wait for a response from an election message
 constexpr const std::chrono::system_clock::duration DefaultElectionTimeOut = std::chrono::milliseconds(2000);
 
-enum class ClientElectionMessageType {
+enum class ClientElectionMessageType
+{
     Election = 0,
     ElectionResponse,
     ElectionLeader,
@@ -55,7 +62,8 @@ using ClientScore = int64_t;
 using ClientId = int64_t;
 using EventId = int64_t;
 
-struct ElectionEvent {
+struct ElectionEvent
+{
     std::atomic<EventId> Id;
     std::atomic<ClientId> TargetClient;
     std::atomic<ClientElectionMessageType> Type;
@@ -64,7 +72,8 @@ struct ElectionEvent {
 using ClientList = std::list<class ClientProxy*>;
 using ClientMap = std::map<ClientId, class ClientProxy*>;
 
-class ClientProxy {
+class ClientProxy
+{
 public:
     ClientProxy(ClientId Id, ClientElectionManager* ElectionManager);
 

@@ -22,9 +22,11 @@
 #include <thread>
 #include <vector>
 
-namespace csp {
+namespace csp
+{
 
-class ITaskQueue {
+class ITaskQueue
+{
 public:
     ITaskQueue() = default;
     virtual ~ITaskQueue() = default;
@@ -33,12 +35,14 @@ public:
     virtual void Shutdown() = 0;
 };
 
-class ThreadPool : public ITaskQueue {
+class ThreadPool : public ITaskQueue
+{
 public:
     explicit ThreadPool(size_t Size)
         : ShutdownFlag(false)
     {
-        while (Size) {
+        while (Size)
+        {
             Threads.emplace_back(Worker(*this));
             Size--;
         }
@@ -65,13 +69,15 @@ public:
         Cond.notify_all();
 
         // Join...
-        for (auto& T : Threads) {
+        for (auto& T : Threads)
+        {
             T.join();
         }
     }
 
 private:
-    struct Worker {
+    struct Worker
+    {
         explicit Worker(ThreadPool& InPool)
             : Pool(InPool)
         {
@@ -79,14 +85,16 @@ private:
 
         void operator()()
         {
-            for (;;) {
+            for (;;)
+            {
                 std::function<void*(void*)> Work;
                 {
                     std::unique_lock<std::mutex> Lock(Pool.Mutex);
 
                     Pool.Cond.wait(Lock, [&] { return !Pool.Jobs.empty() || Pool.ShutdownFlag; });
 
-                    if (Pool.ShutdownFlag && Pool.Jobs.empty()) {
+                    if (Pool.ShutdownFlag && Pool.Jobs.empty())
+                    {
                         break;
                     }
 

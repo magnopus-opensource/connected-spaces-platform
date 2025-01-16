@@ -18,7 +18,8 @@
 
 #include <cmath>
 
-namespace csp::common {
+namespace csp::common
+{
 
 static constexpr float FloatComparatorThreshold = 0.001f;
 

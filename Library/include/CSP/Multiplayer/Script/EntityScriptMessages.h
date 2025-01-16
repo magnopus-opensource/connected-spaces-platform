@@ -15,7 +15,8 @@
  */
 #pragma once
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 CSP_START_IGNORE
 // Entity script messages
 

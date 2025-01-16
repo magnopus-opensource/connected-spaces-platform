@@ -17,14 +17,16 @@
 
 #include <new>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// Allocator base class
 ///
 /// Base class for memory allocators intended to be overriden
 /// to provide different allocator models
 ///
-class Allocator {
+class Allocator
+{
 public:
     Allocator() { }
 

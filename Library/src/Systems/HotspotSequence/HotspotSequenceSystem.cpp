@@ -26,9 +26,11 @@
 #include <regex>
 #include <string>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-namespace {
+namespace
+{
     csp::common::String CreateKey(const csp::common::String& Key, const csp::common::String& SpaceId) { return "Hotspots:" + SpaceId + ":" + Key; }
 
     void DeleteSequences(const std::vector<systems::Sequence>& Sequences, csp::systems::NullResultCallback Callback)
@@ -38,12 +40,15 @@ namespace {
         // Remove necessary sequences
         common::Array<common::String> DeletionKeys(Sequences.size());
 
-        for (size_t i = 0; i < Sequences.size(); ++i) {
+        for (size_t i = 0; i < Sequences.size(); ++i)
+        {
             DeletionKeys[i] = Sequences[i].Key;
         }
 
-        auto DeleteCallback = [Callback, SequenceSystem](const csp::systems::NullResult& DeleteResult) {
-            if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress) {
+        auto DeleteCallback = [Callback, SequenceSystem](const csp::systems::NullResult& DeleteResult)
+        {
+            if (DeleteResult.GetResultCode() == systems::EResultCode::InProgress)
+            {
                 return;
             }
 
@@ -58,15 +63,18 @@ namespace {
     {
         systems::SequenceSystem* SequenceSystem = systems::SystemsManager::Get().GetSequenceSystem();
 
-        for (const auto& Sequence : Sequences) {
+        for (const auto& Sequence : Sequences)
+        {
             // Remove key from items array
             common::Array<common::String> Items = Sequence.Items;
             auto ItemsList = Items.ToList();
             ItemsList.RemoveItem(ItemToRemove);
             Items = ItemsList.ToArray();
 
-            auto UpdateCB = [Callback](const systems::SequenceResult& Result) {
-                if (Result.GetResultCode() == systems::EResultCode::InProgress) {
+            auto UpdateCB = [Callback](const systems::SequenceResult& Result)
+            {
+                if (Result.GetResultCode() == systems::EResultCode::InProgress)
+                {
                     return;
                 }
 
@@ -92,8 +100,10 @@ HotspotSequenceSystem::HotspotSequenceSystem(
 void HotspotSequenceSystem::CreateHotspotGroup(
     const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
 {
-    auto CB = [Callback](const SequenceResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    auto CB = [Callback](const SequenceResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
             Callback(ReturnValue);
@@ -125,16 +135,20 @@ void HotspotSequenceSystem::RenameHotspotGroup(
     auto NewKey = CreateKey(NewGroupName, SpaceId);
     auto SQ = this->SequenceSystem;
 
-    auto CB = [Callback, SQ, NewKey, NewGroupName, SpaceId](const SequenceResult& Result) {
-        if (Result.GetResultCode() != csp::systems::EResultCode::Success) {
+    auto CB = [Callback, SQ, NewKey, NewGroupName, SpaceId](const SequenceResult& Result)
+    {
+        if (Result.GetResultCode() != csp::systems::EResultCode::Success)
+        {
             HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
             Callback(ReturnValue);
             return;
         }
 
-        auto UpdateCB = [Callback, SQ, NewKey](const SequenceResult& Result) {
-            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+        auto UpdateCB = [Callback, SQ, NewKey](const SequenceResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+            {
                 HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
                 // convert SequenceResult To HotspotGroupResultCallback
                 Callback(ReturnValue);
@@ -159,8 +173,10 @@ void HotspotSequenceSystem::RenameHotspotGroup(
 void HotspotSequenceSystem::UpdateHotspotGroup(
     const csp::common::String& GroupName, const csp::common::Array<csp::common::String>& HotspotIds, HotspotGroupResultCallback Callback)
 {
-    auto CB = [Callback](const SequenceResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    auto CB = [Callback](const SequenceResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
             Callback(ReturnValue);
@@ -184,8 +200,10 @@ void HotspotSequenceSystem::UpdateHotspotGroup(
 
 void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName, HotspotGroupResultCallback Callback)
 {
-    auto CB = [Callback](const SequenceResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    auto CB = [Callback](const SequenceResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             HotspotGroupResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
             Callback(ReturnValue);
@@ -206,8 +224,10 @@ void HotspotSequenceSystem::GetHotspotGroup(const csp::common::String& GroupName
 
 void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callback)
 {
-    auto CB = [Callback](const SequencesResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    auto CB = [Callback](const SequencesResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             HotspotGroupsResult ReturnValue(Result.GetResultCode(), Result.GetHttpResultCode());
             // convert SequenceResult To HotspotGroupResultCallback
             Callback(ReturnValue);
@@ -217,7 +237,8 @@ void HotspotSequenceSystem::GetHotspotGroups(HotspotGroupsResultCallback Callbac
 
         csp::common::Array<HotspotGroup> Groups(Data.Size());
 
-        for (size_t i = 0; i < Data.Size(); i++) {
+        for (size_t i = 0; i < Data.Size(); i++)
+        {
             Groups[i].Items = Data[i].Items;
             Groups[i].Name = Data[i].MetaData["Name"];
         }
@@ -252,8 +273,10 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
     // This uses multiple async calls, so ensure this variable exists within this function
     csp::common::String ItemCopy = ItemName;
 
-    auto GetSequencesCallback = [this, Callback, ItemCopy](const systems::SequencesResult& SequencesResult) {
-        if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress) {
+    auto GetSequencesCallback = [this, Callback, ItemCopy](const systems::SequencesResult& SequencesResult)
+    {
+        if (SequencesResult.GetResultCode() == systems::EResultCode::InProgress)
+        {
             return;
         }
 
@@ -264,11 +287,15 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
         SequencesToDelete.reserve(Sequences.Size());
         SequencesToUpdate.reserve(Sequences.Size());
 
-        for (size_t i = 0; i < Sequences.Size(); ++i) {
-            if (Sequences[i].Items.Size() == 1) {
+        for (size_t i = 0; i < Sequences.Size(); ++i)
+        {
+            if (Sequences[i].Items.Size() == 1)
+            {
                 // This is the only item in the sequence, so delete the sequence
                 SequencesToDelete.push_back(Sequences[i]);
-            } else {
+            }
+            else
+            {
                 // There are other items in this sequence, so only remove this item
                 SequencesToUpdate.push_back(Sequences[i]);
             }
@@ -301,7 +328,8 @@ void HotspotSequenceSystem::SetHotspotSequenceChangedCallback(HotspotSequenceCha
 
 void HotspotSequenceSystem::RegisterSystemCallback()
 {
-    if (!HotspotSequenceChangedCallback) {
+    if (!HotspotSequenceChangedCallback)
+    {
         return;
     }
 
@@ -310,7 +338,8 @@ void HotspotSequenceSystem::RegisterSystemCallback()
 
 void HotspotSequenceSystem::DeregisterSystemCallback()
 {
-    if (EventBusPtr) {
+    if (EventBusPtr)
+    {
         EventBusPtr->StopListenNetworkEvent("SequenceChanged");
     }
 }
@@ -324,8 +353,10 @@ void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValu
     // Other CSP callbacks may also need to fire if the sequence change relates to a particular sequence type.
     const csp::common::String Key = SequenceDeserialiser.GetEventParams().Key;
     const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
-    if (SequenceType == "Hotspots") {
-        if (HotspotSequenceChangedCallback) {
+    if (SequenceType == "Hotspots")
+    {
+        if (HotspotSequenceChangedCallback)
+        {
             csp::multiplayer::SequenceHotspotChangedEventDeserialiser HotspotDeserialiser;
             HotspotDeserialiser.Parse(EventValues);
             HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());

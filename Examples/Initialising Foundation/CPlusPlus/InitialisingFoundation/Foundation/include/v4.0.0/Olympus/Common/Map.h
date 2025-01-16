@@ -6,9 +6,11 @@
 
 #include <map>
 
-namespace oly_common {
+namespace oly_common
+{
 
-template <typename TKey, typename TValue> class OLY_API Map {
+template <typename TKey, typename TValue> class OLY_API Map
+{
     using MapType = std::map<TKey, TValue>;
 
     /*class Item
@@ -45,7 +47,8 @@ public:
         Container = (MapType*)oly_memory::DllAlloc(sizeof(MapType));
         new (Container) MapType;
 
-        for (const auto& Pair : Values) {
+        for (const auto& Pair : Values)
+        {
             Container->emplace(Pair.first, Pair.second);
         }
     }
@@ -62,7 +65,8 @@ public:
 
     OLY_NO_EXPORT Map<TKey, TValue>& operator=(const Map<TKey, TValue>& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
@@ -74,7 +78,8 @@ public:
 
     OLY_NO_EXPORT Map<TKey, TValue>& operator=(Map<TKey, TValue>&& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
@@ -94,7 +99,8 @@ public:
         new (Keys) oly_common::Array<TKey>(Container->size());
         int i = 0;
 
-        for (const auto& Pair : *Container) {
+        for (const auto& Pair : *Container)
+        {
             Keys->operator[](i++) = Pair.first;
         }
 
@@ -107,7 +113,8 @@ public:
         new (Values) oly_common::Array<TValue>(Container->size());
         int i = 0;
 
-        for (const auto& Pair : *Container) {
+        for (const auto& Pair : *Container)
+        {
             Values->operator[](i++) = Pair.second;
         }
 
@@ -116,7 +123,8 @@ public:
 
     void Remove(const TKey& Key)
     {
-        if (HasKey(Key)) {
+        if (HasKey(Key))
+        {
             Container->erase(Key);
         }
     }

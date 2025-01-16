@@ -33,7 +33,8 @@
 
 using namespace csp::multiplayer;
 
-namespace {
+namespace
+{
 
 void OnConnect();
 void OnDisconnect(bool ok);
@@ -747,8 +748,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
     bool ConversationNewMessagecallbackCalled = false;
     csp::common::String ConversationId;
 
-    auto ConversationNewMessageCallback = [&ConversationNewMessagecallbackCalled, &ConversationId](const ConversationSystemParams& Info) {
-        if (ConversationNewMessagecallbackCalled) {
+    auto ConversationNewMessageCallback = [&ConversationNewMessagecallbackCalled, &ConversationId](const ConversationSystemParams& Info)
+    {
+        if (ConversationNewMessagecallbackCalled)
+        {
             return;
         }
         EXPECT_EQ(Info.MessageType, ConversationMessageType::NewMessage);
@@ -806,7 +809,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationNewMessageNetwor
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!ConversationNewMessagecallbackCalled && TestTime < 20) {
+    while (!ConversationNewMessagecallbackCalled && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();
@@ -879,9 +883,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
     csp::common::String ConversationId;
     csp::common::String MessageId;
 
-    auto ConversationDeleteMessageCallback = [&ConversationDeleteMessagecallbackCalled, &MessageId](const ConversationSystemParams& Info) {
-        if (Info.MessageType == ConversationMessageType::DeleteMessage) {
-            if (ConversationDeleteMessagecallbackCalled) {
+    auto ConversationDeleteMessageCallback = [&ConversationDeleteMessagecallbackCalled, &MessageId](const ConversationSystemParams& Info)
+    {
+        if (Info.MessageType == ConversationMessageType::DeleteMessage)
+        {
+            if (ConversationDeleteMessagecallbackCalled)
+            {
                 return;
             }
 
@@ -946,7 +953,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteMessageNet
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!ConversationDeleteMessagecallbackCalled && TestTime < 20) {
+    while (!ConversationDeleteMessagecallbackCalled && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();
@@ -1020,17 +1028,20 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
     csp::common::String MessageId;
 
     auto ConversationDeleteConversationCallback
-        = [&ConversationDeleteConversationcallbackCalled, &ConversationId](const ConversationSystemParams& Info) {
-              if (Info.MessageType == ConversationMessageType::DeleteConversation) {
-                  if (ConversationDeleteConversationcallbackCalled) {
-                      return;
-                  }
+        = [&ConversationDeleteConversationcallbackCalled, &ConversationId](const ConversationSystemParams& Info)
+    {
+        if (Info.MessageType == ConversationMessageType::DeleteConversation)
+        {
+            if (ConversationDeleteConversationcallbackCalled)
+            {
+                return;
+            }
 
-                  EXPECT_EQ(Info.MessageValue, ConversationId);
+            EXPECT_EQ(Info.MessageValue, ConversationId);
 
-                  ConversationDeleteConversationcallbackCalled = true;
-              }
-          };
+            ConversationDeleteConversationcallbackCalled = true;
+        }
+    };
 
     ConversationSystem* ConversationSystem = Connection->GetConversationSystem();
 
@@ -1090,7 +1101,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, ConversationDeleteConversati
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!ConversationDeleteConversationcallbackCalled && TestTime < 20) {
+    while (!ConversationDeleteConversationcallbackCalled && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();
@@ -1141,14 +1153,16 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
     csp::common::String MessageId;
 
     auto ConversationConversationInformationCallback
-        = [&ConversationConversationInfocallbackCalled, &ConversationId](const ConversationSystemParams& Info) {
-              if (ConversationConversationInfocallbackCalled) {
-                  return;
-              }
-              EXPECT_EQ(Info.MessageType, ConversationMessageType::ConversationInformation);
-              EXPECT_EQ(Info.MessageValue, ConversationId);
-              ConversationConversationInfocallbackCalled = true;
-          };
+        = [&ConversationConversationInfocallbackCalled, &ConversationId](const ConversationSystemParams& Info)
+    {
+        if (ConversationConversationInfocallbackCalled)
+        {
+            return;
+        }
+        EXPECT_EQ(Info.MessageType, ConversationMessageType::ConversationInformation);
+        EXPECT_EQ(Info.MessageValue, ConversationId);
+        ConversationConversationInfocallbackCalled = true;
+    };
 
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -1265,7 +1279,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!ConversationConversationInfocallbackCalled && TestTime < 20) {
+    while (!ConversationConversationInfocallbackCalled && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();
@@ -1313,8 +1328,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
     csp::common::String ConversationId;
     csp::common::String MessageId;
 
-    auto ConversationMessageInformationCallback = [&ConversationMessageInfoCallbackCalled, &MessageId](const ConversationSystemParams& Info) {
-        if (ConversationMessageInfoCallbackCalled || Info.MessageType == ConversationMessageType::NewMessage) {
+    auto ConversationMessageInformationCallback = [&ConversationMessageInfoCallbackCalled, &MessageId](const ConversationSystemParams& Info)
+    {
+        if (ConversationMessageInfoCallbackCalled || Info.MessageType == ConversationMessageType::NewMessage)
+        {
             return;
         }
 
@@ -1409,7 +1426,8 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateMessageInfo)
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!ConversationMessageInfoCallbackCalled && TestTime < 20) {
+    while (!ConversationMessageInfoCallbackCalled && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();

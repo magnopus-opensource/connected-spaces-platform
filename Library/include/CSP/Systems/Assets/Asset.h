@@ -23,7 +23,8 @@
 
 #include <functional>
 
-namespace csp::web {
+namespace csp::web
+{
 
 struct IWebClient;
 class HttpPayload;
@@ -31,7 +32,8 @@ class WebClient;
 
 } // namespace csp::web
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
@@ -41,12 +43,28 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief Asset type enum, defines the allowed and implemented types of assets.
-enum class EAssetType { IMAGE, THUMBNAIL, SIMULATION, MODEL, VIDEO, SCRIPT_LIBRARY, HOLOCAP_VIDEO, HOLOCAP_AUDIO, AUDIO, GAUSSIAN_SPLAT };
+enum class EAssetType
+{
+    IMAGE,
+    THUMBNAIL,
+    SIMULATION,
+    MODEL,
+    VIDEO,
+    SCRIPT_LIBRARY,
+    HOLOCAP_VIDEO,
+    HOLOCAP_AUDIO,
+    AUDIO,
+    GAUSSIAN_SPLAT
+};
 
-enum class EAssetPlatform { DEFAULT };
+enum class EAssetPlatform
+{
+    DEFAULT
+};
 
 /// @brief Converts a received DTO type into a Connected Spaces Platform enum EAssetType.
 /// @param DTOAssetDetailType : The string defining the asset type given via the DTO.
@@ -61,7 +79,8 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset which maps to a PrototypeService::AssetDetail.
-class CSP_API Asset {
+class CSP_API Asset
+{
 public:
     Asset();
     Asset(const Asset& Other) = default;
@@ -85,7 +104,8 @@ public:
 };
 
 /// @brief Defines a base data source for an Asset, attributing a mime type and providing functionality for uploading the data.
-CSP_INTERFACE class CSP_API AssetDataSource {
+CSP_INTERFACE class CSP_API AssetDataSource
+{
 public:
     /// @brief Gets the mime type of this data source
     /// @return returns a string representing the mime type set for this data source.
@@ -105,7 +125,8 @@ protected:
 
 /// @ingroup Asset System
 /// @brief A file based data source for Assets, handles uploading a file based on a file path.
-class CSP_API FileAssetDataSource : public AssetDataSource {
+class CSP_API FileAssetDataSource : public AssetDataSource
+{
 public:
     /** @name Data Values
      *
@@ -129,7 +150,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief A buffer based data source for Assets, handles uploading a file based on a given buffer.
-class CSP_API BufferAssetDataSource : public AssetDataSource {
+class CSP_API BufferAssetDataSource : public AssetDataSource
+{
 public:
     BufferAssetDataSource();
 
@@ -155,7 +177,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset.
-class CSP_API AssetResult : public csp::systems::ResultBase {
+class CSP_API AssetResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 
@@ -188,7 +211,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of assets.
-class CSP_API AssetsResult : public csp::systems::ResultBase {
+class CSP_API AssetsResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -219,7 +243,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to upload an asset.
-class CSP_API UriResult : public csp::systems::ResultBase {
+class CSP_API UriResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class SpaceSystem;
@@ -257,7 +282,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download asset data.
-class CSP_API AssetDataResult : public csp::systems::ResultBase {
+class CSP_API AssetDataResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

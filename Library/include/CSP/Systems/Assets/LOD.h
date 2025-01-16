@@ -23,7 +23,8 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
@@ -33,11 +34,13 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Asset System
 /// @brief An LODAsset represents an asset for a singular LOD level, and contains both the data and the specified LOD level.
-class CSP_API LODAsset {
+class CSP_API LODAsset
+{
 public:
     Asset Asset;
     int Level = 0;
@@ -46,7 +49,8 @@ public:
 /// @ingroup Asset System
 /// @brief An LODChain represents a set of Asset Levels of Detail, with the intention of operating similarly to that of video game LOD systems.
 /// It stores an ID for the asset collection containing the assets, and an array of LODAssets that represent the LOD structure.
-class CSP_API LODChain {
+class CSP_API LODChain
+{
 public:
     csp::common::String AssetCollectionId;
     csp::common::Array<LODAsset> LODAssets;
@@ -54,7 +58,8 @@ public:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
-class CSP_API LODChainResult : public csp::systems::ResultBase {
+class CSP_API LODChainResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

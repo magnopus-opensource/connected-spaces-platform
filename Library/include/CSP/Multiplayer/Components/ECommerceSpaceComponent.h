@@ -23,16 +23,23 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an ECommerce component.
-enum class ECommercePropertyKeys { Position = 0, ProductId, Num };
+enum class ECommercePropertyKeys
+{
+    Position = 0,
+    ProductId,
+    Num
+};
 
 // @ingroup ECommerceSpaceComponent
 /// @brief Can be used alongside CSP's Stripe integration to add e-commerce to your space.
 ///
 /// This component is used to represent physical objects that can be purchased as virtual items in the environment.
-class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent {
+class CSP_API ECommerceSpaceComponent : public ComponentBase, public IPositionComponent
+{
 public:
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

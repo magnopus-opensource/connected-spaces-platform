@@ -27,7 +27,8 @@
  * This type will create a new random space upon construction if a SpaceId is not set.
  * If a SpaceID is set, this type only joins and leaves the room, not destroying it, as it is assumed to already exist.
  */
-class SpaceRAII {
+class SpaceRAII
+{
 public:
     SpaceRAII(std::optional<std::string> SpaceId);
     ~SpaceRAII();

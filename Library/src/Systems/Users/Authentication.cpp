@@ -35,7 +35,8 @@ using namespace std::chrono;
 namespace chs = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 LoginState::LoginState()
     : State(ELoginState::LoggedOut)
@@ -69,7 +70,8 @@ LoginState::~LoginState() { CSP_DELETE(AccessTokenRefreshTime); }
 
 bool LoginState::RefreshNeeded() const
 {
-    if (AccessTokenRefreshTime->IsEpoch()) {
+    if (AccessTokenRefreshTime->IsEpoch())
+    {
         return false;
     }
 
@@ -97,11 +99,13 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
     auto AuthResponse = static_cast<chs::AuthDto*>(ApiResponse->GetDto());
     const web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         AuthResponse->FromJson(Response->GetPayload().GetContent());
 
-        if (State) {
+        if (State)
+        {
             State->State = ELoginState::LoggedIn;
             State->AccessToken = AuthResponse->GetAccessToken();
             State->RefreshToken = AuthResponse->GetRefreshToken();
@@ -112,7 +116,8 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             const DateTime Expiry(AuthResponse->GetAccessTokenExpiresAt());
             const DateTime CurrentTime(DateTime::UtcTimeNow());
 
-            if (CurrentTime >= Expiry) {
+            if (CurrentTime >= Expiry)
+            {
                 CSP_LOG_FORMAT(LogLevel::Error, "AccessToken Expired: %s %s", AuthResponse->GetAccessToken().c_str(),
                     AuthResponse->GetAccessTokenExpiresAt().c_str());
 
@@ -126,7 +131,8 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             system_clock::time_point RefreshTimepoint = Expiry.GetTimePoint() - system_clock::duration(5min);
             DateTime RefreshTime(RefreshTimepoint);
 
-            if (RefreshTime >= Expiry) {
+            if (RefreshTime >= Expiry)
+            {
                 CSP_LOG_FORMAT(LogLevel::Error, "RefreshToken Expired: %s %s", AuthResponse->GetRefreshToken().c_str(),
                     AuthResponse->GetRefreshTokenExpiresAt().c_str());
 
@@ -142,8 +148,11 @@ void LoginStateResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 
             SystemsManager::Get().GetUserSystem()->NotifyRefreshTokenHasChanged();
         }
-    } else {
-        if (State) {
+    }
+    else
+    {
+        if (State)
+        {
             web::HttpAuth::SetAccessToken("", "", "", "");
 
             State->State = ELoginState::Error;
@@ -170,8 +179,10 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
     ResultBase::OnResponse(ApiResponse);
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
-        if (State) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
+        if (State)
+        {
             State->State = ELoginState::LoggedOut;
             State->AccessToken = "InvalidAccessToken";
             State->RefreshToken = "InvalidRefreshToken";
@@ -184,8 +195,11 @@ void LogoutResult::OnResponse(const services::ApiResponseBase* ApiResponse)
             events::Event* LogoutEvent = events::EventSystem::Get().AllocateEvent(events::USERSERVICE_LOGOUT_EVENT_ID);
             events::EventSystem::Get().EnqueueEvent(LogoutEvent);
         }
-    } else {
-        if (State) {
+    }
+    else
+    {
+        if (State)
+        {
             State->State = ELoginState::Error;
             State->AccessToken = "InvalidAccessToken";
             State->RefreshToken = "InvalidRefreshToken";
@@ -217,17 +231,20 @@ void AgoraUserTokenResult::OnResponse(const services::ApiResponseBase* ApiRespon
     auto AuthResponse = static_cast<chs_aggregation::ServiceResponse*>(ApiResponse->GetDto());
     const web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
         AuthResponse->FromJson(Response->GetPayload().GetContent());
         std::shared_ptr<rapidjson::Document> Result = AuthResponse->GetOperationResult();
 
-        if (!Result) {
+        if (!Result)
+        {
             CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult invalid");
 
             return;
         }
 
-        if (!Result->HasMember("token")) {
+        if (!Result->HasMember("token"))
+        {
             CSP_LOG_MSG(LogLevel::Error, "AgoraUserTokenResult doesn't contain expected member: token");
 
             return;
@@ -244,10 +261,12 @@ void CheckoutSessionUrlResult::OnResponse(const services::ApiResponseBase* ApiRe
     auto CheckoutSessionResponse = static_cast<chs::StripeCheckoutSessionDto*>(ApiResponse->GetDto());
     const web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
         CheckoutSessionResponse->FromJson(Response->GetPayload().GetContent());
 
-        if (CheckoutSessionResponse->HasCheckoutUrl()) {
+        if (CheckoutSessionResponse->HasCheckoutUrl())
+        {
             SetValue(CheckoutSessionResponse->GetCheckoutUrl());
         }
     }
@@ -260,10 +279,12 @@ void CustomerPortalUrlResult::OnResponse(const services::ApiResponseBase* ApiRes
     auto CustomerPortalResponse = static_cast<chs::StripeCustomerPortalDto*>(ApiResponse->GetDto());
     const web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
         CustomerPortalResponse->FromJson(Response->GetPayload().GetContent());
 
-        if (CustomerPortalResponse->HasCustomerPortalUrl()) {
+        if (CustomerPortalResponse->HasCustomerPortalUrl())
+        {
             SetValue(CustomerPortalResponse->GetCustomerPortalUrl());
         }
     }

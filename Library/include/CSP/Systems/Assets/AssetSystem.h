@@ -28,25 +28,29 @@
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 } // namespace csp::services
 
-namespace csp::web {
+namespace csp::web
+{
 
 class RemoteFileManager;
 
 } // namespace csp::web
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class EventBus;
 
 } // namespace csp::multiplayer
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -54,11 +58,13 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
-class CSP_API AssetSystem : public SystemBase {
+class CSP_API AssetSystem : public SystemBase
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

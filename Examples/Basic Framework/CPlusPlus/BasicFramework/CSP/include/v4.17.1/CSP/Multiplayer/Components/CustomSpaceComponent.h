@@ -21,16 +21,23 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a custom component.
-enum class CustomComponentPropertyKeys { ApplicationOrigin, CustomPropertyList, Num };
+enum class CustomComponentPropertyKeys
+{
+    ApplicationOrigin,
+    CustomPropertyList,
+    Num
+};
 
 /// @ingroup CustomSpaceComponent
 /// @brief Data representation of an CustomSpaceComponent.
 /// @note This class is used to replicate properties of primitive types of properties across multiple platforms.
 ///       The supported primitive types are the ones supported by the "ReplicatedValue" class.
-class CSP_API CustomSpaceComponent : public ComponentBase {
+class CSP_API CustomSpaceComponent : public ComponentBase
+{
 public:
     /// @brief Constructs the custom space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

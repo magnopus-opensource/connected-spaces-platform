@@ -21,9 +21,11 @@
 
 #include <unordered_map>
 
-namespace std {
+namespace std
+{
 
-template <> struct hash<csp::events::EventId> {
+template <> struct hash<csp::events::EventId>
+{
     void HashCombine(std::size_t& InHash, std::size_t Other) const { InHash ^= Other + 0x9e3779b9 + (InHash << 6) + (InHash >> 2); }
 
     std::size_t operator()(const csp::events::EventId& Id) const
@@ -37,11 +39,13 @@ template <> struct hash<csp::events::EventId> {
 
 } // namespace std
 
-namespace csp::events {
+namespace csp::events
+{
 
 // Internal Implementation
 
-class EventSystemImpl {
+class EventSystemImpl
+{
 public:
     EventSystemImpl();
     ~EventSystemImpl();
@@ -72,10 +76,13 @@ EventSystemImpl::~EventSystemImpl() { }
 EventDispatcher& EventSystemImpl::GetDispatcher(const EventId& Id)
 {
     DispatcherMap::iterator it = Dispatchers.find(Id);
-    if (it != Dispatchers.end()) {
+    if (it != Dispatchers.end())
+    {
         // Use existing dispatcher
         return it->second;
-    } else {
+    }
+    else
+    {
         // Add new dispatcher
         auto result = Dispatchers.insert(DispatcherMap::value_type(Id, EventDispatcher(Id)));
         return result.first->second;
@@ -100,7 +107,8 @@ void EventSystemImpl::UnRegisterAllListeners() { Dispatchers.clear(); }
 
 void EventSystemImpl::ProcessEvents()
 {
-    while (EventQueue.IsEmpty() == false) {
+    while (EventQueue.IsEmpty() == false)
+    {
         auto QueuedItem = EventQueue.Dequeue();
 
         const Event* QueuedEvent = QueuedItem.value();
@@ -130,35 +138,40 @@ Event* EventSystem::AllocateEvent(const EventId& Id) { return CSP_NEW Event(Id);
 
 void EventSystem::EnqueueEvent(const Event* InEvent)
 {
-    if (Impl) {
+    if (Impl)
+    {
         Impl->EnqueueEvent(InEvent);
     }
 }
 
 void EventSystem::RegisterListener(const EventId& Id, EventListener* InListener)
 {
-    if (Impl) {
+    if (Impl)
+    {
         Impl->RegisterListener(Id, InListener);
     }
 }
 
 void EventSystem::UnRegisterListener(const EventId& Id, EventListener* InListener)
 {
-    if (Impl) {
+    if (Impl)
+    {
         Impl->UnRegisterListener(Id, InListener);
     }
 }
 
 void EventSystem::UnRegisterAllListeners()
 {
-    if (Impl) {
+    if (Impl)
+    {
         Impl->UnRegisterAllListeners();
     }
 }
 
 void EventSystem::ProcessEvents()
 {
-    if (Impl) {
+    if (Impl)
+    {
         Impl->ProcessEvents();
     }
 }

@@ -5,17 +5,20 @@
 #include <map>
 #include <string>
 
-namespace oly_systems {
+namespace oly_systems
+{
 class ScriptSystem;
 }
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class SpaceEntitySystem;
 
 class SpaceEntity;
 class ScriptSpaceComponent;
 
-class OLY_API EntityScript {
+class OLY_API EntityScript
+{
     OLY_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;

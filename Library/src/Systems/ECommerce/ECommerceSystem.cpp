@@ -29,22 +29,29 @@ using namespace csp;
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace {
+namespace
+{
 
 void RemoveUrl(csp::common::String& Url)
 {
-    if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos) {
+    if (std::string(Url.c_str()).find("gid://shopify/Cart/") != std::string::npos)
+    {
         Url = Url.Split('/')[Url.Split('/').Size() - 1];
-    } else if (std::string(Url.c_str()).find("?cart=") != std::string::npos) {
+    }
+    else if (std::string(Url.c_str()).find("?cart=") != std::string::npos)
+    {
         Url = Url.Split('/')[Url.Split('/').Size() - 1].c_str();
-    } else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos) {
+    }
+    else if (std::string(Url.c_str()).find("gid://shopify/ProductVariant/") != std::string::npos)
+    {
         Url = Url.Split('/')[Url.Split('/').Size() - 1];
     }
 }
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 ECommerceSystem::ECommerceSystem()
     : SystemBase(nullptr, nullptr)
@@ -83,7 +90,8 @@ void ECommerceSystem::GetProductInfoCollectionByVariantIds(
 void ECommerceSystem::GetCheckoutInformation(const common::String& SpaceId, const common::String& CartId, CheckoutInfoResultCallback Callback)
 {
     std::string CharacterCheck = CartId.c_str();
-    if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos) {
+    if (CharacterCheck.find("/") != std::string::npos || CharacterCheck.find(R"(\)") != std::string::npos)
+    {
         CSP_LOG_ERROR_MSG("Call to GetCheckoutInformation failed. CartId must NOT include path characters forward or back slash.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CheckoutInfoResult>());
@@ -122,7 +130,8 @@ void ECommerceSystem::GetShopifyStores(const csp::common::Optional<bool>& IsActi
 
     std::optional<bool> ActiveParam;
 
-    if (IsActive.HasValue()) {
+    if (IsActive.HasValue())
+    {
         ActiveParam = *IsActive;
     }
 
@@ -180,7 +189,8 @@ void ECommerceSystem::ValidateShopifyStore(
 
 void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, CartInfoResultCallback Callback)
 {
-    if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty()) {
+    if (CartInformation.SpaceId.IsEmpty() || CartInformation.CartId.IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("SpaceId and CartId inside CartInformation must be populated.")
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<CartInfoResult>());
@@ -190,26 +200,31 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
 
     auto CartUpdateInfo = std::make_shared<chs::ShopifyCartUpdateDto>();
 
-    if (!CartInformation.CartLines.IsEmpty()) {
+    if (!CartInformation.CartLines.IsEmpty())
+    {
         auto CartLinesRemoval = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
         auto CartLinesUpdate = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
         auto CartLinesAdditions = std::vector<std::shared_ptr<chs::ShopifyCartLineDto>>();
 
-        for (int i = 0; i < CartInformation.CartLines.Size(); ++i) {
+        for (int i = 0; i < CartInformation.CartLines.Size(); ++i)
+        {
 
             csp::common::String CartLineId = CartInformation.CartLines[i].CartLineId;
             csp::common::String ProductVariantId = CartInformation.CartLines[i].ProductVariantId;
             RemoveUrl(CartLineId);
             RemoveUrl(ProductVariantId);
 
-            if (CartInformation.CartLines[i].Quantity == 0) {
+            if (CartInformation.CartLines[i].Quantity == 0)
+            {
                 auto CartLineRemoval = std::make_shared<chs::ShopifyCartLineDto>();
 
                 CartLineRemoval->SetShopifyCartLineId(CartLineId);
                 CartLineRemoval->SetProductVariantId(ProductVariantId);
 
                 CartLinesRemoval.push_back(CartLineRemoval);
-            } else if (CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity != 0) {
+            }
+            else if (CartInformation.CartLines[i].CartLineId.IsEmpty() && CartInformation.CartLines[i].Quantity != 0)
+            {
                 auto CartLineAdditions = std::make_shared<chs::ShopifyCartLineDto>();
 
                 CartLineAdditions->SetQuantity(CartInformation.CartLines[i].Quantity);
@@ -217,7 +232,9 @@ void ECommerceSystem::UpdateCartInformation(const CartInfo& CartInformation, Car
                 CartLineAdditions->SetProductVariantId(ProductVariantId);
 
                 CartLinesAdditions.push_back(CartLineAdditions);
-            } else {
+            }
+            else
+            {
                 auto CartLineUpdate = std::make_shared<chs::ShopifyCartLineDto>();
 
                 CartLineUpdate->SetQuantity(CartInformation.CartLines[i].Quantity);

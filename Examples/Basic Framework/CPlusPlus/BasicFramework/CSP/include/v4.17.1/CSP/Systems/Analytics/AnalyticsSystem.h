@@ -25,7 +25,8 @@
 #include <thread>
 #include <vector>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class AnalyticsSystemImpl;
 
@@ -34,7 +35,8 @@ class AnalyticsSystemImpl;
 /// Offers methods for sending events to the provider
 /// Events are added to a queue to be processewd on a different thread
 /// If events are unable to be send to the provider, then they will be held in the queue
-class CSP_API CSP_NO_DISPOSE AnalyticsSystem {
+class CSP_API CSP_NO_DISPOSE AnalyticsSystem
+{
 public:
     AnalyticsSystem();
     ~AnalyticsSystem();

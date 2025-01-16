@@ -18,7 +18,8 @@
 
 #include "Services/AggregationService/Api.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 const HotspotGroup& csp::systems::HotspotGroupResult::GetHotspotGroup() const { return Group; }
 
 void csp::systems::HotspotGroupResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }

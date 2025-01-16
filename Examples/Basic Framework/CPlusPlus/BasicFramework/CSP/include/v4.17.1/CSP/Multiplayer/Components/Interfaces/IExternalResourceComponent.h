@@ -19,10 +19,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the asset and asset collection IDs used for storing external data.
-CSP_INTERFACE class CSP_API IExternalResourceComponent {
+CSP_INTERFACE class CSP_API IExternalResourceComponent
+{
 public:
     /// @brief Gets the ID for the asset used to store external data for this component.
     /// @return csp::common::String : The asset ID.

@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/TextSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 TextSpaceComponent::TextSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Text, Parent)

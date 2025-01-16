@@ -20,7 +20,8 @@
 #include "Multiplayer/Script/ComponentBinding/SplineSpaceComponentScriptInterface.h"
 #include "tinysplinecxx.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Spline, Parent)
 {
@@ -32,10 +33,12 @@ SplineSpaceComponent::SplineSpaceComponent(SpaceEntity* Parent)
 csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float NormalisedDistance)
 {
     csp::common::List<csp::common::Vector3> ListPoints = GetWaypoints();
-    if (ListPoints.Size() != 0) {
+    if (ListPoints.Size() != 0)
+    {
         std::vector<tinyspline::real> Internalpoints;
 
-        for (int i = 0; i < ListPoints.Size(); ++i) {
+        for (int i = 0; i < ListPoints.Size(); ++i)
+        {
             Internalpoints.push_back(static_cast<double>(ListPoints[i].X));
             Internalpoints.push_back(static_cast<double>(ListPoints[i].Y));
             Internalpoints.push_back(static_cast<double>(ListPoints[i].Z));
@@ -45,7 +48,9 @@ csp::common::Vector3 SplineSpaceComponent::GetLocationAlongSpline(float Normalis
         const std::vector<tinyspline::real> SplineResult = spline.eval(NormalisedDistance).result();
 
         return { (float)SplineResult[0], (float)SplineResult[1], (float)SplineResult[2] };
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_MSG("Waypoints not Set.");
 
         return {};
@@ -58,7 +63,8 @@ csp::common::List<csp::common::Vector3> SplineSpaceComponent::GetWaypoints() con
 
     const auto& RepVal = GetIntegerProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints));
 
-    for (int i = 0; i < RepVal; ++i) {
+    for (int i = 0; i < RepVal; ++i)
+    {
         returnList.Append(GetVector3Property(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i)));
     }
 
@@ -69,7 +75,8 @@ void SplineSpaceComponent::SetWaypoints(const csp::common::List<csp::common::Vec
 {
     SetProperty(static_cast<uint32_t>(SplinePropertyKeys::Waypoints), (int64_t)Waypoints.Size());
 
-    for (int i = 0; i < Waypoints.Size(); ++i) {
+    for (int i = 0; i < Waypoints.Size(); ++i)
+    {
         SetProperty(static_cast<uint32_t>((static_cast<int>(SplinePropertyKeys::Waypoints) + 1) + i), Waypoints[i]);
     }
 }

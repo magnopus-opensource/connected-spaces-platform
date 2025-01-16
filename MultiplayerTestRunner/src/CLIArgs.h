@@ -22,16 +22,19 @@
 #include <optional>
 #include <string>
 
-namespace CLI {
+namespace CLI
+{
 class App;
 }
 
-namespace CLIArgs {
+namespace CLIArgs
+{
 
 /*
  * The arguments passed to the runner as command line flags, validated and structured for use throughout the program.
  */
-struct RunnerSettings {
+struct RunnerSettings
+{
     std::pair<std::string, std::string> LoginEmailAndPassword;
     MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestIdentifier;
     std::string Endpoint;

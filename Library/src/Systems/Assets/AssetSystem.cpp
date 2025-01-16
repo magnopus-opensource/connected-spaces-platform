@@ -35,7 +35,8 @@ namespace chs = services::generated::prototypeservice;
 constexpr int DEFAULT_SKIP_NUMBER = 0;
 constexpr int DEFAULT_RESULT_MAX_NUMBER = 100;
 
-namespace {
+namespace
+{
 
 String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCollectionType)
 {
@@ -49,7 +50,8 @@ String ConvertAssetCollectionTypeToString(systems::EAssetCollectionType AssetCol
         return "Comment";
     else if (AssetCollectionType == systems::EAssetCollectionType::SPACE_THUMBNAIL)
         return "SpaceThumbnail";
-    else {
+    else
+    {
         assert(false && "Unsupported AssetCollection Type!");
         return "Default";
     }
@@ -77,7 +79,8 @@ String ConvertAssetTypeToString(systems::EAssetType AssetType)
         return "Audio";
     else if (AssetType == systems::EAssetType::GAUSSIAN_SPLAT)
         return "GaussianSplat";
-    else {
+    else
+    {
         assert(false && "Unsupported Asset Type!");
         return "Image";
     }
@@ -92,21 +95,25 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 
     PrototypeInfo->SetType(ConvertAssetCollectionTypeToString(Type));
 
-    if (SpaceId.HasValue()) {
+    if (SpaceId.HasValue())
+    {
         const std::vector<String> GroupIds = { *SpaceId };
         PrototypeInfo->SetGroupIds(GroupIds);
     }
 
-    if (ParentAssetCollectionId.HasValue()) {
+    if (ParentAssetCollectionId.HasValue())
+    {
         PrototypeInfo->SetParentId(*ParentAssetCollectionId);
     }
 
-    if (Metadata.HasValue()) {
+    if (Metadata.HasValue())
+    {
         std::map<String, String> DTOMetadata;
 
         auto* Keys = Metadata->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx) {
+        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        {
             auto Key = Keys->operator[](idx);
             auto Value = Metadata->operator[](Key);
             DTOMetadata.insert(std::pair<String, String>(Key, Value));
@@ -115,11 +122,13 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
         PrototypeInfo->SetMetadata(DTOMetadata);
     }
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         std::vector<String> TagsVector;
         TagsVector.reserve(Tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx) {
+        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        {
             TagsVector.push_back((*Tags)[idx]);
         }
 
@@ -131,7 +140,8 @@ std::shared_ptr<chs::PrototypeDto> CreatePrototypeDto(const Optional<String>& Sp
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 AssetSystem::AssetSystem()
     : SystemBase(nullptr, nullptr)
@@ -168,7 +178,8 @@ void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId, const
 {
     Optional<String> SpaceId;
 
-    if (InSpaceId.HasValue()) {
+    if (InSpaceId.HasValue())
+    {
         SpaceId = *InSpaceId;
     }
 
@@ -185,7 +196,8 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 {
     const String PrototypeId = AssetCollection.Id;
 
-    if (PrototypeId.IsEmpty()) {
+    if (PrototypeId.IsEmpty())
+    {
         CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
@@ -202,7 +214,8 @@ void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, 
 void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections, const csp::common::String& DestSpaceId,
     bool CopyAsync, AssetCollectionsResultCallback Callback)
 {
-    if (SourceAssetCollections.Size() == 0) {
+    if (SourceAssetCollections.Size() == 0)
+    {
         CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to perform a copy to another space.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
@@ -214,13 +227,15 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
 
     bool AssetCollectionsBelongToSameSpace = true;
 
-    for (size_t i = 1; i < SourceAssetCollections.Size(); ++i) {
+    for (size_t i = 1; i < SourceAssetCollections.Size(); ++i)
+    {
         AssetCollectionsBelongToSameSpace &= SourceAssetCollections[i].SpaceId == SourceSpaceId;
         AssetCollectionIds.emplace_back(SourceAssetCollections[i].Id);
     }
 
     // Verify we have a valid space ID to copy from.
-    if (SourceSpaceId.IsEmpty()) {
+    if (SourceSpaceId.IsEmpty())
+    {
         CSP_LOG_MSG(LogLevel::Error,
             "An asset with no space ID was provided whilst attempting to perform a copy to another space. All assets must have a valid space ID.");
 
@@ -229,7 +244,8 @@ void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection
     }
 
     // Verify that all source asset collections belong to the same space. If not, this qualifies as an unsupported operation.
-    if (!AssetCollectionsBelongToSameSpace) {
+    if (!AssetCollectionsBelongToSameSpace)
+    {
         CSP_LOG_MSG(LogLevel::Error, "All asset collections must belong to the same space for a copy operation.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetCollectionsResult>());
@@ -294,10 +310,12 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 
     StringVec PrototypeIds;
 
-    if (Ids.HasValue()) {
+    if (Ids.HasValue())
+    {
         std::vector<String> Vals;
 
-        for (size_t i = 0; i < Ids->Size(); ++i) {
+        for (size_t i = 0; i < Ids->Size(); ++i)
+        {
             Vals.push_back(Ids->operator[](i));
         }
 
@@ -306,16 +324,19 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 
     std::optional<String> ParentPrototypeId;
 
-    if (ParentId.HasValue()) {
+    if (ParentId.HasValue())
+    {
         ParentPrototypeId = *ParentId;
     }
 
     StringVec PrototypeNames;
 
-    if (Names.HasValue()) {
+    if (Names.HasValue())
+    {
         std::vector<String> Vals;
 
-        for (size_t i = 0; i < Names->Size(); ++i) {
+        for (size_t i = 0; i < Names->Size(); ++i)
+        {
             Vals.push_back(Names->operator[](i));
         }
 
@@ -324,10 +345,12 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 
     StringVec PrototypeTypes;
 
-    if (Types.HasValue()) {
+    if (Types.HasValue())
+    {
         std::vector<String> Vals;
 
-        for (size_t i = 0; i < Types->Size(); ++i) {
+        for (size_t i = 0; i < Types->Size(); ++i)
+        {
             Vals.push_back(ConvertAssetCollectionTypeToString(Types->operator[](i)));
         }
 
@@ -336,10 +359,12 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 
     StringVec PrototypeTags;
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         std::vector<String> Vals;
 
-        for (size_t i = 0; i < Tags->Size(); ++i) {
+        for (size_t i = 0; i < Tags->Size(); ++i)
+        {
             Vals.push_back(Tags->operator[](i));
         }
 
@@ -348,10 +373,12 @@ void AssetSystem::FindAssetCollections(const Optional<Array<String>>& Ids, const
 
     StringVec GroupIds;
 
-    if (SpaceIds.HasValue()) {
+    if (SpaceIds.HasValue())
+    {
         std::vector<String> Vals;
 
-        for (size_t i = 0; i < SpaceIds->Size(); ++i) {
+        for (size_t i = 0; i < SpaceIds->Size(); ++i)
+        {
             Vals.push_back(SpaceIds->operator[](i));
         }
 
@@ -410,12 +437,18 @@ void AssetSystem::CreateAsset(const AssetCollection& AssetCollection, const Stri
     AssetInfo->SetName(Name);
     String InAddressableId;
 
-    if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue()) {
-        if (ThirdPartyPackagedAssetIdentifier.HasValue() && ThirdPartyPlatform.HasValue()) {
+    if (ThirdPartyPackagedAssetIdentifier.HasValue() || ThirdPartyPlatform.HasValue())
+    {
+        if (ThirdPartyPackagedAssetIdentifier.HasValue() && ThirdPartyPlatform.HasValue())
+        {
             InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(*ThirdPartyPlatform));
-        } else if (ThirdPartyPackagedAssetIdentifier.HasValue()) {
+        }
+        else if (ThirdPartyPackagedAssetIdentifier.HasValue())
+        {
             InAddressableId = StringFormat("%s|%d", ThirdPartyPackagedAssetIdentifier->c_str(), static_cast<int>(EThirdPartyPlatform::NONE));
-        } else if (ThirdPartyPlatform.HasValue()) {
+        }
+        else if (ThirdPartyPlatform.HasValue())
+        {
             InAddressableId = StringFormat("%s|%d", "", static_cast<int>(*ThirdPartyPlatform));
         }
 
@@ -456,7 +489,8 @@ void AssetSystem::UpdateAsset(const Asset& Asset, AssetResultCallback Callback)
     Platform.push_back(DefaultPlatform);
     AssetInfo->SetSupportedPlatforms(Platform);
 
-    if (!Asset.ExternalUri.IsEmpty() && !Asset.ExternalMimeType.IsEmpty()) {
+    if (!Asset.ExternalUri.IsEmpty() && !Asset.ExternalMimeType.IsEmpty())
+    {
         AssetInfo->SetExternalUri(Asset.ExternalUri);
         AssetInfo->SetExternalMimeType(Asset.ExternalMimeType);
     }
@@ -515,7 +549,8 @@ void AssetSystem::GetAssetById(const String& AssetCollectionId, const String& As
 void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, const Optional<Array<String>>& AssetIds,
     const Optional<Array<String>>& AssetNames, const Optional<Array<EAssetType>>& AssetTypes, AssetsResultCallback Callback)
 {
-    if (AssetCollectionIds.IsEmpty()) {
+    if (AssetCollectionIds.IsEmpty())
+    {
         CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
@@ -526,39 +561,46 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, c
     std::vector<String> PrototypeIds;
     PrototypeIds.reserve(AssetCollectionIds.Size());
 
-    for (size_t idx = 0; idx < AssetCollectionIds.Size(); ++idx) {
+    for (size_t idx = 0; idx < AssetCollectionIds.Size(); ++idx)
+    {
         PrototypeIds.push_back(AssetCollectionIds[idx]);
     }
 
     std::optional<std::vector<String>> AssetDetailIds;
 
-    if (AssetIds.HasValue()) {
+    if (AssetIds.HasValue())
+    {
         AssetDetailIds.emplace(std::vector<String>());
         AssetDetailIds->reserve(AssetIds->Size());
 
-        for (size_t idx = 0; idx < AssetIds->Size(); ++idx) {
+        for (size_t idx = 0; idx < AssetIds->Size(); ++idx)
+        {
             AssetDetailIds->push_back({ (*AssetIds)[idx] });
         }
     }
 
     std::optional<std::vector<String>> AssetDetailNames;
 
-    if (AssetNames.HasValue()) {
+    if (AssetNames.HasValue())
+    {
         AssetDetailNames.emplace(std::vector<String>());
         AssetDetailNames->reserve(AssetNames->Size());
 
-        for (size_t idx = 0; idx < AssetNames->Size(); ++idx) {
+        for (size_t idx = 0; idx < AssetNames->Size(); ++idx)
+        {
             AssetDetailNames->push_back((*AssetNames)[idx]);
         }
     }
 
     std::optional<std::vector<String>> AssetDetailTypes;
 
-    if (AssetTypes.HasValue()) {
+    if (AssetTypes.HasValue())
+    {
         AssetDetailTypes.emplace(std::vector<String>());
         AssetDetailTypes->reserve(AssetTypes->Size());
 
-        for (size_t idx = 0; idx < AssetTypes->Size(); ++idx) {
+        for (size_t idx = 0; idx < AssetTypes->Size(); ++idx)
+        {
             AssetDetailTypes->push_back(ConvertAssetTypeToString((*AssetTypes)[idx]));
         }
     }
@@ -584,7 +626,8 @@ void AssetSystem::GetAssetsByCriteria(const Array<String>& AssetCollectionIds, c
 
 void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionIds, AssetsResultCallback Callback)
 {
-    if (AssetCollectionIds.IsEmpty()) {
+    if (AssetCollectionIds.IsEmpty())
+    {
         CSP_LOG_MSG(LogLevel::Error, "You have to provide at least one AssetCollectionId");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<AssetsResult>());
@@ -594,7 +637,8 @@ void AssetSystem::GetAssetsByCollectionIds(const Array<String>& AssetCollectionI
 
     std::vector<String> Ids;
 
-    for (int i = 0; i < AssetCollectionIds.Size(); ++i) {
+    for (int i = 0; i < AssetCollectionIds.Size(); ++i)
+    {
         Ids.push_back(AssetCollectionIds[i]);
     }
 
@@ -627,7 +671,8 @@ void AssetSystem::UploadAssetData(
 void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, const Asset& Asset, const AssetDataSource& AssetDataSource,
     CancellationToken& CancellationToken, UriResultCallback Callback)
 {
-    if (Asset.Name.IsEmpty()) {
+    if (Asset.Name.IsEmpty())
+    {
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<UriResult>());
 
         return;
@@ -636,8 +681,10 @@ void AssetSystem::UploadAssetDataEx(const AssetCollection& AssetCollection, cons
     auto FormFile = std::make_shared<web::HttpPayload>();
     AssetDataSource.SetUploadContent(WebClient, FormFile.get(), Asset);
 
-    UriResultCallback InternalCallback = [Callback, Asset](const UriResult& Result) {
-        if (Result.GetFailureReason() != ERequestFailureReason::None) {
+    UriResultCallback InternalCallback = [Callback, Asset](const UriResult& Result)
+    {
+        if (Result.GetFailureReason() != ERequestFailureReason::None)
+        {
             CSP_LOG_ERROR_MSG(String("Asset with Id %s has failed to upload").c_str());
         }
 
@@ -667,10 +714,12 @@ void AssetSystem::DownloadAssetDataEx(const Asset& Asset, CancellationToken& Can
 
 void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Callback)
 {
-    HTTPHeadersResultCallback InternalCallback = [Callback](const HTTPHeadersResult& Result) {
+    HTTPHeadersResultCallback InternalCallback = [Callback](const HTTPHeadersResult& Result)
+    {
         UInt64Result InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success) {
+        if (Result.GetResultCode() == EResultCode::Success)
+        {
             auto& Headers = Result.GetValue();
             auto& ContentLength = Headers["content-length"];
             auto Value = std::strtoull(ContentLength.c_str(), nullptr, 10);
@@ -688,10 +737,12 @@ void AssetSystem::GetAssetDataSize(const Asset& Asset, UInt64ResultCallback Call
 
 CSP_ASYNC_RESULT void AssetSystem::GetLODChain(const AssetCollection& AssetCollection, LODChainResultCallback Callback)
 {
-    auto GetAssetsCallback = [AssetCollection, Callback](const AssetsResult& Result) {
+    auto GetAssetsCallback = [AssetCollection, Callback](const AssetsResult& Result)
+    {
         LODChainResult LODResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success) {
+        if (Result.GetResultCode() == EResultCode::Success)
+        {
             LODChain Chain = CreateLODChainFromAssets(Result.GetAssets(), AssetCollection.Id);
             LODResult.SetLODChain(std::move(Chain));
         }
@@ -706,12 +757,15 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
     const AssetCollection& AssetCollection, const Asset& InAsset, int LODLevel, AssetResultCallback Callback)
 {
     // GetAssetsByCriteria
-    auto GetAssetsCallback = [this, AssetCollection, InAsset, LODLevel, Callback](const AssetsResult& Result) {
-        if (Result.GetResultCode() == EResultCode::InProgress) {
+    auto GetAssetsCallback = [this, AssetCollection, InAsset, LODLevel, Callback](const AssetsResult& Result)
+    {
+        if (Result.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Failed) {
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
             INVOKE_IF_NOT_NULL(Callback, Result);
 
             return;
@@ -720,7 +774,8 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
         const Array<Asset>& Assets = Result.GetAssets();
         LODChain Chain = CreateLODChainFromAssets(Assets, AssetCollection.Id);
 
-        if (!ValidateNewLODLevelForChain(Chain, LODLevel)) {
+        if (!ValidateNewLODLevelForChain(Chain, LODLevel))
+        {
             CSP_LOG_MSG(LogLevel::Error, "LOD level already exists in chain");
 
             INVOKE_IF_NOT_NULL(Callback, Result);
@@ -735,7 +790,8 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
         Asset NewAsset = InAsset;
         Array<String> NewStyles(NewAsset.Styles.Size() + 1);
 
-        for (int i = 0; i < NewAsset.Styles.Size(); ++i) {
+        for (int i = 0; i < NewAsset.Styles.Size(); ++i)
+        {
             NewStyles[i] = NewAsset.Styles[i];
         }
 
@@ -756,7 +812,8 @@ CSP_EVENT void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobCha
 
 void AssetSystem::RegisterSystemCallback()
 {
-    if (!AssetDetailBlobChangedCallback) {
+    if (!AssetDetailBlobChangedCallback)
+    {
         return;
     }
 
@@ -765,14 +822,16 @@ void AssetSystem::RegisterSystemCallback()
 
 void AssetSystem::DeregisterSystemCallback()
 {
-    if (EventBusPtr) {
+    if (EventBusPtr)
+    {
         EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
     }
 }
 
 void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    if (!AssetDetailBlobChangedCallback) {
+    if (!AssetDetailBlobChangedCallback)
+    {
         return;
     }
 

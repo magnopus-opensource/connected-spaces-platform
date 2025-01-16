@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ImageSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ImageSpaceComponent::ImageSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Image, Parent)

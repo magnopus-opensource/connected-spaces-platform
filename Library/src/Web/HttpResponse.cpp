@@ -15,7 +15,8 @@
  */
 #include "Web/HttpResponse.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 HttpResponse::HttpResponse()
     : ResponseCode(EResponseCodes::ResponseNotFound)

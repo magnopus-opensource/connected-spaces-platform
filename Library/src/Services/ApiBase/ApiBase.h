@@ -27,15 +27,21 @@
 #include <memory>
 #include <vector>
 
-namespace csp::services {
+namespace csp::services
+{
 
-enum class EResponseCode : uint8_t { ResponseSuccess, ResponseFailed };
+enum class EResponseCode : uint8_t
+{
+    ResponseSuccess,
+    ResponseFailed
+};
 
 /// @brief Abstract base class for an Api Response
 ///
 /// Base class for Api Responses which handle the translation of Json returned
 /// from an api call to a Dto
-class ApiResponseBase {
+class ApiResponseBase
+{
 public:
     ApiResponseBase(DtoBase* InDto);
     virtual ~ApiResponseBase() = default;
@@ -61,7 +67,8 @@ private:
 
 /// @brief Type for returning Array of DTO objects from a web api call
 /// @tparam DtoType
-template <class DtoType> class DtoArray : public DtoBase {
+template <class DtoType> class DtoArray : public DtoBase
+{
 public:
     DtoArray() { }
 
@@ -73,29 +80,36 @@ public:
     {
         rapidjson::Document JsonDoc;
 
-        if (Json.c_str() == nullptr) {
+        if (Json.c_str() == nullptr)
+        {
             return;
         }
 
         JsonDoc.Parse(Json.c_str());
 
-        if (JsonDoc.IsArray()) {
+        if (JsonDoc.IsArray())
+        {
             Array.resize(JsonDoc.Size());
 
-            for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++) {
+            for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
+            {
                 rapidjson::Value& Val = JsonDoc[i];
 
                 DtoType& Dto = Array[i];
                 Dto.FromJson(csp::web::JsonObjectToString(Val));
             }
-        } else if (JsonDoc.HasMember("items")) {
-            if (!JsonDoc["items"].IsArray()) {
+        }
+        else if (JsonDoc.HasMember("items"))
+        {
+            if (!JsonDoc["items"].IsArray())
+            {
                 return;
             }
 
             Array.resize(JsonDoc["items"].Size());
 
-            for (rapidjson::SizeType i = 0; i < JsonDoc["items"].Size(); i++) {
+            for (rapidjson::SizeType i = 0; i < JsonDoc["items"].Size(); i++)
+            {
                 rapidjson::Value& Val = JsonDoc["items"][i];
 
                 DtoType& Dto = Array[i];
@@ -116,13 +130,15 @@ private:
 ///
 /// Defines how response codes are handled by different Dto types
 /// @tparam DtoType
-template <class DtoType> class ApiResponse : public ApiResponseBase {
+template <class DtoType> class ApiResponse : public ApiResponseBase
+{
 public:
     ApiResponse();
     virtual ~ApiResponse();
 };
 
-class ApiResponseHandlerBase : public csp::web::IHttpResponseHandler {
+class ApiResponseHandlerBase : public csp::web::IHttpResponseHandler
+{
 public:
     ApiResponseHandlerBase();
     virtual ~ApiResponseHandlerBase();
@@ -144,7 +160,8 @@ public:
 /// @tparam ResponseDependType Dependency type to be injected into the Response
 /// @tparam DtoType The Dto type to be used for the response
 template <typename CallbackType, typename ResponseType, typename ResponseDependType, typename DtoType>
-class ApiResponseHandler : public ApiResponseHandlerBase {
+class ApiResponseHandler : public ApiResponseHandlerBase
+{
 public:
     ApiResponseHandler(const CallbackType& InCallback, ResponseDependType* InDepend, csp::web::EResponseCodes InValidResponse)
         : ResponseObject(InDepend)
@@ -192,7 +209,8 @@ using ResponseHandlerPtr = ApiResponseHandlerBase*;
 /// @brief Base class for CHS api definition
 ///
 /// Base class for auto-generated Api definitions
-class ApiBase {
+class ApiBase
+{
 public:
     ApiBase(csp::web::WebClient* InWebClient, const csp::common::String* InRootUri)
         : WebClient(InWebClient)

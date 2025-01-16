@@ -2,9 +2,11 @@
 
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_common {
+namespace oly_common
+{
 
-class OLY_API CancellationToken {
+class OLY_API CancellationToken
+{
 public:
     CancellationToken();
     OLY_NO_EXPORT CancellationToken(const CancellationToken& rhs) = delete;

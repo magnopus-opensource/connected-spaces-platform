@@ -18,13 +18,15 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::common {
+namespace csp::common
+{
 
 Variant::Variant() { ValueType = VariantType::InvalidType; }
 
 Variant::~Variant()
 {
-    if (ValueType == VariantType::String) {
+    if (ValueType == VariantType::String)
+    {
         Value.String.~String();
     }
 }
@@ -75,36 +77,45 @@ Variant::Variant(const Variant& OtherValue) { *this = OtherValue; }
 
 Variant& Variant::operator=(const Variant& InValue)
 {
-    switch (InValue.GetValueType()) {
-    case VariantType::Boolean: {
+    switch (InValue.GetValueType())
+    {
+    case VariantType::Boolean:
+    {
         SetBool(InValue.GetBool());
         break;
     }
-    case VariantType::Integer: {
+    case VariantType::Integer:
+    {
         SetInt(InValue.GetInt());
         break;
     }
-    case VariantType::Float: {
+    case VariantType::Float:
+    {
         SetFloat(InValue.GetFloat());
         break;
     }
-    case VariantType::String: {
+    case VariantType::String:
+    {
         SetString(InValue.GetString());
         break;
     }
-    case VariantType::Vector3: {
+    case VariantType::Vector3:
+    {
         SetVector3(InValue.GetVector3());
         break;
     }
-    case VariantType::Vector4: {
+    case VariantType::Vector4:
+    {
         SetVector4(InValue.GetVector4());
         break;
     }
-    case VariantType::InvalidType: {
+    case VariantType::InvalidType:
+    {
         ValueType = VariantType::InvalidType;
         break;
     }
-    default: {
+    default:
+    {
         assert(0 && "Unhandled replicated value type!");
         break;
     }
@@ -117,33 +128,42 @@ bool Variant::operator==(const Variant& OtherValue) const
 {
     bool IsEqual = GetValueType() == OtherValue.GetValueType();
 
-    if (IsEqual) {
-        switch (OtherValue.GetValueType()) {
-        case VariantType::Boolean: {
+    if (IsEqual)
+    {
+        switch (OtherValue.GetValueType())
+        {
+        case VariantType::Boolean:
+        {
             IsEqual = GetBool() == OtherValue.GetBool();
             break;
         }
-        case VariantType::Integer: {
+        case VariantType::Integer:
+        {
             IsEqual = GetInt() == OtherValue.GetInt();
             break;
         }
-        case VariantType::Float: {
+        case VariantType::Float:
+        {
             IsEqual = GetFloat() == OtherValue.GetFloat();
             break;
         }
-        case VariantType::String: {
+        case VariantType::String:
+        {
             IsEqual = GetString() == OtherValue.GetString();
             break;
         }
-        case VariantType::Vector3: {
+        case VariantType::Vector3:
+        {
             IsEqual = GetVector3() == OtherValue.GetVector3();
             break;
         }
-        case VariantType::Vector4: {
+        case VariantType::Vector4:
+        {
             IsEqual = GetVector4() == OtherValue.GetVector4();
             break;
         }
-        default: {
+        default:
+        {
             assert(0 && "Unhandled replicated value type!");
             break;
         }

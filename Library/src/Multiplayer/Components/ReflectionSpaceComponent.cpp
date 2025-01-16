@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Reflection, Parent)

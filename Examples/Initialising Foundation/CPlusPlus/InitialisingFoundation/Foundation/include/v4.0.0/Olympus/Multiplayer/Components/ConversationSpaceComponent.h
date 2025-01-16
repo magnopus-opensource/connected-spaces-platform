@@ -10,13 +10,26 @@
 
 #include <optional>
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class ConversationPropertyKeys { ConversationId = 0, IsVisible, IsActive, Position, Rotation, Title, Date, NumberOfReplies, Num };
+enum class ConversationPropertyKeys
+{
+    ConversationId = 0,
+    IsVisible,
+    IsActive,
+    Position,
+    Rotation,
+    Title,
+    Date,
+    NumberOfReplies,
+    Num
+};
 
 /// @ingroup ConversationSpaceComponent
 /// @brief Data representation of an ConversationSpaceComponent.
-class OLY_API ConversationSpaceComponent : public ComponentBase {
+class OLY_API ConversationSpaceComponent : public ComponentBase
+{
 public:
     ConversationSpaceComponent(SpaceEntity* Parent);
 

@@ -23,7 +23,8 @@
 #include "TestHelpers.h"
 #include "UserSystemTestHelpers.h"
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -40,7 +41,8 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
     EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::Sequence Sequence = Result.GetSequence();
 
         EXPECT_EQ(Sequence.Key, SequenceKey);
@@ -48,11 +50,13 @@ void CreateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
         EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
         EXPECT_EQ(Sequence.Items.Size(), Items.Size());
         auto Keys = Sequence.MetaData.Keys();
-        for (size_t i = 0; i < Keys->Size(); i++) {
+        for (size_t i = 0; i < Keys->Size(); i++)
+        {
             EXPECT_EQ(Sequence.MetaData[(*Keys)[i]], MetaData[(*Keys)[i]]);
         }
 
-        for (int i = 0; i < Sequence.Items.Size(); ++i) {
+        for (int i = 0; i < Sequence.Items.Size(); ++i)
+        {
             EXPECT_EQ(Sequence.Items[i], Items[i]);
         }
 
@@ -85,7 +89,8 @@ void GetSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::common
 
     csp::systems::Sequence Sequence = Result.GetSequence();
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         EXPECT_EQ(Sequence.Key, SequenceKey);
 
         OutSequence = Sequence;
@@ -106,7 +111,8 @@ void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
     EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::Sequence Sequence = Result.GetSequence();
 
         EXPECT_EQ(Sequence.Key, SequenceKey);
@@ -114,11 +120,13 @@ void UpdateSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
         EXPECT_EQ(Sequence.ReferenceId, ReferenceId);
         EXPECT_EQ(Sequence.Items.Size(), Items.Size());
 
-        for (int i = 0; i < Sequence.Items.Size(); ++i) {
+        for (int i = 0; i < Sequence.Items.Size(); ++i)
+        {
             EXPECT_EQ(Sequence.Items[i], Items[i]);
         }
         auto Keys = Sequence.MetaData.Keys();
-        for (size_t i = 0; i < Keys->Size(); i++) {
+        for (size_t i = 0; i < Keys->Size(); i++)
+        {
             EXPECT_EQ(Sequence.MetaData[(*Keys)[i]], MetaData[(*Keys)[i]]);
         }
         OutSequence = Sequence;
@@ -137,7 +145,8 @@ void RenameSequence(csp::systems::SequenceSystem* SequenceSystem, const csp::com
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
     EXPECT_EQ(Result.GetHttpResultCode(), ExpectedHTTPResponseCode);
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::Sequence Sequence = Result.GetSequence();
 
         EXPECT_EQ(Sequence.Key, NewSequenceKey);
@@ -183,19 +192,23 @@ void GetAllSequencesContainingItems(csp::systems::SequenceSystem* SequenceSystem
     OutSequences = Sequences;
 
     // Search all sequences
-    for (size_t i = 0; i < OutSequences.Size(); ++i) {
+    for (size_t i = 0; i < OutSequences.Size(); ++i)
+    {
         const csp::systems::Sequence& Sequence = OutSequences[i];
         bool Found = false;
 
         // Search all items in sequence
-        for (size_t j = 0; j < Sequence.Items.Size(); ++j) {
+        for (size_t j = 0; j < Sequence.Items.Size(); ++j)
+        {
             const csp::common::String FoundItem = Sequence.Items[j];
 
             // Search all searched items to find a match
-            for (size_t k = 0; k < InItems.Size(); ++k) {
+            for (size_t k = 0; k < InItems.Size(); ++k)
+            {
                 const csp::common::String SearchedItem = InItems[k];
 
-                if (FoundItem == SearchedItem) {
+                if (FoundItem == SearchedItem)
+                {
                     Found = true;
                 }
             }
@@ -212,7 +225,8 @@ void CompareSequences(const csp::systems::Sequence& S1, const csp::systems::Sequ
     EXPECT_EQ(S1.ReferenceId, S2.ReferenceId);
     EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
 
-    for (int i = 0; i < S1.Items.Size(); ++i) {
+    for (int i = 0; i < S1.Items.Size(); ++i)
+    {
         EXPECT_EQ(S1.Items[i], S2.Items[i]);
     }
 }
@@ -940,7 +954,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueSequenceName[256];
     SPRINTF(UniqueSequenceName, "%s-%s", TestSequenceKey, GetUniqueString().c_str());
 
-    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::multiplayer::SequenceChangedParams& Params) {
+    auto CreateCallback = [&CallbackCalled, &UniqueSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    {
         EXPECT_EQ(Params.Key, UniqueSequenceName);
         EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
 
@@ -960,7 +975,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     char UniqueUpdatedSequenceName[256];
     SPRINTF(UniqueUpdatedSequenceName, "%s-%s", TestUpdatedSequenceKey, GetUniqueString().c_str());
 
-    auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params) {
+    auto UpdateCallback = [&CallbackCalled, &Sequence, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    {
         EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Update);
         EXPECT_EQ(Params.Key, std::string(UniqueUpdatedSequenceName).c_str());
 
@@ -977,7 +993,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
     EXPECT_TRUE(CallbackCalled);
 
     // Delete sequence
-    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params) {
+    auto DeleteCallback = [&CallbackCalled, &UniqueUpdatedSequenceName](const csp::multiplayer::SequenceChangedParams& Params)
+    {
         EXPECT_EQ(Params.Key, UniqueUpdatedSequenceName);
         EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
 
@@ -1148,10 +1165,14 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
     bool FoundSequence1 = false;
     bool FoundSequence2 = false;
 
-    for (size_t i = 0; i < FoundSequences.Size(); ++i) {
-        if (FoundSequences[i].Key == UniqueSequenceName1) {
+    for (size_t i = 0; i < FoundSequences.Size(); ++i)
+    {
+        if (FoundSequences[i].Key == UniqueSequenceName1)
+        {
             FoundSequence1 = true;
-        } else if (FoundSequences[i].Key == UniqueSequenceName2) {
+        }
+        else if (FoundSequences[i].Key == UniqueSequenceName2)
+        {
             FoundSequence2 = true;
         }
     }

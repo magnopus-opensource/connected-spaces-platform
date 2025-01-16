@@ -21,11 +21,13 @@
 
 #include <list>
 
-namespace csp::events {
+namespace csp::events
+{
 
 using EventCallbackList = std::list<csp::events::EventListener*, csp::memory::StlAllocator<csp::events::EventListener*>>;
 
-class EventDispatcher {
+class EventDispatcher
+{
 public:
     EventDispatcher(const EventId& InId);
 

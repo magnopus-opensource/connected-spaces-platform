@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 
-class CommandLineParser {
+class CommandLineParser
+{
 public:
     CommandLineParser();
     void ParseCommandLine(int argc, const char* argv[]);

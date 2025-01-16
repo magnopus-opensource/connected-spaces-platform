@@ -45,12 +45,14 @@
 
 #undef PERMUTE3
 #define PERMUTE3(a, b, c)                                                                                                                            \
-    do {                                                                                                                                             \
+    do                                                                                                                                               \
+    {                                                                                                                                                \
         SwapValues(a, b);                                                                                                                            \
         SwapValues(a, c);                                                                                                                            \
     } while (0)
 
-namespace {
+namespace
+{
 
 // Some primes between 2^63 and 2^64 for various uses.
 constexpr uint64_t k0 = 0xc3a5c85c97cb3127ULL;
@@ -110,7 +112,8 @@ uint32_t Hash32Len0to4(const char* s, uint32_t len)
     uint32_t b = 0;
     uint32_t c = 9;
 
-    for (uint32_t i = 0; i < len; i++) {
+    for (uint32_t i = 0; i < len; i++)
+    {
         signed char v = s[i];
         b = b * c1 + v;
         c ^= b;
@@ -143,7 +146,8 @@ uint32_t Hash32Len13to24(const char* s, uint32_t len)
 
 } // namespace
 
-namespace csp {
+namespace csp
+{
 
 uint32_t GenerateAssetHash(const csp::common::String& AssetId)
 {
@@ -152,7 +156,8 @@ uint32_t GenerateAssetHash(const csp::common::String& AssetId)
     // The length of an ID will always be short enough that this is a safe cast.
     uint32_t len = static_cast<uint32_t>(AssetId.Length());
 
-    if (len <= 24) {
+    if (len <= 24)
+    {
         return (len <= 12 ? (len <= 4 ? Hash32Len0to4(s, len) : Hash32Len5to12(s, len)) : Hash32Len13to24(s, len)) >> 1;
     }
 
@@ -180,7 +185,8 @@ uint32_t GenerateAssetHash(const csp::common::String& AssetId)
     f = f * 5 + 0xe6546b64;
     uint32_t iters = (len - 1) / 20;
 
-    do {
+    do
+    {
         uint32_t _a0 = Rotate32(Fetch32(s) * c1, 17) * c2;
         uint32_t _a1 = Fetch32(s + 4);
         uint32_t _a2 = Rotate32(Fetch32(s + 8) * c1, 17) * c2;

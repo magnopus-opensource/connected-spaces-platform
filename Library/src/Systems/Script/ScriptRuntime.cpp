@@ -28,7 +28,8 @@
 #define CSP_SCRIPT_ALLOW_FILE_MODULES
 #endif
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 #if defined(CSP_SCRIPT_ALLOW_FILE_MODULES)
 inline std::optional<std::string> ReadScriptModuleFile(std::filesystem::path const& filepath)
@@ -52,7 +53,8 @@ ScriptRuntime::ScriptRuntime(ScriptSystem* InScriptSystem)
 
 ScriptRuntime::~ScriptRuntime()
 {
-    for (auto Context : Contexts) {
+    for (auto Context : Contexts)
+    {
         CSP_DELETE(Context.second);
     }
 
@@ -63,11 +65,14 @@ bool ScriptRuntime::AddContext(int64_t ContextId)
 {
     ContextMap::iterator It = Contexts.find(ContextId);
 
-    if (It == Contexts.end()) {
+    if (It == Contexts.end())
+    {
         ScriptContext* TheScriptContext = CSP_NEW ScriptContext(TheScriptSystem, Runtime, ContextId);
         Contexts.insert(ContextMap::value_type(ContextId, TheScriptContext));
         return true;
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("Context %lld already exists\n", ContextId);
     }
 
@@ -78,7 +83,8 @@ bool ScriptRuntime::RemoveContext(int64_t ContextId)
 {
     ContextMap::iterator It = Contexts.find(ContextId);
 
-    if (It != Contexts.end()) {
+    if (It != Contexts.end())
+    {
         CSP_DELETE(It->second);
         Contexts.erase(It);
         return true;
@@ -91,7 +97,8 @@ ScriptContext* ScriptRuntime::GetContext(int64_t ContextId)
 {
     ContextMap::iterator It = Contexts.find(ContextId);
 
-    if (It != Contexts.end()) {
+    if (It != Contexts.end())
+    {
         return It->second;
     }
 
@@ -101,7 +108,8 @@ ScriptContext* ScriptRuntime::GetContext(int64_t ContextId)
 bool ScriptRuntime::BindContext(int64_t ContextId)
 {
     ScriptContext* Context = GetContext(ContextId);
-    if (Context) {
+    if (Context)
+    {
         BindContext(Context);
         return true;
     }
@@ -112,7 +120,8 @@ bool ScriptRuntime::BindContext(int64_t ContextId)
 bool ScriptRuntime::ResetContext(int64_t ContextId)
 {
     ScriptContext* Context = GetContext(ContextId);
-    if (Context) {
+    if (Context)
+    {
         ResetContext(Context);
         return true;
     }
@@ -123,7 +132,8 @@ bool ScriptRuntime::ResetContext(int64_t ContextId)
 bool ScriptRuntime::ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName)
 {
     ScriptContext* Context = GetContext(ContextId);
-    if (Context) {
+    if (Context)
+    {
         return Context->ExistsInContext(ObjectName);
     }
 
@@ -136,7 +146,8 @@ void ScriptRuntime::UnregisterScriptBinding(IScriptBinding* ScriptBinding) { Bin
 
 void ScriptRuntime::BindContext(ScriptContext* Context)
 {
-    for (auto Binding : Bindings) {
+    for (auto Binding : Bindings)
+    {
         Binding->Bind(Context->GetId(), TheScriptSystem);
     }
 }
@@ -155,9 +166,12 @@ void ScriptRuntime::AddModuleUrlAlias(const csp::common::String& ModuleUrl, cons
 
     UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
 
-    if (It == UrlAliases.end()) {
+    if (It == UrlAliases.end())
+    {
         UrlAliases.insert(UrlAliasMap::value_type(ModuleUrl.c_str(), ModuleUrlAlias.c_str()));
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("Module alias %s-%s already exists\n", ModuleUrl.c_str(), ModuleUrlAlias.c_str());
     }
 }
@@ -168,9 +182,12 @@ bool ScriptRuntime::GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp:
 
     UrlAliasMap::iterator It = UrlAliases.find(ModuleUrl.c_str());
 
-    if (It == UrlAliases.end()) {
+    if (It == UrlAliases.end())
+    {
         OutModuleUrlAlias = ModuleUrl;
-    } else {
+    }
+    else
+    {
         OutModuleUrlAlias = It->second.c_str();
         FoundAlias = true;
     }
@@ -184,14 +201,17 @@ csp::common::String ScriptRuntime::GetModuleSource(csp::common::String ModuleUrl
 {
     ModuleSourceMap::const_iterator ModuleIt = Modules.find(ModuleUrl.c_str());
 
-    if (ModuleIt != Modules.end()) {
+    if (ModuleIt != Modules.end())
+    {
         return csp::common::String(ModuleIt->second.c_str());
     }
 #if defined(CSP_SCRIPT_ALLOW_FILE_MODULES)
-    else {
+    else
+    {
         std::optional<std::string> ModuleSource = ReadScriptModuleFile(ModuleUrl.c_str());
 
-        if (ModuleSource.has_value()) {
+        if (ModuleSource.has_value())
+        {
             return csp::common::String(ModuleSource->c_str());
         }
     }

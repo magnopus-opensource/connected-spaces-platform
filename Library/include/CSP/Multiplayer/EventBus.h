@@ -21,7 +21,8 @@
 
 #include <map>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SpaceSystem;
 class SystemsManager;
@@ -29,7 +30,8 @@ class SystemBase;
 
 } // namespace csp::systems
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -38,14 +40,16 @@ CSP_END_IGNORE
 } // namespace csp::memory
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ReplicatedValue;
 enum class ErrorCode;
 
 /// @ingroup Multiplayer
 /// @brief Handling of all network events.
-class CSP_API EventBus {
+class CSP_API EventBus
+{
 public:
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::systems::SpaceSystem;

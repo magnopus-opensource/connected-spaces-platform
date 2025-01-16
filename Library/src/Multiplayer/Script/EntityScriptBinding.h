@@ -17,15 +17,18 @@
 
 #include "CSP/Systems/Script/ScriptSystem.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 class ScriptSystem;
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class SpaceEntitySystem;
 
-class EntityScriptBinding : public csp::systems::IScriptBinding {
+class EntityScriptBinding : public csp::systems::IScriptBinding
+{
 public:
     EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
     virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;

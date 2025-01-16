@@ -18,10 +18,12 @@
 
 #include "CSP/Systems/Users/Authentication.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief Result structure for a logout state request.
-class CSP_API LogoutResult : public NullResult {
+class CSP_API LogoutResult : public NullResult
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -39,7 +41,8 @@ private:
 };
 
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public StringResult {
+class CSP_API AgoraUserTokenResult : public StringResult
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -55,7 +58,8 @@ private:
 };
 
 /// @brief Result url for a tier checkout session request
-class CSP_API CheckoutSessionUrlResult : public StringResult {
+class CSP_API CheckoutSessionUrlResult : public StringResult
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class UserSystem;
@@ -71,7 +75,8 @@ private:
 };
 
 /// @brief Result url for a user customer portal request
-class CSP_API CustomerPortalUrlResult : public StringResult {
+class CSP_API CustomerPortalUrlResult : public StringResult
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class UserSystem;

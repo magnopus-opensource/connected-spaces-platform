@@ -17,10 +17,13 @@
 
 #include <string>
 
-namespace csp {
+namespace csp
+{
 
 using FilePath = std::string;
 
-struct FileCache { };
+struct FileCache
+{
+};
 
 } // namespace csp

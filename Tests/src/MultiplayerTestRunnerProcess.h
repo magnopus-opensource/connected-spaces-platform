@@ -22,7 +22,8 @@
 #include <memory>
 #include <optional>
 
-namespace TinyProcessLib {
+namespace TinyProcessLib
+{
 class Process;
 }
 
@@ -38,7 +39,8 @@ class Process;
  * become ready. Use this sparingly, and account for runtime fluctuations to
  * prevent undue flakiness.
  */
-class MultiplayerTestRunnerProcess {
+class MultiplayerTestRunnerProcess
+{
 public:
     MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier _TestToRun);
     ~MultiplayerTestRunnerProcess();

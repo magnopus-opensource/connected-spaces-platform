@@ -21,7 +21,8 @@
 
 #include "gtest/gtest.h"
 
-namespace {
+namespace
+{
 
 #if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_CONSTRUCTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, ConstructionAndDestructionTest) { EXPECT_NO_THROW(csp::common::CancellationToken()); }

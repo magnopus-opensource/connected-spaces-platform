@@ -16,10 +16,12 @@
 #pragma once
 #include <cstdint>
 
-namespace csp::web {
+namespace csp::web
+{
 
 /// @brief Enum which represents all possible HTTP responses.
-enum class EResponseCodes : uint16_t {
+enum class EResponseCodes : uint16_t
+{
     ResponseInit = 0,
     ResponseContinue = 100,
     ResponseSwitchingProtocols = 101,

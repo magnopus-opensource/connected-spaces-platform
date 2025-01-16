@@ -70,18 +70,23 @@ void Signup()
 
     csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-    UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false, true, "", "", [&](const csp::systems::ProfileResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "\nSuccessfully signed up as " + Email << endl;
-            cout << "You should have received a verification email at " + Email << endl;
-            cout << "Please restart this application once verified" << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "\nSign up failed. Please double check if have an account already and restart this application. " + Result.GetResponseBody()
-                 << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    UserSystem->CreateUser("", "", Email.c_str(), Password.c_str(), false, true, "", "",
+        [&](const csp::systems::ProfileResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "\nSuccessfully signed up as " + Email << endl;
+                cout << "You should have received a verification email at " + Email << endl;
+                cout << "Please restart this application once verified" << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "\nSign up failed. Please double check if have an account already and restart this application. " + Result.GetResponseBody()
+                     << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -99,15 +104,20 @@ void Login()
 
     csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-    UserSystem->Login("", Email.c_str(), Password.c_str(), true, [&](const csp::systems::LoginStateResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "Successfully logged in as " + Email << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "Login failed. " + Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    UserSystem->Login("", Email.c_str(), Password.c_str(), true,
+        [&](const csp::systems::LoginStateResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "Successfully logged in as " + Email << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "Login failed. " + Result.GetResponseBody() << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -119,15 +129,20 @@ void Logout()
 
     csp::systems::UserSystem* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-    UserSystem->Logout([&](const csp::systems::LogoutResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "\nSuccessfully logged out" << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "\nLogout failed. " + Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    UserSystem->Logout(
+        [&](const csp::systems::LogoutResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "\nSuccessfully logged out" << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "\nLogout failed. " + Result.GetResponseBody() << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -152,14 +167,17 @@ void SearchSpaces()
 
     csp::systems::GraphQLSystem* QuerySystem = csp::systems::SystemsManager::Get().GetGraphQLSystem();
 
-    QuerySystem->RunQuery(SpacesQuery, [&](csp::systems::GraphQLResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            json JsonData = json::parse(Result.GetResponse().c_str());
-            int TotalSpacesCount = JsonData["data"]["spaces"]["itemTotalCount"];
-            cout << "\nFound " + to_string(TotalSpacesCount) + " spaces in total" << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    QuerySystem->RunQuery(SpacesQuery,
+        [&](csp::systems::GraphQLResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                json JsonData = json::parse(Result.GetResponse().c_str());
+                int TotalSpacesCount = JsonData["data"]["spaces"]["itemTotalCount"];
+                cout << "\nFound " + to_string(TotalSpacesCount) + " spaces in total" << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -180,13 +198,17 @@ void CreateSpace()
     csp::common::Map<csp::common::String, csp::common::String> TestMetadata = { { "spaceData", "myData" } };
 
     SpaceSystem->CreateSpace(SpaceName.c_str(), "", csp::systems::SpaceAttributes::Private, nullptr, TestMetadata, nullptr,
-        [&CallbackPromise](const csp::systems::SpaceResult& Result) {
-            if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+        [&CallbackPromise](const csp::systems::SpaceResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
                 string SpaceID = Result.GetSpace().Id.c_str();
                 string SpaceName = Result.GetSpace().Name.c_str();
                 cout << "Created a new space called " + SpaceName + " and ID: " + SpaceID << endl;
                 CallbackPromise.set_value();
-            } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 cout << "Error: could not create the new space. " + Result.GetResponseBody() << endl;
                 CallbackPromise.set_value();
             }
@@ -213,14 +235,19 @@ void SetupConnection()
     SpaceEntitySystem->SetEntityCreatedCallback(
         [](csp::multiplayer::SpaceEntity* Entity) { cout << "A new remote Entity has been created: " + Entity->GetName() << endl; });
 
-    MultiplayerConnection->Connect([&](bool IsOk) {
-        if (IsOk) {
-            MultiplayerConnection->InitialiseConnection([&](bool Ok) { cout << "Connection has been established." << endl; });
-        } else {
-            cout << "Error: could not create a new connection." << endl;
-        }
-        CallbackPromise.set_value();
-    });
+    MultiplayerConnection->Connect(
+        [&](bool IsOk)
+        {
+            if (IsOk)
+            {
+                MultiplayerConnection->InitialiseConnection([&](bool Ok) { cout << "Connection has been established." << endl; });
+            }
+            else
+            {
+                cout << "Error: could not create a new connection." << endl;
+            }
+            CallbackPromise.set_value();
+        });
 
     CallbackFuture.wait();
 }
@@ -232,14 +259,19 @@ void EnterSpace()
 
     csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
-    SpaceSystem->EnterSpace(CurrentSpaceId.c_str(), [&](const csp::systems::NullResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "Entered space with ID: " + CurrentSpaceId << endl;
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "Error: Could not enter space. " + Result.GetResponseBody() << endl;
-        }
-        CallbackPromise.set_value();
-    });
+    SpaceSystem->EnterSpace(CurrentSpaceId.c_str(),
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "Entered space with ID: " + CurrentSpaceId << endl;
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "Error: Could not enter space. " + Result.GetResponseBody() << endl;
+            }
+            CallbackPromise.set_value();
+        });
 
     CallbackFuture.wait();
 }
@@ -254,11 +286,16 @@ void CreateAvatarEntity()
 
     string AvatarName = "TestAvatar";
     SpaceEntitySystem->CreateAvatar(AvatarName.c_str(), InSpaceTransform, csp::multiplayer::AvatarState::Idle, "id",
-        csp::multiplayer::AvatarPlayMode::Default, [&](csp::multiplayer::SpaceEntity* AvatarSpaceEntity) {
-            if (AvatarSpaceEntity != nullptr) {
+        csp::multiplayer::AvatarPlayMode::Default,
+        [&](csp::multiplayer::SpaceEntity* AvatarSpaceEntity)
+        {
+            if (AvatarSpaceEntity != nullptr)
+            {
                 cout << "\nAvatar Entity created with name " + AvatarName << endl;
                 Avatar = AvatarSpaceEntity;
-            } else {
+            }
+            else
+            {
                 cout << "\nError: Could not create an Avatar Entity" << endl;
             }
             CallbackPromise.set_value();
@@ -275,17 +312,20 @@ void MoveEntity(csp::multiplayer::SpaceEntity* Entity)
     bool EntityUpdated = false;
 
     // Set Entity Update Callback
-    Entity->SetUpdateCallback([&](const csp::multiplayer::SpaceEntity* SpaceEntity, csp::multiplayer::SpaceEntityUpdateFlags UpdateFlags,
-                                  csp::common::Array<csp::multiplayer::ComponentUpdateInfo> ComponentUpdateInfo) {
-        if (UpdateFlags & csp::multiplayer::SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION) {
-            string SpaceEntityName = SpaceEntity->GetName().c_str();
-            csp::common::Vector3 EntityPosition = SpaceEntity->GetTransform().Position;
-            cout << "Received update from Entity " + SpaceEntityName + " : it moved to " + to_string(EntityPosition.X) + ", "
-                    + to_string(EntityPosition.Y) + ", " + to_string(EntityPosition.Z)
-                 << endl;
-            EntityUpdated = true;
-        }
-    });
+    Entity->SetUpdateCallback(
+        [&](const csp::multiplayer::SpaceEntity* SpaceEntity, csp::multiplayer::SpaceEntityUpdateFlags UpdateFlags,
+            csp::common::Array<csp::multiplayer::ComponentUpdateInfo> ComponentUpdateInfo)
+        {
+            if (UpdateFlags & csp::multiplayer::SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+            {
+                string SpaceEntityName = SpaceEntity->GetName().c_str();
+                csp::common::Vector3 EntityPosition = SpaceEntity->GetTransform().Position;
+                cout << "Received update from Entity " + SpaceEntityName + " : it moved to " + to_string(EntityPosition.X) + ", "
+                        + to_string(EntityPosition.Y) + ", " + to_string(EntityPosition.Z)
+                     << endl;
+                EntityUpdated = true;
+            }
+        });
 
     // Move Entity
     csp::common::Vector3 EntityNewPosition = csp::common::Vector3 { 1.0f, 2.0f, 3.0f };
@@ -297,7 +337,8 @@ void MoveEntity(csp::multiplayer::SpaceEntity* Entity)
          << endl;
 
     // Simulate "tick", which is needed for Multiplayer
-    while (!EntityUpdated && WaitForTimeoutCountMs < WaitForTimeoutLimit) {
+    while (!EntityUpdated && WaitForTimeoutCountMs < WaitForTimeoutLimit)
+    {
         csp::multiplayer::SpaceEntitySystem* EntitySystem = MultiplayerConnection->GetSpaceEntitySystem();
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(50ms);
@@ -317,12 +358,17 @@ void CreateAssetCollection()
 
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
     AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(), nullptr, csp::systems::EAssetCollectionType::DEFAULT,
-        nullptr, [&](const csp::systems::AssetCollectionResult Result) {
-            if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+        nullptr,
+        [&](const csp::systems::AssetCollectionResult Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
                 AssetCollection = Result.GetAssetCollection();
                 cout << "Created a new Asset Collection called " + AssetCollection.Name + ".ID: " + AssetCollection.Id << endl;
                 CallbackPromise.set_value();
-            } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 cout << "Error: Could not create a new Asset Collection. " + Result.GetResponseBody() << endl;
             }
         });
@@ -341,13 +387,17 @@ void CreateAsset()
     std::getline(cin, AssetName);
 
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    AssetSystem->CreateAsset(
-        AssetCollection, AssetName.c_str(), nullptr, nullptr, csp::systems::EAssetType::IMAGE, [&](const csp::systems::AssetResult Result) {
-            if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr, csp::systems::EAssetType::IMAGE,
+        [&](const csp::systems::AssetResult Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
                 Asset = Result.GetAsset();
                 cout << "Created a new Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
                 CallbackPromise.set_value();
-            } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 cout << "Error: Could not create a new Asset. " + Result.GetResponseBody() << endl;
                 CallbackPromise.set_value();
             }
@@ -372,15 +422,20 @@ void UploadAsset()
     // Upload Asset
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-    AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&](const csp::systems::UriResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "\nUploaded Test Asset from path: " + AssetDataSource.FilePath << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "\nError: Could not upload Test Asset. " + Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource,
+        [&](const csp::systems::UriResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "\nUploaded Test Asset from path: " + AssetDataSource.FilePath << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "\nError: Could not upload Test Asset. " + Result.GetResponseBody() << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -391,15 +446,20 @@ void DeleteAsset()
     future<void> CallbackFuture = CallbackPromise.get_future();
 
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    AssetSystem->DeleteAsset(AssetCollection, Asset, [&](const csp::systems::NullResult Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "\nDeleted Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "\nError: Could not delete Asset. " + Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    AssetSystem->DeleteAsset(AssetCollection, Asset,
+        [&](const csp::systems::NullResult Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "\nDeleted Asset called " + Asset.Name + ". ID: " + Asset.Id << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "\nError: Could not delete Asset. " + Result.GetResponseBody() << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -423,15 +483,20 @@ void DeleteSpace()
 
     csp::systems::SpaceSystem* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
 
-    SpaceSystem->DeleteSpace(SpaceId.c_str(), [&](const csp::systems::NullResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-            cout << "Deleted space with ID: " + SpaceId << endl;
-            CallbackPromise.set_value();
-        } else if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            cout << "Error: could not delete the space. " + Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+    SpaceSystem->DeleteSpace(SpaceId.c_str(),
+        [&](const csp::systems::NullResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                cout << "Deleted space with ID: " + SpaceId << endl;
+                CallbackPromise.set_value();
+            }
+            else if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                cout << "Error: could not delete the space. " + Result.GetResponseBody() << endl;
+                CallbackPromise.set_value();
+            }
+        });
 
     CallbackFuture.wait();
 }
@@ -439,11 +504,14 @@ void DeleteSpace()
 int main()
 {
     // Initialise CSP Foundation
-    if (StartupCSPFoundation()) {
+    if (StartupCSPFoundation())
+    {
         cout << "Welcome to the Connected Spaces Platform (CSP)! \nThis is a simple Hello World example to demonstrate basic CSP functionality."
              << endl;
         SetClientUserAgentInfo();
-    } else {
+    }
+    else
+    {
         cout << "Error: The Connected Spaces Platform (CSP) could not be initialized." << endl;
         return 1;
     }
@@ -451,10 +519,12 @@ int main()
     // Signup if we don't have an account yet
     cout << "\nDo you already have an account to login with using the tenant " + Tenant + "?" << endl;
     string SignUpAnswer;
-    while (SignUpAnswer != "Y" && SignUpAnswer != "y") {
+    while (SignUpAnswer != "Y" && SignUpAnswer != "y")
+    {
         cout << "(Please answer Y for yes or N for no)" << endl;
         cin >> SignUpAnswer;
-        if (SignUpAnswer == "N" || SignUpAnswer == "n") {
+        if (SignUpAnswer == "N" || SignUpAnswer == "n")
+        {
             Signup();
             // After sign up, exit application because the user either needs to verify email or sign up failed
             return 0;
@@ -470,10 +540,12 @@ int main()
     // Create a new space if wanted
     cout << "\nDo you want to create a new space?" << endl;
     string CreateSpaceAnswer;
-    while (CreateSpaceAnswer != "N" && CreateSpaceAnswer != "n") {
+    while (CreateSpaceAnswer != "N" && CreateSpaceAnswer != "n")
+    {
         cout << "(Please answer Y for yes or N for no)" << endl;
         cin >> CreateSpaceAnswer;
-        if (CreateSpaceAnswer == "Y" || CreateSpaceAnswer == "y") {
+        if (CreateSpaceAnswer == "Y" || CreateSpaceAnswer == "y")
+        {
             CreateSpace();
             break;
         }
@@ -485,12 +557,14 @@ int main()
     // Enter an existing space
     EnterSpace();
 
-    if (MultiplayerConnection != nullptr) {
+    if (MultiplayerConnection != nullptr)
+    {
         // Create an Avatar
         CreateAvatarEntity();
 
         // Move the Avatar
-        if (Avatar != nullptr) {
+        if (Avatar != nullptr)
+        {
             MoveEntity(Avatar);
         }
 
@@ -507,10 +581,12 @@ int main()
     // Delete a space if wanted
     cout << "\nDo you want to delete a space?" << endl;
     string DeleteSpaceAnswer;
-    while (DeleteSpaceAnswer != "N" && DeleteSpaceAnswer != "n") {
+    while (DeleteSpaceAnswer != "N" && DeleteSpaceAnswer != "n")
+    {
         cout << "(Please answer Y for yes or N for no)" << endl;
         cin >> DeleteSpaceAnswer;
-        if (DeleteSpaceAnswer == "Y" || DeleteSpaceAnswer == "y") {
+        if (DeleteSpaceAnswer == "Y" || DeleteSpaceAnswer == "y")
+        {
             DeleteSpace();
             break;
         }
@@ -520,9 +596,12 @@ int main()
     Logout();
 
     // Shut down CSP Foundation
-    if (ShutdownCSPFoundation()) {
+    if (ShutdownCSPFoundation())
+    {
         cout << "\nCSP Foundation shut down" << endl;
-    } else {
+    }
+    else
+    {
         cout << "\nError: CSP Foundation could not shut down" << endl;
         return 1;
     }

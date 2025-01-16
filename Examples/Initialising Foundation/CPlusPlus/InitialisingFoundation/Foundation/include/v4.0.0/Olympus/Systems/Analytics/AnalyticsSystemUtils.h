@@ -5,10 +5,12 @@
 #include "Olympus/Multiplayer/ReplicatedValue.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_systems {
+namespace oly_systems
+{
 using MetricValue = oly_multiplayer::ReplicatedValue;
 
-class OLY_API AnalyticsEvent {
+class OLY_API AnalyticsEvent
+{
     friend class AnalyticsEventInitialiser;
 
 public:
@@ -36,7 +38,8 @@ private:
     oly_common::Map<oly_common::String, MetricValue> Parameters;
 };
 
-class OLY_API AnalyticsEventInitialiser {
+class OLY_API AnalyticsEventInitialiser
+{
 public:
     static AnalyticsEvent* Initialise(const oly_common::String Tag);
     static void DeInitialise(AnalyticsEvent* Event);

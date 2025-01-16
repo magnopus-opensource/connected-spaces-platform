@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AvatarSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 AvatarSpaceComponent::AvatarSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::AvatarData, Parent)

@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/FogSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 FogSpaceComponent::FogSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Fog, Parent)

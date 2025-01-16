@@ -25,7 +25,8 @@
 
 #include <iostream>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
@@ -42,7 +43,8 @@ void NetworkEventManagerImpl::SetConnection(csp::multiplayer::SignalRConnection*
 void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Arguments,
     uint64_t TargetClientId, ErrorCodeCallbackHandler Callback)
 {
-    if (Connection == nullptr) {
+    if (Connection == nullptr)
+    {
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::NotConnected);
 
         return;
@@ -50,8 +52,10 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     csp::multiplayer::SignalRConnection* SignalRConnectionPtr = static_cast<csp::multiplayer::SignalRConnection*>(Connection);
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except) {
-        if (Except != nullptr) {
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    {
+        if (Except != nullptr)
+        {
             auto Error = ParseError(Except);
             INVOKE_IF_NOT_NULL(Callback, Error);
 
@@ -63,9 +67,12 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     std::map<uint64_t, signalr::value> Components;
 
-    for (int i = 0; i < Arguments.Size(); ++i) {
-        switch (Arguments[i].GetReplicatedValueType()) {
-        case ReplicatedValueType::Boolean: {
+    for (int i = 0; i < Arguments.Size(); ++i)
+    {
+        switch (Arguments[i].GetReplicatedValueType())
+        {
+        case ReplicatedValueType::Boolean:
+        {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetBool());
 
@@ -74,7 +81,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Integer: {
+        case ReplicatedValueType::Integer:
+        {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetInt());
 
@@ -83,7 +91,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Float: {
+        case ReplicatedValueType::Float:
+        {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetFloat());
 
@@ -92,7 +101,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::String: {
+        case ReplicatedValueType::String:
+        {
             std::vector<signalr::value> Fields;
             Fields.push_back(Arguments[i].GetString().c_str());
 
@@ -101,7 +111,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector2: {
+        case ReplicatedValueType::Vector2:
+        {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector2();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y });
@@ -111,7 +122,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector3: {
+        case ReplicatedValueType::Vector3:
+        {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector3();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z });
@@ -121,7 +133,8 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
             break;
         }
-        case ReplicatedValueType::Vector4: {
+        case ReplicatedValueType::Vector4:
+        {
             std::vector<signalr::value> Fields;
             auto Vector = Arguments[i].GetVector4();
             Fields.push_back(std::vector<signalr::value> { Vector.X, Vector.Y, Vector.Z, Vector.W });

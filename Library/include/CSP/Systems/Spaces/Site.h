@@ -22,7 +22,8 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -30,11 +31,13 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Space System
 /// @brief Data representation of a Site associated with a Space.
-class CSP_API Site {
+class CSP_API Site
+{
 public:
     Site() {};
 
@@ -52,7 +55,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to retrieve Site information.
-class CSP_API SiteResult : public csp::systems::ResultBase {
+class CSP_API SiteResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -75,7 +79,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of Site information.
-class CSP_API SitesCollectionResult : public csp::systems::ResultBase {
+class CSP_API SitesCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

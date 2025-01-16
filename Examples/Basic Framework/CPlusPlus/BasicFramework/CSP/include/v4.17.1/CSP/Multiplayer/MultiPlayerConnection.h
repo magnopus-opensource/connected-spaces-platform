@@ -27,12 +27,14 @@
 #include <map>
 #include <vector>
 
-namespace csp::systems {
+namespace csp::systems
+{
 class SpaceSystem;
 }
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ReplicatedValue;
 class SpaceEntitySystem;
@@ -42,11 +44,18 @@ class SignalRConnection;
 class IWebSocketClient;
 
 /// @brief Enum used to specify the current state of the muiltiplayer connection.
-enum class ConnectionState { Connecting, Connected, Disconnecting, Disconnected };
+enum class ConnectionState
+{
+    Connecting,
+    Connected,
+    Disconnecting,
+    Disconnected
+};
 
 /// @ingroup Multiplayer
 /// @brief Handling of all multiplayer connection functionality, such as connect, disconnect, entity replication and network events.
-class CSP_API MultiplayerConnection {
+class CSP_API MultiplayerConnection
+{
 public:
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;

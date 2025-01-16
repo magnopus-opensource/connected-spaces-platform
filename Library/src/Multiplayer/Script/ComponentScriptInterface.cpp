@@ -21,7 +21,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ComponentScriptInterface::ComponentScriptInterface(ComponentBase* InComponenty)
     : Component(InComponenty)
@@ -30,21 +31,24 @@ ComponentScriptInterface::ComponentScriptInterface(ComponentBase* InComponenty)
 
 void ComponentScriptInterface::SubscribeToPropertyChange(int32_t PropertyKey, std::string Message)
 {
-    if (Component) {
+    if (Component)
+    {
         Component->SubscribeToPropertyChange(PropertyKey, Message.c_str());
     }
 }
 
 void ComponentScriptInterface::InvokeAction(std::string ActionId, std::string ActionParams)
 {
-    if (Component) {
+    if (Component)
+    {
         Component->InvokeAction(ActionId.c_str(), ActionParams.c_str());
     }
 }
 
 int64_t ComponentScriptInterface::GetComponentId() const
 {
-    if (Component) {
+    if (Component)
+    {
         return Component->GetId();
     }
 
@@ -53,7 +57,8 @@ int64_t ComponentScriptInterface::GetComponentId() const
 
 int64_t ComponentScriptInterface::GetComponentType() const
 {
-    if (Component) {
+    if (Component)
+    {
         return (int64_t)Component->GetComponentType();
     }
 
@@ -62,14 +67,16 @@ int64_t ComponentScriptInterface::GetComponentType() const
 
 void ComponentScriptInterface::SetComponentName(std::string name)
 {
-    if (Component) {
+    if (Component)
+    {
         Component->SetComponentName(name.c_str());
     }
 }
 
 std::string ComponentScriptInterface::GetComponentName() const
 {
-    if (Component) {
+    if (Component)
+    {
         return Component->GetComponentName().c_str();
     }
 
@@ -78,7 +85,8 @@ std::string ComponentScriptInterface::GetComponentName() const
 
 void ComponentScriptInterface::SendPropertyUpdate()
 {
-    if (Component) {
+    if (Component)
+    {
         Component->GetParent()->MarkForUpdate();
     }
 }

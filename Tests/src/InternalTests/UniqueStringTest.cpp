@@ -31,7 +31,8 @@ CSP_INTERNAL_TEST(CSPEngine, UniqueStringTests, GetUniqueStringTest)
     const int TestLength = 10000;
     std::string UniqueHexStrings[TestLength];
 
-    for (int i = 0; i < TestLength; i++) {
+    for (int i = 0; i < TestLength; i++)
+    {
         std::string HexValue = GetUniqueString();
 
         EXPECT_FALSE((std::find(std::begin(UniqueHexStrings), std::end(UniqueHexStrings), HexValue) != std::end(UniqueHexStrings)));

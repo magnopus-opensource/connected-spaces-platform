@@ -5,13 +5,26 @@
 #include "Olympus/Multiplayer/SpaceTransform.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class LightType { Directional = 0, Point, Spot, Num };
+enum class LightType
+{
+    Directional = 0,
+    Point,
+    Spot,
+    Num
+};
 
-enum class LightCookieType { ImageCookie = 0, VideoCookie, NoCookie };
+enum class LightCookieType
+{
+    ImageCookie = 0,
+    VideoCookie,
+    NoCookie
+};
 
-enum class LightPropertyKeys {
+enum class LightPropertyKeys
+{
     Name = 0,
     LightType,
     Color,
@@ -31,7 +44,8 @@ enum class LightPropertyKeys {
 
 /// @ingroup LightSpaceComponent
 /// @brief Data representation of an LightSpaceComponent.
-class OLY_API LightSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API LightSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     LightSpaceComponent(SpaceEntity* Parent);
 

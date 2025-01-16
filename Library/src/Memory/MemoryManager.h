@@ -18,14 +18,16 @@
 #include "Allocator.h"
 #include "Allocators/StandardAllocator.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// Manager class for memory handling
 ///
 /// Provides access to vaious allocators and heaps that are optimised
 /// for different situations
 ///
-class MemoryManager {
+class MemoryManager
+{
 public:
     static void Initialise();
     static void Shutdown();

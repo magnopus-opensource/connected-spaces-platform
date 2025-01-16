@@ -76,7 +76,8 @@ void TestListener::OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*i
 
     int SuiteCount = UnitTest.total_test_suite_count();
 
-    for (int i = 0; i < SuiteCount; ++i) {
+    for (int i = 0; i < SuiteCount; ++i)
+    {
         const testing::TestSuite* Suite = UnitTest.GetTestSuite(i);
 
         ss << "  <testsuite name=\"" << Suite->name() << "\" tests=\"" << Suite->total_test_count() << "\" failures=\"" << Suite->failed_test_count()
@@ -85,7 +86,8 @@ void TestListener::OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*i
 
         int TestCount = Suite->reportable_test_count();
 
-        for (int j = 0; j < TestCount; ++j) {
+        for (int j = 0; j < TestCount; ++j)
+        {
             const testing::TestInfo* Test = Suite->GetTestInfo(j);
             const testing::TestResult* Result = Test->result();
 
@@ -93,9 +95,12 @@ void TestListener::OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*i
                << FormatTimeInMillisAsSeconds(Result->elapsed_time()) << "\" timestamp=\""
                << FormatEpochTimeInMillisAsIso8601(Result->start_timestamp()) << "\" classname=\"" << Suite->name() << "\"";
 
-            if (Result->Passed()) {
+            if (Result->Passed())
+            {
                 ss << " />\n";
-            } else {
+            }
+            else
+            {
                 ss << ">\n";
                 ss << "      <failure message=\"TODO: Print real error message.\" type=\"\"><![CDATA[TODO: Print real error "
                       "message.]]></failure>\n";

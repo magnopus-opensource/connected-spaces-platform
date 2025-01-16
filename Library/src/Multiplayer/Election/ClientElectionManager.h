@@ -20,19 +20,22 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class IClientSelectionCriteria;
 class SpaceEntitySystem;
 class SpaceEntity;
 
-enum class ElectionState {
+enum class ElectionState
+{
     Idle,
     Requested,
     Electing,
 };
 
-class ClientElectionManager {
+class ClientElectionManager
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ClientProxy;
     friend class SpaceEntitySystem;

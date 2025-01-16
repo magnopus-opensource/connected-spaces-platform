@@ -2,8 +2,10 @@
 
 #include "Olympus/Multiplayer/ComponentBase.h"
 
-namespace oly_multiplayer {
-enum class SplinePropertyKeys {
+namespace oly_multiplayer
+{
+enum class SplinePropertyKeys
+{
     Waypoints = 0,
     Num
 
@@ -14,7 +16,8 @@ enum class SplinePropertyKeys {
  *
  * SplineSpaceComponent allows for the calculation of Cubic splines and a point along the position of that spline.
  */
-class OLY_API SplineSpaceComponent : public ComponentBase {
+class OLY_API SplineSpaceComponent : public ComponentBase
+{
 public:
     SplineSpaceComponent(SpaceEntity* Parent);
 

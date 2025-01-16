@@ -22,7 +22,8 @@
 #include <CSP/Systems/SystemsManager.h>
 #include <future>
 
-namespace CreateAvatar {
+namespace CreateAvatar
+{
 
 void RunTest()
 {

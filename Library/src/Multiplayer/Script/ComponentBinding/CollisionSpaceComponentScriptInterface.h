@@ -19,11 +19,13 @@
 
 #include <string>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class CollisionSpaceComponent;
 
-class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface {
+class CollisionSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     CollisionSpaceComponentScriptInterface(CollisionSpaceComponent* InComponent = nullptr);
 

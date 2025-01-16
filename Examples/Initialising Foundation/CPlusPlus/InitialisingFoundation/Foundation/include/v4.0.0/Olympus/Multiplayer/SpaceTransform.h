@@ -3,9 +3,11 @@
 #include "Olympus/Common/Vector.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-class OLY_API SpaceTransform {
+class OLY_API SpaceTransform
+{
 public:
     SpaceTransform();
     SpaceTransform(const oly_common::Vector3& Position, const oly_common::Vector4& Rotation, const oly_common::Vector3& Scale);

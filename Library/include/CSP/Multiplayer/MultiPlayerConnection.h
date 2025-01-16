@@ -28,7 +28,8 @@
 #include <map>
 #include <vector>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SpaceSystem;
 class SystemsManager;
@@ -36,7 +37,8 @@ class UserSystem;
 
 } // namespace csp::systems
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -45,7 +47,8 @@ CSP_END_IGNORE
 } // namespace csp::memory
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ReplicatedValue;
 class SpaceEntitySystem;
@@ -56,14 +59,28 @@ class IWebSocketClient;
 class EventBus;
 
 /// @brief Enum used to specify the current state of the multiplayer connection.
-enum class ConnectionState { Connecting, Connected, Disconnecting, Disconnected };
+enum class ConnectionState
+{
+    Connecting,
+    Connected,
+    Disconnecting,
+    Disconnected
+};
 
 /// @brief Enum used to indicate the failure state of a multiplayer request.
-enum class ErrorCode { None, Unknown, NotConnected, AlreadyConnected, SpaceUserLimitExceeded };
+enum class ErrorCode
+{
+    None,
+    Unknown,
+    NotConnected,
+    AlreadyConnected,
+    SpaceUserLimitExceeded
+};
 
 /// @ingroup Multiplayer
 /// @brief Handling of all multiplayer connection functionality, such as connect, disconnect, entity replication and network events.
-class CSP_API MultiplayerConnection {
+class CSP_API MultiplayerConnection
+{
 public:
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;

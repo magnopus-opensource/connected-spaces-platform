@@ -6,13 +6,26 @@
 #include "Olympus/Multiplayer/SpaceTransform.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class StaticModelPropertyKeys { Name = 0, ModelAssetId, AssetCollectionId, Position, Rotation, Scale, IsVisible, IsARVisible, Num };
+enum class StaticModelPropertyKeys
+{
+    Name = 0,
+    ModelAssetId,
+    AssetCollectionId,
+    Position,
+    Rotation,
+    Scale,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup StaticModelSpaceComponent
 /// @brief Data representation of an StaticModelSpaceComponent.
-class OLY_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API StaticModelSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     StaticModelSpaceComponent(SpaceEntity* Parent);
 

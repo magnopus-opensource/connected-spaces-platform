@@ -22,9 +22,11 @@
 #include <string>
 #include <vector>
 
-namespace csp::web {
+namespace csp::web
+{
 
-class Uri {
+class Uri
+{
 public:
     Uri();
     explicit Uri(const char* InUri);
@@ -52,7 +54,8 @@ template <class T>
 
 template <> inline void Uri::AddQueryParams(const char* ParamName, csp::common::String Param)
 {
-    if (Param.Length() > 0) {
+    if (Param.Length() > 0)
+    {
         std::string Path = UriPath.c_str();
 
         const std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
@@ -65,13 +68,15 @@ template <> inline void Uri::AddQueryParams(const char* ParamName, csp::common::
 
 template <> inline void Uri::AddQueryParams(const char* ParamName, std::vector<csp::common::String> Param)
 {
-    if (Param.size() == 0) {
+    if (Param.size() == 0)
+    {
         return;
     }
 
     std::string Path = UriPath.c_str();
 
-    for (size_t i = 0; i < Param.size(); ++i) {
+    for (size_t i = 0; i < Param.size(); ++i)
+    {
         std::string Separator = (NumParams == 0) ? std::string("?") : std::string("&");
         Path = Path + Separator + std::string(ParamName) + std::string("=") + std::string(Encode(Param[i]));
         ++NumParams;

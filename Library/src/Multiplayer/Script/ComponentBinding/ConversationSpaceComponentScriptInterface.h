@@ -20,11 +20,13 @@
 #include <map>
 #include <string>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ConversationSpaceComponent;
 
-class ConversationSpaceComponentScriptInterface : public ComponentScriptInterface {
+class ConversationSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     ConversationSpaceComponentScriptInterface(ConversationSpaceComponent* InComponent = nullptr);
 

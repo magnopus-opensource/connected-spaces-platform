@@ -21,9 +21,11 @@
 #include "Web/POCOWebClient/POCOWebClient.h"
 #endif
 
-namespace {
+namespace
+{
 #ifdef CSP_WASM
-class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient {
+class UAEmscriptenWebClient : public csp::web::EmscriptenWebClient
+{
 public:
     UAEmscriptenWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
         : csp::web::EmscriptenWebClient(InPort, Tp)
@@ -31,7 +33,8 @@ public:
     }
 };
 #else
-class UAPOCOWebClient : public csp::web::POCOWebClient {
+class UAPOCOWebClient : public csp::web::POCOWebClient
+{
 public:
     UAPOCOWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
         : csp::web::POCOWebClient(InPort, Tp)
@@ -40,7 +43,8 @@ public:
 };
 #endif
 
-class ResponseReceiver : public csp::web::IHttpResponseHandler {
+class ResponseReceiver : public csp::web::IHttpResponseHandler
+{
 public:
     void OnHttpResponse(csp::web::HttpResponse& InResponse) override { }
 
@@ -48,7 +52,8 @@ public:
 };
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 csp::common::String CreateUAEventString(const csp::common::String& ClientId, const csp::common::String& Property, csp::systems::AnalyticsEvent* Event)
 {
     static constexpr const char* VersionTag = "v=1";
@@ -66,7 +71,8 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
     const csp::common::Map<csp::common::String, csp::systems::MetricValue>& Params = Event->GetParams();
     auto* Values = Params.Values();
 
-    if (Values->Size() > 2) {
+    if (Values->Size() > 2)
+    {
         return "";
     }
 
@@ -74,23 +80,31 @@ csp::common::String CreateUAEventString(const csp::common::String& ClientId, con
     bool HasIntegerParam = false;
     bool HasStringParam = false;
 
-    for (int i = 0; i < Values->Size(); ++i) {
-        if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer) {
-            if (HasIntegerParam) {
+    for (int i = 0; i < Values->Size(); ++i)
+    {
+        if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::Integer)
+        {
+            if (HasIntegerParam)
+            {
                 return "";
             }
 
             HasIntegerParam = true;
             EventString += ValueTag;
             EventString += std::to_string(Values->operator[](i).GetInt()).c_str();
-        } else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String) {
-            if (HasStringParam) {
+        }
+        else if (Values->operator[](i).GetReplicatedValueType() == csp::multiplayer::ReplicatedValueType::String)
+        {
+            if (HasStringParam)
+            {
                 return "";
             }
 
             HasStringParam = true;
             EventString += LabelTag + Values->operator[](i).GetString();
-        } else {
+        }
+        else
+        {
             return "";
         }
     }

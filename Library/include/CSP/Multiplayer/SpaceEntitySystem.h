@@ -28,13 +28,15 @@
 #include <mutex>
 #include <set>
 
-namespace signalr {
+namespace signalr
+{
 
 class value;
 
 } // namespace signalr
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -42,7 +44,8 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SpaceSystem;
 class SystemsManager;
@@ -51,7 +54,8 @@ class SequenceSystem;
 } // namespace csp::systems
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ClientElectionManager;
 class MultiplayerConnection;
@@ -65,7 +69,8 @@ class SpaceTransform;
 /// It manages things like queueing updated entities and triggering tick events. Callbacks
 /// can be registered for certain events that occur within the entity system so clients can
 /// react appropriately.
-class CSP_API SpaceEntitySystem {
+class CSP_API SpaceEntitySystem
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::systems::SystemsManager;

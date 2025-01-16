@@ -24,7 +24,8 @@
 
 #include "Memory/MemoryManager.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 inline void* Allocate(size_t size);
 inline void* Allocate(size_t size, std::align_val_t alignment);
@@ -74,7 +75,8 @@ inline void Deallocate(void* Ptr, size_t Size, csp::memory::Allocator* Allocator
 
 template <typename T> inline void Delete(T* Ptr)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         Ptr->~T();
         Deallocate(Ptr, sizeof(T));
     }
@@ -82,7 +84,8 @@ template <typename T> inline void Delete(T* Ptr)
 
 template <typename T> inline void Delete(const T* Ptr)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         T* NonConstPtr = (T*)Ptr;
         NonConstPtr->~T();
         Deallocate(NonConstPtr, sizeof(T));
@@ -91,7 +94,8 @@ template <typename T> inline void Delete(const T* Ptr)
 
 template <typename T> inline void Delete(T* Ptr, csp::memory::Allocator* Allocator)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         Ptr->~T();
         Deallocate(Ptr, sizeof(T), Allocator);
     }
@@ -99,7 +103,8 @@ template <typename T> inline void Delete(T* Ptr, csp::memory::Allocator* Allocat
 
 template <typename T> inline void Delete(const T* Ptr, csp::memory::Allocator* Allocator)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         T* NonConstPtr = (T*)Ptr;
         NonConstPtr->~T();
         Deallocate(NonConstPtr, sizeof(T), Allocator);
@@ -108,7 +113,8 @@ template <typename T> inline void Delete(const T* Ptr, csp::memory::Allocator* A
 
 template <typename T, typename std::enable_if_t<std::is_integral_v<T>>*> inline void DeleteArray(const T* Ptr)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         auto& Allocator = csp::memory::MemoryManager::GetDefaultAllocator();
         auto RealPointer = (char*)Ptr - sizeof(size_t);
         auto BufferSize = *(size_t*)RealPointer;
@@ -118,13 +124,15 @@ template <typename T, typename std::enable_if_t<std::is_integral_v<T>>*> inline 
 
 template <typename T, typename std::enable_if_t<!std::is_integral_v<T>>*> inline void DeleteArray(const T* Ptr)
 {
-    if (Ptr != nullptr) {
+    if (Ptr != nullptr)
+    {
         auto& Allocator = csp::memory::MemoryManager::GetDefaultAllocator();
         auto RealPointer = (char*)Ptr - sizeof(size_t);
         auto BufferSize = *(size_t*)RealPointer;
         auto Count = BufferSize / sizeof(T);
 
-        for (int i = 0; i < Count; ++i) {
+        for (int i = 0; i < Count; ++i)
+        {
             (Ptr + i)->~T();
         }
 
@@ -186,7 +194,8 @@ inline Allocator* DefaultAllocator() { return &MemoryManager::GetDefaultAllocato
 
 #endif // #if !CSP_MEMORY_TRACKING_ENABLED
 
-template <class T> struct OlyDeleter {
+template <class T> struct OlyDeleter
+{
     void operator()(T* Ptr) { CSP_DELETE(Ptr); }
 };
 

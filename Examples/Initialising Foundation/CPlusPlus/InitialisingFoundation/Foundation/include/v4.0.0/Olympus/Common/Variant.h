@@ -7,9 +7,11 @@
 
 #include <functional>
 
-namespace oly_common {
+namespace oly_common
+{
 
-enum class VariantType {
+enum class VariantType
+{
     InvalidType,
     Boolean,
     Integer,
@@ -22,7 +24,8 @@ enum class VariantType {
 /**
  * @brief Variant is an intermediate class that enables clients to pack data into types that are supported by Foundation replication systems.
  */
-class OLY_API Variant {
+class OLY_API Variant
+{
 public:
     /**
      * @brief A default Variant will not have a valid type ("VariantType::InvalidType"), and will have no internal value associated.
@@ -107,7 +110,8 @@ private:
     VariantType ValueType;
 
     OLY_START_IGNORE
-    union InternalValue {
+    union InternalValue
+    {
         InternalValue();
         ~InternalValue();
 

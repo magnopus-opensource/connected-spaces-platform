@@ -20,7 +20,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace {
+namespace
+{
 
 /*
  * Construct a new string from the input that is lower cased (via std::tolower)
@@ -34,7 +35,8 @@ std::string ToLowerCaseString(const std::string& input)
 
 } // namespace
 
-namespace MultiplayerTestRunner::TestIdentifiers {
+namespace MultiplayerTestRunner::TestIdentifiers
+{
 /*
  * The test runner works by passing a specific test identifier in an a command line arg.
  * These things have to be strings, so this file serves to encode which tests are available,
@@ -46,7 +48,8 @@ namespace MultiplayerTestRunner::TestIdentifiers {
  * The identifier of the test to launch. Each of these should map to one test. See `main::RunTest`
  * To pass an identifier to the CLI, you need to pass the exact string representation defined in `TestIdentifierStringMap`.
  */
-enum class TestIdentifier {
+enum class TestIdentifier
+{
     CREATE_AVATAR //"CreateAvatar"
 };
 
@@ -57,7 +60,8 @@ inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStrin
  */
 inline std::string TestIdentifierToString(TestIdentifier identifier)
 {
-    if (TestIdentifierStringMap.count(identifier)) {
+    if (TestIdentifierStringMap.count(identifier))
+    {
         return TestIdentifierStringMap.at(identifier);
     }
     throw std::invalid_argument("Invalid TestIdentifier value in TestIdentifierToString: " + std::to_string(static_cast<int>(identifier)));
@@ -72,7 +76,8 @@ inline TestIdentifier StringToTestIdentifier(std::string identifier)
     auto it = std::find_if(TestIdentifierStringMap.begin(), TestIdentifierStringMap.end(),
         [&identifier](const auto& pair) { return ToLowerCaseString(pair.second) == ToLowerCaseString(identifier); });
 
-    if (it != TestIdentifierStringMap.end()) {
+    if (it != TestIdentifierStringMap.end())
+    {
         return it->first;
     }
 

@@ -18,32 +18,40 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include <string>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 static inline std::string ErrorCodeToString(csp::multiplayer::ErrorCode ErrorCode)
 {
     std::string ErrorCodeString;
-    switch (ErrorCode) {
-    case csp::multiplayer::ErrorCode::None: {
+    switch (ErrorCode)
+    {
+    case csp::multiplayer::ErrorCode::None:
+    {
         ErrorCodeString = "None";
         break;
     }
-    case csp::multiplayer::ErrorCode::Unknown: {
+    case csp::multiplayer::ErrorCode::Unknown:
+    {
         ErrorCodeString = "Unknown";
         break;
     }
-    case csp::multiplayer::ErrorCode::NotConnected: {
+    case csp::multiplayer::ErrorCode::NotConnected:
+    {
         ErrorCodeString = "NotConnected";
         break;
     }
-    case csp::multiplayer::ErrorCode::AlreadyConnected: {
+    case csp::multiplayer::ErrorCode::AlreadyConnected:
+    {
         ErrorCodeString = "AlreadyConnected";
         break;
     }
-    case csp::multiplayer::ErrorCode::SpaceUserLimitExceeded: {
+    case csp::multiplayer::ErrorCode::SpaceUserLimitExceeded:
+    {
         ErrorCodeString = "SpaceUserLimitExceeded";
         break;
     }
-    default: {
+    default:
+    {
         ErrorCodeString = std::string("Unknown error code. Value") + std::to_string(static_cast<unsigned int>(ErrorCode));
         break;
     }

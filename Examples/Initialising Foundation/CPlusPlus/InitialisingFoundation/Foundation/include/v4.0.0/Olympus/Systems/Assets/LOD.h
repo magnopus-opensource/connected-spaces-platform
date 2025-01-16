@@ -8,7 +8,8 @@
 #include "Olympus/Systems/Assets/Asset.h"
 #include "Olympus/Systems/Assets/AssetCollection.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiResponseBase;
 
@@ -18,16 +19,19 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Asset System
-class OLY_API LODAsset {
+class OLY_API LODAsset
+{
 public:
     Asset Asset;
     int Level = 0;
 };
 
-class OLY_API LODChain {
+class OLY_API LODChain
+{
 public:
     oly_common::String AssetCollectionId;
     oly_common::Array<LODAsset> LODAssets;
@@ -35,7 +39,8 @@ public:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
-class OLY_API LODChainResult : public oly_services::ResultBase {
+class OLY_API LODChainResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

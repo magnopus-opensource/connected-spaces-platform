@@ -5,7 +5,8 @@
 #include <chrono>
 #include <functional>
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 class SystemsManager;
 class UserSystem;
@@ -23,13 +24,15 @@ class AnalyticsSystem;
 
 } // namespace oly_systems
 
-namespace oly {
+namespace oly
+{
 
 class OlympusFoundation;
 
 }
 
-namespace oly_memory {
+namespace oly_memory
+{
 
 OLY_START_IGNORE
 template <typename T> void Delete(T*);
@@ -37,17 +40,20 @@ OLY_END_IGNORE
 
 } // namespace oly_memory
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Systems
 /// @brief Interface used to access each of the systems.
-class OLY_API OLY_NO_DISPOSE SystemsManager {
+class OLY_API OLY_NO_DISPOSE SystemsManager
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class oly::OlympusFoundation;
     friend void oly_memory::Delete(SystemsManager*);

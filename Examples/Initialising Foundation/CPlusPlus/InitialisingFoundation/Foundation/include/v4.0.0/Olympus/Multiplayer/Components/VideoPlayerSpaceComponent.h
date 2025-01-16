@@ -5,15 +5,34 @@
 #include "Olympus/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class VideoPlayerPlaybackState { Reset = 0, Pause, Play, Num };
+enum class VideoPlayerPlaybackState
+{
+    Reset = 0,
+    Pause,
+    Play,
+    Num
+};
 
-enum class VideoPlayerActions { VideoBegin, VideoEnd, Num };
+enum class VideoPlayerActions
+{
+    VideoBegin,
+    VideoEnd,
+    Num
+};
 
-enum class VideoPlayerSourceType { URLSource = 0, AssetSource, WowzaStreamSource, Num };
+enum class VideoPlayerSourceType
+{
+    URLSource = 0,
+    AssetSource,
+    WowzaStreamSource,
+    Num
+};
 
-enum class VideoPlayerPropertyKeys {
+enum class VideoPlayerPropertyKeys
+{
     Name = 0,
     VideoAssetId,
     VideoAssetURL,
@@ -38,7 +57,8 @@ enum class VideoPlayerPropertyKeys {
 
 /// @ingroup VideoPlayerSpaceComponent
 /// @brief Data representation of an VideoPlayerSpaceComponent.
-class OLY_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API VideoPlayerSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     VideoPlayerSpaceComponent(SpaceEntity* Parent);
 

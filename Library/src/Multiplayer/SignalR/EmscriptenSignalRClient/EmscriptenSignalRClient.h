@@ -21,9 +21,11 @@
 #include <emscripten/websocket.h>
 #include <thread>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class CSPWebSocketClientEmscripten : public IWebSocketClient {
+class CSPWebSocketClientEmscripten : public IWebSocketClient
+{
 public:
     CSPWebSocketClientEmscripten() noexcept;
     ~CSPWebSocketClientEmscripten() {};

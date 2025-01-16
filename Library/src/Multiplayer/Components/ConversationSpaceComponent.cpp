@@ -29,7 +29,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Conversation, Parent)
@@ -49,7 +50,8 @@ csp::multiplayer::ConversationSpaceComponent::ConversationSpaceComponent(SpaceEn
 
 void ConversationSpaceComponent::CreateConversation(const csp::common::String& Message, StringResultCallback Callback)
 {
-    if (!GetConversationId().IsEmpty()) {
+    if (!GetConversationId().IsEmpty())
+    {
         CSP_LOG_WARN_MSG("This component already has an associated conversation! No new conversation was created as a result.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
@@ -57,8 +59,10 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
         return;
     }
 
-    const StringResultCallback CreateConversationIdCallback = [=](const StringResult& StringResult) {
-        if (StringResult.GetResultCode() == csp::systems::EResultCode::Success) {
+    const StringResultCallback CreateConversationIdCallback = [=](const StringResult& StringResult)
+    {
+        if (StringResult.GetResultCode() == csp::systems::EResultCode::Success)
+        {
             SetConversationId(StringResult.GetValue());
         }
 
@@ -70,7 +74,8 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
 bool ConversationSpaceComponent::MoveConversationFromComponent(ConversationSpaceComponent& OtherConversationComponent)
 {
-    if (!GetConversationId().IsEmpty()) {
+    if (!GetConversationId().IsEmpty())
+    {
         CSP_LOG_WARN_MSG("This component already has an associated conversation! The conversation was not moved as a result.");
 
         return false;
@@ -84,7 +89,8 @@ bool ConversationSpaceComponent::MoveConversationFromComponent(ConversationSpace
 
 void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty()) {
+    if (GetConversationId().IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("The conversation ID passed to DeleteConversation was empty! No update to the conversation was issued as a result.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
@@ -97,7 +103,8 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 
 void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, MessageResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty()) {
+    if (GetConversationId().IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("The conversation ID passed to AddMessage was empty! No update to the conversation was issued as a result.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
@@ -105,12 +112,15 @@ void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, 
         return;
     }
 
-    csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult) {
-        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::ProfileResultCallback GetProfileCallback = [=](const csp::systems::ProfileResult& GetProfileResult)
+    {
+        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
-        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             const MessageResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -131,7 +141,8 @@ void ConversationSpaceComponent::GetMessage(const csp::common::String& MessageId
 
 void ConversationSpaceComponent::GetAllMessages(MessageCollectionResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty()) {
+    if (GetConversationId().IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("The conversation ID passed to GetAllMessages was empty! No update to the conversation was issued as a result.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageCollectionResult>());
@@ -179,7 +190,8 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 
 void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty()) {
+    if (GetConversationId().IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
@@ -192,7 +204,8 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 
 void ConversationSpaceComponent::SetConversationInfo(const ConversationInfo& ConversationData, ConversationResultCallback Callback)
 {
-    if (GetConversationId().IsEmpty()) {
+    if (GetConversationId().IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("This component does not have an associated conversation.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());

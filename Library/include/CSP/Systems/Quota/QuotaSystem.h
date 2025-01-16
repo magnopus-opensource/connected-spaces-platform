@@ -19,19 +19,22 @@
 #include "CSP/Systems/Quota/Quota.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 } // namespace csp::services
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -39,11 +42,13 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' Quota Server.
 /// Offers methods for receiving Quota Queries.
-class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE QuotaSystem : public SystemBase
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

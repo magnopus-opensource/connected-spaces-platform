@@ -18,9 +18,11 @@
 #include "Memory/Allocator.h"
 #include "Memory/Memory.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
-template <typename T> class StlAllocator {
+template <typename T> class StlAllocator
+{
 public:
     typedef T value_type;
     typedef value_type* pointer;
@@ -31,7 +33,8 @@ public:
     typedef std::ptrdiff_t difference_type;
 
 public:
-    template <typename U> struct rebind {
+    template <typename U> struct rebind
+    {
         typedef StlAllocator<U> other;
     };
 
@@ -63,7 +66,8 @@ public:
     // memory allocation
     inline pointer allocate(size_type cnt)
     {
-        if (Allocator) {
+        if (Allocator)
+        {
             return static_cast<T*>(Allocator->Allocate(sizeof(T) * cnt));
         }
 
@@ -72,9 +76,12 @@ public:
 
     inline void deallocate(pointer p, size_type cnt)
     {
-        if (Allocator) {
+        if (Allocator)
+        {
             Allocator->Deallocate(p, sizeof(T) * cnt);
-        } else {
+        }
+        else
+        {
             csp::memory::Deallocate(p, sizeof(T) * cnt);
         }
     }

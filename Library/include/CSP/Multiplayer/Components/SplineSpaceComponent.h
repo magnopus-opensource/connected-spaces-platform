@@ -21,16 +21,22 @@
 
 #include "CSP/Multiplayer/ComponentBase.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a spline component.
-enum class SplinePropertyKeys { Waypoints = 0, Num };
+enum class SplinePropertyKeys
+{
+    Waypoints = 0,
+    Num
+};
 
 /**
  * @ingroup SplineSpaceComponent
  * @brief Add a spline curve to your space. This can be used in conjunction with Scripts to align/animate objects along its length.
  */
-class CSP_API SplineSpaceComponent : public ComponentBase {
+class CSP_API SplineSpaceComponent : public ComponentBase
+{
 public:
     /// @brief Constructs the spline space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

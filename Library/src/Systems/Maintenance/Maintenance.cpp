@@ -19,11 +19,13 @@
 #include "Common/Algorithm.h"
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 bool MaintenanceInfo::IsInsideWindow() const
 {
-    if (StartDateTimestamp.IsEmpty() || EndDateTimestamp.IsEmpty()) {
+    if (StartDateTimestamp.IsEmpty() || EndDateTimestamp.IsEmpty())
+    {
         return false;
     }
 
@@ -35,7 +37,8 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
 {
     ResultBase::OnResponse(ApiResponse);
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         rapidjson::Document JsonDoc;
 
         JsonDoc.Parse(ApiResponse->GetResponse()->GetPayload().GetContent());
@@ -45,26 +48,32 @@ void MaintenanceInfoResult::OnResponse(const csp::services::ApiResponseBase* Api
         const auto TimeNow = csp::common::DateTime::UtcTimeNow().GetTimePoint();
         uint32_t ArrayShrinkage = 0;
 
-        for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++) {
+        for (rapidjson::SizeType i = 0; i < JsonDoc.Size(); i++)
+        {
             // remove old maintenance windows
-            if (TimeNow <= csp::common::DateTime(JsonDoc[i]["End"].GetString()).GetTimePoint()) {
+            if (TimeNow <= csp::common::DateTime(JsonDoc[i]["End"].GetString()).GetTimePoint())
+            {
                 LocalArray[i - ArrayShrinkage].Description = JsonDoc[i]["Description"].GetString();
                 LocalArray[i - ArrayShrinkage].StartDateTimestamp = JsonDoc[i]["Start"].GetString();
                 LocalArray[i - ArrayShrinkage].EndDateTimestamp = JsonDoc[i]["End"].GetString();
-            } else {
+            }
+            else
+            {
                 ArrayShrinkage++;
             };
         }
 
         MaintenanceInfoResponses = csp::common::Array<MaintenanceInfo>(JsonDoc.Size() - ArrayShrinkage);
 
-        for (uint32_t i = 0; i < (JsonDoc.Size() - ArrayShrinkage); i++) {
+        for (uint32_t i = 0; i < (JsonDoc.Size() - ArrayShrinkage); i++)
+        {
             MaintenanceInfoResponses[i].Description = LocalArray[i].Description;
             MaintenanceInfoResponses[i].StartDateTimestamp = LocalArray[i].StartDateTimestamp;
             MaintenanceInfoResponses[i].EndDateTimestamp = LocalArray[i].EndDateTimestamp;
         }
 
-        if (MaintenanceInfoResponses.Size() == 0) {
+        if (MaintenanceInfoResponses.Size() == 0)
+        {
             CSP_LOG_MSG(LogLevel::Verbose, "No future maintenance windows are defined by the services");
         }
 
@@ -79,9 +88,12 @@ const csp::common::Array<MaintenanceInfo>& MaintenanceInfoResult::GetMaintenance
 
 const MaintenanceInfo& MaintenanceInfoResult::GetLatestMaintenanceInfo() const
 {
-    if (HasAnyMaintenanceWindows()) {
+    if (HasAnyMaintenanceWindows())
+    {
         return MaintenanceInfoResponses[0];
-    } else {
+    }
+    else
+    {
         CSP_LOG_MSG(LogLevel::Verbose, "Default maintenance window info is being returned as the latest window.");
         return GetDefaultMaintenanceInfo();
     }
@@ -99,12 +111,14 @@ void SortMaintenanceInfos(csp::common::Array<MaintenanceInfo>& MaintenanceInfos)
 {
     const csp::common::DateTime CurrentTime(csp::common::DateTime::UtcTimeNow());
 
-    csp::common::Sort(MaintenanceInfos, [CurrentTime](const MaintenanceInfo& Item1, const MaintenanceInfo& Item2) {
-        const csp::common::DateTime Item1Time(Item1.EndDateTimestamp);
-        const csp::common::DateTime Item2Time(Item2.EndDateTimestamp);
+    csp::common::Sort(MaintenanceInfos,
+        [CurrentTime](const MaintenanceInfo& Item1, const MaintenanceInfo& Item2)
+        {
+            const csp::common::DateTime Item1Time(Item1.EndDateTimestamp);
+            const csp::common::DateTime Item2Time(Item2.EndDateTimestamp);
 
-        return Item1Time.GetTimePoint() - CurrentTime.GetTimePoint() < Item2Time.GetTimePoint() - CurrentTime.GetTimePoint();
-    });
+            return Item1Time.GetTimePoint() - CurrentTime.GetTimePoint() < Item2Time.GetTimePoint() - CurrentTime.GetTimePoint();
+        });
 }
 
 } // namespace csp::systems

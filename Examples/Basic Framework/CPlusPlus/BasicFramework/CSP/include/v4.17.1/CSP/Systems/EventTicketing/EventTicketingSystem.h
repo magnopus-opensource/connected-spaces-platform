@@ -19,11 +19,13 @@
 #include "CSP/Systems/EventTicketing/EventTicketing.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Event Ticketing System
 /// @brief System that allows creation and management of ticketed events for spaces.
-class CSP_API CSP_NO_DISPOSE EventTicketingSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE EventTicketingSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

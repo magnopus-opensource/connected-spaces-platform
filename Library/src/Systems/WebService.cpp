@@ -17,7 +17,8 @@
 
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 systems::ResultBase::ResultBase()
     : FailureReason(ERequestFailureReason::None)
 {
@@ -39,7 +40,8 @@ ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, 
 
 void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 {
-    if (ApiResponse) {
+    if (ApiResponse)
+    {
         const csp::web::HttpRequest* Request = ApiResponse->GetResponse()->GetRequest();
 
         Result = EResultCode::InProgress;
@@ -53,9 +55,12 @@ void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 /// @param ApiResponse
 void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
-    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
+    {
         Result = EResultCode::Success;
-    } else {
+    }
+    else
+    {
         Result = EResultCode::Failed;
     }
 
@@ -67,7 +72,8 @@ void ResultBase::OnResponse(const services::ApiResponseBase* ApiResponse)
 
     const auto& Headers = ResponsePayload.GetHeaders();
 
-    if (Result == EResultCode::Failed && Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty()) {
+    if (Result == EResultCode::Failed && Headers.count("x-errorcode") > 0 && !Headers.at("x-errorcode").empty())
+    {
         FailureReason = ParseErrorCode(Headers.at("x-errorcode").c_str());
     }
 }
@@ -130,7 +136,8 @@ ERequestFailureReason ResultBase::ParseErrorCode(const csp::common::String& Valu
     };
 
     const auto Reason = XErrorCodeToFailureReason.find(Value);
-    if (Reason != XErrorCodeToFailureReason.end()) {
+    if (Reason != XErrorCodeToFailureReason.end())
+    {
         return Reason->second;
     }
 

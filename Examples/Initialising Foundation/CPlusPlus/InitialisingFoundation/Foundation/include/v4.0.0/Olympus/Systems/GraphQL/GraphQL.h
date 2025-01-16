@@ -7,18 +7,21 @@
 #pragma once
 #include "Olympus/Services/WebService.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiResponseBase;
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup GraphQL System
 /// @brief Data class used to contain information when a Response is received from GraphQL
 
-class OLY_API GraphQLResult : public oly_services::ResultBase {
+class OLY_API GraphQLResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     friend class GraphQLSystem;

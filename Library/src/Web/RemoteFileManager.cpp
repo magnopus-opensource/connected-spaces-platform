@@ -19,7 +19,8 @@
 #include "Web/HttpPayload.h"
 #include "Web/WebClient.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 RemoteFileManager::RemoteFileManager(csp::web::WebClient* InWebClient)
     : WebClient(InWebClient)

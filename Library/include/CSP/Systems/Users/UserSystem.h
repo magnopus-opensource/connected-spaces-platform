@@ -27,13 +27,15 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -41,12 +43,14 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup User System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' user service.
 /// Offers methods for creating accounts, authenticating, and retrieving user profiles.
-class CSP_API UserSystem : public SystemBase {
+class CSP_API UserSystem : public SystemBase
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

@@ -25,7 +25,8 @@
 
 namespace chs = csp::services::generated::prototypeservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DTOAssetDetailType)
 {
@@ -49,7 +50,8 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::AUDIO;
     else if (DTOAssetDetailType == "GaussianSplat")
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
-    else {
+    else
+    {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
         return csp::systems::EAssetType::IMAGE;
     }
@@ -57,9 +59,12 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
 
 csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::String& Platform)
 {
-    if (Platform == "Default") {
+    if (Platform == "Default")
+    {
         return EAssetPlatform::DEFAULT;
-    } else {
+    }
+    else
+    {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Platform!");
         return EAssetPlatform::DEFAULT;
     }
@@ -67,7 +72,8 @@ csp::systems::EAssetPlatform ConvertStringToAssetPlatform(const csp::common::Str
 
 csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 {
-    switch (Platform) {
+    switch (Platform)
+    {
     case EAssetPlatform::DEFAULT:
         return "Default";
     }
@@ -78,78 +84,98 @@ csp::common::String ConvertAssetPlatformToString(EAssetPlatform Platform)
 
 void AssetDetailDtoToAsset(const chs::AssetDetailDto& Dto, csp::systems::Asset& Asset)
 {
-    if (Dto.HasPrototypeId()) {
+    if (Dto.HasPrototypeId())
+    {
         Asset.AssetCollectionId = Dto.GetPrototypeId();
     }
 
-    if (Dto.HasId()) {
+    if (Dto.HasId())
+    {
         Asset.Id = Dto.GetId();
     }
 
-    if (Dto.HasFileName()) {
+    if (Dto.HasFileName())
+    {
         Asset.FileName = Dto.GetFileName();
     }
 
-    if (Dto.HasName()) {
+    if (Dto.HasName())
+    {
         Asset.Name = Dto.GetName();
     }
 
-    if (Dto.HasLanguageCode()) {
+    if (Dto.HasLanguageCode())
+    {
         Asset.LanguageCode = Dto.GetLanguageCode();
     }
 
-    if (Dto.HasAssetType()) {
+    if (Dto.HasAssetType())
+    {
         Asset.Type = ConvertDTOAssetDetailType(Dto.GetAssetType());
     }
 
-    if (Dto.HasSupportedPlatforms()) {
+    if (Dto.HasSupportedPlatforms())
+    {
         const auto& Platforms = Dto.GetSupportedPlatforms();
         Asset.Platforms = csp::common::Array<csp::systems::EAssetPlatform>(Platforms.size());
 
-        for (size_t i = 0; i < Platforms.size(); ++i) {
+        for (size_t i = 0; i < Platforms.size(); ++i)
+        {
             // TODO Move this to a separate function when we have some different values than DEFAULT
             Asset.Platforms[i] = ConvertStringToAssetPlatform(Platforms[i]);
         }
     }
 
-    if (Dto.HasStyle()) {
+    if (Dto.HasStyle())
+    {
         Asset.Styles = csp::common::Convert(Dto.GetStyle());
     }
 
-    if (Dto.HasAddressableId()) {
+    if (Dto.HasAddressableId())
+    {
         // TODO CHS naming refactor planned for AssetDetailDto.m_AddressableId, becoming AssetDetailDto.m_ThirdPartyReferenceId
         const auto& InAddressableId = Dto.GetAddressableId().Split('|');
-        if (InAddressableId.Size() == 2) {
+        if (InAddressableId.Size() == 2)
+        {
             Asset.ThirdPartyPlatformType = static_cast<EThirdPartyPlatform>(std::stoi(InAddressableId[1].c_str()));
             Asset.ThirdPartyPackagedAssetIdentifier = InAddressableId[0];
-        } else {
+        }
+        else
+        {
             Asset.ThirdPartyPackagedAssetIdentifier = Dto.GetAddressableId();
             Asset.ThirdPartyPlatformType = EThirdPartyPlatform::NONE;
         }
-    } else {
+    }
+    else
+    {
         Asset.ThirdPartyPackagedAssetIdentifier = "";
         Asset.ThirdPartyPlatformType = EThirdPartyPlatform::NONE;
     }
 
-    if (Dto.HasUri()) {
+    if (Dto.HasUri())
+    {
         Asset.Uri = Dto.GetUri();
     }
 
-    if (Dto.HasChecksum()) {
+    if (Dto.HasChecksum())
+    {
         Asset.Checksum = Dto.GetChecksum();
     }
 
-    if (Dto.HasVersion()) {
+    if (Dto.HasVersion())
+    {
         Asset.Version = std::stoi(Dto.GetVersion().c_str());
     }
 
-    if (Dto.HasMimeType()) {
+    if (Dto.HasMimeType())
+    {
         Asset.MimeType = Dto.GetMimeType();
     }
 }
 } // namespace csp::systems
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 Asset::Asset()
     : Type(EAssetType::MODEL)
@@ -205,7 +231,8 @@ void AssetResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     auto* AssetDetailResponse = static_cast<chs::AssetDetailDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         AssetDetailResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -224,7 +251,8 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     auto* AssetsResponse = static_cast<csp::services::DtoArray<chs::AssetDetailDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         AssetsResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -232,7 +260,8 @@ void AssetsResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
         Assets = csp::common::Array<csp::systems::Asset>(DetailsArray.size());
 
         // Extract data from response in our Projects array
-        for (size_t i = 0; i < DetailsArray.size(); ++i) {
+        for (size_t i = 0; i < DetailsArray.size(); ++i)
+        {
             AssetDetailDtoToAsset(DetailsArray[i], Assets[i]);
         }
     }
@@ -257,7 +286,8 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     const auto* Response = ApiResponse->GetResponse();
     const auto& Headers = Response->GetPayload().GetHeaders();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         Uri = Response->GetPayload().GetContent();
     }
 }

@@ -23,7 +23,8 @@ namespace chs = csp::services::generated::aggregationservice;
 
 csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor& Vendor)
 {
-    switch (Vendor) {
+    switch (Vendor)
+    {
     case csp::systems::EventTicketingVendor::Eventbrite:
         return "eventbrite";
     default:
@@ -32,7 +33,8 @@ csp::common::String GetVendorNameString(const csp::systems::EventTicketingVendor
     }
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 EventTicketingSystem::EventTicketingSystem(csp::web::WebClient* InWebClient)
     : SystemBase(InWebClient, nullptr)
@@ -66,19 +68,23 @@ void EventTicketingSystem::UpdateTicketedEvent(const csp::common::String& SpaceI
 {
     auto Request = std::make_shared<chs::SpaceEventDto>();
 
-    if (Vendor.HasValue()) {
+    if (Vendor.HasValue())
+    {
         Request->SetVendorName(GetVendorNameString(*Vendor));
     }
 
-    if (VendorEventId.HasValue()) {
+    if (VendorEventId.HasValue())
+    {
         Request->SetVendorEventId(*VendorEventId);
     }
 
-    if (VendorEventUri.HasValue()) {
+    if (VendorEventUri.HasValue())
+    {
         Request->SetVendorEventUri(*VendorEventUri);
     }
 
-    if (IsTicketingActive.HasValue()) {
+    if (IsTicketingActive.HasValue())
+    {
         Request->SetIsTicketingActive(*IsTicketingActive);
     }
 
@@ -95,7 +101,8 @@ void EventTicketingSystem::GetTicketedEvents(const csp::common::Array<csp::commo
     std::vector<csp::common::String> RequestSpaceIds;
     RequestSpaceIds.reserve(SpaceIds.Size());
 
-    for (auto i = 0; i < SpaceIds.Size(); ++i) {
+    for (auto i = 0; i < SpaceIds.Size(); ++i)
+    {
         RequestSpaceIds.push_back(SpaceIds[i]);
     }
 
@@ -126,7 +133,8 @@ void EventTicketingSystem::SubmitEventTicket(const csp::common::String& SpaceId,
             Callback, nullptr, csp::web::EResponseCodes::ResponseCreated);
 
     std::optional<csp::common::String> RequestOnBehalfOfUserId = std::nullopt;
-    if (OnBehalfOfUserId.HasValue()) {
+    if (OnBehalfOfUserId.HasValue())
+    {
         RequestOnBehalfOfUserId = *OnBehalfOfUserId;
     }
 

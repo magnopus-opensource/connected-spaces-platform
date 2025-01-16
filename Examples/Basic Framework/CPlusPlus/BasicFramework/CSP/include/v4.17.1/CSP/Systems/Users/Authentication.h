@@ -19,13 +19,15 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::common {
+namespace csp::common
+{
 
 class DateTime;
 
 } // namespace csp::common
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -33,12 +35,14 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class UserSystem;
 class LoginStateResult;
 
-enum class ELoginState : uint8_t {
+enum class ELoginState : uint8_t
+{
     LoginThirdPartyProviderDetailsRequested,
     LoginRequested,
     LoggedIn,
@@ -48,7 +52,8 @@ enum class ELoginState : uint8_t {
 };
 
 /// @brief Data structure representing the user login state, including detection of access token expiry
-class CSP_API LoginState {
+class CSP_API LoginState
+{
     friend class LoginStateResult;
 
 public:
@@ -75,7 +80,8 @@ private:
 };
 
 /// @brief Data for access and refresh tokens, and their expiry times.
-class CSP_API LoginTokenInfo {
+class CSP_API LoginTokenInfo
+{
 public:
     csp::common::String AccessToken;
     csp::common::String AccessExpiryTime;
@@ -84,7 +90,8 @@ public:
 };
 
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public csp::systems::ResultBase {
+class CSP_API LoginStateResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -106,7 +113,8 @@ private:
 };
 
 /// @brief Result structure for a logout state request.
-class CSP_API LogoutResult : public NullResult {
+class CSP_API LogoutResult : public NullResult
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -125,7 +133,8 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenReceived : public csp::systems::ResultBase {
+class CSP_API LoginTokenReceived : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class UserSystem;
     /** @endcond */
@@ -146,7 +155,8 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when a ping response is received
-class CSP_API PingResponseReceived : public csp::systems::ResultBase {
+class CSP_API PingResponseReceived : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -161,7 +171,8 @@ private:
 };
 
 /// @brief Data structure for an Agora user token, giving userID, channel name and settings regarding sharing of audio/video/screenshare.
-class CSP_API AgoraUserTokenParams {
+class CSP_API AgoraUserTokenParams
+{
 public:
     csp::common::String AgoraUserId;
     int Lifespan;
@@ -174,7 +185,8 @@ public:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information requesting a user token
-class CSP_API AgoraUserTokenResult : public csp::systems::ResultBase {
+class CSP_API AgoraUserTokenResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -196,7 +208,8 @@ private:
 };
 
 /// @brief Result url for a tier checkout session request
-class CSP_API CheckoutSessionUrlResult : public csp::systems::ResultBase {
+class CSP_API CheckoutSessionUrlResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class UserSystem;
@@ -217,7 +230,8 @@ private:
 };
 
 /// @brief Result url for a user customer portal request
-class CSP_API CustomerPortalUrlResult : public csp::systems::ResultBase {
+class CSP_API CustomerPortalUrlResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class UserSystem;

@@ -28,7 +28,8 @@
 #include <filesystem>
 using namespace csp::systems;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -139,7 +140,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForUser)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
-    for (int i = 0; i < TierFeaturesArray.Size(); i++) {
+    for (int i = 0; i < TierFeaturesArray.Size(); i++)
+    {
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
@@ -178,7 +180,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeatureProgressForSpace)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesLimitInfo().Size(), TierFeaturesArray.Size());
 
-    for (int i = 0; i < TierFeaturesArray.Size(); i++) {
+    for (int i = 0; i < TierFeaturesArray.Size(); i++)
+    {
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].FeatureName, TierFeaturesArray[i]);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].Limit, -1);
         EXPECT_EQ(Result.GetFeaturesLimitInfo()[i].ActivityCount, 0);
@@ -245,7 +248,8 @@ CSP_PUBLIC_TEST(CSPEngine, QuotaSystemTests, GetTierFeaturesQuota)
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
     EXPECT_EQ(Result.GetFeaturesQuotaInfo().Size(), ExpectedInfoArray.Size());
 
-    for (int i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++) {
+    for (int i = 0; i < Result.GetFeaturesQuotaInfo().Size(); i++)
+    {
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].FeatureName, ExpectedInfoArray[i].FeatureName);
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].TierName, ExpectedInfoArray[i].TierName);
         EXPECT_EQ(Result.GetFeaturesQuotaInfo()[i].Limit, ExpectedInfoArray[i].Limit);

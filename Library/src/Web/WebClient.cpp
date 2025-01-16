@@ -26,7 +26,8 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-namespace csp::web {
+namespace csp::web
+{
 
 WebClient::WebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
     : RootPort(InPort)
@@ -49,7 +50,8 @@ WebClient::~WebClient()
     WasmRequestsMutex.lock();
     {
         // Cancel all in-flight requests
-        while (!WasmRequests.IsEmpty()) {
+        while (!WasmRequests.IsEmpty())
+        {
             auto WasmRequest = WasmRequests.Dequeue();
             WasmRequest.value()->Cancel();
         }
@@ -65,14 +67,16 @@ WebClient::~WebClient()
     RequestsMutex.lock();
     {
         // Cancel all in-flight requests
-        for (auto* Request : Requests) {
+        for (auto* Request : Requests)
+        {
             Request->Cancel();
         }
     }
     RequestsMutex.unlock();
 
     // Wait for all cancelled requests to be processed
-    while ((RequestCount > 0) && (WaitCounter < kMaxWaitCounter)) {
+    while ((RequestCount > 0) && (WaitCounter < kMaxWaitCounter))
+    {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         ++WaitCounter;
     }
@@ -80,7 +84,8 @@ WebClient::~WebClient()
     // Process all outstanding responses
     WaitCounter = 0;
 
-    while ((RequestCount > 0) && (WaitCounter < kMaxWaitCounter)) {
+    while ((RequestCount > 0) && (WaitCounter < kMaxWaitCounter))
+    {
         ProcessResponses(RequestCount);
 
         // Guard against exiting while Requests are still in flight
@@ -88,7 +93,8 @@ WebClient::~WebClient()
         ++WaitCounter;
     }
 
-    if (WaitCounter == kMaxWaitCounter) {
+    if (WaitCounter == kMaxWaitCounter)
+    {
         CSP_LOG_WARN_MSG("Web client timed out waiting for outstanding request on exit\n");
     }
 
@@ -100,16 +106,19 @@ WebClient::~WebClient()
 
 void WebClient::RefreshIfExpired()
 {
-    if (!AutoRefreshEnabled || RefreshNeeded) {
+    if (!AutoRefreshEnabled || RefreshNeeded)
+    {
         return;
     }
 
-    if (LoginState == nullptr) {
+    if (LoginState == nullptr)
+    {
         UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
         LoginState = &UserSystem->GetLoginState();
     }
 
-    if (LoginState->RefreshNeeded()) {
+    if (LoginState->RefreshNeeded())
+    {
 #ifdef CSP_WASM
         WasmRequestsMutex.lock();
         {
@@ -120,12 +129,15 @@ void WebClient::RefreshIfExpired()
         RefreshNeeded = true;
 #endif
 
-        csp::systems::NullResultCallback NullResCallback = [this](const csp::systems::NullResult& NullRes) {
-            if (NullRes.GetResultCode() == csp::systems::EResultCode::Success) {
+        csp::systems::NullResultCallback NullResCallback = [this](const csp::systems::NullResult& NullRes)
+        {
+            if (NullRes.GetResultCode() == csp::systems::EResultCode::Success)
+            {
 #ifdef CSP_WASM
                 WasmRequestsMutex.lock();
                 {
-                    while (!WasmRequests.IsEmpty()) {
+                    while (!WasmRequests.IsEmpty())
+                    {
                         auto WasmRequest = WasmRequests.Dequeue().value();
                         WasmRequest->RefreshAccessToken();
                         Send(*WasmRequest);
@@ -138,7 +150,9 @@ void WebClient::RefreshIfExpired()
                 RefreshNeeded = false;
 #endif
                 RefreshStarted = false;
-            } else if (NullRes.GetResultCode() == csp::systems::EResultCode::Failed) {
+            }
+            else if (NullRes.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 assert(false && "User authentication token refresh failed!");
             }
         };
@@ -157,9 +171,12 @@ void WebClient::SendRequest(ERequestVerb Verb, const csp::web::Uri& InUri, HttpP
 
     WasmRequestsMutex.lock();
     {
-        if (RefreshNeeded && Request->GetPayload().GetRequiresBearerToken()) {
+        if (RefreshNeeded && Request->GetPayload().GetRequiresBearerToken())
+        {
             WasmRequests.Enqueue(Request);
-        } else {
+        }
+        else
+        {
             Request->RefreshAccessToken();
             Send(*Request);
         }
@@ -174,13 +191,17 @@ void WebClient::AddRequest(HttpRequest* Request, std::chrono::milliseconds SendD
 {
     RefreshIfExpired();
 
-    if (Request) {
+    if (Request)
+    {
 #ifdef CSP_WASM
         WasmRequestsMutex.lock();
         {
-            if (RefreshNeeded && Request->GetPayload().GetRequiresBearerToken()) {
+            if (RefreshNeeded && Request->GetPayload().GetRequiresBearerToken())
+            {
                 WasmRequests.Enqueue(Request);
-            } else {
+            }
+            else
+            {
                 Request->RefreshAccessToken();
                 Send(*Request);
             }
@@ -196,21 +217,25 @@ void WebClient::AddRequest(HttpRequest* Request, std::chrono::milliseconds SendD
         ++RequestCount;
         Request->IncRefCount();
         Request->SetSendDelay(SendDelay);
-        ThreadPool.Enqueue([this, Request](void*) {
-            while (RefreshStarted) {
-                std::this_thread::sleep_for(10ns);
-            }
+        ThreadPool.Enqueue(
+            [this, Request](void*)
+            {
+                while (RefreshStarted)
+                {
+                    std::this_thread::sleep_for(10ns);
+                }
 
-            if (RefreshNeeded && !RefreshStarted) {
-                RefreshStarted = true;
-            }
+                if (RefreshNeeded && !RefreshStarted)
+                {
+                    RefreshStarted = true;
+                }
 
-            Request->RefreshAccessToken();
+                Request->RefreshAccessToken();
 
-            ProcessRequest(Request);
+                ProcessRequest(Request);
 
-            return nullptr;
-        });
+                return nullptr;
+            });
 #endif
     }
 }
@@ -220,13 +245,15 @@ void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
 {
     uint32_t ResponseCount = 0;
 
-    while ((PollRequests.IsEmpty() == false) && (ResponseCount < MaxNumResponses)) {
+    while ((PollRequests.IsEmpty() == false) && (ResponseCount < MaxNumResponses))
+    {
         auto PollRequest = PollRequests.Dequeue();
 
         HttpRequest* Request = PollRequest.value();
         IHttpResponseHandler* Callback = Request->GetCallback();
 
-        if (!Request->Cancelled() && Callback) {
+        if (!Request->Cancelled() && Callback)
+        {
             auto& Response = Request->GetMutableResponse();
             Callback->OnHttpResponse(Response);
         }
@@ -241,21 +268,27 @@ void WebClient::ProcessResponses(const uint32_t MaxNumResponses)
 
 void WebClient::ProcessRequest(HttpRequest* Request)
 {
-    if (Request) {
+    if (Request)
+    {
         auto& Payload = Request->GetMutablePayload();
         Payload.SetBearerToken();
 
         const std::chrono::milliseconds SendDelay = Request->GetSendDelay();
 
-        if (SendDelay > std::chrono::milliseconds(0)) {
+        if (SendDelay > std::chrono::milliseconds(0))
+        {
             // Wait before sending if required (e.g. for Retries)
             std::this_thread::sleep_for(SendDelay);
         }
 
-        try {
-            if (!Request->Cancelled()) {
+        try
+        {
+            if (!Request->Cancelled())
+            {
                 Send(*Request);
-            } else {
+            }
+            else
+            {
                 Request->SetRequestProgress(100.0f);
                 Request->SetResponseProgress(100.0f);
                 Request->SetResponseCode(EResponseCodes::ResponseRequestTimeout);
@@ -263,7 +296,9 @@ void WebClient::ProcessRequest(HttpRequest* Request)
                 Request->SetResponseData(ResponseBody.c_str(), ResponseBody.length());
                 Request->EnableAutoRetry(false);
             }
-        } catch (const WebClientException& Ex) {
+        }
+        catch (const WebClientException& Ex)
+        {
             CSP_LOG_MSG(csp::systems::LogLevel::Error, Ex.what());
 
             Request->SetRequestProgress(100.0f);
@@ -278,11 +313,15 @@ void WebClient::ProcessRequest(HttpRequest* Request)
         // Attempt Auto-retry if needed
         bool RetryIssued = Request->CheckForAutoRetry();
 
-        if (Request->GetCallback()) {
-            if (Request->GetIsCallbackAsync()) {
-                if (!RetryIssued) {
+        if (Request->GetCallback())
+        {
+            if (Request->GetIsCallbackAsync())
+            {
+                if (!RetryIssued)
+                {
                     const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-                    if (ResponseCode >= 400) {
+                    if (ResponseCode >= 400)
+                    {
                         PrintClientErrorResponseMessages(Response);
                     }
 
@@ -290,10 +329,14 @@ void WebClient::ProcessRequest(HttpRequest* Request)
                 }
 
                 DestroyRequest(Request);
-            } else {
-                if (!RetryIssued) {
+            }
+            else
+            {
+                if (!RetryIssued)
+                {
                     const uint16_t ResponseCode = static_cast<uint16_t>(Response.GetResponseCode());
-                    if (ResponseCode >= 400) {
+                    if (ResponseCode >= 400)
+                    {
                         PrintClientErrorResponseMessages(Response);
                     }
 
@@ -302,7 +345,9 @@ void WebClient::ProcessRequest(HttpRequest* Request)
                     PollRequests.Enqueue({ Request });
                 }
             }
-        } else {
+        }
+        else
+        {
             // No callback, so just destroy the request
             DestroyRequest(Request);
         }
@@ -319,7 +364,8 @@ void WebClient::DestroyRequest(HttpRequest* Request)
 
     --RequestCount;
 
-    if (Request->DecRefCount() == 0) {
+    if (Request->DecRefCount() == 0)
+    {
         CSP_DELETE(Request);
     }
 }
@@ -333,7 +379,8 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
     const csp::common::String& ResponsePayload = Response.GetPayload().GetContent();
 
     csp::common::String Verb = "";
-    switch (Response.GetRequest()->GetVerb()) {
+    switch (Response.GetRequest()->GetVerb())
+    {
     case ERequestVerb::Get:
         Verb = "GET";
         break;
@@ -353,7 +400,8 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
         break;
     }
 
-    if (ResponsePayload.IsEmpty()) {
+    if (ResponsePayload.IsEmpty())
+    {
         CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) but with no payload/error message.", Verb.c_str(),
             Response.GetRequest()->GetUri().GetAsString(), ResponseCode);
         return;
@@ -361,41 +409,57 @@ void WebClient::PrintClientErrorResponseMessages(const HttpResponse& Response)
 
     csp::common::List<csp::common::String> Errors;
 
-    if (Response.GetPayload().IsJsonPayload()) {
+    if (Response.GetPayload().IsJsonPayload())
+    {
         rapidjson::Document ResponseJson;
         ResponseJson.Parse(ResponsePayload.c_str());
 
         // Since is is possible to have responses in various different structures this is extra cautious in
         // not assuming the structure and always checking before accessing any element. If there is doubt
         // the full response will be printed later.
-        if (ResponseJson.HasMember("errors")) {
-            if (ResponseJson["errors"].IsArray()) {
+        if (ResponseJson.HasMember("errors"))
+        {
+            if (ResponseJson["errors"].IsArray())
+            {
                 const auto& ResponseArray = ResponseJson["errors"].GetArray();
 
-                for (uint32_t i = 0; i < ResponseArray.Size(); i++) {
-                    if (ResponseArray[i].IsObject()) {
+                for (uint32_t i = 0; i < ResponseArray.Size(); i++)
+                {
+                    if (ResponseArray[i].IsObject())
+                    {
                         const auto& ResponseError = ResponseArray[i].GetObject();
-                        if (ResponseError.HasMember("message") && ResponseError["message"].IsString()) {
+                        if (ResponseError.HasMember("message") && ResponseError["message"].IsString())
+                        {
                             Errors.Append(ResponseError["message"].GetString());
-                        } else {
+                        }
+                        else
+                        {
                             Errors.Append(JsonObjectToString(ResponseError));
                         }
                     }
                 }
-            } else {
+            }
+            else
+            {
                 Errors.Append(JsonObjectToString(ResponseJson["errors"]));
             }
-        } else if (ResponseJson.HasMember("error")) {
+        }
+        else if (ResponseJson.HasMember("error"))
+        {
             Errors.Append(JsonObjectToString(ResponseJson["error"]));
         }
     }
 
     // If the response was not JSON or errors were not found as expected, log the full response payload.
-    if (Errors.Size() == 0) {
+    if (Errors.Size() == 0)
+    {
         CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
             Response.GetRequest()->GetUri().GetAsString(), ResponseCode, ResponsePayload.c_str());
-    } else {
-        for (auto i = 0; i < Errors.Size(); ++i) {
+    }
+    else
+    {
+        for (auto i = 0; i < Errors.Size(); ++i)
+        {
             CSP_LOG_ERROR_FORMAT("Services request %s %s has returned a failed response (%i) with payload/error message: %s", Verb.c_str(),
                 Response.GetRequest()->GetUri().GetAsString(), ResponseCode, Errors[i].c_str());
         }

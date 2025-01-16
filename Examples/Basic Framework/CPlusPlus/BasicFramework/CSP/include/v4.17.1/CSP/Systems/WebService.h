@@ -21,18 +21,27 @@
 #include <cstdint>
 #include <functional>
 
-namespace csp::services {
+namespace csp::services
+{
 class ApiBase;
 class ApiResponseBase;
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief Code to indicate the result of a request.
 /// Request results should be checked for a success by clients before using any other accessors.
-enum class EResultCode : uint8_t { Init, InProgress, Success, Failed };
+enum class EResultCode : uint8_t
+{
+    Init,
+    InProgress,
+    Success,
+    Failed
+};
 
-enum class ERequestFailureReason {
+enum class ERequestFailureReason
+{
     Unknown = -1,
     None = 0,
     AddUserToSpaceDenied,
@@ -71,7 +80,8 @@ enum class ERequestFailureReason {
 };
 
 /// @brief Base class for a HTTP request result.
-class CSP_API ResultBase {
+class CSP_API ResultBase
+{
 public:
     /// @brief Constructs an empty result.
     ResultBase();

@@ -25,10 +25,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a fog component.
-enum class FogPropertyKeys {
+enum class FogPropertyKeys
+{
     FogMode = 0,
     Position,
     Rotation,
@@ -47,11 +49,17 @@ enum class FogPropertyKeys {
 };
 
 /// @brief Enumerates the types of fog supported by the fog component.
-enum class FogMode { Linear = 0, Exponential, Exponential2 };
+enum class FogMode
+{
+    Linear = 0,
+    Exponential,
+    Exponential2
+};
 
 /// @ingroup FogSpaceComponent
 /// @brief Add a depth-based fog volume to your space.
-class CSP_API FogSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IVisibleComponent {
+class CSP_API FogSpaceComponent : public ComponentBase, public IThirdPartyComponentRef, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the fog space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

@@ -22,7 +22,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/HotspotSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 HotspotSpaceComponent::HotspotSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Hotspot, Parent)

@@ -6,7 +6,8 @@
 #include "Olympus/Services/WebService.h"
 #include "Olympus/Systems/Assets/AssetCollection.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -14,15 +15,22 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 class Space;
 
-enum class SpaceUserRole { Owner, Moderator, User };
+enum class SpaceUserRole
+{
+    Owner,
+    Moderator,
+    User
+};
 
 /// @ingroup Space System
 /// @brief Data representation of User Roles inside a space
-class OLY_API UserRoleInfo {
+class OLY_API UserRoleInfo
+{
 public:
     UserRoleInfo() = default;
     UserRoleInfo(const UserRoleInfo& Other) = default;
@@ -33,7 +41,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of User Roles inside a space
-class OLY_API InviteUserRoleInfo {
+class OLY_API InviteUserRoleInfo
+{
 public:
     InviteUserRoleInfo() = default;
     InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
@@ -44,7 +53,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of User Roles information.
-class OLY_API UserRoleCollectionResult : public oly_services::ResultBase {
+class OLY_API UserRoleCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 

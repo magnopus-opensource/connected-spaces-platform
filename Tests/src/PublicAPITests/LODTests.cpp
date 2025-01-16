@@ -26,7 +26,8 @@
 #include <Awaitable.h>
 #include <filesystem>
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 

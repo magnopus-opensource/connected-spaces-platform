@@ -21,7 +21,8 @@
 #include <sstream>
 #include <string>
 
-namespace csp {
+namespace csp
+{
 
 /// @brief Generates a uuid
 /// @return std::string
@@ -47,7 +48,8 @@ inline std::string GenerateUUID()
     std::ostringstream UUIDStringStream;
     UUIDStringStream << std::hex << std::uppercase << std::setfill('0');
 
-    for (const auto uuid : Uuid) {
+    for (const auto uuid : Uuid)
+    {
         UUIDStringStream << std::setw(2) << static_cast<int>(uuid);
     }
 

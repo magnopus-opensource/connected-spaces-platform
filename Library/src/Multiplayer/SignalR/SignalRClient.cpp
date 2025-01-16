@@ -34,7 +34,8 @@
 
 using namespace signalr;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 csp::multiplayer::IWebSocketClient* CSPWebSocketClientPtr = nullptr;
 
@@ -77,14 +78,14 @@ void CSPWebsocketClient::send(const std::string& payload, signalr::transfer_form
 
 void CSPWebsocketClient::receive(std::function<void(const std::string&, std::exception_ptr)> callback)
 {
-    IWebSocketClient::ReceiveHandler LocalCallback = [callback](const std::string& message, bool ok) {
-        ok ? callback(message, nullptr) : callback(message, std::make_exception_ptr(std::runtime_error("Socket Receive Error")));
-    };
+    IWebSocketClient::ReceiveHandler LocalCallback = [callback](const std::string& message, bool ok)
+    { ok ? callback(message, nullptr) : callback(message, std::make_exception_ptr(std::runtime_error("Socket Receive Error"))); };
 
     CSPWebSocketClientPtr->Receive(LocalCallback);
 }
 
-class SignalRResponseWaiter {
+class SignalRResponseWaiter
+{
 public:
     /// @brief Wait for an event to occur
     /// @param IsDone Functional (function or lambda) that return true when an event occurs
@@ -101,7 +102,8 @@ public:
 
         const std::chrono::duration TimeOut = TimeOutInSeconds;
 
-        while (!IsDone() && (Elapsed < TimeOut)) {
+        while (!IsDone() && (Elapsed < TimeOut))
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(SleepTimeMs));
             Elapsed = clock::now() - Start;
         }
@@ -111,7 +113,8 @@ public:
     }
 };
 
-class SignalRResponseReceiver : public SignalRResponseWaiter, public csp::web::IHttpResponseHandler {
+class SignalRResponseReceiver : public SignalRResponseWaiter, public csp::web::IHttpResponseHandler
+{
 public:
     SignalRResponseReceiver()
         : ResponseReceived(false)
@@ -159,8 +162,10 @@ void CSPHttpClient::send(const std::string& url, const http_request& request, st
     PayLoad.SetBearerToken();
 
     // Set headers here
-    if (request.headers.size() > 0) {
-        for (auto& header : request.headers) {
+    if (request.headers.size() > 0)
+    {
+        for (auto& header : request.headers)
+        {
             PayLoad.AddHeader(CSP_TEXT(header.first.c_str()), CSP_TEXT(header.second.c_str()));
         }
     }
@@ -171,16 +176,22 @@ void CSPHttpClient::send(const std::string& url, const http_request& request, st
     WebClientHttps->SendRequest(
         csp::web::ERequestVerb::POST, csp::web::Uri(UriString.c_str()), PayLoad, &SignalRConnectionReceiver, csp::common::CancellationToken::Dummy());
     // Sleep thread until response is received
-    if (SignalRConnectionReceiver.WaitForResponse()) {
-        if (SignalRConnectionReceiver.GetResponse().GetResponseCode() == csp::web::EResponseCodes::ResponseOK) {
+    if (SignalRConnectionReceiver.WaitForResponse())
+    {
+        if (SignalRConnectionReceiver.GetResponse().GetResponseCode() == csp::web::EResponseCodes::ResponseOK)
+        {
             std::string ResponseContent = SignalRConnectionReceiver.GetResponse().GetPayload().GetContent().c_str();
             http_response ReceivedResponse
                 = http_response(static_cast<int>(SignalRConnectionReceiver.GetResponse().GetResponseCode()), ResponseContent);
             callback(ReceivedResponse, nullptr);
-        } else {
+        }
+        else
+        {
             callback(http_response(), std::make_exception_ptr(std::runtime_error("unknown http method")));
         }
-    } else {
+    }
+    else
+    {
         callback(http_response(), std::make_exception_ptr(std::runtime_error("unknown http method")));
     }
 }

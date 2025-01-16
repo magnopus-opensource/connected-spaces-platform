@@ -17,7 +17,8 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 void* DllAlloc(size_t Size, size_t Alignment) { return CSP_ALLOC_ALIGN(Size, (std::align_val_t)Alignment); }
 

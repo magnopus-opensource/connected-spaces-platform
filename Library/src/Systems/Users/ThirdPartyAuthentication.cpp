@@ -22,33 +22,40 @@
 using namespace std::chrono;
 namespace chs = csp::services::generated::userservice;
 
-namespace {
+namespace
+{
 void SocialProviderInfoDtoToProviderDetails(const chs::SocialProviderInfo& Dto, csp::systems::ThirdPartyProviderDetails& ProviderDetails)
 {
-    if (Dto.HasProviderName()) {
+    if (Dto.HasProviderName())
+    {
         ProviderDetails.ProviderName = Dto.GetProviderName();
     }
 
-    if (Dto.HasClientId()) {
+    if (Dto.HasClientId())
+    {
         ProviderDetails.ProviderClientId = Dto.GetClientId();
     }
 
-    if (Dto.HasScopes()) {
+    if (Dto.HasScopes())
+    {
         const auto& Scopes = Dto.GetScopes();
         ProviderDetails.ProviderAuthScopes = csp::common::Array<csp::common::String>(Scopes.size());
 
-        for (size_t idx = 0; idx < Scopes.size(); ++idx) {
+        for (size_t idx = 0; idx < Scopes.size(); ++idx)
+        {
             ProviderDetails.ProviderAuthScopes[idx] = Scopes[idx];
         }
     }
 
-    if (Dto.HasAuthorizeEndpoint()) {
+    if (Dto.HasAuthorizeEndpoint())
+    {
         ProviderDetails.AuthoriseURL = Dto.GetAuthorizeEndpoint();
     }
 }
 }; // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 ThirdPartyProviderDetails& ProviderDetailsResult::GetDetails() { return ProviderDetails; }
 
@@ -61,7 +68,8 @@ void ProviderDetailsResult::OnResponse(const csp::services::ApiResponseBase* Api
     auto* InfoResponse = static_cast<chs::SocialProviderInfo*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         InfoResponse->FromJson(Response->GetPayload().GetContent());
 

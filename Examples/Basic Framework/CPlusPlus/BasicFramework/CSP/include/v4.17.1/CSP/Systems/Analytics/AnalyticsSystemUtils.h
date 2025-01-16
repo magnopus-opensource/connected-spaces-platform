@@ -20,10 +20,12 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 using MetricValue = csp::multiplayer::ReplicatedValue;
 
-class CSP_API AnalyticsEvent {
+class CSP_API AnalyticsEvent
+{
     friend class AnalyticsEventInitialiser;
 
 public:
@@ -51,7 +53,8 @@ private:
     csp::common::Map<csp::common::String, MetricValue> Parameters;
 };
 
-class CSP_API AnalyticsEventInitialiser {
+class CSP_API AnalyticsEventInitialiser
+{
 public:
     static AnalyticsEvent* Initialise(const csp::common::String Tag);
     static void DeInitialise(AnalyticsEvent* Event);

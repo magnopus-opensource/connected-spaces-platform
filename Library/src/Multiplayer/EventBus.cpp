@@ -23,7 +23,8 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
@@ -40,27 +41,32 @@ EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection)
 
 void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
 {
-    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected) {
+    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
+    {
         std::string ErrorMessage = "Error: Multiplayer connection is not available.";
         CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
         return;
     }
 
-    if (!System) {
+    if (!System)
+    {
         std::string ErrorMessage = "Error: Expected non-null system.";
         CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
         return;
     }
 
-    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end()) {
-        if (CallbacksNetworkEventMap[EventName]) {
+    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end())
+    {
+        if (CallbacksNetworkEventMap[EventName])
+        {
             CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.\n", EventName.c_str());
             return;
         }
     }
 
     if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()
-        && SystemsNetworkEventMap[EventName]) {
+        && SystemsNetworkEventMap[EventName])
+    {
         CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
         return;
     }
@@ -70,27 +76,32 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
 
 void EventBus::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
-    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected) {
+    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
+    {
         std::string ErrorMessage = "Error: Multiplayer connection is not available.";
         CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
         return;
     }
 
-    if (!Callback) {
+    if (!Callback)
+    {
         std::string ErrorMessage = "Error: Expected non-null callback.";
         CSP_LOG_ERROR_FORMAT("%s\n", ErrorMessage.c_str());
         return;
     }
 
-    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end()) {
-        if (CallbacksNetworkEventMap[EventName]) {
+    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end())
+    {
+        if (CallbacksNetworkEventMap[EventName])
+        {
             CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.\n", EventName.c_str());
             return;
         }
     }
 
     if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()
-        && SystemsNetworkEventMap[EventName]) {
+        && SystemsNetworkEventMap[EventName])
+    {
         CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.\n", EventName.c_str());
         return;
     }
@@ -102,23 +113,28 @@ void EventBus::StopListenNetworkEvent(const csp::common::String& EventName)
 {
     // There is no need to split this into two different functions because we will always
     // have either a system or a callback, not both
-    if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()) {
+    if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end())
+    {
         SystemsNetworkEventMap.erase(EventName);
     }
-    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end()) {
+    if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end())
+    {
         CallbacksNetworkEventMap.erase(EventName);
     }
 }
 
 void EventBus::StartEventMessageListening()
 {
-    std::function<void(signalr::value)> LocalCallback = [this](signalr::value Result) {
-        if (Result.is_null()) {
+    std::function<void(signalr::value)> LocalCallback = [this](signalr::value Result)
+    {
+        if (Result.is_null())
+        {
             CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event values were empty.\n");
             return;
         }
 
-        if (CallbacksNetworkEventMap.empty() && SystemsNetworkEventMap.empty()) {
+        if (CallbacksNetworkEventMap.empty() && SystemsNetworkEventMap.empty())
+        {
             CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event map was empty.\n");
             return;
         }
@@ -127,14 +143,18 @@ void EventBus::StartEventMessageListening()
         const csp::common::String EventType(EventValues[0].as_string().c_str());
 
         if (CallbacksNetworkEventMap.find(EventType) == CallbacksNetworkEventMap.end()
-            && SystemsNetworkEventMap.find(EventType) == SystemsNetworkEventMap.end()) {
+            && SystemsNetworkEventMap.find(EventType) == SystemsNetworkEventMap.end())
+        {
             CSP_LOG_MSG(csp::systems::LogLevel::Log, "Event was not found in event map.\n");
             return;
         }
 
-        if (SystemsNetworkEventMap.find(EventType) != SystemsNetworkEventMap.end() && SystemsNetworkEventMap[EventType]) {
+        if (SystemsNetworkEventMap.find(EventType) != SystemsNetworkEventMap.end() && SystemsNetworkEventMap[EventType])
+        {
             SystemsNetworkEventMap[EventType]->OnEvent(EventValues);
-        } else if (CallbacksNetworkEventMap.find(EventType) != CallbacksNetworkEventMap.end()) {
+        }
+        else if (CallbacksNetworkEventMap.find(EventType) != CallbacksNetworkEventMap.end())
+        {
             // For everything else, use the generic deserialiser
             EventDeserialiser Deserialiser;
             Deserialiser.Parse(EventValues);

@@ -21,11 +21,13 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/VideoPlayerSpaceComponentScriptInterface.h"
 
-namespace {
+namespace
+{
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 VideoPlayerSpaceComponent::VideoPlayerSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::VideoPlayer, Parent)
@@ -218,7 +220,8 @@ void VideoPlayerSpaceComponent::SetMeshComponentId(uint16_t Value)
 
     ComponentBase* FoundComponent = EntitySystem->FindComponentById(Value);
 
-    if (FoundComponent == nullptr) {
+    if (FoundComponent == nullptr)
+    {
         return;
     }
 

@@ -15,7 +15,8 @@
  */
 #include "Services/PrototypeService/AssetFileDto.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 AssetFileDto::AssetFileDto() { }
 

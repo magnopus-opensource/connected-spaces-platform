@@ -18,10 +18,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp {
+namespace csp
+{
 
 /// @brief Holds supported endpoint uris used by Foundation.
-class CSP_API EndpointURIs {
+class CSP_API EndpointURIs
+{
 public:
     csp::common::String UserServiceURI;
     csp::common::String PrototypeServiceURI;
@@ -33,7 +35,8 @@ public:
 };
 
 /// @brief Holds client data used in requests for all Magnopus Serives.
-class CSP_API ClientUserAgent {
+class CSP_API ClientUserAgent
+{
 public:
     // @brief Foundation version.
     csp::common::String CSPVersion;
@@ -56,7 +59,8 @@ public:
 
 /// @brief Main entry point for interacting with Foundation.
 /// Provides functionality for initialising, shutting down and managing essential information for the Foundation instance to run.
-class CSP_API CSPFoundation {
+class CSP_API CSPFoundation
+{
 public:
     /// @brief Sets the endpoints for the various services needed for foundation, passes over the client header information and initialises the
     /// systems required for foundation to operate.

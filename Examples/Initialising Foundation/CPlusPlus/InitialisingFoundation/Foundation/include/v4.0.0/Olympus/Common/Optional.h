@@ -8,7 +8,8 @@
 
 OLY_NO_EXPORT
 
-namespace {
+namespace
+{
 
 template <typename T> void DefaultDestructor(T* Pointer)
 {
@@ -18,9 +19,11 @@ template <typename T> void DefaultDestructor(T* Pointer)
 
 } // namespace
 
-namespace oly_common {
+namespace oly_common
+{
 
-template <typename T> class OLY_API Optional {
+template <typename T> class OLY_API Optional
+{
 public:
     Optional()
         : Value(nullptr)
@@ -76,10 +79,13 @@ public:
 
     Optional(const Optional<T>& Other)
     {
-        if (Other.HasValue()) {
+        if (Other.HasValue())
+        {
             Value = (T*)oly_memory::DllAlloc(sizeof(T));
             new (Value) T(*(Other.Value));
-        } else {
+        }
+        else
+        {
             Value = nullptr;
         }
 
@@ -88,10 +94,13 @@ public:
 
     Optional(const Optional<T>&& Other)
     {
-        if (Other.HasValue()) {
+        if (Other.HasValue())
+        {
             Value = (T*)oly_memory::DllAlloc(sizeof(T));
             new (Value) T(std::move(*(Other.Value)));
-        } else {
+        }
+        else
+        {
             Value = nullptr;
         }
 
@@ -100,7 +109,8 @@ public:
 
     ~Optional()
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
     }
@@ -113,7 +123,8 @@ public:
 
     Optional<T>& operator=(const T& Other)
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
 

@@ -16,9 +16,11 @@
 #pragma once
 #include "CSP/Common/String.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-enum ComponentKeys : uint64_t {
+enum ComponentKeys : uint64_t
+{
     PACKED_POD_REPLICATED_VALUES = 0,
     // we store strings as individual signalr components so that we can rely on fixed-width entries in the
     // backed buffer of replicated values (since all other types are POD types)
@@ -32,9 +34,11 @@ enum ComponentKeys : uint64_t {
     ENTITY_SCALE = 1003,
 };
 
-namespace msgpack_typeids {
+namespace msgpack_typeids
+{
 
-    enum ItemComponentData : uint64_t {
+    enum ItemComponentData : uint64_t
+    {
         BOOL,
         NULLABLE_BOOL,
         BOOL_ARRAY,
@@ -96,7 +100,8 @@ namespace msgpack_typeids {
 
 } // namespace msgpack_typeids
 
-class SequenceConstants {
+class SequenceConstants
+{
 public:
     // For uniquely identifying sequences which relate to a space entity hierarchy.
     static csp::common::String GetHierarchyName();

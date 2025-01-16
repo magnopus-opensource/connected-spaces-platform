@@ -16,7 +16,8 @@ CommandLineParser::CommandLineParser()
 
 void CommandLineParser::ParseCommandLine(int argc, const char* argv[])
 {
-    try {
+    try
+    {
         cxxopts::Options options(argv[0], "Space Migration tool");
         options.add_options()("u,User", "Email address for logging in to CHS", cxxopts::value<std::string>()->default_value("InvalidUser"))(
             "p,Password", "Password of the email address for logging in to CHS", cxxopts::value<std::string>()->default_value("InvalidPassword"))(
@@ -32,16 +33,23 @@ void CommandLineParser::ParseCommandLine(int argc, const char* argv[])
         EndpointBaseURI = result["Endpoint"].as<std::string>();
         Tenant = result["Tenant"].as<std::string>();
 
-        if (result.count("ListSpaces")) {
+        if (result.count("ListSpaces"))
+        {
             IsListSpaceOperation = true;
-        } else if (result.count("MigrateSpace")) {
+        }
+        else if (result.count("MigrateSpace"))
+        {
             IsMigrateSpaceOperation = true;
             SpaceId = result["MigrateSpace"].as<std::string>();
-        } else if (result.count("Help")) {
+        }
+        else if (result.count("Help"))
+        {
             IsShowHelpOperation = true;
             std::cout << options.help() << std::endl;
         }
-    } catch (const cxxopts::OptionException& e) {
+    }
+    catch (const cxxopts::OptionException& e)
+    {
         std::cout << "Error parsing command line options: " << e.what() << std::endl;
     }
 }

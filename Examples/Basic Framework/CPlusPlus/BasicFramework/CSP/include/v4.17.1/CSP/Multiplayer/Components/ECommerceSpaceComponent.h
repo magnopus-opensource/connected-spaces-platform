@@ -20,14 +20,21 @@
 
 #include "CSP/Multiplayer/ComponentBase.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an ECommerce component.
-enum class ECommercePropertyKeys { Position = 0, ProductId, Num };
+enum class ECommercePropertyKeys
+{
+    Position = 0,
+    ProductId,
+    Num
+};
 
 // @ingroup ECommerceSpaceComponent
 /// @brief Data representation of an ECommerceSpaceComponent.
-class CSP_API ECommerceSpaceComponent : public ComponentBase {
+class CSP_API ECommerceSpaceComponent : public ComponentBase
+{
 public:
     /// @brief Constructs the ECommerce space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

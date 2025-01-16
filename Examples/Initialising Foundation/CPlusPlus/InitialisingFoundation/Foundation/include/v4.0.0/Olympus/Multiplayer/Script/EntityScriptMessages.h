@@ -1,6 +1,7 @@
 #pragma once
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 OLY_START_IGNORE
 // Entity script messages
 

@@ -5,11 +5,24 @@
 
 #include <functional>
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-enum class LogLevel { NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All };
+enum class LogLevel
+{
+    NoLogging,
+    Fatal,
+    Error,
+    Warning,
+    Display,
+    Log,
+    Verbose,
+    VeryVerbose,
+    All
+};
 
-class OLY_API OLY_NO_DISPOSE LogSystem {
+class OLY_API OLY_NO_DISPOSE LogSystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

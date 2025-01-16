@@ -20,7 +20,8 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
@@ -30,10 +31,12 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief Represents a single maintenance window, provides description of the event and a start and end timestamp
-class CSP_API MaintenanceInfo {
+class CSP_API MaintenanceInfo
+{
 public:
     bool IsInsideWindow() const;
 
@@ -44,7 +47,8 @@ public:
 
 /// @ingroup CSPFoundation
 /// @brief Data class used to contain information when a Response is received from Maintenance Window Server
-class CSP_API MaintenanceInfoResult : public csp::systems::ResultBase {
+class CSP_API MaintenanceInfoResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class CSPFoundation;

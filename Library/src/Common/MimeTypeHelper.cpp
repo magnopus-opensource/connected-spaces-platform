@@ -20,7 +20,8 @@
 
 #include <cctype>
 
-namespace csp::common {
+namespace csp::common
+{
 
 MimeTypeHelper& MimeTypeHelper::Get()
 {
@@ -37,15 +38,19 @@ String& MimeTypeHelper::GetMimeType(const String& FilePath)
 
     auto LowerChars = std::make_unique<char[]>(Length);
 
-    for (auto i = 0; i < Length; ++i) {
+    for (auto i = 0; i < Length; ++i)
+    {
         LowerChars[i] = std::tolower(Chars[i]);
     }
 
     String LowerExtension(LowerChars.get(), Length);
 
-    if (ExtensionToMimeTypeMap.HasKey(LowerExtension)) {
+    if (ExtensionToMimeTypeMap.HasKey(LowerExtension))
+    {
         return ExtensionToMimeTypeMap[LowerExtension];
-    } else {
+    }
+    else
+    {
         return Default;
     }
 }

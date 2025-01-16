@@ -37,7 +37,8 @@
 
 using namespace csp::multiplayer;
 
-namespace {
+namespace
+{
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
 
@@ -45,7 +46,8 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+    {
         PrintProgress(Result.GetRequestProgress());
 
         return false;
@@ -63,7 +65,8 @@ void CreateAssetCollection(csp::systems::AssetSystem* AssetSystem, const csp::co
 {
     csp::systems::EAssetCollectionType type = csp::systems::EAssetCollectionType::DEFAULT;
 
-    if (AssetCollectionType.HasValue()) {
+    if (AssetCollectionType.HasValue())
+    {
         type = *AssetCollectionType;
     }
 
@@ -96,7 +99,8 @@ void GetAssetCollections(
     const auto& AssetCollections = Result.GetAssetCollections();
     OutAssetCollections = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
 
-    for (size_t i = 0U; i < AssetCollections.Size(); ++i) {
+    for (size_t i = 0U; i < AssetCollections.Size(); ++i)
+    {
         OutAssetCollections[i] = AssetCollections[i];
     }
 }
@@ -124,7 +128,8 @@ void GetAssetCollectionsByIds(csp::systems::AssetSystem* AssetSystem, const csp:
     const auto& AssetCollections = Result.GetAssetCollections();
     OutAssetCollections = csp::common::Array<csp::systems::AssetCollection>(AssetCollections.Size());
 
-    for (size_t i = 0U; i < AssetCollections.Size(); ++i) {
+    for (size_t i = 0U; i < AssetCollections.Size(); ++i)
+    {
         OutAssetCollections[i] = AssetCollections[i];
     }
 }
@@ -196,7 +201,8 @@ void GetAssetsInCollection(
     const auto& Assets = Result.GetAssets();
     OutAssets = csp::common::Array<csp::systems::Asset>(Assets.Size());
 
-    for (size_t i = 0U; i < Assets.Size(); ++i) {
+    for (size_t i = 0U; i < Assets.Size(); ++i)
+    {
         OutAssets[i] = Assets[i];
     }
 }
@@ -213,7 +219,8 @@ void GetAssetsByCollectionIds(
     const auto& Assets = Result.GetAssets();
     OutAssets = csp::common::Array<csp::systems::Asset>(Assets.Size());
 
-    for (size_t i = 0U; i < Assets.Size(); ++i) {
+    for (size_t i = 0U; i < Assets.Size(); ++i)
+    {
         OutAssets[i] = Assets[i];
     }
 }
@@ -240,7 +247,8 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem, csp::
 
     auto AssetCollectionTags = ResultAssetCollection.Tags;
 
-    for (size_t i = 0U; i < AssetCollectionTags.Size(); ++i) {
+    for (size_t i = 0U; i < AssetCollectionTags.Size(); ++i)
+    {
         EXPECT_EQ(AssetCollectionTags[i], AssetCollection.Tags[i]);
     }
 
@@ -386,12 +394,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetCollectionsByIdsTest)
 
     bool Found1 = false, Found2 = false;
 
-    for (int i = 0; i < AssetCollections.Size(); ++i) {
+    for (int i = 0; i < AssetCollections.Size(); ++i)
+    {
         auto& AssetCollection = AssetCollections[i];
 
-        if (AssetCollection.Id == AssetCollection1.Id) {
+        if (AssetCollection.Id == AssetCollection1.Id)
+        {
             Found1 = true;
-        } else if (AssetCollection.Id == AssetCollection2.Id) {
+        }
+        else if (AssetCollection.Id == AssetCollection2.Id)
+        {
             Found2 = true;
         }
     }
@@ -676,14 +688,20 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByCollectionIdsTest)
 
     bool Found1 = false, Found2 = false, Found3 = false;
 
-    for (int i = 0; i < Assets.Size(); ++i) {
+    for (int i = 0; i < Assets.Size(); ++i)
+    {
         auto& Asset = Assets[i];
 
-        if (Asset.Id == Asset1.Id) {
+        if (Asset.Id == Asset1.Id)
+        {
             Found1 = true;
-        } else if (Asset.Id == Asset2.Id) {
+        }
+        else if (Asset.Id == Asset2.Id)
+        {
             Found2 = true;
-        } else if (Asset.Id == Asset3.Id) {
+        }
+        else if (Asset.Id == Asset3.Id)
+        {
             Found3 = true;
         }
     }
@@ -808,12 +826,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, FindAssetCollectionsTest)
 
         const auto& RetrievedAssetCollections = Result.GetAssetCollections();
 
-        for (int idx = 0; idx < RetrievedAssetCollections.Size(); ++idx) {
+        for (int idx = 0; idx < RetrievedAssetCollections.Size(); ++idx)
+        {
             auto& CurrentAsset = RetrievedAssetCollections[idx];
 
-            if (CurrentAsset.Id == AssetCollection1.Id) {
+            if (CurrentAsset.Id == AssetCollection1.Id)
+            {
                 FoundFirstAssetCollection = true;
-            } else if (CurrentAsset.Id == AssetCollection2.Id) {
+            }
+            else if (CurrentAsset.Id == AssetCollection2.Id)
+            {
                 FoundSecondAssetCollection = true;
             }
         }
@@ -922,12 +944,16 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, GetAssetsByDifferentCriteriaTest)
 
         const auto& RetrievedAssets = Result.GetAssets();
 
-        for (int idx = 0; idx < RetrievedAssets.Size(); ++idx) {
+        for (int idx = 0; idx < RetrievedAssets.Size(); ++idx)
+        {
             auto& CurrentAsset = RetrievedAssets[idx];
 
-            if (CurrentAsset.Id == FirstAsset.Id) {
+            if (CurrentAsset.Id == FirstAsset.Id)
+            {
                 FoundFirstAsset = true;
-            } else if (CurrentAsset.Id == SecondAsset.Id) {
+            }
+            else if (CurrentAsset.Id == SecondAsset.Id)
+            {
                 FoundSecondAsset = true;
             }
         }
@@ -2017,17 +2043,19 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessedCallbackTest)
     csp::common::String CallbackAssetId;
 
     auto AssetDetailBlobChangedCallback
-        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params) {
-              if (AssetDetailBlobChangedCallbackCalled) {
-                  return;
-              }
+        = [&AssetDetailBlobChangedCallbackCalled, &CallbackAssetId](const csp::multiplayer::AssetDetailBlobParams& Params)
+    {
+        if (AssetDetailBlobChangedCallbackCalled)
+        {
+            return;
+        }
 
-              EXPECT_EQ(Params.ChangeType, EAssetChangeType::Created);
-              EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
+        EXPECT_EQ(Params.ChangeType, EAssetChangeType::Created);
+        EXPECT_EQ(Params.AssetType, csp::systems::EAssetType::MODEL);
 
-              CallbackAssetId = Params.AssetId;
-              AssetDetailBlobChangedCallbackCalled = true;
-          };
+        CallbackAssetId = Params.AssetId;
+        AssetDetailBlobChangedCallbackCalled = true;
+    };
 
     AssetSystem->SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallback);
 
@@ -2102,8 +2130,10 @@ CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, AssetProcessGracefulFailureCallback
     // Setup Asset callback
     bool AssetDetailBlobChangedCallbackCalled = false;
 
-    auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params) {
-        if (AssetDetailBlobChangedCallbackCalled) {
+    auto AssetDetailBlobChangedCallback = [&AssetDetailBlobChangedCallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
+    {
+        if (AssetDetailBlobChangedCallbackCalled)
+        {
             return;
         }
 

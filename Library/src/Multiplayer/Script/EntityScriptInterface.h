@@ -21,7 +21,8 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class SpaceEntity;
 class ComponentScriptInterface;
@@ -29,7 +30,8 @@ class LightSpaceComponentScriptInterface;
 class ButtonSpaceComponentScriptInterface;
 class VideoPlayerSpaceComponentScriptInterface;
 
-class EntityScriptInterface {
+class EntityScriptInterface
+{
 public:
     EntityScriptInterface(SpaceEntity* InEntity = nullptr);
 
@@ -80,16 +82,19 @@ template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterf
 {
     std::vector<ScriptInterface*> Components;
 
-    if (Entity) {
+    if (Entity)
+    {
         const ComponentType ThisType = Type;
 
         const auto& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
-        for (int i = 0; i < ComponentKeys->Size(); ++i) {
+        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
-            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr)) {
+            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
+            {
                 Components.push_back((ScriptInterface*)Component->GetScriptInterface());
             }
         }

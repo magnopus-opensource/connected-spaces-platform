@@ -24,7 +24,8 @@
 #include <string>
 #include <vector>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -32,16 +33,19 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-class IScriptBinding {
+class IScriptBinding
+{
 public:
     virtual ~IScriptBinding() = default;
     virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
-class CSP_API ScriptSystem {
+class CSP_API ScriptSystem
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

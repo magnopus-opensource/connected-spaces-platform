@@ -23,16 +23,19 @@
 #include <string>
 #include <vector>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-class IScriptBinding {
+class IScriptBinding
+{
 public:
     virtual ~IScriptBinding() = default;
     virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
-class CSP_API CSP_NO_DISPOSE ScriptSystem {
+class CSP_API CSP_NO_DISPOSE ScriptSystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     friend class ScriptContext;

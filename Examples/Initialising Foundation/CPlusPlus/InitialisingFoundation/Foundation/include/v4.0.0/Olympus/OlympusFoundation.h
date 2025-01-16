@@ -3,9 +3,11 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly {
+namespace oly
+{
 
-class OLY_API EndpointURIs {
+class OLY_API EndpointURIs
+{
 public:
     oly_common::String UserServiceURI;
     oly_common::String PrototypeServiceURI;
@@ -14,7 +16,8 @@ public:
     oly_common::String AggregationServiceURI;
 };
 
-class OLY_API ClientUserAgent {
+class OLY_API ClientUserAgent
+{
 public:
     oly_common::String OlympusVersion;
     oly_common::String ClientOS;
@@ -24,7 +27,8 @@ public:
     oly_common::String CHSEnvironment;
 };
 
-class OLY_API OlympusFoundation {
+class OLY_API OlympusFoundation
+{
 public:
     /**
      * @brief Sets the endpoints for the various services needed for foundation, passes over the client header information and initialises the systems

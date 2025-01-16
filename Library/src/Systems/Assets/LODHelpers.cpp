@@ -20,17 +20,20 @@
 
 #include <string>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 csp::common::String CreateLODStyleVar(int LODLevel) { return std::string("lod:" + std::to_string(LODLevel)).c_str(); }
 
 int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& Styles)
 {
-    for (size_t i = 0; i < Styles.Size(); ++i) {
+    for (size_t i = 0; i < Styles.Size(); ++i)
+    {
         std::string Style = Styles[i].c_str();
         size_t Pos = Style.find("lod:");
 
-        if (Pos != std::string::npos) {
+        if (Pos != std::string::npos)
+        {
             return std::stoi(Style.substr(4, 1));
         }
     }
@@ -45,21 +48,27 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
 
     csp::common::List<LODAsset> AssetList;
 
-    if (Assets.Size() == 1) {
+    if (Assets.Size() == 1)
+    {
         int LODLevel = csp::systems::GetLODLevelFromStylesArray(Assets[0].Styles);
 
-        if (LODLevel == -1) {
+        if (LODLevel == -1)
+        {
             // As there is only 1 asset, return this as LOD 0
             LODLevel = 0;
         }
 
         AssetList.Append(csp::systems::LODAsset { Assets[0], LODLevel });
-    } else {
-        for (int i = 0; i < Assets.Size(); ++i) {
+    }
+    else
+    {
+        for (int i = 0; i < Assets.Size(); ++i)
+        {
             const csp::systems::Asset& Asset = Assets[i];
             int LODLevel = csp::systems::GetLODLevelFromStylesArray(Asset.Styles);
 
-            if (LODLevel != -1) {
+            if (LODLevel != -1)
+            {
                 AssetList.Append(csp::systems::LODAsset { Asset, LODLevel });
             }
         }
@@ -67,7 +76,8 @@ LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const
 
     Chain.LODAssets = csp::common::Array<LODAsset>(AssetList.Size());
 
-    for (int i = 0; i < Chain.LODAssets.Size(); ++i) {
+    for (int i = 0; i < Chain.LODAssets.Size(); ++i)
+    {
         Chain.LODAssets[i] = std::move(AssetList[i]);
     }
 

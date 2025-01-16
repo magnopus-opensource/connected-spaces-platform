@@ -4,15 +4,31 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class ReflectionPropertyKeys { Name, ReflectionAssetId, AssetCollectionId, Position, Rotation, Scale, ReflectionShape, Num };
+enum class ReflectionPropertyKeys
+{
+    Name,
+    ReflectionAssetId,
+    AssetCollectionId,
+    Position,
+    Rotation,
+    Scale,
+    ReflectionShape,
+    Num
+};
 
-enum class ReflectionShape { UnitSphere = 0, UnitBox };
+enum class ReflectionShape
+{
+    UnitSphere = 0,
+    UnitBox
+};
 
 /// @ingroup ReflectionSpaceComponent
 /// @brief Data representation of an ReflectionSpaceComponent.
-class OLY_API ReflectionSpaceComponent : public ComponentBase {
+class OLY_API ReflectionSpaceComponent : public ComponentBase
+{
 public:
     ReflectionSpaceComponent(SpaceEntity* Parent);
 

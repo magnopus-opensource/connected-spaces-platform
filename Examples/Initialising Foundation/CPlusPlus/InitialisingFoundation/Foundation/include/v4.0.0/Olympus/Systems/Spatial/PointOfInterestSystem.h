@@ -9,13 +9,15 @@
 #include "Olympus/Systems/SystemBase.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 class Space;
 class AssetCollection;
@@ -23,7 +25,8 @@ class AssetCollection;
 /// @ingroup Point of Interest System
 /// @brief Public facing system that allows interfacing with CHS's concept of a Point of Interest.
 /// Offers methods for creating and deleting POIs.
-class OLY_API OLY_NO_DISPOSE PointOfInterestSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE PointOfInterestSystem : public SystemBase
+{
 
 public:
     ~PointOfInterestSystem();

@@ -15,7 +15,8 @@
  */
 #include "CSP/Systems/Assets/LOD.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 const LODChain& LODChainResult::GetLODChain() const { return Chain; }
 
 void LODChainResult::SetLODChain(const LODChain& InChain) { Chain = InChain; }

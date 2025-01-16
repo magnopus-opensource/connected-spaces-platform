@@ -26,17 +26,35 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief The type of actions that can be performed by an external link component.
-enum class ExternalLinkActions { LinkClicked, Num };
+enum class ExternalLinkActions
+{
+    LinkClicked,
+    Num
+};
 
 /// @brief The list of properties defined within an external link component.
-enum class ExternalLinkPropertyKeys { Name_DEPRECATED = 0, LinkUrl, Position, Rotation, Scale, DisplayText, IsEnabled, IsVisible, IsARVisible, Num };
+enum class ExternalLinkPropertyKeys
+{
+    Name_DEPRECATED = 0,
+    LinkUrl,
+    Position,
+    Rotation,
+    Scale,
+    DisplayText,
+    IsEnabled,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup ExternalLinkSpaceComponent
 /// @brief Used to handle external URLs that can be opened from within a space.
-class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent {
+class CSP_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Creates an external link component that can be added to an existing space entity.
     /// @param Parent - The space entity to which this new component will belong to.

@@ -33,7 +33,8 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 {
-    if (!std::filesystem::exists("ShopifyCreds.txt")) {
+    if (!std::filesystem::exists("ShopifyCreds.txt"))
+    {
         LogFatal("ShopifyCreds.txt not found! This file must exist and must contain a minimum of the following information:\nSpaceId "
                  "<SpaceId>\nProductId <ProductId> but may also need \nProductId <ProductId>\nCartId <CartId>\n");
     }
@@ -43,7 +44,8 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
     std::ifstream CredsFile;
     CredsFile.open("ShopifyCreds.txt");
     std::string Key, Value;
-    while (CredsFile >> Key >> Value) {
+    while (CredsFile >> Key >> Value)
+    {
         OutMap[Key.c_str()] = Value.c_str();
     }
 
@@ -110,7 +112,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 
     EXPECT_EQ(Result.GetProductInfo().Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Media.Size(); ++i) {
+    for (int i = 0; i < Result.GetProductInfo().Media.Size(); ++i)
+    {
         EXPECT_EQ(Result.GetProductInfo().Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProductInfo().Media[i].Url, ImageUrl);
         EXPECT_EQ(Result.GetProductInfo().Media[i].Alt, ImageAlt);
@@ -119,7 +122,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
     }
     EXPECT_EQ(Result.GetProductInfo().Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProductInfo().Variants.Size(); ++i) {
+    for (int i = 0; i < Result.GetProductInfo().Variants.Size(); ++i)
+    {
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Id, VariantIds[i]);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Title, VariantTitleAndOptionValue[i]);
         EXPECT_EQ(Result.GetProductInfo().Variants[i].AvailableForSale, true);
@@ -131,7 +135,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 
         EXPECT_EQ(Result.GetProductInfo().Variants[i].Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n) {
+        for (int n = 0; n < Result.GetProductInfo().Variants[i].Options.Size(); ++n)
+        {
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Name, OptionsName);
             EXPECT_EQ(Result.GetProductInfo().Variants[i].Options[n].Value, VariantTitleAndOptionValue[i]);
         }
@@ -202,7 +207,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 
     EXPECT_EQ(Result.GetProducts()[0].Media.Size(), MediaSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Media.Size(); ++i) {
+    for (int i = 0; i < Result.GetProducts()[0].Media.Size(); ++i)
+    {
         EXPECT_EQ(Result.GetProducts()[0].Media[i].MediaContentType, ImageMediaContentType);
         EXPECT_EQ(Result.GetProducts()[0].Media[i].Url, ImageUrl);
         EXPECT_EQ(Result.GetProducts()[0].Media[i].Alt, ImageAlt);
@@ -211,7 +217,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
     }
     EXPECT_EQ(Result.GetProducts()[0].Variants.Size(), VariantSize);
 
-    for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i) {
+    for (int i = 0; i < Result.GetProducts()[0].Variants.Size(); ++i)
+    {
         auto& Variant = Result.GetProducts()[0].Variants[i];
         EXPECT_EQ(Variant.Id, VariantIds[i]);
         EXPECT_EQ(Variant.Title, VariantTitleAndOptionValue[i]);
@@ -226,7 +233,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, GetProductInformationByVariantT
 
         EXPECT_EQ(Variant.Options.Size(), OptionsSize);
 
-        for (int n = 0; n < Variant.Options.Size(); ++n) {
+        for (int n = 0; n < Variant.Options.Size(); ++n)
+        {
             EXPECT_EQ(Variant.Options[n].Name, OptionsName);
             EXPECT_EQ(Variant.Options[n].Value, VariantTitleAndOptionValue[i]);
         }
@@ -453,7 +461,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     auto CartLines = csp::common::Array<csp::systems::CartLine>(VariantIds.Size());
 
     // Add local cart lines
-    for (int i = 0; i < VariantIds.Size(); ++i) {
+    for (int i = 0; i < VariantIds.Size(); ++i)
+    {
         auto CartLine = csp::systems::CartLine();
         CartLine.Quantity = 1;
         CartLine.ProductVariantId = VariantIds[i];
@@ -482,7 +491,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, AddCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 4);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 4);
 
-    for (int i = 0; i < CartLines.Size(); ++i) {
+    for (int i = 0; i < CartLines.Size(); ++i)
+    {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
         EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
@@ -566,7 +576,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i) {
+    for (int i = 0; i < CartLines.Size(); ++i)
+    {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, "");
         EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);
@@ -601,7 +612,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
     EXPECT_EQ(UpdateCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(UpdateCartLinesCart.TotalQuantity, 2);
 
-    for (int i = 0; i < CartLines.Size(); ++i) {
+    for (int i = 0; i < CartLines.Size(); ++i)
+    {
         EXPECT_EQ(UpdateCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(UpdateCartLinesCart.CartLines[i].CartLineId, "");
         EXPECT_EQ(UpdateCartLinesCart.CartLines[i].Quantity, 2);
@@ -686,7 +698,8 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
     EXPECT_EQ(AddCartLinesCart.CartLines.Size(), 1);
     EXPECT_EQ(AddCartLinesCart.TotalQuantity, 1);
 
-    for (int i = 0; i < CartLines.Size(); ++i) {
+    for (int i = 0; i < CartLines.Size(); ++i)
+    {
         EXPECT_EQ(AddCartLinesCart.CartLines[i].ProductVariantId, CartLines[i].ProductVariantId);
         EXPECT_NE(AddCartLinesCart.CartLines[i].CartLineId, CartLines[i].CartLineId);
         EXPECT_EQ(AddCartLinesCart.CartLines[i].Quantity, 1);

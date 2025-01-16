@@ -1,4 +1,5 @@
 ---
 BasedOnStyle: WebKit
 ColumnLimit: 150
+BreakBeforeBraces: Allman
 ...

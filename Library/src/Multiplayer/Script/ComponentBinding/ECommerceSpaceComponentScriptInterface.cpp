@@ -17,7 +17,8 @@
 
 #include "CSP/Multiplayer/Components/ECommerceSpaceComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 csp::multiplayer::ECommerceSpaceComponentScriptInterface::ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)
 {

@@ -22,7 +22,8 @@
 
 CSP_NO_EXPORT
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// @brief Dll safe allocation of memory.
 /// @param Size size_t : Size in bytes to allocate
@@ -41,7 +42,8 @@ CSP_API void* DllRealloc(void* Ptr, size_t NewSize, size_t Alignment = size_t(16
 CSP_API void DllFree(void* Ptr);
 
 /// @brief Struct wrapper for csp::memory::DllFree.
-template <typename T> struct DllDeleter {
+template <typename T> struct DllDeleter
+{
     constexpr void operator()(T* Ptr) { csp::memory::DllFree((void*)Ptr); }
 };
 

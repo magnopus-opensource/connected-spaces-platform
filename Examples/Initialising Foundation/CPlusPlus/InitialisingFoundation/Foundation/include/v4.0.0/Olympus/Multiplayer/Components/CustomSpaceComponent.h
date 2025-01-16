@@ -3,12 +3,18 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
-enum class CustomComponentPropertyKeys { ApplicationOrigin, Num };
+namespace oly_multiplayer
+{
+enum class CustomComponentPropertyKeys
+{
+    ApplicationOrigin,
+    Num
+};
 
 /// @ingroup CustomSpaceComponent
 /// @brief Data representation of an CustomSpaceComponent.
-class OLY_API CustomSpaceComponent : public ComponentBase {
+class OLY_API CustomSpaceComponent : public ComponentBase
+{
 public:
     CustomSpaceComponent(SpaceEntity* Parent);
 

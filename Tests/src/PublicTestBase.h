@@ -17,7 +17,8 @@
 
 #include <gtest/gtest.h>
 
-namespace {
+namespace
+{
 constexpr char* EndpointEnvironmentName = "MAGNOPUS_SERVICES_ENDPOINT";
 
 const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const char* DefaultValue)
@@ -29,7 +30,8 @@ const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const ch
 
 inline const char* EndpointBaseURI() { return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud"); }
 
-class PublicTestBase : public ::testing::Test {
+class PublicTestBase : public ::testing::Test
+{
 protected:
     void SetUp() override;
     void TearDown() override;

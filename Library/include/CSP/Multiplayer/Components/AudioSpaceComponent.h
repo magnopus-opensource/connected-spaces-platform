@@ -24,13 +24,21 @@
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the playback states for an audio clip.
-enum class AudioPlaybackState { Reset = 0, Pause, Play, Num };
+enum class AudioPlaybackState
+{
+    Reset = 0,
+    Pause,
+    Play,
+    Num
+};
 
 /// @brief Specifies the type of audio source for an audio component.
-enum class AudioType {
+enum class AudioType
+{
     /// A global audio type keeps the volume of the audio independent from the player position.
     Global = 0,
     /// A spatial audio takes the player position into account to attenuate or amplify the volume.
@@ -39,7 +47,8 @@ enum class AudioType {
 };
 
 /// @brief Enumerates the list of properties that can be replicated for an audio component.
-enum class AudioPropertyKeys {
+enum class AudioPropertyKeys
+{
     Position = 0,
     PlaybackState,
     AudioType,
@@ -59,7 +68,8 @@ enum class AudioPropertyKeys {
 ///
 /// This component creates immersive soundscapes by playing audio that reacts to the user's position in the space.
 /// Whether it's background music, sound effects, or voiceovers, the AudioSpaceComponent makes sound more engaging by positioning it in 3D space.
-class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef {
+class CSP_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent, public IThirdPartyComponentRef
+{
 public:
     /// @brief Constructs the audio space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

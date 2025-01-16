@@ -18,11 +18,13 @@
 #include <mutex>
 #include <vector>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// @brief Extremely simple (read: "naïve") pool for fixed-size buffers.
 /// Uses a std::mutex for thread-safe borrowing and returning.
-class SimpleBufferPool {
+class SimpleBufferPool
+{
 public:
     SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize = 5);
     ~SimpleBufferPool();

@@ -21,9 +21,11 @@
 #include <functional>
 #include <signalrclient/hub_connection_builder.h>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class SignalRConnection {
+class SignalRConnection
+{
 public:
     typedef std::function<void __cdecl(const signalr::value&)> MethodInvokedHandler;
 
@@ -33,7 +35,13 @@ public:
     void Start(std::function<void(std::exception_ptr)> Callback);
     void Stop(std::function<void(std::exception_ptr)> Callback);
 
-    enum class ConnectionState { Connecting, Connected, Disconnecting, Disconnected };
+    enum class ConnectionState
+    {
+        Connecting,
+        Connected,
+        Disconnecting,
+        Disconnected
+    };
 
     ConnectionState GetConnectionState() const;
 

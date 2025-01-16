@@ -15,7 +15,8 @@
  */
 #include "CSP/Systems/Voip/VoipSystem.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 VoipSystem::VoipSystem() { }
 

@@ -16,7 +16,8 @@
 
 #include "JsonSerializer.h"
 
-namespace csp::json {
+namespace csp::json
+{
 
 void JsonSerializer::SerializeValue(int32_t Value) { Writer.Int(Value); }
 

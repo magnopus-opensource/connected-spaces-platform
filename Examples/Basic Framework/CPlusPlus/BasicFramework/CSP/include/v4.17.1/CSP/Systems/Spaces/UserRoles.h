@@ -21,7 +21,8 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -29,15 +30,23 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class Space;
 
-enum class SpaceUserRole { Owner, Moderator, User, Invalid };
+enum class SpaceUserRole
+{
+    Owner,
+    Moderator,
+    User,
+    Invalid
+};
 
 /// @ingroup Space System
 /// @brief Data representation of User Roles inside a space
-class CSP_API UserRoleInfo {
+class CSP_API UserRoleInfo
+{
 public:
     UserRoleInfo() = default;
     UserRoleInfo(const UserRoleInfo& Other) = default;
@@ -48,7 +57,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of roles for an invited user inside a space
-class CSP_API InviteUserRoleInfo {
+class CSP_API InviteUserRoleInfo
+{
 public:
     InviteUserRoleInfo() = default;
     InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
@@ -59,7 +69,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of roles for a group of invited users, the email link and the destination link to be included in the invite emails
-class CSP_API InviteUserRoleInfoCollection {
+class CSP_API InviteUserRoleInfoCollection
+{
 public:
     InviteUserRoleInfoCollection() = default;
     InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
@@ -71,7 +82,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of User Roles information.
-class CSP_API UserRoleCollectionResult : public csp::systems::ResultBase {
+class CSP_API UserRoleCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 

@@ -20,16 +20,19 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Common/String.h"
 
-namespace csp {
+namespace csp
+{
 
 class CSPFoundation;
 
 }
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Holds all valid mime types.
-class CSP_API MimeTypes {
+class CSP_API MimeTypes
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MimeTypeHelper;
     /** @endcond */
@@ -348,7 +351,8 @@ private:
 };
 
 /// @brief Holds all valid file extensions.
-class CSP_API FileExtensions {
+class CSP_API FileExtensions
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MimeTypeHelper;
     /** @endcond */
@@ -809,7 +813,8 @@ private:
 };
 
 /// @brief Singleton which manages mime types.
-class CSP_API MimeTypeHelper {
+class CSP_API MimeTypeHelper
+{
 public:
     /// @brief Gets singleton instance.
     /// @return MimeTypeHelper&

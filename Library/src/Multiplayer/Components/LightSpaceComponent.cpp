@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/LightSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 LightSpaceComponent::LightSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Light, Parent)

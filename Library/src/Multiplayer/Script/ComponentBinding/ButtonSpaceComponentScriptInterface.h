@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ButtonSpaceComponent;
 
-class ButtonSpaceComponentScriptInterface : public ComponentScriptInterface {
+class ButtonSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     ButtonSpaceComponentScriptInterface(ButtonSpaceComponent* InComponent = nullptr);
 

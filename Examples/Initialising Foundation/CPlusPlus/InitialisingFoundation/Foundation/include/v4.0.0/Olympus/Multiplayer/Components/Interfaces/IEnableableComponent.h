@@ -2,9 +2,11 @@
 
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-OLY_INTERFACE class OLY_API IEnableableComponent {
+OLY_INTERFACE class OLY_API IEnableableComponent
+{
 public:
     virtual bool GetIsEnabled() const = 0;
     virtual void SetIsEnabled(bool InValue) = 0;

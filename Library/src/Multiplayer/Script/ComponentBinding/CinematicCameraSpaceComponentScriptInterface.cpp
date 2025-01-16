@@ -21,7 +21,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 CinematicCameraSpaceComponentScriptInterface::CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)

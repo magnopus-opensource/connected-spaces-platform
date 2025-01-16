@@ -28,13 +28,21 @@
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the actions that can be performed on an animated model component.
-enum class AnimatedModelActions { Play, Pause, Restart, Num };
+enum class AnimatedModelActions
+{
+    Play,
+    Pause,
+    Restart,
+    Num
+};
 
 /// @brief Enumerates the list of properties that can be replicated for an animated model component.
-enum class AnimatedModelPropertyKeys {
+enum class AnimatedModelPropertyKeys
+{
     Name = 0,
     ExternalResourceAssetId,
     ExternalResourceAssetCollectionId,
@@ -59,7 +67,8 @@ class CSP_API AnimatedModelSpaceComponent : public ComponentBase,
                                             public IVisibleComponent,
                                             public IExternalResourceComponent,
                                             public IThirdPartyComponentRef,
-                                            public IShadowCasterComponent {
+                                            public IShadowCasterComponent
+{
 public:
     /// @brief Constructs the animated model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

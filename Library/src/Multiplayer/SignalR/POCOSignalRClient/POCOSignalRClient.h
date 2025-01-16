@@ -24,9 +24,11 @@
 #include <signalrclient/signalr_client_config.h>
 #include <thread>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class CSPWebSocketClientPOCO : public IWebSocketClient {
+class CSPWebSocketClientPOCO : public IWebSocketClient
+{
 public:
     CSPWebSocketClientPOCO() noexcept;
     ~CSPWebSocketClientPOCO();

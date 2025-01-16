@@ -22,14 +22,16 @@
 
 #include <functional>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class MultiplayerConnection;
 class ReplicatedValue;
 class SignalRConnection;
 enum class ErrorCode;
 
-class NetworkEventManagerImpl {
+class NetworkEventManagerImpl
+{
 public:
     NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection);
 

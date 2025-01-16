@@ -15,7 +15,8 @@
  */
 #include "ApiBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 ApiResponseBase::ApiResponseBase(DtoBase* InDto)
     : Dto(InDto)
@@ -36,9 +37,12 @@ void ApiResponseBase::SetResponseCode(csp::web::EResponseCodes InResponseCode, c
 {
     bool IsValidCode = IsValidResponseCode(static_cast<int>(InResponseCode), static_cast<int>(InValidResponseCode));
 
-    if (IsValidCode) {
+    if (IsValidCode)
+    {
         ResponseCode = EResponseCode::ResponseSuccess;
-    } else {
+    }
+    else
+    {
         ResponseCode = EResponseCode::ResponseFailed;
     }
     HttpResponseCode = InResponseCode;
@@ -46,7 +50,8 @@ void ApiResponseBase::SetResponseCode(csp::web::EResponseCodes InResponseCode, c
 
 bool ApiResponseBase::IsValidResponseCode(int ResponseCodeA, int ResponseCodeB)
 {
-    auto ReturnFirstDigit = [](int x) {
+    auto ReturnFirstDigit = [](int x)
+    {
         while (x >= 10)
             x /= 10;
         return x;

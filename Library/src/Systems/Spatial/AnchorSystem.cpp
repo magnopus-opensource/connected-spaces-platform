@@ -22,7 +22,8 @@
 
 namespace chs = csp::services::generated::spatialdataservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 AnchorSystem::AnchorSystem()
     : SystemBase(nullptr, nullptr)
@@ -46,7 +47,8 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
 {
     auto AnchorInfo = std::make_shared<chs::AnchorDto>();
 
-    switch (ThirdPartyAnchorProvider) {
+    switch (ThirdPartyAnchorProvider)
+    {
     case AnchorProvider::GoogleCloudAnchors:
         AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
         break;
@@ -79,10 +81,12 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
     // SpatialData must be set with or without data
     std::map<csp::common::String, csp::common::String> SpatialData;
 
-    if (SpatialKeyValue.HasValue()) {
+    if (SpatialKeyValue.HasValue())
+    {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx) {
+        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);
             SpatialData.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
@@ -91,11 +95,13 @@ void AnchorSystem::CreateAnchor(csp::systems::AnchorProvider ThirdPartyAnchorPro
 
     AnchorInfo->SetSpatialKeyValue(SpatialData);
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         std::vector<csp::common::String> TagsVector;
         TagsVector.reserve(Tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx) {
+        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        {
             TagsVector.push_back((*Tags)[idx]);
         }
 
@@ -116,7 +122,8 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
 {
     auto AnchorInfo = std::make_shared<chs::AnchorDto>();
 
-    switch (ThirdPartyAnchorProvider) {
+    switch (ThirdPartyAnchorProvider)
+    {
     case AnchorProvider::GoogleCloudAnchors:
         AnchorInfo->SetThirdPartyProviderName("GoogleCloudAnchors");
         break;
@@ -151,10 +158,12 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
     // SpatialData must be set with or without data
     std::map<csp::common::String, csp::common::String> SpatialData;
 
-    if (SpatialKeyValue.HasValue()) {
+    if (SpatialKeyValue.HasValue())
+    {
         auto* Keys = SpatialKeyValue->Keys();
 
-        for (auto idx = 0; idx < Keys->Size(); ++idx) {
+        for (auto idx = 0; idx < Keys->Size(); ++idx)
+        {
             auto Key = Keys->operator[](idx);
             auto Value = SpatialKeyValue->operator[](Key);
             SpatialData.insert(std::pair<csp::common::String, csp::common::String>(Key, Value));
@@ -163,11 +172,13 @@ void AnchorSystem::CreateAnchorInSpace(csp::systems::AnchorProvider ThirdPartyAn
 
     AnchorInfo->SetSpatialKeyValue(SpatialData);
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         std::vector<csp::common::String> TagsVector;
         TagsVector.reserve(Tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx) {
+        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        {
             TagsVector.push_back((*Tags)[idx]);
         }
 
@@ -185,7 +196,8 @@ void AnchorSystem::DeleteAnchors(const csp::common::Array<csp::common::String>& 
     std::vector<csp::common::String> IdsToBeDeleted;
     IdsToBeDeleted.reserve(AnchorIds.Size());
 
-    for (size_t idx = 0; idx < AnchorIds.Size(); idx++) {
+    for (size_t idx = 0; idx < AnchorIds.Size(); idx++)
+    {
         IdsToBeDeleted.push_back(AnchorIds[idx]);
     }
 
@@ -208,44 +220,52 @@ void AnchorSystem::GetAnchorsInArea(const csp::systems::GeoLocation& OriginLocat
 
     std::optional<std::vector<csp::common::String>> AnchorTags;
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         AnchorTags.emplace(std::vector<csp::common::String>());
         AnchorTags->reserve(Tags->Size());
 
-        for (size_t idx = 0; idx < Tags->Size(); ++idx) {
+        for (size_t idx = 0; idx < Tags->Size(); ++idx)
+        {
             AnchorTags->push_back({ (*Tags)[idx] });
         }
     }
 
     std::optional<std::vector<csp::common::String>> AnchorSpatialKeys;
 
-    if (SpatialKeys.HasValue()) {
+    if (SpatialKeys.HasValue())
+    {
         AnchorSpatialKeys.emplace(std::vector<csp::common::String>());
         AnchorSpatialKeys->reserve(SpatialKeys->Size());
 
-        for (size_t idx = 0; idx < SpatialKeys->Size(); ++idx) {
+        for (size_t idx = 0; idx < SpatialKeys->Size(); ++idx)
+        {
             AnchorSpatialKeys->push_back({ (*SpatialKeys)[idx] });
         }
     }
 
     std::optional<std::vector<csp::common::String>> AnchorSpatialValues;
 
-    if (SpatialValues.HasValue()) {
+    if (SpatialValues.HasValue())
+    {
         AnchorSpatialValues.emplace(std::vector<csp::common::String>());
         AnchorSpatialValues->reserve(SpatialValues->Size());
 
-        for (size_t idx = 0; idx < SpatialValues->Size(); ++idx) {
+        for (size_t idx = 0; idx < SpatialValues->Size(); ++idx)
+        {
             AnchorSpatialValues->push_back({ (*SpatialValues)[idx] });
         }
     }
 
     std::optional<std::vector<csp::common::String>> ReferenceIds;
 
-    if (SpaceIds.HasValue()) {
+    if (SpaceIds.HasValue())
+    {
         ReferenceIds.emplace(std::vector<csp::common::String>());
         ReferenceIds->reserve(SpaceIds->Size());
 
-        for (size_t idx = 0; idx < SpaceIds->Size(); ++idx) {
+        for (size_t idx = 0; idx < SpaceIds->Size(); ++idx)
+        {
             ReferenceIds->push_back({ (*SpaceIds)[idx] });
         }
     }

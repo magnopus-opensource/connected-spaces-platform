@@ -24,9 +24,11 @@
 #include <msgpack/unpack.hpp>
 #include <signalrclient/signalr_value.h>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-enum class SerialiserState {
+enum class SerialiserState
+{
     Initial,
     InEntity,
     InComponents,
@@ -44,7 +46,8 @@ enum class SerialiserState {
 ///     Ensure you finish by closing out the relevant sections with the 'End' functions,
 /// then use Finalise() to give back a signalR value that represents the data structure you created.
 /// </summary>
-class SignalRMsgPackEntitySerialiser : public IEntitySerialiser {
+class SignalRMsgPackEntitySerialiser : public IEntitySerialiser
+{
 public:
     SignalRMsgPackEntitySerialiser();
 
@@ -87,7 +90,8 @@ private:
 /// comment for more details, it does not have a Finalise() method at the end. Instead, it's expected that you will be
 /// using the data as you read it to populate either a newly created or currently existing SpaceEntity.
 /// </summary>
-class SignalRMsgPackEntityDeserialiser : public IEntityDeserialiser {
+class SignalRMsgPackEntityDeserialiser : public IEntityDeserialiser
+{
 public:
     SignalRMsgPackEntityDeserialiser(const signalr::value& Object);
 

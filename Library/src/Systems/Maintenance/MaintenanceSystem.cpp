@@ -25,7 +25,8 @@
 
 namespace chs = csp::systems::maintenanceservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 MaintenanceSystem::MaintenanceSystem()
     : SystemBase(nullptr, nullptr)
@@ -45,13 +46,17 @@ MaintenanceSystem::~MaintenanceSystem() { CSP_DELETE(MaintenanceAPI); }
 
 void MaintenanceSystem::GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback)
 {
-    if (AllowMaintenanceInfoRequests == true) {
-        const MaintenanceInfoCallback GetMaintenanceInfoCallback = [this, Callback](const MaintenanceInfoResult& Result) {
-            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    if (AllowMaintenanceInfoRequests == true)
+    {
+        const MaintenanceInfoCallback GetMaintenanceInfoCallback = [this, Callback](const MaintenanceInfoResult& Result)
+        {
+            if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+            {
                 return;
             }
 
-            if (Result.GetResultCode() == csp::systems::EResultCode::Failed) {
+            if (Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 MaintenanceInfoResult res(csp::systems::EResultCode::Failed, Result.GetHttpResultCode());
                 AllowMaintenanceInfoRequests = false;
                 CSP_LOG_ERROR_MSG("Failed to Get Maintenance Information: Maintenance system disabled. Check Maintenance URL, and restart");

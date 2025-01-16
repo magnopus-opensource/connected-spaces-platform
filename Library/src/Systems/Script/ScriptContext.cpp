@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Memory/MemoryManager.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 ScriptContext::ScriptContext(ScriptSystem* InScriptSystem, qjs::Runtime* InRuntime, uint64_t InContextId)
     : ContextId(InContextId)
@@ -36,11 +37,13 @@ void ScriptContext::Initialise()
 {
     Context = CSP_NEW qjs::Context(*Runtime);
 
-    Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData {
+    Context->moduleLoader = [this](std::string_view filename) -> qjs::Context::ModuleData
+    {
         csp::common::String Url = csp::common::String(filename.data(), filename.length());
 
         csp::common::String Alias;
-        if (TheScriptSystem->GetModuleUrlAlias(Url, Alias)) {
+        if (TheScriptSystem->GetModuleUrlAlias(Url, Alias))
+        {
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, Alias.c_str() };
         }
 
@@ -50,7 +53,8 @@ void ScriptContext::Initialise()
 
         qjs::Context::ModuleData Data;
 
-        if (Source.IsEmpty()) {
+        if (Source.IsEmpty())
+        {
             CSP_LOG_ERROR_FORMAT("Module %s not found\n", Url.c_str());
             return qjs::Context::ModuleData { std::nullopt, std::nullopt, std::nullopt };
         }
@@ -63,7 +67,8 @@ void ScriptContext::Initialise()
 
 void ScriptContext::Shutdown()
 {
-    for (auto Module : Modules) {
+    for (auto Module : Modules)
+    {
         CSP_DELETE(Module.second);
     }
 
@@ -77,7 +82,8 @@ ScriptModule* ScriptContext::GetModule(const csp::common::String& ModuleName)
 {
     ModuleMap::iterator It = Modules.find(ModuleName.c_str());
 
-    if (It != Modules.end()) {
+    if (It != Modules.end())
+    {
         return It->second;
     }
 
@@ -91,12 +97,15 @@ void ScriptContext::AddModule(const csp::common::String& ModuleName)
 
     ModuleMap::iterator It = Modules.find(ModuleName.c_str());
 
-    if (It == Modules.end()) {
+    if (It == Modules.end())
+    {
         ScriptModule* TheScriptModule = CSP_NEW ScriptModule();
         TheScriptModule->ModuleName = ModuleName;
         TheScriptModule->Module = &Context->addModule(ModuleName.c_str());
         Modules.insert(ModuleMap::value_type(ModuleName.c_str(), TheScriptModule));
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("Module %s already exists\n", ModuleName.c_str());
     }
 }
@@ -114,14 +123,17 @@ void ScriptContext::AddImport(const csp::common::String& Url)
 {
     bool Exists = false;
 
-    for (const auto& Import : Imports) {
-        if (Import == Url.c_str()) {
+    for (const auto& Import : Imports)
+    {
+        if (Import == Url.c_str())
+        {
             Exists = true;
             break;
         }
     }
 
-    if (Exists) {
+    if (Exists)
+    {
         Imports.push_back(Url.c_str());
     }
 }
@@ -130,7 +142,8 @@ size_t ScriptContext::GetNumImportedModules() const { return Imports.size(); }
 
 const char* ScriptContext::GetImportedModule(size_t Index) const
 {
-    if (Index >= Imports.size()) {
+    if (Index >= Imports.size())
+    {
         return nullptr;
     }
 

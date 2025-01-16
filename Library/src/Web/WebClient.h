@@ -30,7 +30,8 @@
 #include <mutex>
 #include <unordered_set>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class LoginState;
 class SystemsManager;
@@ -38,7 +39,8 @@ class UserSystem;
 
 } // namespace csp::systems
 
-namespace csp::web {
+namespace csp::web
+{
 
 /**
                 @defgroup   web Web Client
@@ -56,7 +58,11 @@ constexpr int CSP_MAX_CONCURRENT_REQUESTS = 4;
 
 using Port = uint32_t;
 
-enum class ETransferProtocol : uint8_t { HTTP, HTTPS };
+enum class ETransferProtocol : uint8_t
+{
+    HTTP,
+    HTTPS
+};
 
 /// @addtogroup web
 /// @brief Web Client Base Class
@@ -64,7 +70,8 @@ enum class ETransferProtocol : uint8_t { HTTP, HTTPS };
 /// Provides common functionality for all Web Request clients by abstracting requests and their responses and
 /// provides methods of aynchronous or synchronous callbacks for the responses
 ///
-class WebClient {
+class WebClient
+{
     friend class HttpRequest;
     friend class csp::systems::SystemsManager;
 
@@ -129,7 +136,8 @@ private:
 #endif
 };
 
-class WebClientException : public std::runtime_error {
+class WebClientException : public std::runtime_error
+{
 public:
     WebClientException(const char* what)
         : std::runtime_error(what)

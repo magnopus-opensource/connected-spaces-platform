@@ -18,7 +18,8 @@
 #include "Common/StlString.h"
 #include "Common/Wrappers.h"
 
-namespace csp::events {
+namespace csp::events
+{
 
 EventId::EventId(const char* InEventNamespace, const char* InEventName)
 {

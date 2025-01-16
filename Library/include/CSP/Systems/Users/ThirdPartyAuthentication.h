@@ -18,16 +18,25 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief FDN supported Authentication Providers, the ones that can be used are the ones above Num
 /// Note: it's important for this enum to start with 0
 /// Note2: make sure to keep all enum values *above* Num
-enum EThirdPartyAuthenticationProviders { Google = 0, Discord, Apple, Num, Invalid = Num };
+enum EThirdPartyAuthenticationProviders
+{
+    Google = 0,
+    Discord,
+    Apple,
+    Num,
+    Invalid = Num
+};
 
 /// @ingroup User System
 /// @brief Data class used in the GetThirdPartyProviderAuthoriseURL authentication step
-class CSP_API ThirdPartyProviderDetails {
+class CSP_API ThirdPartyProviderDetails
+{
 public:
     csp::common::String ProviderName;
     csp::common::String ProviderClientId;
@@ -36,7 +45,8 @@ public:
 };
 
 /// @brief Result structure for a third party auth provider details request
-class CSP_API ProviderDetailsResult : public csp::systems::ResultBase {
+class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class UserSystem;

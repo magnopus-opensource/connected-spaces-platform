@@ -19,7 +19,8 @@
 #include "CSP/CSPCommon.h"
 #include "Memory.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 #if defined(CSP_WINDOWS)
 #pragma init_seg(lib)

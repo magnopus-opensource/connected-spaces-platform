@@ -21,13 +21,15 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls access to a third party component reference.
 /// To enable developers to author CSP powered applications using
 /// the native features of their platform of choice, we need to be able
 /// to map their platform component definition to the CSP component.
-CSP_INTERFACE class CSP_API IThirdPartyComponentRef {
+CSP_INTERFACE class CSP_API IThirdPartyComponentRef
+{
 public:
     /// @brief Returns the third party component reference.
     /// @return The third party component reference.

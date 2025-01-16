@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::GaussianSplat, Parent)

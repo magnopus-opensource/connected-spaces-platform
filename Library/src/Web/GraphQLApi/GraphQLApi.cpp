@@ -20,7 +20,8 @@
 #include "Web/HttpPayload.h"
 #include "Web/WebClient.h"
 
-namespace csp::systems::graphqlservice {
+namespace csp::systems::graphqlservice
+{
 
 GraphQLApi::GraphQLApi(csp::web::WebClient* InWebClient)
     : ApiBase(InWebClient, &csp::CSPFoundation::GetEndpoints().AggregationServiceURI)

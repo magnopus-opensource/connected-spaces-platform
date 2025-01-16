@@ -17,9 +17,11 @@
 
 #include "CSP/Common/String.h"
 
-namespace csp::common {
+namespace csp::common
+{
 /// @brief Utility class containing static helper functions for encoding data.
-class Encode {
+class Encode
+{
 public:
     /// @brief URI-encodes the given string by escaping reserved and non-ASCII characters.
     /// @param UriToEncode const csp::common::String&: The string to encode.
@@ -28,7 +30,8 @@ public:
 };
 
 /// @brief Utility class containing static helper functions for decoding data.
-class Decode {
+class Decode
+{
 public:
     /// @brief URI-decodes the given string by replacing percent-encoded characters with the actual character.
     /// @param UriToDecode const csp::common::String&: The string to decode.

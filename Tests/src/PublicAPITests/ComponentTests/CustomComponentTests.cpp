@@ -35,7 +35,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -199,19 +200,23 @@ CSP_PUBLIC_TEST(CSPEngine, CustomTests, CustomComponentTest)
         auto GotAllEntities = false;
         SpaceEntity* LoadedObject;
 
-        EntitySystem->SetEntityCreatedCallback([&](SpaceEntity* Entity) {
-            if (Entity->GetName() == ObjectName) {
-                GotAllEntities = true;
-                LoadedObject = Entity;
-            }
-        });
+        EntitySystem->SetEntityCreatedCallback(
+            [&](SpaceEntity* Entity)
+            {
+                if (Entity->GetName() == ObjectName)
+                {
+                    GotAllEntities = true;
+                    LoadedObject = Entity;
+                }
+            });
 
         // Wait until loaded
         auto Start = std::chrono::steady_clock::now();
         auto Current = std::chrono::steady_clock::now();
         int64_t TestTime = 0;
 
-        while (!GotAllEntities && TestTime < 20) {
+        while (!GotAllEntities && TestTime < 20)
+        {
             std::this_thread::sleep_for(50ms);
 
             Current = std::chrono::steady_clock::now();

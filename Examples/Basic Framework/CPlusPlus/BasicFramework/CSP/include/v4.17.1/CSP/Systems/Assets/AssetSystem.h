@@ -25,23 +25,27 @@
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 } // namespace csp::services
 
-namespace csp::web {
+namespace csp::web
+{
 
 class RemoteFileManager;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Asset System
 /// @brief Public facing system that allows uploading/downloading and creation of assets.
-class CSP_API CSP_NO_DISPOSE AssetSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE AssetSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

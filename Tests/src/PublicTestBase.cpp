@@ -46,7 +46,8 @@ void PublicTestBase::TearDown()
 
     AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
-    if (!csp::CSPFoundation::GetIsInitialised()) {
+    if (!csp::CSPFoundation::GetIsInitialised())
+    {
         fprintf(stderr, "%s\n",
             "csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
 

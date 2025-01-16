@@ -44,7 +44,8 @@
 #include "Web/POCOWebClient/POCOWebClient.h"
 #endif
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 SystemsManager* SystemsManager::Instance = nullptr;
 

@@ -21,9 +21,11 @@
 
 #include <map>
 
-namespace csp::events {
+namespace csp::events
+{
 
-class EventPayloadImpl {
+class EventPayloadImpl
+{
 public:
     EventPayloadImpl();
     ~EventPayloadImpl();
@@ -39,9 +41,16 @@ public:
     bool GetBool(const char* Key) const;
 
 private:
-    enum EParamType { TypeInt, TypeFloat, TypeString, TypeBool };
+    enum EParamType
+    {
+        TypeInt,
+        TypeFloat,
+        TypeString,
+        TypeBool
+    };
 
-    struct EventParam {
+    struct EventParam
+    {
         EventParam(EParamType Type)
             : ParamType(Type)
         {
@@ -51,7 +60,8 @@ private:
         {
             ParamType = Other.ParamType;
 
-            switch (ParamType) {
+            switch (ParamType)
+            {
             case TypeInt:
                 IntParam = Other.IntParam;
                 break;
@@ -75,7 +85,8 @@ private:
 
         ~EventParam()
         {
-            if (ParamType == TypeString) {
+            if (ParamType == TypeString)
+            {
                 CSP_FREE(StringParam);
             }
         }
@@ -90,7 +101,8 @@ private:
 
         EParamType ParamType;
 
-        union {
+        union
+        {
             int IntParam;
             float FloatParam;
             char* StringParam;
@@ -139,7 +151,8 @@ void EventPayloadImpl::AddBool(const char* Key, const bool Value)
 const int EventPayloadImpl::GetInt(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end()) {
+    if (it != Parameters.end())
+    {
         assert(it->second.ParamType == TypeInt);
         return it->second.IntParam;
     }
@@ -150,7 +163,8 @@ const int EventPayloadImpl::GetInt(const char* Key) const
 const char* EventPayloadImpl::GetString(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end()) {
+    if (it != Parameters.end())
+    {
         assert(it->second.ParamType == TypeString);
         return it->second.StringParam;
     }
@@ -161,7 +175,8 @@ const char* EventPayloadImpl::GetString(const char* Key) const
 const float EventPayloadImpl::GetFloat(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end()) {
+    if (it != Parameters.end())
+    {
         assert(it->second.ParamType == TypeFloat);
         return it->second.FloatParam;
     }
@@ -172,7 +187,8 @@ const float EventPayloadImpl::GetFloat(const char* Key) const
 bool EventPayloadImpl::GetBool(const char* Key) const
 {
     ParamMap::const_iterator it = Parameters.find(Key);
-    if (it != Parameters.end()) {
+    if (it != Parameters.end())
+    {
         assert(it->second.ParamType == TypeBool);
         return it->second.BoolParam;
     }

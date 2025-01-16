@@ -24,18 +24,21 @@
 
 using namespace csp::common;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class AssetCollection;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class MessageInfo;
 class ConversationInfo;
 
-class ConversationSystemHelpers {
+class ConversationSystemHelpers
+{
 
 public:
     static String GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId);

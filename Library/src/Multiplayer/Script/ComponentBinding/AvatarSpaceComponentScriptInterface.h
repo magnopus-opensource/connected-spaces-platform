@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class AvatarSpaceComponent;
 
-class AvatarSpaceComponentScriptInterface : public ComponentScriptInterface {
+class AvatarSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     AvatarSpaceComponentScriptInterface(AvatarSpaceComponent* InComponent = nullptr);
 

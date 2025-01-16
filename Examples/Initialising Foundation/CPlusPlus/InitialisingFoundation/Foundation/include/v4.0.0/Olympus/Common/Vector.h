@@ -2,9 +2,11 @@
 
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_common {
+namespace oly_common
+{
 
-class OLY_API Vector3 {
+class OLY_API Vector3
+{
 public:
     /**
      * @brief Returns a Vector3 with all fields set to 0
@@ -40,7 +42,8 @@ public:
     float Z;
 };
 
-class OLY_API Vector4 {
+class OLY_API Vector4
+{
 public:
     /**
      * @brief Returns a Vector4 with all fields set to 0

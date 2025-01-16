@@ -46,7 +46,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 void InitialiseTestingConnection();
 
@@ -91,7 +92,8 @@ void InitialiseTestingConnection()
 
 typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> TestCallbackHandler;
 
-class TestSystem : public csp::systems::SystemBase {
+class TestSystem : public csp::systems::SystemBase
+{
 public:
     // Test callback
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback;
@@ -106,25 +108,29 @@ public:
 
     void RegisterSystemCallback()
     {
-        if (!TestCallback) {
+        if (!TestCallback)
+        {
             return;
         }
 
-        if (EventBusPtr) {
+        if (EventBusPtr)
+        {
             EventBusPtr->ListenNetworkEvent("TestEvent", this);
         }
     }
 
     void DeregisterSystemCallback()
     {
-        if (EventBusPtr) {
+        if (EventBusPtr)
+        {
             EventBusPtr->StopListenNetworkEvent("TestEvent");
         }
     }
 
     void OnEvent(const std::vector<signalr::value>& EventValues)
     {
-        if (!TestCallback) {
+        if (!TestCallback)
+        {
             return;
         }
 
@@ -186,37 +192,46 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    EventBus->ListenNetworkEvent("TestEvent", [](bool ok, csp::common::Array<ReplicatedValue> Data) {
-        EXPECT_TRUE(ok);
+    EventBus->ListenNetworkEvent("TestEvent",
+        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        {
+            EXPECT_TRUE(ok);
 
-        std::cerr << "Test Event Received " << ok << std::endl;
-    });
+            std::cerr << "Test Event Received " << ok << std::endl;
+        });
 
-    EventBus->ListenNetworkEvent("TestEvent", [](bool ok, csp::common::Array<ReplicatedValue> Data) {
-        EXPECT_TRUE(ok);
+    EventBus->ListenNetworkEvent("TestEvent",
+        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        {
+            EXPECT_TRUE(ok);
 
-        EventReceived = true;
+            EventReceived = true;
 
-        if (EventSent) {
-            IsTestComplete = true;
-        }
+            if (EventSent)
+            {
+                IsTestComplete = true;
+            }
 
-        std::cerr << "Second Test Event Received " << ok << std::endl;
-    });
+            std::cerr << "Second Test Event Received " << ok << std::endl;
+        });
 
-    EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), [](ErrorCode Error) {
-        ASSERT_EQ(Error, ErrorCode::None);
+    EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(),
+        [](ErrorCode Error)
+        {
+            ASSERT_EQ(Error, ErrorCode::None);
 
-        EventSent = true;
+            EventSent = true;
 
-        if (EventReceived) {
-            IsTestComplete = true;
-        }
+            if (EventReceived)
+            {
+                IsTestComplete = true;
+            }
 
-        std::cerr << "Test Event Sent " << (Error == ErrorCode::None ? "true" : "false") << std::endl;
-    });
+            std::cerr << "Test Event Sent " << (Error == ErrorCode::None ? "true" : "false") << std::endl;
+        });
 
-    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
@@ -273,45 +288,57 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 
     EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-    EventBus->ListenNetworkEvent("MultiTypeEvent", [](bool ok, csp::common::Array<ReplicatedValue> Data) {
-        EXPECT_TRUE(ok);
+    EventBus->ListenNetworkEvent("MultiTypeEvent",
+        [](bool ok, csp::common::Array<ReplicatedValue> Data)
+        {
+            EXPECT_TRUE(ok);
 
-        std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
+            std::cerr << "Multi Type Event Received " << ok << "  Payload: " << std::endl;
 
-        for (int i = 0; i < Data.Size(); ++i) {
-            if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean) {
-                printf("%s\n", Data[i].GetBool() ? "true" : "false");
-            } else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Integer) {
-                printf("%lli\n", Data[i].GetInt());
-            } else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Float) {
-                printf("%f\n", Data[i].GetFloat());
+            for (int i = 0; i < Data.Size(); ++i)
+            {
+                if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Boolean)
+                {
+                    printf("%s\n", Data[i].GetBool() ? "true" : "false");
+                }
+                else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Integer)
+                {
+                    printf("%lli\n", Data[i].GetInt());
+                }
+                else if (Data[i].GetReplicatedValueType() == ReplicatedValueType::Float)
+                {
+                    printf("%f\n", Data[i].GetFloat());
+                }
             }
-        }
 
-        EventReceived = true;
+            EventReceived = true;
 
-        if (EventSent) {
-            IsTestComplete = true;
-        }
-    });
+            if (EventSent)
+            {
+                IsTestComplete = true;
+            }
+        });
 
     ReplicatedValue EventInt((int64_t)-1);
     ReplicatedValue EventFloat(1234.567890f);
 
-    EventBus->SendNetworkEventToClient(
-        "MultiTypeEvent", { EventInt, EventFloat }, Connection->GetClientId(), [EventInt, EventFloat](ErrorCode Error) {
+    EventBus->SendNetworkEventToClient("MultiTypeEvent", { EventInt, EventFloat }, Connection->GetClientId(),
+        [EventInt, EventFloat](ErrorCode Error)
+        {
             ASSERT_EQ(Error, ErrorCode::None);
 
             EventSent = true;
 
-            if (EventReceived) {
+            if (EventReceived)
+            {
                 IsTestComplete = true;
             }
 
             printf("%lli, %f, \n", EventInt.GetInt(), EventFloat.GetFloat());
         });
 
-    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
     }
@@ -382,28 +409,32 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     int TestCallbackId = 0;
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback1
-        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params) {
-              EXPECT_TRUE(ok);
+        = [&TestCallback1Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+    {
+        EXPECT_TRUE(ok);
 
-              if (TestCallback1Called) {
-                  return;
-              }
+        if (TestCallback1Called)
+        {
+            return;
+        }
 
-              TestCallback1Called = true;
-              TestCallbackId = 1111;
-          };
+        TestCallback1Called = true;
+        TestCallbackId = 1111;
+    };
 
     csp::multiplayer::EventBus::ParameterisedCallbackHandler TestCallback2
-        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params) {
-              EXPECT_TRUE(ok);
+        = [&TestCallback2Called, &TestCallbackId](bool ok, const csp::common::Array<csp::multiplayer::ReplicatedValue>& Params)
+    {
+        EXPECT_TRUE(ok);
 
-              if (TestCallback2Called) {
-                  return;
-              }
+        if (TestCallback2Called)
+        {
+            return;
+        }
 
-              TestCallback2Called = true;
-              TestCallbackId = 2222;
-          };
+        TestCallback2Called = true;
+        TestCallbackId = 2222;
+    };
 
     auto ErrorCallback = [](ErrorCode Error) { ASSERT_EQ(Error, ErrorCode::None); };
 

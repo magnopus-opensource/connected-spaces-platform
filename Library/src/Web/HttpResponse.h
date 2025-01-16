@@ -19,12 +19,14 @@
 #include "HttpPayload.h"
 #include "HttpProgress.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class HttpRequest;
 class HttpResponse;
 
-struct IHttpResponseHandler {
+struct IHttpResponseHandler
+{
     virtual void OnHttpProgress(HttpRequest& Request) {};
     virtual void OnHttpResponse(HttpResponse& Response) = 0;
     virtual bool ShouldDelete() const { return false; }
@@ -32,7 +34,8 @@ struct IHttpResponseHandler {
     virtual ~IHttpResponseHandler() = default;
 };
 
-class HttpResponse {
+class HttpResponse
+{
 public:
     HttpResponse();
     HttpResponse(HttpRequest* InRequest);

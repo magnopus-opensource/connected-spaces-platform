@@ -17,10 +17,12 @@
 
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup Sequence System
 /// @brief A basic class abstraction for a sequence, including key, and reference variables, and items.
-class CSP_API Sequence {
+class CSP_API Sequence
+{
 public:
     csp::common::String Key;
     csp::common::String ReferenceType;
@@ -31,7 +33,8 @@ public:
 
 /// @ingroup Sequence System
 /// @brief Result structure for a sequence result
-class CSP_API SequenceResult : public csp::systems::ResultBase {
+class CSP_API SequenceResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -55,7 +58,8 @@ private:
 
 /// @ingroup Sequence System
 /// @brief Data class used to contain information when attempting to get an array of sequences.
-class CSP_API SequencesResult : public csp::systems::ResultBase {
+class CSP_API SequencesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

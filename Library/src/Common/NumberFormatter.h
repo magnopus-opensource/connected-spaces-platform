@@ -8,11 +8,13 @@
 
 #pragma once
 
-namespace csp {
+namespace csp
+{
 
 /// Utility char pointer wrapper class.
 /// Class ensures increment/decrement remain within boundaries.
-class NumberFormatterPtr {
+class NumberFormatterPtr
+{
 public:
     NumberFormatterPtr(char* InPtr, std::size_t InOffset)
         : Beg(InPtr)
@@ -186,7 +188,8 @@ private:
     /// "0x" for hexadecimal) is prepended. For all other bases, prefix argument is ignored.
     /// Formatted string has at least [width] total length.
     {
-        if (Base < 2 || Base > 0x10) {
+        if (Base < 2 || Base > 0x10)
+        {
             *Result = '\0';
             return false;
         }
@@ -194,17 +197,20 @@ private:
         NumberFormatterPtr Ptr(Result, Size);
         int ThCount = 0;
         T TmpVal;
-        do {
+        do
+        {
             TmpVal = Value;
             Value /= Base;
             *Ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (TmpVal - Value * Base)];
-            if (ThSep && (Base == 10) && (++ThCount == 3)) {
+            if (ThSep && (Base == 10) && (++ThCount == 3))
+            {
                 *Ptr++ = ThSep;
                 ThCount = 0;
             }
         } while (Value);
 
-        if ('0' == Fill) {
+        if ('0' == Fill)
+        {
             if (TmpVal < 0)
                 --Width;
             if (Prefix && Base == 010)
@@ -217,7 +223,8 @@ private:
 
         if (Prefix && Base == 010)
             *Ptr++ = '0';
-        else if (Prefix && Base == 0x10) {
+        else if (Prefix && Base == 0x10)
+        {
             *Ptr++ = 'x';
             *Ptr++ = '0';
         }
@@ -225,7 +232,8 @@ private:
         if (TmpVal < 0)
             *Ptr++ = '-';
 
-        if ('0' != Fill) {
+        if ('0' != Fill)
+        {
             while ((Ptr - Result) < Width)
                 *Ptr++ = Fill;
         }
@@ -235,7 +243,8 @@ private:
 
         char* Ptrr = Result;
         char Tmp;
-        while (Ptrr < Ptr) {
+        while (Ptrr < Ptr)
+        {
             Tmp = *Ptr;
             *Ptr-- = *Ptrr;
             *Ptrr++ = Tmp;
@@ -255,7 +264,8 @@ private:
     /// "0x" for hexadecimal) is prepended. For all other bases, prefix argument is ignored.
     /// Formatted string has at least [width] total length.
     {
-        if (Base < 2 || Base > 0x10) {
+        if (Base < 2 || Base > 0x10)
+        {
             *Result = '\0';
             return false;
         }
@@ -263,17 +273,20 @@ private:
         NumberFormatterPtr Ptr(Result, Size);
         int ThCount = 0;
         T TmpVal;
-        do {
+        do
+        {
             TmpVal = Value;
             Value /= Base;
             *Ptr++ = "FEDCBA9876543210123456789ABCDEF"[15 + (TmpVal - Value * Base)];
-            if (ThSep && (Base == 10) && (++ThCount == 3)) {
+            if (ThSep && (Base == 10) && (++ThCount == 3))
+            {
                 *Ptr++ = ThSep;
                 ThCount = 0;
             }
         } while (Value);
 
-        if ('0' == Fill) {
+        if ('0' == Fill)
+        {
             if (Prefix && Base == 010)
                 --Width;
             if (Prefix && Base == 0x10)
@@ -284,12 +297,14 @@ private:
 
         if (Prefix && Base == 010)
             *Ptr++ = '0';
-        else if (Prefix && Base == 0x10) {
+        else if (Prefix && Base == 0x10)
+        {
             *Ptr++ = 'x';
             *Ptr++ = '0';
         }
 
-        if ('0' != Fill) {
+        if ('0' != Fill)
+        {
             while ((Ptr - Result) < Width)
                 *Ptr++ = Fill;
         }
@@ -299,7 +314,8 @@ private:
 
         char* Ptrr = Result;
         char Tmp;
-        while (Ptrr < Ptr) {
+        while (Ptrr < Ptr)
+        {
             Tmp = *Ptr;
             *Ptr-- = *Ptrr;
             *Ptrr++ = Tmp;

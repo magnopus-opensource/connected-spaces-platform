@@ -26,7 +26,8 @@
 #include <iostream>
 #include <sstream>
 
-namespace {
+namespace
+{
 
 void GetResponseHeaders(emscripten_fetch_t* Fetch, csp::common::Map<csp::common::String, csp::common::String>& OutHeadersMap)
 {
@@ -35,7 +36,8 @@ void GetResponseHeaders(emscripten_fetch_t* Fetch, csp::common::Map<csp::common:
     emscripten_fetch_get_response_headers(Fetch, Buf, Length + 1);
     auto Headers = emscripten_fetch_unpack_response_headers(Buf);
 
-    for (int i = 0; Headers[i] != nullptr; i += 2) {
+    for (int i = 0; Headers[i] != nullptr; i += 2)
+    {
         csp::common::String _Key = Headers[i];
         csp::common::String _Val = Headers[i + 1];
 
@@ -53,7 +55,8 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
     auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
     Request->SetResponseCode(static_cast<csp::web::EResponseCodes>(Fetch->status));
 
-    if (Fetch->numBytes) {
+    if (Fetch->numBytes)
+    {
         Request->SetResponseData(Fetch->data, Fetch->numBytes);
     }
 
@@ -64,7 +67,8 @@ void OnFetchSuccessOrError(emscripten_fetch_t* Fetch)
     auto& Payload = Response.GetMutablePayload();
     auto* Keys = Headers.Keys();
 
-    for (int i = 0; i < Keys->Size(); ++i) {
+    for (int i = 0; i < Keys->Size(); ++i)
+    {
         auto Key = Keys->operator[](i).ToLower();
         auto Value = Headers[Key].ToLower();
 
@@ -84,16 +88,20 @@ void OnFetchError(emscripten_fetch_t* Fetch)
 {
     auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
 
-    if (Request->Retry()) {
+    if (Request->Retry())
+    {
         CSP_LOG_WARN_MSG("Retrying failed emscripten request\n");
-    } else {
+    }
+    else
+    {
         OnFetchSuccessOrError(Fetch);
     }
 }
 
 void OnFetchProgress(emscripten_fetch_t* Fetch)
 {
-    if (Fetch->totalBytes) {
+    if (Fetch->totalBytes)
+    {
         auto* Request = reinterpret_cast<csp::web::HttpRequest*>(Fetch->userData);
         Request->SetResponseProgress(Fetch->dataOffset * 100.0 / Fetch->totalBytes);
     }
@@ -103,7 +111,8 @@ template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N
 
 } // namespace
 
-namespace csp::web {
+namespace csp::web
+{
 
 EmscriptenWebClient::EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
     : WebClient(InPort, Tp, AutoRefresh)
@@ -185,7 +194,8 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
     emscripten_fetch_attr_t attr;
     emscripten_fetch_attr_init(&attr);
 
-    switch (Request.GetVerb()) {
+    switch (Request.GetVerb())
+    {
     case ERequestVerb::Get:
         strcpy(attr.requestMethod, "GET");
         break;
@@ -209,13 +219,15 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
     attr.onprogress = OnFetchProgress;
 
     // Don't send headers or content for HEAD requests
-    if (Request.GetVerb() != ERequestVerb::Head) {
+    if (Request.GetVerb() != ERequestVerb::Head)
+    {
         auto& Payload = Request.GetPayload();
         auto& Headers = Payload.GetHeaders();
         int i = 0;
         auto** HeadersBuf = CSP_NEW char * [Headers.size() * 2 + 1];
 
-        for (auto& Header : Headers) {
+        for (auto& Header : Headers)
+        {
             auto Len = Header.first.size();
             auto* Key = CSP_NEW char[Len + 1];
             strcpy(Key, Header.first.c_str());
@@ -236,7 +248,8 @@ void EmscriptenWebClient::Send(HttpRequest& Request)
         auto& Content = Payload.GetContent();
         auto Len = Content.Length();
 
-        if (Len) {
+        if (Len)
+        {
             attr.requestData = Content.c_str();
             attr.requestDataSize = Len;
         }

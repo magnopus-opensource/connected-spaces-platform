@@ -24,7 +24,8 @@
 
 #include <future>
 
-namespace {
+namespace
+{
 /* Login to CHS. Return the userID on success */
 csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::common::String& Email, const csp::common::String& Password,
     bool AgeVerified, csp::systems::EResultCode ExpectedResultCode, csp::systems::ERequestFailureReason ExpectedResultFailureCode)
@@ -32,19 +33,25 @@ csp::common::String LogIn(csp::systems::UserSystem& UserSystem, const csp::commo
     std::promise<csp::systems::LoginStateResult> ResultPromise;
     std::future<csp::systems::LoginStateResult> ResultFuture = ResultPromise.get_future();
 
-    UserSystem.Login("", Email, Password, AgeVerified, [&ResultPromise](csp::systems::LoginStateResult Result) {
-        // Callbacks are called both in progress and at the end, guard against double promise sets
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            ResultPromise.set_value(Result);
-        }
-    });
+    UserSystem.Login("", Email, Password, AgeVerified,
+        [&ResultPromise](csp::systems::LoginStateResult Result)
+        {
+            // Callbacks are called both in progress and at the end, guard against double promise sets
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                ResultPromise.set_value(Result);
+            }
+        });
 
     csp::systems::LoginStateResult LoginResult = ResultFuture.get();
 
-    if (LoginResult.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (LoginResult.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         MultiplayerTestRunner::ProcessDescriptors::PrintProcessDescriptor(MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR);
         return LoginResult.GetLoginState().UserId;
-    } else {
+    }
+    else
+    {
         const std::string msg = "Failed to login to service, got result code " + std::to_string(static_cast<uint8_t>(LoginResult.GetResultCode()))
             + "\n Response Body: " + LoginResult.GetResponseBody().c_str();
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::FAILED_TO_LOGIN, msg);
@@ -69,12 +76,15 @@ LoginRAII::~LoginRAII()
     std::promise<csp::systems::NullResult> ResultPromise;
     std::future<csp::systems::NullResult> ResultFuture = ResultPromise.get_future();
 
-    UserSystem.Logout([&ResultPromise](csp::systems::NullResult Result) {
-        // Callbacks are called both in progress and at the end, guard against double promise sets
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed) {
-            ResultPromise.set_value(Result);
-        }
-    });
+    UserSystem.Logout(
+        [&ResultPromise](csp::systems::NullResult Result)
+        {
+            // Callbacks are called both in progress and at the end, guard against double promise sets
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success || Result.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                ResultPromise.set_value(Result);
+            }
+        });
 
     csp::systems::NullResult LogoutResult = ResultFuture.get();
     MultiplayerTestRunner::ProcessDescriptors::PrintProcessDescriptor(MultiplayerTestRunner::ProcessDescriptors::LOGGED_OUT_DESCRIPTOR);

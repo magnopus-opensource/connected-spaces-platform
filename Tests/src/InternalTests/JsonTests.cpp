@@ -22,7 +22,8 @@
 
 using namespace csp::json;
 
-struct TestObjectProps {
+struct TestObjectProps
+{
     int32_t Int32Member = 0;
     uint32_t Uint32Member = 0;
     int64_t Int64Member = 0;
@@ -57,7 +58,8 @@ void FromJson(const JsonDeserializer& Deserializer, TestObjectProps& Obj)
     Deserializer.DeserializeMember("charPtrMember", Obj.CharPtrMember);
 }
 
-struct TestOptionalPropObject {
+struct TestOptionalPropObject
+{
     int32_t Int32Member1 = 0;
     int32_t Int32Member2 = 0;
 };
@@ -71,11 +73,13 @@ void FromJson(const JsonDeserializer& Deserializer, TestOptionalPropObject& Obj)
     EXPECT_FALSE(Deserializer.HasProperty("int32Member2"));
 }
 
-struct TestNestedObject {
+struct TestNestedObject
+{
     csp::common::String StringMember = "";
 };
 
-struct TestParentObject {
+struct TestParentObject
+{
     int32_t Int32Member = 0;
     TestNestedObject Obj;
     float FloatMember = 0;
@@ -99,7 +103,8 @@ void ToJson(JsonSerializer& Serializer, const TestNestedObject& Obj) { Serialize
 
 void FromJson(const JsonDeserializer& Deserializer, TestNestedObject& Obj) { Deserializer.DeserializeMember("stringMember", Obj.StringMember); }
 
-struct TestContainerObject {
+struct TestContainerObject
+{
     csp::common::Array<int> IntMembers;
     csp::common::List<float> FloatMembers;
 };
@@ -116,7 +121,8 @@ void FromJson(const JsonDeserializer& Deserializer, TestContainerObject& Obj)
     Deserializer.DeserializeMember("floatMembers", Obj.FloatMembers);
 }
 
-struct TestObjectContainerObject {
+struct TestObjectContainerObject
+{
     csp::common::Array<TestParentObject> ArrayMember;
     csp::common::List<TestParentObject> ListMember;
 };
@@ -264,7 +270,8 @@ CSP_INTERNAL_TEST(CSPEngine, JsonTests, JsonObjectContainerObjectTest)
     EXPECT_EQ(Obj.ArrayMember.Size(), Obj2.ArrayMember.Size());
     EXPECT_EQ(Obj.ListMember.Size(), Obj2.ListMember.Size());
 
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 2; ++i)
+    {
         EXPECT_EQ(Obj.ArrayMember[i].Int32Member, Obj.ArrayMember[i].Int32Member);
         EXPECT_EQ(Obj.ArrayMember[i].Obj.StringMember, Obj.ArrayMember[i].Obj.StringMember);
         EXPECT_EQ(Obj.ArrayMember[i].FloatMember, Obj.ArrayMember[i].FloatMember);

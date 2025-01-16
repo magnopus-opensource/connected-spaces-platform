@@ -19,10 +19,12 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup HotspotSequence System
 /// @brief A basic class abstraction for a Hot Spot Group, including name, and items within the group.
-class CSP_API HotspotGroup {
+class CSP_API HotspotGroup
+{
 public:
     csp::common::String Name;
     csp::common::Array<csp::common::String> Items;
@@ -30,7 +32,8 @@ public:
 
 /// @ingroup HotspotSequence System
 /// @brief Data class used to contain information when attempting to get a Hot Spot Group.
-class CSP_API HotspotGroupResult : public csp::systems::ResultBase {
+class CSP_API HotspotGroupResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -55,7 +58,8 @@ private:
 
 /// @ingroup HotspotSequence System
 /// @brief Data class used to contain information when attempting to get a Hot Spot Group.
-class CSP_API HotspotGroupsResult : public csp::systems::ResultBase {
+class CSP_API HotspotGroupsResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

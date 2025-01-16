@@ -20,7 +20,8 @@
 #include "CSP/Common/Vector.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief The serialiser is responsible for converting a SpaceEntity instance into a data structure that both SignalR
 /// and our servers can understand and use.
@@ -29,7 +30,8 @@ namespace csp::multiplayer {
 /// Entity level. Use BeginComponents() to start writing as the Server component data, with each BeginComponent and
 /// EndComponent brace dictating information written into a server component. Within a component, use WriteProperty()
 /// to write the individual data. Ensure you finish by closing out the relevant sections with the 'End' functions.
-CSP_INTERFACE class CSP_API IEntitySerialiser {
+CSP_INTERFACE class CSP_API IEntitySerialiser
+{
 public:
     /// @brief Start the serialisiation.
     virtual void BeginEntity() = 0;
@@ -114,7 +116,8 @@ protected:
 ///
 /// This works similarly to the serialiser and you can refer to the serialiser for more details.
 /// It is expected that you will be using the data as you read it to populate either a newly created or currently existing SpaceEntity.
-CSP_INTERFACE class CSP_API IEntityDeserialiser {
+CSP_INTERFACE class CSP_API IEntityDeserialiser
+{
 public:
     /// @brief Starts the deserialisation.
     virtual void EnterEntity() = 0;

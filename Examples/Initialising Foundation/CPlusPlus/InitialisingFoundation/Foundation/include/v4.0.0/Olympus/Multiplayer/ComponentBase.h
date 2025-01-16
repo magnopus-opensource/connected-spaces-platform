@@ -16,7 +16,8 @@ class OlympusEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTe
 #endif
 OLY_END_IGNORE
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 class SpaceEntity;
 class ComponentScriptInterface;
@@ -24,7 +25,8 @@ class ComponentScriptInterface;
 /**
  * @brief Represents the type of component.
  */
-enum class ComponentType {
+enum class ComponentType
+{
     Invalid,
     Core,
     UIController_DEPRECATED,
@@ -52,7 +54,8 @@ enum class ComponentType {
 /**
  * @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
  */
-class OLY_API ComponentBase {
+class OLY_API ComponentBase
+{
     OLY_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;

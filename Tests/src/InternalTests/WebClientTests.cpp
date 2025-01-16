@@ -35,7 +35,8 @@
 
 using namespace csp::web;
 
-class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler {
+class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
+{
 public:
     ResponseReceiver()
         : ResponseReceived(false)
@@ -70,7 +71,8 @@ private:
 
 #ifdef CSP_WASM
 
-class TestWebClient : public EmscriptenWebClient {
+class TestWebClient : public EmscriptenWebClient
+{
 public:
     TestWebClient(const Port InPort, const ETransferProtocol Tp)
         : EmscriptenWebClient(InPort, Tp, false)
@@ -80,7 +82,8 @@ public:
 
 #else
 
-class TestWebClient : public POCOWebClient {
+class TestWebClient : public POCOWebClient
+{
 public:
     TestWebClient(const Port InPort, const ETransferProtocol Tp)
         : POCOWebClient(InPort, Tp, false)
@@ -112,9 +115,12 @@ void RunWebClientTest(const char* Url, ERequestVerb Verb, uint32_t Port, HttpPay
     WebClientSendRequest(&WebClient, Url, Verb, Payload, &Receiver);
 
     //// Sleep thread until response is received
-    if (Receiver.WaitForResponse()) {
+    if (Receiver.WaitForResponse())
+    {
         EXPECT_TRUE(Receiver.GetResponse().GetResponseCode() == ExpectedResponse) << "Response was " << (int)Receiver.GetResponse().GetResponseCode();
-    } else {
+    }
+    else
+    {
         FAIL() << "Response timeout" << std::endl;
     }
 }
@@ -177,7 +183,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientDeleteTestExt)
     csp::CSPFoundation::Shutdown();
 }
 
-class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler {
+class PollingLoginResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
+{
 public:
     PollingLoginResponseReceiver(std::thread::id InThreadId)
         : ResponseReceived(false)
@@ -193,20 +200,27 @@ public:
         Response = InResponse;
         ResponseReceived = true;
 
-        if (Response.GetResponseCode() == EResponseCodes::ResponseOK) {
+        if (Response.GetResponseCode() == EResponseCodes::ResponseOK)
+        {
             rapidjson::Document ResponseJson;
             ResponseJson.Parse(Response.GetPayload().GetContent().c_str());
 
-            if (ResponseJson.IsObject()) {
+            if (ResponseJson.IsObject())
+            {
                 EXPECT_TRUE(ResponseJson["accessToken"].IsString());
 
-                if (ResponseJson["accessToken"].IsString()) {
+                if (ResponseJson["accessToken"].IsString())
+                {
                     AccessToken = ResponseJson["accessToken"].GetString();
                 }
-            } else {
+            }
+            else
+            {
                 FAIL() << "Invalid response JSON" << std::endl;
             }
-        } else {
+        }
+        else
+        {
             FAIL() << "Invalid response code " << (int)Response.GetResponseCode() << std::endl;
         }
     }
@@ -214,7 +228,8 @@ public:
     bool WaitForResponse(csp::web::WebClient* WebClient)
     {
         return WaitFor(
-            [this, WebClient] {
+            [this, WebClient]
+            {
 #ifndef CSP_WASM
                 WebClient->ProcessResponses();
 #endif
@@ -423,7 +438,8 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientAuthorizationTest)
 }
 #endif
 
-class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler {
+class RetryResponseReceiver : public ResponseWaiter, public IHttpResponseHandler
+{
 public:
     RetryResponseReceiver()
         : ResponseReceived(false)
@@ -439,7 +455,8 @@ public:
         bool RetryIssued = false;
         constexpr uint32_t MaxNumRequestRetries = 3;
 
-        if (InResponse.GetResponseCode() == EResponseCodes::ResponseNotFound) {
+        if (InResponse.GetResponseCode() == EResponseCodes::ResponseNotFound)
+        {
 #ifdef CSP_WASM
             std::thread TestThread([&]() { RetryIssued = InResponse.GetRequest()->Retry(MaxNumRequestRetries); });
 
@@ -449,12 +466,15 @@ public:
 #endif
         }
 
-        if (!RetryIssued) {
+        if (!RetryIssued)
+        {
             EXPECT_TRUE(InResponse.GetRequest()->GetRetryCount() >= MaxNumRequestRetries);
 
             Response = InResponse;
             ResponseReceived = true;
-        } else {
+        }
+        else
+        {
             std::cerr << "Retrying Request" << std::endl;
         }
     }
@@ -525,11 +545,14 @@ CSP_INTERNAL_TEST(CSPEngine, WebClientTests, WebClientUserAgentTest)
     WebClientSendRequest(WebClient, "https://postman-echo.com/get", ERequestVerb::Get, Payload, &Receiver);
 
     //// Sleep thread until response is received
-    if (Receiver.WaitForResponse()) {
+    if (Receiver.WaitForResponse())
+    {
         std::string ResponseContent = Receiver.GetResponse().GetPayload().GetContent().c_str();
 
         EXPECT_TRUE(ResponseContent.find(TESTS_CLIENT_SKU) != std::string::npos) << TESTS_CLIENT_SKU << " was not found.";
-    } else {
+    }
+    else
+    {
         FAIL() << "Response timeout" << std::endl;
     }
 

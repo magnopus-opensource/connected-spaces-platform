@@ -18,9 +18,11 @@
 #include "CSP/Common/String.h"
 #include "Common/DateTime.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
-class HttpAuth {
+class HttpAuth
+{
 public:
     HttpAuth();
 

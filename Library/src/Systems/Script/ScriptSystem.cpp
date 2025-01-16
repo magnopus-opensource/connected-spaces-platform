@@ -38,7 +38,8 @@
 constexpr int MAX_SCRIPT_FUNCTION_LEN = 256;
 
 // Template specializations for some custom csp types we want to use
-template <> struct qjs::js_property_traits<csp::common::String> {
+template <> struct qjs::js_property_traits<csp::common::String>
+{
     static void set_property(JSContext* ctx, JSValue this_obj, csp::common::String str, JSValue value)
     {
         int err = JS_SetPropertyStr(ctx, this_obj, str.c_str(), value);
@@ -53,7 +54,8 @@ template <> struct qjs::js_property_traits<csp::common::String> {
     }
 };
 
-template <> struct qjs::js_traits<csp::common::String> {
+template <> struct qjs::js_traits<csp::common::String>
+{
     static csp::common::String unwrap(JSContext* ctx, JSValueConst v)
     {
         size_t plen;
@@ -68,7 +70,8 @@ template <> struct qjs::js_traits<csp::common::String> {
     static JSValue wrap(JSContext* ctx, csp::common::String str) noexcept { return JS_NewStringLen(ctx, str.c_str(), str.Length()); }
 };
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 ScriptSystem::ScriptSystem()
     : TheScriptRuntime(nullptr)
@@ -79,7 +82,8 @@ ScriptSystem::~ScriptSystem() { Shutdown(); }
 
 void ScriptSystem::Initialise()
 {
-    if (TheScriptRuntime != nullptr) {
+    if (TheScriptRuntime != nullptr)
+    {
         CSP_LOG_ERROR_MSG("ScriptSystem::Initialise already called\n");
         return;
     }
@@ -104,7 +108,8 @@ void ScriptSystem::Initialise()
 
 void ScriptSystem::Shutdown()
 {
-    if (TheScriptRuntime != nullptr) {
+    if (TheScriptRuntime != nullptr)
+    {
         CSP_DELETE(TheScriptRuntime);
         TheScriptRuntime = nullptr;
     }
@@ -115,7 +120,8 @@ bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& Scrip
     // CSP_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
 
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    if (TheScriptContext == nullptr) {
+    if (TheScriptContext == nullptr)
+    {
         return false;
     }
 
@@ -129,7 +135,8 @@ bool ScriptSystem::RunScriptFile(int64_t ContextId, const csp::common::String& S
     CSP_LOG_FORMAT(LogLevel::Verbose, "RunScriptFile: %s\n", ScriptFilePath.c_str());
 
     ScriptContext* TheScriptContext = TheScriptRuntime->GetContext(ContextId);
-    if (TheScriptContext == nullptr) {
+    if (TheScriptContext == nullptr)
+    {
         return false;
     }
 

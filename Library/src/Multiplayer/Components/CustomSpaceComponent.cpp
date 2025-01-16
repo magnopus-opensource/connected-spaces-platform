@@ -22,7 +22,8 @@
 #include <algorithm>
 #include <functional>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 CustomSpaceComponent::CustomSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Custom, Parent) //, NumProperties(2)
@@ -65,9 +66,11 @@ const ReplicatedValue& CustomSpaceComponent::GetCustomProperty(const csp::common
 
 void CustomSpaceComponent::SetCustomProperty(const csp::common::String& Key, const ReplicatedValue& Value)
 {
-    if (Value.GetReplicatedValueType() != ReplicatedValueType::InvalidType) {
+    if (Value.GetReplicatedValueType() != ReplicatedValueType::InvalidType)
+    {
         const uint32_t PropertyKey = GetCustomPropertySubscriptionKey(Key);
-        if (!Properties.HasKey(PropertyKey)) {
+        if (!Properties.HasKey(PropertyKey))
+        {
             AddKey(Key);
         }
         SetProperty(PropertyKey, Value);
@@ -78,7 +81,8 @@ void CustomSpaceComponent::RemoveCustomProperty(const csp::common::String& Key)
 {
     const uint32_t PropertyKey = GetCustomPropertySubscriptionKey(Key);
 
-    if (Properties.HasKey(PropertyKey)) {
+    if (Properties.HasKey(PropertyKey))
+    {
         RemoveProperty(PropertyKey);
         RemoveKey(Key);
     }
@@ -86,10 +90,12 @@ void CustomSpaceComponent::RemoveCustomProperty(const csp::common::String& Key)
 
 csp::common::List<csp::common::String> CustomSpaceComponent::GetCustomPropertyKeys() const
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList))) {
+    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)))
+    {
         const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
-        if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String && !RepVal.GetString().IsEmpty()) {
+        if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String && !RepVal.GetString().IsEmpty())
+        {
             return GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)).GetString().Split(',');
         }
     }
@@ -99,31 +105,41 @@ csp::common::List<csp::common::String> CustomSpaceComponent::GetCustomPropertyKe
 
 int32_t CustomSpaceComponent::GetNumProperties() const
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList))) {
+    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)))
+    {
         return static_cast<uint32_t>(Properties.Size() - 1);
-    } else {
+    }
+    else
+    {
         return static_cast<uint32_t>(Properties.Size());
     }
 }
 
 void CustomSpaceComponent::AddKey(const csp::common::String& Value)
 {
-    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList))) {
+    if (Properties.HasKey(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList)))
+    {
         const auto& RepVal = GetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
 
-        if (RepVal.GetReplicatedValueType() != ReplicatedValueType::String) {
+        if (RepVal.GetReplicatedValueType() != ReplicatedValueType::String)
+        {
             return;
         }
 
         csp::common::String ReturnKeys = RepVal.GetString();
 
-        if (!ReturnKeys.IsEmpty()) {
+        if (!ReturnKeys.IsEmpty())
+        {
             ReturnKeys = ReturnKeys + "," + Value;
             SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
-        } else {
+        }
+        else
+        {
             SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
         }
-    } else {
+    }
+    else
+    {
         SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), Value);
     }
 }
@@ -132,21 +148,29 @@ void CustomSpaceComponent::RemoveKey(const csp::common::String& Key)
 {
     const csp::common::String& CurrentKeys = GetStringProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList));
     csp::common::List<csp::common::String> KeyList = CurrentKeys.Split(',');
-    if (KeyList.Contains(Key)) {
+    if (KeyList.Contains(Key))
+    {
         csp::common::String ReturnKeys;
         KeyList.RemoveItem(Key);
-        if (KeyList.Size() != 0) {
-            for (int i = 0; i < KeyList.Size(); ++i) {
-                if (i == 0) {
+        if (KeyList.Size() != 0)
+        {
+            for (int i = 0; i < KeyList.Size(); ++i)
+            {
+                if (i == 0)
+                {
                     ReturnKeys = KeyList[i];
-                } else {
+                }
+                else
+                {
                     ReturnKeys = ReturnKeys + "," + KeyList[i];
                 }
             }
         }
 
         SetProperty(static_cast<uint32_t>(CustomComponentPropertyKeys::CustomPropertyList), ReturnKeys);
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_MSG("Key Not Found.");
     }
 }

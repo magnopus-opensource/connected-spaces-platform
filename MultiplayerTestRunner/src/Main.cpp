@@ -55,7 +55,8 @@
 void RunTest(CLIArgs::RunnerSettings Settings, std::chrono::steady_clock::time_point ProgramStartTime)
 {
     using namespace MultiplayerTestRunner::TestIdentifiers;
-    switch (Settings.TestIdentifier) {
+    switch (Settings.TestIdentifier)
+    {
     case TestIdentifier::CREATE_AVATAR:
         CreateAvatar::RunTest();
         break;
@@ -92,7 +93,8 @@ int main(int argc, char* argv[])
     // We grab the program start time right at the beginning so the timeout can be calculated.
     const auto ProgramStartTime = std::chrono::steady_clock::now();
 
-    try {
+    try
+    {
         // Create the CLI, and get the validated data from the inputs.
         CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(argc, argv);
 
@@ -115,12 +117,14 @@ int main(int argc, char* argv[])
      * The test runner uses exceptions to propogate errors up, as it is a process-based executable
      * we want to (or really, must) use return codes to communicate errors. Convert them here.
      */
-    catch (const Utils::ExceptionWithCode& Exception) {
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         std::cerr << Exception.what();
         return Exception.ErrorCode;
     }
     // Sometimes CSP itself may throw an exception, cover ourself.
-    catch (const std::exception& Exception) {
+    catch (const std::exception& Exception)
+    {
         std::cerr << Exception.what();
         return MultiplayerTestRunner::ErrorCodes::OTHER_EXCEPTION;
     }

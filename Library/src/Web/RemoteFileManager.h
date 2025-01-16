@@ -20,9 +20,11 @@
 #include "Services/PrototypeService/AssetFileDto.h"
 #include "Web/WebClient.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
-class RemoteFileManager {
+class RemoteFileManager
+{
 public:
     RemoteFileManager(csp::web::WebClient* InWebClient);
     ~RemoteFileManager();

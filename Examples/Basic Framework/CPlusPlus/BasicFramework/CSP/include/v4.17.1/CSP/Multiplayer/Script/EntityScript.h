@@ -20,12 +20,14 @@
 #include <map>
 #include <string>
 
-namespace csp::systems {
+namespace csp::systems
+{
 class ScriptSystem;
 }
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class SpaceEntitySystem;
 
 class SpaceEntity;
@@ -34,7 +36,8 @@ class ScriptSpaceComponent;
 /// @brief Manages the script attached to an Entity.
 ///
 /// Provides functions for setting the script source, subscribing to property changes and messages and other script management.
-class CSP_API EntityScript {
+class CSP_API EntityScript
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;

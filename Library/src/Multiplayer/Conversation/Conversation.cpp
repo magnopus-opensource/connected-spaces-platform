@@ -18,7 +18,8 @@
 #include "ConversationSystemHelpers.h"
 #include "Web/HttpResponse.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 MessageInfo& MessageResult::GetMessageInfo() { return MsgInfo; }
 
@@ -70,7 +71,8 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 
     MessageInfo MsgInfo;
 
-    for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx) {
+    for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
+    {
         MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
         ConversationMessages[idx] = MsgInfo;
     }

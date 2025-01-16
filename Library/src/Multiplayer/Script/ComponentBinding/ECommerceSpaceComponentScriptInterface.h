@@ -17,10 +17,12 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class ECommerceSpaceComponent;
 
-class ECommerceSpaceComponentScriptInterface : public ComponentScriptInterface {
+class ECommerceSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent = nullptr);
 

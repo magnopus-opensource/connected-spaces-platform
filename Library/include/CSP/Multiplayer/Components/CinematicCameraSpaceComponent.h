@@ -25,10 +25,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a CinematicCamera component.
-enum class CinematicCameraPropertyKeys {
+enum class CinematicCameraPropertyKeys
+{
     Position = 0,
     Rotation,
     IsEnabled,
@@ -51,7 +53,8 @@ class CSP_API CinematicCameraSpaceComponent : public ComponentBase,
                                               public IThirdPartyComponentRef,
                                               public IPositionComponent,
                                               public IRotationComponent,
-                                              public IEnableableComponent {
+                                              public IEnableableComponent
+{
 public:
     /// @brief Constructs the CinematicCamera space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

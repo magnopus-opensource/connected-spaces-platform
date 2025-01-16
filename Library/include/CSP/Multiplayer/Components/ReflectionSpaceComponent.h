@@ -26,10 +26,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/IScaleComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a reflection component.
-enum class ReflectionPropertyKeys {
+enum class ReflectionPropertyKeys
+{
     Name_DEPRECATED,
     ReflectionAssetId,
     AssetCollectionId,
@@ -42,11 +44,16 @@ enum class ReflectionPropertyKeys {
 };
 
 /// @brief Enumerates the supported shapes for a reflection component.
-enum class ReflectionShape { UnitSphere = 0, UnitBox };
+enum class ReflectionShape
+{
+    UnitSphere = 0,
+    UnitBox
+};
 
 /// @ingroup ReflectionSpaceComponent
 /// @brief Add sphere and box reflection captures to your Space which can be used by objects with reflective materials.
-class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionComponent, public IScaleComponent, public IThirdPartyComponentRef {
+class CSP_API ReflectionSpaceComponent : public ComponentBase, public IPositionComponent, public IScaleComponent, public IThirdPartyComponentRef
+{
 public:
     /// @brief Constructs the reflection component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

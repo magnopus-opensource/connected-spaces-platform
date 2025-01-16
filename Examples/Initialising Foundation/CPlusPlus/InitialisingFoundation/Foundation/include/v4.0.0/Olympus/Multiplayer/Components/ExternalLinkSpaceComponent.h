@@ -6,17 +6,35 @@
 #include "Olympus/Multiplayer/SpaceTransform.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 /// @brief The type of actions that can be performed by an external link component.
-enum class ExternalLinkActions { LinkClicked, Num };
+enum class ExternalLinkActions
+{
+    LinkClicked,
+    Num
+};
 
 /// @brief The list of properties defined within an external link component.
-enum class ExternalLinkPropertyKeys { Name = 0, LinkUrl, Position, Rotation, Scale, DisplayText, IsEnabled, IsVisible, IsARVisible, Num };
+enum class ExternalLinkPropertyKeys
+{
+    Name = 0,
+    LinkUrl,
+    Position,
+    Rotation,
+    Scale,
+    DisplayText,
+    IsEnabled,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup ExternalLinkSpaceComponent
 /// @brief Data representation of an ExternalLinkSpaceComponent.
-class OLY_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public IVisibleComponent {
+class OLY_API ExternalLinkSpaceComponent : public ComponentBase, public IEnableableComponent, public IVisibleComponent
+{
 public:
     /// @brief Creates an external link component that can be added to an existing space entity.
     /// @param Parent - The space entity to which this new component will belong to.

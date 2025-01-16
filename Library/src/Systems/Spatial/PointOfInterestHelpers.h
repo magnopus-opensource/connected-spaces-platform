@@ -17,9 +17,11 @@
 
 #include "Debug/Logging.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-class PointOfInterestHelpers {
+class PointOfInterestHelpers
+{
 public:
     // Enum to string conversion utilities. This rovides a centralized mechanism for mapping between the two
     // and should be used for all POI type/string conversions internally.
@@ -27,16 +29,20 @@ public:
     {
         csp::common::String String;
 
-        switch (Type) {
-        case EPointOfInterestType::SPACE: {
+        switch (Type)
+        {
+        case EPointOfInterestType::SPACE:
+        {
             String = "SpaceGeoLocation";
             break;
         }
-        case EPointOfInterestType::DEFAULT: {
+        case EPointOfInterestType::DEFAULT:
+        {
             String = "Default";
             break;
         }
-        default: {
+        default:
+        {
             CSP_LOG_ERROR_MSG(
                 "Unkwnown POI type detected when attempting to derive its string representation. The type string being returned will be empty.");
             break;
@@ -50,11 +56,13 @@ public:
     {
         EPointOfInterestType Type = EPointOfInterestType::DEFAULT;
 
-        if (String == "Default") {
+        if (String == "Default")
+        {
             Type = csp::systems::EPointOfInterestType::DEFAULT;
         }
         // Two terms map to space geolocation, because `OKOSpaceGeoLocation` is a legacy term, preserved for compatibility reasons.
-        else if ((String == csp::common::String("SpaceGeoLocation")) || (String == csp::common::String("OKOSpaceGeoLocation"))) {
+        else if ((String == csp::common::String("SpaceGeoLocation")) || (String == csp::common::String("OKOSpaceGeoLocation")))
+        {
             Type = csp::systems::EPointOfInterestType::SPACE;
         }
 

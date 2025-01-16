@@ -21,14 +21,16 @@
 #include <algorithm>
 #include <cctype>
 
-namespace csp::common {
+namespace csp::common
+{
 
 /**
                 Custom string class that we can use safely across a DLL boundary
  */
 
 /// @brief Internal implementation for DLL safe string class
-class String::Impl {
+class String::Impl
+{
 public:
     ~Impl() { CSP_DELETE_ARRAY(Text); }
 
@@ -38,7 +40,8 @@ public:
     {
         const char* _InText = InText;
 
-        if (InText == nullptr) {
+        if (InText == nullptr)
+        {
             _InText = "";
         }
 
@@ -46,7 +49,8 @@ public:
 
         char* NewText = CSP_NEW char[Len + 1];
 
-        if (Len > 0) {
+        if (Len > 0)
+        {
             memcpy((void*)NewText, _InText, Len * sizeof(char));
         }
 
@@ -62,14 +66,16 @@ public:
     {
         const char* _InText = InText;
 
-        if (InText == nullptr || Len == 0) {
+        if (InText == nullptr || Len == 0)
+        {
             _InText = "";
             Len = 0;
         }
 
         char* NewText = CSP_NEW char[Len + 1];
 
-        if (Len > 0) {
+        if (Len > 0)
+        {
             memcpy((void*)NewText, _InText, Len * sizeof(char));
         }
 
@@ -86,7 +92,8 @@ public:
         char* NewText = CSP_NEW char[Len + 1];
 
 #if DEBUG
-        if (Len > 0) {
+        if (Len > 0)
+        {
             memset((void*)NewText, 0, sizeof(NewText));
         }
 #endif
@@ -100,7 +107,8 @@ public:
 
     inline void Append(const char* Other, size_t OtherLength)
     {
-        if (Other == nullptr || OtherLength == 0) {
+        if (Other == nullptr || OtherLength == 0)
+        {
             return;
         }
 
@@ -119,7 +127,8 @@ public:
 
     void Append(const char* Other)
     {
-        if (Other == nullptr) {
+        if (Other == nullptr)
+        {
             return;
         }
 
@@ -134,7 +143,8 @@ public:
         // NOTE: Don't use strtok here because it ignores empty entries!
         auto Index = strchr(Text, Separator);
 
-        if (Index == nullptr) {
+        if (Index == nullptr)
+        {
             Parts.Append(Text);
 
             return Parts;
@@ -142,13 +152,15 @@ public:
 
         auto Start = Text;
 
-        for (;;) {
+        for (;;)
+        {
             Parts.Append(String(Start, Index - Start));
             Start = Index + 1;
             Index = strchr(Start, Separator);
 
             // Also look for null-terminator
-            if (Index == nullptr) {
+            if (Index == nullptr)
+            {
                 Index = strchr(Start, '\0');
                 Parts.Append(String(Start, Index - Start));
                 break;
@@ -203,7 +215,8 @@ String& String::swap(String& Other)
 
 String& String::operator=(const String& Rhs)
 {
-    if (ImplPtr != nullptr) {
+    if (ImplPtr != nullptr)
+    {
         CSP_DELETE(ImplPtr);
     }
 
@@ -213,7 +226,8 @@ String& String::operator=(const String& Rhs)
 
 String& String::operator=(String&& Rhs)
 {
-    if (ImplPtr != nullptr) {
+    if (ImplPtr != nullptr)
+    {
         CSP_DELETE(ImplPtr);
     }
 
@@ -224,7 +238,8 @@ String& String::operator=(String&& Rhs)
 
 String& String::operator=(char const* const Text)
 {
-    if (ImplPtr != nullptr) {
+    if (ImplPtr != nullptr)
+    {
         CSP_DELETE(ImplPtr);
     }
 
@@ -242,11 +257,13 @@ bool String::IsEmpty() const { return ImplPtr->Length == 0; }
 
 bool String::operator==(const String& Other) const
 {
-    if (ImplPtr->Length == 0 && Other.Length() == 0) {
+    if (ImplPtr->Length == 0 && Other.Length() == 0)
+    {
         return true;
     }
 
-    if (ImplPtr->Length == 0 || Other.Length() == 0) {
+    if (ImplPtr->Length == 0 || Other.Length() == 0)
+    {
         return false;
     }
 
@@ -257,11 +274,13 @@ bool String::operator==(const char* Other) const
 {
     auto OtherLength = strlen(Other);
 
-    if (ImplPtr->Length == 0 && OtherLength == 0) {
+    if (ImplPtr->Length == 0 && OtherLength == 0)
+    {
         return true;
     }
 
-    if (ImplPtr->Length == 0 || OtherLength == 0) {
+    if (ImplPtr->Length == 0 || OtherLength == 0)
+    {
         return false;
     }
 
@@ -276,7 +295,8 @@ bool String::operator<(const String& Other) const { return strcmp(Get(), Other.G
 
 String::~String()
 {
-    if (ImplPtr != nullptr) {
+    if (ImplPtr != nullptr)
+    {
         CSP_DELETE(ImplPtr);
     }
 }
@@ -307,7 +327,8 @@ String String::Trim() const
     auto Text = ImplPtr->Text;
 
     // Trim leading whitespace
-    while (Length > 0) {
+    while (Length > 0)
+    {
         auto IsWhitespace = std::find(std::begin(Whitespace), std::end(Whitespace), Text[0]) != std::end(Whitespace);
 
         if (!IsWhitespace)
@@ -318,7 +339,8 @@ String String::Trim() const
     }
 
     // Trim trailing whitespace
-    while (Length > 0) {
+    while (Length > 0)
+    {
         auto IsWhitespace = std::find(std::begin(Whitespace), std::end(Whitespace), Text[Length - 1]) != std::end(Whitespace);
 
         if (!IsWhitespace)
@@ -336,7 +358,8 @@ String String::ToLower() const
     auto Length = Copy.ImplPtr->Length;
     auto Text = Copy.ImplPtr->Text;
 
-    for (int i = 0; i < Length; ++i) {
+    for (int i = 0; i < Length; ++i)
+    {
         Text[i] = std::tolower(Text[i]);
     }
 
@@ -345,38 +368,45 @@ String String::ToLower() const
 
 String String::Join(const List<String>& Parts, Optional<char> Separator)
 {
-    if (Parts.Size() == 0) {
+    if (Parts.Size() == 0)
+    {
         return String();
     }
 
     size_t Length = 0;
 
-    for (int i = 0; i < Parts.Size(); ++i) {
+    for (int i = 0; i < Parts.Size(); ++i)
+    {
         Length += Parts[i].Length();
     }
 
-    if (Length == 0) {
+    if (Length == 0)
+    {
         return String();
     }
 
-    if (Separator.HasValue()) {
+    if (Separator.HasValue())
+    {
         Length += Parts.Size() - 1;
     }
 
     auto Buffer = CSP_NEW char[Length + 1]();
     size_t Pos = 0;
 
-    for (size_t i = 0; i < Parts.Size(); ++i) {
+    for (size_t i = 0; i < Parts.Size(); ++i)
+    {
         auto PartLength = Parts[i].Length();
 
-        if (PartLength == 0) {
+        if (PartLength == 0)
+        {
             continue;
         }
 
         memcpy(Buffer + Pos, Parts[i].c_str(), PartLength);
         Pos += PartLength;
 
-        if (Separator.HasValue()) {
+        if (Separator.HasValue())
+        {
             Buffer[Pos++] = *Separator;
         }
     }
@@ -392,38 +422,45 @@ String String::Join(const List<String>& Parts, Optional<char> Separator)
 
 String String::Join(const std::initializer_list<String>& Parts, Optional<char> Separator)
 {
-    if (Parts.size() == 0) {
+    if (Parts.size() == 0)
+    {
         return String();
     }
 
     size_t Length = 0;
 
-    for (int i = 0; i < Parts.size(); ++i) {
+    for (int i = 0; i < Parts.size(); ++i)
+    {
         Length += (Parts.begin() + i)->Length();
     }
 
-    if (Length == 0) {
+    if (Length == 0)
+    {
         return String();
     }
 
-    if (Separator.HasValue()) {
+    if (Separator.HasValue())
+    {
         Length += Parts.size() - 1;
     }
 
     auto Buffer = CSP_NEW char[Length + 1]();
     size_t Pos = 0;
 
-    for (size_t i = 0; i < Parts.size(); ++i) {
+    for (size_t i = 0; i < Parts.size(); ++i)
+    {
         auto PartLength = (Parts.begin() + i)->Length();
 
-        if (PartLength == 0) {
+        if (PartLength == 0)
+        {
             continue;
         }
 
         memcpy(Buffer + Pos, (Parts.begin() + i)->c_str(), PartLength);
         Pos += PartLength;
 
-        if (Separator.HasValue()) {
+        if (Separator.HasValue())
+        {
             Buffer[Pos++] = *Separator;
         }
     }

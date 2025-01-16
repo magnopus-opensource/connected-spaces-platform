@@ -23,14 +23,25 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the supported states for an avatar.
 ///        These are used to establish the related animation that the avatar will use on its state machine.
-enum class AvatarState { Idle = 0, Walking, Running, Flying, Jumping, Falling, Num };
+enum class AvatarState
+{
+    Idle = 0,
+    Walking,
+    Running,
+    Flying,
+    Jumping,
+    Falling,
+    Num
+};
 
 /// @brief Enumerates the supported play mode for the avatar.
-enum class AvatarPlayMode {
+enum class AvatarPlayMode
+{
     /// Viewer mode, with desktop or mobile viewer
     Default = 0,
     /// Intended for use with augmented reality viewers (e.g. mobile AR)
@@ -43,10 +54,16 @@ enum class AvatarPlayMode {
 };
 
 /// @brief Enumerates the supported locomotion models available for the avatar movements.
-enum class LocomotionModel { Grounded = 0, FreeCamera, Num };
+enum class LocomotionModel
+{
+    Grounded = 0,
+    FreeCamera,
+    Num
+};
 
 /// @brief Enumerates the list of properties that can be replicated for an avatar component.
-enum class AvatarComponentPropertyKeys {
+enum class AvatarComponentPropertyKeys
+{
     AvatarId = 0,
     UserId,
     State,
@@ -67,7 +84,8 @@ enum class AvatarComponentPropertyKeys {
 
 // @ingroup AvatarSpaceComponent
 /// @brief Data representation of an AvatarSpaceComponent.
-class CSP_API AvatarSpaceComponent : public ComponentBase {
+class CSP_API AvatarSpaceComponent : public ComponentBase
+{
 public:
     /// @brief Constructs the avatar space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

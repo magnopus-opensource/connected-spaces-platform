@@ -22,10 +22,12 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an image space component.
-enum class ImagePropertyKeys {
+enum class ImagePropertyKeys
+{
     Name,
     ImageAssetId,
     AssetCollectionId,
@@ -41,14 +43,25 @@ enum class ImagePropertyKeys {
 };
 
 /// @brief The billboard mode supported by this image space component.
-enum class BillboardMode { Off = 0, Billboard, YawLockedBillboard };
+enum class BillboardMode
+{
+    Off = 0,
+    Billboard,
+    YawLockedBillboard
+};
 
 /// @brief The display mode supported by this image space component.
-enum class DisplayMode { SingleSided = 0, DoubleSided, DoubleSidedReversed };
+enum class DisplayMode
+{
+    SingleSided = 0,
+    DoubleSided,
+    DoubleSidedReversed
+};
 
 /// @ingroup ImageSpaceComponent
 /// @brief Data representation of an ImageSpaceComponent.
-class CSP_API ImageSpaceComponent : public ComponentBase, public IVisibleComponent {
+class CSP_API ImageSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     /// @brief Constructs the image space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

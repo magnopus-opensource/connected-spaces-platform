@@ -21,7 +21,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ReflectionSpaceComponentScriptInterface::ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)

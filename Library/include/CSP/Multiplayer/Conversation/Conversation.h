@@ -23,7 +23,8 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -31,13 +32,15 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class AssetCollection;
 
 /// @ingroup Conversation System
 /// @brief Data representation of fields shared by MessageInfo and CovnersationInfo.
-class CSP_API BaseMessageInfo {
+class CSP_API BaseMessageInfo
+{
 public:
     csp::common::String ConversationId;
     csp::common::String Timestamp;
@@ -49,7 +52,8 @@ public:
 
 /// @ingroup Conversation System
 /// @brief Data representation of a message.
-class CSP_API MessageInfo : public BaseMessageInfo {
+class CSP_API MessageInfo : public BaseMessageInfo
+{
 public:
     csp::common::String Id;
     explicit MessageInfo(void*) {};
@@ -58,7 +62,8 @@ public:
 };
 
 /// @brief Data representation of a conversation.
-class CSP_API ConversationInfo : public BaseMessageInfo {
+class CSP_API ConversationInfo : public BaseMessageInfo
+{
 public:
     bool Resolved;
     SpaceTransform CameraPosition;
@@ -68,11 +73,19 @@ public:
 };
 
 /// @brief Enum used to specify the type of a conversation system network event.
-enum class ConversationMessageType { NewMessage, DeleteMessage, DeleteConversation, ConversationInformation, MessageInformation };
+enum class ConversationMessageType
+{
+    NewMessage,
+    DeleteMessage,
+    DeleteConversation,
+    ConversationInformation,
+    MessageInformation
+};
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when a message is being retrieved
-class CSP_API MessageResult : public csp::systems::ResultBase {
+class CSP_API MessageResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
     friend class ConversationSpaceComponent;
@@ -105,7 +118,8 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a collection of messages
-class CSP_API MessageCollectionResult : public csp::systems::ResultBase {
+class CSP_API MessageCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
 
@@ -150,7 +164,8 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a conversation.
-class CSP_API ConversationResult : public csp::systems::ResultBase {
+class CSP_API ConversationResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
 

@@ -17,7 +17,8 @@
 #include <gtest/gtest.h>
 
 /// @brief Custom xml writer for googletest on wasm that writes to stdout.
-class TestListener : public testing::EmptyTestEventListener {
+class TestListener : public testing::EmptyTestEventListener
+{
 public:
     void OnTestIterationEnd(const testing::UnitTest& UnitTest, int /*iteration*/) override;
 

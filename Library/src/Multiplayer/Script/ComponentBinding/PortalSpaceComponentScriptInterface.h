@@ -17,10 +17,12 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class PortalSpaceComponent;
 
-class PortalSpaceComponentScriptInterface : public ComponentScriptInterface {
+class PortalSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     PortalSpaceComponentScriptInterface(PortalSpaceComponent* InComponent = nullptr);
 

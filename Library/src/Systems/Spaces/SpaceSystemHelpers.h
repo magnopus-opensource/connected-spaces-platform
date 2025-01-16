@@ -21,7 +21,8 @@
 #include "CSP/Common/String.h"
 #include "Services/UserService/Dto.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class InviteUserRoleInfo;
 class AssetCollection;
@@ -29,7 +30,8 @@ class AssetCollection;
 constexpr const char* PUBLIC_SPACE_TYPE = "public";
 constexpr const char* PRIVATE_SPACE_TYPE = "private";
 
-namespace SpaceSystemHelpers {
+namespace SpaceSystemHelpers
+{
 
     constexpr const char* SPACE_METADATA_ASSET_COLLECTION_NAME_PREFIX = "ASSET_COLLECTION_SPACE_METADATA_";
     constexpr const char* SPACE_METADATA_KEY = "SpaceMetadata";

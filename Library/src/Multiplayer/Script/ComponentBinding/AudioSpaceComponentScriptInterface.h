@@ -17,10 +17,12 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class AudioSpaceComponent;
 
-class AudioSpaceComponentScriptInterface : public ComponentScriptInterface {
+class AudioSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent = nullptr);
 

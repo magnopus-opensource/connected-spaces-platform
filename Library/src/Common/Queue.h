@@ -22,9 +22,11 @@
 #include <queue>
 #include <utility>
 
-namespace csp {
+namespace csp
+{
 /* Thread Safe Queue Template, C++17 */
-template <typename T> struct Queue {
+template <typename T> struct Queue
+{
     /* Create Queue object. Set maximum size of the queue to max_size. */
     inline Queue(size_t max_size = -2147483647 - 1)
         : MaxSize(max_size)
@@ -62,7 +64,8 @@ private:
 template <typename T> void Queue<T>::Enqueue(T&& t)
 {
     std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.size() == MaxSize && !End) {
+    while (InternalQueue.size() == MaxSize && !End)
+    {
         Full.wait(Lock);
     }
     assert(!End);
@@ -73,7 +76,8 @@ template <typename T> void Queue<T>::Enqueue(T&& t)
 template <typename T> void Queue<T>::Enqueue(const T& t)
 {
     std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.size() == MaxSize && !End) {
+    while (InternalQueue.size() == MaxSize && !End)
+    {
         Full.wait(Lock);
     }
     assert(!End);
@@ -84,11 +88,13 @@ template <typename T> void Queue<T>::Enqueue(const T& t)
 template <typename T> std::optional<T> Queue<T>::Dequeue()
 {
     std::unique_lock<std::mutex> Lock(Mutex);
-    while (InternalQueue.empty() && !End) {
+    while (InternalQueue.empty() && !End)
+    {
         Empty.wait(Lock);
     }
 
-    if (InternalQueue.empty()) {
+    if (InternalQueue.empty())
+    {
         return {};
     }
     T Out = std::move(InternalQueue.front());

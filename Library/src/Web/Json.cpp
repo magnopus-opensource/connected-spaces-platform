@@ -15,7 +15,8 @@
  */
 #include "Web/Json.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 // Todo :- More complex types will be handled here with template specialisations
 

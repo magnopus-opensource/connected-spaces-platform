@@ -21,7 +21,8 @@
 
 #include <functional>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -29,13 +30,26 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-enum class LogLevel { NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All };
+enum class LogLevel
+{
+    NoLogging,
+    Fatal,
+    Error,
+    Warning,
+    Display,
+    Log,
+    Verbose,
+    VeryVerbose,
+    All
+};
 
 /// @brief A Connected Spaces Platform level Logger for debugging or printing to console, also handles logging to a file.
 /// Contains a callback system that allows clients to react to specific logs or events.
-class CSP_API LogSystem {
+class CSP_API LogSystem
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/CollisionSpaceComponentScriptInterface.h"
 
-namespace {
+namespace
+{
 
 constexpr const float DefaultSphereRadius = 0.5f;
 constexpr const float DefaultCapsuleHalfWidth = 0.5f;
@@ -28,7 +29,8 @@ constexpr const float DefaultCapsuleHalfHeight = 1.f;
 
 } // namespace
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 CollisionSpaceComponent::CollisionSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Collision, Parent)

@@ -18,7 +18,8 @@
 #include <iostream>
 #include <string>
 
-namespace MultiplayerTestRunner::ProcessDescriptors {
+namespace MultiplayerTestRunner::ProcessDescriptors
+{
 /*
  * Process descriptors are emitted in stdout. The string will be emitted followed by a newline.
  * These are intended to be used by invoking processes to manage when they conduct their test assertions.

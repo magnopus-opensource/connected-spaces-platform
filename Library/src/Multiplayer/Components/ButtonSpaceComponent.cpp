@@ -19,7 +19,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ButtonSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ButtonSpaceComponent::ButtonSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Button, Parent)

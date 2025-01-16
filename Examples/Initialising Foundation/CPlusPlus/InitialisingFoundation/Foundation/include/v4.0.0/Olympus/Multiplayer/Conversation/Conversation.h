@@ -8,7 +8,8 @@
 #include "Olympus/Systems/Assets/AssetCollection.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -16,13 +17,15 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 class AssetCollection;
 
 /// @ingroup Conversation System
 /// @brief Data representation of fields shared by MessageInfo and CovnersationInfo
-class OLY_API BaseMessageInfo {
+class OLY_API BaseMessageInfo
+{
 public:
     oly_common::String ConversationId;
     oly_common::String Timestamp;
@@ -34,7 +37,8 @@ public:
 
 /// @ingroup Conversation System
 /// @brief Data representation of a message
-class OLY_API MessageInfo : public BaseMessageInfo {
+class OLY_API MessageInfo : public BaseMessageInfo
+{
 public:
     oly_common::String Id;
     explicit MessageInfo(void*) {};
@@ -42,7 +46,8 @@ public:
     MessageInfo(const MessageInfo& MessageData);
 };
 
-class OLY_API ConversationInfo : public BaseMessageInfo {
+class OLY_API ConversationInfo : public BaseMessageInfo
+{
 public:
     bool Resolved;
     SpaceTransform CameraPosition;
@@ -51,11 +56,19 @@ public:
     ConversationInfo(const ConversationInfo& ConversationData);
 };
 
-enum class ConversationMessageType { NewMessage, DeleteMessage, DeleteConversation, ConversationInformation, MessageInformation };
+enum class ConversationMessageType
+{
+    NewMessage,
+    DeleteMessage,
+    DeleteConversation,
+    ConversationInformation,
+    MessageInformation
+};
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when a message is being retrieved
-class OLY_API MessageResult : public oly_services::ResultBase {
+class OLY_API MessageResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
     friend class ConversationSpaceComponent;
@@ -86,7 +99,8 @@ private:
 
 /// @ingroup Conversation System
 /// @brief Data class used to contain information when retrieving a collection of messages
-class OLY_API MessageCollectionResult : public oly_services::ResultBase {
+class OLY_API MessageCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
 
@@ -122,7 +136,8 @@ private:
     uint64_t ResultTotalCount = 0;
 };
 
-class OLY_API ConversationResult : public oly_services::ResultBase {
+class OLY_API ConversationResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ConversationSystem;
 

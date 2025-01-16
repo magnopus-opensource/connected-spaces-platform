@@ -4,17 +4,39 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class CollisionPropertyKeys { Position = 0, Rotation, Scale, CollisionShape, CollisionMode, CollisionAssetId, AssetCollectionId, Num };
+enum class CollisionPropertyKeys
+{
+    Position = 0,
+    Rotation,
+    Scale,
+    CollisionShape,
+    CollisionMode,
+    CollisionAssetId,
+    AssetCollectionId,
+    Num
+};
 
-enum class CollisionShape { Box = 0, Mesh, Capsule, Sphere };
+enum class CollisionShape
+{
+    Box = 0,
+    Mesh,
+    Capsule,
+    Sphere
+};
 
-enum class CollisionMode { Collision = 0, Trigger };
+enum class CollisionMode
+{
+    Collision = 0,
+    Trigger
+};
 
 /// @ingroup CollisionSpaceComponent
 /// @brief Data representation of an CollisionSpaceComponent.
-class OLY_API CollisionSpaceComponent : public ComponentBase {
+class OLY_API CollisionSpaceComponent : public ComponentBase
+{
 public:
     CollisionSpaceComponent(SpaceEntity* Parent);
 

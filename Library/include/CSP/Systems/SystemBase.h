@@ -17,13 +17,15 @@
 
 #include "CSP/Multiplayer/EventBus.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class EventBus;
 class EventDeserialiser;
@@ -31,16 +33,19 @@ class MultiplayerConnection;
 
 } // namespace csp::multiplayer
 
-namespace signalr {
+namespace signalr
+{
 
 class value;
 
 } // namespace signalr
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient or EventBus instance in the constructor of each
 /// System.
-class CSP_API CSP_NO_DISPOSE SystemBase {
+class CSP_API CSP_NO_DISPOSE SystemBase
+{
     friend class csp::multiplayer::MultiplayerConnection;
 
 protected:

@@ -27,19 +27,38 @@
 #include "CSP/Multiplayer/Components/Interfaces/IThirdPartyComponentRef.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the types of light supported by the light component.
-enum class LightType { Directional = 0, Point, Spot, Num };
+enum class LightType
+{
+    Directional = 0,
+    Point,
+    Spot,
+    Num
+};
 
 /// @brief Enumerates the types of light shadows supported by the light component.
-enum class LightShadowType { None = 0, Static, Realtime, Num };
+enum class LightShadowType
+{
+    None = 0,
+    Static,
+    Realtime,
+    Num
+};
 
 /// @brief Enumerates the types of cookie supported by the light component.
-enum class LightCookieType { ImageCookie = 0, VideoCookie, NoCookie };
+enum class LightCookieType
+{
+    ImageCookie = 0,
+    VideoCookie,
+    NoCookie
+};
 
 /// @brief Enumerates the list of properties that can be replicated for a light component.
-enum class LightPropertyKeys {
+enum class LightPropertyKeys
+{
     Name_DEPRECATED = 0,
     LightType,
     Color,
@@ -67,7 +86,8 @@ class CSP_API LightSpaceComponent : public ComponentBase,
                                     public IPositionComponent,
                                     public IRotationComponent,
                                     public IThirdPartyComponentRef,
-                                    public IVisibleComponent {
+                                    public IVisibleComponent
+{
 public:
     /// @brief Constructs the light space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

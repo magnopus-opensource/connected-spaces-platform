@@ -23,10 +23,12 @@
 
 #include <functional>
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief enum for representing a type stored by a csp::common::Variant.
-enum class VariantType {
+enum class VariantType
+{
     InvalidType,
     Boolean,
     Integer,
@@ -38,7 +40,8 @@ enum class VariantType {
 
 /// @brief Variant is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform replication
 /// systems.
-class CSP_API Variant {
+class CSP_API Variant
+{
 public:
     /// @brief A default Variant will not have a valid type ("VariantType::InvalidType"), and will have no internal value associated.
     /// Do not use this constructor unless you know what you are doing!
@@ -134,7 +137,8 @@ private:
     VariantType ValueType;
 
     CSP_START_IGNORE
-    union InternalValue {
+    union InternalValue
+    {
         InternalValue();
         ~InternalValue();
 

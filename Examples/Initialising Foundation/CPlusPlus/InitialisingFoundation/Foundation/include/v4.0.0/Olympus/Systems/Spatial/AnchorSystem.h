@@ -10,18 +10,21 @@
 #include "Olympus/Systems/SystemBase.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Anchor System
 /// @brief Public facing system that allows interfacing with CHS's concept of an Anchor.
 /// Offers methods for creating and deleting Anchors.
-class OLY_API OLY_NO_DISPOSE AnchorSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE AnchorSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

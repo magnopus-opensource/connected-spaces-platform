@@ -20,10 +20,12 @@
 
 #include "CSP/CSPCommon.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls whether a component is enabled or disabled.
-CSP_INTERFACE class CSP_API IEnableableComponent {
+CSP_INTERFACE class CSP_API IEnableableComponent
+{
 public:
     /// @brief Checks if the component is enabled.
     /// @return True if the component is enabled, false otherwise.

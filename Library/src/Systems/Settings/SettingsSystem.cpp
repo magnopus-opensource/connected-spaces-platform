@@ -40,7 +40,8 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::userservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 SettingsSystem::SettingsSystem()
     : SystemBase(nullptr, nullptr)
@@ -69,8 +70,10 @@ void SettingsSystem::SetSettingValue(const String& InContext, const String& InKe
     NewSettings.insert(std::make_pair(InKey, InValue));
     InSettings->SetSettings(NewSettings);
 
-    SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result) {
-        if (Result.GetResultCode() == EResultCode::InProgress) {
+    SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result)
+    {
+        if (Result.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
@@ -93,24 +96,32 @@ void SettingsSystem::GetSettingValue(const String& InContext, const String& InKe
 
     const auto& UserId = UserSystem->GetLoginState().UserId;
 
-    SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result) {
+    SettingsResultCallback InternalCallback = [InKey, Callback](const SettingsCollectionResult& Result)
+    {
         StringResult StringResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::InProgress) {
+        if (Result.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
-        if (Result.GetResultCode() == EResultCode::Success) {
+        if (Result.GetResultCode() == EResultCode::Success)
+        {
             // Only attempt to read settings if result is valid
 
             auto& Settings = Result.GetSettingsCollection().Settings;
 
-            if (Settings.HasKey(InKey)) {
+            if (Settings.HasKey(InKey))
+            {
                 StringResult.SetValue(Settings[InKey]);
-            } else {
+            }
+            else
+            {
                 StringResult.SetValue("");
             }
-        } else {
+        }
+        else
+        {
             // Handle failure state
             StringResult.SetValue("");
         }
@@ -134,7 +145,8 @@ void SettingsSystem::SetNDAStatus(bool InValue, NullResultCallback Callback)
 
 void SettingsSystem::GetNDAStatus(BooleanResultCallback Callback)
 {
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result) {
+    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    {
         BooleanResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
         InternalResult.SetValue(Result.GetValue() == "true");
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -152,7 +164,8 @@ void SettingsSystem::SetNewsletterStatus(bool InValue, NullResultCallback Callba
 
 void SettingsSystem::GetNewsletterStatus(BooleanResultCallback Callback)
 {
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result) {
+    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    {
         BooleanResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
         InternalResult.SetValue(Result.GetValue() == "true");
 
@@ -164,8 +177,10 @@ void SettingsSystem::GetNewsletterStatus(BooleanResultCallback Callback)
 
 void SettingsSystem::AddRecentlyVisitedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetRecentSpacesCallback = [=](StringArrayResult Result) {
-        if (Result.GetResultCode() == EResultCode::Failed) {
+    StringArrayResultCallback GetRecentSpacesCallback = [=](StringArrayResult Result)
+    {
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
             NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -178,8 +193,10 @@ void SettingsSystem::AddRecentlyVisitedSpace(const String InSpaceID, NullResultC
         RecentSpaces.Insert(0, InSpaceID);
 
         // Remove duplicate entry
-        for (size_t i = RecentSpaces.Size() - 1; i > 0; --i) {
-            if (RecentSpaces[i] == InSpaceID) {
+        for (size_t i = RecentSpaces.Size() - 1; i > 0; --i)
+        {
+            if (RecentSpaces[i] == InSpaceID)
+            {
                 RecentSpaces.Remove(i);
 
                 // Only a single duplicate entry (if any) should be found
@@ -188,7 +205,8 @@ void SettingsSystem::AddRecentlyVisitedSpace(const String InSpaceID, NullResultC
         }
 
         // Remove last entry if max number of spaces reached
-        if (RecentSpaces.Size() > MAX_RECENT_SPACES) {
+        if (RecentSpaces.Size() > MAX_RECENT_SPACES)
+        {
             RecentSpaces.Remove(MAX_RECENT_SPACES);
         }
 
@@ -202,15 +220,20 @@ void SettingsSystem::AddRecentlyVisitedSpace(const String InSpaceID, NullResultC
 
 void SettingsSystem::GetRecentlyVisitedSpaces(StringArrayResultCallback Callback)
 {
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result) {
+    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    {
         StringArrayResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success) {
+        if (Result.GetResultCode() == EResultCode::Success)
+        {
             auto& RecentSpacesString = Result.GetValue();
 
-            if (RecentSpacesString.IsEmpty()) {
+            if (RecentSpacesString.IsEmpty())
+            {
                 InternalResult.SetValue({});
-            } else {
+            }
+            else
+            {
                 auto RecentSpacesList = RecentSpacesString.Split(',');
                 auto RecentSpaces = RecentSpacesList.ToArray();
                 InternalResult.SetValue(RecentSpaces);
@@ -227,8 +250,10 @@ void SettingsSystem::ClearRecentlyVisitedSpaces(NullResultCallback Callback) { S
 
 void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result) {
-        if (Result.GetResultCode() == EResultCode::Failed) {
+    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
+    {
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
             NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -238,8 +263,10 @@ void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback 
         const auto& BlockedSpacesArray = Result.GetValue();
 
         // Ignore if space already blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i) {
-            if (BlockedSpacesArray[i] == InSpaceID) {
+        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        {
+            if (BlockedSpacesArray[i] == InSpaceID)
+            {
                 NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -260,8 +287,10 @@ void SettingsSystem::AddBlockedSpace(const String InSpaceID, NullResultCallback 
 
 void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallback Callback)
 {
-    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result) {
-        if (Result.GetResultCode() == EResultCode::Failed) {
+    StringArrayResultCallback GetBlockedSpacesCallback = [=](StringArrayResult Result)
+    {
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
             NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -272,15 +301,18 @@ void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallba
         auto FoundSpace = false;
 
         // Ignore if space not blocked
-        for (int i = 0; i < BlockedSpacesArray.Size(); ++i) {
-            if (BlockedSpacesArray[i] == InSpaceID) {
+        for (int i = 0; i < BlockedSpacesArray.Size(); ++i)
+        {
+            if (BlockedSpacesArray[i] == InSpaceID)
+            {
                 FoundSpace = true;
 
                 break;
             }
         }
 
-        if (!FoundSpace) {
+        if (!FoundSpace)
+        {
             NullResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -300,15 +332,20 @@ void SettingsSystem::RemoveBlockedSpace(const String InSpaceID, NullResultCallba
 
 void SettingsSystem::GetBlockedSpaces(StringArrayResultCallback Callback)
 {
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result) {
+    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    {
         StringArrayResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Success) {
+        if (Result.GetResultCode() == EResultCode::Success)
+        {
             const auto& BlockedSpacesString = Result.GetValue();
 
-            if (BlockedSpacesString.IsEmpty()) {
+            if (BlockedSpacesString.IsEmpty())
+            {
                 InternalResult.SetValue({});
-            } else {
+            }
+            else
+            {
                 auto BlockedSpacesList = BlockedSpacesString.Split(',');
                 auto BlockedSpaces = BlockedSpacesList.ToArray();
                 InternalResult.SetValue(BlockedSpaces);
@@ -325,20 +362,29 @@ void SettingsSystem::ClearBlockedSpaces(NullResultCallback Callback) { SetSettin
 
 void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPortrait, NullResultCallback Callback)
 {
-    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
-            if (AssetCollections.IsEmpty()) {
+            if (AssetCollections.IsEmpty())
+            {
                 // space without a thumbnail
                 AddAvatarPortrait(NewAvatarPortrait, Callback);
-            } else {
+            }
+            else
+            {
                 const auto& AvatarPortraitAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& PortraitResult) {
-                    if (PortraitResult.GetResultCode() == EResultCode::Success) {
-                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult) {
-                            if (UploadResult.GetResultCode() == EResultCode::Failed) {
+                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& PortraitResult)
+                {
+                    if (PortraitResult.GetResultCode() == EResultCode::Success)
+                    {
+                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                        {
+                            if (UploadResult.GetResultCode() == EResultCode::Failed)
+                            {
                                 CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     static_cast<int>(UploadResult.GetResultCode()), UploadResult.GetHttpResultCode());
                             }
@@ -352,7 +398,9 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
                         const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
 
                         AssetSystem->UploadAssetData(AvatarPortraitAssetCollection, AvatarPortraitAsset, NewAvatarPortrait, UploadCallback);
-                    } else {
+                    }
+                    else
+                    {
                         NullResult InternalResult(PortraitResult);
                         INVOKE_IF_NOT_NULL(Callback, InternalResult);
                     }
@@ -360,7 +408,9 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 
                 GetAvatarPortraitAsset(AvatarPortraitAssetCollection, AvatarPortraitAssetCallback);
             }
-        } else {
+        }
+        else
+        {
             const NullResult InternalResult(AssetCollResult);
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         }
@@ -373,25 +423,35 @@ void SettingsSystem::UpdateAvatarPortrait(const FileAssetDataSource& NewAvatarPo
 
 void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriResultCallback Callback)
 {
-    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+    AssetCollectionsResultCallback AvatarPortraitAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
-            if (AssetCollections.IsEmpty()) {
+            if (AssetCollections.IsEmpty())
+            {
                 // User Doesn't have a Avatar Portrait
                 const UriResult InternalResult(EResultCode::Success, static_cast<uint16_t>(web::EResponseCodes::ResponseNotFound));
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
-            } else {
+            }
+            else
+            {
                 const auto& AvatarPortraitAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& AssetsResult) {
-                    if (AssetsResult.GetResultCode() == EResultCode::Success) {
+                AssetsResultCallback AvatarPortraitAssetCallback = [=](const AssetsResult& AssetsResult)
+                {
+                    if (AssetsResult.GetResultCode() == EResultCode::Success)
+                    {
                         const auto& Assets = AssetsResult.GetAssets();
 
-                        if (Assets.Size() > 0) {
+                        if (Assets.Size() > 0)
+                        {
                             const UriResult InternalResult(AssetsResult.GetAssets()[0].Uri);
                             INVOKE_IF_NOT_NULL(Callback, InternalResult);
-                        } else {
+                        }
+                        else
+                        {
                             UriResult InternalResult(EResultCode::Failed, 200);
                             InternalResult.SetResponseBody(
                                 "Invalid avatar portrait AssetCollection. AssetCollection should contain an Asset but does not!");
@@ -399,7 +459,9 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriRe
 
                             INVOKE_IF_NOT_NULL(Callback, InternalResult);
                         }
-                    } else {
+                    }
+                    else
+                    {
                         const UriResult InternalResult(AssetsResult.GetResultCode(), AssetsResult.GetHttpResultCode());
                         INVOKE_IF_NOT_NULL(Callback, InternalResult);
                     }
@@ -407,7 +469,9 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriRe
 
                 GetAvatarPortraitAsset(AvatarPortraitAssetCollection, AvatarPortraitAssetCallback);
             }
-        } else {
+        }
+        else
+        {
             const UriResult InternalResult(AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         }
@@ -418,20 +482,29 @@ void SettingsSystem::GetAvatarPortrait(const csp::common::String InUserID, UriRe
 
 void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource& NewAvatarPortrait, NullResultCallback Callback)
 {
-    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+    AssetCollectionsResultCallback ThumbnailAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
-            if (AssetCollections.IsEmpty()) {
+            if (AssetCollections.IsEmpty())
+            {
                 // space without a thumbnail
                 AddAvatarPortraitWithBuffer(NewAvatarPortrait, Callback);
-            } else {
+            }
+            else
+            {
                 const auto& ThumbnailAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& ThumbnailResult) {
-                    if (ThumbnailResult.GetResultCode() == EResultCode::Success) {
-                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult) {
-                            if (UploadResult.GetResultCode() == EResultCode::Failed) {
+                AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& ThumbnailResult)
+                {
+                    if (ThumbnailResult.GetResultCode() == EResultCode::Success)
+                    {
+                        UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                        {
+                            if (UploadResult.GetResultCode() == EResultCode::Failed)
+                            {
                                 CSP_LOG_FORMAT(LogLevel::Log, "The Space thumbnail upload data has failed. ResCode: %d, HttpResCode: %d",
                                     (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                             }
@@ -446,7 +519,9 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
                         ThumbnailAsset.MimeType = NewAvatarPortrait.GetMimeType();
                         const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
                         AssetSystem->UploadAssetData(ThumbnailAssetCollection, ThumbnailAsset, NewAvatarPortrait, UploadCallback);
-                    } else {
+                    }
+                    else
+                    {
                         NullResult InternalResult(ThumbnailResult);
                         INVOKE_IF_NOT_NULL(Callback, InternalResult);
                     }
@@ -454,7 +529,9 @@ void SettingsSystem::UpdateAvatarPortraitWithBuffer(const BufferAssetDataSource&
 
                 GetAvatarPortraitAsset(ThumbnailAssetCollection, ThumbnailAssetCallback);
             }
-        } else {
+        }
+        else
+        {
             const NullResult InternalResult(AssetCollResult);
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         }
@@ -473,22 +550,30 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
 
     const auto& UserId = UserSystem->GetLoginState().UserId;
 
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::InProgress) {
+    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& PortraitAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult) {
-                if (CreateAssetResult.GetResultCode() == EResultCode::InProgress) {
+            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            {
+                if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
+                {
                     return;
                 }
 
-                if (CreateAssetResult.GetResultCode() == EResultCode::Success) {
-                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult) {
-                        if (UploadResult.GetResultCode() == EResultCode::Failed) {
+                if (CreateAssetResult.GetResultCode() == EResultCode::Success)
+                {
+                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                    {
+                        if (UploadResult.GetResultCode() == EResultCode::Failed)
+                        {
                             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
                                 (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                         }
@@ -498,7 +583,9 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
                     };
 
                     AssetSystem->UploadAssetData(PortraitAssetColl, CreateAssetResult.GetAsset(), ImageDataSource, UploadCallback);
-                } else {
+                }
+                else
+                {
                     CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
                         (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
 
@@ -509,7 +596,9 @@ void SettingsSystem::AddAvatarPortrait(const FileAssetDataSource& ImageDataSourc
 
             const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserId;
             AssetSystem->CreateAsset(PortraitAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
-        } else {
+        }
+        else
+        {
             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
@@ -532,22 +621,30 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 
     const auto& UserId = UserSystem->GetLoginState().UserId;
 
-    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::InProgress) {
+    AssetCollectionResultCallback CreateAssetCollCallback = [=](const AssetCollectionResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& PortraitAvatarAssetColl = AssetCollResult.GetAssetCollection();
 
-            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult) {
-                if (CreateAssetResult.GetResultCode() == EResultCode::InProgress) {
+            AssetResultCallback CreateAssetCallback = [=](const AssetResult& CreateAssetResult)
+            {
+                if (CreateAssetResult.GetResultCode() == EResultCode::InProgress)
+                {
                     return;
                 }
 
-                if (CreateAssetResult.GetResultCode() == EResultCode::Success) {
-                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult) {
-                        if (UploadResult.GetResultCode() == EResultCode::Failed) {
+                if (CreateAssetResult.GetResultCode() == EResultCode::Success)
+                {
+                    UriResultCallback UploadCallback = [=](const UriResult& UploadResult)
+                    {
+                        if (UploadResult.GetResultCode() == EResultCode::Failed)
+                        {
                             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait upload data has failed. ResCode: %d, HttpResCode: %d",
                                 (int)UploadResult.GetResultCode(), UploadResult.GetHttpResultCode());
                         }
@@ -562,7 +659,9 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
                         = AVATAR_PORTRAIT_ASSET_NAME + UserId + SpaceSystemHelpers::GetAssetFileExtension(ImageDataSource.GetMimeType());
                     AvatarPortraitAsset.MimeType = ImageDataSource.GetMimeType();
                     AssetSystem->UploadAssetData(PortraitAvatarAssetColl, AvatarPortraitAsset, ImageDataSource, UploadCallback);
-                } else {
+                }
+                else
+                {
                     CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset creation was not successful. ResCode: %d, HttpResCode: %d",
                         (int)CreateAssetResult.GetResultCode(), CreateAssetResult.GetHttpResultCode());
 
@@ -573,7 +672,9 @@ void SettingsSystem::AddAvatarPortraitWithBuffer(const BufferAssetDataSource& Im
 
             const auto UniqueAssetName = AVATAR_PORTRAIT_ASSET_NAME + UserId;
             AssetSystem->CreateAsset(PortraitAvatarAssetColl, UniqueAssetName, nullptr, nullptr, EAssetType::IMAGE, CreateAssetCallback);
-        } else {
+        }
+        else
+        {
             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
 
@@ -594,8 +695,10 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String 
     auto& SystemsManager = SystemsManager::Get();
     auto* AssetSystem = SystemsManager.GetAssetSystem();
 
-    AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::Failed) {
+    AssetCollectionsResultCallback GetAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset collection retrieval has failed. ResCode: %d, HttpResCode: %d",
                 (int)AssetCollResult.GetResultCode(), AssetCollResult.GetHttpResultCode());
         }
@@ -613,8 +716,10 @@ void SettingsSystem::GetAvatarPortraitAssetCollection(const csp::common::String 
 
 void SettingsSystem::GetAvatarPortraitAsset(const AssetCollection& AvatarPortraitAssetCollection, AssetsResultCallback Callback)
 {
-    AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& AssetsResult) {
-        if (AssetsResult.GetResultCode() == EResultCode::Failed) {
+    AssetsResultCallback ThumbnailAssetCallback = [=](const AssetsResult& AssetsResult)
+    {
+        if (AssetsResult.GetResultCode() == EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(LogLevel::Error, "The Avatar Portrait asset retrieval has failed. ResCode: %d, HttpResCode: %d",
                 (int)AssetsResult.GetResultCode(), AssetsResult.GetHttpResultCode());
         }
@@ -630,35 +735,49 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 {
     const auto AssetSystem = SystemsManager::Get().GetAssetSystem();
 
-    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult) {
-        if (AssetCollResult.GetResultCode() == EResultCode::InProgress) {
+    AssetCollectionsResultCallback PortraitAvatarAssetCollCallback = [=](const AssetCollectionsResult& AssetCollResult)
+    {
+        if (AssetCollResult.GetResultCode() == EResultCode::InProgress)
+        {
             return;
         }
 
-        if (AssetCollResult.GetResultCode() == EResultCode::Success) {
+        if (AssetCollResult.GetResultCode() == EResultCode::Success)
+        {
             const auto& AssetCollections = AssetCollResult.GetAssetCollections();
 
-            if (AssetCollections.IsEmpty()) {
+            if (AssetCollections.IsEmpty())
+            {
                 // user doesnt have a avatar portrait
                 const NullResult InternalResult(AssetCollResult);
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
-            } else {
+            }
+            else
+            {
                 const auto& PortraitAvatarAssetCollection = AssetCollections[0];
 
-                AssetsResultCallback PortraitAvatarAssetCallback = [=](const AssetsResult& PortraitResult) {
-                    if (PortraitResult.GetResultCode() == EResultCode::InProgress) {
+                AssetsResultCallback PortraitAvatarAssetCallback = [=](const AssetsResult& PortraitResult)
+                {
+                    if (PortraitResult.GetResultCode() == EResultCode::InProgress)
+                    {
                         return;
                     }
 
-                    if (PortraitResult.GetResultCode() == EResultCode::Success) {
-                        NullResultCallback DeleteAssetCallback = [=](const NullResult& DeleteAssetResult) {
-                            if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress) {
+                    if (PortraitResult.GetResultCode() == EResultCode::Success)
+                    {
+                        NullResultCallback DeleteAssetCallback = [=](const NullResult& DeleteAssetResult)
+                        {
+                            if (DeleteAssetResult.GetResultCode() == EResultCode::InProgress)
+                            {
                                 return;
                             }
 
-                            if (DeleteAssetResult.GetResultCode() == EResultCode::Success) {
-                                NullResultCallback DeleteAssetCollCallback = [=](const NullResult& DeleteAssetCollResult) {
-                                    if (DeleteAssetCollResult.GetResultCode() == EResultCode::Failed) {
+                            if (DeleteAssetResult.GetResultCode() == EResultCode::Success)
+                            {
+                                NullResultCallback DeleteAssetCollCallback = [=](const NullResult& DeleteAssetCollResult)
+                                {
+                                    if (DeleteAssetCollResult.GetResultCode() == EResultCode::Failed)
+                                    {
                                         CSP_LOG_FORMAT(LogLevel::Error,
                                             "The Portrait Avatar asset collection deletion has failed. ResCode: %d, HttpResCode: %d",
                                             (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
@@ -669,7 +788,9 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
                                 };
 
                                 AssetSystem->DeleteAssetCollection(PortraitAvatarAssetCollection, DeleteAssetCollCallback);
-                            } else {
+                            }
+                            else
+                            {
                                 CSP_LOG_FORMAT(LogLevel::Error, "The Portrait Avatar asset deletion was not successful. ResCode: %d, HttpResCode: %d",
                                     (int)DeleteAssetResult.GetResultCode(), DeleteAssetResult.GetHttpResultCode());
 
@@ -680,7 +801,9 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 
                         const auto& PortraitAvatarAsset = PortraitResult.GetAssets()[0];
                         AssetSystem->DeleteAsset(PortraitAvatarAssetCollection, PortraitAvatarAsset, DeleteAssetCallback);
-                    } else {
+                    }
+                    else
+                    {
                         const NullResult InternalResult(PortraitResult);
                         INVOKE_IF_NOT_NULL(Callback, InternalResult);
                     }
@@ -688,7 +811,9 @@ void SettingsSystem::RemoveAvatarPortrait(NullResultCallback Callback)
 
                 GetAvatarPortraitAsset(PortraitAvatarAssetCollection, PortraitAvatarAssetCallback);
             }
-        } else {
+        }
+        else
+        {
             const NullResult InternalResult(AssetCollResult);
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
         }
@@ -714,16 +839,19 @@ void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier
 
 void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 {
-    if (!Callback) {
+    if (!Callback)
+    {
         CSP_LOG_ERROR_MSG("SettingsSystem::GetAvatarInfo(): Callback must not my empty!");
 
         return;
     }
 
-    StringResultCallback GetSettingCallback = [=](const StringResult& Result) {
+    StringResultCallback GetSettingCallback = [=](const StringResult& Result)
+    {
         AvatarInfoResult InternalResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == EResultCode::Failed) {
+        if (Result.GetResultCode() == EResultCode::Failed)
+        {
             CSP_LOG_ERROR_MSG("Failed to retrieve avatar info.");
 
             Callback(InternalResult);
@@ -733,7 +861,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
         const auto& Value = Result.GetValue();
 
-        if (Value.IsEmpty()) {
+        if (Value.IsEmpty())
+        {
             Callback(InternalResult);
 
             return;
@@ -742,7 +871,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
         rapidjson::Document Json;
         Json.Parse(Value.c_str());
 
-        if (!Json.HasMember("type") || !Json.HasMember("identifier")) {
+        if (!Json.HasMember("type") || !Json.HasMember("identifier"))
+        {
             CSP_LOG_ERROR_MSG("Invalid avatar info!");
 
             Callback(InternalResult);
@@ -752,7 +882,8 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
         const auto& type = Json["type"];
 
-        if (!type.IsInt()) {
+        if (!type.IsInt())
+        {
             CSP_LOG_ERROR_MSG("Invalid avatar info!");
 
             Callback(InternalResult);
@@ -762,14 +893,19 @@ void SettingsSystem::GetAvatarInfo(AvatarInfoResultCallback Callback)
 
         InternalResult.SetAvatarType(static_cast<AvatarType>(type.GetInt()));
 
-        if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer) {
+        if (Json.HasMember("identifierType") && static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::Integer)
+        {
             // Integer type is no longer supported -- convert to string
             InternalResult.SetAvatarIdentifier(std::to_string(Json["identifier"].GetInt()).c_str());
             Callback(InternalResult);
-        } else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String)) {
+        }
+        else if (!Json.HasMember("identifierType") || (static_cast<VariantType>(Json["identifierType"].GetInt()) == VariantType::String))
+        {
             InternalResult.SetAvatarIdentifier(Json["identifier"].GetString());
             Callback(InternalResult);
-        } else {
+        }
+        else
+        {
             CSP_LOG_ERROR_MSG("Invalid identifier type!");
 
             Callback(InternalResult);

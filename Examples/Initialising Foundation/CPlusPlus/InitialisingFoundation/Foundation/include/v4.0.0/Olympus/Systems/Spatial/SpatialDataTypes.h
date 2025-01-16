@@ -1,9 +1,11 @@
 #pragma once
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-class OLY_API GeoLocation {
+class OLY_API GeoLocation
+{
 public:
     GeoLocation()
         : Longitude(0.0)
@@ -21,7 +23,8 @@ public:
     bool operator!=(const GeoLocation& Other) const;
 };
 
-class OLY_API OlyRotation {
+class OLY_API OlyRotation
+{
 public:
     OlyRotation()
         : X(0.0)

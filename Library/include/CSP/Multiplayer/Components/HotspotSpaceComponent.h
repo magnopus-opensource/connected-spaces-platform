@@ -27,14 +27,26 @@
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an Hotspot space component.
-enum class HotspotPropertyKeys { Position, Rotation, Name_DEPRECATED, IsTeleportPoint, IsSpawnPoint, IsVisible, IsARVisible, Num };
+enum class HotspotPropertyKeys
+{
+    Position,
+    Rotation,
+    Name_DEPRECATED,
+    IsTeleportPoint,
+    IsSpawnPoint,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup HotspotSpaceComponent
 /// @brief Data representation of an HotspotSpaceComponent.
-class CSP_API HotspotSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent, public IVisibleComponent {
+class CSP_API HotspotSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the Hotspot space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

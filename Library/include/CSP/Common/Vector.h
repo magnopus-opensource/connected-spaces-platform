@@ -18,10 +18,12 @@
 
 #include "CSP/CSPCommon.h"
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Represents a 2 dimensional vector.
-class CSP_API Vector2 {
+class CSP_API Vector2
+{
 public:
     /// @brief Returns a Vector2 with all fields set to 0.
     /// @return const Vector2&
@@ -77,7 +79,8 @@ public:
 };
 
 /// @brief Represents a 3 dimensional vector.
-class CSP_API Vector3 {
+class CSP_API Vector3
+{
 public:
     /// @brief Returns a Vector3 with all fields set to 0.
     /// @return const Vector3&
@@ -137,7 +140,8 @@ public:
 };
 
 /// @brief Represents a 4 dimensional vector.
-class CSP_API Vector4 {
+class CSP_API Vector4
+{
 public:
     /// @brief Returns a Vector4 with all fields set to 0.
     /// @return const Vector4&

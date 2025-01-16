@@ -27,10 +27,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a static model component.
-enum class StaticModelPropertyKeys {
+enum class StaticModelPropertyKeys
+{
     Name = 0,
     ExternalResourceAssetId,
     ExternalResourceAssetCollectionId,
@@ -51,7 +53,8 @@ class CSP_API StaticModelSpaceComponent : public ComponentBase,
                                           public IVisibleComponent,
                                           public IExternalResourceComponent,
                                           public IThirdPartyComponentRef,
-                                          public IShadowCasterComponent {
+                                          public IShadowCasterComponent
+{
 public:
     /// @brief Constructs the static model space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

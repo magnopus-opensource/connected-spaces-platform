@@ -29,7 +29,8 @@
 #define EMS_FORMATTED_LOG(FORMAT_STR, ...)
 #endif
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 constexpr const unsigned short SOCKET_CLOSE_CODE = 1000; // TODO random number for now
 constexpr const char* SOCKET_CLOSE_REASON = "Close";
@@ -55,7 +56,8 @@ EM_BOOL onSocketError(int EventType, const EmscriptenWebSocketErrorEvent* Websoc
 
     auto WebSocketClient = static_cast<CSPWebSocketClientEmscripten*>(UserData);
 
-    if (WebSocketClient->getReceiveCallback()) {
+    if (WebSocketClient->getReceiveCallback())
+    {
         (*WebSocketClient->getReceiveCallback())("", false);
     }
 
@@ -68,7 +70,8 @@ EM_BOOL onSocketClosed(int EventType, const EmscriptenWebSocketCloseEvent* Webso
 
     auto WebSocketClient = static_cast<CSPWebSocketClientEmscripten*>(UserData);
 
-    if (WebSocketClient->getReceiveCallback()) {
+    if (WebSocketClient->getReceiveCallback())
+    {
         (*WebSocketClient->getReceiveCallback())("", false);
     }
 
@@ -84,7 +87,8 @@ EM_BOOL onDataReceived(int EventType, const EmscriptenWebSocketMessageEvent* Web
 {
     EMS_FORMATTED_LOG("EMS onDataReceived NumBytes: %d, isText: %d", WebsocketEvent->numBytes, (int)WebsocketEvent->isText);
 
-    if (WebsocketEvent->numBytes == 0) {
+    if (WebsocketEvent->numBytes == 0)
+    {
         std::cerr << "Socket closed by remote host." << std::endl;
         return EM_FALSE;
     }
@@ -93,7 +97,8 @@ EM_BOOL onDataReceived(int EventType, const EmscriptenWebSocketMessageEvent* Web
     auto ReceivedByteCount = WebsocketEvent->numBytes;
     auto Idx = 0;
 
-    while (ReceivedByteCount > 0) {
+    while (ReceivedByteCount > 0)
+    {
         const auto ProcessedByteCount
             = WebSocketClient->ProcessReceivedMessage(WebsocketEvent->data + Idx, ReceivedByteCount, WebsocketEvent->isText);
         Idx += ProcessedByteCount;
@@ -112,7 +117,8 @@ void CSPWebSocketClientEmscripten::Start(const std::string& Url, CallbackHandler
 {
     EMS_LOG("EMS Start");
 
-    if (!emscripten_websocket_is_supported()) {
+    if (!emscripten_websocket_is_supported())
+    {
         Callback(false);
         return;
     }
@@ -140,7 +146,8 @@ void CSPWebSocketClientEmscripten::Stop(CallbackHandler Callback)
 
     Socket = NULL;
 
-    if (Callback) {
+    if (Callback)
+    {
         Callback(EMSCRIPTEN_RESULT_SUCCESS == result && EMSCRIPTEN_RESULT_SUCCESS == result2);
     }
 }
@@ -150,7 +157,8 @@ void CSPWebSocketClientEmscripten::Send(const std::string& Message, CallbackHand
     EMS_FORMATTED_LOG("EMS Send %s", Message.c_str());
 
     EMSCRIPTEN_RESULT result = emscripten_websocket_send_binary(Socket, const_cast<char*>(Message.data()), Message.size());
-    if (result) {
+    if (result)
+    {
         EMS_FORMATTED_LOG("Failed to send data: %d", result);
     }
 
@@ -171,13 +179,16 @@ std::string CSPWebSocketClientEmscripten::GetWebSocketConnectURL(const std::stri
 {
     std::string WebSocketConnectURL;
     auto QueryParamPos = InitialUrl.rfind(URL_QUERY_SEPARATOR);
-    if (std::string::npos != QueryParamPos) {
+    if (std::string::npos != QueryParamPos)
+    {
         std::string WebSocketEndpoint = InitialUrl.substr(0, QueryParamPos);
 
         WebSocketConnectURL = WebSocketEndpoint + "?access_token=" + std::string(csp::web::HttpAuth::GetAccessToken().c_str())
             + "&X-AssetPlatform=" + std::string(csp::CSPFoundation::GetClientUserAgentString().c_str());
         EMS_FORMATTED_LOG("WebSocket connect URL: %s", WebSocketConnectURL.c_str());
-    } else {
+    }
+    else
+    {
         assert(false && "The initialURL is not in the expected format");
     }
 
@@ -196,11 +207,14 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     size_t ProcessedByteCount = 0;
 
     // Handshake needs to be handled differently as it is in JSON format
-    if (!ReceivedHandshake) {
+    if (!ReceivedHandshake)
+    {
         int Idx;
-        for (Idx = 0; Idx < NumRecvBytes; ++Idx) {
+        for (Idx = 0; Idx < NumRecvBytes; ++Idx)
+        {
             // JSON messages are terminated with the 0x1E character
-            if (RecvBuffer[Idx] == 0x1E) {
+            if (RecvBuffer[Idx] == 0x1E)
+            {
                 break;
             }
         }
@@ -212,20 +226,25 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
         CallbackHasData = true;
 
         ProcessedByteCount = Idx + 1;
-    } else {
+    }
+    else
+    {
         auto Length = 0;
         int Idx;
 
-        for (Idx = 0; Idx < 5; ++Idx) {
+        for (Idx = 0; Idx < 5; ++Idx)
+        {
             Length |= (RecvBuffer[Idx] & 0x7F) << (Idx * 7);
 
-            if ((RecvBuffer[Idx] & 0x80) == 0) {
+            if ((RecvBuffer[Idx] & 0x80) == 0)
+            {
                 ++Idx;
                 break;
             }
         }
 
-        if (Length > NumRecvBytes - Idx) {
+        if (Length > NumRecvBytes - Idx)
+        {
             assert(false && "We have not received the entire SignalR message");
         }
 
@@ -236,7 +255,8 @@ size_t CSPWebSocketClientEmscripten::ProcessReceivedMessage(uint8_t* RecvData, u
     }
 
     // Call the callback
-    if (ReceiveCallback) {
+    if (ReceiveCallback)
+    {
         ReceiveCallback(CallbackMessage, CallbackHasData);
     }
 

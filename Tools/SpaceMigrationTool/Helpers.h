@@ -8,7 +8,8 @@
 #include <thread>
 
 /// Wait for a response from an aync event with a timeout
-class ResponseWaiter {
+class ResponseWaiter
+{
 public:
     /// @brief Wait for an event to occur
     /// @param IsDone Functional (function or lambda) that return true when an event occurs
@@ -25,7 +26,8 @@ public:
 
         const auto TimeOut = TimeOutInSeconds;
 
-        while (!IsDone() && (Elapsed < TimeOut)) {
+        while (!IsDone() && (Elapsed < TimeOut))
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(SleepTimeMs));
             Elapsed = clock::now() - Start;
         }
@@ -35,7 +37,8 @@ public:
     }
 };
 
-template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter {
+template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
+{
 public:
     ServiceResponseReceiver(csp::services::EResultCode InExpectedResult = csp::services::EResultCode::Success)
         : ExpectedResult(InExpectedResult)

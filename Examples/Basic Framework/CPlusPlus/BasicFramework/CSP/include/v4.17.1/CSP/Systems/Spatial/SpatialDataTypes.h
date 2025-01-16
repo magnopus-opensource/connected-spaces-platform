@@ -16,10 +16,12 @@
 #pragma once
 #include "CSP/CSPCommon.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief Data structure representing a Geo-spatial location, handling lonitude and latitude, with a validation function
-class CSP_API GeoLocation {
+class CSP_API GeoLocation
+{
 public:
     GeoLocation()
         : Longitude(0.0)
@@ -40,7 +42,8 @@ public:
 };
 
 /// @brief Data structure representing rotation as defined by Connected Spaces Platform, in the format (X,Y,Z,W) as a quaternion with double values.
-class CSP_API OlyRotation {
+class CSP_API OlyRotation
+{
 public:
     OlyRotation()
         : X(0.0)

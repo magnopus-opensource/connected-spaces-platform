@@ -7,7 +7,8 @@
 #include "Olympus/Services/WebService.h"
 #include "Olympus/Systems/Spatial/SpatialDataTypes.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -15,11 +16,16 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-enum class AnchorProvider { GoogleCloudAnchors = 0 };
+enum class AnchorProvider
+{
+    GoogleCloudAnchors = 0
+};
 
-class OLY_API OlyAnchorPosition {
+class OLY_API OlyAnchorPosition
+{
 public:
     OlyAnchorPosition();
     OlyAnchorPosition(double InX, double InY, double InZ)
@@ -34,7 +40,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data representation of an Anchor
-class OLY_API Anchor {
+class OLY_API Anchor
+{
 public:
     Anchor() {};
 
@@ -60,7 +67,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an Anchor.
-class OLY_API AnchorResult : public oly_services::ResultBase {
+class OLY_API AnchorResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -81,7 +89,8 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of Anchors.
-class OLY_API AnchorCollectionResult : public oly_services::ResultBase {
+class OLY_API AnchorCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -115,7 +124,8 @@ typedef std::function<void(const AnchorCollectionResult& Result)> AnchorCollecti
 
 /// @ingroup Anchor System
 /// @brief Data representation of an AnchorResolution
-class OLY_API AnchorResolution {
+class OLY_API AnchorResolution
+{
 public:
     oly_common::String Id;
     oly_common::String AnchorId;
@@ -127,7 +137,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an AnchorResolution.
-class OLY_API AnchorResolutionResult : public oly_services::ResultBase {
+class OLY_API AnchorResolutionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -153,7 +164,8 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of AnchorResolutions.
-class OLY_API AnchorResolutionCollectionResult : public oly_services::ResultBase {
+class OLY_API AnchorResolutionCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

@@ -24,7 +24,8 @@
 #include <initializer_list>
 #include <utility>
 
-namespace csp::common {
+namespace csp::common
+{
 
 CSP_START_IGNORE
 template <typename T> class Array;
@@ -52,7 +53,8 @@ inline size_t next_pow2(size_t val)
 /// us to move all items after it down one space.
 ///
 /// @tparam T : Object type to store in the list
-template <typename T> class CSP_API List {
+template <typename T> class CSP_API List
+{
 public:
     /// @brief Constructs a list with 0 elements.
     List()
@@ -81,7 +83,8 @@ public:
         , MaximumSize(0)
         , ObjectArray(nullptr)
     {
-        if (Other.CurrentSize == 0) {
+        if (Other.CurrentSize == 0)
+        {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
@@ -90,7 +93,8 @@ public:
         AllocList(Other.MaximumSize);
         CurrentSize = Other.CurrentSize;
 
-        for (size_t i = 0; i < CurrentSize; ++i) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
             T* ObjectPtr = &ObjectArray[i];
             new (ObjectPtr) T;
             ObjectArray[i] = Other.ObjectArray[i];
@@ -102,7 +106,8 @@ public:
         , MaximumSize(0)
         , ObjectArray(nullptr)
     {
-        if (Other.CurrentSize == 0) {
+        if (Other.CurrentSize == 0)
+        {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
@@ -122,7 +127,8 @@ public:
         , MaximumSize(0)
         , ObjectArray(nullptr)
     {
-        if (List.size() == 0) {
+        if (List.size() == 0)
+        {
             AllocList(LIST_DEFAULT_SIZE);
 
             return;
@@ -132,7 +138,8 @@ public:
         AllocList(Size);
         CurrentSize = List.size();
 
-        for (size_t i = 0; i < CurrentSize; ++i) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
             T* ObjectPtr = &ObjectArray[i];
             new (ObjectPtr) T;
             ObjectArray[i] = *(List.begin() + i);
@@ -156,7 +163,8 @@ public:
     /// @return List<T>&
     List<T>& operator=(const List<T>& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
@@ -164,7 +172,8 @@ public:
         MaximumSize = 0;
         ObjectArray = nullptr;
 
-        if (CurrentSize == 0) {
+        if (CurrentSize == 0)
+        {
             AllocList(LIST_DEFAULT_SIZE);
 
             return *this;
@@ -172,7 +181,8 @@ public:
 
         AllocList(Other.MaximumSize);
 
-        for (size_t i = 0; i < CurrentSize; i++) {
+        for (size_t i = 0; i < CurrentSize; i++)
+        {
             ObjectArray[i] = Other.ObjectArray[i];
         }
 
@@ -203,7 +213,8 @@ public:
     /// @param Item const T&
     void Append(const T& Item)
     {
-        if (CurrentSize == MaximumSize) {
+        if (CurrentSize == MaximumSize)
+        {
             auto Size = next_pow2(MaximumSize + 1);
             ReallocList(Size);
         }
@@ -218,7 +229,8 @@ public:
     /// @param Item T&&
     CSP_NO_EXPORT void Append(T&& Item)
     {
-        if (CurrentSize == MaximumSize) {
+        if (CurrentSize == MaximumSize)
+        {
             auto Size = next_pow2(MaximumSize + 1);
             ReallocList(Size);
         }
@@ -234,7 +246,8 @@ public:
     /// @param Item const T&
     void Insert(size_t Index, const T& Item)
     {
-        if (CurrentSize == MaximumSize) {
+        if (CurrentSize == MaximumSize)
+        {
             auto Size = next_pow2(MaximumSize + 1);
             ReallocList(Size);
         }
@@ -266,8 +279,10 @@ public:
     /// @param Item const T& : Element to remove from the list
     void RemoveItem(const T& Item)
     {
-        for (size_t i = 0; i < CurrentSize; ++i) {
-            if (ObjectArray[i] == Item) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
+            if (ObjectArray[i] == Item)
+            {
                 Remove(i);
                 return;
             }
@@ -290,8 +305,10 @@ public:
     /// @return bool
     bool Contains(const T& Item) const
     {
-        for (size_t i = 0; i < CurrentSize; ++i) {
-            if (ObjectArray[i] == Item) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
+            if (ObjectArray[i] == Item)
+            {
                 return true;
             }
         }
@@ -305,7 +322,8 @@ public:
     {
         Array<T> Result(CurrentSize);
 
-        for (size_t i = 0; i < CurrentSize; ++i) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
             Result[i] = ObjectArray[i];
         }
 
@@ -332,11 +350,13 @@ private:
     /// @brief Frees memory for the list.
     void FreeList()
     {
-        if (ObjectArray == nullptr) {
+        if (ObjectArray == nullptr)
+        {
             return;
         }
 
-        for (size_t i = 0; i < CurrentSize; ++i) {
+        for (size_t i = 0; i < CurrentSize; ++i)
+        {
             T* ObjectPtr = &ObjectArray[i];
             ObjectPtr->~T();
         }

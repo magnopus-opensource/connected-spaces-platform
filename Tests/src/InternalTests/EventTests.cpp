@@ -25,57 +25,71 @@ using namespace csp::events;
 
 const EventId kTestEventId = EventId("TestEvent", "Test");
 
-class LoginEventHandler : public EventListener {
+class LoginEventHandler : public EventListener
+{
 public:
     LoginEventHandler() { }
 
     virtual void OnEvent(const Event& InEvent) override
     {
-        if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID) {
+        if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
+        {
             std::cerr << "LoginEvent Received" << std::endl;
 
             EXPECT_TRUE(strcmp(InEvent.GetString("UserId"), "MyUserId") == 0);
             EXPECT_TRUE(InEvent.GetInt("TestInt") == 384);
-        } else {
+        }
+        else
+        {
             FAIL();
         }
     }
 };
 
-class TestEventHandler : public EventListener {
+class TestEventHandler : public EventListener
+{
 public:
     TestEventHandler() { }
 
     virtual void OnEvent(const Event& InEvent) override
     {
-        if (InEvent.GetId() == kTestEventId) {
+        if (InEvent.GetId() == kTestEventId)
+        {
             EXPECT_TRUE(InEvent.GetFloat("TestFloat") == 3.14f);
             EXPECT_TRUE(InEvent.GetBool("TestBool") == true);
 
             std::cerr << "TestEvent Received" << std::endl;
-        } else {
+        }
+        else
+        {
             FAIL();
         }
     }
 };
 
-class AllEventHandler : public EventListener {
+class AllEventHandler : public EventListener
+{
 public:
     AllEventHandler() { }
 
     virtual void OnEvent(const Event& InEvent) override
     {
-        if (InEvent.GetId() == kTestEventId) {
+        if (InEvent.GetId() == kTestEventId)
+        {
             EXPECT_TRUE(InEvent.GetFloat("TestFloat") == 3.14f);
             EXPECT_TRUE(InEvent.GetBool("TestBool") == true);
 
             std::cerr << "TestEvent Received" << std::endl;
-        } else if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID) {
+        }
+        else if (InEvent.GetId() == USERSERVICE_LOGIN_EVENT_ID)
+        {
             EXPECT_TRUE(strcmp(InEvent.GetString("UserId"), "MyUserId") == 0);
             EXPECT_TRUE(InEvent.GetInt("TestInt") == 384);
 
             std::cerr << "LoginEvent Received" << std::endl;
-        } else {
+        }
+        else
+        {
             FAIL();
         }
     }

@@ -19,9 +19,11 @@
 #include "Events/Event.h"
 #include "Events/EventListener.h"
 
-namespace csp::events {
+namespace csp::events
+{
 
-class CSP_API EventSystem {
+class CSP_API EventSystem
+{
 public:
     EventSystem();
     ~EventSystem();

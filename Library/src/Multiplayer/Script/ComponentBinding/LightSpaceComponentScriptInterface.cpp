@@ -21,7 +21,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 LightSpaceComponentScriptInterface::LightSpaceComponentScriptInterface(LightSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)

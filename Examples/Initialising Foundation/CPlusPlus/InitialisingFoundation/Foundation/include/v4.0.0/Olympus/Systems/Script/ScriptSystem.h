@@ -8,15 +8,18 @@
 #include <string>
 #include <vector>
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-class IScriptBinding {
+class IScriptBinding
+{
 public:
     virtual ~IScriptBinding() = default;
     virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
 
-class OLY_API OLY_NO_DISPOSE ScriptSystem {
+class OLY_API OLY_NO_DISPOSE ScriptSystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     friend class ScriptContext;

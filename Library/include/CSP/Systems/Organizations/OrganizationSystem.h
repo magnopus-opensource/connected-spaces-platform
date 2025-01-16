@@ -20,17 +20,20 @@
 #include "CSP/Systems/SystemsResult.h"
 #include "Services/UserService/Dto.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class SignalRConnection;
 
 } // namespace csp::multiplayer
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup Quota System
 /// @brief Public facing system that allows interfacing with the Organization System.
 /// .
-class CSP_API CSP_NO_DISPOSE OrganizationSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE OrganizationSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

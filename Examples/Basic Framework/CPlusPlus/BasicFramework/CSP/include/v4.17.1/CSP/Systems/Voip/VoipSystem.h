@@ -17,16 +17,19 @@
 
 #include "CSP/CSPCommon.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief System class for handling VOIP. Provides Connected Spaces Platform specific overidden functionality.
-class CSP_API CSP_NO_DISPOSE VoipSystem {
+class CSP_API CSP_NO_DISPOSE VoipSystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

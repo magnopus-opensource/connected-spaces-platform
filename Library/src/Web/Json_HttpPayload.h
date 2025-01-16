@@ -20,7 +20,8 @@
 
 #include <rapidjson/rapidjson.h>
 
-namespace csp::web {
+namespace csp::web
+{
 
 template <> inline rapidjson::Value TypeToJsonValue(const csp::web::HttpPayload& Value, RapidJsonAlloc& Allocator)
 {

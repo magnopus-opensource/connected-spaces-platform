@@ -26,78 +26,96 @@ using namespace csp::common;
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3DefaultInitialisationTest)
 {
-    try {
+    try
+    {
         Vector3 Instance;
 
         EXPECT_EQ(Instance.X, 0);
         EXPECT_EQ(Instance.Y, 0);
         EXPECT_EQ(Instance.Z, 0);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3ValueInitialisationTest)
 {
-    try {
+    try
+    {
         Vector3 Instance(1, 2, 3);
 
         EXPECT_EQ(Instance.X, 1);
         EXPECT_EQ(Instance.Y, 2);
         EXPECT_EQ(Instance.Z, 3);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3EqualityTest)
 {
-    try {
+    try
+    {
         Vector3 Instance1(1, 2, 3);
         Vector3 Instance2(1, 2, 3);
 
         EXPECT_TRUE(Instance1 == Instance2);
         EXPECT_FALSE(Instance1 != Instance2);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3NonEqualityTest)
 {
-    try {
+    try
+    {
         Vector3 Instance1(1, 2, 3);
         Vector3 Instance2(3, 2, 1);
 
         EXPECT_FALSE(Instance1 == Instance2);
         EXPECT_TRUE(Instance1 != Instance2);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3ZeroTest)
 {
-    try {
+    try
+    {
         Vector3 Instance = Vector3::Zero();
 
         EXPECT_EQ(Instance.X, 0);
         EXPECT_EQ(Instance.Y, 0);
         EXPECT_EQ(Instance.Z, 0);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector3OneTest)
 {
-    try {
+    try
+    {
         Vector3 Instance = Vector3::One();
 
         EXPECT_EQ(Instance.X, 1);
         EXPECT_EQ(Instance.Y, 1);
         EXPECT_EQ(Instance.Z, 1);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }

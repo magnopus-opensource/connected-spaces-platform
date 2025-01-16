@@ -25,7 +25,8 @@
 #include "gtest/gtest.h"
 using namespace csp::systems;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 

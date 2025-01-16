@@ -18,7 +18,8 @@
 #include <climits>
 #include <cstdint>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 constexpr const uint16_t MAX_RESERVED_COMPONENT_COUNT = 1024;
 

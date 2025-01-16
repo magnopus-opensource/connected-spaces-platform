@@ -9,18 +9,21 @@
 #include "Olympus/Systems/Users/Profile.h"
 #include "Olympus/Systems/Users/ThirdPartyAuthentication.h"
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup User System
 /// @brief Public facing system that allows interfacing with CHS's user service.
 /// Offers methods for creating accounts, authenticating, and retrieving user profiles.
-class OLY_API OLY_NO_DISPOSE UserSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE UserSystem : public SystemBase
+{
 public:
     ~UserSystem();
 

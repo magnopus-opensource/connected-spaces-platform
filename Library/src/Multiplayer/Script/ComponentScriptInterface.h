@@ -21,13 +21,15 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ComponentBase;
 
 constexpr int64_t INVALID_COMPONENT_ID = -1;
 
-class CSP_API ComponentScriptInterface {
+class CSP_API ComponentScriptInterface
+{
 public:
     using Vector2 = std::vector<float>;
     using Vector3 = std::vector<float>;

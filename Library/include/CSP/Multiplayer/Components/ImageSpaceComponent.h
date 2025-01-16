@@ -26,10 +26,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an image space component.
-enum class ImagePropertyKeys {
+enum class ImagePropertyKeys
+{
     Name_DEPRECATED,
     ImageAssetId,
     AssetCollectionId,
@@ -45,11 +47,17 @@ enum class ImagePropertyKeys {
 };
 
 /// @brief The display mode supported by this image space component.
-enum class DisplayMode { SingleSided = 0, DoubleSided, DoubleSidedReversed };
+enum class DisplayMode
+{
+    SingleSided = 0,
+    DoubleSided,
+    DoubleSidedReversed
+};
 
 /// @ingroup ImageSpaceComponent
 /// @brief Add an image to your space.
-class CSP_API ImageSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent {
+class CSP_API ImageSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the image space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

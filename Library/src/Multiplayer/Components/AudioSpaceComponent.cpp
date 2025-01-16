@@ -20,14 +20,16 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AudioSpaceComponentScriptInterface.h"
 
-namespace {
+namespace
+{
 
 constexpr const float DefaultAttenuationRadius = 10.f; // Distance in meters
 constexpr const float DefaultVolume = 1.f;
 
 } // namespace
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 AudioSpaceComponent::AudioSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::Audio, Parent)
@@ -110,9 +112,12 @@ float AudioSpaceComponent::GetVolume() const { return GetFloatProperty(static_ca
 
 void AudioSpaceComponent::SetVolume(float Value)
 {
-    if (Value >= 0.f && Value <= 1.f) {
+    if (Value >= 0.f && Value <= 1.f)
+    {
         SetProperty(static_cast<uint32_t>(AudioPropertyKeys::Volume), Value);
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("Invalid value for volume (%.2f). Must be from 0.0 to 1.0", Value);
     }
 }

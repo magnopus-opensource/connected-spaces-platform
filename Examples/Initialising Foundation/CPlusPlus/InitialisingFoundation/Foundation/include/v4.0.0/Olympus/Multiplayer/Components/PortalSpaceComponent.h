@@ -4,10 +4,21 @@
 #include "Olympus/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 #include "Olympus/Systems/Assets/Asset.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 // IsVisible, IsARVisible and IsActive are no longer exposed but retained for backwards compatibility
-enum class PortalPropertyKeys { SpaceId = 0, IsVisible, IsActive, IsARVisible, IsEnabled, Position, Radius, Num };
+enum class PortalPropertyKeys
+{
+    SpaceId = 0,
+    IsVisible,
+    IsActive,
+    IsARVisible,
+    IsEnabled,
+    Position,
+    Radius,
+    Num
+};
 
 /**
  * @ingroup PortalSpaceComponent
@@ -21,7 +32,8 @@ enum class PortalPropertyKeys { SpaceId = 0, IsVisible, IsActive, IsARVisible, I
  * 4. Follow the standard procedure to re-connect to a space
  */
 
-class OLY_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent {
+class OLY_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent
+{
 public:
     PortalSpaceComponent(SpaceEntity* Parent);
 

@@ -40,13 +40,15 @@
 using namespace csp::common;
 using namespace csp::systems;
 
-namespace SystemResultsTest {
+namespace SystemResultsTest
+{
 
 typedef std::function<void(const NullResult& Result)> NullResultCallback;
 
 #ifdef CSP_WASM
 
-class TestWebClient : public csp::web::EmscriptenWebClient {
+class TestWebClient : public csp::web::EmscriptenWebClient
+{
 public:
     TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
         : EmscriptenWebClient(InPort, Tp, false)
@@ -56,7 +58,8 @@ public:
 
 #else
 
-class TestWebClient : public csp::web::POCOWebClient {
+class TestWebClient : public csp::web::POCOWebClient
+{
 public:
     TestWebClient(const csp::web::Port InPort, const csp::web::ETransferProtocol Tp)
         : POCOWebClient(InPort, Tp, false)
@@ -66,7 +69,8 @@ public:
 
 #endif
 
-class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler {
+class ResponseReceiver : public ResponseWaiter, public csp::web::IHttpResponseHandler
+{
 public:
     ResponseReceiver()
         : ResponseReceived(false)
@@ -82,7 +86,8 @@ public:
 
     void OnHttpProgress(csp::web::HttpRequest& Request) override
     {
-        if (Request.GetProgress().GetProgressPercentage() >= 1.0f) {
+        if (Request.GetProgress().GetProgressPercentage() >= 1.0f)
+        {
             OnHttpResponse(Request.GetMutableResponse());
         }
     }
@@ -96,10 +101,13 @@ private:
 
 void NullResultTestFunction(NullResultCallback Callback)
 {
-    try {
+    try
+    {
         csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t)csp::web::EResponseCodes::ResponseNoContent);
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         std::cout << e.what();
         ADD_FAILURE();
     }

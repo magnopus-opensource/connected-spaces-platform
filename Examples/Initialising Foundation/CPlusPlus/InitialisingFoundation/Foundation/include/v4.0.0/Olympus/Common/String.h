@@ -7,10 +7,12 @@ OLY_NO_EXPORT
 
 #define OLY_TEXT(txt) oly_common::String(txt)
 
-namespace oly_common {
+namespace oly_common
+{
 
 /// @brief Custom string class that we can use safely across a DLL boundary.
-class OLY_API String {
+class OLY_API String
+{
 public:
     String();
     ~String();

@@ -17,7 +17,8 @@
 
 #include <assert.h>
 
-namespace csp::web {
+namespace csp::web
+{
 
 // @RossB: TODO: Temporarily hanged from static to pointers due to iOS runtime issues
 HttpAuth::AccessToken* HttpAuth::Token = nullptr;
@@ -30,19 +31,23 @@ HttpAuth::HttpAuth() { }
 void HttpAuth::SetAccessToken(const AccessToken& InToken, const csp::common::String& InTokenExpiry, const AccessToken& InRefreshToken,
     const csp::common::String& InRefreshTokenExpiry)
 {
-    if (Token == nullptr) {
+    if (Token == nullptr)
+    {
         Token = new HttpAuth::AccessToken();
     }
 
-    if (RefreshToken == nullptr) {
+    if (RefreshToken == nullptr)
+    {
         RefreshToken = new HttpAuth::AccessToken();
     }
 
-    if (TokenExpiry == nullptr) {
+    if (TokenExpiry == nullptr)
+    {
         TokenExpiry = new csp::common::String();
     }
 
-    if (RefreshTokenExpiry == nullptr) {
+    if (RefreshTokenExpiry == nullptr)
+    {
         RefreshTokenExpiry = new csp::common::String();
     }
 
@@ -55,7 +60,8 @@ void HttpAuth::SetAccessToken(const AccessToken& InToken, const csp::common::Str
 
 const HttpAuth::AccessToken& HttpAuth::GetAccessToken()
 {
-    if (Token == nullptr) {
+    if (Token == nullptr)
+    {
         Token = new HttpAuth::AccessToken();
     }
 
@@ -64,7 +70,8 @@ const HttpAuth::AccessToken& HttpAuth::GetAccessToken()
 
 const csp::common::String& HttpAuth::GetTokenExpiry()
 {
-    if (TokenExpiry == nullptr) {
+    if (TokenExpiry == nullptr)
+    {
         TokenExpiry = new csp::common::String();
     }
 
@@ -73,7 +80,8 @@ const csp::common::String& HttpAuth::GetTokenExpiry()
 
 const csp::common::String& HttpAuth::GetRefreshTokenExpiry()
 {
-    if (RefreshTokenExpiry == nullptr) {
+    if (RefreshTokenExpiry == nullptr)
+    {
         RefreshTokenExpiry = new csp::common::String();
     }
 
@@ -82,7 +90,8 @@ const csp::common::String& HttpAuth::GetRefreshTokenExpiry()
 
 const HttpAuth::AccessToken& HttpAuth::GetRefreshToken()
 {
-    if (RefreshToken == nullptr) {
+    if (RefreshToken == nullptr)
+    {
         RefreshToken = new HttpAuth::AccessToken();
     }
 

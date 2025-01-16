@@ -15,7 +15,8 @@
  */
 #include "Web/HttpProgress.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 HttpProgress::HttpProgress()
     : Progress(0)

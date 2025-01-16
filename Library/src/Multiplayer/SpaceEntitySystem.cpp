@@ -52,7 +52,8 @@
 
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 const csp::common::String SequenceTypeName = "EntityHierarchy";
 
@@ -60,13 +61,16 @@ uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
 {
     uint64_t EntityId = 0;
 
-    if (Result.is_array()) {
+    if (Result.is_array())
+    {
         const std::vector<signalr::value>& Ids = Result.as_array();
 
         // GenerateObjectIds can in theory create multiple Ids at once,
         // but we just assume one for now
-        for (const signalr::value& IdValue : Ids) {
-            if (IdValue.is_uinteger()) {
+        for (const signalr::value& IdValue : Ids)
+        {
+            if (IdValue.is_uinteger())
+            {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Verbose, "Entity Id=%i", IdValue.as_uinteger());
                 EntityId = IdValue.as_uinteger();
                 break;
@@ -91,11 +95,13 @@ csp::common::String JSONStringFromDeltaTime(double DeltaTime)
 
 template class csp::common::List<csp::multiplayer::SpaceEntity*>;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 constexpr uint64_t ENTITY_PAGE_LIMIT = 100;
 
-class SpaceEntityEventHandler : public csp::events::EventListener {
+class SpaceEntityEventHandler : public csp::events::EventListener
+{
 public:
     SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem);
 
@@ -113,9 +119,12 @@ SpaceEntityEventHandler::SpaceEntityEventHandler(SpaceEntitySystem* EntitySystem
 void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 {
     if (InEvent.GetId() == csp::events::FOUNDATION_TICK_EVENT_ID && EntitySystem->MultiplayerConnectionInst != nullptr
-        && EntitySystem->MultiplayerConnectionInst->Connected) {
+        && EntitySystem->MultiplayerConnectionInst->Connected)
+    {
         EntitySystem->TickEntities();
-    } else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID) {
+    }
+    else if (InEvent.GetId() == csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID)
+    {
         auto Connection = EntitySystem->MultiplayerConnectionInst;
         csp::common::String Reason(InEvent.GetString("Reason"));
 
@@ -124,7 +133,8 @@ void SpaceEntityEventHandler::OnEvent(const csp::events::Event& InEvent)
 
         int TimeoutCounter = 2000;
 
-        while (!Done && TimeoutCounter > 0) {
+        while (!Done && TimeoutCounter > 0)
+        {
             std::this_thread::sleep_for(1ms);
 
             --TimeoutCounter;
@@ -205,7 +215,8 @@ SpaceEntitySystem::~SpaceEntitySystem()
 
 void SpaceEntitySystem::Initialise()
 {
-    if (IsInitialised) {
+    if (IsInitialised)
+    {
         return;
     }
 
@@ -221,7 +232,8 @@ void SpaceEntitySystem::Initialise()
 
 void SpaceEntitySystem::Shutdown()
 {
-    if (!IsInitialised) {
+    if (!IsInitialised)
+    {
         return;
     }
 
@@ -239,14 +251,19 @@ void SpaceEntitySystem::Shutdown()
 void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const SpaceTransform& InSpaceTransform, AvatarState InState,
     const csp::common::String& InAvatarId, AvatarPlayMode InAvatarPlayMode, EntityCreatedCallback Callback)
 {
-    const std::function<void(signalr::value, std::exception_ptr)> LocalIDCallback = [this, InName, InSpaceTransform, InState, InAvatarId,
-                                                                                        InAvatarPlayMode, Callback](const signalr::value& Result,
-                                                                                        const std::exception_ptr& Except) {
-        try {
-            if (Except) {
+    const std::function<void(signalr::value, std::exception_ptr)> LocalIDCallback
+        = [this, InName, InSpaceTransform, InState, InAvatarId, InAvatarPlayMode, Callback](
+              const signalr::value& Result, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
                 std::rethrow_exception(Except);
             }
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception& e)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
             Callback(nullptr);
         }
@@ -276,12 +293,17 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 
         const std::vector InvokeArguments = { SerialisedUser };
 
-        const std::function LocalSendCallback = [this, Callback, NewAvatar](const signalr::value& /*Result*/, const std::exception_ptr& Except) {
-            try {
-                if (Except) {
+        const std::function LocalSendCallback = [this, Callback, NewAvatar](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        {
+            try
+            {
+                if (Except)
+                {
                     std::rethrow_exception(Except);
                 }
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception& e)
+            {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create Avatar. Exception: %s", e.what());
                 Callback(nullptr);
             }
@@ -292,7 +314,8 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
             Avatars.Append(NewAvatar);
             NewAvatar->ApplyLocalPatch(false);
 
-            if (ElectionManager != nullptr) {
+            if (ElectionManager != nullptr)
+            {
                 ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
             }
             Callback(NewAvatar);
@@ -318,12 +341,17 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 {
     const auto& Children = Entity->ChildEntities;
 
-    const std::function LocalCallback = [this, Callback, Children](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except) {
-        try {
-            if (Except) {
+    const std::function LocalCallback = [this, Callback, Children](const signalr::value& /*EntityMessage*/, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
                 std::rethrow_exception(Except);
             }
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception& e)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to destroy entity. Exception: %s", e.what());
             Callback(false);
         }
@@ -343,7 +371,8 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     ObjectPatches.push_back(signalr::value { DeletionPatch });
 
     // Move children to the root in the same patch
-    for (size_t i = 0; i < Children.Size(); ++i) {
+    for (size_t i = 0; i < Children.Size(); ++i)
+    {
         const std::vector<signalr::value> ChildParentIdPatch { Children[i]->GetId(), MultiplayerConnectionInst->GetClientId(), false,
             std::vector<signalr::value> {
                 true, // Update Parent
@@ -357,7 +386,8 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     auto EntityComponents = Entity->GetComponents();
     auto Keys = EntityComponents->Keys();
 
-    for (size_t i = 0; i < Keys->Size(); ++i) {
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
         auto EntityComponent = Entity->GetComponent((*Keys)[i]);
         EntityComponent->OnLocalDelete();
     }
@@ -372,11 +402,13 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
     // We want this callback to fire before the deletion so clients can react to children first
     auto ChildrenToUpdate = Children;
 
-    for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i) {
+    for (size_t i = 0; i < ChildrenToUpdate.Size(); ++i)
+    {
         ChildrenToUpdate[i]->ParentId = nullptr;
         ResolveEntityHierarchy(ChildrenToUpdate[i]);
 
-        if (ChildrenToUpdate[i]->EntityUpdateCallback) {
+        if (ChildrenToUpdate[i]->EntityUpdateCallback)
+        {
             ChildrenToUpdate[i]->EntityUpdateCallback(ChildrenToUpdate[i], UPDATE_FLAGS_PARENT, Info);
         }
     }
@@ -393,8 +425,10 @@ void SpaceEntitySystem::DestroyEntity(SpaceEntity* Entity, CallbackHandler Callb
 
 void SpaceEntitySystem::LocalDestroyEntity(SpaceEntity* Entity)
 {
-    if (Entity != nullptr) {
-        if (Entity->EntityDestroyCallback != nullptr) {
+    if (Entity != nullptr)
+    {
+        if (Entity->EntityDestroyCallback != nullptr)
+        {
             Entity->EntityDestroyCallback(true);
         }
 
@@ -406,8 +440,10 @@ SpaceEntity* SpaceEntitySystem::FindSpaceEntity(const csp::common::String& InNam
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-    for (size_t i = 0; i < Entities.Size(); ++i) {
-        if (Entities[i]->GetName() == InName) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        if (Entities[i]->GetName() == InName)
+        {
             return Entities[i];
         }
     }
@@ -419,8 +455,10 @@ SpaceEntity* SpaceEntitySystem::FindSpaceEntityById(uint64_t EntityId)
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-    for (size_t i = 0; i < Entities.Size(); ++i) {
-        if (Entities[i]->GetId() == EntityId) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        if (Entities[i]->GetId() == EntityId)
+        {
             return Entities[i];
         }
     }
@@ -432,8 +470,10 @@ SpaceEntity* SpaceEntitySystem::FindSpaceAvatar(const csp::common::String& InNam
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-    for (size_t i = 0; i < Avatars.Size(); ++i) {
-        if (Avatars[i]->GetName() == InName) {
+    for (size_t i = 0; i < Avatars.Size(); ++i)
+    {
+        if (Avatars[i]->GetName() == InName)
+        {
             return Avatars[i];
         }
     }
@@ -445,8 +485,10 @@ SpaceEntity* SpaceEntitySystem::FindSpaceObject(const csp::common::String& InNam
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-    for (size_t i = 0; i < Objects.Size(); ++i) {
-        if (Objects[i]->GetName() == InName) {
+    for (size_t i = 0; i < Objects.Size(); ++i)
+    {
+        if (Objects[i]->GetName() == InName)
+        {
             return Objects[i];
         }
     }
@@ -469,7 +511,8 @@ void SpaceEntitySystem::BindNewEntityToScript(SpaceEntity* NewEntity)
 
 void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 {
-    if (SpaceEntityCreatedCallback) {
+    if (SpaceEntityCreatedCallback)
+    {
         CSP_LOG_WARN_MSG("SpaceEntityCreatedCallback has already been set. Previous callback overwritten.");
     }
 
@@ -478,7 +521,8 @@ void SpaceEntitySystem::SetEntityCreatedCallback(EntityCreatedCallback Callback)
 
 void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Callback)
 {
-    if (InitialEntitiesRetrievedCallback) {
+    if (InitialEntitiesRetrievedCallback)
+    {
         CSP_LOG_WARN_MSG("InitialEntitiesRetrievedCallback has already been set. Previous callback overwritten.");
     }
 
@@ -487,13 +531,15 @@ void SpaceEntitySystem::SetInitialEntitiesRetrievedCallback(CallbackHandler Call
 
 void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
 {
-    if (ScriptSystemReadyCallback) {
+    if (ScriptSystemReadyCallback)
+    {
         CSP_LOG_WARN_MSG("ScriptSystemReadyCallback has already been set. Previous callback overwritten.");
     }
 
     ScriptSystemReadyCallback = std::move(Callback);
 
-    if (ElectionManager) {
+    if (ElectionManager)
+    {
         ElectionManager->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
     }
 }
@@ -512,68 +558,81 @@ static SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMe
 
 void SpaceEntitySystem::BindOnObjectMessage()
 {
-    Connection->On("OnObjectMessage", [this](const signalr::value& Params) {
-        // Params is an array of all params sent, so grab the first
-        auto& EntityMessage = Params.as_array()[0];
+    Connection->On("OnObjectMessage",
+        [this](const signalr::value& Params)
+        {
+            // Params is an array of all params sent, so grab the first
+            auto& EntityMessage = Params.as_array()[0];
 
-        SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
+            SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
 
-        if (SpaceEntityCreatedCallback) {
-            SpaceEntityCreatedCallback(NewEntity);
-        } else {
-            CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
-        }
-    });
+            if (SpaceEntityCreatedCallback)
+            {
+                SpaceEntityCreatedCallback(NewEntity);
+            }
+            else
+            {
+                CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
+            }
+        });
 }
 
 void SpaceEntitySystem::BindOnObjectPatch()
 {
-    Connection->On("OnObjectPatch", [this](const signalr::value& Params) {
-        std::scoped_lock EntitiesLocker(*EntitiesLock);
+    Connection->On("OnObjectPatch",
+        [this](const signalr::value& Params)
+        {
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-        // Params is an array of all params sent, so grab the first
-        auto& EntityMessage = Params.as_array()[0];
+            // Params is an array of all params sent, so grab the first
+            auto& EntityMessage = Params.as_array()[0];
 
-        PendingIncomingUpdates->emplace_back(CSP_NEW signalr::value(EntityMessage));
-    });
+            PendingIncomingUpdates->emplace_back(CSP_NEW signalr::value(EntityMessage));
+        });
 }
 
 void SpaceEntitySystem::BindOnRequestToSendObject()
 {
-    Connection->On("OnRequestToSendObject", [this](const signalr::value& Params) {
-        const uint64_t EntityID = Params.as_array()[0].as_uinteger();
+    Connection->On("OnRequestToSendObject",
+        [this](const signalr::value& Params)
+        {
+            const uint64_t EntityID = Params.as_array()[0].as_uinteger();
 
-        // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
-        if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID)) {
-            SignalRMsgPackEntitySerialiser Serialiser;
+            // TODO: add ability to check for ID or get by ID from Entity List (maybe change to Map<EntityID, Entity> ?)
+            if (SpaceEntity* MatchedEntity = FindSpaceEntityById(EntityID))
+            {
+                SignalRMsgPackEntitySerialiser Serialiser;
 
-            MatchedEntity->Serialise(Serialiser);
-            const auto SerialisedObject = Serialiser.Finalise();
+                MatchedEntity->Serialise(Serialiser);
+                const auto SerialisedObject = Serialiser.Finalise();
 
-            std::vector const InvokeArguments = { SerialisedObject };
+                std::vector const InvokeArguments = { SerialisedObject };
 
-            const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except) {
-                HandleException(Except, "Failed to send server requested object.");
-            };
+                const std::function LocalSendCallback = [this](const signalr::value&, const std::exception_ptr& Except)
+                { HandleException(Except, "Failed to send server requested object."); };
 
-            Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
-        } else {
-            std::vector<signalr::value> const InvokeArguments = { EntityID };
+                Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+            }
+            else
+            {
+                std::vector<signalr::value> const InvokeArguments = { EntityID };
 
-            Connection->Invoke("SendObjectNotFound", InvokeArguments);
-        }
-    });
+                Connection->Invoke("SendObjectNotFound", InvokeArguments);
+            }
+        });
 }
 
 void SpaceEntitySystem::BindOnRequestToDisconnect() const
 {
-    Connection->On("OnRequestToDisconnect", [this](const signalr::value& Params) {
-        const std::string Reason = Params.as_array()[0].as_string();
+    Connection->On("OnRequestToDisconnect",
+        [this](const signalr::value& Params)
+        {
+            const std::string Reason = Params.as_array()[0].as_string();
 
-        csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
-        DisconnectEvent->AddString("Reason", Reason.c_str());
-        csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
-    });
+            csp::events::Event* DisconnectEvent = csp::events::EventSystem::Get().AllocateEvent(csp::events::MULTIPLAYERSYSTEM_DISCONNECT_EVENT_ID);
+            DisconnectEvent->AddString("Reason", Reason.c_str());
+            csp::events::EventSystem::Get().EnqueueEvent(DisconnectEvent);
+        });
 }
 
 void SpaceEntitySystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
@@ -603,28 +662,36 @@ void SpaceEntitySystem::GetEntitiesPaged(int Skip, int Limit, const std::functio
 
 std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem::CreateRetrieveAllEntitiesCallback(int Skip)
 {
-    const std::function Callback = [this, Skip](const signalr::value& Result, std::exception_ptr Except) {
+    const std::function Callback = [this, Skip](const signalr::value& Result, std::exception_ptr Except)
+    {
         HandleException(Except, "Failed to retrieve paged entities.");
 
         const auto& Results = Result.as_array();
         const auto& Items = Results[0].as_array();
         auto ItemTotalCount = Results[1].as_uinteger();
 
-        for (const auto& EntityMessage : Items) {
+        for (const auto& EntityMessage : Items)
+        {
             SpaceEntity* NewEntity = CreateRemotelyRetrievedEntity(EntityMessage, this);
 
-            if (SpaceEntityCreatedCallback) {
+            if (SpaceEntityCreatedCallback)
+            {
                 SpaceEntityCreatedCallback(NewEntity);
-            } else {
+            }
+            else
+            {
                 CSP_LOG_WARN_MSG("Called SpaceEntityCreatedCallback without it being set! Call SetEntityCreatedCallback first!");
             }
         }
 
         int CurrentEntityCount = Skip + static_cast<int>(Items.size());
 
-        if (CurrentEntityCount < ItemTotalCount) {
+        if (CurrentEntityCount < ItemTotalCount)
+        {
             GetEntitiesPaged(CurrentEntityCount, ENTITY_PAGE_LIMIT, CreateRetrieveAllEntitiesCallback(CurrentEntityCount));
-        } else {
+        }
+        else
+        {
             OnAllEntitiesCreated();
         }
     };
@@ -634,7 +701,8 @@ std::function<void(const signalr::value&, std::exception_ptr)> SpaceEntitySystem
 
 void SpaceEntitySystem::RetrieveAllEntities()
 {
-    if (Connection == nullptr) {
+    if (Connection == nullptr)
+    {
         return;
     }
 
@@ -647,16 +715,19 @@ void SpaceEntitySystem::LocalDestroyAllEntities()
 
     const auto NumEntities = GetNumEntities();
 
-    for (size_t i = 0; i < NumEntities; ++i) {
+    for (size_t i = 0; i < NumEntities; ++i)
+    {
         SpaceEntity* Entity = GetEntityByIndex(i);
 
         // We automatically invoke SignalR deletion for all transient entities that were owned by this local client
         // as these are only ever valid for a single connected session
-        if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId()) {
+        if (Entity->GetIsTransient() && Entity->GetOwnerId() == csp::systems::SystemsManager::Get().GetMultiplayerConnection()->GetClientId())
+        {
             DestroyEntity(Entity, [](auto Ok) {});
         }
         // Otherwise we clear up all all locally represented entities
-        else {
+        else
+        {
             LocalDestroyEntity(Entity);
         }
 
@@ -680,14 +751,16 @@ void SpaceEntitySystem::QueueEntityUpdate(SpaceEntity* EntityToUpdate)
 {
     // If we have nothing to update, don't allow a patch to be sent.
     if (EntityToUpdate->DirtyComponents.Size() == 0 && EntityToUpdate->DirtyProperties.Size() == 0
-        && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false) {
+        && EntityToUpdate->TransientDeletionComponentIds.Size() == 0 && EntityToUpdate->ShouldUpdateParent == false)
+    {
         // TODO: consider making this a callback that informs the user what the status of the request is 'Success, SignalRException, NoChanges', etc.
         // CSP_LOG_MSG(csp::systems::LogLevel::Log, "Skipped patch message send as no data changed");
         return;
     }
 
     // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-    if (!EntityToUpdate->IsModifiable()) {
+    if (!EntityToUpdate->IsModifiable())
+    {
         CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
             EntityToUpdate->GetName().c_str());
         return;
@@ -711,7 +784,8 @@ void SpaceEntitySystem::TickEntities()
 {
     ProcessPendingEntityOperations();
 
-    if (EnableEntityTick) {
+    if (EnableEntityTick)
+    {
         TickEntityScripts();
     }
 
@@ -723,7 +797,8 @@ void SpaceEntitySystem::TickEntities()
         TickUpdateEntities.sort(PointCmp);
         TickUpdateEntities.unique(PointCmp);
 
-        for (const auto Entity : TickUpdateEntities) {
+        for (const auto Entity : TickUpdateEntities)
+        {
             QueueEntityUpdate(Entity);
         }
 
@@ -747,13 +822,15 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     ProcessPendingEntityOperations();
 
     // Register all scripts for import
-    for (size_t i = 0; i < Entities.Size(); ++i) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
         EntityScript* Script = Entities[i]->GetScript();
         Script->RegisterSourceAsModule();
     }
 
     // Bind and invoke all scripts
-    for (size_t i = 0; i < Entities.Size(); ++i) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
         EntityScript* Script = Entities[i]->GetScript();
 
         Script->Bind();
@@ -761,25 +838,30 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     }
 
     // Tell all scripts that all entities are now loaded
-    for (size_t i = 0; i < Entities.Size(); ++i) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
         EntityScript* Script = Entities[i]->GetScript();
         Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
 
-    if (IsLeaderElectionEnabled()) {
+    if (IsLeaderElectionEnabled())
+    {
         // Start listening for election events
         //
         // If we are the first client to connect then this
         // will also set this client as the leader
         ElectionManager->OnConnect(Avatars, Objects);
-    } else {
+    }
+    else
+    {
         DetermineScriptOwners();
     }
 
     // Enable entity tick events
     EnableEntityTick = true;
 
-    if (InitialEntitiesRetrievedCallback) {
+    if (InitialEntitiesRetrievedCallback)
+    {
         InitialEntitiesRetrievedCallback(true);
     }
 }
@@ -796,18 +878,21 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
 //
 void SpaceEntitySystem::DetermineScriptOwners()
 {
-    for (size_t i = 0; i < Entities.Size(); ++i) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
         ClaimScriptOwnership(Entities[i]);
     }
 }
 
 void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
-    if (Deletion->GetParentEntity()) {
+    if (Deletion->GetParentEntity())
+    {
         Deletion->GetParentEntity()->ChildEntities.RemoveItem(Deletion);
     }
 
-    for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i) {
+    for (size_t i = 0; i < Deletion->ChildEntities.Size(); ++i)
+    {
         Deletion->ChildEntities[i]->RemoveParentEntity();
         Deletion->ChildEntities[i]->Parent = nullptr;
         ResolveEntityHierarchy(Deletion->ChildEntities[i]);
@@ -816,15 +901,21 @@ void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 
 void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
 {
-    if (Entity->ParentId.HasValue()) {
-        for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i) {
-            if (RootHierarchyEntities[i]->GetId() == Entity->GetId()) {
+    if (Entity->ParentId.HasValue())
+    {
+        for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+        {
+            if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+            {
                 RootHierarchyEntities.Remove(i);
                 break;
             }
         }
-    } else {
-        if (EntityIsInRootHierarchy(Entity) == false) {
+    }
+    else
+    {
+        if (EntityIsInRootHierarchy(Entity) == false)
+        {
             RootHierarchyEntities.Append(Entity);
         }
     }
@@ -834,8 +925,10 @@ void SpaceEntitySystem::ResolveEntityHierarchy(SpaceEntity* Entity)
 
 bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
 {
-    for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i) {
-        if (RootHierarchyEntities[i]->GetId() == Entity->GetId()) {
+    for (size_t i = 0; i < RootHierarchyEntities.Size(); ++i)
+    {
+        if (RootHierarchyEntities[i]->GetId() == Entity->GetId())
+        {
             return true;
         }
     }
@@ -845,8 +938,10 @@ bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
 
 void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
 {
-    for (size_t i = 0; i < Entities.Size(); ++i) {
-        if (Entities[i]->GetScript()->GetOwnerId() == ClientId) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
+        if (Entities[i]->GetScript()->GetOwnerId() == ClientId)
+        {
             ClaimScriptOwnership(Entities[i]);
         }
     }
@@ -862,17 +957,24 @@ void SpaceEntitySystem::TickEntityScripts()
 
     const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
 
-    if (IsLeaderElectionEnabled()) {
-        if (ElectionManager->IsLocalClientLeader()) {
-            for (size_t i = 0; i < Entities.Size(); ++i) {
+    if (IsLeaderElectionEnabled())
+    {
+        if (ElectionManager->IsLocalClientLeader())
+        {
+            for (size_t i = 0; i < Entities.Size(); ++i)
+            {
                 Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
-    } else {
+    }
+    else
+    {
         const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
 
-        for (size_t i = 0; i < Entities.Size(); ++i) {
-            if (ClientId == Entities[i]->GetScript()->GetOwnerId()) {
+        for (size_t i = 0; i < Entities.Size(); ++i)
+        {
+            if (ClientId == Entities[i]->GetScript()->GetOwnerId())
+            {
                 Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
             }
         }
@@ -882,9 +984,12 @@ void SpaceEntitySystem::TickEntityScripts()
 bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity)
 {
 
-    if (SelectedState && !Entity->IsSelected()) {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId())) {
-            if (!SelectedEntities.Contains(Entity)) {
+    if (SelectedState && !Entity->IsSelected())
+    {
+        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, MultiplayerConnectionInst->GetClientId()))
+        {
+            if (!SelectedEntities.Contains(Entity))
+            {
                 SelectedEntities.Append(Entity);
             }
             return true;
@@ -893,8 +998,10 @@ bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, Spac
         return false;
     }
 
-    if (!SelectedState && Entity->GetSelectingClientID() == MultiplayerConnectionInst->GetClientId()) {
-        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, 0)) {
+    if (!SelectedState && Entity->GetSelectingClientID() == MultiplayerConnectionInst->GetClientId())
+    {
+        if (Entity->InternalSetSelectionStateOfEntity(SelectedState, 0))
+        {
             SelectedEntities.RemoveItem(Entity);
             return true;
         }
@@ -907,14 +1014,16 @@ bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, Spac
 
 void SpaceEntitySystem::EnableLeaderElection()
 {
-    if (ElectionManager == nullptr) {
+    if (ElectionManager == nullptr)
+    {
         ElectionManager = CSP_NEW ClientElectionManager(this);
     }
 }
 
 void SpaceEntitySystem::DisableLeaderElection()
 {
-    if (ElectionManager != nullptr) {
+    if (ElectionManager != nullptr)
+    {
         CSP_DELETE(ElectionManager);
         ElectionManager = nullptr;
     }
@@ -924,9 +1033,12 @@ bool SpaceEntitySystem::IsLeaderElectionEnabled() const { return (ElectionManage
 
 uint64_t SpaceEntitySystem::GetLeaderId() const
 {
-    if (ElectionManager != nullptr && ElectionManager->GetLeader() != nullptr) {
+    if (ElectionManager != nullptr && ElectionManager->GetLeader() != nullptr)
+    {
         return ElectionManager->GetLeader()->GetId();
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
@@ -934,10 +1046,12 @@ uint64_t SpaceEntitySystem::GetLeaderId() const
 ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
 {
     // Search for component id across all entites
-    for (size_t i = 0; i < Entities.Size(); ++i) {
+    for (size_t i = 0; i < Entities.Size(); ++i)
+    {
         ComponentBase* Component = Entities[i]->GetComponents()->operator[](Id);
 
-        if (Component) {
+        if (Component)
+        {
             return Component;
         }
     }
@@ -955,11 +1069,14 @@ const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntiti
 
 bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
 {
-    if (!IsLeaderElectionEnabled()) {
+    if (!IsLeaderElectionEnabled())
+    {
         // Retain existing behavior if feature disabled
         // (Run scripts locally if client is object owner)
         return true;
-    } else {
+    }
+    else
+    {
         // Only run script locally if we are the Leader
         return ElectionManager->IsLocalClientLeader();
     }
@@ -972,7 +1089,8 @@ void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::
 
     ClientProxy* LeaderProxy = ElectionManager->GetLeader();
 
-    if (LeaderProxy) {
+    if (LeaderProxy)
+    {
         LeaderProxy->RunScript(ContextId, ScriptText);
     }
 }
@@ -1032,12 +1150,17 @@ void SpaceEntitySystem::AddEntity(SpaceEntity* EntityToAdd)
 
 void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::common::List<SpaceEntity*> PendingEntities)
 {
-    const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except) {
-        try {
-            if (Except) {
+    const std::function LocalCallback = [](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
                 std::rethrow_exception(Except);
             }
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception& e)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to send list of entity update due to a signalr exception! Exception: %s", e.what());
         }
     };
@@ -1045,7 +1168,8 @@ void SendPatches(csp::multiplayer::SignalRConnection* Connection, const csp::com
     SignalRMsgPackEntitySerialiser Serialiser;
     std::vector<signalr::value> ObjectPatches;
 
-    for (int i = 0; i < PendingEntities.Size(); ++i) {
+    for (int i = 0; i < PendingEntities.Size(); ++i)
+    {
         PendingEntities[i]->SerialisePatch(Serialiser);
         auto SerialisedEntity = Serialiser.Finalise();
         ObjectPatches.push_back(SerialisedEntity);
@@ -1067,11 +1191,13 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
     // adds
     std::unordered_set<SpaceEntity*> AddedEntities;
-    while (PendingAdds->empty() == false) {
+    while (PendingAdds->empty() == false)
+    {
         SpaceEntity* PendingAddEntity = PendingAdds->front();
 
         // we only want to add an entity once, even though a client could have queued it for updates multiple times
-        if (AddedEntities.find(PendingAddEntity) == AddedEntities.end()) {
+        if (AddedEntities.find(PendingAddEntity) == AddedEntities.end())
+        {
             AddPendingEntity(PendingAddEntity);
             AddedEntities.emplace(PendingAddEntity);
 
@@ -1081,21 +1207,25 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
     }
 
     // local updates
-    while (PendingIncomingUpdates->empty() == false) {
+    while (PendingIncomingUpdates->empty() == false)
+    {
         ApplyIncomingPatch(PendingIncomingUpdates->front());
         PendingIncomingUpdates->pop_front();
     }
 
     // remote updates
     {
-        for (auto it = PendingOutgoingUpdateUniqueSet->begin(); it != PendingOutgoingUpdateUniqueSet->end();) {
+        for (auto it = PendingOutgoingUpdateUniqueSet->begin(); it != PendingOutgoingUpdateUniqueSet->end();)
+        {
             SpaceEntity* PendingEntity = *it;
 
             const milliseconds CurrentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
-            if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled) {
+            if (CurrentTime - PendingEntity->TimeOfLastPatch >= EntityPatchRate || !EntityPatchRateLimitEnabled)
+            {
                 // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-                if (!PendingEntity->IsModifiable()) {
+                if (!PendingEntity->IsModifiable())
+                {
                     CSP_LOG_ERROR_FORMAT(
                         "Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
                         PendingEntity->GetName().c_str());
@@ -1110,24 +1240,29 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
                 PendingEntities.Append(PendingEntity);
 
-                if (PendingEntity->EntityPatchSentCallback != nullptr) {
+                if (PendingEntity->EntityPatchSentCallback != nullptr)
+                {
                     PendingEntity->EntityPatchSentCallback(true);
                 }
 
                 PendingEntity->TimeOfLastPatch = CurrentTime;
                 it = PendingOutgoingUpdateUniqueSet->erase(it);
-            } else {
+            }
+            else
+            {
                 ++it;
             }
         }
 
         // Only send if there are patches in list
-        if (PendingEntities.Size() != 0) {
+        if (PendingEntities.Size() != 0)
+        {
             // Send list of PendingEntities to chs
             SendPatches(Connection, PendingEntities);
 
             // Loop through and apply local patches from generated list
-            for (int i = 0; i < PendingEntities.Size(); ++i) {
+            for (int i = 0; i < PendingEntities.Size(); ++i)
+            {
                 PendingEntities[i]->ApplyLocalPatch(true);
             }
         }
@@ -1135,11 +1270,13 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
     // removes
     std::unordered_set<SpaceEntity*> RemovedEntities;
-    while (PendingRemoves->empty() == false) {
+    while (PendingRemoves->empty() == false)
+    {
         SpaceEntity* PendingRemoveEntity = PendingRemoves->front();
 
         // we only want to remove an entity once, even though a client could have queued it for updates multiple times
-        if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end()) {
+        if (RemovedEntities.find(PendingRemoveEntity) == RemovedEntities.end())
+        {
             RemovedEntities.emplace(PendingRemoveEntity);
 
             RemovePendingEntity(PendingRemoves->front());
@@ -1150,10 +1287,12 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
 void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
 {
-    if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr) {
+    if (FindSpaceEntityById(EntityToAdd->GetId()) == nullptr)
+    {
         Entities.Append(EntityToAdd);
 
-        switch (EntityToAdd->GetEntityType()) {
+        switch (EntityToAdd->GetEntityType())
+        {
         case SpaceEntityType::Avatar:
             Avatars.Append(EntityToAdd);
             OnAvatarAdd(EntityToAdd, Avatars);
@@ -1164,7 +1303,9 @@ void SpaceEntitySystem::AddPendingEntity(SpaceEntity* EntityToAdd)
             OnObjectAdd(EntityToAdd, Objects);
             break;
         }
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_MSG("Attempted to add a pending entity that we already have!");
     }
 }
@@ -1173,7 +1314,8 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 {
     assert(Entities.Contains(EntityToRemove));
 
-    switch (EntityToRemove->GetEntityType()) {
+    switch (EntityToRemove->GetEntityType())
+    {
     case SpaceEntityType::Avatar:
         assert(Avatars.Contains(EntityToRemove));
         OnAvatarRemove(EntityToRemove, Avatars);
@@ -1201,7 +1343,8 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 
 void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
 {
-    if (ElectionManager != nullptr) {
+    if (ElectionManager != nullptr)
+    {
         // Note we are assuming Avatar==Client,
         // which is true now but may not be in the future
         ElectionManager->OnClientAdd(Avatar, Avatars);
@@ -1210,21 +1353,24 @@ void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntity
 
 void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
 {
-    if (ElectionManager != nullptr) {
+    if (ElectionManager != nullptr)
+    {
         ElectionManager->OnClientRemove(Avatar, Avatars);
     }
 }
 
 void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Objects)
 {
-    if (ElectionManager != nullptr) {
+    if (ElectionManager != nullptr)
+    {
         ElectionManager->OnObjectAdd(Object, Objects);
     }
 }
 
 void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Objects)
 {
-    if (ElectionManager != nullptr) {
+    if (ElectionManager != nullptr)
+    {
         ElectionManager->OnObjectRemove(Object, Objects);
     }
 }
@@ -1233,58 +1379,69 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
     const SpaceTransform& InSpaceTransform, EntityCreatedCallback Callback)
 {
     const std::function LocalIDCallback
-        = [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except) {
-              try {
-                  if (Except) {
-                      std::rethrow_exception(Except);
-                  }
-              } catch (const std::exception& e) {
-                  CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
-                  Callback(nullptr);
-              }
+        = [this, InName, InParent, InSpaceTransform, Callback](const signalr::value& Result, const std::exception_ptr& Except)
+    {
+        try
+        {
+            if (Except)
+            {
+                std::rethrow_exception(Except);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to generate object ID. Exception: %s", e.what());
+            Callback(nullptr);
+        }
 
-              auto* NewObject = CSP_NEW SpaceEntity(this);
-              NewObject->Type = SpaceEntityType::Object;
-              auto ID = ParseGenerateObjectIDsResult(Result);
-              NewObject->Id = ID;
-              NewObject->Name = InName;
-              NewObject->Transform = InSpaceTransform;
-              NewObject->OwnerId = MultiplayerConnectionInst->GetClientId();
-              NewObject->IsTransferable = true;
+        auto* NewObject = CSP_NEW SpaceEntity(this);
+        NewObject->Type = SpaceEntityType::Object;
+        auto ID = ParseGenerateObjectIDsResult(Result);
+        NewObject->Id = ID;
+        NewObject->Name = InName;
+        NewObject->Transform = InSpaceTransform;
+        NewObject->OwnerId = MultiplayerConnectionInst->GetClientId();
+        NewObject->IsTransferable = true;
 
-              if (InParent.HasValue()) {
-                  NewObject->SetParentId(*InParent);
-              }
+        if (InParent.HasValue())
+        {
+            NewObject->SetParentId(*InParent);
+        }
 
-              SignalRMsgPackEntitySerialiser Serialiser;
+        SignalRMsgPackEntitySerialiser Serialiser;
 
-              NewObject->Serialise(Serialiser);
-              const auto SerialisedObject = Serialiser.Finalise();
+        NewObject->Serialise(Serialiser);
+        const auto SerialisedObject = Serialiser.Finalise();
 
-              const std::vector InvokeArguments = { SerialisedObject };
+        const std::vector InvokeArguments = { SerialisedObject };
 
-              const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
-                  = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except) {
-                        try {
-                            if (Except) {
-                                std::rethrow_exception(Except);
-                            }
-                        } catch (const std::exception& e) {
-                            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
-                            Callback(nullptr);
-                        }
+        const std::function<void(signalr::value, std::exception_ptr)> LocalSendCallback
+            = [this, Callback, NewObject](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        {
+            try
+            {
+                if (Except)
+                {
+                    std::rethrow_exception(Except);
+                }
+            }
+            catch (const std::exception& e)
+            {
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to create object. Exception: %s", e.what());
+                Callback(nullptr);
+            }
 
-                        std::scoped_lock EntitiesLocker(*EntitiesLock);
+            std::scoped_lock EntitiesLocker(*EntitiesLock);
 
-                        ResolveEntityHierarchy(NewObject);
+            ResolveEntityHierarchy(NewObject);
 
-                        Entities.Append(NewObject);
-                        Objects.Append(NewObject);
-                        Callback(NewObject);
-                    };
+            Entities.Append(NewObject);
+            Objects.Append(NewObject);
+            Callback(NewObject);
+        };
 
-              Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
-          };
+        Connection->Invoke("SendObjectMessage", InvokeArguments, LocalSendCallback);
+    };
 
     // ReSharper disable once CppRedundantCastExpression, this is needed for Android builds to play nice
     const signalr::value Param1((uint64_t)1ULL);
@@ -1306,36 +1463,46 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
         bool ShouldUpdateParent = false;
         csp::common::Optional<uint64_t> ParentId = nullptr;
 
-        if (Deserialiser.NextValueIsArray()) {
+        if (Deserialiser.NextValueIsArray())
+        {
             uint32_t size = 0;
             Deserialiser.EnterArray(size);
             {
                 ShouldUpdateParent = Deserialiser.ReadBool();
 
-                if (Deserialiser.NextValueIsNull()) {
+                if (Deserialiser.NextValueIsNull())
+                {
                     Deserialiser.Skip();
-                } else {
+                }
+                else
+                {
                     ParentId = Deserialiser.ReadUInt64();
                 }
             }
             Deserialiser.LeaveArray();
         }
 
-        if (Destroy) {
+        if (Destroy)
+        {
             // Deletion
-            for (int i = 0; i < Entities.Size(); ++i) {
+            for (int i = 0; i < Entities.Size(); ++i)
+            {
                 SpaceEntity* Entity = Entities[i];
 
-                if (Entity->GetId() == EntityID) {
-                    if (Entity->GetEntityType() == SpaceEntityType::Avatar) {
+                if (Entity->GetId() == EntityID)
+                {
+                    if (Entity->GetEntityType() == SpaceEntityType::Avatar)
+                    {
                         // All clients will take ownership of deleted avatars scripts
                         // Last client which receives patch will end up with ownership
                         ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
 
                         // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                         // This covers disconnected clients as their avatar gets cleaned up after timing out.
-                        for (int j = 0; j < Entities.Size(); ++j) {
-                            if (Entities[j]->GetSelectingClientID() == EntityID) {
+                        for (int j = 0; j < Entities.Size(); ++j)
+                        {
+                            if (Entities[j]->GetSelectingClientID() == EntityID)
+                            {
                                 Entities[j]->Deselect();
                                 SelectedEntities.RemoveItem(Entities[j]);
                             }
@@ -1345,12 +1512,16 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
                     LocalDestroyEntity(Entity);
                 }
             }
-        } else {
+        }
+        else
+        {
             bool EntityFound = false;
 
             // Update
-            for (int i = 0; i < Entities.Size(); ++i) {
-                if (Entities[i]->GetId() == EntityID) {
+            for (int i = 0; i < Entities.Size(); ++i)
+            {
+                if (Entities[i]->GetId() == EntityID)
+                {
                     EntityFound = true;
                     Entities[i]->ShouldUpdateParent = ShouldUpdateParent;
                     Entities[i]->ParentId = ParentId;
@@ -1359,7 +1530,8 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
                 }
             }
 
-            if (!EntityFound) {
+            if (!EntityFound)
+            {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "Failed to find an entity with ID %d when recieved a patch message.", EntityID);
             }
         }
@@ -1369,11 +1541,15 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 
 void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const std::string& ExceptionDescription)
 {
-    try {
-        if (Except) {
+    try
+    {
+        if (Except)
+        {
             std::rethrow_exception(Except);
         }
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
     }
 }

@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ReflectionSpaceComponent;
 
-class ReflectionSpaceComponentScriptInterface : public ComponentScriptInterface {
+class ReflectionSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     ReflectionSpaceComponentScriptInterface(ReflectionSpaceComponent* InComponent = nullptr);
 

@@ -42,7 +42,8 @@
     {                                                                                                                                                \
         ComponentScriptInterface::Vector2 Vec = { 0, 0 };                                                                                            \
                                                                                                                                                      \
-        if (Component) {                                                                                                                             \
+        if (Component)                                                                                                                               \
+        {                                                                                                                                            \
             csp::common::Vector2 Value = ((COMP*)Component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \
@@ -65,7 +66,8 @@
     {                                                                                                                                                \
         ComponentScriptInterface::Vector3 Vec = { 0, 0, 0 };                                                                                         \
                                                                                                                                                      \
-        if (Component) {                                                                                                                             \
+        if (Component)                                                                                                                               \
+        {                                                                                                                                            \
             csp::common::Vector3 Value = ((COMP*)Component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \
@@ -89,7 +91,8 @@
     {                                                                                                                                                \
         ComponentScriptInterface::Vector4 Vec = { 0, 0, 0, 0 };                                                                                      \
                                                                                                                                                      \
-        if (Component) {                                                                                                                             \
+        if (Component)                                                                                                                               \
+        {                                                                                                                                            \
             csp::common::Vector4 Value = ((COMP*)Component)->Get##NAME();                                                                            \
                                                                                                                                                      \
             Vec[0] = Value.X;                                                                                                                        \

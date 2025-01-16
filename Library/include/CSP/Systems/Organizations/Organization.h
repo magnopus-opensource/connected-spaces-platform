@@ -20,7 +20,8 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -28,16 +29,23 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 // enum class TierNames;
 
 // @ingroup Organization System
 /// @brief Data representation of User Role in Organization.
-enum class EOrganizationRole { Member, Administrator, Owner };
+enum class EOrganizationRole
+{
+    Member,
+    Administrator,
+    Owner
+};
 
 /// @ingroup Organization System
 /// @brief Data representation of a User's Organization invite.
-class CSP_API InviteOrganizationRoleInfo {
+class CSP_API InviteOrganizationRoleInfo
+{
 public:
     InviteOrganizationRoleInfo() = default;
 
@@ -47,7 +55,8 @@ public:
 
 /// @ingroup Organization System
 /// @brief Data representation of a collection of User Organization invites.
-class CSP_API InviteOrganizationRoleCollection {
+class CSP_API InviteOrganizationRoleCollection
+{
 public:
     InviteOrganizationRoleCollection() = default;
 
@@ -58,7 +67,8 @@ public:
 
 /// @ingroup Organization System
 /// @brief Data representation of a User's role within an Organization.
-class CSP_API OrganizationRoleInfo {
+class CSP_API OrganizationRoleInfo
+{
 public:
     OrganizationRoleInfo() = default;
 
@@ -68,7 +78,8 @@ public:
 
 /// @ingroup Organization System
 /// @brief Data representation of an Organization.
-class CSP_API Organization {
+class CSP_API Organization
+{
 public:
     Organization() = default;
     Organization(const Organization& Other) = default;
@@ -84,7 +95,8 @@ public:
 
 /// @ingroup Organization System
 /// @brief Data class used to contain Organization object.
-class CSP_API OrganizationResult : public csp::systems::ResultBase {
+class CSP_API OrganizationResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -109,7 +121,8 @@ private:
 
 /// @ingroup Organization System
 /// @brief Data class used to contain a Users Organization Role Info object.
-class CSP_API OrganizationRolesResult : public csp::systems::ResultBase {
+class CSP_API OrganizationRolesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

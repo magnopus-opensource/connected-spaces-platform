@@ -49,11 +49,13 @@
 #include "ScriptHelpers.h"
 #include "quickjspp.hpp"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
-class EntitySystemScriptInterface {
+class EntitySystemScriptInterface
+{
 public:
     EntitySystemScriptInterface(SpaceEntitySystem* InEntitySystem = nullptr)
         : EntitySystem(InEntitySystem)
@@ -64,10 +66,12 @@ public:
     {
         std::vector<uint64_t> EntityIds;
 
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i) {
+            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
 
                 uint64_t Id = Entity->GetId();
@@ -84,10 +88,12 @@ public:
     {
         std::vector<EntityScriptInterface*> Entities;
 
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i) {
+            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
                 Entities.push_back(Entity->GetScriptInterface());
             }
@@ -102,8 +108,10 @@ public:
     {
         std::vector<EntityScriptInterface*> Objects;
 
-        if (EntitySystem) {
-            for (size_t i = 0; i < EntitySystem->GetNumObjects(); ++i) {
+        if (EntitySystem)
+        {
+            for (size_t i = 0; i < EntitySystem->GetNumObjects(); ++i)
+            {
                 SpaceEntity* Entity = EntitySystem->GetObjectByIndex(i);
                 Objects.push_back(Entity->GetScriptInterface());
             }
@@ -116,8 +124,10 @@ public:
     {
         std::vector<EntityScriptInterface*> Avatars;
 
-        if (EntitySystem) {
-            for (size_t i = 0; i < EntitySystem->GetNumAvatars(); ++i) {
+        if (EntitySystem)
+        {
+            for (size_t i = 0; i < EntitySystem->GetNumAvatars(); ++i)
+            {
                 SpaceEntity* Entity = EntitySystem->GetAvatarByIndex(i);
                 Avatars.push_back(Entity->GetScriptInterface());
             }
@@ -130,12 +140,15 @@ public:
     {
         int32_t IndexOfEntity = -1;
 
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i) {
+            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            {
                 const SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId) {
+                if (Entity->GetId() == EntityId)
+                {
                     IndexOfEntity = static_cast<int32_t>(i);
                     break;
                 }
@@ -150,12 +163,15 @@ public:
     EntityScriptInterface* GetEntityById(int64_t EntityId)
     {
         EntityScriptInterface* ScriptInterface;
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i) {
+            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetId() == EntityId) {
+                if (Entity->GetId() == EntityId)
+                {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;
                 }
@@ -170,12 +186,15 @@ public:
     EntityScriptInterface* GetEntityByName(std::string EntityName)
     {
         EntityScriptInterface* ScriptInterface;
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i) {
+            for (size_t i = 0; i < EntitySystem->GetNumEntities(); ++i)
+            {
                 SpaceEntity* Entity = EntitySystem->GetEntityByIndex(i);
-                if (Entity->GetName() == EntityName.c_str()) {
+                if (Entity->GetName() == EntityName.c_str())
+                {
                     ScriptInterface = Entity->GetScriptInterface();
                     break;
                 }
@@ -190,10 +209,12 @@ public:
     std::vector<EntityScriptInterface*> GetRootHierarchyEntities()
     {
         std::vector<EntityScriptInterface*> RootHierarchyEntities;
-        if (EntitySystem) {
+        if (EntitySystem)
+        {
             EntitySystem->LockEntityUpdate();
 
-            for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i) {
+            for (int i = 0; i < EntitySystem->GetRootHierarchyEntities()->Size(); ++i)
+            {
                 SpaceEntity* Entity = (*EntitySystem->GetRootHierarchyEntities())[i];
                 RootHierarchyEntities.push_back(Entity->GetScriptInterface());
             }
@@ -214,7 +235,8 @@ void EntityScriptLog(qjs::rest<std::string> Args)
 {
     std::stringstream Str;
 
-    for (auto const& Arg : Args) {
+    for (auto const& Arg : Args)
+    {
         Str << Arg << " ";
     }
 
@@ -236,7 +258,8 @@ EntityScriptBinding* EntityScriptBinding::BindEntitySystem(SpaceEntitySystem* In
 
 void EntityScriptBinding::RemoveBinding(EntityScriptBinding* InEntityBinding)
 {
-    if (csp::CSPFoundation::GetIsInitialised()) {
+    if (csp::CSPFoundation::GetIsInitialised())
+    {
         csp::systems::ScriptSystem* ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
         ScriptSystem->UnregisterScriptBinding(InEntityBinding);
     }
@@ -499,7 +522,8 @@ void BindComponents(qjs::Context::Module* Module)
 
 void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* ScriptSystem)
 {
-    if (ScriptSystem == nullptr) {
+    if (ScriptSystem == nullptr)
+    {
         ScriptSystem = csp::systems::SystemsManager::Get().GetScriptSystem();
     }
 

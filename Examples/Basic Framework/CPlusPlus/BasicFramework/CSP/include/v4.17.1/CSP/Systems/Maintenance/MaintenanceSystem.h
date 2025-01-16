@@ -20,25 +20,29 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Maintenance System
 /// @brief Public facing system that allows interfacing with the Maintenance Window Server.
 /// This system can be used to query if there is currently a planned outage
 /// and can also be used to check for up coming maintenances outages
-class CSP_API CSP_NO_DISPOSE MaintenanceSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE MaintenanceSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

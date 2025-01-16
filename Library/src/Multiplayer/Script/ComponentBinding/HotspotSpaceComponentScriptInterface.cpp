@@ -19,7 +19,8 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 HotspotSpaceComponentScriptInterface::HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)

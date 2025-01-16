@@ -24,7 +24,8 @@
 #include <atomic>
 #include <chrono>
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
@@ -37,7 +38,8 @@ class WebClient;
 // - redefine the macro
 #pragma push_macro("DELETE")
 #undef DELETE
-enum class ERequestVerb : uint8_t {
+enum class ERequestVerb : uint8_t
+{
     Get = 0,
     Put = 1,
     Post = 2,
@@ -56,7 +58,8 @@ enum class ERequestVerb : uint8_t {
 constexpr uint32_t DefaultNumRequestRetries = 4;
 constexpr uint32_t DefaultRetriesDelayInMs = 100;
 
-class HttpRequest {
+class HttpRequest
+{
 public:
     HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload, IHttpResponseHandler* ResponseCallback,
         csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync = true);

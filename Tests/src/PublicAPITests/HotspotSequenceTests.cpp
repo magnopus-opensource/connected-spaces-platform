@@ -27,7 +27,8 @@
 
 #include <iostream>
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -44,13 +45,15 @@ void CreateHotspotgroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
         EXPECT_EQ(group.Name, GroupName);
         EXPECT_EQ(group.Items.Size(), Items.Size());
 
-        for (int i = 0; i < group.Items.Size(); ++i) {
+        for (int i = 0; i < group.Items.Size(); ++i)
+        {
             EXPECT_EQ(group.Items[i], Items[i]);
         }
 
@@ -77,7 +80,8 @@ void GetHotpotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSystem, 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
     csp::systems::HotspotGroup group = Result.GetHotspotGroup();
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         Group = group;
     }
 }
@@ -93,13 +97,15 @@ void UpdateHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::HotspotGroup group = Result.GetHotspotGroup();
 
         EXPECT_EQ(group.Name, GroupName);
         EXPECT_EQ(group.Items.Size(), Items.Size());
 
-        for (int i = 0; i < group.Items.Size(); ++i) {
+        for (int i = 0; i < group.Items.Size(); ++i)
+        {
             EXPECT_EQ(group.Items[i], Items[i]);
         }
 
@@ -118,7 +124,8 @@ void RenameHotspotGroup(csp::systems::HotspotSequenceSystem* HotspotSequenceSyst
     EXPECT_EQ(Result.GetResultCode(), ExpectedResultCode);
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-    if (ExpectedResultCode == csp::systems::EResultCode::Success) {
+    if (ExpectedResultCode == csp::systems::EResultCode::Success)
+    {
         csp::systems::HotspotGroup group = Result.GetHotspotGroup();
         EXPECT_EQ(group.Name, NewGroupName);
 
@@ -143,8 +150,10 @@ void CompareGroups(const csp::systems::HotspotGroup& S1, const csp::systems::Hot
 {
     EXPECT_EQ(S1.Name, S2.Name);
     EXPECT_EQ(S1.Items.Size(), S2.Items.Size());
-    if (S1.Items.Size() == S2.Items.Size()) {
-        for (int i = 0; i < S1.Items.Size(); ++i) {
+    if (S1.Items.Size() == S2.Items.Size())
+    {
+        for (int i = 0; i < S1.Items.Size(); ++i)
+        {
             EXPECT_EQ(S1.Items[i], S2.Items[i]);
         }
     }
@@ -187,7 +196,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
     bool CallbackCalled = false;
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params) {
+        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+        {
             EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
             EXPECT_EQ(Params.SpaceId, Space.Id);
             EXPECT_EQ(Params.Name, TestGroupName);
@@ -202,7 +212,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
     // Validate sequence deletion events.
     HotspotSystem->SetHotspotSequenceChangedCallback(
-        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params) {
+        [&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
+        {
             EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
             EXPECT_EQ(Params.SpaceId, Space.Id);
             EXPECT_EQ(Params.Name, TestGroupName);
@@ -372,23 +383,28 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
     auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-    HotspotSystem->SetHotspotSequenceChangedCallback([&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
-                                                         const csp::multiplayer::SequenceHotspotChangedParams& Params) {
-        // When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
-        // The second is an update, as CSP will also update the group's metadata to reflect the new name.
-        if (Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Rename) {
-            // With rename events, we expect to be able to receive both the old and new names.
-            EXPECT_EQ(Params.Name, OldTestGroupName);
-            EXPECT_EQ(Params.NewName, NewTestGroupName);
+    HotspotSystem->SetHotspotSequenceChangedCallback(
+        [&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
+            const csp::multiplayer::SequenceHotspotChangedParams& Params)
+        {
+            // When renaming a hotspot group, we expect two callbacks - the first is the rename of the group.
+            // The second is an update, as CSP will also update the group's metadata to reflect the new name.
+            if (Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Rename)
+            {
+                // With rename events, we expect to be able to receive both the old and new names.
+                EXPECT_EQ(Params.Name, OldTestGroupName);
+                EXPECT_EQ(Params.NewName, NewTestGroupName);
 
-            ReceivedRenameCallback = true;
-        } else if (Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update) {
-            EXPECT_EQ(Params.Name, NewTestGroupName);
-            ReceivedUpdateCallback = true; // Both the rename and update callbacks have now fired. That's all the expected events.
-        }
+                ReceivedRenameCallback = true;
+            }
+            else if (Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+            {
+                EXPECT_EQ(Params.Name, NewTestGroupName);
+                ReceivedUpdateCallback = true; // Both the rename and update callbacks have now fired. That's all the expected events.
+            }
 
-        EXPECT_EQ(Params.SpaceId, Space.Id);
-    });
+            EXPECT_EQ(Params.SpaceId, Space.Id);
+        });
 
     RenameHotspotGroup(HotspotSystem, OldTestGroupName, NewTestGroupName, HotspotGroup);
     EXPECT_EQ(HotspotGroup.Name, NewTestGroupName);
@@ -544,7 +560,8 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
     // Get the sequence we just created
     GetHotspotGroups(HotspotSystem, ExpectedGroupNames, RetrievedGroups);
     EXPECT_EQ(RetrievedGroups.Size(), RetrievedGroups.Size());
-    for (size_t i = 0; i < ExpectedGroups.Size(); i++) {
+    for (size_t i = 0; i < ExpectedGroups.Size(); i++)
+    {
         CompareGroups(RetrievedGroups[i], ExpectedGroups[i]);
     }
 
@@ -686,10 +703,14 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 
     CreatedObject->SetUpdateCallback(
         [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
-            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ObjectName) {
-                for (size_t i = 0; i < UpdateInfo.Size(); ++i) {
-                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add) {
+            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ObjectName)
+            {
+                for (size_t i = 0; i < UpdateInfo.Size(); ++i)
+                {
+                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add)
+                    {
                         ComponentAdded = true;
                     }
                 }
@@ -735,11 +756,15 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
         bool SequencesUpdated = false;
 
         auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
-                      const csp::multiplayer::SequenceHotspotChangedParams& Params) {
-            if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete) {
+                      const csp::multiplayer::SequenceHotspotChangedParams& Params)
+        {
+            if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
+            {
                 // Ensure we delete the group which only has one item
                 SequenceDeleted = true;
-            } else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update) {
+            }
+            else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+            {
                 // Ensure we update the sequence that has multiple items
                 SequenceUpdate = true;
             }
@@ -824,10 +849,14 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 
     CreatedObject->SetUpdateCallback(
         [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
-            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ObjectName) {
-                for (size_t i = 0; i < UpdateInfo.Size(); ++i) {
-                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add) {
+            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ObjectName)
+            {
+                for (size_t i = 0; i < UpdateInfo.Size(); ++i)
+                {
+                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add)
+                    {
                         ComponentAdded = true;
                     }
                 }
@@ -873,11 +902,15 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
         bool SequencesUpdated = false;
 
         auto CB = [TestGroupName1, TestGroupName2, &SequenceDeleted, &SequenceUpdate, &SequencesUpdated](
-                      const csp::multiplayer::SequenceHotspotChangedParams& Params) {
-            if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete) {
+                      const csp::multiplayer::SequenceHotspotChangedParams& Params)
+        {
+            if (Params.Name == TestGroupName1 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Delete)
+            {
                 // Ensure we delete the group which only has one item
                 SequenceDeleted = true;
-            } else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update) {
+            }
+            else if (Params.Name == TestGroupName2 && Params.UpdateType == csp::multiplayer::ESequenceUpdateType::Update)
+            {
                 // Ensure we update the sequence that has multiple items
                 SequenceUpdate = true;
             }
@@ -960,10 +993,14 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 
     CreatedObject->SetUpdateCallback(
         [&ComponentAdded, ObjectName](csp::multiplayer::SpaceEntity* Entity, csp::multiplayer::SpaceEntityUpdateFlags Flags,
-            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ObjectName) {
-                for (size_t i = 0; i < UpdateInfo.Size(); ++i) {
-                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add) {
+            csp::common::Array<csp::multiplayer::ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ObjectName)
+            {
+                for (size_t i = 0; i < UpdateInfo.Size(); ++i)
+                {
+                    if (UpdateInfo[i].UpdateType == csp::multiplayer::ComponentUpdateType::Add)
+                    {
                         ComponentAdded = true;
                     }
                 }

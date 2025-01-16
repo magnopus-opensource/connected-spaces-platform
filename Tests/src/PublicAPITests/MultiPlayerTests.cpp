@@ -47,7 +47,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 void InitialiseTestingConnection();
 void OnConnect();
@@ -95,7 +96,8 @@ void InitialiseTestingConnection()
 
 void SetRandomProperties(SpaceEntity* User, SpaceEntitySystem* EntitySystem)
 {
-    if (User == nullptr) {
+    if (User == nullptr)
+    {
         return;
     }
 
@@ -128,17 +130,20 @@ void OnConnect(SpaceEntitySystem* EntitySystem)
     AvatarState UserState = AvatarState::Idle;
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-    EntitySystem->CreateAvatar(UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode, [EntitySystem](SpaceEntity* NewAvatar) {
-        EXPECT_NE(NewAvatar, nullptr);
+    EntitySystem->CreateAvatar(UserName, UserTransform, UserState, UserAvatarId, UserAvatarPlayMode,
+        [EntitySystem](SpaceEntity* NewAvatar)
+        {
+            EXPECT_NE(NewAvatar, nullptr);
 
-        std::cerr << "CreateAvatar Local Callback" << std::endl;
+            std::cerr << "CreateAvatar Local Callback" << std::endl;
 
-        EXPECT_EQ(NewAvatar->GetEntityType(), SpaceEntityType::Avatar);
+            EXPECT_EQ(NewAvatar->GetEntityType(), SpaceEntityType::Avatar);
 
-        if (NewAvatar->GetEntityType() == SpaceEntityType::Avatar) {
-            OnUserCreated(NewAvatar, EntitySystem);
-        }
-    });
+            if (NewAvatar->GetEntityType() == SpaceEntityType::Avatar)
+            {
+                OnUserCreated(NewAvatar, EntitySystem);
+            }
+        });
 }
 
 void OnDisconnect(bool ok)
@@ -160,32 +165,40 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
     TestUser = InUser;
     TestUser->SetUpdateCallback(
-        [InUser](SpaceEntity* UpdatedUser, SpaceEntityUpdateFlags InUpdateFlags, csp::common::Array<ComponentUpdateInfo> InComponentUpdateInfoArray) {
-            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_NAME) {
+        [InUser](SpaceEntity* UpdatedUser, SpaceEntityUpdateFlags InUpdateFlags, csp::common::Array<ComponentUpdateInfo> InComponentUpdateInfoArray)
+        {
+            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_NAME)
+            {
                 std::cerr << "Name Updated: " << UpdatedUser->GetName() << std::endl;
             }
 
-            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION) {
+            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_POSITION)
+            {
                 std::cerr << "Position Updated: X:" << UpdatedUser->GetPosition().X << " Y:" << UpdatedUser->GetPosition().Y
                           << " Z:" << UpdatedUser->GetPosition().Z << std::endl;
             }
 
-            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION) {
+            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_ROTATION)
+            {
                 std::cerr << "Rotation Updated: X:" << UpdatedUser->GetRotation().X << " Y:" << UpdatedUser->GetRotation().Y
                           << " Z:" << UpdatedUser->GetRotation().Z << " W:" << UpdatedUser->GetRotation().W << std::endl;
             }
 
-            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS) {
-                for (int i = 0; i < InComponentUpdateInfoArray.Size(); ++i) {
+            if (InUpdateFlags & SpaceEntityUpdateFlags::UPDATE_FLAGS_COMPONENTS)
+            {
+                for (int i = 0; i < InComponentUpdateInfoArray.Size(); ++i)
+                {
                     uint16_t ComponentID = InComponentUpdateInfoArray[i].ComponentId;
 
-                    if (ComponentID < csp::multiplayer::COMPONENT_KEYS_START_VIEWS) {
+                    if (ComponentID < csp::multiplayer::COMPONENT_KEYS_START_VIEWS)
+                    {
                         std::cerr << "Component Updated: ID: " << ComponentID << std::endl;
 
                         const csp::common::Map<uint32_t, ReplicatedValue>& Properties = *UpdatedUser->GetComponent(ComponentID)->GetProperties();
                         const csp::common::Array<uint32_t>* PropertyKeys = Properties.Keys();
 
-                        for (int j = 0; j < PropertyKeys->Size(); ++j) {
+                        for (int j = 0; j < PropertyKeys->Size(); ++j)
+                        {
                             if (j >= 3) // We only randomise the first 3 properties, so we don't really need to print any more
                             {
                                 break;
@@ -196,7 +209,8 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
 
                             const ReplicatedValue& Property = Properties[PropertyID];
 
-                            switch (Property.GetReplicatedValueType()) {
+                            switch (Property.GetReplicatedValueType())
+                            {
                             case ReplicatedValueType::Integer:
                                 std::cerr << "\tValue: " << Property.GetInt() << std::endl;
                                 break;
@@ -227,17 +241,21 @@ void OnUserCreated(SpaceEntity* InUser, SpaceEntitySystem* EntitySystem)
                 }
             }
 
-            if (InUser == TestUser) {
+            if (InUser == TestUser)
+            {
                 ReceivedEntityUpdatesCount++;
                 IsReadyForUpdate = true;
             }
         });
 
-    TestUser->SetDestroyCallback([](bool Ok) {
-        if (Ok) {
-            std::cerr << "Destroy Callback Complete!" << std::endl;
-        }
-    });
+    TestUser->SetDestroyCallback(
+        [](bool Ok)
+        {
+            if (Ok)
+            {
+                std::cerr << "Destroy Callback Complete!" << std::endl;
+            }
+        });
 
     std::cerr << "OnUserCreated" << std::endl;
 
@@ -395,7 +413,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRKeepAliveTest)
     WaitForTestTimeoutCountMs = 0;
     int KeepAliveInterval = 200;
 
-    while (WaitForTestTimeoutCountMs < KeepAliveInterval) {
+    while (WaitForTestTimeoutCountMs < KeepAliveInterval)
+    {
         std::this_thread::sleep_for(20ms);
         WaitForTestTimeoutCountMs += 20;
     }
@@ -455,21 +474,27 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityReplicationTest)
 
     WaitForTestTimeoutCountMs = 0;
 
-    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!IsTestComplete && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         EntitySystem->ProcessPendingEntityOperations();
 
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
 
-        if (ReceivedEntityUpdatesCount < NumberOfEntityUpdateTicks) {
-            if (IsReadyForUpdate) {
+        if (ReceivedEntityUpdatesCount < NumberOfEntityUpdateTicks)
+        {
+            if (IsReadyForUpdate)
+            {
                 SetRandomProperties(TestUser, EntitySystem);
             }
-        } else if (ReceivedEntityUpdatesCount == NumberOfEntityUpdateTicks && IsReadyForUpdate) // Send a final update that doesn't change the data
+        }
+        else if (ReceivedEntityUpdatesCount == NumberOfEntityUpdateTicks && IsReadyForUpdate) // Send a final update that doesn't change the data
         {
             IsReadyForUpdate = false;
             EntitySystem->QueueEntityUpdate(TestUser);
-        } else {
+        }
+        else
+        {
             IsTestComplete = true;
         }
     }
@@ -525,7 +550,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
 
     auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
 
-    if (FlagSetResult == ErrorCode::None) {
+    if (FlagSetResult == ErrorCode::None)
+    {
         csp::common::String ObjectName = "Object 1";
         SpaceTransform ObjectTransform
             = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
@@ -546,9 +572,12 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
         bool EntityUpdated = false;
 
         CreatedObject->SetUpdateCallback(
-            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-                if (Entity->GetName() == "Object 1") {
-                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE) {
+            [&EntityUpdated](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == "Object 1")
+                {
+                    if (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_SCALE)
+                    {
                         std::cerr << "Scale Updated" << std::endl;
                         EntityUpdated = true;
                     }
@@ -557,7 +586,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SelfReplicationTest)
         CreatedObject->SetScale(csp::common::Vector3 { 3.0f, 3.0f, 3.0f });
         CreatedObject->QueueUpdate();
 
-        while (!EntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+        while (!EntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+        {
             EntitySystem->ProcessPendingEntityOperations();
             std::this_thread::sleep_for(50ms);
             WaitForTestTimeoutCountMs += 50;
@@ -795,16 +825,19 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
     std::array<std::future<void>, 2> ReadyForAssertionsFutures = { Runners[0].ReadyForAssertionsFuture(), Runners[1].ReadyForAssertionsFuture() };
 
     // Start all the MultiplayerTestRunners
-    for (auto& Runner : Runners) {
+    for (auto& Runner : Runners)
+    {
         Runner.StartProcess();
     }
 
     // Wait until the processes have reached the point where we're ready to assert
-    for (auto& Future : ReadyForAssertionsFutures) {
+    for (auto& Future : ReadyForAssertionsFutures)
+    {
         // Just being safe here, so we dont hang forever in case of catastrophe.
         auto Status = Future.wait_for(std::chrono::seconds(60));
 
-        if (Status == std::future_status::timeout) {
+        if (Status == std::future_status::timeout)
+        {
             FAIL("CreateAvatar process timed out before it was ready for assertions.");
         }
     }
@@ -1009,7 +1042,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     StaticModelComponent->SetExternalResourceAssetId(ModelAssetId);
     Object->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -1035,7 +1069,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectAddComponentTest)
     ImageComponent->SetImageAssetId(ImageAssetId);
     Object->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -1113,7 +1148,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
     ImageComponent->SetImageAssetId("TestID");
     Object->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -1138,7 +1174,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 
     Object->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -1167,7 +1204,8 @@ csp::multiplayer::MultiplayerConnection* Connection;
 
 void OnEntityUpdate(Entity* Object, EntityUpdateType UpdateType)
 {
-    if (UpdateType == EntityUpdateType::Delete) {
+    if (UpdateType == EntityUpdateType::Delete)
+    {
         std::cerr << "Got ObjectDelete: " << Object->GetId() << std::endl;
 
         return;
@@ -1179,8 +1217,10 @@ void OnEntityUpdate(Entity* Object, EntityUpdateType UpdateType)
 
     std::cerr << "Got ObjectUpdate: " << Object->GetId() << "(" << Pos.X << ", " << Pos.Y << ", " << Pos.Z << ") [";
 
-    for (int i = 0; i < RepVals.Size(); ++i) {
-        switch (RepVals[i].GetReplicatedValueType()) {
+    for (int i = 0; i < RepVals.Size(); ++i)
+    {
+        switch (RepVals[i].GetReplicatedValueType())
+        {
         case csp::multiplayer::ReplicatedValueType::Boolean:
             std::cerr << RepVals[i].GetBool() << ", ";
             break;
@@ -1220,10 +1260,12 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 
     Connection = new MultiplayerConnection(SpaceId.c_str());
 
-    Connection->RegisterEntityCreatedCallback([](Entity* Object) {
-        OnEntityUpdate(Object, EntityUpdateType::Update);
-        Object->SetRemoteUpdateCallback(OnEntityUpdate);
-    });
+    Connection->RegisterEntityCreatedCallback(
+        [](Entity* Object)
+        {
+            OnEntityUpdate(Object, EntityUpdateType::Update);
+            Object->SetRemoteUpdateCallback(OnEntityUpdate);
+        });
 
     time_t _time;
     srand((unsigned int)time(&_time));
@@ -1242,7 +1284,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 
     EXPECT_TRUE(Object != nullptr);
 
-    if (Object == nullptr) {
+    if (Object == nullptr)
+    {
         return;
     }
 
@@ -1253,13 +1296,15 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
 
     EXPECT_TRUE(Ok);
 
-    if (!Ok) {
+    if (!Ok)
+    {
         return;
     }
 
     std::cerr << "Object sent: " << Object->GetId() << std::endl;
 
-    for (;;) {
+    for (;;)
+    {
         auto c = _getch();
 
         if (c == 0x1B) // Escape
@@ -1271,31 +1316,36 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, InteractiveMovementTest)
         {
             c = _getch();
 
-            switch (c) {
+            switch (c)
+            {
             case 0x48: // Up Arrow
             {
                 EntityTransform Transform(Object->GetTransform());
                 ++Transform.Position.Z;
                 Object->SetTransform(Transform);
-            } break;
+            }
+            break;
             case 0x4B: // Left Arrow
             {
                 EntityTransform Transform(Object->GetTransform());
                 --Transform.Position.X;
                 Object->SetTransform(Transform);
-            } break;
+            }
+            break;
             case 0x4D: // Right Arrow
             {
                 EntityTransform Transform(Object->GetTransform());
                 ++Transform.Position.X;
                 Object->SetTransform(Transform);
-            } break;
+            }
+            break;
             case 0x50: // Down Arrow
             {
                 EntityTransform Transform(Object->GetTransform());
                 --Transform.Position.Z;
                 Object->SetTransform(Transform);
-            } break;
+            }
+            break;
             }
 
             Awaitable(&MultiplayerConnection::UpdateEntity, Connection, Object).Await();
@@ -1367,7 +1417,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     float TestTime = 0;
 
     // Interrupt connection here
-    while (!Interrupted && TestTime < 60) {
+    while (!Interrupted && TestTime < 60)
+    {
         std::this_thread::sleep_for(50ms);
 
         SetRandomProperties(Avatar);
@@ -1532,7 +1583,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntitySelectionTest)
 #endif
 
 // Derived type that allows us to access protected members of SpaceEntitySystem
-class InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem {
+class InternalSpaceEntitySystem : public csp::multiplayer::SpaceEntitySystem
+{
     ~InternalSpaceEntitySystem();
 
 public:
@@ -1591,7 +1643,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
     SpaceTransform Transform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
 
-    for (size_t i = 0; i < NUM_ENTITIES_TO_CREATE; ++i) {
+    for (size_t i = 0; i < NUM_ENTITIES_TO_CREATE; ++i)
+    {
         csp::common::String Name = ENTITY_NAME_PREFIX;
         Name.Append(std::to_string(i).c_str());
 
@@ -1619,7 +1672,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManyEntitiesTest)
 
     EntitySystem->RetrieveAllEntities();
 
-    while (!GotAllEntities) {
+    while (!GotAllEntities)
+    {
         std::this_thread::sleep_for(100ms);
     }
 
@@ -1832,12 +1886,15 @@ void RunParentEntityReplicationTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity1->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity1->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName1](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
@@ -1872,12 +1929,15 @@ void RunParentEntityReplicationTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity2->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity2->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName2](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
 
@@ -1906,12 +1966,15 @@ void RunParentEntityReplicationTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity1->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity1->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName1](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity1->RemoveParentEntity();
 
@@ -1938,12 +2001,15 @@ void RunParentEntityReplicationTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity2->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity2->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName2](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity2->RemoveParentEntity();
 
@@ -1965,7 +2031,8 @@ void RunParentEntityReplicationTest(bool Local)
         EXPECT_EQ(EntitySystem->GetRootHierarchyEntities()->Size(), 3);
     }
 
-    if (!Local) {
+    if (!Local)
+    {
         auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
     }
 
@@ -2049,12 +2116,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
 
     bool ChildEntityUpdated = false;
 
-    CreatedChildEntity->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                              csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-        if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-            ChildEntityUpdated = true;
-        }
-    });
+    CreatedChildEntity->SetUpdateCallback(
+        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            {
+                ChildEntityUpdated = true;
+            }
+        });
 
     // Change Parent
     CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
@@ -2062,7 +2131,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalPositionTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
@@ -2145,12 +2215,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
 
     bool ChildEntityUpdated = false;
 
-    CreatedChildEntity->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                              csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-        if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-            ChildEntityUpdated = true;
-        }
-    });
+    CreatedChildEntity->SetUpdateCallback(
+        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            {
+                ChildEntityUpdated = true;
+            }
+        });
 
     // Change Parent
     CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
@@ -2158,7 +2230,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
@@ -2244,12 +2317,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
 
     bool ChildEntityUpdated = false;
 
-    CreatedChildEntity->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                              csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-        if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-            ChildEntityUpdated = true;
-        }
-    });
+    CreatedChildEntity->SetUpdateCallback(
+        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            {
+                ChildEntityUpdated = true;
+            }
+        });
 
     // Change Parent
     CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
@@ -2257,7 +2332,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
@@ -2340,12 +2416,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
 
     bool ChildEntityUpdated = false;
 
-    CreatedChildEntity->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                              csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-        if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-            ChildEntityUpdated = true;
-        }
-    });
+    CreatedChildEntity->SetUpdateCallback(
+        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            {
+                ChildEntityUpdated = true;
+            }
+        });
 
     // Change Parent
     CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
@@ -2353,7 +2431,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     CreatedChildEntity->QueueUpdate();
 
     // Wait for update
-    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit) {
+    while (!ChildEntityUpdated && WaitForTestTimeoutCountMs < WaitForTestTimeoutLimit)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(50ms);
         WaitForTestTimeoutCountMs += 50;
@@ -2437,12 +2516,14 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
     bool ChildEntityUpdated = false;
 
-    CreatedChildEntity->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                              csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-        if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-            ChildEntityUpdated = true;
-        }
-    });
+    CreatedChildEntity->SetUpdateCallback(
+        [&ChildEntityUpdated, ChildEntityName](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+        {
+            if (Entity->GetName() == ChildEntityName && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+            {
+                ChildEntityUpdated = true;
+            }
+        });
 
     // Change Parent
     CreatedChildEntity->SetParentId(CreatedParentEntity->GetId());
@@ -2470,7 +2551,8 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ParentEntityEnterSpaceReplicationTe
 
     bool EntitiesCreated = false;
 
-    auto EntitiesReadyCallback = [&EntitiesCreated](bool Success) {
+    auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+    {
         EntitiesCreated = true;
         EXPECT_TRUE(Success);
     };
@@ -2554,12 +2636,15 @@ void RunParentChildDeletionTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity1->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity1->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName1](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
@@ -2584,12 +2669,15 @@ void RunParentChildDeletionTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity2->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity2->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName2](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
         CreatedChildEntity2->QueueUpdate();
@@ -2605,7 +2693,8 @@ void RunParentChildDeletionTest(bool Local)
     {
         bool DestroyCalled = false;
 
-        auto DestroyCb = [&DestroyCalled](bool Success) {
+        auto DestroyCb = [&DestroyCalled](bool Success)
+        {
             DestroyCalled = true;
             EXPECT_TRUE(Success);
         };
@@ -2631,7 +2720,8 @@ void RunParentChildDeletionTest(bool Local)
     {
         bool DestroyCalled = false;
 
-        auto DestroyCb = [&DestroyCalled](bool Success) {
+        auto DestroyCb = [&DestroyCalled](bool Success)
+        {
             DestroyCalled = true;
             EXPECT_TRUE(Success);
         };
@@ -2645,7 +2735,8 @@ void RunParentChildDeletionTest(bool Local)
         EXPECT_EQ(EntitySystem->GetNumEntities(), 1);
         EXPECT_EQ(CreatedChildEntity2->GetParentEntity(), nullptr);
 
-        if (!Local) {
+        if (!Local)
+        {
             auto [FlagSetResult2] = AWAIT(Connection, SetAllowSelfMessagingFlag, false);
         }
 
@@ -2786,12 +2877,15 @@ void RunParentDeletionTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity1->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName1](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity1->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName1](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName1 && (Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT))
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity1->SetParentId(CreatedParentEntity->GetId());
 
@@ -2812,12 +2906,15 @@ void RunParentDeletionTest(bool Local)
     {
         bool ChildEntityUpdated = false;
 
-        CreatedChildEntity2->SetUpdateCallback([&ChildEntityUpdated, ChildEntityName2](SpaceEntity* Entity, SpaceEntityUpdateFlags Flags,
-                                                   csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-            }
-        });
+        CreatedChildEntity2->SetUpdateCallback(
+            [&ChildEntityUpdated, ChildEntityName2](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                }
+            });
 
         CreatedChildEntity2->SetParentId(CreatedParentEntity->GetId());
 
@@ -2834,30 +2931,37 @@ void RunParentDeletionTest(bool Local)
         bool ChildEntityUpdated = false;
         bool ChildEntityUpdated2 = false;
 
-        CreatedChildEntity1->SetUpdateCallback([&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](SpaceEntity* Entity,
-                                                   SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-            if (ChildEntityUpdated) {
-                // Prevent from being called twice when AllowSelfMessaging is on
-                return;
-            }
-
-            if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
-                ChildEntityUpdated = true;
-                // Ensure this is called before both destroy callbacks
-                EXPECT_FALSE(LocalDestroyCalled);
-                EXPECT_FALSE(EntityDestroyCalled);
-            }
-        });
-
-        CreatedChildEntity2->SetUpdateCallback(
-            [&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](
-                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo) {
-                if (ChildEntityUpdated2) {
+        CreatedChildEntity1->SetUpdateCallback(
+            [&ChildEntityUpdated, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName1](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (ChildEntityUpdated)
+                {
                     // Prevent from being called twice when AllowSelfMessaging is on
                     return;
                 }
 
-                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT) {
+                if (Entity->GetName() == ChildEntityName1 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
+                    ChildEntityUpdated = true;
+                    // Ensure this is called before both destroy callbacks
+                    EXPECT_FALSE(LocalDestroyCalled);
+                    EXPECT_FALSE(EntityDestroyCalled);
+                }
+            });
+
+        CreatedChildEntity2->SetUpdateCallback(
+            [&ChildEntityUpdated2, &LocalDestroyCalled, &EntityDestroyCalled, ChildEntityName2](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags Flags, csp::common::Array<ComponentUpdateInfo>& UpdateInfo)
+            {
+                if (ChildEntityUpdated2)
+                {
+                    // Prevent from being called twice when AllowSelfMessaging is on
+                    return;
+                }
+
+                if (Entity->GetName() == ChildEntityName2 && Flags & SpaceEntityUpdateFlags::UPDATE_FLAGS_PARENT)
+                {
                     ChildEntityUpdated2 = true;
                     // Ensure this is called before both destroy callbacks
                     EXPECT_FALSE(LocalDestroyCalled);
@@ -2865,15 +2969,19 @@ void RunParentDeletionTest(bool Local)
                 }
             });
 
-        CreatedParentEntity->SetDestroyCallback([&EntityDestroyCalled](bool Success) {
-            EntityDestroyCalled = true;
-            EXPECT_TRUE(Success);
-        });
+        CreatedParentEntity->SetDestroyCallback(
+            [&EntityDestroyCalled](bool Success)
+            {
+                EntityDestroyCalled = true;
+                EXPECT_TRUE(Success);
+            });
 
-        EntitySystem->DestroyEntity(CreatedParentEntity, [&LocalDestroyCalled](bool Success) {
-            LocalDestroyCalled = true;
-            EXPECT_TRUE(Success);
-        });
+        EntitySystem->DestroyEntity(CreatedParentEntity,
+            [&LocalDestroyCalled](bool Success)
+            {
+                LocalDestroyCalled = true;
+                EXPECT_TRUE(Success);
+            });
 
         WaitForCallbackWithUpdate(LocalDestroyCalled, EntitySystem);
         EXPECT_TRUE(LocalDestroyCalled);
@@ -2909,7 +3017,8 @@ void RunParentDeletionTest(bool Local)
         // Enter space
         bool EntitiesCreated = false;
 
-        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success) {
+        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+        {
             EntitiesCreated = true;
             EXPECT_TRUE(Success);
         };

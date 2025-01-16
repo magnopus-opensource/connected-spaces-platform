@@ -24,7 +24,8 @@
 #include <optional>
 #include <vector>
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Converts csp::common::Array to std::vector.
 /// @param In const Array<T>&
@@ -34,7 +35,8 @@ template <typename T> std::vector<T> Convert(const Array<T>& In)
     std::vector<T> Out;
     Out.reserve(In.Size());
 
-    for (size_t idx = 0; idx < In.Size(); ++idx) {
+    for (size_t idx = 0; idx < In.Size(); ++idx)
+    {
         Out.push_back({ In[idx] });
     }
 
@@ -48,7 +50,8 @@ template <typename T> Array<T> Convert(const std::vector<T>& In)
 {
     Array<T> Out(In.size());
 
-    for (size_t idx = 0; idx < In.size(); ++idx) {
+    for (size_t idx = 0; idx < In.size(); ++idx)
+    {
         Out[idx] = In[idx];
     }
 
@@ -61,7 +64,8 @@ template <typename T1, typename T2> Map<T1, T2> Convert(const std::map<T1, T2>& 
 {
     Map<T1, T2> Out;
 
-    for (auto const& pair : In) {
+    for (auto const& pair : In)
+    {
         Out[pair.first] = pair.second;
     }
 
@@ -76,7 +80,8 @@ template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& 
 
     auto* Keys = In.Keys();
 
-    for (auto idx = 0; idx < Keys->Size(); ++idx) {
+    for (auto idx = 0; idx < Keys->Size(); ++idx)
+    {
         auto Key = (*Keys)[idx];
         auto Value = In[Key];
         Out.insert(std::pair<T1, T2>(Key, Value));
@@ -92,7 +97,8 @@ template <typename T> std::optional<T> Convert(const Optional<T>& In)
 {
     std::optional<T> Out;
 
-    if (In.HasValue()) {
+    if (In.HasValue())
+    {
         Out = *In;
     }
 
@@ -106,7 +112,8 @@ template <typename T> std::optional<std::vector<T>> Convert(const Optional<Array
 {
     std::optional<std::vector<T>> Out;
 
-    if (In.HasValue()) {
+    if (In.HasValue())
+    {
         Out = Convert(*In);
     }
 
@@ -120,7 +127,8 @@ template <typename T1, typename T2> std::optional<std::map<T1, T2>> Convert(cons
 {
     std::optional<std::map<T1, T2>> Out;
 
-    if (In.HasValue()) {
+    if (In.HasValue())
+    {
         Out = Convert(*In);
     }
 

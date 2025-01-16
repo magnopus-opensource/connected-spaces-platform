@@ -40,7 +40,8 @@ class CSPEngine_SerialisationTests_MapDeserialisationTest_Test;
 #endif
 CSP_END_IGNORE
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class SpaceEntitySystem;
 class EntityScript;
 class EntityScriptInterface;
@@ -49,7 +50,8 @@ class EntityScriptInterface;
 ///
 /// Note that this specifically starts from 1 as 0 is reserved for internal purposes.
 /// Any additions should not use 0.
-enum class SpaceEntityType {
+enum class SpaceEntityType
+{
     Avatar = 1,
     Object,
 };
@@ -61,14 +63,16 @@ enum class SpaceEntityType {
 /// Delete means the component has been marked for deletion. It is likely that some other clients will not have the component at the point this is
 /// recieved. Any wrapping data objects should be deleted when this is recieved, and clients should cease updating this component as any call would
 /// fail. The CSP representation of the component has been removed at this point.
-enum class ComponentUpdateType {
+enum class ComponentUpdateType
+{
     Update,
     Add,
     Delete,
 };
 
 /// @brief Info class that specifies a type of update and the ID of a component the update is applied to.
-class CSP_API ComponentUpdateInfo {
+class CSP_API ComponentUpdateInfo
+{
 public:
     uint16_t ComponentId;
     ComponentUpdateType UpdateType;
@@ -77,7 +81,8 @@ public:
 /// @brief Enum used to specify what part of a SpaceEntity was updated when deserialising.
 /// Use this to determine which parts of an entity to copy values from when an update occurs.
 /// It is a bitwise flag enum, so values are additive, the value may represent several flags.
-enum SpaceEntityUpdateFlags {
+enum SpaceEntityUpdateFlags
+{
     UPDATE_FLAGS_NAME = 1,
     UPDATE_FLAGS_POSITION = 2,
     UPDATE_FLAGS_ROTATION = 4,
@@ -90,7 +95,8 @@ enum SpaceEntityUpdateFlags {
 };
 
 /// @brief Primary multiplayer object that can have associated scripts and many multiplayer components created within it.
-class CSP_API SpaceEntity {
+class CSP_API SpaceEntity
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;
@@ -345,7 +351,8 @@ public:
     bool IsModifiable();
 
 private:
-    class DirtyComponent {
+    class DirtyComponent
+    {
     public:
         ComponentBase* Component;
         ComponentUpdateType UpdateType;

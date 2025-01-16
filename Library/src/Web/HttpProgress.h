@@ -17,10 +17,12 @@
 
 #include <atomic>
 
-namespace csp::web {
+namespace csp::web
+{
 
 /// Upload and download progress for large files
-class HttpProgress {
+class HttpProgress
+{
 public:
     HttpProgress();
     ~HttpProgress();

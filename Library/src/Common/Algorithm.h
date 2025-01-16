@@ -22,7 +22,8 @@
 #include <algorithm>
 #include <functional>
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Finds a given value in an array.
 /// @param Array const csp::common::Array<T>& : Array to search
@@ -30,8 +31,10 @@ namespace csp::common {
 /// @return int : Index of first found element or -1 if not found
 template <typename T> int Find(const Array<T>& Array, const T& Value)
 {
-    for (size_t i = 0; i < Array.Size(); ++i) {
-        if (Array[i] == Value) {
+    for (size_t i = 0; i < Array.Size(); ++i)
+    {
+        if (Array[i] == Value)
+        {
             return i;
         }
     }
@@ -47,8 +50,10 @@ template <typename T> int Find(const Array<T>& Array, const T& Value)
 /// @return int : Index of first found element or -1 if not found
 template <typename T, typename F> int FindIf(const Array<T>& Array, const F& Callback)
 {
-    for (size_t i = 0; i < Array.Size(); ++i) {
-        if (Callback(Array[i])) {
+    for (size_t i = 0; i < Array.Size(); ++i)
+    {
+        if (Callback(Array[i]))
+        {
             return static_cast<int>(i);
         }
     }

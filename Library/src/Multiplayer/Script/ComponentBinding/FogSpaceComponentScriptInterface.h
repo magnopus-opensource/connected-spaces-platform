@@ -17,11 +17,13 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class FogSpaceComponent;
 
-class FogSpaceComponentScriptInterface : public ComponentScriptInterface {
+class FogSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent = nullptr);
 

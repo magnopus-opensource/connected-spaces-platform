@@ -7,7 +7,8 @@
 #include <cstring>
 #include <initializer_list>
 
-namespace oly_common {
+namespace oly_common
+{
 
 OLY_START_IGNORE
 template <typename T> class List;
@@ -18,7 +19,8 @@ OLY_END_IGNORE
 /// Simple array type used to pass arrays of objects across the DLL boundary.
 ///
 /// @tparam T Object type to store in the array
-template <typename T> class OLY_API Array {
+template <typename T> class OLY_API Array
+{
 public:
     Array()
         : ArraySize(0)
@@ -30,7 +32,8 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (Size > 0) {
+        if (Size > 0)
+        {
             AllocArray(Size);
         }
     }
@@ -43,7 +46,8 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (Size > 0) {
+        if (Size > 0)
+        {
             AllocArray(Size);
             memcpy(ObjectArray, Buffer, Size * sizeof(T));
         }
@@ -55,10 +59,12 @@ public:
     {
         ArraySize = Other.ArraySize;
 
-        if (ArraySize > 0) {
+        if (ArraySize > 0)
+        {
             AllocArray(ArraySize);
 
-            for (size_t i = 0; i < ArraySize; i++) {
+            for (size_t i = 0; i < ArraySize; i++)
+            {
                 ObjectArray[i] = Other.ObjectArray[i];
             }
         }
@@ -68,10 +74,12 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (List.size() > 0) {
+        if (List.size() > 0)
+        {
             AllocArray(List.size());
 
-            for (size_t i = 0; i < List.size(); ++i) {
+            for (size_t i = 0; i < List.size(); ++i)
+            {
                 ObjectArray[i] = *(List.begin() + i);
             }
         }
@@ -85,17 +93,20 @@ public:
 
     Array<T>& operator=(const Array<T>& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
         ArraySize = Other.ArraySize;
         ObjectArray = nullptr;
 
-        if (ArraySize > 0) {
+        if (ArraySize > 0)
+        {
             AllocArray(ArraySize);
 
-            for (size_t i = 0; i < ArraySize; i++) {
+            for (size_t i = 0; i < ArraySize; i++)
+            {
                 ObjectArray[i] = Other.ObjectArray[i];
             }
         }
@@ -124,10 +135,12 @@ public:
 private:
     void AllocArray(const size_t Size)
     {
-        if (ObjectArray == nullptr) {
+        if (ObjectArray == nullptr)
+        {
             ObjectArray = (T*)oly_memory::DllAlloc(sizeof(T) * Size);
 
-            for (size_t i = 0; i < Size; ++i) {
+            for (size_t i = 0; i < Size; ++i)
+            {
                 T* ObjectPtr = &ObjectArray[i];
                 new (ObjectPtr) T;
             }
@@ -138,8 +151,10 @@ private:
 
     void FreeArray()
     {
-        if (ObjectArray != nullptr) {
-            for (size_t i = 0; i < ArraySize; ++i) {
+        if (ObjectArray != nullptr)
+        {
+            for (size_t i = 0; i < ArraySize; ++i)
+            {
                 T* ObjectPtr = &ObjectArray[i];
                 ObjectPtr->~T();
             }

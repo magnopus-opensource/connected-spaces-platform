@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/CinematicCameraSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 CinematicCameraSpaceComponent::CinematicCameraSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::CinematicCamera, Parent)

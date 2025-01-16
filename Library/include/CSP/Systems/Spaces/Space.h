@@ -25,11 +25,13 @@
 
 #include <functional>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class MultiplayerConnection;
 }
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -37,11 +39,13 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class AssetCollection;
 
-enum class CSP_FLAGS SpaceAttributes : uint8_t {
+enum class CSP_FLAGS SpaceAttributes : uint8_t
+{
     None = 0,
     IsDiscoverable = 1,
     RequiresInvite = 2,
@@ -85,7 +89,8 @@ CSP_END_IGNORE
 
 /// @ingroup Space System
 /// @brief Data representation for a Space that maps to a Magnopus Connected Services 'Lite Group'
-class CSP_API BasicSpace {
+class CSP_API BasicSpace
+{
 public:
     BasicSpace()
         : Attributes(SpaceAttributes::None) {};
@@ -98,7 +103,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of a Space which maps to a UserService Group.
-class CSP_API Space : public BasicSpace {
+class CSP_API Space : public BasicSpace
+{
 public:
     Space() = default;
     Space(const Space& Other) = default;
@@ -119,7 +125,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of the geo location of a space
-class CSP_API SpaceGeoLocation {
+class CSP_API SpaceGeoLocation
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class SpaceGeoLocationResult;
@@ -141,7 +148,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get a space.
-class CSP_API SpaceResult : public csp::systems::ResultBase {
+class CSP_API SpaceResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -181,7 +189,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class CSP_API SpacesResult : public csp::systems::ResultBase {
+class CSP_API SpacesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -210,7 +219,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to update the Space details.
-class CSP_API BasicSpaceResult : public csp::systems::ResultBase {
+class CSP_API BasicSpaceResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -231,7 +241,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class CSP_API BasicSpacesResult : public csp::systems::ResultBase {
+class CSP_API BasicSpacesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -266,7 +277,8 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve the Space metadata information.
-class CSP_API SpaceMetadataResult : public csp::systems::ResultBase {
+class CSP_API SpaceMetadataResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -297,7 +309,8 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve multiple Spaces metadata information.
-class CSP_API SpacesMetadataResult : public csp::systems::ResultBase {
+class CSP_API SpacesMetadataResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -325,7 +338,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain the obfuscated email addresses of the users that have not yet accepted the space invites
-class CSP_API PendingInvitesResult : public csp::systems::ResultBase {
+class CSP_API PendingInvitesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -352,7 +366,8 @@ private:
 /// @ingroup Space System
 /// @brief Data class used to contain the outcome of space geo location operations.
 /// The result can be successful and still return no geo location if one does not exist.
-class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase {
+class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class PointOfInterestSystem;
@@ -385,7 +400,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Collection result to be used only by the PointOfInterestSystem
-class SpaceGeoLocationCollectionResult : public csp::systems::ResultBase {
+class SpaceGeoLocationCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class PointOfInterestSystem;
 

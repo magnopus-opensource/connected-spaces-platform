@@ -32,7 +32,8 @@ typedef std::list<int, ListAllocator> StlList;
 
 CSP_INTERNAL_TEST(CSPEngine, MemoryTests, AllocationTest)
 {
-    struct TestObject {
+    struct TestObject
+    {
         int32_t IntMember;
     };
 
@@ -45,7 +46,8 @@ CSP_INTERNAL_TEST(CSPEngine, MemoryTests, NewCustomAllocatorTest)
 {
     MemoryAllocator MyAllocator;
 
-    struct TestObject {
+    struct TestObject
+    {
         int32_t IntMember;
     };
 

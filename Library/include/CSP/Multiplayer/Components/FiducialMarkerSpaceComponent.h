@@ -25,14 +25,27 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a fiducial marker space component.
-enum class FiducialMarkerPropertyKeys { Name_DEPRECATED, MarkerAssetId, AssetCollectionId, Position, Rotation, Scale, IsVisible, IsARVisible, Num };
+enum class FiducialMarkerPropertyKeys
+{
+    Name_DEPRECATED,
+    MarkerAssetId,
+    AssetCollectionId,
+    Position,
+    Rotation,
+    Scale,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup FiducialMarkerSpaceComponent
 /// @brief As an alternative to cloud-based anchors, fiducial markers can be used to anchor your space to a physical location.
-class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent {
+class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the fiducial marker space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

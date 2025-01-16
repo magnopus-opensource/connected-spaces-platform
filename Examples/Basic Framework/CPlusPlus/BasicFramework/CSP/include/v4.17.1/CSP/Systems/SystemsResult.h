@@ -20,11 +20,13 @@
 #include "CSP/Common/Map.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class ConversationSystem;
 }
 
-namespace csp::services {
+namespace csp::services
+{
 
 // TODO: Add support for template friends in wrapper generator and remove usage of these ignore macros
 CSP_START_IGNORE
@@ -33,9 +35,11 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @brief A result handler that is used to notify a user of an error.
-class CSP_API NullResult : public csp::systems::ResultBase {
+class CSP_API NullResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class SettingsSystem;
@@ -60,7 +64,8 @@ protected:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a boolean value.
-class CSP_API BooleanResult : public csp::systems::ResultBase {
+class CSP_API BooleanResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
     friend class MaintenanceSystem;
@@ -87,7 +92,8 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
-class CSP_API StringResult : public csp::systems::ResultBase {
+class CSP_API StringResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
     friend class UserSystem;
@@ -118,7 +124,8 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a StringArray value.
-class CSP_API StringArrayResult : public csp::systems::ResultBase {
+class CSP_API StringArrayResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
 
@@ -143,7 +150,8 @@ private:
 };
 
 /// @brief A result handler that is used to notify a user of an error while passing a uint64_t value.
-class CSP_API UInt64Result : public csp::systems::ResultBase {
+class CSP_API UInt64Result : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 
@@ -169,7 +177,8 @@ private:
 
 /// @brief A result handler that is used to notify a user of an error while providing an event for a callback response, in addition to
 /// passing a Map of Strings representing the HTTP Responses.
-class CSP_API HTTPHeadersResult : public csp::systems::ResultBase {
+class CSP_API HTTPHeadersResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

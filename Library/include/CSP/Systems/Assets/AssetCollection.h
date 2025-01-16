@@ -23,7 +23,8 @@
 
 #include <functional>
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
@@ -33,13 +34,22 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-enum class EAssetCollectionType { DEFAULT, FOUNDATION_INTERNAL, COMMENT_CONTAINER, COMMENT, SPACE_THUMBNAIL };
+enum class EAssetCollectionType
+{
+    DEFAULT,
+    FOUNDATION_INTERNAL,
+    COMMENT_CONTAINER,
+    COMMENT,
+    SPACE_THUMBNAIL
+};
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset collection which maps to a PrototypeService::Prototype.
-class CSP_API AssetCollection {
+class CSP_API AssetCollection
+{
 public:
     AssetCollection();
     AssetCollection(const AssetCollection& Other);
@@ -104,7 +114,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset collection.
-class CSP_API AssetCollectionResult : public csp::systems::ResultBase {
+class CSP_API AssetCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -130,7 +141,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of asset collections.
-class CSP_API AssetCollectionsResult : public csp::systems::ResultBase {
+class CSP_API AssetCollectionsResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

@@ -17,11 +17,13 @@
 
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class CinematicCameraSpaceComponent;
 
-class CinematicCameraSpaceComponentScriptInterface : public ComponentScriptInterface {
+class CinematicCameraSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent = nullptr);
 

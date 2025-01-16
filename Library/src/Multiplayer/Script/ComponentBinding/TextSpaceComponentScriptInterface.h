@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class TextSpaceComponent;
 
-class TextSpaceComponentScriptInterface : public ComponentScriptInterface {
+class TextSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     TextSpaceComponentScriptInterface(TextSpaceComponent* InComponent = nullptr);
     DECLARE_SCRIPT_PROPERTY(std::string, Text);

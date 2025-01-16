@@ -21,16 +21,19 @@
 #include <signalrclient/signalr_client_config.h>
 #include <signalrclient/websocket_client.h>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class LoginState;
 class UserSystem;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class CSPWebsocketClient : public signalr::websocket_client {
+class CSPWebsocketClient : public signalr::websocket_client
+{
 public:
     CSPWebsocketClient() noexcept;
 
@@ -45,7 +48,8 @@ private:
     std::atomic_bool RefreshInitialised;
 };
 
-class CSPHttpClient : public signalr::http_client {
+class CSPHttpClient : public signalr::http_client
+{
 public:
     CSPHttpClient();
 

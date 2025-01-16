@@ -21,9 +21,11 @@
 
 namespace chs = csp::services::generated::aggregationservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-namespace ECommerceSystemHelpers {
+namespace ECommerceSystemHelpers
+{
     std::shared_ptr<chs::ShopifyStorefrontDto> DefaultShopifyStorefrontInfo()
     {
         auto DefaultStoreInfo = std::make_shared<chs::ShopifyStorefrontDto>();

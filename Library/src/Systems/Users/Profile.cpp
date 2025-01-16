@@ -21,22 +21,26 @@
 
 namespace chs = csp::services::generated::userservice;
 
-namespace {
+namespace
+{
 
 void ProfileLiteDtoToBasicProfile(const chs::ProfileLiteDto& Dto, csp::systems::BasicProfile& Profile)
 {
     Profile.UserId = Dto.GetId();
     Profile.AvatarId = Dto.GetAvatarId();
 
-    if (Dto.HasUserName()) {
+    if (Dto.HasUserName())
+    {
         Profile.UserName = Dto.GetUserName();
     }
 
-    if (Dto.HasDisplayName()) {
+    if (Dto.HasDisplayName())
+    {
         Profile.DisplayName = Dto.GetDisplayName();
     }
 
-    if (Dto.HasPlatform()) {
+    if (Dto.HasPlatform())
+    {
         Profile.LastPlatform = Dto.GetPlatform();
     }
 }
@@ -45,63 +49,76 @@ void ProfileDtoToProfile(const chs::ProfileDto& Dto, csp::systems::Profile& Prof
 {
     Profile.UserId = Dto.GetId();
 
-    if (Dto.HasEmail()) {
+    if (Dto.HasEmail())
+    {
         Profile.Email = Dto.GetEmail();
     }
 
-    if (Dto.HasLastDeviceId()) {
+    if (Dto.HasLastDeviceId())
+    {
         Profile.LastDeviceId = Dto.GetLastDeviceId();
     }
 
-    if (Dto.HasLastPlatform()) {
+    if (Dto.HasLastPlatform())
+    {
         Profile.LastPlatform = Dto.GetLastPlatform();
     }
 
     Profile.AvatarId = Dto.GetAvatarId();
 
-    if (Dto.HasUserName()) {
+    if (Dto.HasUserName())
+    {
         Profile.UserName = Dto.GetUserName();
     }
 
-    if (Dto.HasDisplayName()) {
+    if (Dto.HasDisplayName())
+    {
         Profile.DisplayName = Dto.GetDisplayName();
     }
 
     // TODO: Add PersonalityType and PersonalityValuesType if Mag requests it. They are currently ignored as they seem to be Parasol-specific
 
-    if (Dto.HasIsEmailConfirmed()) {
+    if (Dto.HasIsEmailConfirmed())
+    {
         Profile.IsEmailConfirmed = Dto.GetIsEmailConfirmed();
     }
 
-    if (Dto.HasRoles()) {
+    if (Dto.HasRoles())
+    {
         auto ResponseRoles = Dto.GetRoles();
         Profile.Roles = csp::common::Array<csp::common::String>(ResponseRoles.size());
 
-        for (int i = 0; i < ResponseRoles.size(); ++i) {
+        for (int i = 0; i < ResponseRoles.size(); ++i)
+        {
             Profile.Roles[i] = ResponseRoles[i];
         }
     }
 
-    if (Dto.HasCreatedBy()) {
+    if (Dto.HasCreatedBy())
+    {
         Profile.CreatedBy = Dto.GetCreatedBy();
     }
 
-    if (Dto.HasCreatedAt()) {
+    if (Dto.HasCreatedAt())
+    {
         Profile.CreatedAt = Dto.GetCreatedAt();
     }
 
-    if (Dto.HasUpdatedBy()) {
+    if (Dto.HasUpdatedBy())
+    {
         Profile.UpdatedBy = Dto.GetUpdatedBy();
     }
 
-    if (Dto.HasUpdatedAt()) {
+    if (Dto.HasUpdatedAt())
+    {
         Profile.UpdatedAt = Dto.GetUpdatedAt();
     }
 }
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 Profile::Profile()
     : IsEmailConfirmed(false)
@@ -115,7 +132,8 @@ void ProfileResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse
     auto ProfileResponse = static_cast<chs::ProfileDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         ProfileResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -134,14 +152,16 @@ void BasicProfilesResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     auto* ProfileDataResponse = static_cast<csp::services::DtoArray<chs::ProfileLiteDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         ProfileDataResponse->FromJson(Response->GetPayload().GetContent());
 
         const std::vector<chs::ProfileLiteDto>& ProfileArray = ProfileDataResponse->GetArray();
         Profiles = csp::common::Array<csp::systems::BasicProfile>(ProfileArray.size());
 
-        for (size_t i = 0; i < ProfileArray.size(); ++i) {
+        for (size_t i = 0; i < ProfileArray.size(); ++i)
+        {
             ProfileLiteDtoToBasicProfile(ProfileArray[i], Profiles[i]);
         }
     }

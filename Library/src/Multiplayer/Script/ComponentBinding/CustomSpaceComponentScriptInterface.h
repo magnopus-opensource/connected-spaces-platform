@@ -21,11 +21,13 @@
 #include <variant>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class CustomSpaceComponent;
 
-class CustomSpaceComponentScriptInterface : public ComponentScriptInterface {
+class CustomSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent = nullptr);
     DECLARE_SCRIPT_PROPERTY(std::string, ApplicationOrigin);

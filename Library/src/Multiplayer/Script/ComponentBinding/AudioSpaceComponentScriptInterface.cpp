@@ -17,7 +17,8 @@
 
 #include "CSP/Multiplayer/Components/AudioSpaceComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 csp::multiplayer::AudioSpaceComponentScriptInterface::AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)
 {

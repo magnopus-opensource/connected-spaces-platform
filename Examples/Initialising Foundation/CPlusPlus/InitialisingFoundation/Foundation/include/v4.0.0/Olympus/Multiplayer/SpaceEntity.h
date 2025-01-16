@@ -23,29 +23,34 @@ class OlympusEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTe
 #endif
 OLY_END_IGNORE
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class SpaceEntitySystem;
 class EntityScript;
 class EntityScriptInterface;
 
-enum class SpaceEntityType {
+enum class SpaceEntityType
+{
     Avatar = 1,
     Object,
 };
 
-enum class ComponentUpdateType {
+enum class ComponentUpdateType
+{
     Update,
     Add,
     Delete,
 };
 
-class OLY_API PropertyUpdateInfo {
+class OLY_API PropertyUpdateInfo
+{
 public:
     uint32_t PropertyId;
     ComponentUpdateType UpdateType;
 };
 
-class OLY_API ComponentUpdateInfo {
+class OLY_API ComponentUpdateInfo
+{
 public:
     uint16_t ComponentId;
     ComponentUpdateType UpdateType;
@@ -53,7 +58,8 @@ public:
     // oly_common::Array<PropertyUpdateInfo> PropertyInfo;
 };
 
-enum SpaceEntityUpdateFlags {
+enum SpaceEntityUpdateFlags
+{
     UPDATE_FLAGS_NAME = 1,
     UPDATE_FLAGS_POSITION = 2,
     UPDATE_FLAGS_ROTATION = 4,
@@ -64,7 +70,8 @@ enum SpaceEntityUpdateFlags {
     UPDATE_FLAGS_THIRD_PARTY_PLATFORM = 128,
 };
 
-class OLY_API SpaceEntity {
+class OLY_API SpaceEntity
+{
     OLY_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntitySystem;
@@ -299,7 +306,8 @@ public:
     bool Deselect();
 
 private:
-    class DirtyComponent {
+    class DirtyComponent
+    {
     public:
         ComponentBase* Component;
         ComponentUpdateType UpdateType;

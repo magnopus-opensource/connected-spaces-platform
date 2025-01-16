@@ -19,23 +19,27 @@
 
 #include <CSP/Systems/SystemsResult.h>
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup ECommerce System
 /// @brief Public facing system that allows interfacing with CSP's concept of a ECommerce platform.
 /// Offers methods for utilising Ecommerce through CSP
-class CSP_API CSP_NO_DISPOSE ECommerceSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE ECommerceSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

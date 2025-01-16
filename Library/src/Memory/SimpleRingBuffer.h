@@ -17,11 +17,13 @@
 
 #include <cstddef>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// @brief A very simple fixed-size ring buffer.
 /// Does not resize when full. Instead, throws an assert error.
-class SimpleRingBuffer {
+class SimpleRingBuffer
+{
 public:
     SimpleRingBuffer(size_t BufferSize);
     ~SimpleRingBuffer();

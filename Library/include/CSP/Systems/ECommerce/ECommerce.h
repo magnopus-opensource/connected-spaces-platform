@@ -19,7 +19,8 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -27,10 +28,12 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup ECommerce System
 /// @brief Represents currency information for a product
-class CSP_API CurrencyInfo {
+class CSP_API CurrencyInfo
+{
 public:
     CurrencyInfo()
         : Amount(0.0)
@@ -45,7 +48,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents media information for a product
-class CSP_API ProductMediaInfo {
+class CSP_API ProductMediaInfo
+{
 public:
     ProductMediaInfo()
         : Width(0)
@@ -67,7 +71,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents option for a variant
-class CSP_API VariantOptionInfo {
+class CSP_API VariantOptionInfo
+{
 public:
     VariantOptionInfo() = default;
 
@@ -79,7 +84,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents variant information for a product
-class CSP_API ProductVariantInfo {
+class CSP_API ProductVariantInfo
+{
 public:
     ProductVariantInfo()
         : AvailableForSale(false)
@@ -107,7 +113,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents a single product and the information associated with it.
-class CSP_API ProductInfo {
+class CSP_API ProductInfo
+{
 public:
     ProductInfo() = default;
 
@@ -129,7 +136,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents Checkout information for a product
-class CSP_API CheckoutInfo {
+class CSP_API CheckoutInfo
+{
 public:
     CheckoutInfo() = default;
 
@@ -141,7 +149,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents a line in a cart.
-class CSP_API CartLine {
+class CSP_API CartLine
+{
 public:
     CartLine()
         : Quantity(0)
@@ -160,7 +169,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents a cart.
-class CSP_API CartInfo {
+class CSP_API CartInfo
+{
 public:
     CartInfo()
         : TotalQuantity(0)
@@ -182,7 +192,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Represents a shopify store.
-class CSP_API ShopifyStoreInfo {
+class CSP_API ShopifyStoreInfo
+{
 public:
     ShopifyStoreInfo()
         : IsEcommerceActive(false)
@@ -207,7 +218,8 @@ public:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Product Info.
-class CSP_API ProductInfoResult : public csp::systems::ResultBase {
+class CSP_API ProductInfoResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -233,7 +245,8 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Arrays of Product Info.
-class CSP_API ProductInfoCollectionResult : public csp::systems::ResultBase {
+class CSP_API ProductInfoCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -259,7 +272,8 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get Checkout Info.
-class CSP_API CheckoutInfoResult : public csp::systems::ResultBase {
+class CSP_API CheckoutInfoResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -288,7 +302,8 @@ private:
 
 /// @ingroup ECommerce System
 /// @brief Data class used to contain information when attempting to get a Cart.
-class CSP_API CartInfoResult : public csp::systems::ResultBase {
+class CSP_API CartInfoResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class ECommerceSystem;
 
@@ -317,7 +332,8 @@ private:
     CartInfo Cart;
 };
 
-class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase {
+class CSP_API AddShopifyStoreResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -337,7 +353,8 @@ private:
     ShopifyStoreInfo Store;
 };
 
-class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase {
+class CSP_API GetShopifyStoresResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -361,7 +378,8 @@ private:
     csp::common::Array<ShopifyStoreInfo> Stores;
 };
 
-class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase {
+class CSP_API ValidateShopifyStoreResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

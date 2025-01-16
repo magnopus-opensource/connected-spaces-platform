@@ -26,10 +26,12 @@
 PRAGMA_WARNING_PUSH()
 PRAGMA_WARNING_IGNORE_MSVC(4996) // gmtime/localtime unsafe warnings
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Represents date and time.
-class DateTime {
+class DateTime
+{
 public:
     using Clock = std::chrono::system_clock;
 
@@ -71,7 +73,8 @@ public:
         time_t Now = time(0);
         tm* Gmtm = gmtime(&Now);
 
-        if (Gmtm != nullptr) {
+        if (Gmtm != nullptr)
+        {
             std::string TimeString;
             TimeString = std::to_string(1900 + Gmtm->tm_year);
             TimeString += "-";

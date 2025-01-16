@@ -24,7 +24,8 @@
 #include <filesystem>
 #include <fstream>
 
-namespace Utils {
+namespace Utils
+{
 
 /*
  * Load the test account credentials from a location adjacent to the binary
@@ -32,7 +33,8 @@ namespace Utils {
  */
 TestAccountCredentials LoadTestAccountCredentials()
 {
-    if (!std::filesystem::exists("test_account_creds.txt")) {
+    if (!std::filesystem::exists("test_account_creds.txt"))
+    {
         constexpr const char* msg
             = "test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
               "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>";
@@ -49,7 +51,8 @@ TestAccountCredentials LoadTestAccountCredentials()
     CredsFile >> SuperUserLoginEmail >> SuperUserLoginPassword;
 
     if (DefaultLoginEmail.empty() || DefaultLoginPassword.empty() || AlternativeLoginEmail.empty() || AlternativeLoginPassword.empty()
-        || SuperUserLoginEmail.empty() || SuperUserLoginPassword.empty()) {
+        || SuperUserLoginEmail.empty() || SuperUserLoginPassword.empty())
+    {
         constexpr const char* msg
             = "test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
               "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>";

@@ -17,7 +17,8 @@
 
 #include "Services/ApiBase/ApiBase.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 bool BooleanResult::GetValue() const { return Value; }
 
@@ -39,14 +40,16 @@ void HTTPHeadersResult::OnResponse(const csp::services::ApiResponseBase* ApiResp
 {
     ResultBase::OnResponse(ApiResponse);
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseFailed) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseFailed)
+    {
         return;
     }
 
     auto Response = ApiResponse->GetResponse();
     auto Headers = Response->GetPayload().GetHeaders();
 
-    for (auto& Header : Headers) {
+    for (auto& Header : Headers)
+    {
         csp::common::String Key(Header.first.c_str());
         csp::common::String Val(Header.second.c_str());
 

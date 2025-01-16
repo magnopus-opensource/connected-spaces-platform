@@ -9,7 +9,8 @@
 
 OLY_NO_EXPORT
 
-namespace oly_common {
+namespace oly_common
+{
 
 // Based on...
 // https://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
@@ -17,7 +18,8 @@ namespace oly_common {
 template <typename... Args> static String StringFormat(const String& Format, Args... args)
 {
     int SizeS = std::snprintf(nullptr, 0, Format.c_str(), args...) + 1; // Extra space for '\0'
-    if (SizeS <= 0) {
+    if (SizeS <= 0)
+    {
         return String();
     }
     auto Size = static_cast<size_t>(SizeS);

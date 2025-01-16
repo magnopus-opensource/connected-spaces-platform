@@ -6,12 +6,14 @@
 #include <cstdint>
 #include <functional>
 
-namespace oly_services {
+namespace oly_services
+{
 class ApiBase;
 class ApiResponseBase;
 } // namespace oly_services
 
-namespace oly_services {
+namespace oly_services
+{
 
 /**
  *   @namespace oly_services
@@ -21,15 +23,23 @@ namespace oly_services {
  */
 
 /// @brief Abstract base class for all CHS web services.
-class OLY_API WebService {
+class OLY_API WebService
+{
 public:
     WebService() { }
     virtual ~WebService() = default;
 };
 
-enum class EResultCode : uint8_t { Init, InProgress, Success, Failed };
+enum class EResultCode : uint8_t
+{
+    Init,
+    InProgress,
+    Success,
+    Failed
+};
 
-class OLY_API ResultBase {
+class OLY_API ResultBase
+{
 public:
     ResultBase();
     virtual ~ResultBase() = default;

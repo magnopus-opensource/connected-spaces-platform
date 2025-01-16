@@ -31,13 +31,15 @@
 
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+    {
         PrintProgress(Result.GetRequestProgress());
 
         return false;
@@ -49,7 +51,8 @@ bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
     // check that Uri starts with something valid
-    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0) {
+    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0)
+    {
         return false;
     }
 
@@ -332,7 +335,8 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
     constexpr int NUM_BLOCKED_SPACES = 10;
 
-    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex) {
+    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
+    {
         char BlockedSpaceName[256];
         SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
 
@@ -346,7 +350,8 @@ CSP_PUBLIC_TEST(CSPEngine, SettingsSystemTests, MultiBlockedSpacesTest)
 
     EXPECT_EQ(ReturnedStringArray.Size(), NUM_BLOCKED_SPACES);
 
-    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex) {
+    for (int SpaceIndex = 0; SpaceIndex < NUM_BLOCKED_SPACES; ++SpaceIndex)
+    {
         char BlockedSpaceName[256];
         SPRINTF(BlockedSpaceName, "BlockSpace%d", SpaceIndex);
 

@@ -21,11 +21,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class StaticModelSpaceComponent;
 
-class StaticModelSpaceComponentScriptInterface : public ComponentScriptInterface {
+class StaticModelSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     StaticModelSpaceComponentScriptInterface(StaticModelSpaceComponent* InComponent = nullptr);
 

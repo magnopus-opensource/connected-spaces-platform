@@ -27,10 +27,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a button component.
-enum class ButtonPropertyKeys {
+enum class ButtonPropertyKeys
+{
     Name_DEPRECATED = 0,
     LabelText,
     IconAssetId,
@@ -46,7 +48,8 @@ enum class ButtonPropertyKeys {
 
 /// @ingroup ButtonSpaceComponent
 /// @brief Add a clickable button to your space. Button click events can be responded to via scripts.
-class CSP_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent {
+class CSP_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the button space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

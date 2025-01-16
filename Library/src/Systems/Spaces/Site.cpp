@@ -20,7 +20,8 @@
 
 namespace chs = csp::services::generated::spatialdataservice;
 
-namespace {
+namespace
+{
 
 const char* ENGLISH_LANGUAGE_CODE = "EN";
 
@@ -30,21 +31,26 @@ void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& Dto, csp::syste
     Site.SpaceId = Dto.GetGroupId();
 
     const auto& LocalisedTitle = Dto.GetTitle();
-    for (auto& CurrentTitle : LocalisedTitle) {
-        if (CurrentTitle->GetLanguageCode() == ENGLISH_LANGUAGE_CODE) {
+    for (auto& CurrentTitle : LocalisedTitle)
+    {
+        if (CurrentTitle->GetLanguageCode() == ENGLISH_LANGUAGE_CODE)
+        {
             Site.Name = CurrentTitle->GetValue();
         }
     }
 
-    if (Dto.HasLocation()) {
+    if (Dto.HasLocation())
+    {
         const auto& Location = Dto.GetLocation();
         Site.Location.Longitude = Location->GetLongitude();
         Site.Location.Latitude = Location->GetLatitude();
     }
 
-    if (Dto.HasPrototypeTransform()) {
+    if (Dto.HasPrototypeTransform())
+    {
         const auto& Transform = Dto.GetPrototypeTransform();
-        if (Transform->HasRotation()) {
+        if (Transform->HasRotation())
+        {
             const auto& Rotation = Transform->GetRotation();
             Site.Rotation.X = Rotation->GetX();
             Site.Rotation.Y = Rotation->GetY();
@@ -56,7 +62,8 @@ void PointOfInterestDtoToSiteInfo(const chs::PointOfInterestDto& Dto, csp::syste
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 Site& SiteResult::GetSite() { return Site; }
 
@@ -69,7 +76,8 @@ void SiteResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     auto* POIResponse = static_cast<chs::PointOfInterestDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         POIResponse->FromJson(Response->GetPayload().GetContent());
 
         PointOfInterestDtoToSiteInfo(*POIResponse, Site);
@@ -87,7 +95,8 @@ void SitesCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
     auto* POICollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         POICollectionResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -95,7 +104,8 @@ void SitesCollectionResult::OnResponse(const csp::services::ApiResponseBase* Api
         std::vector<chs::PointOfInterestDto>& POIArray = POICollectionResponse->GetArray();
         Sites = csp::common::Array<csp::systems::Site>(POIArray.size());
 
-        for (size_t idx = 0; idx < POIArray.size(); ++idx) {
+        for (size_t idx = 0; idx < POIArray.size(); ++idx)
+        {
             PointOfInterestDtoToSiteInfo(POIArray[idx], Sites[idx]);
         }
     }

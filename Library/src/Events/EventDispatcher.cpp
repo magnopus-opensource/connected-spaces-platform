@@ -15,7 +15,8 @@
  */
 #include "Events/EventDispatcher.h"
 
-namespace csp::events {
+namespace csp::events
+{
 
 EventDispatcher::EventDispatcher(const EventId& InId)
     : Id(InId)
@@ -34,7 +35,8 @@ void EventDispatcher::UnRegisterListener(EventListener* InListener) { CallbackLi
 
 void EventDispatcher::Dispatch(const Event& InEvent)
 {
-    for (auto Callback : CallbackList) {
+    for (auto Callback : CallbackList)
+    {
         Callback->OnEvent(InEvent);
     }
 }

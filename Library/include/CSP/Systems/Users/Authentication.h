@@ -20,13 +20,15 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::common {
+namespace csp::common
+{
 
 class DateTime;
 
 } // namespace csp::common
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -34,12 +36,14 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class UserSystem;
 class LoginStateResult;
 
-enum class ELoginState : uint8_t {
+enum class ELoginState : uint8_t
+{
     LoginThirdPartyProviderDetailsRequested,
     LoginRequested,
     LoggedIn,
@@ -49,7 +53,8 @@ enum class ELoginState : uint8_t {
 };
 
 /// @brief Data structure representing the user login state, including detection of access token expiry
-class CSP_API LoginState {
+class CSP_API LoginState
+{
     friend class LoginStateResult;
 
 public:
@@ -77,7 +82,8 @@ private:
 };
 
 /// @brief Data for access and refresh tokens, and their expiry times.
-class CSP_API LoginTokenInfo {
+class CSP_API LoginTokenInfo
+{
 public:
     csp::common::String AccessToken;
     csp::common::String AccessExpiryTime;
@@ -86,7 +92,8 @@ public:
 };
 
 /// @brief Result structure for a login state request.
-class CSP_API LoginStateResult : public ResultBase {
+class CSP_API LoginStateResult : public ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -108,7 +115,8 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class CSP_API LoginTokenInfoResult : public ResultBase {
+class CSP_API LoginTokenInfoResult : public ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class UserSystem;
     /** @endcond */
@@ -127,7 +135,8 @@ private:
 };
 
 /// @brief Data structure for an Agora user token, giving userID, referenceID, channel name and settings regarding sharing of audio/video/screenshare.
-class CSP_API AgoraUserTokenParams {
+class CSP_API AgoraUserTokenParams
+{
 public:
     /// @brief The unique identifer for the user requesting the token.
     csp::common::String AgoraUserId;

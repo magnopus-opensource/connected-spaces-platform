@@ -29,13 +29,15 @@
 #include <CSP/Systems/Spatial/PointOfInterestSystem.h>
 #include <CSP/Systems/Spatial/SpatialDataTypes.h>
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
-namespace {
+namespace
+{
 
 void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
     const csp::common::Optional<csp::systems::GeoLocation>& Location, const csp::common::Optional<csp::systems::AssetCollection>& AssetCollection,
@@ -48,18 +50,24 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
 
     csp::systems::GeoLocation POILocation;
 
-    if (Location.HasValue()) {
+    if (Location.HasValue())
+    {
         POILocation = *Location;
-    } else {
+    }
+    else
+    {
         POILocation.Latitude = 90.0; // default values for the tests
         POILocation.Longitude = 180.0;
     }
 
     csp::systems::AssetCollection POIAssetCollection;
 
-    if (AssetCollection.HasValue()) {
+    if (AssetCollection.HasValue())
+    {
         POIAssetCollection = *AssetCollection;
-    } else {
+    }
+    else
+    {
         // for the POI creation only the ID is relevant
         POIAssetCollection.Id = "OLY-UNITTEST-ASSET-COLLECTION-ID";
     }
@@ -72,7 +80,8 @@ void CreatePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
                         .Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutPOI = Result.GetPointOfInterest();
         std::cerr << "POI Created: Name=" << OutPOI.Name << " Id=" << OutPOI.Id << std::endl;
     }
@@ -83,7 +92,8 @@ void DeletePointOfInterest(csp::systems::PointOfInterestSystem* POISystem, const
     auto [Result] = Awaitable(&csp::systems::PointOfInterestSystem::DeletePOI, POISystem, POI).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         std::cerr << "POI Deleted: Name=" << POI.Name << " Id=" << POI.Id << std::endl;
     }
 }
@@ -94,7 +104,8 @@ void GetAssetCollectionFromPOI(
     auto [Result] = Awaitable(&csp::systems::AssetSystem::GetAssetCollectionById, AssetSystem, POI.AssetCollectionId).Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutAssetCollection = Result.GetAssetCollection();
     }
 }
@@ -107,7 +118,8 @@ void CreateAssetCollection(
                         .Await(RequestPredicate);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutAssetCollection = Result.GetAssetCollection();
     }
 }
@@ -214,11 +226,13 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         const auto& ResultPOIs = Result.GetPOIs();
         POICollection = csp::common::Array<csp::systems::PointOfInterest>(ResultPOIs.Size());
 
-        for (int idx = 0; idx < ResultPOIs.Size(); ++idx) {
+        for (int idx = 0; idx < ResultPOIs.Size(); ++idx)
+        {
             POICollection[idx] = ResultPOIs[idx];
         }
     }
@@ -228,8 +242,10 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
     bool POIFound = false;
 
-    for (int idx = 0; idx < POICollection.Size(); ++idx) {
-        if (POICollection[idx].Name == PointOfInterest.Name) {
+    for (int idx = 0; idx < POICollection.Size(); ++idx)
+    {
+        if (POICollection[idx].Name == PointOfInterest.Name)
+        {
             POIFound = true;
             break;
         }
@@ -367,10 +383,12 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
         // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
         bool FoundSpacePOI = false;
-        for (uint32_t i = 0; i < POIs.Size(); i++) {
+        for (uint32_t i = 0; i < POIs.Size(); i++)
+        {
             // All the returned POIs should be of type SPACE, since that is what we searched for.
             EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::SPACE);
-            if (POIs[i].SpaceId == Space.Id) {
+            if (POIs[i].SpaceId == Space.Id)
+            {
                 FoundSpacePOI = true;
                 break;
             }
@@ -389,10 +407,12 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 
         // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
         bool FoundDefaultPOI = false;
-        for (uint32_t i = 0; i < POIs.Size(); i++) {
+        for (uint32_t i = 0; i < POIs.Size(); i++)
+        {
             // All the returned POIs should be of type DEFAULT, since that is what we searched for.
             EXPECT_EQ(POIs[i].Type, csp::systems::EPointOfInterestType::DEFAULT);
-            if (POIs[i].Id == DefaultPOI.Id) {
+            if (POIs[i].Id == DefaultPOI.Id)
+            {
                 FoundDefaultPOI = true;
                 break;
             }
@@ -411,12 +431,15 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
         // There may be more than one POI at this location, so we search for the one we have created and expect to find it.
         bool FoundSpacePOI = false;
         bool FoundDefaultPOI = false;
-        for (uint32_t i = 0; i < POIs.Size(); i++) {
-            if (POIs[i].Id == DefaultPOI.Id) {
+        for (uint32_t i = 0; i < POIs.Size(); i++)
+        {
+            if (POIs[i].Id == DefaultPOI.Id)
+            {
                 FoundDefaultPOI = true;
             }
 
-            if (POIs[i].SpaceId == Space.Id) {
+            if (POIs[i].SpaceId == Space.Id)
+            {
                 FoundSpacePOI = true;
             }
         }

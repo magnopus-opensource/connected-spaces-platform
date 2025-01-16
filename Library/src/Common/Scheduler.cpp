@@ -15,13 +15,15 @@
  */
 #include "Common/Scheduler.h"
 
-namespace csp {
+namespace csp
+{
 
 static Scheduler* SchedulerPtr = nullptr;
 
 Scheduler* GetScheduler()
 {
-    if (SchedulerPtr == nullptr) {
+    if (SchedulerPtr == nullptr)
+    {
         SchedulerPtr = CSP_NEW Scheduler();
         SchedulerPtr->Initialise();
     }

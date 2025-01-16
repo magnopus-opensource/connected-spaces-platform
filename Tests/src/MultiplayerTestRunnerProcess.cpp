@@ -47,7 +47,8 @@ MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(const MultiplayerTest
 
 MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(const MultiplayerTestRunnerProcess& other)
 {
-    if (this != &other) {
+    if (this != &other)
+    {
         MultiplayerTestRunnerProcess swapping(other);
         std::swap(*this, swapping);
     }
@@ -72,7 +73,8 @@ MultiplayerTestRunnerProcess::MultiplayerTestRunnerProcess(MultiplayerTestRunner
 
 MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::operator=(MultiplayerTestRunnerProcess&& other)
 {
-    if (this != &other) {
+    if (this != &other)
+    {
         // Steal the juicy internals, whilst being nice and resetting the moved-from object to a sensible state.
         this->LoggedInPromise = std::exchange(other.LoggedInPromise, std::promise<void>());
         this->JoinedSpacePromise = std::exchange(other.JoinedSpacePromise, std::promise<void>());
@@ -123,7 +125,8 @@ MultiplayerTestRunnerProcess& MultiplayerTestRunnerProcess::SetEndpoint(std::str
     return *this;
 }
 
-namespace {
+namespace
+{
 /* Construct the CLI arguments to pass to MultiplayerTestRunner with spawning a TinyProcessLib::Process*/
 std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifiers::TestIdentifier TestToRun, std::optional<std::string> LoginEmail,
     std::optional<std::string> Password, std::optional<std::string> SpaceId, std::optional<int> TimeoutInSeconds, std::optional<std::string> Endpoint)
@@ -136,27 +139,32 @@ std::vector<std::string> BuildProcessArgList(MultiplayerTestRunner::TestIdentifi
     CLIArgs.push_back("--test");
     CLIArgs.push_back(MultiplayerTestRunner::TestIdentifiers::TestIdentifierToString(TestToRun));
 
-    if (LoginEmail.has_value()) {
+    if (LoginEmail.has_value())
+    {
         CLIArgs.push_back("--email");
         CLIArgs.push_back(LoginEmail.value());
     }
 
-    if (Password.has_value()) {
+    if (Password.has_value())
+    {
         CLIArgs.push_back("--password");
         CLIArgs.push_back(Password.value());
     }
 
-    if (SpaceId.has_value()) {
+    if (SpaceId.has_value())
+    {
         CLIArgs.push_back("--space");
         CLIArgs.push_back(SpaceId.value());
     }
 
-    if (TimeoutInSeconds.has_value()) {
+    if (TimeoutInSeconds.has_value())
+    {
         CLIArgs.push_back("--timeout");
         CLIArgs.push_back(std::to_string(TimeoutInSeconds.value()));
     }
 
-    if (Endpoint.has_value()) {
+    if (Endpoint.has_value())
+    {
         CLIArgs.push_back("--endpoint");
         CLIArgs.push_back(Endpoint.value());
     }
@@ -205,32 +213,39 @@ void MultiplayerTestRunnerProcess::StartProcess()
        of the callback, I've observed they can be batched, probably an OS thing. */
     ProcessHandle = std::make_unique<TinyProcessLib::Process>(
         std::move(InvocationArgs), "",
-        [this](const char* bytes, size_t n) {
+        [this](const char* bytes, size_t n)
+        {
             // STDOUT
             std::string StdOutStr = std::string(bytes, n);
             // You might want to put std::cout << StdOutStr << std::endl; here when debugging.
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR)) {
+            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_IN_DESCRIPTOR))
+            {
                 LoggedInPromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR)) {
+            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::JOINED_SPACE_DESCRIPTOR))
+            {
                 JoinedSpacePromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::READY_FOR_ASSERTIONS_DESCRIPTOR)) {
+            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::READY_FOR_ASSERTIONS_DESCRIPTOR))
+            {
                 ReadyForAssertionsPromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::EXIT_SPACE_DESCRIPTOR)) {
+            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::EXIT_SPACE_DESCRIPTOR))
+            {
                 ExitSpacePromise.set_value();
             }
 
-            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_OUT_DESCRIPTOR)) {
+            if (ContainsStr(StdOutStr, MultiplayerTestRunner::ProcessDescriptors::LOGGED_OUT_DESCRIPTOR))
+            {
                 LoggedOutPromise.set_value();
             }
         },
-        [](const char* bytes, size_t n) {
+        [](const char* bytes, size_t n)
+        {
             // STDERR
             std::string StdErrStr = std::string(bytes, n);
             std::cout << StdErrStr << "\n";
@@ -240,7 +255,8 @@ void MultiplayerTestRunnerProcess::StartProcess()
 
 void MultiplayerTestRunnerProcess::TerminateProcess()
 {
-    if (ProcessHandle != nullptr) {
+    if (ProcessHandle != nullptr)
+    {
         std::cout << "Terminating Multiplayer Test Runner Process." << std::endl;
         ProcessHandle->kill();
         ProcessHandle = nullptr;

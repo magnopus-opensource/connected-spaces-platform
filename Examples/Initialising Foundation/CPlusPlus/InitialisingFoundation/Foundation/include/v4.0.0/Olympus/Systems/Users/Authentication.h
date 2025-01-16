@@ -4,11 +4,13 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_common {
+namespace oly_common
+{
 class DateTime;
 }
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -16,12 +18,14 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 class UserSystem;
 class LoginStateResult;
 
-enum class ELoginState : uint8_t {
+enum class ELoginState : uint8_t
+{
     LoginThirdPartyProviderDetailsRequested,
     LoginRequested,
     LoggedIn,
@@ -30,7 +34,8 @@ enum class ELoginState : uint8_t {
     Error,
 };
 
-class OLY_API LoginState {
+class OLY_API LoginState
+{
     friend class LoginStateResult;
 
 public:
@@ -54,7 +59,8 @@ private:
     oly_common::DateTime* AccessTokenRefreshTime;
 };
 
-class OLY_API LoginTokenInfo {
+class OLY_API LoginTokenInfo
+{
 public:
     oly_common::String AccessToken;
     oly_common::String AccessExpiryTime;
@@ -62,7 +68,8 @@ public:
     oly_common::String RefreshExpiryTime;
 };
 
-class OLY_API LoginStateResult : public oly_services::ResultBase {
+class OLY_API LoginStateResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -84,7 +91,8 @@ private:
     LoginState* State;
 };
 
-class OLY_API LogoutResult : public NullResult {
+class OLY_API LogoutResult : public NullResult
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -103,7 +111,8 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when the login token has changed
-class OLY_API LoginTokenReceived : public oly_services::ResultBase {
+class OLY_API LoginTokenReceived : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class UserSystem;
     /** @endcond */
@@ -124,7 +133,8 @@ private:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information when a ping response is received
-class OLY_API PingResponseReceived : public oly_services::ResultBase {
+class OLY_API PingResponseReceived : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -138,7 +148,8 @@ private:
     PingResponseReceived() {};
 };
 
-class OLY_API AgoraUserTokenParams {
+class OLY_API AgoraUserTokenParams
+{
 public:
     oly_common::String AgoraUserId;
     int Lifespan;
@@ -151,7 +162,8 @@ public:
 
 /// @ingroup User System
 /// @brief @brief Data class used to contain information requesting a user token
-class OLY_API AgoraUserTokenResult : public oly_services::ResultBase {
+class OLY_API AgoraUserTokenResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

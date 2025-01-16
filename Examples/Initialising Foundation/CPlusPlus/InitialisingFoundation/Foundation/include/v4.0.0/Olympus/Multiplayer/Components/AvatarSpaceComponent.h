@@ -3,15 +3,38 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class AvatarState { Idle = 0, Walking, Running, Flying, Jumping, Falling, Num };
+enum class AvatarState
+{
+    Idle = 0,
+    Walking,
+    Running,
+    Flying,
+    Jumping,
+    Falling,
+    Num
+};
 
-enum class AvatarPlayMode { Default = 0, AR, VR, Creator, Num };
+enum class AvatarPlayMode
+{
+    Default = 0,
+    AR,
+    VR,
+    Creator,
+    Num
+};
 
-enum class LocomotionModel { Grounded = 0, FreeCamera, Num };
+enum class LocomotionModel
+{
+    Grounded = 0,
+    FreeCamera,
+    Num
+};
 
-enum class AvatarComponentPropertyKeys {
+enum class AvatarComponentPropertyKeys
+{
     AvatarId = 0,
     UserId,
     State,
@@ -30,7 +53,8 @@ enum class AvatarComponentPropertyKeys {
     Num
 };
 
-class OLY_API AvatarSpaceComponent : public ComponentBase {
+class OLY_API AvatarSpaceComponent : public ComponentBase
+{
 public:
     AvatarSpaceComponent(SpaceEntity* Parent);
 

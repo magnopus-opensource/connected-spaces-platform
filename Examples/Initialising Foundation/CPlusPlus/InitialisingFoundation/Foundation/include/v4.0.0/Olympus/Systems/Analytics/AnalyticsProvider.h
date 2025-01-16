@@ -4,13 +4,15 @@
 
 class EventPayloadImpl;
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 using MetricValue = oly_multiplayer::ReplicatedValue;
 
 /// @ingroup Analytics System
 /// @brief Interface for an Analytics Provider
-class OLY_API IAnalyticsProvider {
+class OLY_API IAnalyticsProvider
+{
 public:
     OLY_START_IGNORE
     IAnalyticsProvider(const IAnalyticsProvider&) = delete;

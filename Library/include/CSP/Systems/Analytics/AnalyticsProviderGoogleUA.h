@@ -19,15 +19,18 @@
 
 #include <chrono>
 
-namespace csp::web {
+namespace csp::web
+{
 class WebClient;
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Analytics System
 /// @brief Analytics Provider implementation for Google Universal Analytics
-class AnalyticsProviderGoogleUA : public IAnalyticsProvider {
+class AnalyticsProviderGoogleUA : public IAnalyticsProvider
+{
 public:
     AnalyticsProviderGoogleUA(const csp::common::String& ClientId, const csp::common::String& PropertyTag);
 

@@ -6,24 +6,28 @@
 #include "Olympus/Systems/SystemBase.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiBase;
 
 }
 
-namespace oly_web {
+namespace oly_web
+{
 
 class WebClient;
 
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Settings System
 /// @brief Public facing system that allows interfacing with CHS's settings service.
 /// Offers methods for storing and retrieving client settings.
-class OLY_API OLY_NO_DISPOSE SettingsSystem : public SystemBase {
+class OLY_API OLY_NO_DISPOSE SettingsSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

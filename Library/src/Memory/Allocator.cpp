@@ -15,6 +15,7 @@
  */
 #include "Allocator.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 } // namespace csp::memory

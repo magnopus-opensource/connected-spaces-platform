@@ -37,7 +37,8 @@ typedef std::chrono::system_clock Clock;
 
 #define RESET "\033[0m"
 
-namespace csp {
+namespace csp
+{
 
 constexpr unsigned int Info = 1;
 constexpr unsigned int Warning = 2;
@@ -50,7 +51,8 @@ constexpr unsigned int Network = 5;
 static std::string LogFilePath = "";
 
 // @brief Sends data to file and console streams.
-class Logger {
+class Logger
+{
 public:
     /// @brief Writes the provided string to a file.
     /// File exists within the Build/Logs folder in the following format:
@@ -69,7 +71,8 @@ public:
         strftime(Buffer, sizeof(Buffer), "%Y-%m-%d_%H-%M-%S", &TimeInfo);
         const std::string CurrentTime(Buffer);
 
-        if (LogFilePath == "") {
+        if (LogFilePath == "")
+        {
             std::filesystem::create_directory(".\\Logs");
             LogFilePath = ".\\Logs\\Log_" + CurrentTime + ".txt";
         }
@@ -97,7 +100,8 @@ public:
     {
         std::string CategoryStr = "";
 
-        switch (Category) {
+        switch (Category)
+        {
         case csp::Info:
             CategoryStr = "InfoLog";
             break;
@@ -122,7 +126,8 @@ public:
         std::string OutputMessage
             = ShowLineNumber ? CategoryStr + ": " + FileName + "(" + std::to_string(Line) + "): " + Message : CategoryStr + ": " + Message;
 
-        if (OutputMessage.back() != '\n') {
+        if (OutputMessage.back() != '\n')
+        {
             OutputMessage += '\n';
         }
 

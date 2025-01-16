@@ -22,7 +22,8 @@
 #include "CSP/Systems/WebService.h"
 #include "CSP/Web/HTTPResponseCodes.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
@@ -32,12 +33,20 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 /// @ingroup Quota System
 /// @brief Data representation period of time.
-enum class PeriodEnum { Total = 0, CalendarMonth, Hours24, Invalid };
+enum class PeriodEnum
+{
+    Total = 0,
+    CalendarMonth,
+    Hours24,
+    Invalid
+};
 
-enum class TierFeatures {
+enum class TierFeatures
+{
     SpaceOwner = 0,
     ScopeConcurrentUsers,
     ObjectCaptureUpload,
@@ -50,12 +59,20 @@ enum class TierFeatures {
     Invalid
 };
 
-enum class TierNames { Basic = 0, Premium, Pro, Enterprise, Invalid };
+enum class TierNames
+{
+    Basic = 0,
+    Premium,
+    Pro,
+    Enterprise,
+    Invalid
+};
 
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
 /// Limit Value of -1 means unlimited usage
-class CSP_API FeatureLimitInfo {
+class CSP_API FeatureLimitInfo
+{
 public:
     FeatureLimitInfo()
         : ActivityCount(0)
@@ -68,7 +85,8 @@ public:
 
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
-class CSP_API UserTierInfo {
+class CSP_API UserTierInfo
+{
 public:
     UserTierInfo() = default;
 
@@ -80,7 +98,8 @@ public:
 /// @ingroup Quota System
 /// @brief Data representation of a progress of a specific feature.
 /// Limit Value of -1 means unlimited usage
-class CSP_API FeatureQuotaInfo {
+class CSP_API FeatureQuotaInfo
+{
 public:
     FeatureQuotaInfo()
         : Limit(-1) {};
@@ -93,7 +112,8 @@ public:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progress.
-class CSP_API FeaturesLimitResult : public csp::systems::ResultBase {
+class CSP_API FeaturesLimitResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -115,7 +135,8 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature progresses.
-class CSP_API FeatureLimitResult : public csp::systems::ResultBase {
+class CSP_API FeatureLimitResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -137,7 +158,8 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving user tier information.
-class CSP_API UserTierResult : public csp::systems::ResultBase {
+class CSP_API UserTierResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -159,7 +181,8 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving feature quota information.
-class CSP_API FeatureQuotaResult : public csp::systems::ResultBase {
+class CSP_API FeatureQuotaResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -181,7 +204,8 @@ private:
 
 /// @ingroup Quota System
 /// @brief Data class used to contain information when receiving an array of feature quota information.
-class CSP_API FeaturesQuotaResult : public csp::systems::ResultBase {
+class CSP_API FeaturesQuotaResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

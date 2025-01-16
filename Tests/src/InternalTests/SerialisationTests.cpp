@@ -89,7 +89,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 
     auto& Components = Array[6].as_uint_map();
 
-    for (auto& [Key, Component] : Components) {
+    for (auto& [Key, Component] : Components)
+    {
         EXPECT_TRUE(Component.is_array() && Component.as_array().size() == 2);
 
         auto& ComponentArray = Component.as_array();
@@ -98,44 +99,57 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
         EXPECT_TRUE(ComponentArray[1].is_array() && ComponentArray[1].as_array().size() == 1);
         auto& ComponentValue = ComponentArray[1].as_array()[0];
 
-        switch (ComponentArray[0].as_uinteger()) {
-        case ItemComponentData::UINT8_ARRAY: {
+        switch (ComponentArray[0].as_uinteger())
+        {
+        case ItemComponentData::UINT8_ARRAY:
+        {
             EXPECT_TRUE(ComponentValue.is_raw());
 
             break;
         }
-        case ItemComponentData::FLOAT_ARRAY: {
+        case ItemComponentData::FLOAT_ARRAY:
+        {
             EXPECT_TRUE(ComponentValue.is_array() && ComponentValue.as_array()[0].is_double());
 
             auto& Array = ComponentValue.as_array();
 
-            if (Key == COMPONENT_KEY_VIEW_POSITION) {
+            if (Key == COMPONENT_KEY_VIEW_POSITION)
+            {
 
                 EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == User->Transform.Position.X
                     && Array[1].as_double() == User->Transform.Position.Y && Array[2].as_double() == User->Transform.Position.Z);
-            } else if (Key == COMPONENT_KEY_VIEW_ROTATION) {
+            }
+            else if (Key == COMPONENT_KEY_VIEW_ROTATION)
+            {
                 EXPECT_TRUE(Array.size() == 4 && Array[0].as_double() == User->Transform.Rotation.X
                     && Array[1].as_double() == User->Transform.Rotation.Y && Array[2].as_double() == User->Transform.Rotation.Z
                     && Array[3].as_double() == User->Transform.Rotation.W);
-            } else if (Key == COMPONENT_KEY_VIEW_SCALE) {
+            }
+            else if (Key == COMPONENT_KEY_VIEW_SCALE)
+            {
                 EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == User->Transform.Scale.X && Array[1].as_double() == User->Transform.Scale.Y
                     && Array[2].as_double() == User->Transform.Scale.Z);
-            } else {
+            }
+            else
+            {
                 FAIL();
             }
 
             break;
         }
-        case ItemComponentData::STRING: {
+        case ItemComponentData::STRING:
+        {
             EXPECT_TRUE(ComponentValue.is_string());
 
             break;
         }
-        case ItemComponentData::INT64: {
+        case ItemComponentData::INT64:
+        {
             EXPECT_TRUE(ComponentValue.is_integer());
             break;
         }
-        case ItemComponentData::UINT16_DICTIONARY: {
+        case ItemComponentData::UINT16_DICTIONARY:
+        {
             EXPECT_TRUE(ComponentValue.is_uint_map());
             break;
         }
@@ -258,7 +272,8 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 
     auto& Components = Array[6].as_uint_map();
 
-    for (auto& [Key, Component] : Components) {
+    for (auto& [Key, Component] : Components)
+    {
         EXPECT_TRUE(Component.is_array() && Component.as_array().size() == 2);
 
         auto& ComponentArray = Component.as_array();
@@ -267,40 +282,52 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
         EXPECT_TRUE(ComponentArray[1].is_array() && ComponentArray[1].as_array().size() == 1);
         auto& ComponentValue = ComponentArray[1].as_array()[0];
 
-        switch (ComponentArray[0].as_uinteger()) {
-        case ItemComponentData::UINT8_ARRAY: {
+        switch (ComponentArray[0].as_uinteger())
+        {
+        case ItemComponentData::UINT8_ARRAY:
+        {
             EXPECT_TRUE(ComponentValue.is_raw());
 
             break;
         }
-        case ItemComponentData::FLOAT_ARRAY: {
+        case ItemComponentData::FLOAT_ARRAY:
+        {
             EXPECT_TRUE(ComponentValue.is_array() && ComponentValue.as_array()[0].is_double());
 
             auto& Array = ComponentValue.as_array();
 
-            if (Key == COMPONENT_KEY_VIEW_POSITION) {
+            if (Key == COMPONENT_KEY_VIEW_POSITION)
+            {
 
                 EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == Object->Transform.Position.X
                     && Array[1].as_double() == Object->Transform.Position.Y && Array[2].as_double() == Object->Transform.Position.Z);
-            } else if (Key == COMPONENT_KEY_VIEW_ROTATION) {
+            }
+            else if (Key == COMPONENT_KEY_VIEW_ROTATION)
+            {
                 EXPECT_TRUE(Array.size() == 4 && Array[0].as_double() == Object->Transform.Rotation.X
                     && Array[1].as_double() == Object->Transform.Rotation.Y && Array[2].as_double() == Object->Transform.Rotation.Z
                     && Array[3].as_double() == Object->Transform.Rotation.W);
-            } else if (Key == COMPONENT_KEY_VIEW_SCALE) {
+            }
+            else if (Key == COMPONENT_KEY_VIEW_SCALE)
+            {
                 EXPECT_TRUE(Array.size() == 3 && Array[0].as_double() == Object->Transform.Scale.X
                     && Array[1].as_double() == Object->Transform.Scale.Y && Array[2].as_double() == Object->Transform.Scale.Z);
-            } else {
+            }
+            else
+            {
                 FAIL();
             }
 
             break;
         }
-        case ItemComponentData::STRING: {
+        case ItemComponentData::STRING:
+        {
             EXPECT_TRUE(ComponentValue.is_string());
 
             break;
         }
-        case ItemComponentData::INT64: {
+        case ItemComponentData::INT64:
+        {
             EXPECT_TRUE(ComponentValue.is_integer());
             break;
         }

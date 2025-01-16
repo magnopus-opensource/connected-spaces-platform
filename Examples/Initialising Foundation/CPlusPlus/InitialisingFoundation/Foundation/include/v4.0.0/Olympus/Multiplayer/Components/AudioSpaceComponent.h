@@ -3,13 +3,26 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/Multiplayer/Components/Interfaces/IEnableableComponent.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class AudioPlaybackState { Reset = 0, Pause, Play, Num };
+enum class AudioPlaybackState
+{
+    Reset = 0,
+    Pause,
+    Play,
+    Num
+};
 
-enum class AudioType { Global = 0, Spatial, Num };
+enum class AudioType
+{
+    Global = 0,
+    Spatial,
+    Num
+};
 
-enum class AudioPropertyKeys {
+enum class AudioPropertyKeys
+{
     Position = 0,
     PlaybackState,
     AudioType,
@@ -25,7 +38,8 @@ enum class AudioPropertyKeys {
 
 // @ingroup AudioSpaceComponent
 /// @brief Data representation of an AudioSpaceComponent.
-class OLY_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent {
+class OLY_API AudioSpaceComponent : public ComponentBase, public IEnableableComponent
+{
 public:
     AudioSpaceComponent(SpaceEntity* Parent);
 

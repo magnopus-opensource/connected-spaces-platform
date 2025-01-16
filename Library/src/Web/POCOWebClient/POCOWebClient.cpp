@@ -39,13 +39,15 @@
 #include <string>
 #include <thread>
 
-namespace {
+namespace
+{
 
 template <size_t N> constexpr size_t CStringLength(char const (&)[N]) { return N - 1; }
 
 } // namespace
 
-namespace csp::web {
+namespace csp::web
+{
 
 /// @brief Size of stack space used for async streaming upload and download
 const uint32_t kPOCOAsyncBufferSize = 2 * 1024;
@@ -76,10 +78,12 @@ POCOWebClient::~POCOWebClient() { delete Cookies; }
 
 void POCOWebClient::Send(HttpRequest& Request)
 {
-    try {
+    try
+    {
         const ERequestVerb Verb = Request.GetVerb();
 
-        switch (Verb) {
+        switch (Verb)
+        {
         case ERequestVerb::Get:
             Get(Request);
             break;
@@ -98,7 +102,9 @@ void POCOWebClient::Send(HttpRequest& Request)
         default:
             break;
         }
-    } catch (const Poco::Exception& Ex) {
+    }
+    catch (const Poco::Exception& Ex)
+    {
         throw WebClientException(Ex.displayText());
     }
 }
@@ -112,7 +118,8 @@ void POCOWebClient::Get(HttpRequest& Request)
     Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_GET, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders()) {
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
@@ -130,7 +137,8 @@ void POCOWebClient::Get(HttpRequest& Request)
         PocoResponse.getCookies(*Cookies);
     }
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 }
@@ -140,7 +148,8 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
     {
         std::scoped_lock Lock(CookiesMutex);
 
-        if (Cookies->size() == 0) {
+        if (Cookies->size() == 0)
+        {
             return;
         }
     }
@@ -152,7 +161,8 @@ void POCOWebClient::AddCookie(Poco::Net::HTTPRequest& PocoRequest)
     {
         std::scoped_lock Lock(CookiesMutex);
 
-        for (const Poco::Net::HTTPCookie& Cookie : *Cookies) {
+        for (const Poco::Net::HTTPCookie& Cookie : *Cookies)
+        {
             CookieCollection.add(Cookie.getName(), Cookie.getValue());
         }
     }
@@ -170,7 +180,8 @@ void POCOWebClient::Post(HttpRequest& Request)
     Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_POST, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders()) {
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
@@ -181,7 +192,8 @@ void POCOWebClient::Post(HttpRequest& Request)
     std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
     ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
 
-    if (Request.Cancelled()) {
+    if (Request.Cancelled())
+    {
         return;
     }
 
@@ -201,7 +213,8 @@ void POCOWebClient::Post(HttpRequest& Request)
     auto& Payload = ((HttpResponse&)Request.GetResponse()).GetMutablePayload();
 
     // Get all response headers
-    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter) {
+    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    {
         std::string Key = Iter->first;
         std::string Val = Iter->second;
 
@@ -222,7 +235,8 @@ void POCOWebClient::Put(HttpRequest& Request)
     Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_PUT, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders()) {
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
@@ -233,7 +247,8 @@ void POCOWebClient::Put(HttpRequest& Request)
     std::ostream& RequestStream = ClientSession->sendRequest(PocoRequest);
     ProcessRequestAsync(*ClientSession, PocoRequest, RequestStream, Request);
 
-    if (Request.Cancelled()) {
+    if (Request.Cancelled())
+    {
         return;
     }
 
@@ -247,7 +262,8 @@ void POCOWebClient::Put(HttpRequest& Request)
         PocoResponse.getCookies(*Cookies);
     }
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    {
         std::string ResponseString;
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
@@ -263,7 +279,8 @@ void POCOWebClient::Delete(HttpRequest& Request)
     Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_DELETE, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders()) {
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
@@ -283,7 +300,8 @@ void POCOWebClient::Delete(HttpRequest& Request)
         PocoResponse.getCookies(*Cookies);
     }
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    {
         std::string ResponseString;
         Poco::StreamCopier::copyToString(ResponseStream, ResponseString);
         Request.SetResponseData(ResponseString.c_str(), ResponseString.length());
@@ -299,7 +317,8 @@ void POCOWebClient::Head(HttpRequest& Request)
     Poco::Net::HTTPClientSession* ClientSession = Poco::Net::HTTPSessionFactory::defaultFactory().createClientSession(Uri);
     Poco::Net::HTTPRequest PocoRequest(Poco::Net::HTTPRequest::HTTP_HEAD, Uri.getPathAndQuery(), Poco::Net::HTTPRequest::HTTP_1_1);
 
-    for (auto Header : Request.GetPayload().GetHeaders()) {
+    for (auto Header : Request.GetPayload().GetHeaders())
+    {
         PocoRequest.add(Header.first.c_str(), Header.second.c_str());
     }
 
@@ -317,7 +336,8 @@ void POCOWebClient::Head(HttpRequest& Request)
         PocoResponse.getCookies(*Cookies);
     }
 
-    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+    if (PocoResponse.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+    {
         ProcessResponseAsync(*ClientSession, PocoResponse, ResponseStream, Request);
     }
 }
@@ -329,7 +349,8 @@ void POCOWebClient::ProcessResponseAsync(
 
     std::streamsize ContentLength = PocoResponse.getContentLength();
 
-    if (ContentLength == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH || ContentLength == 0) {
+    if (ContentLength == Poco::Net::HTTPMessage::UNKNOWN_CONTENT_LENGTH || ContentLength == 0)
+    {
         return;
     }
 
@@ -339,8 +360,10 @@ void POCOWebClient::ProcessResponseAsync(
 
     char Buffer[kPOCOAsyncBufferSize];
 
-    while (ResponseStream.good() && TotalRead < ContentLength) {
-        if (Request.Cancelled()) {
+    while (ResponseStream.good() && TotalRead < ContentLength)
+    {
+        if (Request.Cancelled())
+        {
             ClientSession.abort();
             return;
         }
@@ -359,7 +382,8 @@ void POCOWebClient::ProcessResponseAsync(
     auto& Payload = ((HttpResponse&)Response).GetMutablePayload();
 
     // Get all response headers
-    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter) {
+    for (auto Iter = PocoResponse.begin(); Iter != PocoResponse.end(); ++Iter)
+    {
         std::string Key = Iter->first;
         std::string Val = Iter->second;
 
@@ -378,7 +402,8 @@ void POCOWebClient::ProcessRequestAsync(
 
     size_t ContentLength = Request.GetPayload().GetContent().Length();
 
-    if (ContentLength == 0) {
+    if (ContentLength == 0)
+    {
         return;
     }
 
@@ -386,8 +411,10 @@ void POCOWebClient::ProcessRequestAsync(
 
     char buffer[kPOCOAsyncBufferSize];
 
-    while (RequestStream.good() && TotalWritten < ContentLength) {
-        if (Request.Cancelled()) {
+    while (RequestStream.good() && TotalWritten < ContentLength)
+    {
+        if (Request.Cancelled())
+        {
             ClientSession.abort();
             return;
         }
@@ -419,11 +446,14 @@ void POCOWebClient::SetFileUploadContentFromFile(
     HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType)
 {
     Poco::File* File = new Poco::File(FilePath);
-    if (File->exists()) {
+    if (File->exists())
+    {
         /// @note this must be newed as it is deleted by the HTMLForm
         Poco::Net::FilePartSource* Source = new Poco::Net::FilePartSource(FilePath, MediaType.c_str());
         SetFileUploadContent(Payload, Source, Version);
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_FORMAT("File not found. Path given: %s", FilePath);
     }
 }

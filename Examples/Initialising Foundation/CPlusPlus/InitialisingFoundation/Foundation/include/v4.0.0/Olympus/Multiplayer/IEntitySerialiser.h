@@ -5,9 +5,11 @@
 #include "Olympus/Multiplayer/ReplicatedValue.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-OLY_INTERFACE class OLY_API IEntitySerialiser {
+OLY_INTERFACE class OLY_API IEntitySerialiser
+{
 public:
     virtual void BeginEntity() = 0;
     virtual void EndEntity() = 0;
@@ -33,7 +35,8 @@ protected:
     virtual ~IEntitySerialiser() = default;
 };
 
-OLY_INTERFACE class OLY_API IEntityDeserialiser {
+OLY_INTERFACE class OLY_API IEntityDeserialiser
+{
 public:
     virtual void EnterEntity() = 0;
     virtual void LeaveEntity() = 0;

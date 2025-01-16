@@ -10,11 +10,13 @@
 
 #include <functional>
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class MultiplayerConnection;
 }
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -22,17 +24,20 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 class AssetCollection;
 
-enum class SpaceType {
+enum class SpaceType
+{
     Private,
     Public,
 };
 
 /// @ingroup Space System
 /// @brief Data representation for a Space that maps to a CHS Lite Group
-class OLY_API BasicSpace {
+class OLY_API BasicSpace
+{
 public:
     oly_common::String Id;
     oly_common::String Name;
@@ -42,7 +47,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of a Space which maps to a UserService Group.
-class OLY_API Space : public BasicSpace {
+class OLY_API Space : public BasicSpace
+{
 public:
     Space() = default;
     Space(const Space& Other) = default;
@@ -62,7 +68,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data representation of the geo location of a space
-class OLY_API SpaceGeoLocation {
+class OLY_API SpaceGeoLocation
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class SpaceGeoLocationResult;
@@ -84,7 +91,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get a space.
-class OLY_API SpaceResult : public oly_services::ResultBase {
+class OLY_API SpaceResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -123,7 +131,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class OLY_API SpacesResult : public oly_services::ResultBase {
+class OLY_API SpacesResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -153,7 +162,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to update the Space details.
-class OLY_API BasicSpaceResult : public oly_services::ResultBase {
+class OLY_API BasicSpaceResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -174,7 +184,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of spaces.
-class OLY_API BasicSpacesResult : public oly_services::ResultBase {
+class OLY_API BasicSpacesResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -209,7 +220,8 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve the Space metadata information.
-class OLY_API SpaceMetadataResult : public oly_services::ResultBase {
+class OLY_API SpaceMetadataResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -234,7 +246,8 @@ private:
 
 /// @ingroup Space System
 /// @brief @brief Data class used to contain information when attempting to retrieve multiple Spaces metadata information.
-class OLY_API SpacesMetadataResult : public oly_services::ResultBase {
+class OLY_API SpacesMetadataResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -259,7 +272,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to Enter a Space.
-class OLY_API EnterSpaceResult : public oly_services::ResultBase {
+class OLY_API EnterSpaceResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
 
@@ -284,7 +298,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain the obfuscated email addresses of the users that have not yet accepted the space invites
-class OLY_API PendingInvitesResult : public oly_services::ResultBase {
+class OLY_API PendingInvitesResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -311,7 +326,8 @@ private:
 /// @ingroup Space System
 /// @brief Data class used to contain the outcome of space geo location operations.
 /// The result can be successful and still return no geo location if one does not exist.
-class OLY_API SpaceGeoLocationResult : public oly_services::ResultBase {
+class OLY_API SpaceGeoLocationResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class PointOfInterestSystem;
@@ -345,7 +361,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Collection result to be used only by the PointOfInterestSystem
-class SpaceGeoLocationCollectionResult : public oly_services::ResultBase {
+class SpaceGeoLocationCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class PointOfInterestSystem;
 

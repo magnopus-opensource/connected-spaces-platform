@@ -30,7 +30,8 @@
 #include "Systems/ResultHelpers.h"
 #include "Web/HttpResponse.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ConversationSystem::ConversationSystem(MultiplayerConnection* Connection)
     : Connection(nullptr)
@@ -47,16 +48,21 @@ void ConversationSystem::StoreConversationMessage(const csp::common::String& Con
     const csp::common::String& UserId, const csp::common::String& SenderDisplayName, const csp::common::String& Message,
     MessageResultCallback Callback) const
 {
-    const csp::systems::AssetCollectionResultCallback AddCommentCallback = [=](const csp::systems::AssetCollectionResult& AddCommentResult) {
-        if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    const csp::systems::AssetCollectionResultCallback AddCommentCallback = [=](const csp::systems::AssetCollectionResult& AddCommentResult)
+    {
+        if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
-        if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::Success) {
+        if (AddCommentResult.GetResultCode() == csp::systems::EResultCode::Success)
+        {
             MessageResult Result;
             Result.FillMessageInfo(AddCommentResult.GetAssetCollection());
             INVOKE_IF_NOT_NULL(Callback, Result);
-        } else {
+        }
+        else
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "The Comment asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
                 static_cast<int>(AddCommentResult.GetResultCode()), AddCommentResult.GetHttpResultCode());
 
@@ -81,7 +87,8 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
 {
     const auto MessagesCount = Messages.Size();
 
-    if (MessagesCount == 0) {
+    if (MessagesCount == 0)
+    {
         csp::systems::NullResult InternalResult(csp::systems::EResultCode::Success, (uint16_t)csp::web::EResponseCodes::ResponseNoContent);
         INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -95,22 +102,29 @@ void ConversationSystem::DeleteMessages(const csp::common::Array<csp::systems::A
     std::shared_ptr<size_t> DeletionCounter(CSP_NEW size_t, DeletionCounterDeleter);
     *DeletionCounter = 0;
 
-    for (auto idx = 0; idx < MessagesCount; ++idx) {
-        const csp::systems::NullResultCallback DeleteCommentCallback = [=](const csp::systems::NullResult& DeleteCommentResult) {
-            if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Success) {
+    for (auto idx = 0; idx < MessagesCount; ++idx)
+    {
+        const csp::systems::NullResultCallback DeleteCommentCallback = [=](const csp::systems::NullResult& DeleteCommentResult)
+        {
+            if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Success)
+            {
                 ++*DeletionCounter;
 
-                if (*DeletionCounter == MessagesCount) {
+                if (*DeletionCounter == MessagesCount)
+                {
                     INVOKE_IF_NOT_NULL(Callback, DeleteCommentResult);
                 }
-            } else if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+            }
+            else if (DeleteCommentResult.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
 
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Delete asset collection for message ID %s has failed. ResCode: %d, HttpResCode: %d",
                     Messages[idx].Id.c_str(), static_cast<int>(DeleteCommentResult.GetResultCode()), DeleteCommentResult.GetHttpResultCode());
 
                 ++*DeletionCounter;
 
-                if (*DeletionCounter == MessagesCount) {
+                if (*DeletionCounter == MessagesCount)
+                {
                     INVOKE_IF_NOT_NULL(Callback, DeleteCommentResult);
                 }
             }
@@ -125,7 +139,8 @@ void ConversationSystem::CreateConversation(const csp::common::String& Message, 
     auto* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
     const auto& CurrentSpace = SpaceSystem->GetCurrentSpace();
 
-    if (CurrentSpace.Id.IsEmpty()) {
+    if (CurrentSpace.Id.IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("ConversationSystem::CreateConversation() failed: Enter a space before adding a message");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::StringResult>());
@@ -135,7 +150,8 @@ void ConversationSystem::CreateConversation(const csp::common::String& Message, 
 
     const auto UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-    if (UserSystem->GetLoginState().State != csp::systems::ELoginState::LoggedIn) {
+    if (UserSystem->GetLoginState().State != csp::systems::ELoginState::LoggedIn)
+    {
         CSP_LOG_ERROR_MSG("ConversationSystem::CreateConversation() failed: Log in before adding a message");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::StringResult>());
@@ -146,57 +162,63 @@ void ConversationSystem::CreateConversation(const csp::common::String& Message, 
     const auto& UserId = UserSystem->GetLoginState().UserId;
     const auto& SpaceId = CurrentSpace.Id;
 
-    csp::systems::ProfileResultCallback GetProfileCallback
-        = [Callback, UserId, SpaceId, Message](const csp::systems::ProfileResult& GetProfileResult) {
-              if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
-                  return;
-              }
+    csp::systems::ProfileResultCallback GetProfileCallback = [Callback, UserId, SpaceId, Message](const csp::systems::ProfileResult& GetProfileResult)
+    {
+        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
+            return;
+        }
 
-              if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed) {
-                  const csp::systems::StringResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
-                  INVOKE_IF_NOT_NULL(Callback, InternalResult);
+        if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
+            const csp::systems::StringResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
+            INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
-                  return;
-              }
+            return;
+        }
 
-              // We need to firstly create the comment container asset collection
-              const csp::systems::AssetCollectionResultCallback AddCommentContainerCallback
-                  = [=](const csp::systems::AssetCollectionResult& AddCommentContainerResult) {
-                        if (AddCommentContainerResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
-                            return;
-                        }
+        // We need to firstly create the comment container asset collection
+        const csp::systems::AssetCollectionResultCallback AddCommentContainerCallback
+            = [=](const csp::systems::AssetCollectionResult& AddCommentContainerResult)
+        {
+            if (AddCommentContainerResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+            {
+                return;
+            }
 
-                        if (AddCommentContainerResult.GetResultCode() == csp::systems::EResultCode::Success) {
-                            const auto& ConversationId = AddCommentContainerResult.GetAssetCollection().Id;
+            if (AddCommentContainerResult.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                const auto& ConversationId = AddCommentContainerResult.GetAssetCollection().Id;
 
-                            csp::systems::StringResult InternalResult(
-                                AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
-                            InternalResult.SetValue(ConversationId);
-                            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-                        } else {
-                            CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
-                                "The Comment Container asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
-                                (int)AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
+                csp::systems::StringResult InternalResult(AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
+                InternalResult.SetValue(ConversationId);
+                INVOKE_IF_NOT_NULL(Callback, InternalResult);
+            }
+            else
+            {
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+                    "The Comment Container asset collection creation was not successful. ResCode: %d, HttpResCode: %d",
+                    (int)AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
 
-                            const csp::systems::StringResult InternalResult(
-                                AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
-                            INVOKE_IF_NOT_NULL(Callback, InternalResult);
-                        }
-                    };
+                const csp::systems::StringResult InternalResult(
+                    AddCommentContainerResult.GetResultCode(), AddCommentContainerResult.GetHttpResultCode());
+                INVOKE_IF_NOT_NULL(Callback, InternalResult);
+            }
+        };
 
-              const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
-              ConversationInfo DefaultConversationInfo = ConversationInfo();
-              DefaultConversationInfo.UserDisplayName = GetProfileResult.GetProfile().DisplayName;
-              DefaultConversationInfo.Message = Message;
-              DefaultConversationInfo.Edited = false;
-              DefaultConversationInfo.Resolved = false;
-              DefaultConversationInfo.CameraPosition = SpaceTransform();
+        const auto UniqueAssetCollectionName = ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(SpaceId, UserId);
+        ConversationInfo DefaultConversationInfo = ConversationInfo();
+        DefaultConversationInfo.UserDisplayName = GetProfileResult.GetProfile().DisplayName;
+        DefaultConversationInfo.Message = Message;
+        DefaultConversationInfo.Edited = false;
+        DefaultConversationInfo.Resolved = false;
+        DefaultConversationInfo.CameraPosition = SpaceTransform();
 
-              auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-              AssetSystem->CreateAssetCollection(SpaceId, nullptr, UniqueAssetCollectionName,
-                  ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(DefaultConversationInfo),
-                  csp::systems::EAssetCollectionType::COMMENT_CONTAINER, nullptr, AddCommentContainerCallback);
-          };
+        auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+        AssetSystem->CreateAssetCollection(SpaceId, nullptr, UniqueAssetCollectionName,
+            ConversationSystemHelpers::GenerateConversationAssetCollectionMetadata(DefaultConversationInfo),
+            csp::systems::EAssetCollectionType::COMMENT_CONTAINER, nullptr, AddCommentContainerCallback);
+    };
 
     UserSystem->GetProfileByUserId(UserId, GetProfileCallback);
 }
@@ -207,7 +229,8 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
     auto* SpaceSystem = csp::systems::SystemsManager::Get().GetSpaceSystem();
     const auto& CurrentSpace = SpaceSystem->GetCurrentSpace();
 
-    if (CurrentSpace.Id.IsEmpty()) {
+    if (CurrentSpace.Id.IsEmpty())
+    {
         CSP_LOG_ERROR_MSG("ConversationSystem::AddMessageToConversation() failed: Enter a space before adding a message");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
@@ -217,7 +240,8 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 
     auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
 
-    if (UserSystem->GetLoginState().State != csp::systems::ELoginState::LoggedIn) {
+    if (UserSystem->GetLoginState().State != csp::systems::ELoginState::LoggedIn)
+    {
         CSP_LOG_ERROR_MSG("ConversationSystem::AddMessageToConversation() failed: Log in before adding a message");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
@@ -227,9 +251,12 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 
     const auto& UserId = UserSystem->GetLoginState().UserId;
 
-    const MessageResultCallback MessageResultCallback = [Callback, ConversationId, this](const MessageResult& MessageResultCallbackResult) {
-        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error) {
-            if (Error != ErrorCode::None) {
+    const MessageResultCallback MessageResultCallback = [Callback, ConversationId, this](const MessageResult& MessageResultCallbackResult)
+    {
+        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, MessageResultCallbackResult, this](ErrorCode Error)
+        {
+            if (Error != ErrorCode::None)
+            {
                 CSP_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
 
                 const MessageResult InternalResult(
@@ -252,14 +279,17 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 void ConversationSystem::GetMessagesFromConversation(const csp::common::String& ConversationId, const csp::common::Optional<int>& ResultsSkipNumber,
     const csp::common::Optional<int>& ResultsMaxNumber, MessageCollectionResultCallback Callback)
 {
-    csp::systems::AssetCollectionsResultCallback GetMessagesCallback = [Callback](const csp::systems::AssetCollectionsResult& GetMessagesResult) {
-        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::AssetCollectionsResultCallback GetMessagesCallback = [Callback](const csp::systems::AssetCollectionsResult& GetMessagesResult)
+    {
+        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
         MessageCollectionResult InternalResult(GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
 
-        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
                 static_cast<int>(GetMessagesResult.GetResultCode()), GetMessagesResult.GetHttpResultCode());
 
@@ -282,14 +312,17 @@ void ConversationSystem::GetMessagesFromConversation(const csp::common::String& 
 
 void ConversationSystem::GetMessage(const csp::common::String& MessageId, MessageResultCallback Callback)
 {
-    const csp::systems::AssetCollectionResultCallback GetMessageCallback = [Callback](const csp::systems::AssetCollectionResult& GetMessageResult) {
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    const csp::systems::AssetCollectionResultCallback GetMessageCallback = [Callback](const csp::systems::AssetCollectionResult& GetMessageResult)
+    {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
         MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
 
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
                 "The retrieval of the Message asset collection was not successful. ResCode: %d, HttpResCode: %d",
                 static_cast<int>(GetMessageResult.GetResultCode()), GetMessageResult.GetHttpResultCode());
@@ -311,17 +344,20 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 {
     auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-    csp::systems::AssetCollectionResultCallback GetMessageCallback = [Callback, MessageId, MessageData, AssetSystem, this](
-                                                                         const csp::systems::AssetCollectionResult& GetMessageResult) {
+    csp::systems::AssetCollectionResultCallback GetMessageCallback
+        = [Callback, MessageId, MessageData, AssetSystem, this](const csp::systems::AssetCollectionResult& GetMessageResult)
+    {
         csp::systems::AssetCollectionResultCallback GetUpdatedMessageCallback
             = [Callback, MessageId, GetMessageResult, this](const csp::systems::AssetCollectionResult& GetUpdatedMessageResult)
 
         {
-            if (GetUpdatedMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+            if (GetUpdatedMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+            {
                 return;
             }
 
-            if (GetUpdatedMessageResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+            if (GetUpdatedMessageResult.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
                     "The Update of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
                     static_cast<int>(GetMessageResult.GetResultCode()), GetMessageResult.GetHttpResultCode());
@@ -332,8 +368,10 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
                 return;
             }
 
-            const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedMessageResult](ErrorCode Error) {
-                if (Error != ErrorCode::None) {
+            const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedMessageResult](ErrorCode Error)
+            {
+                if (Error != ErrorCode::None)
+                {
                     CSP_LOG_ERROR_MSG("UpdatedMessageInfo: SignalR connection: Error");
 
                     INVOKE_IF_NOT_NULL(Callback, MakeInvalid<MessageResult>());
@@ -350,11 +388,13 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
                 "ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::MessageInformation), MessageId }, signalRCallback);
         };
 
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
                 static_cast<int>(GetMessageResult.GetResultCode()), GetMessageResult.GetHttpResultCode());
 
@@ -366,9 +406,11 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 
         MessageInfo NewMessageData(MessageData);
 
-        if (MessageData.Edited != true) {
+        if (MessageData.Edited != true)
+        {
             if (ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetMessageResult.GetAssetCollection()).Message
-                != NewMessageData.Message) {
+                != NewMessageData.Message)
+            {
                 NewMessageData.Edited = true;
             }
         }
@@ -384,14 +426,17 @@ void ConversationSystem::GetMessageInformation(const csp::common::String& Messag
 {
     auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-    csp::systems::AssetCollectionResultCallback GetMessageCallback = [Callback](const csp::systems::AssetCollectionResult& GetMessageResult) {
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::AssetCollectionResultCallback GetMessageCallback = [Callback](const csp::systems::AssetCollectionResult& GetMessageResult)
+    {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
         MessageResult InternalResult(GetMessageResult.GetResultCode(), GetMessageResult.GetHttpResultCode());
 
-        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
             return;
@@ -406,13 +451,16 @@ void ConversationSystem::GetMessageInformation(const csp::common::String& Messag
 
 void ConversationSystem::DeleteConversation(const csp::common::String& ConversationId, csp::systems::NullResultCallback Callback)
 {
-    csp::systems::AssetCollectionsResultCallback GetMessagesCallback = [Callback, ConversationId, this](
-                                                                           const csp::systems::AssetCollectionsResult& GetMessagesResult) {
-        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::AssetCollectionsResultCallback GetMessagesCallback
+        = [Callback, ConversationId, this](const csp::systems::AssetCollectionsResult& GetMessagesResult)
+    {
+        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
-        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "The retrieval of Message asset collections was not successful. ResCode: %d, HttpResCode: %d",
                 (int)GetMessagesResult.GetResultCode(), GetMessagesResult.GetHttpResultCode());
 
@@ -423,60 +471,67 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
         }
 
         const csp::systems::NullResultCallback DeleteMessagesCallback
-            = [Callback, ConversationId, this](const csp::systems::NullResult& DeleteMessagesResult) {
-                  if (DeleteMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed) {
-                      CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Not all Message asset collections were deleted. ResCode: %d, HttpResCode: %d",
-                          (int)DeleteMessagesResult.GetResultCode(), DeleteMessagesResult.GetHttpResultCode());
+            = [Callback, ConversationId, this](const csp::systems::NullResult& DeleteMessagesResult)
+        {
+            if (DeleteMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
+                CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Not all Message asset collections were deleted. ResCode: %d, HttpResCode: %d",
+                    (int)DeleteMessagesResult.GetResultCode(), DeleteMessagesResult.GetHttpResultCode());
 
-                      INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
+                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
 
-                      return;
-                  }
+                return;
+            }
 
-                  const csp::systems::NullResultCallback DeleteConversationAssetCollectionCallback
-                      = [Callback](const csp::systems::NullResult& DeleteConversationAssetCollectionResult) {
-                            if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
-                                return;
-                            }
+            const csp::systems::NullResultCallback DeleteConversationAssetCollectionCallback
+                = [Callback](const csp::systems::NullResult& DeleteConversationAssetCollectionResult)
+            {
+                if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+                {
+                    return;
+                }
 
-                            if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::Failed) {
-                                CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
-                                    "The deletion of the Conversation asset collection was not successful. ResCode: %d, HttpResCode: %d",
-                                    (int)DeleteConversationAssetCollectionResult.GetResultCode(),
-                                    DeleteConversationAssetCollectionResult.GetHttpResultCode());
+                if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::Failed)
+                {
+                    CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
+                        "The deletion of the Conversation asset collection was not successful. ResCode: %d, HttpResCode: %d",
+                        (int)DeleteConversationAssetCollectionResult.GetResultCode(), DeleteConversationAssetCollectionResult.GetHttpResultCode());
 
-                                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
 
-                                return;
-                            }
+                    return;
+                }
 
-                            INVOKE_IF_NOT_NULL(Callback, DeleteConversationAssetCollectionResult);
-                        };
+                INVOKE_IF_NOT_NULL(Callback, DeleteConversationAssetCollectionResult);
+            };
 
-                  // Delete also the conversation asset collection
-                  csp::systems::AssetCollection ConversationAssetCollection;
-                  ConversationAssetCollection.Id = ConversationId;
+            // Delete also the conversation asset collection
+            csp::systems::AssetCollection ConversationAssetCollection;
+            ConversationAssetCollection.Id = ConversationId;
 
-                  DeleteMessages({ ConversationAssetCollection }, DeleteConversationAssetCollectionCallback);
-              };
+            DeleteMessages({ ConversationAssetCollection }, DeleteConversationAssetCollectionCallback);
+        };
 
         const csp::systems::NullResultCallback NullResultCallback
-            = [Callback, ConversationId, this](const csp::systems::NullResult& NullResultCallbackResult) {
-                  const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error) {
-                      if (Error != ErrorCode::None) {
-                          CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
+            = [Callback, ConversationId, this](const csp::systems::NullResult& NullResultCallbackResult)
+        {
+            const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error)
+            {
+                if (Error != ErrorCode::None)
+                {
+                    CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
 
-                          INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
+                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
 
-                          return;
-                      }
+                    return;
+                }
 
-                      INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
-                  };
+                INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
+            };
 
-                  EventBusPtr->SendNetworkEvent("ConversationSystem",
-                      { ReplicatedValue((int64_t)ConversationMessageType::DeleteConversation), ConversationId }, signalRCallback);
-              };
+            EventBusPtr->SendNetworkEvent(
+                "ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::DeleteConversation), ConversationId }, signalRCallback);
+        };
 
         const auto& Messages = GetMessagesResult.GetAssetCollections();
         DeleteMessages(Messages, NullResultCallback);
@@ -495,9 +550,12 @@ void ConversationSystem::DeleteMessage(const csp::common::String& MessageId, csp
     csp::systems::AssetCollection MessageAssetCollection;
     MessageAssetCollection.Id = MessageId;
 
-    const csp::systems::NullResultCallback NullCallback = [Callback, MessageId, this](const csp::systems::NullResult& NullCallbackResult) {
-        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullCallbackResult](ErrorCode Error) {
-            if (Error != ErrorCode::None) {
+    const csp::systems::NullResultCallback NullCallback = [Callback, MessageId, this](const csp::systems::NullResult& NullCallbackResult)
+    {
+        const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, NullCallbackResult](ErrorCode Error)
+        {
+            if (Error != ErrorCode::None)
+            {
                 CSP_LOG_ERROR_MSG("DeleteMessage: SignalR connection: Error");
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
@@ -521,13 +579,16 @@ void ConversationSystem::SetConversationInformation(
 {
     auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-    csp::systems::AssetCollectionResultCallback GetConversationCallback = [Callback, ConversationId, ConversationData, AssetSystem, this](
-                                                                              const csp::systems::AssetCollectionResult& GetConversationResult) {
-        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::AssetCollectionResultCallback GetConversationCallback
+        = [Callback, ConversationId, ConversationData, AssetSystem, this](const csp::systems::AssetCollectionResult& GetConversationResult)
+    {
+        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
-        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
                 "The retrieval of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
                 (int)GetConversationResult.GetResultCode(), GetConversationResult.GetHttpResultCode());
@@ -539,12 +600,15 @@ void ConversationSystem::SetConversationInformation(
         }
 
         csp::systems::ProfileResultCallback GetProfileCallback = [Callback, GetConversationResult, ConversationId, ConversationData, AssetSystem,
-                                                                     this](const csp::systems::ProfileResult& GetProfileResult) {
-            if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+                                                                     this](const csp::systems::ProfileResult& GetProfileResult)
+        {
+            if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+            {
                 return;
             }
 
-            if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+            if (GetProfileResult.GetResultCode() == csp::systems::EResultCode::Failed)
+            {
                 const ConversationResult InternalResult(GetProfileResult.GetResultCode(), GetProfileResult.GetHttpResultCode());
                 INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
@@ -555,11 +619,13 @@ void ConversationSystem::SetConversationInformation(
                 = [Callback, GetConversationResult, ConversationId, this](const csp::systems::AssetCollectionResult& GetUpdatedConversationResult)
 
             {
-                if (GetUpdatedConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+                if (GetUpdatedConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+                {
                     return;
                 }
 
-                if (GetUpdatedConversationResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+                if (GetUpdatedConversationResult.GetResultCode() == csp::systems::EResultCode::Failed)
+                {
                     CSP_LOG_FORMAT(csp::systems::LogLevel::Log,
                         "The Update of Conversation asset collections was not successful. ResCode: %d, HttpResCode: %d",
                         (int)GetConversationResult.GetResultCode(), GetConversationResult.GetHttpResultCode());
@@ -570,8 +636,10 @@ void ConversationSystem::SetConversationInformation(
                     return;
                 }
 
-                const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedConversationResult](ErrorCode Error) {
-                    if (Error != ErrorCode::None) {
+                const MultiplayerConnection::ErrorCodeCallbackHandler signalRCallback = [Callback, GetUpdatedConversationResult](ErrorCode Error)
+                {
+                    if (Error != ErrorCode::None)
+                    {
                         CSP_LOG_ERROR_MSG("AddMessageToConversation: SignalR connection: Error");
 
                         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<ConversationResult>());
@@ -591,7 +659,8 @@ void ConversationSystem::SetConversationInformation(
             ConversationInfo NewConversationData(ConversationData);
             NewConversationData.UserDisplayName = GetProfileResult.GetProfile().DisplayName;
 
-            if (!NewConversationData.Edited) {
+            if (!NewConversationData.Edited)
+            {
                 const auto CurrentConversationData
                     = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(GetConversationResult.GetAssetCollection());
                 NewConversationData.Edited = CurrentConversationData.Message != NewConversationData.Message;
@@ -612,14 +681,17 @@ void ConversationSystem::GetConversationInformation(const csp::common::String& C
 {
     auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-    csp::systems::AssetCollectionResultCallback GetConversationCallback = [=](const csp::systems::AssetCollectionResult& GetConversationResult) {
-        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    csp::systems::AssetCollectionResultCallback GetConversationCallback = [=](const csp::systems::AssetCollectionResult& GetConversationResult)
+    {
+        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
         ConversationResult InternalResult(GetConversationResult.GetResultCode(), GetConversationResult.GetHttpResultCode());
 
-        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::Failed) {
+        if (GetConversationResult.GetResultCode() == csp::systems::EResultCode::Failed)
+        {
             INVOKE_IF_NOT_NULL(Callback, InternalResult);
 
             return;
@@ -640,7 +712,8 @@ CSP_EVENT void ConversationSystem::SetConversationSystemCallback(ConversationSys
 
 void ConversationSystem::RegisterSystemCallback()
 {
-    if (!ConversationSystemCallback) {
+    if (!ConversationSystemCallback)
+    {
         return;
     }
 
@@ -649,14 +722,16 @@ void ConversationSystem::RegisterSystemCallback()
 
 void ConversationSystem::DeregisterSystemCallback()
 {
-    if (EventBusPtr) {
+    if (EventBusPtr)
+    {
         EventBusPtr->StopListenNetworkEvent("ConversationSystem");
     }
 }
 
 void ConversationSystem::OnEvent(const std::vector<signalr::value>& EventValues)
 {
-    if (!ConversationSystemCallback) {
+    if (!ConversationSystemCallback)
+    {
         return;
     }
 

@@ -24,11 +24,22 @@
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Systems/Assets/Asset.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a portal component.
 /// @note IsVisible, IsARVisible and IsActive are no longer exposed but retained for backwards compatibility.
-enum class PortalPropertyKeys { SpaceId = 0, IsVisible, IsActive, IsARVisible, IsEnabled, Position, Radius, Num };
+enum class PortalPropertyKeys
+{
+    SpaceId = 0,
+    IsVisible,
+    IsActive,
+    IsARVisible,
+    IsEnabled,
+    Position,
+    Radius,
+    Num
+};
 
 /**
  * @ingroup PortalSpaceComponent
@@ -41,7 +52,8 @@ enum class PortalPropertyKeys { SpaceId = 0, IsVisible, IsActive, IsARVisible, I
  * 3. Enter the new one (also via the space system).
  */
 
-class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent {
+class CSP_API PortalSpaceComponent : public ComponentBase, public IEnableableComponent, public IPositionComponent
+{
 public:
     /// @brief Constructs the portal space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

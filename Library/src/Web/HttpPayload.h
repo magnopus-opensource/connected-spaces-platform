@@ -23,10 +23,12 @@
 #include <map>
 #include <rapidjson/document.h>
 
-namespace csp::web {
+namespace csp::web
+{
 
 /// Headers and Content for a HttpRequest or Response
-class HttpPayload {
+class HttpPayload
+{
 public:
     using HeadersMap = std::map<csp::StlString, csp::StlString, std::less<csp::StlString>,
         csp::memory::StlAllocator<std::pair<const csp::StlString, csp::StlString>>>;

@@ -18,9 +18,11 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/DtoBase/DtoBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
-class AssetFileDto : public csp::services::DtoBase {
+class AssetFileDto : public csp::services::DtoBase
+{
 public:
     AssetFileDto();
     virtual ~AssetFileDto();

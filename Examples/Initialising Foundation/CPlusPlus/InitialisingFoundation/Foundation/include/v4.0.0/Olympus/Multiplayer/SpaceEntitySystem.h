@@ -11,24 +11,28 @@
 #include <mutex>
 #include <set>
 
-namespace signalr {
+namespace signalr
+{
 class value;
 }
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class ClientElectionManager;
 
 class SignalRConnection;
 
 } // namespace oly_multiplayer
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 class MultiplayerConnection;
 class SpaceTransform;
 class SpaceEntity;
 
-class OLY_API OLY_NO_DISPOSE SpaceEntitySystem {
+class OLY_API OLY_NO_DISPOSE SpaceEntitySystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MultiplayerConnection;
     friend class SpaceEntityEventHandler;

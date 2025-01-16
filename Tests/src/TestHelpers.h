@@ -42,7 +42,8 @@ inline const char* TESTS_CLIENT_SKU = "CPPTest";
 
 #define NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, parent_class, parent_id)                                                    \
     class NAMESPACE_GTEST_TEST_CLASS_NAME_(namespace_name, test_case_name, test_name)                                                                \
-        : public parent_class {                                                                                                                      \
+        : public parent_class                                                                                                                        \
+    {                                                                                                                                                \
     public:                                                                                                                                          \
         NAMESPACE_GTEST_TEST_CLASS_NAME_(namespace_name, test_case_name, test_name)() { }                                                            \
                                                                                                                                                      \
@@ -68,7 +69,8 @@ inline const char* TESTS_CLIENT_SKU = "CPPTest";
     NAMESPACE_GTEST_TEST_(namespace_name, test_case_name, test_name, ::testing::Test, ::testing::internal::GetTestTypeId())
 
 /// Wait for a response from an aync event with a timeout
-class ResponseWaiter {
+class ResponseWaiter
+{
 public:
     /// @brief Wait for an event to occur
     /// @param IsDone Functional (function or lambda) that return true when an event occurs
@@ -85,7 +87,8 @@ public:
 
         const std::chrono::duration TimeOut = TimeOutInSeconds;
 
-        while (!IsDone() && (Elapsed < TimeOut)) {
+        while (!IsDone() && (Elapsed < TimeOut))
+        {
             std::this_thread::sleep_for(std::chrono::milliseconds(SleepTimeMs));
             Elapsed = clock::now() - Start;
         }
@@ -95,7 +98,8 @@ public:
     }
 };
 
-template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter {
+template <class ResultType> class ServiceResponseReceiver : public ResponseWaiter
+{
 public:
     ServiceResponseReceiver(csp::systems::EResultCode InExpectedResult = csp::systems::EResultCode::Success)
         : ExpectedResult(InExpectedResult)
@@ -202,14 +206,16 @@ inline void WaitForCallback(bool& CallbackCalled, int MaxTextTimeSeconds = 20)
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds) {
+    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();
         TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
     }
 
-    if (CallbackCalled == false) {
+    if (CallbackCalled == false)
+    {
         printf("Test timed out - Callback wasn't called\n");
     }
 }
@@ -224,7 +230,8 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
     // Call at least once
     EntitySystem->ProcessPendingEntityOperations();
 
-    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds) {
+    while (CallbackCalled == false && TestTime < MaxTextTimeSeconds)
+    {
         EntitySystem->ProcessPendingEntityOperations();
 
         std::this_thread::sleep_for(50ms);
@@ -233,7 +240,8 @@ inline void WaitForCallbackWithUpdate(bool& CallbackCalled, csp::multiplayer::Sp
         TestTime = std::chrono::duration_cast<std::chrono::seconds>(Current - Start).count();
     }
 
-    if (CallbackCalled == false) {
+    if (CallbackCalled == false)
+    {
         printf("Test timed out - Callback wasn't called\n");
     }
 }

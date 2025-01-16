@@ -17,7 +17,8 @@
 
 #include <cmath>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 bool GeoLocation::IsValid() const { return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Latitude <= 180.0; }
 

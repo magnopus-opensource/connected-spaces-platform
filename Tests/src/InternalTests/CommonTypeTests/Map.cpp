@@ -29,11 +29,14 @@ using namespace csp::common;
 // Test case to check if default initialisation works correctly
 CSP_INTERNAL_TEST(CSPEngine, CommonMapTests, MapDefaultInitialisationTest)
 {
-    try {
+    try
+    {
         Map<int, int> Instance;
 
         EXPECT_EQ(Instance.Size(), 0);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }

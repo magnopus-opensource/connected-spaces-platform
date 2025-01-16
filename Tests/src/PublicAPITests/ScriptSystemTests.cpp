@@ -39,7 +39,8 @@
 
 using namespace csp::multiplayer;
 
-namespace {
+namespace
+{
 
 MultiplayerConnection* Connection;
 SpaceEntitySystem* EntitySystem;
@@ -69,7 +70,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptBindingTest)
 
     ScriptSystem.Initialise();
 
-    auto Fn = [&TestMessage](const char* Str) {
+    auto Fn = [&TestMessage](const char* Str)
+    {
         TestMessage = Str;
         CSP_LOG_MSG(csp::systems::LogLevel::Log, Str);
         std::cout << Str << "\n";
@@ -224,12 +226,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok) {
+    auto EntitiesReadyCallback = [](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "EntitiesReadyCallback called" << std::endl;
     };
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -260,7 +264,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -280,7 +285,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, RunScriptTest)
 		  
     )xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cerr << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -547,7 +553,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteScriptTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -656,7 +663,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, DeleteAndChangeComponentTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -747,12 +755,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok) {
+    auto EntitiesReadyCallback = [](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "EntitiesReadyCallback called" << std::endl;
     };
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -783,7 +793,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -801,7 +812,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 		  
     )xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cerr << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -824,7 +836,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     CreatedObject->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -836,7 +849,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     CreatedObject->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         std::this_thread::sleep_for(10ms);
     }
@@ -853,7 +867,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, AddSecondScriptTest)
 
     CreatedObject->QueueUpdate();
 
-    while (PatchPending) {
+    while (PatchPending)
+    {
         EntitySystem->ProcessPendingEntityOperations();
         csp::CSPFoundation::Tick();
         std::this_thread::sleep_for(10ms);
@@ -919,7 +934,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, ScriptDeltaTimeTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -998,12 +1014,14 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     auto EntityCreatedCallback = [](SpaceEntity* Entity) { std::cerr << "EntityCreatedCallback called" << std::endl; };
 
-    auto EntitiesReadyCallback = [](bool Ok) {
+    auto EntitiesReadyCallback = [](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "EntitiesReadyCallback called" << std::endl;
     };
 
-    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok) {
+    auto ScriptSystemReadyCallback = [&ScriptSystemReady](bool Ok)
+    {
         EXPECT_EQ(Ok, true);
         std::cerr << "ScriptSystemReadyCallback called" << std::endl;
         ScriptSystemReady = true;
@@ -1034,7 +1052,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 
@@ -1065,7 +1084,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, CustomComponentScriptInterfaceSubs
 		ThisEntity.subscribeToMessage("valueChanged", "onValueChanged");
 		)xx";
 
-    auto ScriptSystemIsReady = [&ScriptSystemReady]() {
+    auto ScriptSystemIsReady = [&ScriptSystemReady]()
+    {
         std::cerr << "Waiting for ScriptSystemReady" << std::endl;
         return (ScriptSystemReady == true);
     };
@@ -1146,7 +1166,8 @@ CSP_PUBLIC_TEST(CSPEngine, ScriptSystemTests, MultipleScriptComponentTest)
 
     EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
 
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar) {
+    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
+    {
         OnUserCreated(Avatar);
     }
 

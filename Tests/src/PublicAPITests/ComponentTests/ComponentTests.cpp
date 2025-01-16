@@ -38,7 +38,8 @@
 
 using namespace csp::multiplayer;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 } // namespace
@@ -143,13 +144,15 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ARVisibleTest)
         new ImageSpaceComponent(MySpaceEntity), new LightSpaceComponent(MySpaceEntity), new StaticModelSpaceComponent(MySpaceEntity),
         new VideoPlayerSpaceComponent(MySpaceEntity) };
 
-    for (auto Component : Components) {
+    for (auto Component : Components)
+    {
         auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
 
         EXPECT_TRUE(VisibleComponent->GetIsARVisible());
     }
 
-    for (auto Component : Components) {
+    for (auto Component : Components)
+    {
         auto* VisibleComponent = dynamic_cast<IVisibleComponent*>(Component);
         VisibleComponent->SetIsARVisible(false);
 
@@ -167,13 +170,15 @@ CSP_PUBLIC_TEST(CSPEngine, ComponentTests, ThirdPartyComponentRefTest)
         new CollisionSpaceComponent(MySpaceEntity), new FogSpaceComponent(MySpaceEntity), new LightSpaceComponent(MySpaceEntity),
         new ReflectionSpaceComponent(MySpaceEntity), new StaticModelSpaceComponent(MySpaceEntity) };
 
-    for (auto Component : Components) {
+    for (auto Component : Components)
+    {
         auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
 
         EXPECT_EQ(ThirdPartyComponentRef->GetThirdPartyComponentRef(), "");
     }
 
-    for (auto Component : Components) {
+    for (auto Component : Components)
+    {
         auto* ThirdPartyComponentRef = dynamic_cast<IThirdPartyComponentRef*>(Component);
         ThirdPartyComponentRef->SetThirdPartyComponentRef("ComponentRef");
 

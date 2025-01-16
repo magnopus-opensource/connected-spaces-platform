@@ -22,13 +22,15 @@
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -36,13 +38,15 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 class SequenceSystem;
 class SpaceSystem;
 /// @ingroup HotspotSequenceSystem System
 /// @brief Public facing system that allows the management of groupings of hotspots in a space.
 
-class CSP_API HotspotSequenceSystem : public SystemBase {
+class CSP_API HotspotSequenceSystem : public SystemBase
+{
 public:
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */

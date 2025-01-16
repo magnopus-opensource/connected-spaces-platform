@@ -22,7 +22,8 @@
 #include <rapidjson/writer.h>
 #include <stack>
 
-namespace csp::json {
+namespace csp::json
+{
 class JsonSerializer;
 class JsonDeserializer;
 } // namespace csp::json
@@ -34,9 +35,11 @@ template <typename T> inline void ToJson(csp::json::JsonSerializer& Serializer, 
 template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T& Object);
 template <typename T> inline void FromJson(const csp::json::JsonDeserializer& Deserializer, T* Object);
 
-namespace csp::json {
+namespace csp::json
+{
 
-class JsonSerializer {
+class JsonSerializer
+{
 public:
     /// @brief Generates a json string from an object
     /// A global ToJson function in the root namespace should be created to work with this function:
@@ -95,7 +98,8 @@ private:
     template <typename T> void SerializeValue(const csp::common::List<T>& Value);
 };
 
-class JsonDeserializer {
+class JsonDeserializer
+{
 public:
     /// @brief Converts a given Json string into the specified object
     /// A global FromJson function in the root namespace should be created to work with this function:
@@ -106,7 +110,8 @@ public:
     {
         JsonDeserializer Deserializer { Data };
 
-        if (Deserializer.Doc.HasParseError()) {
+        if (Deserializer.Doc.HasParseError())
+        {
             // Error parsing Json
             return false;
         }
@@ -164,7 +169,8 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
 {
     Writer.StartArray();
 
-    for (size_t i = 0; i < Value.Size(); ++i) {
+    for (size_t i = 0; i < Value.Size(); ++i)
+    {
         SerializeValue(Value[i]);
     }
 
@@ -175,7 +181,8 @@ template <typename T> inline void JsonSerializer::SerializeValue(const csp::comm
 {
     Writer.StartArray();
 
-    for (size_t i = 0; i < Value.Size(); ++i) {
+    for (size_t i = 0; i < Value.Size(); ++i)
+    {
         SerializeValue(Value[i]);
     }
 
@@ -187,7 +194,8 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
     int Size = ValueStack.top()->Size();
     Values = csp::common::Array<T>(Size);
 
-    for (int i = 0; i < Size; ++i) {
+    for (int i = 0; i < Size; ++i)
+    {
         auto JsonValue = &(*ValueStack.top())[i];
         ValueStack.push(JsonValue);
 
@@ -203,7 +211,8 @@ template <typename T> inline void JsonDeserializer::DeserializeValue(csp::common
 {
     int Size = ValueStack.top()->Size();
 
-    for (int i = 0; i < Size; ++i) {
+    for (int i = 0; i < Size; ++i)
+    {
         auto JsonValue = &(*ValueStack.top())[i];
         ValueStack.push(JsonValue);
 

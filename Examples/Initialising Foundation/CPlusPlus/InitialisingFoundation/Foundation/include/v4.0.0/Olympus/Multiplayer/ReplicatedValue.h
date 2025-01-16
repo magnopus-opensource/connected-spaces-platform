@@ -7,9 +7,11 @@
 
 #include <functional>
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class ReplicatedValueType {
+enum class ReplicatedValueType
+{
     InvalidType,
     Boolean,
     Integer,
@@ -22,7 +24,8 @@ enum class ReplicatedValueType {
 /**
  * @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Foundation replication systems.
  */
-class OLY_API ReplicatedValue {
+class OLY_API ReplicatedValue
+{
 public:
     /**
      * @brief A default ReplicatedValue will not have a valid type ("ReplicatedValueType::InvalidType"), and will have no internal value associated.
@@ -171,7 +174,8 @@ private:
     ReplicatedValueType ReplicatedType;
 
     OLY_START_IGNORE
-    union InternalValue {
+    union InternalValue
+    {
         InternalValue();
         ~InternalValue();
 

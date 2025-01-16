@@ -31,7 +31,8 @@ class CSPEngine_SerialisationTests_SpaceEntityObjectSignalRDeserialisationTest_T
 #endif
 CSP_END_IGNORE
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class SpaceEntity;
 class ComponentScriptInterface;
@@ -39,7 +40,8 @@ class ComponentScriptInterface;
 /// @brief Represents the type of component.
 ///
 /// Values with _DEPRECATED appended to their name should not be used. They are retained only for backwards compatibility.
-enum class ComponentType {
+enum class ComponentType
+{
     Invalid,
     Core,
     UIController_DEPRECATED,
@@ -71,7 +73,8 @@ enum class ComponentType {
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
-class CSP_API ComponentBase {
+class CSP_API ComponentBase
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceEntity;

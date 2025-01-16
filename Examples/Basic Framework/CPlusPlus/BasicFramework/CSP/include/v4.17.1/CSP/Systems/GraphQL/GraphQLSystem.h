@@ -19,24 +19,28 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup GraphQL System
 /// @brief Public facing system that allows interfacing with Magnopus Connect Services' GraphQL Server.
 /// Offers methods for sending and receiving GraphQL Queries.
-class CSP_API CSP_NO_DISPOSE GraphQLSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE GraphQLSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

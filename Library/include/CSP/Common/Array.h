@@ -33,7 +33,8 @@
 #endif
 #endif
 
-namespace csp::common {
+namespace csp::common
+{
 
 CSP_START_IGNORE
 template <typename T> class List;
@@ -44,7 +45,8 @@ CSP_END_IGNORE
 /// Simple array type used to pass arrays of objects across the DLL boundary.
 ///
 /// @tparam T : Object type to store in the array
-template <typename T> class CSP_API Array {
+template <typename T> class CSP_API Array
+{
 public:
     /// @brief Constructs an array with 0 elements
     Array()
@@ -60,7 +62,8 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (Size > 0) {
+        if (Size > 0)
+        {
             AllocArray(Size);
         }
     }
@@ -72,7 +75,8 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (Buffer != nullptr && Size > 0) {
+        if (Buffer != nullptr && Size > 0)
+        {
             AllocArray(Size);
             memcpy(ObjectArray, Buffer, Size * sizeof(T));
         }
@@ -86,10 +90,12 @@ public:
     {
         ArraySize = Other.ArraySize;
 
-        if (ArraySize > 0) {
+        if (ArraySize > 0)
+        {
             AllocArray(ArraySize);
 
-            for (size_t i = 0; i < ArraySize; i++) {
+            for (size_t i = 0; i < ArraySize; i++)
+            {
                 ObjectArray[i] = Other.ObjectArray[i];
             }
         }
@@ -101,10 +107,12 @@ public:
         : ArraySize(0)
         , ObjectArray(nullptr)
     {
-        if (List.size() > 0) {
+        if (List.size() > 0)
+        {
             AllocArray(List.size());
 
-            for (size_t i = 0; i < List.size(); ++i) {
+            for (size_t i = 0; i < List.size(); ++i)
+            {
                 ObjectArray[i] = *(List.begin() + i);
             }
         }
@@ -127,17 +135,20 @@ public:
     /// @return Array<T>&
     Array<T>& operator=(const Array<T>& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
         ArraySize = Other.ArraySize;
         ObjectArray = nullptr;
 
-        if (ArraySize > 0) {
+        if (ArraySize > 0)
+        {
             AllocArray(ArraySize);
 
-            for (size_t i = 0; i < ArraySize; i++) {
+            for (size_t i = 0; i < ArraySize; i++)
+            {
                 ObjectArray[i] = Other.ObjectArray[i];
             }
         }
@@ -151,7 +162,8 @@ public:
     T& operator[](const size_t Index)
     {
 #ifndef CSP_DISABLE_BOUNDS_CHECKING
-        if (Index >= ArraySize) {
+        if (Index >= ArraySize)
+        {
             throw std::out_of_range("Index");
         }
 #endif
@@ -165,7 +177,8 @@ public:
     const T& operator[](const size_t Index) const
     {
 #ifndef CSP_DISABLE_BOUNDS_CHECKING
-        if (Index >= ArraySize) {
+        if (Index >= ArraySize)
+        {
             throw std::out_of_range("Index");
         }
 #endif
@@ -187,7 +200,8 @@ public:
     {
         List<T> Result(ArraySize);
 
-        for (size_t i = 0; i < ArraySize; ++i) {
+        for (size_t i = 0; i < ArraySize; ++i)
+        {
             Result.Append(ObjectArray[i]);
         }
 
@@ -199,7 +213,8 @@ private:
     /// @param Size const size_t : Number of elements in the array
     void AllocArray(const size_t Size)
     {
-        if (ObjectArray == nullptr) {
+        if (ObjectArray == nullptr)
+        {
 #ifndef CSP_DISABLE_OVERFLOW_CHECKING
 #ifdef _MSC_VER // MSVC
             auto HighBits = __umulh(sizeof(T), Size);
@@ -208,7 +223,8 @@ private:
             auto HighBits = static_cast<size_t>(MultiplyResult >> static_cast<__uint128_t>(64));
 #endif
 
-            if (HighBits > 0) {
+            if (HighBits > 0)
+            {
                 throw std::overflow_error("Size");
             }
 #endif
@@ -216,7 +232,8 @@ private:
             auto BufferSize = sizeof(T) * Size;
             ObjectArray = (T*)csp::memory::DllAlloc(BufferSize);
 
-            for (size_t i = 0; i < Size; ++i) {
+            for (size_t i = 0; i < Size; ++i)
+            {
                 T* ObjectPtr = &ObjectArray[i];
                 new (ObjectPtr) T;
             }
@@ -228,8 +245,10 @@ private:
     /// @brief Frees memory for the array.
     void FreeArray()
     {
-        if (ObjectArray != nullptr) {
-            for (size_t i = 0; i < ArraySize; ++i) {
+        if (ObjectArray != nullptr)
+        {
+            for (size_t i = 0; i < ArraySize; ++i)
+            {
                 T* ObjectPtr = &ObjectArray[i];
                 ObjectPtr->~T();
             }

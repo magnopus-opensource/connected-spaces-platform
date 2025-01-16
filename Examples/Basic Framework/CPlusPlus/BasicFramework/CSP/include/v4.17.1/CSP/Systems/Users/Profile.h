@@ -19,7 +19,8 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -27,11 +28,13 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @brief A basic class abstraction for a user profile, including User Id and name, a display name, avatar information
 /// and the users latest platform used.
-class CSP_API BasicProfile {
+class CSP_API BasicProfile
+{
 public:
     csp::common::String UserId;
     csp::common::String UserName;
@@ -41,7 +44,8 @@ public:
 };
 
 /// @brief Data structure for a full user profile, which incudes user email, roles, and data for creation and update history.
-class CSP_API Profile : public BasicProfile {
+class CSP_API Profile : public BasicProfile
+{
 public:
     Profile();
 
@@ -56,7 +60,8 @@ public:
 };
 
 /// @brief Result structure for a Profile request
-class CSP_API ProfileResult : public csp::systems::ResultBase {
+class CSP_API ProfileResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -76,7 +81,8 @@ private:
 };
 
 /// @brief Result structure for a BasicProfile request
-class CSP_API BasicProfilesResult : public csp::systems::ResultBase {
+class CSP_API BasicProfilesResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

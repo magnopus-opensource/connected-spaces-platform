@@ -25,7 +25,8 @@
 
 CSP_NO_EXPORT
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Builds a string with the specified format and arguments.
 /// Based on sprintf:
@@ -37,7 +38,8 @@ template <typename... Args> static String StringFormat(const String& Format, Arg
 {
     int SizeS = std::snprintf(nullptr, 0, Format.c_str(), args...) + 1; // Extra space for '\0'
 
-    if (SizeS <= 0) {
+    if (SizeS <= 0)
+    {
         return String();
     }
 

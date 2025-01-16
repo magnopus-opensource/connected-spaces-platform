@@ -9,12 +9,14 @@
 #include "Olympus/Systems/Spaces/Space.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
 class Space;
 /// @ingroup Conversation System
 /// @brief Public facing system that can handle conversations taking place between users of a space in the form of thread messages
-class OLY_API OLY_NO_DISPOSE ConversationSystem {
+class OLY_API OLY_NO_DISPOSE ConversationSystem
+{
     /** @cond DO_NOT_DOCUMENT */
     /** @endcond */
 

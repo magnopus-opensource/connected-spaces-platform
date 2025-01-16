@@ -22,7 +22,8 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -30,13 +31,18 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-enum class EPointOfInterestType { DEFAULT };
+enum class EPointOfInterestType
+{
+    DEFAULT
+};
 
 /// @ingroup Point Of Interest System
 /// @brief Data representation of a Point Of Interest
-class CSP_API PointOfInterest {
+class CSP_API PointOfInterest
+{
 public:
     PointOfInterest();
 
@@ -60,7 +66,8 @@ public:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information after creating or retrieving a POI.
-class CSP_API POIResult : public csp::systems::ResultBase {
+class CSP_API POIResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -81,7 +88,8 @@ private:
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information when attempting to get an array of POIs.
-class CSP_API POICollectionResult : public csp::systems::ResultBase {
+class CSP_API POICollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

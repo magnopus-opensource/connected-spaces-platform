@@ -21,11 +21,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class GaussianSplatSpaceComponent;
 
-class GaussianSplatSpaceComponentScriptInterface : public ComponentScriptInterface {
+class GaussianSplatSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     GaussianSplatSpaceComponentScriptInterface(GaussianSplatSpaceComponent* InComponent = nullptr);
 

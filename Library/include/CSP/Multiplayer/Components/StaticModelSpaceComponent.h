@@ -28,10 +28,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a static model component.
-enum class StaticModelPropertyKeys {
+enum class StaticModelPropertyKeys
+{
     Name_DEPRECATED = 0,
     ExternalResourceAssetId,
     ExternalResourceAssetCollectionId,

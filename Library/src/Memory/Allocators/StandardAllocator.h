@@ -59,14 +59,16 @@ constexpr std::align_val_t CSP_ALLOCATOR_MIN_ALIGNMENT = std::align_val_t(16);
 
 #endif
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 /// StandardAllocator class
 ///
 /// Simple default allocator type that just uses malloc and free
 ///
 ///
-template <typename TLockTrait = STD_ALLOCATOR_TRAIT> class StandardAllocator : public Allocator {
+template <typename TLockTrait = STD_ALLOCATOR_TRAIT> class StandardAllocator : public Allocator
+{
 public:
     StandardAllocator();
     virtual ~StandardAllocator();
@@ -174,7 +176,8 @@ template <typename TLockTrait> void StandardAllocator<TLockTrait>::Deallocate(vo
 
 template <typename TLockTrait> void StandardAllocator<TLockTrait>::Deallocate(void* p)
 {
-    if (p != nullptr) {
+    if (p != nullptr)
+    {
         AllocMutex.Lock();
 
 #ifdef CSP_WASM

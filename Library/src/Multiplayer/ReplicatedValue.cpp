@@ -17,7 +17,8 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 static const csp::common::Vector2 InvalidVector2 = csp::common::Vector2();
 static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
 static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
@@ -27,9 +28,12 @@ ReplicatedValue::ReplicatedValue() { ReplicatedType = ReplicatedValueType::Inval
 
 ReplicatedValue::~ReplicatedValue()
 {
-    if (ReplicatedType == ReplicatedValueType::String) {
+    if (ReplicatedType == ReplicatedValueType::String)
+    {
         Value.String.~String();
-    } else if (ReplicatedType == ReplicatedValueType::Map) {
+    }
+    else if (ReplicatedType == ReplicatedValueType::Map)
+    {
         Value.Map.~Map();
     }
 }
@@ -92,44 +96,55 @@ ReplicatedValue::ReplicatedValue(const ReplicatedValue& OtherValue) { *this = Ot
 
 ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
 {
-    switch (InValue.GetReplicatedValueType()) {
-    case ReplicatedValueType::Boolean: {
+    switch (InValue.GetReplicatedValueType())
+    {
+    case ReplicatedValueType::Boolean:
+    {
         SetBool(InValue.GetBool());
         break;
     }
-    case ReplicatedValueType::Integer: {
+    case ReplicatedValueType::Integer:
+    {
         SetInt(InValue.GetInt());
         break;
     }
-    case ReplicatedValueType::Float: {
+    case ReplicatedValueType::Float:
+    {
         SetFloat(InValue.GetFloat());
         break;
     }
-    case ReplicatedValueType::String: {
+    case ReplicatedValueType::String:
+    {
         SetString(InValue.GetString());
         break;
     }
-    case ReplicatedValueType::Vector2: {
+    case ReplicatedValueType::Vector2:
+    {
         SetVector2(InValue.GetVector2());
         break;
     }
-    case ReplicatedValueType::Vector3: {
+    case ReplicatedValueType::Vector3:
+    {
         SetVector3(InValue.GetVector3());
         break;
     }
-    case ReplicatedValueType::Vector4: {
+    case ReplicatedValueType::Vector4:
+    {
         SetVector4(InValue.GetVector4());
         break;
     }
-    case ReplicatedValueType::Map: {
+    case ReplicatedValueType::Map:
+    {
         SetMap(InValue.GetMap());
         break;
     }
-    case ReplicatedValueType::InvalidType: {
+    case ReplicatedValueType::InvalidType:
+    {
         ReplicatedType = ReplicatedValueType::InvalidType;
         break;
     }
-    default: {
+    default:
+    {
         assert(0 && "Unhandled replicated value type!");
         break;
     }
@@ -141,41 +156,52 @@ ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
 bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
 {
     bool IsEqual = GetReplicatedValueType() == OtherValue.GetReplicatedValueType();
-    if (IsEqual) {
-        switch (OtherValue.GetReplicatedValueType()) {
-        case ReplicatedValueType::Boolean: {
+    if (IsEqual)
+    {
+        switch (OtherValue.GetReplicatedValueType())
+        {
+        case ReplicatedValueType::Boolean:
+        {
             IsEqual = GetBool() == OtherValue.GetBool();
             break;
         }
-        case ReplicatedValueType::Integer: {
+        case ReplicatedValueType::Integer:
+        {
             IsEqual = GetInt() == OtherValue.GetInt();
             break;
         }
-        case ReplicatedValueType::Float: {
+        case ReplicatedValueType::Float:
+        {
             IsEqual = GetFloat() == OtherValue.GetFloat();
             break;
         }
-        case ReplicatedValueType::String: {
+        case ReplicatedValueType::String:
+        {
             IsEqual = GetString() == OtherValue.GetString();
             break;
         }
-        case ReplicatedValueType::Vector2: {
+        case ReplicatedValueType::Vector2:
+        {
             IsEqual = GetVector2() == OtherValue.GetVector2();
             break;
         }
-        case ReplicatedValueType::Vector3: {
+        case ReplicatedValueType::Vector3:
+        {
             IsEqual = GetVector3() == OtherValue.GetVector3();
             break;
         }
-        case ReplicatedValueType::Vector4: {
+        case ReplicatedValueType::Vector4:
+        {
             IsEqual = GetVector4() == OtherValue.GetVector4();
             break;
         }
-        case ReplicatedValueType::Map: {
+        case ReplicatedValueType::Map:
+        {
             IsEqual = GetMap() == OtherValue.GetMap();
             break;
         }
-        default: {
+        default:
+        {
             assert(0 && "Unhandled replicated value type!");
             break;
         }
@@ -187,20 +213,26 @@ bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const { retu
 
 bool ReplicatedValue::operator<(const ReplicatedValue& OtherValue) const
 {
-    switch (OtherValue.GetReplicatedValueType()) {
-    case ReplicatedValueType::Boolean: {
+    switch (OtherValue.GetReplicatedValueType())
+    {
+    case ReplicatedValueType::Boolean:
+    {
         return GetBool() < OtherValue.GetBool();
     }
-    case ReplicatedValueType::Integer: {
+    case ReplicatedValueType::Integer:
+    {
         return GetInt() < OtherValue.GetInt();
     }
-    case ReplicatedValueType::Float: {
+    case ReplicatedValueType::Float:
+    {
         return GetFloat() < OtherValue.GetFloat();
     }
-    case ReplicatedValueType::String: {
+    case ReplicatedValueType::String:
+    {
         return GetString() < OtherValue.GetString();
     }
-    default: {
+    default:
+    {
         assert(0 && "Unhandled replicated value type!");
         break;
     }
@@ -211,20 +243,26 @@ bool ReplicatedValue::operator<(const ReplicatedValue& OtherValue) const
 
 bool ReplicatedValue::operator>(const ReplicatedValue& OtherValue) const
 {
-    switch (OtherValue.GetReplicatedValueType()) {
-    case ReplicatedValueType::Boolean: {
+    switch (OtherValue.GetReplicatedValueType())
+    {
+    case ReplicatedValueType::Boolean:
+    {
         return GetBool() > OtherValue.GetBool();
     }
-    case ReplicatedValueType::Integer: {
+    case ReplicatedValueType::Integer:
+    {
         return GetInt() > OtherValue.GetInt();
     }
-    case ReplicatedValueType::Float: {
+    case ReplicatedValueType::Float:
+    {
         return GetFloat() > OtherValue.GetFloat();
     }
-    case ReplicatedValueType::String: {
+    case ReplicatedValueType::String:
+    {
         return GetString() > OtherValue.GetString();
     }
-    default: {
+    default:
+    {
         assert(0 && "Unhandled replicated value type!");
         break;
     }

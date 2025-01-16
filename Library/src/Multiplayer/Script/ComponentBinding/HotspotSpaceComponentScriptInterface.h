@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class HotspotSpaceComponent;
 
-class HotspotSpaceComponentScriptInterface : public ComponentScriptInterface {
+class HotspotSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     HotspotSpaceComponentScriptInterface(HotspotSpaceComponent* InComponent = nullptr);
 

@@ -31,7 +31,8 @@
 
 #include "gtest/gtest.h"
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -57,7 +58,8 @@ void CreateAnchor(csp::systems::AnchorSystem* AnchorSystem, const csp::common::S
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutAnchor = Result.GetAnchor();
         std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
     }
@@ -86,7 +88,8 @@ void CreateAnchorInSpace(csp::systems::AnchorSystem* AnchorSystem, const csp::co
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutAnchor = Result.GetAnchor();
         std::cerr << "Anchor Created: Id=" << OutAnchor.Id << std::endl;
     }
@@ -98,8 +101,10 @@ void DeleteAnchors(csp::systems::AnchorSystem* AnchorSystem, const csp::common::
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
-        for (int idx = 0; idx < AnchorIDs.Size(); idx++) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
+        for (int idx = 0; idx < AnchorIDs.Size(); idx++)
+        {
             std::cerr << "Anchor Deleted: "
                       << "Id=" << AnchorIDs[idx] << std::endl;
         }
@@ -388,11 +393,13 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         const auto& ResultAnchors = Result.GetAnchors();
         AnchorCollection = csp::common::Array<csp::systems::Anchor>(ResultAnchors.Size());
 
-        for (int idx = 0; idx < ResultAnchors.Size(); ++idx) {
+        for (int idx = 0; idx < ResultAnchors.Size(); ++idx)
+        {
             AnchorCollection[idx] = ResultAnchors[idx];
         }
 
@@ -401,12 +408,15 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
 
         bool AnchorFound = false;
 
-        for (size_t idx = 0; idx < AnchorCollection.Size(); ++idx) {
-            if (AnchorCollection[idx].Id == Anchor.Id) {
+        for (size_t idx = 0; idx < AnchorCollection.Size(); ++idx)
+        {
+            if (AnchorCollection[idx].Id == Anchor.Id)
+            {
                 auto ReturnSpatialKeyValue = AnchorCollection[idx].SpatialKeyValue;
                 EXPECT_EQ(ReturnSpatialKeyValue.Size(), SpacialValues.Size());
 
-                for (size_t i = 0; i < ReturnSpatialKeyValue.Size(); ++i) {
+                for (size_t i = 0; i < ReturnSpatialKeyValue.Size(); ++i)
+                {
                     EXPECT_TRUE(ReturnSpatialKeyValue.HasKey(SpacialKeys[i]));
                     EXPECT_EQ(ReturnSpatialKeyValue[SpacialKeys[i]], SpacialValues[i]);
                 }
@@ -414,7 +424,8 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
                 auto ReturnTags = AnchorCollection[idx].Tags;
                 EXPECT_EQ(ReturnTags.Size(), Tags.Size());
 
-                for (size_t i = 0; i < ReturnTags.Size(); ++i) {
+                for (size_t i = 0; i < ReturnTags.Size(); ++i)
+                {
                     EXPECT_EQ(ReturnTags[i], Tags[i]);
                 }
 
@@ -424,7 +435,9 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInsideCircularAreaTest)
         }
 
         EXPECT_TRUE(AnchorFound);
-    } else {
+    }
+    else
+    {
         std::cerr << "GetAnchorsInArea failed with ResultCode: " << (int)Result.GetResultCode() << " HttpResultCode: " << Result.GetHttpResultCode()
                   << std::endl;
     }
@@ -509,9 +522,11 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsInSpaceTest)
     EXPECT_EQ(Anchors.Size(), 2);
 
     int AnchorsFound = 0;
-    for (size_t i = 0; i < Anchors.Size(); ++i) {
+    for (size_t i = 0; i < Anchors.Size(); ++i)
+    {
         EXPECT_EQ(Anchors[i].SpaceId, Space.Id);
-        if (Anchors[i].ThirdPartyAnchorId == Anchor1.ThirdPartyAnchorId || Anchors[i].ThirdPartyAnchorId == Anchor2.ThirdPartyAnchorId) {
+        if (Anchors[i].ThirdPartyAnchorId == Anchor1.ThirdPartyAnchorId || Anchors[i].ThirdPartyAnchorId == Anchor2.ThirdPartyAnchorId)
+        {
             ++AnchorsFound;
         }
     }
@@ -569,10 +584,14 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, GetAnchorsByAssetCollectionIdTest)
 
         bool Found1 = false, Found2 = false;
 
-        for (auto i = 0; i < Anchors.Size(); ++i) {
-            if (Anchors[i].Id == Anchor1.Id) {
+        for (auto i = 0; i < Anchors.Size(); ++i)
+        {
+            if (Anchors[i].Id == Anchor1.Id)
+            {
                 Found1 = true;
-            } else if (Anchors[i].Id == Anchor2.Id) {
+            }
+            else if (Anchors[i].Id == Anchor2.Id)
+            {
                 Found2 = true;
             }
         }

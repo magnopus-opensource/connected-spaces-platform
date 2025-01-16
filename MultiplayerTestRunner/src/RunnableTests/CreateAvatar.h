@@ -18,7 +18,8 @@
 
 #include "../CLIArgs.h"
 
-namespace CreateAvatar {
+namespace CreateAvatar
+{
 /*
  * Example test that simply creates an avatar in a room.
  */

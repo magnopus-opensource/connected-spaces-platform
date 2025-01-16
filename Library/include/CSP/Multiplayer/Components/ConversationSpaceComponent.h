@@ -33,14 +33,27 @@
 
 #include <optional>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a conversation component.
-enum class ConversationPropertyKeys { ConversationId = 0, IsVisible, IsActive, Position, Rotation, Title, Date, NumberOfReplies, Num };
+enum class ConversationPropertyKeys
+{
+    ConversationId = 0,
+    IsVisible,
+    IsActive,
+    Position,
+    Rotation,
+    Title,
+    Date,
+    NumberOfReplies,
+    Num
+};
 
 /// @ingroup ConversationSpaceComponent
 /// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
-class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent {
+class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
+{
 public:
     /// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

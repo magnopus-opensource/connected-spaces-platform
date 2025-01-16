@@ -26,24 +26,28 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Space System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Group.
 /// Offers methods for creating, deleting and joining spaces.
-class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE SpaceSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

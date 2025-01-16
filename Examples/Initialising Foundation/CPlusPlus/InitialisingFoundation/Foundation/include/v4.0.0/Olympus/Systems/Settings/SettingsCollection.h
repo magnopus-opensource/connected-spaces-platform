@@ -9,7 +9,8 @@
 
 #include <functional>
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiResponseBase;
 
@@ -19,11 +20,13 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Settings System
 /// @brief Data representation of a Settings collection which maps to a UserService::Settings.
-class OLY_API SettingsCollection {
+class OLY_API SettingsCollection
+{
 public:
     SettingsCollection() = default;
 
@@ -34,7 +37,8 @@ public:
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
-class OLY_API SettingsCollectionResult : public oly_services::ResultBase {
+class OLY_API SettingsCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

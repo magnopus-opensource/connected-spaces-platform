@@ -20,7 +20,8 @@
 #include <chrono>
 #include <functional>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SystemsManager;
 class UserSystem;
@@ -42,23 +43,27 @@ class QuotaSystem;
 
 } // namespace csp::systems
 
-namespace csp {
+namespace csp
+{
 
 class CSPFoundation;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Systems
 /// @brief Interface used to access each of the systems.
-class CSP_API CSP_NO_DISPOSE SystemsManager {
+class CSP_API CSP_NO_DISPOSE SystemsManager
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::CSPFoundation;
     /** @endcond */

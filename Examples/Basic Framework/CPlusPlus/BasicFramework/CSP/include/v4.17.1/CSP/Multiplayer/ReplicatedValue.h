@@ -22,10 +22,12 @@
 
 #include <functional>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enum representing the type of a replicated value.
-enum class ReplicatedValueType {
+enum class ReplicatedValueType
+{
     InvalidType,
     Boolean,
     Integer,
@@ -37,7 +39,8 @@ enum class ReplicatedValueType {
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
 /// replication systems.
-class CSP_API ReplicatedValue {
+class CSP_API ReplicatedValue
+{
 public:
     /// @brief A default ReplicatedValue will not have a valid type ("ReplicatedValueType::InvalidType"), and will have no internal value associated.
     ///
@@ -195,7 +198,8 @@ private:
     ReplicatedValueType ReplicatedType;
 
     CSP_START_IGNORE
-    union InternalValue {
+    union InternalValue
+    {
         InternalValue();
         ~InternalValue();
 

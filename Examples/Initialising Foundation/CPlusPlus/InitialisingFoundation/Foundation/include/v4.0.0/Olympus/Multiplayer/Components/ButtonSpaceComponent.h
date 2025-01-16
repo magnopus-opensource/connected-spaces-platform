@@ -7,9 +7,11 @@
 #include "Olympus/Multiplayer/SpaceTransform.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class ButtonPropertyKeys {
+enum class ButtonPropertyKeys
+{
     Name = 0,
     LabelText,
     IconAssetId,
@@ -25,7 +27,8 @@ enum class ButtonPropertyKeys {
 
 /// @ingroup ButtonSpaceComponent
 /// @brief Data representation of an ButtonSpaceComponent.
-class OLY_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public IVisibleComponent {
+class OLY_API ButtonSpaceComponent : public ComponentBase, public IEnableableComponent, public IVisibleComponent
+{
 public:
     ButtonSpaceComponent(SpaceEntity* Parent);
 

@@ -23,14 +23,16 @@
 
 #include <signalrclient/signalr_value.h>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, unsigned int Index);
 
 // Generic deserialiser for multiplayer events. It can be derived from and
 // its behavior can be overridden if specialised handling is needed for
 // certain events.
-class EventDeserialiser {
+class EventDeserialiser
+{
 public:
     // Creates an empty event deserialiser.
     EventDeserialiser();
@@ -59,7 +61,8 @@ protected:
 };
 
 // A specialised deserialiser for handling events triggered when an asset referenced by the space changes.
-class AssetChangedEventDeserialiser : public EventDeserialiser {
+class AssetChangedEventDeserialiser : public EventDeserialiser
+{
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
@@ -70,7 +73,8 @@ private:
 };
 
 // A specialised deserialiser for handling events triggered when a conversation event happens.
-class ConversationEventDeserialiser : public EventDeserialiser {
+class ConversationEventDeserialiser : public EventDeserialiser
+{
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
@@ -81,7 +85,8 @@ private:
 };
 
 // A specialised deserialiser for handling events triggered when a user in the space's access permissions change.
-class UserPermissionsChangedEventDeserialiser : public EventDeserialiser {
+class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
+{
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
@@ -91,7 +96,8 @@ private:
     UserPermissionsParams EventParams;
 };
 
-class SequenceChangedEventDeserialiser : public EventDeserialiser {
+class SequenceChangedEventDeserialiser : public EventDeserialiser
+{
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
@@ -106,7 +112,8 @@ private:
 /// SpaceId - The unique identifer of the space this hotspot sequence relates to.
 /// Name - The name of the hotspot which has been changed.
 /// NewName - In the case of renames, describes the new name of the sequence.
-class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser {
+class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
+{
 public:
     virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 

@@ -23,20 +23,25 @@
 #include <gtest/gtest.h>
 #include <optional>
 
-namespace {
+namespace
+{
 /* Some tests only run if there's a credentials file */
 std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
 {
-    try {
+    try
+    {
         return Utils::LoadTestAccountCredentials();
-    } catch (...) {
+    }
+    catch (...)
+    {
         return {};
     }
 }
 } // namespace
 
 /* Initialze CSP before the suite begins with a fixture */
-class LoginRAIITest : public ::testing::Test {
+class LoginRAIITest : public ::testing::Test
+{
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
 };
@@ -44,7 +49,8 @@ protected:
 TEST_F(LoginRAIITest, TestValidLogin)
 {
     std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value()) {
+    if (!Credentials.has_value())
+    {
         GTEST_SKIP() << "No credentials file found, Skipping Test.";
     }
 
@@ -62,12 +68,17 @@ TEST_F(LoginRAIITest, TestValidLogin)
 TEST_F(LoginRAIITest, TestInvalidLogin)
 {
     ::testing::internal::CaptureStdout();
-    try {
+    try
+    {
         LoginRAII login { "FakeName", "FakePassword" };
-    } catch (const Utils::ExceptionWithCode& Exception) {
+    }
+    catch (const Utils::ExceptionWithCode& Exception)
+    {
         EXPECT_EQ(Exception.ErrorCode, MultiplayerTestRunner::ErrorCodes::FAILED_TO_LOGIN);
         EXPECT_NE(std::string(Exception.what()).find("Failed to login to service, got result code 3"), std::string::npos);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL() << "Unexpected exception type thrown";
     }
 

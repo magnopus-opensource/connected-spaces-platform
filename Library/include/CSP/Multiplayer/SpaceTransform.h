@@ -18,10 +18,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Vector.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Simple class for holding the position, rotation and scale of a transform.
-class CSP_API SpaceTransform {
+class CSP_API SpaceTransform
+{
 public:
     /// @brief Default constuctor for the SpaceTransform
     SpaceTransform();

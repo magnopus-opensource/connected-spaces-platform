@@ -29,11 +29,13 @@
 #include <sstream>
 #include <thread>
 
-namespace csp {
+namespace csp
+{
 
 using ScheduledTaskId = uint32_t;
 
-struct FunctionTimer {
+struct FunctionTimer
+{
     std::function<void()> Func;
     std::chrono::system_clock::time_point Time;
     ScheduledTaskId Id;
@@ -58,7 +60,8 @@ struct FunctionTimer {
     uint32_t GetId() const { return Id; }
 };
 
-class Scheduler {
+class Scheduler
+{
 public:
     Scheduler()
         : Thread(nullptr)
@@ -78,7 +81,8 @@ public:
 
     void Shutdown()
     {
-        if (Thread != nullptr) {
+        if (Thread != nullptr)
+        {
             ShouldExit = true;
             Thread->join();
             CSP_DELETE(Thread);
@@ -88,7 +92,8 @@ public:
 
     ScheduledTaskId ScheduleAt(const std::chrono::system_clock::time_point& Time, std::function<void()> Func)
     {
-        std::function<void()> threadFunc = [Func]() {
+        std::function<void()> threadFunc = [Func]()
+        {
             std::thread Thread(Func);
             Thread.detach();
         };
@@ -98,7 +103,8 @@ public:
 
     void ScheduleEvery(std::chrono::system_clock::duration Interval, std::function<void()> Func)
     {
-        std::function<void()> threadFunc = [Func]() {
+        std::function<void()> threadFunc = [Func]()
+        {
             std::thread Thread(Func);
             Thread.detach();
         };
@@ -136,7 +142,8 @@ private:
 
     void ScheduleEveryIntern(std::chrono::system_clock::duration Interval, std::function<void()> Func)
     {
-        std::function<void()> waitFunc = [this, Interval, Func]() {
+        std::function<void()> waitFunc = [this, Interval, Func]()
+        {
             Func();
             this->ScheduleEveryIntern(Interval, Func);
         };
@@ -146,13 +153,15 @@ private:
 
     void ThreadLoop()
     {
-        while (!ShouldExit) {
+        while (!ShouldExit)
+        {
             {
                 std::scoped_lock<std::mutex> ListLocker(ListLock);
 
                 auto now = std::chrono::system_clock::now();
 
-                if (Tasks.size() > 0 && Tasks.front().Time <= now) {
+                if (Tasks.size() > 0 && Tasks.front().Time <= now)
+                {
                     FunctionTimer Func;
 
                     {

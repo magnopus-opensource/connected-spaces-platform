@@ -22,7 +22,8 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 CSP_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -30,13 +31,18 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-enum class AnchorProvider { GoogleCloudAnchors = 0 };
+enum class AnchorProvider
+{
+    GoogleCloudAnchors = 0
+};
 
 /// @ingroup Anchor System
 /// @brief a data structure specifically for anchor position vector handling.
-class CSP_API OlyAnchorPosition {
+class CSP_API OlyAnchorPosition
+{
 public:
     OlyAnchorPosition();
     OlyAnchorPosition(double InX, double InY, double InZ)
@@ -51,7 +57,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data representation of an Anchor
-class CSP_API Anchor {
+class CSP_API Anchor
+{
 public:
     Anchor() {};
 
@@ -77,7 +84,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an Anchor.
-class CSP_API AnchorResult : public csp::systems::ResultBase {
+class CSP_API AnchorResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -98,7 +106,8 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of Anchors.
-class CSP_API AnchorCollectionResult : public csp::systems::ResultBase {
+class CSP_API AnchorCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -132,7 +141,8 @@ typedef std::function<void(const AnchorCollectionResult& Result)> AnchorCollecti
 
 /// @ingroup Anchor System
 /// @brief Data representation of an AnchorResolution
-class CSP_API AnchorResolution {
+class CSP_API AnchorResolution
+{
 public:
     csp::common::String Id;
     csp::common::String AnchorId;
@@ -144,7 +154,8 @@ public:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information after creating or retrieving an AnchorResolution.
-class CSP_API AnchorResolutionResult : public csp::systems::ResultBase {
+class CSP_API AnchorResolutionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
@@ -170,7 +181,8 @@ private:
 
 /// @ingroup Anchor System
 /// @brief Data class used to contain information when attempting to get an array of AnchorResolutions.
-class CSP_API AnchorResolutionCollectionResult : public csp::systems::ResultBase {
+class CSP_API AnchorResolutionCollectionResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;

@@ -21,7 +21,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 EntityScriptInterface::EntityScriptInterface(SpaceEntity* InEntity)
     : Entity(InEntity)
@@ -32,7 +33,8 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetPosition() const
 {
     EntityScriptInterface::Vector3 Pos = { 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         const csp::common::Vector3& Position = Entity->GetPosition();
 
         Pos[0] = Position.X;
@@ -50,7 +52,8 @@ void EntityScriptInterface::SetPosition(EntityScriptInterface::Vector3 Pos)
     const csp::common::Vector3 NewPosition(Pos[0], Pos[1], Pos[2]);
     const csp::common::Vector3& CurrentPosition = Entity->GetPosition();
 
-    if (CurrentPosition != NewPosition) {
+    if (CurrentPosition != NewPosition)
+    {
         Entity->SetPosition(NewPosition);
         Entity->MarkForUpdate();
     }
@@ -60,7 +63,8 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalPosition() const
 {
     EntityScriptInterface::Vector3 GlobalPos = { 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         const csp::common::Vector3& Position = Entity->GetGlobalPosition();
 
         GlobalPos[0] = Position.X;
@@ -75,7 +79,8 @@ EntityScriptInterface::Vector4 EntityScriptInterface::GetRotation() const
 {
     EntityScriptInterface::Vector4 Rot = { 0, 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         csp::common::Vector4 Rotation = Entity->GetRotation();
 
         Rot[0] = Rotation.X;
@@ -93,7 +98,8 @@ void EntityScriptInterface::SetRotation(EntityScriptInterface::Vector4 Rot)
     const csp::common::Vector4 NewRotation(Rot[0], Rot[1], Rot[2], Rot[3]);
     const csp::common::Vector4& CurrentRotation = Entity->GetRotation();
 
-    if (CurrentRotation != NewRotation) {
+    if (CurrentRotation != NewRotation)
+    {
         Entity->SetRotation(NewRotation);
         Entity->MarkForUpdate();
     }
@@ -103,7 +109,8 @@ EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
 {
     EntityScriptInterface::Vector4 GlobalRot = { 0, 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         csp::common::Vector4 Rotation = Entity->GetGlobalRotation();
 
         GlobalRot[0] = Rotation.X;
@@ -117,7 +124,8 @@ EntityScriptInterface::Vector4 EntityScriptInterface::GetGlobalRotation() const
 
 int64_t EntityScriptInterface::GetParentId()
 {
-    if (const auto Parent = Entity->GetParentEntity()) {
+    if (const auto Parent = Entity->GetParentEntity())
+    {
         return Parent->GetId();
     }
 
@@ -126,21 +134,24 @@ int64_t EntityScriptInterface::GetParentId()
 
 void EntityScriptInterface::SetParentId(int64_t ParentId)
 {
-    if (Entity) {
+    if (Entity)
+    {
         Entity->SetParentId(ParentId);
     }
 }
 
 void EntityScriptInterface::RemoveParentEntity()
 {
-    if (Entity) {
+    if (Entity)
+    {
         Entity->RemoveParentEntity();
     }
 }
 
 SpaceEntity* EntityScriptInterface::GetParentEntity() const
 {
-    if (Entity) {
+    if (Entity)
+    {
         return Entity->GetParentEntity();
     }
 
@@ -151,7 +162,8 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetScale() const
 {
     EntityScriptInterface::Vector3 Scale = { 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         csp::common::Vector3 EntityScale = Entity->GetScale();
 
         Scale[0] = EntityScale.X;
@@ -167,7 +179,8 @@ void EntityScriptInterface::SetScale(EntityScriptInterface::Vector3 Scale)
     const csp::common::Vector3 NewScale(Scale[0], Scale[1], Scale[2]);
     const csp::common::Vector3& CurrentScale = Entity->GetScale();
 
-    if (CurrentScale != NewScale) {
+    if (CurrentScale != NewScale)
+    {
         Entity->SetScale(NewScale);
         Entity->MarkForUpdate();
     }
@@ -177,7 +190,8 @@ EntityScriptInterface::Vector3 EntityScriptInterface::GetGlobalScale() const
 {
     EntityScriptInterface::Vector3 GlobalScale = { 0, 0, 0 };
 
-    if (Entity) {
+    if (Entity)
+    {
         csp::common::Vector3 EntityScale = Entity->GetGlobalScale();
 
         GlobalScale[0] = EntityScale.X;
@@ -213,14 +227,17 @@ std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 {
     std::vector<ComponentScriptInterface*> Components;
 
-    if (Entity) {
+    if (Entity)
+    {
         const csp::common::Map<uint16_t, ComponentBase*>& ComponentMap = *Entity->GetComponents();
         const auto ComponentKeys = ComponentMap.Keys();
 
-        for (int i = 0; i < ComponentKeys->Size(); ++i) {
+        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        {
             ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
-            if (Component->GetScriptInterface() != nullptr) {
+            if (Component->GetScriptInterface() != nullptr)
+            {
                 Components.push_back(Component->GetScriptInterface());
             }
         }

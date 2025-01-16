@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/StaticModelSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 StaticModelSpaceComponent::StaticModelSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::StaticModel, Parent)

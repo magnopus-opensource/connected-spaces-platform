@@ -17,21 +17,25 @@
 
 #include "Web/WebClient.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SystemsManager;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class CSPHttpClient;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
-class EmscriptenWebClient : public WebClient {
+class EmscriptenWebClient : public WebClient
+{
     friend class csp::systems::SystemsManager;
     friend class csp::multiplayer::CSPHttpClient;
 

@@ -19,6 +19,12 @@
 
 #pragma once
 
-namespace csp::multiplayer {
-enum class BillboardMode { Off = 0, Billboard, YawLockedBillboard };
+namespace csp::multiplayer
+{
+enum class BillboardMode
+{
+    Off = 0,
+    Billboard,
+    YawLockedBillboard
+};
 }

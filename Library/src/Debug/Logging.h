@@ -55,13 +55,16 @@ CSP_NO_EXPORT
 #define CSP_CONCAT_IMPL(x, y) x##y
 #define CSP_CONCAT(x, y) CSP_CONCAT_IMPL(x, y)
 
-namespace csp::profile {
+namespace csp::profile
+{
 constexpr const int CSP_MAX_LOG_FORMAT_LEN = 1024;
 
 template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, const csp::common::String& FormatStr, Args... args)
 {
-    if (csp::CSPFoundation::GetIsInitialised()) {
-        if (csp::systems::SystemsManager::Get().GetLogSystem()->LoggingEnabled(Level)) {
+    if (csp::CSPFoundation::GetIsInitialised())
+    {
+        if (csp::systems::SystemsManager::Get().GetLogSystem()->LoggingEnabled(Level))
+        {
             char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
             csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
 
@@ -71,21 +74,24 @@ template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, cons
 }
 
 #define CSP_LOG_MSG(LEVEL, MSG)                                                                                                                      \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(LEVEL, MSG);                                                                      \
     }
 
 #define CSP_LOG_FORMAT(LEVEL, FORMAT_STR, ...) csp::profile::LogMsg(LEVEL, FORMAT_STR, __VA_ARGS__)
 
 #define CSP_LOG_ERROR_MSG(MSG)                                                                                                                       \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Error, MSG);                                              \
     }
 
 #define CSP_LOG_ERROR_FORMAT(FORMAT_STR, ...) csp::profile::LogMsg(csp::systems::LogLevel::Error, FORMAT_STR, __VA_ARGS__)
 
 #define CSP_LOG_WARN_MSG(MSG)                                                                                                                        \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Warning, MSG);                                            \
     }
 
@@ -93,32 +99,37 @@ template <typename... Args> void LogMsg(const csp::systems::LogLevel Level, cons
 
 #if CSP_PROFILING_ENABLED
 
-class ScopedProfiler {
+class ScopedProfiler
+{
 public:
     ScopedProfiler(const char* Tag)
     {
-        if (csp::CSPFoundation::GetIsInitialised()) {
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
             csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(csp::common::String(Tag));
         }
     }
 
     ScopedProfiler(const csp::common::String& Tag)
     {
-        if (csp::CSPFoundation::GetIsInitialised()) {
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
             csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(Tag);
         }
     }
 
     ScopedProfiler(const std::string& Tag)
     {
-        if (csp::CSPFoundation::GetIsInitialised()) {
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
             csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(Tag.c_str());
         }
     }
 
     template <typename... Args> ScopedProfiler(const csp::common::String& FormatStr, Args... args)
     {
-        if (csp::CSPFoundation::GetIsInitialised()) {
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
             char MsgString[CSP_MAX_LOG_FORMAT_LEN];
             csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MsgString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
 
@@ -128,7 +139,8 @@ public:
 
     ~ScopedProfiler()
     {
-        if (csp::CSPFoundation::GetIsInitialised()) {
+        if (csp::CSPFoundation::GetIsInitialised())
+        {
             csp::systems::SystemsManager::Get().GetLogSystem()->EndMarker();
         }
     }
@@ -137,10 +149,13 @@ public:
 inline std::string TrimFunctionTag(const std::string& Tag)
 {
     const size_t TrimStart = Tag.find("csp::");
-    if (TrimStart != std::string::npos) {
+    if (TrimStart != std::string::npos)
+    {
         const size_t TrimLength = Tag.find_first_of('(') - TrimStart;
         return Tag.substr(TrimStart, TrimLength);
-    } else {
+    }
+    else
+    {
         const size_t TrimLength = Tag.find_first_of('(');
         return Tag.substr(0, TrimLength);
     }
@@ -148,7 +163,8 @@ inline std::string TrimFunctionTag(const std::string& Tag)
 
 template <typename... Args> void BeginMarker(const csp::common::String& FormatStr, Args... args)
 {
-    if (csp::CSPFoundation::GetIsInitialised()) {
+    if (csp::CSPFoundation::GetIsInitialised())
+    {
         char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
         csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
 
@@ -158,7 +174,8 @@ template <typename... Args> void BeginMarker(const csp::common::String& FormatSt
 
 template <typename... Args> void LogEvent(const csp::common::String& FormatStr, Args... args)
 {
-    if (csp::CSPFoundation::GetIsInitialised()) {
+    if (csp::CSPFoundation::GetIsInitialised())
+    {
         char MarkerString[CSP_MAX_LOG_FORMAT_LEN];
         csp_snprintf(CSP_MAX_LOG_FORMAT_LEN, MarkerString, CSP_MAX_LOG_FORMAT_LEN - 1, FormatStr, args...);
 
@@ -191,12 +208,14 @@ template <typename... Args> void LogEvent(const csp::common::String& FormatStr, 
 //			... code ...
 //		}
 #define CSP_PROFILE_BEGIN(TAG)                                                                                                                       \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->BeginMarker(TAG);                                                                        \
     }
 
 #define CSP_PROFILE_END()                                                                                                                            \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->EndMarker();                                                                             \
     }
 
@@ -205,7 +224,8 @@ template <typename... Args> void LogEvent(const csp::common::String& FormatStr, 
 #define CSP_PROFILE_SCOPED_TAG(TAG) csp::profile::ScopedProfiler CSP_CONCAT(ProfilerTag, __LINE__)(TAG)
 
 #define CSP_PROFILE_EVENT_TAG(TAG)                                                                                                                   \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetLogSystem()->LogEvent(TAG);                                                                           \
     }
 

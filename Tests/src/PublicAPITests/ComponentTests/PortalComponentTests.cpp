@@ -35,7 +35,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -179,8 +180,10 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     // Get Thumbnail
     bool HasThumbailResult = false;
 
-    csp::systems::UriResultCallback Callback = [&HasThumbailResult](const csp::systems::UriResult& Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    csp::systems::UriResultCallback Callback = [&HasThumbailResult](const csp::systems::UriResult& Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+        {
             HasThumbailResult = true;
             EXPECT_TRUE(Result.GetUri() != "");
         }
@@ -193,7 +196,8 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalThumbnailTest)
     auto Current = std::chrono::steady_clock::now();
     int64_t TestTime = 0;
 
-    while (!HasThumbailResult && TestTime < 20) {
+    while (!HasThumbailResult && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();

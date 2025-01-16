@@ -20,10 +20,12 @@
 
 #include "CSP/CSPCommon.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the visibility of the component when in default mode or in AR mode.
-CSP_INTERFACE class CSP_API IVisibleComponent {
+CSP_INTERFACE class CSP_API IVisibleComponent
+{
 public:
     /// @brief Checks if the component is visible when in default mode.
     /// @return True if the component is visible, false otherwise.

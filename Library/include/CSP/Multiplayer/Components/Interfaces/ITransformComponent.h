@@ -24,10 +24,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/IScaleComponent.h"
 #include "CSP/Multiplayer/SpaceTransform.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the 3D position (in world space), rotation, and scale of the component.
-CSP_INTERFACE class CSP_API ITransformComponent : public IPositionComponent, public IRotationComponent, public IScaleComponent {
+CSP_INTERFACE class CSP_API ITransformComponent : public IPositionComponent, public IRotationComponent, public IScaleComponent
+{
 public:
     /// @brief Gets the transform of this component in world space.
     /// @return SpaceTransform : The 3D transform as an object containing position, rotation, and scale.

@@ -21,7 +21,8 @@
 
 namespace chs = csp::services::generated::spatialdataservice;
 
-namespace {
+namespace
+{
 
 void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp::systems::PointOfInterest& POI)
 {
@@ -31,54 +32,64 @@ void PointOfInterestDtoToPointOfInterest(const chs::PointOfInterestDto& Dto, csp
 
     const auto& LocalisedTitle = Dto.GetTitle();
 
-    for (auto& CurrentTitle : LocalisedTitle) {
+    for (auto& CurrentTitle : LocalisedTitle)
+    {
         POI.Title[CurrentTitle->GetLanguageCode()] = CurrentTitle->GetValue();
     }
 
     const auto& LocalisedDescription = Dto.GetDescription();
 
-    for (auto& CurrentDescription : LocalisedDescription) {
+    for (auto& CurrentDescription : LocalisedDescription)
+    {
         POI.Description[CurrentDescription->GetLanguageCode()] = CurrentDescription->GetValue();
     }
 
     POI.Name = Dto.GetName();
 
-    if (Dto.HasType()) {
+    if (Dto.HasType())
+    {
         POI.Type = csp::systems::PointOfInterestHelpers::StringToType(Dto.GetType());
     }
 
-    if (Dto.HasTags()) {
+    if (Dto.HasTags())
+    {
         const auto& Tags = Dto.GetTags();
         POI.Tags = csp::common::Array<csp::common::String>(Tags.size());
 
-        for (int idx = 0; idx < Tags.size(); ++idx) {
+        for (int idx = 0; idx < Tags.size(); ++idx)
+        {
             POI.Tags[idx] = Tags[idx];
         }
     }
 
-    if (Dto.HasOwner()) {
+    if (Dto.HasOwner())
+    {
         POI.Owner = Dto.GetOwner();
     }
 
-    if (Dto.HasLocation()) {
+    if (Dto.HasLocation())
+    {
         const auto& Location = Dto.GetLocation();
         POI.Location.Longitude = Location->GetLongitude();
         POI.Location.Latitude = Location->GetLatitude();
     }
 
-    if (Dto.HasPrototypeName()) {
+    if (Dto.HasPrototypeName())
+    {
         // TODO: Find out why we're using name instead of Id here
         POI.AssetCollectionId = Dto.GetPrototypeName();
     }
 
-    if (Dto.HasGroupId()) {
+    if (Dto.HasGroupId())
+    {
         POI.SpaceId = Dto.GetGroupId();
     }
 }
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 PointOfInterest::PointOfInterest()
     : Type(EPointOfInterestType::DEFAULT)
@@ -96,7 +107,8 @@ void POIResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     auto* POIResponse = static_cast<chs::PointOfInterestDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         POIResponse->FromJson(Response->GetPayload().GetContent());
 
         PointOfInterestDtoToPointOfInterest(*POIResponse, POI);
@@ -114,7 +126,8 @@ void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     auto* POICollectionResponse = static_cast<csp::services::DtoArray<chs::PointOfInterestDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         POICollectionResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -122,7 +135,8 @@ void POICollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
         std::vector<chs::PointOfInterestDto>& POIArray = POICollectionResponse->GetArray();
         POIs = csp::common::Array<csp::systems::PointOfInterest>(POIArray.size());
 
-        for (size_t idx = 0; idx < POIArray.size(); ++idx) {
+        for (size_t idx = 0; idx < POIArray.size(); ++idx)
+        {
             PointOfInterestDtoToPointOfInterest(POIArray[idx], POIs[idx]);
         }
     }

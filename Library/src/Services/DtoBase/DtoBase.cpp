@@ -15,7 +15,8 @@
  */
 #include "DtoBase.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 utility::string_t DtoBase::ToJson() const
 {

@@ -17,9 +17,11 @@
 #include "CSP/Systems/Analytics/AnalyticsSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 #define CSP_ANALYTICS_LOG_EVENT(Event)                                                                                                               \
-    if (csp::CSPFoundation::GetIsInitialised()) {                                                                                                    \
+    if (csp::CSPFoundation::GetIsInitialised())                                                                                                      \
+    {                                                                                                                                                \
         csp::systems::SystemsManager::Get().GetAnalyticsSystem()->Log(Event);                                                                        \
     }
 } // namespace csp::systems

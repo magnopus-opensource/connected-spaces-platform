@@ -20,9 +20,11 @@
 
 #include <atomic>
 
-namespace csp::common {
+namespace csp::common
+{
 
-class CancellationToken::Impl {
+class CancellationToken::Impl
+{
 public:
     Impl()
         : IsCancelled(false)

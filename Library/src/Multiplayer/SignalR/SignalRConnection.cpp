@@ -31,17 +31,20 @@
 
 using namespace signalr;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 #if ENABLE_SIGNALR_LOGGING
-class stdout_log_writer : public log_writer {
+class stdout_log_writer : public log_writer
+{
 public:
     void write(const std::string& entry) override
     {
         std::cerr << entry << std::endl;
 
 #if SIGNALR_LOG_TO_DEBUGGER
-        if (IsDebuggerPresent()) {
+        if (IsDebuggerPresent())
+        {
             OutputDebugString(entry.c_str());
             OutputDebugString("\n");
         }
@@ -76,10 +79,13 @@ void SignalRConnection::Start(std::function<void(std::exception_ptr)> Callback) 
 
 void SignalRConnection::Stop(std::function<void(std::exception_ptr)> Callback)
 {
-    if (PendingInvocations == 0) {
+    if (PendingInvocations == 0)
+    {
         PendingStopCallback = nullptr;
         Connection.stop(Callback);
-    } else {
+    }
+    else
+    {
         PendingStopCallback = Callback;
     }
 }
@@ -106,20 +112,24 @@ void SignalRConnection::Invoke(
     CSP_PROFILE_SCOPED();
 
     std::function<void(const signalr::value&, std::exception_ptr)> InvocationCallback
-        = [Callback, this](const signalr::value& Value, std::exception_ptr ExceptionPtr) {
-              Callback(Value, ExceptionPtr);
+        = [Callback, this](const signalr::value& Value, std::exception_ptr ExceptionPtr)
+    {
+        Callback(Value, ExceptionPtr);
 
-              PendingInvocations--;
-              if (PendingStopCallback && PendingInvocations == 0) {
-                  Connection.stop([this, ExceptionPtr](auto Exception) {
-                      // making a copy of the PendingStopCallback in case the SignalRConnection object gets deleted inside the callback itself
-                      auto _PendingStopCallback = PendingStopCallback;
-                      PendingStopCallback = nullptr;
+        PendingInvocations--;
+        if (PendingStopCallback && PendingInvocations == 0)
+        {
+            Connection.stop(
+                [this, ExceptionPtr](auto Exception)
+                {
+                    // making a copy of the PendingStopCallback in case the SignalRConnection object gets deleted inside the callback itself
+                    auto _PendingStopCallback = PendingStopCallback;
+                    PendingStopCallback = nullptr;
 
-                      _PendingStopCallback(ExceptionPtr);
-                  });
-              }
-          };
+                    _PendingStopCallback(ExceptionPtr);
+                });
+        }
+    };
 
     PendingInvocations++;
     Connection.invoke(MethodName, Arguments, InvocationCallback);

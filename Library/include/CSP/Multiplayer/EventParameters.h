@@ -20,13 +20,23 @@
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Spaces/UserRoles.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enum specifying the type of change that occured to an asset.
-enum class EAssetChangeType { Created, Updated, MusubiFailed, Deleted, Invalid, Num };
+enum class EAssetChangeType
+{
+    Created,
+    Updated,
+    MusubiFailed,
+    Deleted,
+    Invalid,
+    Num
+};
 
 /// @brief Enum specifying the type of change that occured to a user's permissions whilst in a space.
-enum class EPermissionChangeType {
+enum class EPermissionChangeType
+{
     Created,
     Updated,
     Removed,
@@ -34,7 +44,8 @@ enum class EPermissionChangeType {
 };
 
 /// @brief Describes the changes an asset has undergone when the client application is connected to a space.
-class CSP_API AssetDetailBlobParams {
+class CSP_API AssetDetailBlobParams
+{
 public:
     /// @brief The type of change this asset has undergone.
     EAssetChangeType ChangeType;
@@ -53,7 +64,8 @@ public:
 };
 
 /// @brief Class used to provide details of a conversation message that has been received whilst the client application is connected to a space.
-class CSP_API ConversationSystemParams {
+class CSP_API ConversationSystemParams
+{
 public:
     /// @brief The type of conversation message event.
     ConversationMessageType MessageType;
@@ -63,7 +75,8 @@ public:
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.
-class CSP_API UserPermissionsParams {
+class CSP_API UserPermissionsParams
+{
 public:
     /// @brief The unique identifier of the space for which a user's permissions have changed.
     csp::common::String SpaceId;
@@ -78,9 +91,17 @@ public:
     csp::common::String UserId;
 };
 
-enum class ESequenceUpdateType { Create, Update, Rename, Delete, Invalid };
+enum class ESequenceUpdateType
+{
+    Create,
+    Update,
+    Rename,
+    Delete,
+    Invalid
+};
 
-class CSP_API SequenceChangedParams {
+class CSP_API SequenceChangedParams
+{
 public:
     /// @brief The type of update to the sequence.
     ESequenceUpdateType UpdateType;
@@ -92,7 +113,8 @@ public:
     csp::common::String NewKey;
 };
 
-class CSP_API SequenceHotspotChangedParams {
+class CSP_API SequenceHotspotChangedParams
+{
 public:
     /// @brief The type of update to the sequence.
     ESequenceUpdateType UpdateType;

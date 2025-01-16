@@ -32,7 +32,8 @@ using namespace std::chrono_literals;
 
 using namespace csp::systems;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -41,7 +42,8 @@ csp::common::String CreateTimeString(system_clock::time_point tp)
     std::time_t now_c = std::chrono::system_clock::to_time_t(tp);
     std::tm* Gmtm = std::gmtime(&now_c);
 
-    if (Gmtm != nullptr) {
+    if (Gmtm != nullptr)
+    {
         std::string TimeString;
         TimeString = std::to_string(1900 + Gmtm->tm_year);
         TimeString += "-";
@@ -105,12 +107,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaintenanceSystemTests, GetLatestMaintenanceWindowInf
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const MaintenanceInfo& LatestMaintenanceInfo = Result.GetLatestMaintenanceInfo();
-    if (Result.HasAnyMaintenanceWindows()) {
+    if (Result.HasAnyMaintenanceWindows())
+    {
         // if any windows were retrieved, then we should expect these fields to all be filled
         EXPECT_NE(LatestMaintenanceInfo.Description, "");
         EXPECT_NE(LatestMaintenanceInfo.StartDateTimestamp, "");
         EXPECT_NE(LatestMaintenanceInfo.EndDateTimestamp, "");
-    } else {
+    }
+    else
+    {
         // if no windows were retrieved, we should expect to have gotten the default window back when asking for the latest one
         EXPECT_FALSE(LatestMaintenanceInfo.IsInsideWindow());
         EXPECT_EQ(LatestMaintenanceInfo.Description, Result.GetDefaultMaintenanceInfo().Description);

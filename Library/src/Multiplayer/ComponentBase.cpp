@@ -23,7 +23,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 static const ReplicatedValue InvalidValue = ReplicatedValue();
 
@@ -47,7 +48,8 @@ ComponentBase::ComponentBase(ComponentType Type, SpaceEntity* Parent)
 
 ComponentBase::~ComponentBase()
 {
-    if (ScriptInterface) {
+    if (ScriptInterface)
+    {
         CSP_DELETE(ScriptInterface);
     }
 }
@@ -60,7 +62,8 @@ const csp::common::Map<uint32_t, ReplicatedValue>* ComponentBase::GetProperties(
 
 const ReplicatedValue& ComponentBase::GetProperty(uint32_t Key) const
 {
-    if (Properties.HasKey(Key)) {
+    if (Properties.HasKey(Key))
+    {
         return Properties[Key];
     }
 
@@ -73,7 +76,8 @@ const bool ComponentBase::GetBooleanProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Boolean)
+    {
         return RepVal.GetBool();
     }
 
@@ -86,7 +90,8 @@ const int64_t ComponentBase::GetIntegerProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Integer)
+    {
         return RepVal.GetInt();
     }
 
@@ -99,7 +104,8 @@ const float ComponentBase::GetFloatProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Float) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Float)
+    {
         return RepVal.GetFloat();
     }
 
@@ -112,7 +118,8 @@ const csp::common::String& ComponentBase::GetStringProperty(uint32_t Key) const
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::String)
+    {
         return RepVal.GetString();
     }
 
@@ -125,7 +132,8 @@ const csp::common::Vector2& ComponentBase::GetVector2Property(uint32_t Key) cons
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector2)
+    {
         return RepVal.GetVector2();
     }
 
@@ -138,7 +146,8 @@ const csp::common::Vector3& ComponentBase::GetVector3Property(uint32_t Key) cons
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector3)
+    {
         return RepVal.GetVector3();
     }
 
@@ -151,7 +160,8 @@ const csp::common::Vector4& ComponentBase::GetVector4Property(uint32_t Key) cons
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Vector4)
+    {
         return RepVal.GetVector4();
     }
 
@@ -164,7 +174,8 @@ const csp::common::Map<ReplicatedValue, ReplicatedValue>& ComponentBase::GetMapP
 {
     const auto& RepVal = GetProperty(Key);
 
-    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Map) {
+    if (RepVal.GetReplicatedValueType() == ReplicatedValueType::Map)
+    {
         return RepVal.GetMap();
     }
 
@@ -175,13 +186,15 @@ const csp::common::Map<ReplicatedValue, ReplicatedValue>& ComponentBase::GetMapP
 
 void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
 {
-    if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType()) {
+    if (Properties.HasKey(Key) && Value.GetReplicatedValueType() != Properties[Key].GetReplicatedValueType())
+    {
         CSP_LOG_ERROR_FORMAT("ValueType is unexpected. Expected: %d Received: %d", static_cast<uint32_t>(Properties[Key].GetReplicatedValueType()),
             static_cast<uint32_t>(Value.GetReplicatedValueType()));
     }
 
     // If the entity is not owned by us, and not a transferable entity, it is not allowed to modify the entity.
-    if (!GetParent()->IsModifiable()) {
+    if (!GetParent()->IsModifiable())
+    {
         CSP_LOG_ERROR_FORMAT("Error: Update attempted on a non-owned entity that is marked as non-transferable. Skipping update. Entity name: %s",
             GetParent()->GetName().c_str());
         return;
@@ -196,7 +209,8 @@ void ComponentBase::SetProperty(uint32_t Key, const ReplicatedValue& Value)
             Parent->AddDirtyComponent(this);
     }*/
 
-    if (!Properties.HasKey(Key) || Properties[Key] != Value) {
+    if (!Properties.HasKey(Key) || Properties[Key] != Value)
+    {
         Properties[Key] = Value;
 
         Parent->AddDirtyComponent(this);
@@ -233,9 +247,12 @@ void ComponentBase::SubscribeToPropertyChange(uint32_t PropertyKey, csp::common:
 
 void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, EntityActionHandler ActionHandler)
 {
-    if (!ActionMap.HasKey(InAction.c_str())) {
+    if (!ActionMap.HasKey(InAction.c_str()))
+    {
         ActionMap[InAction.c_str()] = ActionHandler;
-    } else {
+    }
+    else
+    {
         // Already registered
         CSP_LOG_ERROR_FORMAT("Action %s already registered\n", InAction.c_str());
     }
@@ -243,16 +260,20 @@ void ComponentBase::RegisterActionHandler(const csp::common::String& InAction, E
 
 void ComponentBase::UnregisterActionHandler(const csp::common::String& InAction)
 {
-    if (ActionMap.HasKey(InAction.c_str())) {
+    if (ActionMap.HasKey(InAction.c_str()))
+    {
         ActionMap.Remove(InAction.c_str());
-    } else {
+    }
+    else
+    {
         CSP_LOG_ERROR_FORMAT("Action %s not found\n", InAction.c_str());
     }
 }
 
 void ComponentBase::InvokeAction(const csp::common::String& InAction, const csp::common::String& InActionParams)
 {
-    if (ActionMap.HasKey(InAction.c_str())) {
+    if (ActionMap.HasKey(InAction.c_str()))
+    {
         EntityActionHandler ActionHandler = ActionMap[InAction.c_str()];
         ActionHandler(this, InAction, InActionParams);
     }

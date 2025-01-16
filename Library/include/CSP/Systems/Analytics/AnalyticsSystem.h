@@ -26,7 +26,8 @@
 #include <thread>
 #include <vector>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -34,7 +35,8 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class AnalyticsSystemImpl;
 
@@ -43,7 +45,8 @@ class AnalyticsSystemImpl;
 /// Offers methods for sending events to the provider
 /// Events are added to a queue to be processewd on a different thread
 /// If events are unable to be send to the provider, then they will be held in the queue
-class CSP_API AnalyticsSystem {
+class CSP_API AnalyticsSystem
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;

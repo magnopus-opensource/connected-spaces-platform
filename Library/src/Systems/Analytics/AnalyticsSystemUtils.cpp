@@ -17,7 +17,8 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 void AnalyticsEvent::AddInt(csp::common::String Key, int64_t Value)
 {

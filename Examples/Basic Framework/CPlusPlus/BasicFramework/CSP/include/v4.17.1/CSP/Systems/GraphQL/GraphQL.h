@@ -22,18 +22,21 @@
 #pragma once
 #include "CSP/Systems/WebService.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiResponseBase;
 
 } // namespace csp::services
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup GraphQL System
 /// @brief Data class used to contain information when a Response is received from GraphQL
 
-class CSP_API GraphQLResult : public csp::systems::ResultBase {
+class CSP_API GraphQLResult : public csp::systems::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     CSP_START_IGNORE
     friend class GraphQLSystem;

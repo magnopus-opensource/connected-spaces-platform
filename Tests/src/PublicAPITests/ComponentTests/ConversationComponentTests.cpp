@@ -33,7 +33,8 @@
 using namespace csp::multiplayer;
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -235,12 +236,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
         }
 
         auto TestMessage = "test123";
-        EventBus->ListenNetworkEvent("ConversationSystem:NewMessage", [=](bool ok, csp::common::Array<ReplicatedValue> Data) {
-            EXPECT_TRUE(ok);
+        EventBus->ListenNetworkEvent("ConversationSystem:NewMessage",
+            [=](bool ok, csp::common::Array<ReplicatedValue> Data)
+            {
+                EXPECT_TRUE(ok);
 
-            ConversationId == Data[0].GetString();
-            std::cerr << "Test Event Received " << ok << std::endl;
-        });
+                ConversationId == Data[0].GetString();
+                std::cerr << "Test Event Received " << ok << std::endl;
+            });
 
         {
             auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);

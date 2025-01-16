@@ -22,9 +22,11 @@
 #include <android/log.h>
 #endif
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-struct LogCallbacks {
+struct LogCallbacks
+{
     void Clear()
     {
         LogCallback = nullptr;
@@ -63,7 +65,8 @@ bool LogSystem::LoggingEnabled(const csp::systems::LogLevel Level) { return Leve
 
 void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::String& InMessage)
 {
-    if (!LoggingEnabled(Level)) {
+    if (!LoggingEnabled(Level))
+    {
         return;
     }
 
@@ -78,7 +81,8 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
     // Log to our Connected Spaces Platform file system.
     LogToFile(InMessage);
 
-    if (Callbacks->LogCallback != nullptr) {
+    if (Callbacks->LogCallback != nullptr)
+    {
         // Send message to clients to display the log on the client side.
         Callbacks->LogCallback(InMessage);
     }
@@ -86,7 +90,8 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
 
 void LogSystem::LogEvent(const csp::common::String& InEvent)
 {
-    if (Callbacks->EventCallback != nullptr) {
+    if (Callbacks->EventCallback != nullptr)
+    {
         // Send message to clients to display the log on the client side.
         Callbacks->EventCallback(InEvent);
     }
@@ -94,7 +99,8 @@ void LogSystem::LogEvent(const csp::common::String& InEvent)
 
 void LogSystem::BeginMarker(const csp::common::String& InMarker)
 {
-    if (Callbacks->BeginMarkerCallback != nullptr) {
+    if (Callbacks->BeginMarkerCallback != nullptr)
+    {
         // Send message to clients to display the log on the client side.
         Callbacks->BeginMarkerCallback(InMarker);
     }
@@ -102,7 +108,8 @@ void LogSystem::BeginMarker(const csp::common::String& InMarker)
 
 void LogSystem::EndMarker()
 {
-    if (Callbacks->EndMarkerCallback != nullptr) {
+    if (Callbacks->EndMarkerCallback != nullptr)
+    {
         // Send message to clients to display the log on the client side.
         Callbacks->EndMarkerCallback(nullptr);
     }

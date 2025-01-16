@@ -12,8 +12,10 @@ bool Login(const std::string& UserEmail, const std::string& UserPassword)
 {
     bool RetValue = true;
     ServiceResponseReceiver<csp::systems::LoginStateResult> ResponseReceiver;
-    csp::systems::LoginStateResultCallback Callback = [&](const csp::systems::LoginStateResult& Result) {
-        if (Result.GetResultCode() == csp::services::EResultCode::Failed) {
+    csp::systems::LoginStateResultCallback Callback = [&](const csp::systems::LoginStateResult& Result)
+    {
+        if (Result.GetResultCode() == csp::services::EResultCode::Failed)
+        {
             std::cout << "Error: Login failed" << std::endl;
             RetValue = false;
         }
@@ -34,12 +36,15 @@ void GetSpacesForLoggedInUser(csp::common::Array<csp::systems::Space>& OutSpaces
     csp::common::Array<csp::systems::Space> Spaces;
 
     ServiceResponseReceiver<csp::systems::SpacesResult> ResponseReceiver;
-    csp::systems::SpacesResultCallback Callback = [&](const csp::systems::SpacesResult& Result) {
-        if (Result.GetResultCode() == csp::services::EResultCode::Success) {
+    csp::systems::SpacesResultCallback Callback = [&](const csp::systems::SpacesResult& Result)
+    {
+        if (Result.GetResultCode() == csp::services::EResultCode::Success)
+        {
             auto& ResultSpaces = Result.GetSpaces();
             OutSpaces = csp::common::Array<csp::systems::Space>(ResultSpaces.Size());
 
-            for (int idx = 0; idx < ResultSpaces.Size(); ++idx) {
+            for (int idx = 0; idx < ResultSpaces.Size(); ++idx)
+            {
                 OutSpaces[idx] = ResultSpaces[idx];
             }
         }
@@ -58,7 +63,8 @@ void ListSpacesForLoggedInUser()
     csp::common::Array<csp::systems::Space> UserSpaces;
     GetSpacesForLoggedInUser(UserSpaces);
 
-    for (int idx = 0; idx < UserSpaces.Size(); ++idx) {
+    for (int idx = 0; idx < UserSpaces.Size(); ++idx)
+    {
         std::cout << "Space Id: " << UserSpaces[idx].Id << " -> "
                   << "Space Name: " << UserSpaces[idx].Name << std::endl;
     }
@@ -69,10 +75,12 @@ bool GetSpace(const csp::common::String SpaceId, csp::systems::Space& OutSpaceIn
     bool RetValue = false;
 
     ServiceResponseReceiver<csp::systems::SpaceResult> ResponseReceiver;
-    csp::systems::SpaceResultCallback Callback = [&](const csp::systems::SpaceResult& Result) {
+    csp::systems::SpaceResultCallback Callback = [&](const csp::systems::SpaceResult& Result)
+    {
         RetValue = (Result.GetResultCode() == csp::services::EResultCode::Success);
 
-        if (Result.GetResultCode() == csp::services::EResultCode::Success) {
+        if (Result.GetResultCode() == csp::services::EResultCode::Success)
+        {
             OutSpaceInfo = Result.GetSpace();
         }
 
@@ -92,22 +100,28 @@ void MigrateSpace(const CommandLineParser& Parser)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
 
-    if (Parser.SpaceId.empty()) {
+    if (Parser.SpaceId.empty())
+    {
         std::cout << "Error: Empty Space Id provided";
         return;
     }
 
     csp::systems::Space RetrievedSpace;
-    if (!GetSpace(Parser.SpaceId.c_str(), RetrievedSpace)) {
+    if (!GetSpace(Parser.SpaceId.c_str(), RetrievedSpace))
+    {
         std::cout << "Error: Space retrieval failed. Migration has not been completed." << std::endl;
         return;
     }
 
     ServiceResponseReceiver<csp::systems::NullResult> MigrationResponseReceiver;
-    csp::systems::NullResultCallback MigrationCallback = [&](const csp::systems::NullResult& MigrationResult) {
-        if (MigrationResult.GetResultCode() == csp::services::EResultCode::Success) {
+    csp::systems::NullResultCallback MigrationCallback = [&](const csp::systems::NullResult& MigrationResult)
+    {
+        if (MigrationResult.GetResultCode() == csp::services::EResultCode::Success)
+        {
             std::cout << "The Space has been migrated successfully!";
-        } else if (MigrationResult.GetResultCode() == csp::services::EResultCode::Failed) {
+        }
+        else if (MigrationResult.GetResultCode() == csp::services::EResultCode::Failed)
+        {
             std::cout << "Error: Space migration failed with error code " << MigrationResult.GetHttpResultCode() << std::endl;
         }
 
@@ -127,7 +141,8 @@ int main(int argc, const char* argv[])
     CommandLineParser Parser;
     Parser.ParseCommandLine(argc, argv);
 
-    if (Parser.IsShowHelpOperation) {
+    if (Parser.IsShowHelpOperation)
+    {
         return 0;
     }
 
@@ -136,9 +151,12 @@ int main(int argc, const char* argv[])
     if (!Login(Parser.UserEmailAddress, Parser.UserPassword))
         return 0;
 
-    if (Parser.IsListSpaceOperation) {
+    if (Parser.IsListSpaceOperation)
+    {
         ListSpacesForLoggedInUser();
-    } else if (Parser.IsMigrateSpaceOperation) {
+    }
+    else if (Parser.IsMigrateSpaceOperation)
+    {
         MigrateSpace(Parser);
     }
 

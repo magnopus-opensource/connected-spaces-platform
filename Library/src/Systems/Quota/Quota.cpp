@@ -22,7 +22,8 @@
 
 namespace chs = csp::services::generated::trackingservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 FeatureQuotaInfo::FeatureQuotaInfo(TierFeatures FeatureNameIn, TierNames TierNameIn, int32_t LimitIn, PeriodEnum PeriodIn, bool AllowReductionsIn)
     : FeatureName(FeatureNameIn)
     , TierName(TierNameIn)
@@ -38,7 +39,8 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     auto* FeatureProgressResponse = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         FeatureProgressResponse->FromJson(Response->GetPayload().GetContent());
 
@@ -46,16 +48,20 @@ void FeaturesLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
         std::vector<chs::QuotaFeatureLimitProgressDto>& FeatureArray = FeatureProgressResponse->GetArray();
         FeaturesLimitInfo = csp::common::Array<FeatureLimitInfo>(FeatureArray.size());
 
-        for (size_t i = 0; i < FeatureArray.size(); ++i) {
-            if (FeatureArray[i].HasLimit()) {
+        for (size_t i = 0; i < FeatureArray.size(); ++i)
+        {
+            if (FeatureArray[i].HasLimit())
+            {
                 FeaturesLimitInfo[i].Limit = FeatureArray[i].GetLimit();
             }
 
-            if (FeatureArray[i].HasActivityCount()) {
+            if (FeatureArray[i].HasActivityCount())
+            {
                 FeaturesLimitInfo[i].ActivityCount = FeatureArray[i].GetActivityCount();
             }
 
-            if (FeatureArray[i].HasFeatureName()) {
+            if (FeatureArray[i].HasFeatureName())
+            {
                 FeaturesLimitInfo[i].FeatureName = StringToTierFeatureEnum(FeatureArray[i].GetFeatureName());
             }
         }
@@ -71,21 +77,25 @@ void FeatureLimitResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
     auto* FeatureProgressResponse = static_cast<csp::services::DtoArray<chs::QuotaFeatureLimitProgressDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         FeatureProgressResponse->FromJson(Response->GetPayload().GetContent());
 
         std::vector<chs::QuotaFeatureLimitProgressDto>& FeatureProgressArray = FeatureProgressResponse->GetArray();
 
-        if (FeatureProgressArray[0].HasLimit()) {
+        if (FeatureProgressArray[0].HasLimit())
+        {
             FeatureLimitInfo.Limit = FeatureProgressArray[0].GetLimit();
         }
 
-        if (FeatureProgressArray[0].HasActivityCount()) {
+        if (FeatureProgressArray[0].HasActivityCount())
+        {
             FeatureLimitInfo.ActivityCount = FeatureProgressArray[0].GetActivityCount();
         }
 
-        if (FeatureProgressArray[0].HasFeatureName()) {
+        if (FeatureProgressArray[0].HasFeatureName())
+        {
             FeatureLimitInfo.FeatureName = StringToTierFeatureEnum(FeatureProgressArray[0].GetFeatureName());
         }
     }
@@ -100,19 +110,23 @@ void UserTierResult::OnResponse(const csp::services::ApiResponseBase* ApiRespons
     auto* UserTierResponse = static_cast<chs::QuotaTierAssignmentDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         UserTierResponse->FromJson(Response->GetPayload().GetContent());
 
-        if (UserTierResponse->HasAssignedToId()) {
+        if (UserTierResponse->HasAssignedToId())
+        {
             UserTierInfo.AssignToId = UserTierResponse->GetAssignedToId();
         }
 
-        if (UserTierResponse->HasAssignedToType()) {
+        if (UserTierResponse->HasAssignedToType())
+        {
             UserTierInfo.AssignToType = UserTierResponse->GetAssignedToType();
         }
 
-        if (UserTierResponse->HasTierName()) {
+        if (UserTierResponse->HasTierName())
+        {
             UserTierInfo.TierName = StringToTierNameEnum(UserTierResponse->GetTierName());
         }
     }
@@ -127,23 +141,28 @@ void FeatureQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRes
     auto* FeatureQuotaResponse = static_cast<chs::QuotaFeatureTierDto*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         FeatureQuotaResponse->FromJson(Response->GetPayload().GetContent());
 
-        if (FeatureQuotaResponse->HasFeatureName()) {
+        if (FeatureQuotaResponse->HasFeatureName())
+        {
             FeatureQuotaInfo.FeatureName = StringToTierFeatureEnum(FeatureQuotaResponse->GetFeatureName());
         }
 
-        if (FeatureQuotaResponse->HasTierName()) {
+        if (FeatureQuotaResponse->HasTierName())
+        {
             FeatureQuotaInfo.TierName = StringToTierNameEnum(FeatureQuotaResponse->GetTierName());
         }
 
-        if (FeatureQuotaResponse->HasLimit()) {
+        if (FeatureQuotaResponse->HasLimit())
+        {
             FeatureQuotaInfo.Limit = FeatureQuotaResponse->GetLimit();
         }
 
-        if (FeatureQuotaResponse->HasPeriod()) {
+        if (FeatureQuotaResponse->HasPeriod())
+        {
             FeatureQuotaInfo.Period = static_cast<PeriodEnum>(FeatureQuotaResponse->GetPeriod()->GetValue());
         }
     }
@@ -158,25 +177,31 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
     auto* FeaturesQuotaResponse = static_cast<csp::services::DtoArray<chs::QuotaFeatureTierDto>*>(ApiResponse->GetDto());
     const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess) {
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
         // Build the Dto from the response Json
         FeaturesQuotaResponse->FromJson(Response->GetPayload().GetContent());
         std::vector<chs::QuotaFeatureTierDto>& QuotaArray = FeaturesQuotaResponse->GetArray();
         FeaturesQuotaInfo = csp::common::Array<FeatureQuotaInfo>(QuotaArray.size());
-        for (size_t i = 0; i < QuotaArray.size(); ++i) {
-            if (QuotaArray[i].HasFeatureName()) {
+        for (size_t i = 0; i < QuotaArray.size(); ++i)
+        {
+            if (QuotaArray[i].HasFeatureName())
+            {
                 FeaturesQuotaInfo[i].FeatureName = StringToTierFeatureEnum(QuotaArray[i].GetFeatureName());
             }
 
-            if (QuotaArray[i].HasTierName()) {
+            if (QuotaArray[i].HasTierName())
+            {
                 FeaturesQuotaInfo[i].TierName = StringToTierNameEnum(QuotaArray[i].GetTierName());
             }
 
-            if (QuotaArray[i].HasLimit()) {
+            if (QuotaArray[i].HasLimit())
+            {
                 FeaturesQuotaInfo[i].Limit = QuotaArray[i].GetLimit();
             }
 
-            if (QuotaArray[i].HasPeriod()) {
+            if (QuotaArray[i].HasPeriod())
+            {
                 FeaturesQuotaInfo[i].Period = static_cast<PeriodEnum>(QuotaArray[i].GetPeriod()->GetValue());
             }
         }
@@ -184,7 +209,8 @@ void FeaturesQuotaResult::OnResponse(const csp::services::ApiResponseBase* ApiRe
 }
 const csp::common::String TierNameEnumToString(const TierNames& Value)
 {
-    switch (Value) {
+    switch (Value)
+    {
     case TierNames::Basic:
         return "basic";
     case TierNames::Premium:
@@ -195,7 +221,8 @@ const csp::common::String TierNameEnumToString(const TierNames& Value)
         return "enterprise";
     case TierNames::Invalid:
         return "Invalid";
-    default: {
+    default:
+    {
         CSP_LOG_ERROR_FORMAT("Unknown quota tier encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
                              "case to the enum switch statement.",
             static_cast<int>(Value));
@@ -209,7 +236,8 @@ const csp::common::String TierNameEnumToString(const TierNames& Value)
 
 const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 {
-    switch (Value) {
+    switch (Value)
+    {
     case TierFeatures::Agora:
         return "Agora";
     case TierFeatures::Shopify:
@@ -230,7 +258,8 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
         return "SpaceOwner";
     case TierFeatures::Invalid:
         return "Invalid";
-    default: {
+    default:
+    {
         CSP_LOG_ERROR_FORMAT("Unknown quota feature encountered whilst converting the enum to string. Value passed in was %i. To fix this, add a "
                              "case to the enum switch statement.",
             static_cast<int>(Value));
@@ -244,19 +273,23 @@ const csp::common::String TierFeatureEnumToString(const TierFeatures& Value)
 
 const TierNames StringToTierNameEnum(const csp::common::String& Value)
 {
-    if (Value == "basic") {
+    if (Value == "basic")
+    {
         return TierNames::Basic;
     }
 
-    if (Value == "premium") {
+    if (Value == "premium")
+    {
         return TierNames::Premium;
     }
 
-    if (Value == "pro") {
+    if (Value == "pro")
+    {
         return TierNames::Pro;
     }
 
-    if (Value == "enterprise") {
+    if (Value == "enterprise")
+    {
         return TierNames::Enterprise;
     }
 
@@ -266,39 +299,48 @@ const TierNames StringToTierNameEnum(const csp::common::String& Value)
 
 const TierFeatures StringToTierFeatureEnum(const csp::common::String& Value)
 {
-    if (Value == "Agora") {
+    if (Value == "Agora")
+    {
         return TierFeatures::Agora;
     }
 
-    if (Value == "Shopify") {
+    if (Value == "Shopify")
+    {
         return TierFeatures::Shopify;
     }
 
-    if (Value == "TicketedSpace") {
+    if (Value == "TicketedSpace")
+    {
         return TierFeatures::TicketedSpace;
     }
 
-    if (Value == "AudioVideoUpload") {
+    if (Value == "AudioVideoUpload")
+    {
         return TierFeatures::AudioVideoUpload;
     }
 
-    if (Value == "ObjectCaptureUpload") {
+    if (Value == "ObjectCaptureUpload")
+    {
         return TierFeatures::ObjectCaptureUpload;
     }
 
-    if (Value == "OpenAI") {
+    if (Value == "OpenAI")
+    {
         return TierFeatures::OpenAI;
     }
 
-    if (Value == "ScopeConcurrentUsers") {
+    if (Value == "ScopeConcurrentUsers")
+    {
         return TierFeatures::ScopeConcurrentUsers;
     }
 
-    if (Value == "TotalUploadSizeInKilobytes") {
+    if (Value == "TotalUploadSizeInKilobytes")
+    {
         return TierFeatures::TotalUploadSizeInKilobytes;
     }
 
-    if (Value == "SpaceOwner") {
+    if (Value == "SpaceOwner")
+    {
         return TierFeatures::SpaceOwner;
     }
 

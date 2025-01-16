@@ -8,7 +8,8 @@
 
 #include <functional>
 
-namespace oly_web {
+namespace oly_web
+{
 
 struct IWebClient;
 class HttpPayload;
@@ -16,7 +17,8 @@ class WebClient;
 
 } // namespace oly_web
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiResponseBase;
 
@@ -26,11 +28,26 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-enum class EAssetType { IMAGE, THUMBNAIL, SIMULATION, MODEL, VIDEO, SCRIPT_LIBRARY, HOLOCAP_VIDEO, HOLOCAP_AUDIO, AUDIO };
+enum class EAssetType
+{
+    IMAGE,
+    THUMBNAIL,
+    SIMULATION,
+    MODEL,
+    VIDEO,
+    SCRIPT_LIBRARY,
+    HOLOCAP_VIDEO,
+    HOLOCAP_AUDIO,
+    AUDIO
+};
 
-enum class EAssetPlatform { DEFAULT };
+enum class EAssetPlatform
+{
+    DEFAULT
+};
 
 EAssetType ConvertDTOAssetDetailType(const oly_common::String& DTOAssetDetailType);
 EAssetPlatform ConvertStringToAssetPlatform(const oly_common::String& Platform);
@@ -39,7 +56,8 @@ oly_common::String ConvertAssetPlatformToString(EAssetPlatform Platform);
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset which maps to a PrototypeService::AssetDetail.
-class OLY_API Asset {
+class OLY_API Asset
+{
 public:
     Asset();
     Asset(const Asset& Other) = default;
@@ -86,7 +104,8 @@ private:
     EThirdPartyPlatform ThirdPartyPlatform;
 };
 
-OLY_INTERFACE class OLY_API AssetDataSource {
+OLY_INTERFACE class OLY_API AssetDataSource
+{
 public:
     /**
      * @brief Get the mime type of this data source
@@ -109,7 +128,8 @@ protected:
 
 /// @ingroup Asset System
 /// @brief Asset source file.
-class OLY_API FileAssetDataSource : public AssetDataSource {
+class OLY_API FileAssetDataSource : public AssetDataSource
+{
 public:
     /** @name Data Values
      *
@@ -136,7 +156,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Asset source from memory buffer.
-class OLY_API BufferAssetDataSource : public AssetDataSource {
+class OLY_API BufferAssetDataSource : public AssetDataSource
+{
 public:
     BufferAssetDataSource();
 
@@ -165,7 +186,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset.
-class OLY_API AssetResult : public oly_services::ResultBase {
+class OLY_API AssetResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 
@@ -198,7 +220,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of assets.
-class OLY_API AssetsResult : public oly_services::ResultBase {
+class OLY_API AssetsResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -232,7 +255,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to upload an asset.
-class OLY_API UriResult : public oly_services::ResultBase {
+class OLY_API UriResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     friend class SpaceSystem;
@@ -269,7 +293,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download asset data.
-class OLY_API AssetDataResult : public oly_services::ResultBase {
+class OLY_API AssetDataResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

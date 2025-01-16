@@ -25,7 +25,8 @@
 CSP_NO_EXPORT
 
 /** @cond DO_NOT_DOCUMENT */
-namespace {
+namespace
+{
 
 template <typename T> void DefaultDestructor(T* Pointer)
 {
@@ -36,13 +37,15 @@ template <typename T> void DefaultDestructor(T* Pointer)
 } // namespace
 /** @endcond */
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Simple DLL-safe container holding an optional object.
 /// Simple optional type used to pass optional object across the DLL boundary.
 ///
 /// @tparam T : Object type to store in the optional
-template <typename T> class CSP_API Optional {
+template <typename T> class CSP_API Optional
+{
 public:
     /// @brief Constructs an optional with a null value.
     Optional()
@@ -103,10 +106,13 @@ public:
     /// @param Other const Optional<T>&
     Optional(const Optional<T>& Other)
     {
-        if (Other.HasValue()) {
+        if (Other.HasValue())
+        {
             Value = (T*)csp::memory::DllAlloc(sizeof(T));
             new (Value) T(*(Other.Value));
-        } else {
+        }
+        else
+        {
             Value = nullptr;
         }
 
@@ -117,10 +123,13 @@ public:
     /// @param Other Optional<T>&&
     Optional(Optional<T>&& Other)
     {
-        if (Other.HasValue()) {
+        if (Other.HasValue())
+        {
             Value = (T*)csp::memory::DllAlloc(sizeof(T));
             new (Value) T(std::move(*(Other.Value)));
-        } else {
+        }
+        else
+        {
             Value = nullptr;
         }
 
@@ -130,7 +139,8 @@ public:
     /// @brief Destructor.
     ~Optional()
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
     }
@@ -152,7 +162,8 @@ public:
     /// @return Optional<T>&
     Optional<T>& operator=(const T& InValue)
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
 
@@ -167,14 +178,18 @@ public:
     /// @return Optional<T>&
     Optional<T>& operator=(const Optional<T>& Other)
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
 
-        if (Other.HasValue()) {
+        if (Other.HasValue())
+        {
             Value = (T*)csp::memory::DllAlloc(sizeof(T));
             new (Value) T(*Other.Value);
-        } else {
+        }
+        else
+        {
             Value = nullptr;
         }
 
@@ -186,7 +201,8 @@ public:
     /// @return Optional<T>&
     Optional<T>& operator=(Optional<T>&& Other)
     {
-        if (Value) {
+        if (Value)
+        {
             ValueDestructor(Value);
         }
 

@@ -5,11 +5,19 @@
 #include "Olympus/Multiplayer/SpaceTransform.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class AnimatedModelActions { Play, Pause, Restart, Num };
+enum class AnimatedModelActions
+{
+    Play,
+    Pause,
+    Restart,
+    Num
+};
 
-enum class AnimatedModelPropertyKeys {
+enum class AnimatedModelPropertyKeys
+{
     Name = 0,
     ModelAssetId,
     AssetCollectionId,
@@ -27,7 +35,8 @@ enum class AnimatedModelPropertyKeys {
 
 /// @ingroup AnimatedModelSpaceComponent
 /// @brief Data representation of an AnimatedModelSpaceComponent.
-class OLY_API AnimatedModelSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API AnimatedModelSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     AnimatedModelSpaceComponent(SpaceEntity* Parent);
 

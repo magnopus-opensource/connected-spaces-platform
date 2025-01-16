@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class VideoPlayerSpaceComponent;
 
-class VideoPlayerSpaceComponentScriptInterface : public ComponentScriptInterface {
+class VideoPlayerSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent = nullptr);
 

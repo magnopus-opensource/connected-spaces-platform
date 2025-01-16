@@ -30,20 +30,25 @@
  * Nonetheless, we should ensure they don't crash.
  */
 
-namespace {
+namespace
+{
 /* Some tests only run if there's a credentials file */
 std::optional<Utils::TestAccountCredentials> CredentialsFromFile()
 {
-    try {
+    try
+    {
         return Utils::LoadTestAccountCredentials();
-    } catch (...) {
+    }
+    catch (...)
+    {
         return {};
     }
 }
 } // namespace
 
 /* Initialze CSP before the suite begins with a fixture */
-class RunnableTests : public ::testing::Test {
+class RunnableTests : public ::testing::Test
+{
 protected:
     static void SetUpTestSuite() { Utils::InitialiseCSPWithUserAgentInfo(Utils::DEFAULT_TEST_ENDPOINT); }
 };
@@ -51,7 +56,8 @@ protected:
 TEST_F(RunnableTests, CreateAvatar)
 {
     std::optional<Utils::TestAccountCredentials> Credentials = CredentialsFromFile();
-    if (!Credentials.has_value()) {
+    if (!Credentials.has_value())
+    {
         GTEST_SKIP() << "No credentials file found, Skipping Test.";
     }
 

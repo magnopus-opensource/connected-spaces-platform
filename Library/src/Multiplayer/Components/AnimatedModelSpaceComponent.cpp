@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/AnimatedModelSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::AnimatedModel, Parent)

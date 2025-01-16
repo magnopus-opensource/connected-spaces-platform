@@ -29,11 +29,13 @@ using namespace csp::common;
 
 namespace chs = csp::services::generated::userservice;
 
-namespace {
+namespace
+{
 
 String OrganizationRoleEnumToString(const systems::EOrganizationRole Role)
 {
-    switch (Role) {
+    switch (Role)
+    {
     case systems::EOrganizationRole::Member:
         return "member";
     case systems::EOrganizationRole::Administrator:
@@ -47,14 +49,17 @@ String OrganizationRoleEnumToString(const systems::EOrganizationRole Role)
 
 } // namespace
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 bool HasMemberRoleBeenDefined(const csp::common::Array<EOrganizationRole>& OrganizationRoles)
 {
     bool IsRoleDefined = false;
 
-    for (auto i = 0; i < OrganizationRoles.Size(); ++i) {
-        if (OrganizationRoles[i] == systems::EOrganizationRole::Member) {
+    for (auto i = 0; i < OrganizationRoles.Size(); ++i)
+    {
+        if (OrganizationRoles[i] == systems::EOrganizationRole::Member)
+        {
             IsRoleDefined = true;
             break;
         }
@@ -69,7 +74,8 @@ std::vector<std::shared_ptr<chs::OrganizationInviteDto>> GenerateOrganizationInv
     std::vector<std::shared_ptr<chs::OrganizationInviteDto>> OrganizationInvites;
     OrganizationInvites.reserve(InviteUsers.Size());
 
-    for (auto i = 0; i < InviteUsers.Size(); ++i) {
+    for (auto i = 0; i < InviteUsers.Size(); ++i)
+    {
         auto InviteUser = InviteUsers[i];
 
         auto OrganizationInvite = std::make_shared<chs::OrganizationInviteDto>();
@@ -84,8 +90,10 @@ std::vector<std::shared_ptr<chs::OrganizationInviteDto>> GenerateOrganizationInv
 
         UserRoles.push_back(OrganizationRoleEnumToString(EOrganizationRole::Member));
 
-        for (size_t i = 0; i < NumRoles; ++i) {
-            if (InviteUser.OrganizationRoles[i] == EOrganizationRole::Member) {
+        for (size_t i = 0; i < NumRoles; ++i)
+        {
+            if (InviteUser.OrganizationRoles[i] == EOrganizationRole::Member)
+            {
                 continue;
             }
 
@@ -131,12 +139,16 @@ void OrganizationSystem::GetOrganization(const csp::common::Optional<csp::common
 {
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG("Call to GetOrganization failed. You do not belong to an Organization.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
@@ -159,7 +171,8 @@ const csp::common::String& OrganizationSystem::GetCurrentOrganizationId() const
     const auto* UserSystem = csp::systems::SystemsManager::Get().GetUserSystem();
     const auto& OrganizationIds = UserSystem->GetLoginState().OrganizationIds;
 
-    if (OrganizationIds.Size() == 0) {
+    if (OrganizationIds.Size() == 0)
+    {
         CSP_LOG_ERROR_MSG("Unable to get current Orgaization Id, you do not belong to an Organization.");
 
         static const String EmptyId = "";
@@ -172,7 +185,8 @@ const csp::common::String& OrganizationSystem::GetCurrentOrganizationId() const
 void OrganizationSystem::UpdateOrganization(
     const csp::common::Optional<csp::common::String>& OrganizationId, const csp::common::String& Name, OrganizationResultCallback Callback)
 {
-    if (Name.IsEmpty()) {
+    if (Name.IsEmpty())
+    {
         CSP_LOG_WARN_MSG("A valid new Organization name must be specified.");
 
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
@@ -182,12 +196,16 @@ void OrganizationSystem::UpdateOrganization(
 
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG("Call to UpdateOrganization failed. No Organization has been updated as you do not belong to one.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationResult>());
@@ -225,12 +243,16 @@ void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::c
 {
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG(
                 "Call to InviteToOrganization failed. The specified user has not been invited as you do not belong to an Organization.");
 
@@ -252,8 +274,10 @@ void OrganizationSystem::InviteToOrganization(const csp::common::Optional<csp::c
 
     UserRoles.push_back(OrganizationRoleEnumToString(EOrganizationRole::Member));
 
-    for (auto i = 0; i < OrganizationRoles.Size(); ++i) {
-        if (OrganizationRoles[i] == EOrganizationRole::Member) {
+    for (auto i = 0; i < OrganizationRoles.Size(); ++i)
+    {
+        if (OrganizationRoles[i] == EOrganizationRole::Member)
+        {
             continue;
         }
 
@@ -278,12 +302,16 @@ void OrganizationSystem::BulkInviteToOrganization(const csp::common::Optional<cs
 {
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG("Call to BulkInviteToOrganization failed. No-one has been invited as you do not belong to an Organization.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
@@ -310,12 +338,16 @@ void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Optional<
 {
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG("Call to GetUserRolesInOrganization failed. You do not belong to an Organization.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<OrganizationRolesResult>());
@@ -327,7 +359,8 @@ void OrganizationSystem::GetUserRolesInOrganization(const csp::common::Optional<
     std::vector<String> InternalUserIds;
     InternalUserIds.reserve(UserIds.Size());
 
-    for (auto i = 0; i < UserIds.Size(); ++i) {
+    for (auto i = 0; i < UserIds.Size(); ++i)
+    {
         InternalUserIds.push_back(UserIds[i]);
     }
 
@@ -343,12 +376,16 @@ void OrganizationSystem::RemoveUserFromOrganization(
 {
     csp::common::String SelectedOrganizationId;
 
-    if (OrganizationId.HasValue()) {
+    if (OrganizationId.HasValue())
+    {
         SelectedOrganizationId = *OrganizationId;
-    } else {
+    }
+    else
+    {
         SelectedOrganizationId = GetCurrentOrganizationId();
 
-        if (SelectedOrganizationId.IsEmpty()) {
+        if (SelectedOrganizationId.IsEmpty())
+        {
             CSP_LOG_ERROR_MSG("Call to RemoveUserFromOrganization failed. You do not belong to an Organization.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
@@ -366,7 +403,8 @@ void OrganizationSystem::RemoveUserFromOrganization(
 
 void OrganizationSystem::SetMemberJoinedOrganizationCallback(MemberJoinedOrganizationCallback Callback)
 {
-    if (InternalMemberJoinedOrganizationCallback) {
+    if (InternalMemberJoinedOrganizationCallback)
+    {
         CSP_LOG_WARN_MSG("MemberJoinedOrganizationCallback has already been set. Previous callback overwritten.");
     }
 

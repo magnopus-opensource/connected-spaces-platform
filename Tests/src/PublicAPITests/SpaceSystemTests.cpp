@@ -34,7 +34,8 @@ using namespace csp::systems;
 
 // TODO: Clean up these tests
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -42,7 +43,8 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 bool RequestPredicateWithProgress(const csp::systems::ResultBase& Result)
 {
-    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+    {
         PrintProgress(Result.GetRequestProgress());
 
         return false;
@@ -99,7 +101,8 @@ Array<BasicSpace> GetSpacesByAttributes(::SpaceSystem* SpaceSystem, const Option
     const auto SpacesTotalCount = Result.GetTotalCount();
     const auto Spaces = Result.GetSpaces();
 
-    if (Spaces.Size() > 0) {
+    if (Spaces.Size() > 0)
+    {
         EXPECT_GT(SpacesTotalCount, 0);
     }
 
@@ -170,7 +173,8 @@ void GetSpaceSites(::SpaceSystem* SpaceSystem, const String& SpaceId, Array<Site
     const auto& ResultSites = Result.GetSites();
     OutSites = Array<Site>(ResultSites.Size());
 
-    for (int idx = 0; idx < ResultSites.Size(); ++idx) {
+    for (int idx = 0; idx < ResultSites.Size(); ++idx)
+    {
         OutSites[idx] = ResultSites[idx];
     }
 }
@@ -181,7 +185,8 @@ void UpdateUserRole(::SpaceSystem* SpaceSystem, const String& SpaceId, UserRoleI
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         std::cerr << "The user role for UserId: " << NewUserRoleInfo.UserId << " has been updated successfully" << std::endl;
     }
 }
@@ -209,7 +214,8 @@ void GetUsersRoles(::SpaceSystem* SpaceSystem, const String& SpaceId, const Arra
     const auto& ReturnedRolesInfo = Result.GetUsersRoles();
     OutUsersRoles = Array<UserRoleInfo>(ReturnedRolesInfo.Size());
 
-    for (int idx = 0; idx < ReturnedRolesInfo.Size(); ++idx) {
+    for (int idx = 0; idx < ReturnedRolesInfo.Size(); ++idx)
+    {
         OutUsersRoles[idx] = ReturnedRolesInfo[idx];
     }
 }
@@ -265,7 +271,8 @@ Map<String, Array<String>> GetAndAssertSpacesTags(::SpaceSystem* SpaceSystem, co
 bool IsUriValid(const std::string& Uri, const std::string& FileName)
 {
     // check that Uri starts with something valid
-    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0) {
+    if (Uri.find("https://world-streaming.magnopus-dev.cloud/", 0) != 0)
+    {
         return false;
     }
 
@@ -408,7 +415,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBulkInviteTest)
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
     EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx) {
+    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
 
@@ -516,7 +524,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, CreateSpaceWithBufferWithBulkInvite
     auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
     EXPECT_EQ(PendingInvites.Size(), InviteUsers.InviteUserRoleInfos.Size());
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx) {
+    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
 
@@ -663,8 +672,10 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesTest)
 
     bool SpaceFound = false;
 
-    for (int i = 0; i < ResultSpaces.Size(); ++i) {
-        if (ResultSpaces[i].Name == UniqueSpaceName) {
+    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    {
+        if (ResultSpaces[i].Name == UniqueSpaceName)
+        {
             SpaceFound = true;
 
             break;
@@ -757,11 +768,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSpacesByIdsTest)
     bool PrivateSpaceFound = false;
     bool PublicSpaceFound = false;
 
-    for (int i = 0; i < ResultSpaces.Size(); ++i) {
-        if (ResultSpaces[i].Name == UniquePrivateSpaceName) {
+    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    {
+        if (ResultSpaces[i].Name == UniquePrivateSpaceName)
+        {
             PrivateSpaceFound = true;
             continue;
-        } else if (ResultSpaces[i].Name == UniquePublicSpaceName) {
+        }
+        else if (ResultSpaces[i].Name == UniquePublicSpaceName)
+        {
             PublicSpaceFound = true;
             continue;
         }
@@ -801,7 +816,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -824,7 +840,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i) {
+    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    {
         const auto& Space = ResultSpaces[i];
 
         EXPECT_TRUE((bool)(Space.Attributes & SpaceAttributes::IsDiscoverable));
@@ -837,7 +854,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesAsGuestTest)
     // Clean up
     LogIn(UserSystem, UserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
 
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
 
@@ -867,7 +885,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -884,7 +903,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i) {
+    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    {
         const auto& Space = ResultSpaces[i];
 
         EXPECT_TRUE((bool)(Space.Attributes & SpaceAttributes::IsDiscoverable));
@@ -892,7 +912,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPublicSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
 
@@ -922,7 +943,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -939,7 +961,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
     EXPECT_GE(ResultSpaces.Size(), SPACE_COUNT);
 
     // Make sure that all returned spaces are public
-    for (int i = 0; i < ResultSpaces.Size(); ++i) {
+    for (int i = 0; i < ResultSpaces.Size(); ++i)
+    {
         const auto& Space = ResultSpaces[i];
 
         EXPECT_FALSE((bool)(Space.Attributes & SpaceAttributes::IsDiscoverable));
@@ -947,7 +970,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPrivateSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
 
@@ -977,7 +1001,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
 
     String SpaceId[SPACE_COUNT];
 
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         char UniqueSpaceName[256];
         SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
@@ -1002,7 +1027,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPaginatedPrivateSpacesTest)
     }
 
     // Clean up
-    for (int i = 0; i < SPACE_COUNT; ++i) {
+    for (int i = 0; i < SPACE_COUNT; ++i)
+    {
         DeleteSpace(SpaceSystem, SpaceId[i]);
     }
 
@@ -1054,12 +1080,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, JoinPublicSpaceTest)
 
     EXPECT_EQ(RetrievedUserRoles.Size(), 2);
 
-    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx) {
-        if (RetrievedUserRoles[idx].UserId == SpaceOwnerUserId) {
+    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
+    {
+        if (RetrievedUserRoles[idx].UserId == SpaceOwnerUserId)
+        {
             EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
-        } else if (RetrievedUserRoles[idx].UserId == GuestUserId) {
+        }
+        else if (RetrievedUserRoles[idx].UserId == GuestUserId)
+        {
             EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::User);
-        } else {
+        }
+        else
+        {
             ASSERT_TRUE(false && "Encountered unexpected space user");
         }
     }
@@ -1141,11 +1173,15 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetSiteInfoTest)
     bool Site1Found = false;
     bool Site2Found = false;
 
-    for (int idx = 0; idx < SpaceSites.Size(); ++idx) {
-        if (SpaceSites[idx].Name == SiteInfo1.Name) {
+    for (int idx = 0; idx < SpaceSites.Size(); ++idx)
+    {
+        if (SpaceSites[idx].Name == SiteInfo1.Name)
+        {
             Site1Found = true;
             continue;
-        } else if (SpaceSites[idx].Name == SiteInfo2.Name) {
+        }
+        else if (SpaceSites[idx].Name == SiteInfo2.Name)
+        {
             Site2Found = true;
             continue;
         }
@@ -1244,12 +1280,18 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, UpdateUserRolesTest)
 
     EXPECT_EQ(RetrievedUserRoles.Size(), 2);
 
-    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx) {
-        if (RetrievedUserRoles[idx].UserId == DefaultUserId) {
+    for (auto idx = 0; idx < RetrievedUserRoles.Size(); ++idx)
+    {
+        if (RetrievedUserRoles[idx].UserId == DefaultUserId)
+        {
             EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::Owner);
-        } else if (RetrievedUserRoles[idx].UserId == AltUserId) {
+        }
+        else if (RetrievedUserRoles[idx].UserId == AltUserId)
+        {
             EXPECT_EQ(RetrievedUserRoles[idx].UserRole, SpaceUserRole::User);
-        } else {
+        }
+        else
+        {
             ASSERT_TRUE(false && "Encountered unexpected space user");
         }
     }
@@ -1814,7 +1856,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 
     EXPECT_EQ(PendingInvites.Size(), 1);
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx) {
+    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
 
@@ -1859,7 +1902,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, BulkInvitetoSpaceTest)
 
     EXPECT_EQ(PendingInvites.Size(), 4);
 
-    for (auto idx = 0; idx < PendingInvites.Size(); ++idx) {
+    for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
+    {
         std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
     }
 
@@ -2407,7 +2451,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Location.Longitude, InitialGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().Orientation, InitialOrientation);
 
-    for (auto i = 0; i < AddGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i) {
+    for (auto i = 0; i < AddGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    {
         EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, InitialGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(AddGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, InitialGeoFence[i].Longitude);
     }
@@ -2447,7 +2492,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().Orientation, SecondOrientation);
 
-    for (auto i = 0; i < UpdateGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i) {
+    for (auto i = 0; i < UpdateGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    {
         EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, SecondGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(UpdateGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, SecondGeoFence[i].Longitude);
     }
@@ -2460,7 +2506,8 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GeoLocationTest)
     EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Location.Longitude, SecondGeoLocation.Longitude);
     EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().Orientation, SecondOrientation);
 
-    for (auto i = 0; i < GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i) {
+    for (auto i = 0; i < GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence.Size(); ++i)
+    {
         EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence[i].Latitude, SecondGeoFence[i].Latitude);
         EXPECT_DOUBLE_EQ(GetUpdatedGeoResult.GetSpaceGeoLocation().GeoFence[i].Longitude, SecondGeoFence[i].Longitude);
     }

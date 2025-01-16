@@ -24,10 +24,12 @@ CSP_NO_EXPORT
 
 #define CSP_TEXT(txt) csp::common::String(txt)
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Custom string class that we can use safely across a DLL boundary.
-class CSP_API String {
+class CSP_API String
+{
 public:
     /// @brief Constructs an empty string.
     String();

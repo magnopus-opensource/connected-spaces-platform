@@ -19,13 +19,15 @@
 
 class EventPayloadImpl;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 using MetricValue = csp::multiplayer::ReplicatedValue;
 
 /// @ingroup Analytics System
 /// @brief Interface for an Analytics Provider
-class CSP_API IAnalyticsProvider {
+class CSP_API IAnalyticsProvider
+{
 public:
     CSP_START_IGNORE
     IAnalyticsProvider(const IAnalyticsProvider&) = delete;

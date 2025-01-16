@@ -1,9 +1,11 @@
 #pragma once
 #include <cstdint>
 
-namespace oly_web {
+namespace oly_web
+{
 
-enum class EResponseCodes : uint16_t {
+enum class EResponseCodes : uint16_t
+{
     ResponseInit = 0,
     ResponseContinue = 100,
     ResponseSwitchingProtocols = 101,

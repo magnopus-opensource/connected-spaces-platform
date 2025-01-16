@@ -28,9 +28,12 @@ void LogMessageLevelTest(const csp::systems::LogLevel Level, const csp::common::
 {
     LogConfirmed = false;
     CSP_LOG_MSG(Level, TestMsg);
-    if (Expected) {
+    if (Expected)
+    {
         EXPECT_TRUE(LogConfirmed);
-    } else {
+    }
+    else
+    {
         EXPECT_FALSE(LogConfirmed);
     }
 }
@@ -40,9 +43,12 @@ void LogFormatLevelTest(
 {
     LogConfirmed = false;
     CSP_LOG_FORMAT(Level, TestMsg, TestValue);
-    if (Expected) {
+    if (Expected)
+    {
         EXPECT_TRUE(LogConfirmed);
-    } else {
+    }
+    else
+    {
         EXPECT_FALSE(LogConfirmed);
     }
 }
@@ -605,23 +611,29 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
     const csp::common::String TestTag = "Profile Marker";
     const csp::common::String TestEvent = "Event Marker";
 
-    LogSystem.SetBeginMarkerCallback([&](csp::common::String InMessage) {
-        if (InMessage == TestTag) {
-            BeginConfirmed = true;
-        }
+    LogSystem.SetBeginMarkerCallback(
+        [&](csp::common::String InMessage)
+        {
+            if (InMessage == TestTag)
+            {
+                BeginConfirmed = true;
+            }
 
-        std::cout << InMessage << std::endl;
-    });
+            std::cout << InMessage << std::endl;
+        });
 
     LogSystem.SetEndMarkerCallback([&](void*) { EndConfirmed = true; });
 
-    LogSystem.SetEventCallback([&](csp::common::String InMessage) {
-        if (InMessage == TestEvent) {
-            EventConfirmed = true;
-        }
+    LogSystem.SetEventCallback(
+        [&](csp::common::String InMessage)
+        {
+            if (InMessage == TestEvent)
+            {
+                EventConfirmed = true;
+            }
 
-        std::cout << InMessage << std::endl;
-    });
+            std::cout << InMessage << std::endl;
+        });
 
     const int TestValue = 12345;
 
@@ -666,12 +678,15 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
     const csp::common::String Prefix = "Services";
     std::atomic_bool LogConfirmed = false;
 
-    LogSystem.SetLogCallback([&LogConfirmed, Prefix](csp::common::String InMessage) {
-        if (InMessage.Split(' ')[0] == Prefix) {
-            LogConfirmed = InMessage.Split(' ')[0] == Prefix;
-            std::cout << InMessage << std::endl;
-        }
-    });
+    LogSystem.SetLogCallback(
+        [&LogConfirmed, Prefix](csp::common::String InMessage)
+        {
+            if (InMessage.Split(' ')[0] == Prefix)
+            {
+                LogConfirmed = InMessage.Split(' ')[0] == Prefix;
+                std::cout << InMessage << std::endl;
+            }
+        });
 
     csp::common::String UserId;
 
@@ -682,7 +697,8 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
     auto Current = std::chrono::steady_clock::now();
     float TestTime = 0;
 
-    while (!LogConfirmed && TestTime < 20) {
+    while (!LogConfirmed && TestTime < 20)
+    {
         std::this_thread::sleep_for(50ms);
 
         Current = std::chrono::steady_clock::now();

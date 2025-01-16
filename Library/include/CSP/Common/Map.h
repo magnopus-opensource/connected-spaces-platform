@@ -22,7 +22,8 @@
 
 #include <map>
 
-namespace csp::common {
+namespace csp::common
+{
 
 /// @brief Simple DLL-safe map of key object pairs.
 ///
@@ -30,7 +31,8 @@ namespace csp::common {
 ///
 /// @tparam TKey : Type to use as the key
 /// @tparam TValue : Type to use as the value
-template <typename TKey, typename TValue> class CSP_API Map {
+template <typename TKey, typename TValue> class CSP_API Map
+{
     using MapType = std::map<TKey, TValue>;
 
 public:
@@ -64,7 +66,8 @@ public:
         Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
         new (Container) MapType;
 
-        for (const auto& Pair : Values) {
+        for (const auto& Pair : Values)
+        {
             Container->emplace(Pair.first, Pair.second);
         }
     }
@@ -89,7 +92,8 @@ public:
     /// @return const TValue& : Map element
     const TValue& operator[](const TKey& Key) const
     {
-        if (Container->count(Key) == 0) {
+        if (Container->count(Key) == 0)
+        {
             throw std::runtime_error("Key not present in Map. Please ensure an element with the given key exists before attempting to access it.");
         }
 
@@ -101,13 +105,17 @@ public:
     /// @return Map<TKey, TValue>&
     CSP_NO_EXPORT Map<TKey, TValue>& operator=(const Map<TKey, TValue>& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
-        if (Container) {
+        if (Container)
+        {
             Container->~MapType();
-        } else {
+        }
+        else
+        {
             Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
         }
 
@@ -121,13 +129,17 @@ public:
     /// @return Map<TKey, TValue>&
     CSP_NO_EXPORT Map<TKey, TValue>& operator=(Map<TKey, TValue>&& Other)
     {
-        if (this == &Other) {
+        if (this == &Other)
+        {
             return *this;
         }
 
-        if (Container) {
+        if (Container)
+        {
             Container->~MapType();
-        } else {
+        }
+        else
+        {
             Container = (MapType*)csp::memory::DllAlloc(sizeof(MapType));
         }
 
@@ -158,7 +170,8 @@ public:
         new (Keys) Array<TKey>(Container->size());
         int i = 0;
 
-        for (const auto& Pair : *Container) {
+        for (const auto& Pair : *Container)
+        {
             Keys->operator[](i++) = Pair.first;
         }
 
@@ -173,7 +186,8 @@ public:
         new (Values) Array<TValue>(Container->size());
         int i = 0;
 
-        for (const auto& Pair : *Container) {
+        for (const auto& Pair : *Container)
+        {
             Values->operator[](i++) = Pair.second;
         }
 
@@ -184,7 +198,8 @@ public:
     /// @param Key const TKey& : Key to remove from the map
     void Remove(const TKey& Key)
     {
-        if (HasKey(Key)) {
+        if (HasKey(Key))
+        {
             Container->erase(Key);
         }
     }

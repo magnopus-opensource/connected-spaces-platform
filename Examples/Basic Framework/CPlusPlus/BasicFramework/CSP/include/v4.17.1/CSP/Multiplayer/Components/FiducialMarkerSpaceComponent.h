@@ -22,14 +22,27 @@
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for a fiducial marker space component.
-enum class FiducialMarkerPropertyKeys { Name, MarkerAssetId, AssetCollectionId, Position, Rotation, Scale, IsVisible, IsARVisible, Num };
+enum class FiducialMarkerPropertyKeys
+{
+    Name,
+    MarkerAssetId,
+    AssetCollectionId,
+    Position,
+    Rotation,
+    Scale,
+    IsVisible,
+    IsARVisible,
+    Num
+};
 
 /// @ingroup FiducialMarkerSpaceComponent
 /// @brief Data representation of a FiducialMarkerSpaceComponent.
-class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public IVisibleComponent {
+class CSP_API FiducialMarkerSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     /// @brief Constructs the fiducial marker space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

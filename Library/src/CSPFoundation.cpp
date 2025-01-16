@@ -64,7 +64,8 @@
 #include <emscripten.h>
 #endif
 
-namespace {
+namespace
+{
 
 // We don't need these 3 functions for WASM, as we use localStorage instead of the filesystem to store the device ID
 #if !defined(CSP_WASM)
@@ -168,7 +169,8 @@ std::string LoadDeviceId()
 #if defined(CSP_WASM)
     auto DeviceId = get_device_id();
 
-    if (DeviceId == nullptr) {
+    if (DeviceId == nullptr)
+    {
         auto GeneratedDeviceId = csp::GenerateUUID();
         set_device_id(GeneratedDeviceId.c_str());
 
@@ -182,14 +184,16 @@ std::string LoadDeviceId()
 #else
     const std::string CSPDataRoot = DeviceIdPath();
 
-    if (!FolderExists(CSPDataRoot)) {
+    if (!FolderExists(CSPDataRoot))
+    {
         CreateFolder(CSPDataRoot);
     }
 
     auto DeviceIdFilePath = std::string(CSPDataRoot) + "device.id";
     std::string DeviceId;
 
-    if (!FileExists(DeviceIdFilePath)) {
+    if (!FileExists(DeviceIdFilePath))
+    {
         FILE* File = FOPEN(DeviceIdFilePath.c_str(), "w");
         assert(File != nullptr);
 
@@ -198,7 +202,9 @@ std::string LoadDeviceId()
         fwrite(DeviceId.c_str(), sizeof(char), 32, File);
         fflush(File);
         fclose(File);
-    } else {
+    }
+    else
+    {
         FILE* File = FOPEN(DeviceIdFilePath.c_str(), "r");
         assert(File != nullptr);
 
@@ -216,7 +222,8 @@ std::string LoadDeviceId()
 
 } // namespace
 
-namespace csp {
+namespace csp
+{
 
 bool CSPFoundation::IsInitialised = false;
 EndpointURIs* CSPFoundation::Endpoints = nullptr;
@@ -227,13 +234,15 @@ csp::common::String* CSPFoundation::Tenant = nullptr;
 
 bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const csp::common::String& InTenant)
 {
-    if (IsInitialised) {
+    if (IsInitialised)
+    {
         return false;
     }
 
     // remove last char if a slash
     std::string RootURI(EndpointRootURI.c_str());
-    while (RootURI.rbegin() != RootURI.rend() && (*RootURI.rbegin() == '\\' || *RootURI.rbegin() == '/')) {
+    while (RootURI.rbegin() != RootURI.rend() && (*RootURI.rbegin() == '\\' || *RootURI.rbegin() == '/'))
+    {
         RootURI.resize(RootURI.length() - 1);
     }
 
@@ -286,7 +295,8 @@ bool CSPFoundation::Initialise(const csp::common::String& EndpointRootURI, const
 
 bool CSPFoundation::Shutdown()
 {
-    if (!IsInitialised) {
+    if (!IsInitialised)
+    {
         return false;
     }
 
@@ -308,7 +318,8 @@ bool CSPFoundation::Shutdown()
 
 void CSPFoundation::Tick()
 {
-    if (!IsInitialised) {
+    if (!IsInitialised)
+    {
         return;
     }
 
@@ -378,7 +389,8 @@ void* GetFunctionAddress(const csp::common::String& Name)
 #if defined(CSP_WASM)
     return nullptr;
 #else
-    if (ModuleHandle == nullptr) {
+    if (ModuleHandle == nullptr)
+    {
         ModuleHandle = LOAD_OWN_MODULE();
         assert(ModuleHandle != nullptr);
     }

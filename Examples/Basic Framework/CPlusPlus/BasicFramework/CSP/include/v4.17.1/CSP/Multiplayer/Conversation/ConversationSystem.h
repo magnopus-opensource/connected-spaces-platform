@@ -24,11 +24,13 @@
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @ingroup Conversation System
 /// @brief Public facing system that can handle conversations taking place between users of a space in the form of thread messages.
-class CSP_API CSP_NO_DISPOSE ConversationSystem {
+class CSP_API CSP_NO_DISPOSE ConversationSystem
+{
 public:
     /// @brief Constructs a conversation system instance that uses the given multiplayer connection.
     /// @param InMultiPlayerConnection MultiplayerConnection : The connection to be used.

@@ -23,7 +23,8 @@
 
 namespace chs = csp::systems::graphqlservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 GraphQLSystem::GraphQLSystem()
     : SystemBase(nullptr, nullptr)

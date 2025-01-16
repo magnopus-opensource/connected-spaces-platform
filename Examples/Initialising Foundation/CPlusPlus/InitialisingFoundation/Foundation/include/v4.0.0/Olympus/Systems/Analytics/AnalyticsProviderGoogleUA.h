@@ -4,15 +4,18 @@
 
 #include <chrono>
 
-namespace oly_web {
+namespace oly_web
+{
 class WebClient;
 }
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Analytics System
 /// @brief Analytics Provider implementation for Google Universal Analytics
-class AnalyticsProviderGoogleUA : public IAnalyticsProvider {
+class AnalyticsProviderGoogleUA : public IAnalyticsProvider
+{
 public:
     AnalyticsProviderGoogleUA(const oly_common::String& ClientId, const oly_common::String& PropertyTag);
 

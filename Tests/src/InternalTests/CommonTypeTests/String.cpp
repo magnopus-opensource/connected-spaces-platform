@@ -27,20 +27,24 @@ using namespace csp::common;
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringDefaultInitialisationTest)
 {
-    try {
+    try
+    {
         String Instance;
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance, "");
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthInitialisationTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "abcdefg";
         auto Length = strlen(Buffer);
 
@@ -53,20 +57,25 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthInitialisation
         EXPECT_EQ(Instance, Buffer);
         EXPECT_NE(Instance.c_str(), nullptr);
         EXPECT_NE(Instance.c_str(), &Buffer[0]);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferLengthNullptrInitialisationTest)
 {
-    try {
+    try
+    {
         String Instance(nullptr, 5);
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Length(), 0);
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -75,33 +84,40 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthInitialisationTest)
 {
     constexpr size_t Length = 5;
 
-    try {
+    try
+    {
         String Instance(Length);
 
         EXPECT_FALSE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Length(), Length);
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLengthZeroInitialisationTest)
 {
-    try {
+    try
+    {
         String Instance(0ULL);
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Length(), 0);
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferInitialisationTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "abcdefg";
         auto Length = strlen(Buffer);
 
@@ -114,27 +130,33 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferInitialisationTest)
         EXPECT_EQ(Instance, Buffer);
         EXPECT_NE(Instance.c_str(), nullptr);
         EXPECT_NE(Instance.c_str(), &Buffer[0]);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNullptrInitialisationTest)
 {
-    try {
+    try
+    {
         String Instance((char*)nullptr);
 
         EXPECT_TRUE(Instance.IsEmpty());
         EXPECT_EQ(Instance.Length(), 0);
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyInitialisationTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "abcdefg";
         String Instance(OtherInstance);
 
@@ -145,14 +167,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyInitialisationTest)
         EXPECT_EQ(Instance, OtherInstance);
         EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
         EXPECT_NE(Instance.c_str(), nullptr);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyAssignmentTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "abcdefg";
         String Instance;
         Instance = OtherInstance;
@@ -164,14 +189,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringCopyAssignmentTest)
         EXPECT_EQ(Instance, OtherInstance);
         EXPECT_NE(Instance.c_str(), nullptr);
         EXPECT_NE(Instance.c_str(), OtherInstance.c_str());
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferAssignmentTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "abcdefg";
         String Instance;
         Instance = Buffer;
@@ -183,14 +211,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferAssignmentTest)
         EXPECT_EQ(Instance, Buffer);
         EXPECT_NE(Instance.c_str(), nullptr);
         EXPECT_NE(Instance.c_str(), &Buffer[0]);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSplitTest)
 {
-    try {
+    try
+    {
         String Instance = "abc;;def;";
         auto Parts = Instance.Split(';');
 
@@ -200,89 +231,110 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSplitTest)
         EXPECT_EQ(Parts[1], "");
         EXPECT_EQ(Parts[2], "def");
         EXPECT_EQ(Parts[3], "");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringSwapTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "abcdefg";
         String Instance = "gfecdba";
         Instance.swap(OtherInstance);
 
         EXPECT_EQ(Instance, "abcdefg");
         EXPECT_EQ(OtherInstance, "gfecdba");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringEqualityTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "abcdefg";
         String Instance = "abcdefg";
 
         EXPECT_EQ(Instance, OtherInstance);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringNonEqualityTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "abcdefg";
         String Instance = "abcdefh";
 
         EXPECT_NE(Instance, OtherInstance);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferEqualityTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "abcdefg";
         String Instance = "abcdefg";
 
         EXPECT_EQ(Instance, Buffer);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringBufferNonEqualityTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "abcdefg";
         String Instance = "abcdefh";
 
         EXPECT_NE(Instance, Buffer);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringLessThanTest)
 {
-    try {
+    try
+    {
         // The less than operator is used for ordering of String instances
         String OtherInstance = "abcdefh";
         String Instance = "abcdefg";
 
         EXPECT_LT(Instance, OtherInstance);
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "defg";
         String Instance = "abc";
         Instance.Append(OtherInstance);
@@ -290,14 +342,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendTest)
         // The appended String instance should not be modified
         EXPECT_EQ(OtherInstance, "defg");
         EXPECT_EQ(Instance, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendEmptyTest)
 {
-    try {
+    try
+    {
         String OtherInstance;
         String Instance = "abc";
         Instance.Append(OtherInstance);
@@ -305,40 +360,49 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendEmptyTest)
         // The appended String instance should not be modified
         EXPECT_EQ(OtherInstance, "");
         EXPECT_EQ(Instance, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "defg";
         String Instance = "abc";
         Instance.Append(Buffer);
 
         EXPECT_EQ(Instance, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAppendBufferNullptrTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         Instance.Append((char*)nullptr);
 
         // Appending a null buffer should not throw
         EXPECT_EQ(Instance, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         String OtherInstance = "defg";
         String Combined = Instance + OtherInstance;
@@ -347,14 +411,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddTest)
         EXPECT_EQ(Instance, "abc");
         EXPECT_EQ(OtherInstance, "defg");
         EXPECT_EQ(Combined, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddEmptyTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         String OtherInstance;
         String Combined = Instance + OtherInstance;
@@ -365,28 +432,34 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddEmptyTest)
         EXPECT_EQ(OtherInstance, "");
         EXPECT_EQ(Combined, "abc");
         EXPECT_NE(Instance.c_str(), Combined.c_str());
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         String Combined = Instance + "defg";
 
         // The original String instance should not be modified
         EXPECT_EQ(Instance, "abc");
         EXPECT_EQ(Combined, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferNullptrTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         String Combined = Instance + (char*)nullptr;
 
@@ -394,14 +467,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddBufferNullptrTest)
         EXPECT_EQ(Instance, "abc");
         EXPECT_EQ(Combined, "abc");
         EXPECT_NE(Instance.c_str(), Combined.c_str());
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentTest)
 {
-    try {
+    try
+    {
         String OtherInstance = "defg";
         String Instance = "abc";
         Instance += OtherInstance;
@@ -409,14 +485,17 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentTest)
         // The appended String instance should not be modified
         EXPECT_EQ(OtherInstance, "defg");
         EXPECT_EQ(Instance, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentEmptyTest)
 {
-    try {
+    try
+    {
         String OtherInstance;
         String Instance = "abc";
         Instance += OtherInstance;
@@ -424,54 +503,66 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentEmptyTest)
         // The appended String instance should not be modified
         EXPECT_EQ(OtherInstance, "");
         EXPECT_EQ(Instance, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferTest)
 {
-    try {
+    try
+    {
         const char Buffer[] = "defg";
         String Instance = "abc";
         Instance += Buffer;
 
         EXPECT_EQ(Instance, "abcdefg");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringAddAssignmentBufferNullptrTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         Instance += (char*)nullptr;
 
         // Appending a null buffer should not throw
         EXPECT_EQ(Instance, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimTest)
 {
-    try {
+    try
+    {
         String Instance = " \rabc\t\n  ";
         String Trimmed = Instance.Trim();
 
         // The original String instance should not be modified
         EXPECT_EQ(Instance, " \rabc\t\n  ");
         EXPECT_EQ(Trimmed, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimNoWhitespaceTest)
 {
-    try {
+    try
+    {
         String Instance = "abc";
         String Trimmed = Instance.Trim();
 
@@ -479,83 +570,103 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimNoWhitespaceTest)
         EXPECT_EQ(Instance, "abc");
         EXPECT_EQ(Trimmed, "abc");
         EXPECT_NE(Instance.c_str(), Trimmed.c_str());
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringTrimAllWhitespaceTest)
 {
-    try {
+    try
+    {
         String Instance = "  \r\n\r\n\t";
         String Trimmed = Instance.Trim();
 
         // The original String should not be modified
         EXPECT_EQ(Instance, "  \r\n\r\n\t");
         EXPECT_EQ(Trimmed, "");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringToLowerTest)
 {
-    try {
+    try
+    {
         String Instance = "\nAbC! _76-WHAT-lol";
         String Transformed = Instance.ToLower();
 
         // The original String instance should not be modified
         EXPECT_EQ(Instance, "\nAbC! _76-WHAT-lol");
         EXPECT_EQ(Transformed, "\nabc! _76-what-lol");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListTest)
 {
-    try {
+    try
+    {
         List<String> Parts = { "abc", "def", "ghi" };
         String Instance = String::Join(Parts);
 
         EXPECT_EQ(Instance, "abcdefghi");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListEmptyTest)
 {
-    try {
+    try
+    {
         List<String> Parts(0);
         String Instance = String::Join(Parts);
 
         EXPECT_EQ(Instance, "");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListSomeEmptyEntriesTest)
 {
-    try {
+    try
+    {
         List<String> Parts = { "abc", String(), String(0ULL) };
         String Instance = String::Join(Parts);
 
         EXPECT_EQ(Instance, "abc");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTest)
 {
-    try {
+    try
+    {
         List<String> Parts = { "", String(), String(0ULL) };
         String Instance = String::Join(Parts);
 
         EXPECT_EQ(Instance, "");
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }

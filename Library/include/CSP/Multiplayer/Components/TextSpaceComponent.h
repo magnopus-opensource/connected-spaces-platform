@@ -26,10 +26,12 @@
 #include "CSP/Multiplayer/Components/Interfaces/ITransformComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Enumerates the list of properties that can be replicated for an text space component.
-enum class TextPropertyKeys {
+enum class TextPropertyKeys
+{
     Position,
     Rotation,
     Scale,
@@ -47,7 +49,8 @@ enum class TextPropertyKeys {
 
 /// @ingroup TextSpaceComponent
 /// @brief Add a spatial representation of text to your space.
-class CSP_API TextSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent {
+class CSP_API TextSpaceComponent : public ComponentBase, public ITransformComponent, public IVisibleComponent
+{
 public:
     /// @brief Constructs the text space component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.

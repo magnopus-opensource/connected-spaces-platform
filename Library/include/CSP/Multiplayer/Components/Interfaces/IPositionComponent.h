@@ -19,10 +19,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Vector.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the 3D position of the component in world space.
-CSP_INTERFACE class CSP_API IPositionComponent {
+CSP_INTERFACE class CSP_API IPositionComponent
+{
 public:
     /// @brief Gets the position of the origin of this component in world space.
     /// @note The coordinate system used follows the glTF 2.0 specification, in meters.

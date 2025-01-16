@@ -20,7 +20,8 @@
 #include <sstream>
 #include <stdio.h>
 
-namespace {
+namespace
+{
 
 #ifdef CSP_WINDOWS
 #define timegm _mkgmtime
@@ -28,7 +29,8 @@ namespace {
 
 } // namespace
 
-namespace csp::common {
+namespace csp::common
+{
 
 // Portable implementation of timegm - since it is not part of the C++ standard
 // we cannot assume it is reliably implemented across platforms, and is in fact
@@ -52,7 +54,8 @@ time_t CSPTimeGM(struct tm* Time)
         Result -= (Year - 1900) / 100;
         Result += (Year - 1600) / 400;
 
-        if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2) {
+        if ((Year % 4) == 0 && ((Year % 100) != 0 || (Year % 400) == 0) && Time->tm_mon < 2)
+        {
             Result--;
         }
     }
@@ -65,7 +68,8 @@ time_t CSPTimeGM(struct tm* Time)
     Result *= 60;
     Result += Time->tm_sec;
 
-    if (Time->tm_isdst == 1) {
+    if (Time->tm_isdst == 1)
+    {
         Result -= 3600;
     }
 
@@ -87,7 +91,8 @@ DateTime::DateTime(const csp::common::String& DateString)
     std::tm TM = { Second, Minute, Hour, Day, Month - 1, Year - 1900 };
     TM.tm_isdst = -1;
 
-    if (OffsetModifier == '-') {
+    if (OffsetModifier == '-')
+    {
         OffsetHours = 0 - OffsetHours;
     }
 

@@ -19,10 +19,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Vector.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the 3D rotation of the component.
-CSP_INTERFACE class CSP_API IRotationComponent {
+CSP_INTERFACE class CSP_API IRotationComponent
+{
 public:
     /// @brief Gets a quaternion representing the rotation of the origin of this component, expressed in radians.
     /// @note The coordinate system respects the following conventions:

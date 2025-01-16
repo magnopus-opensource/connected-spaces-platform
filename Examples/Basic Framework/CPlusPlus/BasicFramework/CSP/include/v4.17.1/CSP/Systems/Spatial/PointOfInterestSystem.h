@@ -24,13 +24,15 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class Space;
 class AssetCollection;
@@ -38,7 +40,8 @@ class AssetCollection;
 /// @ingroup Point of Interest System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of a Point of Interest.
 /// Offers methods for creating and deleting POIs.
-class CSP_API CSP_NO_DISPOSE PointOfInterestSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE PointOfInterestSystem : public SystemBase
+{
 
 public:
     ~PointOfInterestSystem();

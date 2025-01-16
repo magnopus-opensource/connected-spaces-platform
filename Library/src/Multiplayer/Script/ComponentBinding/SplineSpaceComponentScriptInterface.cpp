@@ -19,7 +19,8 @@
 #include "CSP/Multiplayer/Components/SplineSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 csp::multiplayer::SplineSpaceComponentScriptInterface::SplineSpaceComponentScriptInterface(SplineSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)
@@ -39,7 +40,8 @@ std::vector<ComponentScriptInterface::Vector3> SplineSpaceComponentScriptInterfa
 
     auto Result = static_cast<SplineSpaceComponent*>(Component)->GetWaypoints();
 
-    for (int i = 0; i < Result.Size(); ++i) {
+    for (int i = 0; i < Result.Size(); ++i)
+    {
         ReturnList.push_back({ Result[i].X, Result[i].Y, Result[i].Z });
     }
 
@@ -50,7 +52,8 @@ void SplineSpaceComponentScriptInterface::SetWaypoints(std::vector<Vector3> Wayp
 {
     csp::common::List<csp::common::Vector3> ConvertedList;
 
-    for (int i = 0; i < Waypoints.size(); ++i) {
+    for (int i = 0; i < Waypoints.size(); ++i)
+    {
         ConvertedList.Append({ Waypoints[i][0], Waypoints[i][1], Waypoints[i][2] });
     }
 

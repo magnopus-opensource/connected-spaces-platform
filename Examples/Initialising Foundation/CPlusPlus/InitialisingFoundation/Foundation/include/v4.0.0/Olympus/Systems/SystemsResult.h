@@ -5,11 +5,13 @@
 #include "Olympus/OlympusCommon.h"
 #include "Olympus/Services/WebService.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 class ConversationSystem;
 }
 
-namespace oly_services {
+namespace oly_services
+{
 
 // TODO: Add support for template friends in wrapper generator and remove usage of these ignore macros
 OLY_START_IGNORE
@@ -18,9 +20,11 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-class OLY_API NullResult : public oly_services::ResultBase {
+class OLY_API NullResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SpaceSystem;
     friend class SettingsSystem;
@@ -44,7 +48,8 @@ protected:
     NullResult(void*) {};
 };
 
-class OLY_API BooleanResult : public oly_services::ResultBase {
+class OLY_API BooleanResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
 
@@ -67,7 +72,8 @@ private:
     bool Value = false;
 };
 
-class OLY_API StringResult : public oly_services::ResultBase {
+class OLY_API StringResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
     friend class UserSystem;
@@ -96,7 +102,8 @@ private:
     oly_common::String Value;
 };
 
-class OLY_API StringArrayResult : public oly_services::ResultBase {
+class OLY_API StringArrayResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SettingsSystem;
 
@@ -119,7 +126,8 @@ private:
     oly_common::Array<oly_common::String> Value;
 };
 
-class OLY_API UInt64Result : public oly_services::ResultBase {
+class OLY_API UInt64Result : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 
@@ -142,7 +150,8 @@ private:
     uint64_t Value = 0UL;
 };
 
-class OLY_API HTTPHeadersResult : public oly_services::ResultBase {
+class OLY_API HTTPHeadersResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

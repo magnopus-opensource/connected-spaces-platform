@@ -18,7 +18,8 @@
 #include "Memory/Memory.h"
 #include "Web/WebClient.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::web::Uri& InUri, HttpPayload& InPayload,
     IHttpResponseHandler* ResponseCallback, csp::common::CancellationToken& CancellationToken, bool CallbackIsAsync)
@@ -34,10 +35,13 @@ HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::we
     , RefCount(0)
     , SendDelay(0)
 {
-    if (&CancellationToken == &csp::common::CancellationToken::Dummy()) {
+    if (&CancellationToken == &csp::common::CancellationToken::Dummy())
+    {
         this->CancellationToken = CSP_NEW csp::common::CancellationToken();
         OwnsCancellationToken = true;
-    } else {
+    }
+    else
+    {
         this->CancellationToken = &CancellationToken;
         OwnsCancellationToken = false;
     }
@@ -45,11 +49,13 @@ HttpRequest::HttpRequest(WebClient* InClient, ERequestVerb InVerb, const csp::we
 
 HttpRequest::~HttpRequest()
 {
-    if (OwnsCancellationToken) {
+    if (OwnsCancellationToken)
+    {
         CSP_DELETE(CancellationToken);
     }
 
-    if ((Callback != nullptr) && Callback->ShouldDelete()) {
+    if ((Callback != nullptr) && Callback->ShouldDelete())
+    {
         CSP_DELETE(Callback);
     }
 }
@@ -85,7 +91,8 @@ void HttpRequest::SetResponseProgress(float Progress)
 {
     Response.GetProgress().SetProgressPercentage(Progress);
 
-    if (Callback) {
+    if (Callback)
+    {
         Callback->OnHttpProgress(*this);
     }
 }
@@ -98,7 +105,8 @@ void HttpRequest::SetRequestProgress(float InProgress)
 {
     Progress.SetProgressPercentage(InProgress);
 
-    if (Callback) {
+    if (Callback)
+    {
         Callback->OnHttpProgress(*this);
     }
 }
@@ -123,7 +131,8 @@ bool ResultCodeValidForRetry(csp::web::EResponseCodes Status)
 /// @return true if retry succeeded, false if retry limit was reached
 bool HttpRequest::Retry(const uint32_t MaxRetries)
 {
-    if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries) {
+    if (ResultCodeValidForRetry(Response.GetResponseCode()) && RetryCount < MaxRetries)
+    {
         ++RetryCount;
 
         // Re-issue the request
@@ -149,7 +158,8 @@ bool HttpRequest::CheckForAutoRetry(const uint32_t MaxRetries)
     EResponseCodes ErrorCodeValue = GetResponse().GetResponseCode();
 
     if (IsAutoRetryEnabled && (ErrorCodeValue != EResponseCodes::ResponseOK) && (ErrorCodeValue != EResponseCodes::ResponseCreated)
-        && (ErrorCodeValue != EResponseCodes::ResponseNoContent)) {
+        && (ErrorCodeValue != EResponseCodes::ResponseNoContent))
+    {
         RetryIssued = Retry(MaxRetries);
     }
 

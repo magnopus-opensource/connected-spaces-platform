@@ -33,7 +33,8 @@
 
 #include "gtest/gtest.h"
 
-namespace {
+namespace
+{
 void InitialiseFoundationInternal() { InitialiseFoundationWithUserAgentInfo(EndpointBaseURI()); }
 } // namespace
 
@@ -42,7 +43,8 @@ void PlatformTestWait(bool& finished)
     std::chrono::seconds total(10);
     std::chrono::milliseconds current(0);
 
-    while (!finished && total > current) {
+    while (!finished && total > current)
+    {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         current += std::chrono::milliseconds(10);
     }
@@ -52,7 +54,8 @@ csp::multiplayer::IWebSocketClient* WebSocketStart(const csp::common::String& Ur
 {
     bool finished = false;
 
-    auto Fn = [&](bool result) {
+    auto Fn = [&](bool result)
+    {
         finished = true;
         EXPECT_TRUE(result);
     };
@@ -79,7 +82,8 @@ void WebSocketStop(csp::multiplayer::IWebSocketClient* WebSocketClient)
 {
     bool finished = false;
 
-    auto Fn = [&](bool result) {
+    auto Fn = [&](bool result)
+    {
         finished = true;
         EXPECT_TRUE(result);
     };
@@ -103,7 +107,8 @@ void WebSocketSend(csp::multiplayer::IWebSocketClient* WebSocketClient, const cs
 {
     bool finished = false;
 
-    auto Fn = [&](bool result) {
+    auto Fn = [&](bool result)
+    {
         finished = true;
         EXPECT_TRUE(result);
     };
@@ -126,7 +131,8 @@ void WebSocketSendReceive(csp::multiplayer::IWebSocketClient* WebSocketClient)
 {
     bool finished2 = false;
 
-    auto Fn2 = [&](const std::string& S, bool result) {
+    auto Fn2 = [&](const std::string& S, bool result)
+    {
         finished2 = true;
         EXPECT_TRUE(result);
     };

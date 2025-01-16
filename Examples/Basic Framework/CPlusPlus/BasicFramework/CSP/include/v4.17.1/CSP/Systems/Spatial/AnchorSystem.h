@@ -25,18 +25,21 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Anchor System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' concept of an Anchor.
 /// Offers methods for creating and deleting Anchors.
-class CSP_API CSP_NO_DISPOSE AnchorSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE AnchorSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

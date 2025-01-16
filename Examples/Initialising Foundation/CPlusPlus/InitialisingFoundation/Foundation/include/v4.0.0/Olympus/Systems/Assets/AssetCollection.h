@@ -8,7 +8,8 @@
 
 #include <functional>
 
-namespace oly_services {
+namespace oly_services
+{
 
 class ApiResponseBase;
 
@@ -18,13 +19,22 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-enum class EAssetCollectionType { DEFAULT, FOUNDATION_INTERNAL, COMMENT_CONTAINER, COMMENT, SPACE_THUMBNAIL };
+enum class EAssetCollectionType
+{
+    DEFAULT,
+    FOUNDATION_INTERNAL,
+    COMMENT_CONTAINER,
+    COMMENT,
+    SPACE_THUMBNAIL
+};
 
 /// @ingroup Asset System
 /// @brief Data representation of an asset collection which maps to a PrototypeService::Prototype.
-class OLY_API AssetCollection {
+class OLY_API AssetCollection
+{
 public:
     AssetCollection();
     AssetCollection(const AssetCollection& Other);
@@ -65,7 +75,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when creating an asset collection.
-class OLY_API AssetCollectionResult : public oly_services::ResultBase {
+class OLY_API AssetCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -91,7 +102,8 @@ private:
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to get an array of asset collections.
-class OLY_API AssetCollectionsResult : public oly_services::ResultBase {
+class OLY_API AssetCollectionsResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class AssetSystem;
 

@@ -20,9 +20,11 @@
 #include "Debug/Logging.h"
 #include "Web/WebClient.h"
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-class PointOfInterestInternalSystem : public PointOfInterestSystem {
+class PointOfInterestInternalSystem : public PointOfInterestSystem
+{
 public:
     PointOfInterestInternalSystem(csp::web::WebClient* InWebClient)
         : PointOfInterestSystem(InWebClient) {};

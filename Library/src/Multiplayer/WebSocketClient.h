@@ -20,9 +20,11 @@
 #include <functional>
 #include <string>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
-class IWebSocketClient {
+class IWebSocketClient
+{
 public:
     virtual ~IWebSocketClient() = default;
 

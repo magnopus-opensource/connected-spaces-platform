@@ -19,10 +19,12 @@
 
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class SplineSpaceComponent;
 
-class SplineSpaceComponentScriptInterface : public ComponentScriptInterface {
+class SplineSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     SplineSpaceComponentScriptInterface(SplineSpaceComponent* InComponent = nullptr);
 

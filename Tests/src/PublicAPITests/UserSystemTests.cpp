@@ -31,7 +31,8 @@
 
 using namespace std::chrono_literals;
 
-namespace {
+namespace
+{
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
@@ -42,7 +43,8 @@ csp::common::String SuperUserLoginPassword;
 
 void LoadTestAccountCredentials()
 {
-    if (!std::filesystem::exists("test_account_creds.txt")) {
+    if (!std::filesystem::exists("test_account_creds.txt"))
+    {
         LogFatal("test_account_creds.txt not found! This file must exist and must contain the following information:\n<DefaultLoginEmail> "
                  "<DefaultLoginPassword>\n<AlternativeLoginEmail> <AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
     }
@@ -58,7 +60,8 @@ void LoadTestAccountCredentials()
     CredsFile >> _SuperUserLoginEmail >> _SuperUserLoginPassword;
 
     if (_DefaultLoginEmail.empty() || _DefaultLoginPassword.empty() || _AlternativeLoginEmail.empty() || _AlternativeLoginPassword.empty()
-        || _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty()) {
+        || _SuperUserLoginEmail.empty() || _SuperUserLoginPassword.empty())
+    {
         LogFatal("test_account_creds.txt must be in the following format:\n<DefaultLoginEmail> <DefaultLoginPassword>\n<AlternativeLoginEmail> "
                  "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
     }
@@ -107,7 +110,8 @@ void LogIn(csp::systems::UserSystem* UserSystem, csp::common::String& OutUserId,
 
     EXPECT_EQ(Result.GetFailureReason(), ExpectedResultFailureCode);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutUserId = Result.GetLoginState().UserId;
     }
 }
@@ -118,7 +122,8 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
 
     EXPECT_EQ(Result.GetResultCode(), ExpectedResult);
 
-    if (Result.GetResultCode() == csp::systems::EResultCode::Success) {
+    if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    {
         OutUserId = Result.GetLoginState().UserId;
     }
 }
@@ -163,18 +168,26 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     std::string RetrievedRedirectURL = INVALID_URL_PARAM_VALUE;
 
     const auto& Tokens = AuthoriseURL.Split('&');
-    for (size_t idx = 0; idx < Tokens.Size(); ++idx) {
+    for (size_t idx = 0; idx < Tokens.Size(); ++idx)
+    {
         std::string URLElement(Tokens[idx].c_str());
-        if (URLElement.find(STATE_ID_URL_PARAM, 0) == 0) {
+        if (URLElement.find(STATE_ID_URL_PARAM, 0) == 0)
+        {
             StateId = URLElement.substr(strlen(STATE_ID_URL_PARAM));
             continue;
-        } else if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0) {
+        }
+        else if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
+        {
             ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
             continue;
-        } else if (URLElement.find(SCOPE_URL_PARAM, 0) == 0) {
+        }
+        else if (URLElement.find(SCOPE_URL_PARAM, 0) == 0)
+        {
             Scope = URLElement.substr(strlen(SCOPE_URL_PARAM));
             continue;
-        } else if (URLElement.find(REDIRECT_URL_PARAM, 0) == 0) {
+        }
+        else if (URLElement.find(REDIRECT_URL_PARAM, 0) == 0)
+        {
             RetrievedRedirectURL = URLElement.substr(strlen(REDIRECT_URL_PARAM));
             continue;
         }
@@ -184,7 +197,8 @@ void ValidateThirdPartyAuthoriseURL(const csp::common::String& AuthoriseURL, con
     EXPECT_EQ(NewTokens.Size(), 2);
 
     std::string URLElement(NewTokens[1].c_str());
-    if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0) {
+    if (URLElement.find(CLIENT_ID_URL_PARAM, 0) == 0)
+    {
         ClientId = URLElement.substr(strlen(CLIENT_ID_URL_PARAM));
     }
 
@@ -685,14 +699,22 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetThirdPartySupportedProvidersTest)
     bool FoundGoogle = false;
     bool FoundDiscord = false;
     bool FoundApple = false;
-    for (auto idx = 0; idx < SupportedProviders.Size(); ++idx) {
-        if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google) {
+    for (auto idx = 0; idx < SupportedProviders.Size(); ++idx)
+    {
+        if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Google)
+        {
             FoundGoogle = true;
-        } else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Discord) {
+        }
+        else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Discord)
+        {
             FoundDiscord = true;
-        } else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Apple) {
+        }
+        else if (SupportedProviders[idx] == csp::systems::EThirdPartyAuthenticationProviders::Apple)
+        {
             FoundApple = true;
-        } else {
+        }
+        else
+        {
             ASSERT_TRUE(false) << "Please update this test with this new FDN auth provider: " << SupportedProviders[idx];
         }
     }

@@ -3,13 +3,26 @@
 #include "Olympus/Multiplayer/ComponentBase.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class ScriptScope { Local = 0, Owner, Num };
+enum class ScriptScope
+{
+    Local = 0,
+    Owner,
+    Num
+};
 
-enum class ScriptComponentPropertyKeys { ScriptSource = 1, OwnerId, ScriptScope, Num };
+enum class ScriptComponentPropertyKeys
+{
+    ScriptSource = 1,
+    OwnerId,
+    ScriptScope,
+    Num
+};
 
-class OLY_API ScriptSpaceComponent : public ComponentBase {
+class OLY_API ScriptSpaceComponent : public ComponentBase
+{
 public:
     ScriptSpaceComponent(SpaceEntity* Parent);
 

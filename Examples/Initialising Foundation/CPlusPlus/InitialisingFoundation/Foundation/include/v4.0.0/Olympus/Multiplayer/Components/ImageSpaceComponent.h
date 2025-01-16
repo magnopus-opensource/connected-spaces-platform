@@ -4,8 +4,10 @@
 #include "Olympus/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
-enum class ImagePropertyKeys {
+namespace oly_multiplayer
+{
+enum class ImagePropertyKeys
+{
     Name,
     ImageAssetId,
     AssetCollectionId,
@@ -20,13 +22,24 @@ enum class ImagePropertyKeys {
     Num
 };
 
-enum class BillboardMode { Off = 0, Billboard, YawLockedBillboard };
+enum class BillboardMode
+{
+    Off = 0,
+    Billboard,
+    YawLockedBillboard
+};
 
-enum class DisplayMode { SingleSided = 0, DoubleSided, DoubleSidedReversed };
+enum class DisplayMode
+{
+    SingleSided = 0,
+    DoubleSided,
+    DoubleSidedReversed
+};
 
 /// @ingroup ImageSpaceComponent
 /// @brief Data representation of an ImageSpaceComponent.
-class OLY_API ImageSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API ImageSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     ImageSpaceComponent(SpaceEntity* Parent);
 

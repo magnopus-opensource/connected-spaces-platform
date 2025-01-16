@@ -21,16 +21,20 @@
 #include <string>
 #include <type_traits>
 
-namespace csp {
-namespace systems {
+namespace csp
+{
+namespace systems
+{
     class ResultBase;
 }
-namespace common {
+namespace common
+{
     class String;
 }
 } // namespace csp
 
-namespace Utils {
+namespace Utils
+{
 // Assert a type is move capable
 #define ASSERT_MOVE_CAPABLE(Type)                                                                                                                    \
     static_assert(std::is_move_constructible_v<Type>, #Type " must be move constructible");                                                          \
@@ -40,7 +44,8 @@ namespace Utils {
  * Internal exception type that adds an error code.
  * The purpose of this type is to facilitate easy conversion of errors -> return codes before program exit.
  */
-struct ExceptionWithCode : public std::runtime_error {
+struct ExceptionWithCode : public std::runtime_error
+{
     ExceptionWithCode(int errorCode, const std::string& message)
         : std::runtime_error(message)
         , ErrorCode(errorCode)
@@ -52,7 +57,8 @@ struct ExceptionWithCode : public std::runtime_error {
 /*
  * Credentials struct for storing the credentials read from `test_account_creds.txt`, in the case that Login/Password are not provided via the CLI.
  */
-struct TestAccountCredentials {
+struct TestAccountCredentials
+{
     std::string DefaultLoginEmail;
     std::string DefaultLoginPassword;
     std::string AlternativeLoginEmail;

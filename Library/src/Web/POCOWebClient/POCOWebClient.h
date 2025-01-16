@@ -22,21 +22,25 @@
 #include <Poco/Net/PartSource.h>
 #include <Poco/Net/PrivateKeyPassphraseHandler.h>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SystemsManager;
 
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class CSPHttpClient;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
-class PocoPrivateKeyHandler : public Poco::Net::PrivateKeyPassphraseHandler {
+class PocoPrivateKeyHandler : public Poco::Net::PrivateKeyPassphraseHandler
+{
 public:
     PocoPrivateKeyHandler(bool onServerSide)
         : Poco::Net::PrivateKeyPassphraseHandler(onServerSide)
@@ -46,7 +50,8 @@ public:
     virtual void onPrivateKeyRequested(const void* pSender, std::string& privateKey) override { }
 };
 
-class POCOWebClient : public WebClient {
+class POCOWebClient : public WebClient
+{
     friend class csp::systems::SystemsManager;
     friend class csp::multiplayer::CSPHttpClient;
 

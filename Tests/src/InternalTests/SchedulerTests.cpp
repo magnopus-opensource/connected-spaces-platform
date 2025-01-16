@@ -34,7 +34,8 @@ CSP_INTERNAL_TEST(CSPEngine, SchedulerTests, SchedulerTest)
 
     csp::GetScheduler()->ScheduleAt(RefreshTime, [this, &ScheduleCallback]() { ScheduleCallback = true; });
 
-    while (WaitForTestTimeoutCountMs < KeepAliveInterval) {
+    while (WaitForTestTimeoutCountMs < KeepAliveInterval)
+    {
         std::this_thread::sleep_for(20ms);
         WaitForTestTimeoutCountMs += 20;
     }

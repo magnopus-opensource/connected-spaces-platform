@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class ExternalLinkSpaceComponent;
 
-class ExternalLinkSpaceComponentScriptInterface : public ComponentScriptInterface {
+class ExternalLinkSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     ExternalLinkSpaceComponentScriptInterface(ExternalLinkSpaceComponent* InComponent = nullptr);
 

@@ -20,7 +20,8 @@
 
 #include <Debug/Logging.h>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ExternalLinkSpaceComponent::ExternalLinkSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::ExternalLink, Parent)

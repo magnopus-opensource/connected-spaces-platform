@@ -22,7 +22,8 @@
 #include <chrono>
 #include <functional>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 class SystemsManager;
 class UserSystem;
@@ -47,19 +48,22 @@ class HotspotSequenceSystem;
 
 } // namespace csp::systems
 
-namespace csp {
+namespace csp
+{
 
 class CSPFoundation;
 
 } // namespace csp
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 } // namespace csp::web
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 CSP_START_IGNORE
 template <typename T> void Delete(T* Ptr);
@@ -67,11 +71,13 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Systems
 /// @brief Interface used to access each of the systems.
-class CSP_API SystemsManager {
+class CSP_API SystemsManager
+{
     CSP_START_IGNORE
     /** @cond DO_NOT_DOCUMENT */
     friend class csp::CSPFoundation;

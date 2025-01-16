@@ -20,7 +20,8 @@
 
 #include <chrono>
 
-class TestAnalyticsProvider : public csp::systems::IAnalyticsProvider {
+class TestAnalyticsProvider : public csp::systems::IAnalyticsProvider
+{
 public:
     const std::vector<csp::systems::AnalyticsEvent>& GetMetrics() const { return Metrics; }
 

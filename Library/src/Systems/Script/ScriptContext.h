@@ -22,14 +22,17 @@
 #include <map>
 #include <string>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-struct ScriptModule {
+struct ScriptModule
+{
     std::string ModuleName;
     qjs::Context::Module* Module;
 };
 
-class ScriptContext {
+class ScriptContext
+{
     friend class ScriptSystem;
 
 public:

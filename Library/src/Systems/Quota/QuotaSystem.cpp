@@ -21,7 +21,8 @@
 
 namespace chs = csp::services::generated::trackingservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 QuotaSystem::QuotaSystem()
     : SystemBase(nullptr, nullptr)
     , QuotaManagementAPI(nullptr)
@@ -85,7 +86,8 @@ void QuotaSystem::GetTierFeatureProgressForUser(const csp::common::Array<TierFea
     std::vector<csp::common::String> FeatureNamesList;
     FeatureNamesList.reserve(FeatureNames.Size());
 
-    for (auto idx = 0; idx < FeatureNames.Size(); ++idx) {
+    for (auto idx = 0; idx < FeatureNames.Size(); ++idx)
+    {
         FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
     }
 
@@ -103,7 +105,8 @@ void QuotaSystem::GetTierFeatureProgressForSpace(
     std::vector<csp::common::String> FeatureNamesList;
     FeatureNamesList.reserve(FeatureNames.Size());
 
-    for (auto idx = 0; idx < FeatureNames.Size(); ++idx) {
+    for (auto idx = 0; idx < FeatureNames.Size(); ++idx)
+    {
         FeatureNamesList.push_back(TierFeatureEnumToString(FeatureNames[idx]));
     }
 

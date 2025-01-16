@@ -7,7 +7,8 @@
 #include "Olympus/Systems/Spatial/SpatialDataTypes.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -15,11 +16,13 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @ingroup Space System
 /// @brief Data representation of a Site associated with a Space.
-class OLY_API Site {
+class OLY_API Site
+{
 public:
     Site() {};
 
@@ -37,7 +40,8 @@ public:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to retrieve Site information.
-class OLY_API SiteResult : public oly_services::ResultBase {
+class OLY_API SiteResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -58,7 +62,8 @@ private:
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of Site information.
-class OLY_API SitesCollectionResult : public oly_services::ResultBase {
+class OLY_API SitesCollectionResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

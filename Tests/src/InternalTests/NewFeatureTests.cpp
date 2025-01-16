@@ -33,7 +33,8 @@
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ListTest)
 {
-    try {
+    try
+    {
         {
             csp::common::List<int> List;
 
@@ -93,14 +94,17 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, ListTest)
 
             EXPECT_TRUE(List[0] == "test item");
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
 {
-    try {
+    try
+    {
         {
             csp::common::Map<int, csp::common::String> Map;
             Map[42] = "asd";
@@ -165,7 +169,9 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
             EXPECT_TRUE(Keys.Size() == 2);
             EXPECT_TRUE(Keys[0] == 1 && Keys[1] == 43);
         }
-    } catch (...) {
+    }
+    catch (...)
+    {
         FAIL();
     }
 }
@@ -187,7 +193,8 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
     csp::CSPFoundation::Shutdown();
 }
 
-class MyCoolClass {
+class MyCoolClass
+{
 public:
     MyCoolClass() { CSP_LOG_MSG(csp::systems::LogLevel::Log, "MyCoolClass::MyCoolClass() called!"); }
 

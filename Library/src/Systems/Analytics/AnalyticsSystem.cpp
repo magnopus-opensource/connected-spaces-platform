@@ -22,9 +22,11 @@
 
 // #include <atomic_queue/atomic_queue.h>
 
-namespace csp::systems {
+namespace csp::systems
+{
 
-class AnalyticsSystemImpl : public csp::events::EventListener {
+class AnalyticsSystemImpl : public csp::events::EventListener
+{
 public:
     AnalyticsSystemImpl()
         : Provider { nullptr }

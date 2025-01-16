@@ -3,16 +3,25 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/Services/WebService.h"
 
-namespace oly_systems {
+namespace oly_systems
+{
 
 /// @brief FDN supported Authentication Providers, the ones that can be used are the ones above Num
 /// Note: it's important for this enum to start with 0
 /// Note2: make sure to keep all enum values *above* Num
-enum EThirdPartyAuthenticationProviders { Google = 0, Discord, Apple, Num, Invalid = Num };
+enum EThirdPartyAuthenticationProviders
+{
+    Google = 0,
+    Discord,
+    Apple,
+    Num,
+    Invalid = Num
+};
 
 /// @ingroup User System
 /// @brief Data class used in the GetThirdPartyProviderAuthoriseURL authentication step
-class OLY_API ThirdPartyProviderDetails {
+class OLY_API ThirdPartyProviderDetails
+{
 public:
     oly_common::String ProviderName;
     oly_common::String ProviderClientId;
@@ -20,7 +29,8 @@ public:
     oly_common::String AuthoriseURL;
 };
 
-class OLY_API ProviderDetailsResult : public oly_services::ResultBase {
+class OLY_API ProviderDetailsResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     friend class UserSystem;

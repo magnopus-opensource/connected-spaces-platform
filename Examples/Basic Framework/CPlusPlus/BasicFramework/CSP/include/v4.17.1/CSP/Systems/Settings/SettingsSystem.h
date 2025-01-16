@@ -21,24 +21,28 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-namespace csp::services {
+namespace csp::services
+{
 
 class ApiBase;
 
 }
 
-namespace csp::web {
+namespace csp::web
+{
 
 class WebClient;
 
 }
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 /// @ingroup Settings System
 /// @brief Public facing system that allows interfacing with Magnopus Connected Services' settings service.
 /// Offers methods for storing and retrieving client settings.
-class CSP_API CSP_NO_DISPOSE SettingsSystem : public SystemBase {
+class CSP_API CSP_NO_DISPOSE SettingsSystem : public SystemBase
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class SystemsManager;
     /** @endcond */

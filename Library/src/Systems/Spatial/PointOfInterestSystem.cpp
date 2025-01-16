@@ -26,7 +26,8 @@
 
 namespace chs = csp::services::generated::spatialdataservice;
 
-namespace csp::systems {
+namespace csp::systems
+{
 
 const char* ENGLISH_LANGUAGE_CODE = "EN";
 
@@ -66,11 +67,13 @@ CSP_ASYNC_RESULT void PointOfInterestSystem::CreatePOI(const csp::common::String
 
     POIInfo->SetName(Name);
 
-    if (Tags.HasValue()) {
+    if (Tags.HasValue())
+    {
         std::vector<csp::common::String> DTOTags;
         DTOTags.reserve(Tags->Size());
 
-        for (int idx = 0; idx < Tags->Size(); idx++) {
+        for (int idx = 0; idx < Tags->Size(); idx++)
+        {
             DTOTags.push_back((*Tags)[idx]);
         }
 
@@ -112,7 +115,8 @@ void PointOfInterestSystem::GetPOIsInArea(const csp::systems::GeoLocation& Origi
     // If the user has provided a type of POI to search for, prepare the corresponding search term string.
     // Otherwise, leave the term as null, to search for all POI types.
     std::optional<csp::services::utility::string_t> TypeOption = std::nullopt;
-    if (Type.HasValue()) {
+    if (Type.HasValue())
+    {
         TypeOption = PointOfInterestHelpers::TypeToString(*Type).c_str();
     }
 
@@ -213,8 +217,10 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
     POIInfo->SetGroupId(SpaceId);
 
-    if (Location.HasValue()) {
-        if (!Location->IsValid()) {
+    if (Location.HasValue())
+    {
+        if (!Location->IsValid())
+        {
             CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -228,8 +234,10 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
         POIInfo->SetLocation(Coordinates);
     }
 
-    if (Orientation.HasValue()) {
-        if (*Orientation < 0.0f || *Orientation > 360.0f) {
+    if (Orientation.HasValue())
+    {
+        if (*Orientation < 0.0f || *Orientation > 360.0f)
+        {
             CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -240,9 +248,11 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
         POIInfo->SetOrientation(*Orientation);
     }
 
-    if (GeoFence.HasValue()) {
+    if (GeoFence.HasValue())
+    {
         const auto Size = GeoFence->Size();
-        if (Size < 4) {
+        if (Size < 4)
+        {
             CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -250,7 +260,8 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
             return;
         }
 
-        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1)) {
+        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
+        {
             CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -260,10 +271,12 @@ void PointOfInterestSystem::AddSpaceGeoLocation(const csp::common::String& Space
 
         std::vector<std::shared_ptr<chs::GeoCoord>> GeoCoords(GeoFence->Size());
 
-        for (size_t i = 0; i < Size; ++i) {
+        for (size_t i = 0; i < Size; ++i)
+        {
             const auto& GeoFenceLocation = GeoFence->operator[](i);
 
-            if (!GeoFenceLocation.IsValid()) {
+            if (!GeoFenceLocation.IsValid())
+            {
                 CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
                     GeoFenceLocation.Longitude);
 
@@ -312,8 +325,10 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
     POIInfo->SetGroupId(SpaceId);
 
-    if (Location.HasValue()) {
-        if (!Location->IsValid()) {
+    if (Location.HasValue())
+    {
+        if (!Location->IsValid())
+        {
             CSP_LOG_ERROR_FORMAT("Invalid GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", Location->Latitude, Location->Longitude);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -327,8 +342,10 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
         POIInfo->SetLocation(Coordinates);
     }
 
-    if (Orientation.HasValue()) {
-        if (*Orientation < 0.0f || *Orientation > 360.0f) {
+    if (Orientation.HasValue())
+    {
+        if (*Orientation < 0.0f || *Orientation > 360.0f)
+        {
             CSP_LOG_ERROR_FORMAT("Invalid Orientation(0-360): %f", *Orientation);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -339,10 +356,12 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
         POIInfo->SetOrientation(*Orientation);
     }
 
-    if (GeoFence.HasValue()) {
+    if (GeoFence.HasValue())
+    {
         const auto Size = GeoFence->Size();
 
-        if (Size < 4) {
+        if (Size < 4)
+        {
             CSP_LOG_ERROR_FORMAT("Invalid GeoFence: Not enough points(4): %d", Size);
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -350,7 +369,8 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
             return;
         }
 
-        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1)) {
+        if (GeoFence->operator[](0) != GeoFence->operator[](Size - 1))
+        {
             CSP_LOG_ERROR_MSG("Invalid GeoFence: First and last not the same.");
 
             INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SpaceGeoLocationResult>());
@@ -360,10 +380,12 @@ void PointOfInterestSystem::UpdateSpaceGeoLocation(const csp::common::String& Sp
 
         std::vector<std::shared_ptr<chs::GeoCoord>> GeoCoords(GeoFence->Size());
 
-        for (size_t i = 0; i < GeoFence->Size(); ++i) {
+        for (size_t i = 0; i < GeoFence->Size(); ++i)
+        {
             const auto GeoFenceLocation = GeoFence->operator[](i);
 
-            if (!GeoFenceLocation.IsValid()) {
+            if (!GeoFenceLocation.IsValid())
+            {
                 CSP_LOG_ERROR_FORMAT("Invalid GeoFence GeoLocation. Latitude(-90<>90): %f, Longitude(-180<>180): %f", GeoFenceLocation.Latitude,
                     GeoFenceLocation.Longitude);
 
@@ -396,14 +418,17 @@ void PointOfInterestSystem::GetSpaceGeoLocation(const csp::common::String& Space
 
     auto Limit = 1;
 
-    SpaceGeoLocationCollectionResultCallback CollectionCallback = [=](const SpaceGeoLocationCollectionResult Result) {
-        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress) {
+    SpaceGeoLocationCollectionResultCallback CollectionCallback = [=](const SpaceGeoLocationCollectionResult Result)
+    {
+        if (Result.GetResultCode() == csp::systems::EResultCode::InProgress)
+        {
             return;
         }
 
         SpaceGeoLocationResult GeoLocationResult(Result.GetResultCode(), Result.GetHttpResultCode());
 
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success && !Result.GeoLocations.IsEmpty()) {
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success && !Result.GeoLocations.IsEmpty())
+        {
             GeoLocationResult.GeoLocation = Result.GeoLocations[0];
             GeoLocationResult.HasGeoLocation = true;
         }

@@ -22,7 +22,8 @@
 
 using namespace csp::systems;
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 GaussianSplatSpaceComponentScriptInterface::GaussianSplatSpaceComponentScriptInterface(GaussianSplatSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)

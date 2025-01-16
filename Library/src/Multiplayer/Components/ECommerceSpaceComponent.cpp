@@ -20,7 +20,8 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ECommerceSpaceComponentScriptInterface.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ECommerceSpaceComponent::ECommerceSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::ECommerce, Parent)

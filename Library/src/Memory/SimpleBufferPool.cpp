@@ -17,21 +17,24 @@
 
 #include "Memory/Memory.h"
 
-namespace csp::memory {
+namespace csp::memory
+{
 
 SimpleBufferPool::SimpleBufferPool(size_t BufferSize, size_t InitialPoolSize)
     : BufferSize(BufferSize)
 {
     Buffers.reserve(InitialPoolSize);
 
-    for (int i = 0; i < InitialPoolSize; ++i) {
+    for (int i = 0; i < InitialPoolSize; ++i)
+    {
         Buffers[i] = CSP_NEW unsigned char[BufferSize];
     }
 }
 
 SimpleBufferPool::~SimpleBufferPool()
 {
-    for (auto Buffer : Buffers) {
+    for (auto Buffer : Buffers)
+    {
         CSP_DELETE_ARRAY(Buffer);
     }
 
@@ -44,14 +47,16 @@ unsigned char* SimpleBufferPool::Rent()
 
     LockMutex.lock();
     {
-        if (Buffers.size() > 0) {
+        if (Buffers.size() > 0)
+        {
             Buffer = Buffers.back();
             Buffers.pop_back();
         }
     }
     LockMutex.unlock();
 
-    if (Buffer == nullptr) {
+    if (Buffer == nullptr)
+    {
         return CSP_NEW unsigned char[BufferSize];
     }
 

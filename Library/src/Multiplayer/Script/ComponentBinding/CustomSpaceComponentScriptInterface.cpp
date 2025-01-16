@@ -23,7 +23,8 @@
 
 using namespace csp::systems;
 
-namespace {
+namespace
+{
 
 const uint8_t ValueType_Integer = 0;
 const uint8_t ValueType_Float = 1;
@@ -33,7 +34,8 @@ const uint8_t ValueType_Boolean = 4;
 
 } // namespace
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 CustomSpaceComponentScriptInterface::CustomSpaceComponentScriptInterface(CustomSpaceComponent* InComponent)
     : ComponentScriptInterface(InComponent)
@@ -60,7 +62,8 @@ const std::variant<bool, int64_t, float, std::string, std::vector<float>> Custom
 {
     ReplicatedValue ReturnValue = static_cast<CustomSpaceComponent*>(Component)->GetCustomProperty(Key.c_str());
 
-    switch (ReturnValue.GetReplicatedValueType()) {
+    switch (ReturnValue.GetReplicatedValueType())
+    {
     case ReplicatedValueType::Boolean:
         return ReturnValue.GetBool();
     case ReplicatedValueType::Integer:
@@ -69,12 +72,14 @@ const std::variant<bool, int64_t, float, std::string, std::vector<float>> Custom
         return ReturnValue.GetFloat();
     case ReplicatedValueType::String:
         return ReturnValue.GetString().c_str();
-    case ReplicatedValueType::Vector3: {
+    case ReplicatedValueType::Vector3:
+    {
         std::vector<float> ReturnVector;
         ReturnVector = { ReturnValue.GetVector3().X, ReturnValue.GetVector3().Y, ReturnValue.GetVector3().Z };
         return ReturnVector;
     }
-    case ReplicatedValueType::Vector4: {
+    case ReplicatedValueType::Vector4:
+    {
         std::vector<float> ReturnVector;
         ReturnVector = { ReturnValue.GetVector4().W, ReturnValue.GetVector4().X, ReturnValue.GetVector4().Y, ReturnValue.GetVector4().Z };
         return ReturnVector;
@@ -89,7 +94,8 @@ std::vector<std::string> CustomSpaceComponentScriptInterface::GetCustomPropertyK
     std::vector<std::string> ReturnValue;
     csp::common::List<csp::common::String> Keys = static_cast<CustomSpaceComponent*>(Component)->GetCustomPropertyKeys();
 
-    for (int i = 0; i < Keys.Size(); ++i) {
+    for (int i = 0; i < Keys.Size(); ++i)
+    {
         ReturnValue.push_back(Keys[i].c_str());
     }
 
@@ -101,7 +107,8 @@ void CustomSpaceComponentScriptInterface::SetCustomProperty(
 {
     ReplicatedValue SetValue;
 
-    switch (Value.index()) {
+    switch (Value.index())
+    {
     case ValueType_Boolean:
         SetValue.SetBool(std::get<ValueType_Boolean>(Value));
         break;
@@ -115,9 +122,12 @@ void CustomSpaceComponentScriptInterface::SetCustomProperty(
         SetValue.SetString(std::get<ValueType_String>(Value).c_str());
         break;
     case ValueType_Vector:
-        if (std::get<ValueType_Vector>(Value).size() == 3) {
+        if (std::get<ValueType_Vector>(Value).size() == 3)
+        {
             SetValue.SetVector3({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2] });
-        } else {
+        }
+        else
+        {
             SetValue.SetVector4({ std::get<ValueType_Vector>(Value)[0], std::get<ValueType_Vector>(Value)[1], std::get<ValueType_Vector>(Value)[2],
                 std::get<ValueType_Vector>(Value)[3] });
         }

@@ -17,15 +17,18 @@
 
 #include <mutex>
 
-namespace csp::memory {
+namespace csp::memory
+{
 
-class NoLockTrait {
+class NoLockTrait
+{
 public:
     inline void Lock() { }
     inline void Unlock() { }
 };
 
-class MutexLockTrait {
+class MutexLockTrait
+{
 public:
     inline void Lock() { Mutex.lock(); }
     inline void Unlock() { Mutex.unlock(); }

@@ -4,9 +4,11 @@
 #include "Olympus/Multiplayer/Components/Interfaces/IVisibleComponent.h"
 #include "Olympus/OlympusCommon.h"
 
-namespace oly_multiplayer {
+namespace oly_multiplayer
+{
 
-enum class FogPropertyKeys {
+enum class FogPropertyKeys
+{
     FogMode = 0,
     Position,
     Rotation,
@@ -23,11 +25,17 @@ enum class FogPropertyKeys {
     Num
 };
 
-enum class FogMode { Linear = 0, Exponential, Exponential2 };
+enum class FogMode
+{
+    Linear = 0,
+    Exponential,
+    Exponential2
+};
 
 /// @ingroup FogSpaceComponent
 /// @brief Data representation of an FogSpaceComponent.
-class OLY_API FogSpaceComponent : public ComponentBase, public IVisibleComponent {
+class OLY_API FogSpaceComponent : public ComponentBase, public IVisibleComponent
+{
 public:
     FogSpaceComponent(SpaceEntity* Parent);
 

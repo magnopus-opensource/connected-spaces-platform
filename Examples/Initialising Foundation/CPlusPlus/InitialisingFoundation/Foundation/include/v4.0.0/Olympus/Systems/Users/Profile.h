@@ -4,7 +4,8 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/Systems/SystemsResult.h"
 
-namespace oly_services {
+namespace oly_services
+{
 
 OLY_START_IGNORE
 template <typename T, typename U, typename V, typename W> class ApiResponseHandler;
@@ -12,9 +13,11 @@ OLY_END_IGNORE
 
 } // namespace oly_services
 
-namespace oly_systems {
+namespace oly_systems
+{
 
-class OLY_API BasicProfile {
+class OLY_API BasicProfile
+{
 public:
     oly_common::String UserId;
     oly_common::String UserName;
@@ -23,7 +26,8 @@ public:
     oly_common::String LastPlatform;
 };
 
-class OLY_API Profile : public BasicProfile {
+class OLY_API Profile : public BasicProfile
+{
 public:
     Profile();
 
@@ -37,7 +41,8 @@ public:
     oly_common::String UpdatedAt;
 };
 
-class OLY_API ProfileResult : public oly_services::ResultBase {
+class OLY_API ProfileResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
@@ -56,7 +61,8 @@ private:
     Profile Profile;
 };
 
-class OLY_API BasicProfilesResult : public oly_services::ResultBase {
+class OLY_API BasicProfilesResult : public oly_services::ResultBase
+{
     /** @cond DO_NOT_DOCUMENT */
     OLY_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;

@@ -28,12 +28,14 @@
 #include <string>
 #include <vector>
 
-namespace csp::services {
+namespace csp::services
+{
 class DtoBase;
 class EnumBase;
 } // namespace csp::services
 
-namespace csp::web {
+namespace csp::web
+{
 
 using RapidJsonAlloc = rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator>;
 
@@ -166,7 +168,8 @@ template <typename U> inline rapidjson::Value TypeToJsonValue(const std::vector<
     rapidjson::Value JsonValue(rapidjson::kArrayType);
     JsonValue.Reserve((rapidjson::SizeType)Value.size(), Allocator);
 
-    for (size_t i = 0; i < Value.size(); ++i) {
+    for (size_t i = 0; i < Value.size(); ++i)
+    {
         JsonValue.PushBack(TypeToJsonValue(Value[i], Allocator), Allocator);
     }
 
@@ -178,7 +181,8 @@ template <typename U, typename V> inline rapidjson::Value TypeToJsonValue(const 
     rapidjson::Value JsonValue(rapidjson::kObjectType);
     JsonValue.MemberReserve((rapidjson::SizeType)Value.size(), Allocator);
 
-    for (auto& Item : Value) {
+    for (auto& Item : Value)
+    {
         JsonValue.AddMember(TypeToJsonValue(Item.first, Allocator), TypeToJsonValue(Item.second, Allocator), Allocator);
     }
 
@@ -287,7 +291,8 @@ template <typename U> inline void JsonValueToType(const rapidjson::Value& Value,
 {
     assert(Value.IsArray());
 
-    for (auto i = 0U; i < Value.Size(); ++i) {
+    for (auto i = 0U; i < Value.Size(); ++i)
+    {
         U Element;
         JsonValueToType(Value[i], Element);
         Type.push_back(Element);
@@ -298,7 +303,8 @@ template <typename U, typename V> inline void JsonValueToType(const rapidjson::V
 {
     assert(Value.IsObject());
 
-    for (auto& Member : Value.GetObject()) {
+    for (auto& Member : Value.GetObject())
+    {
         U ElementKey;
         V ElementValue;
         JsonValueToType(Member.name, ElementKey);

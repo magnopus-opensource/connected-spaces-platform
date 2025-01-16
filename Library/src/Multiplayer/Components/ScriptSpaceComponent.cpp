@@ -19,7 +19,8 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "Debug/Logging.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 ScriptSpaceComponent::ScriptSpaceComponent(SpaceEntity* Parent)
     : ComponentBase(ComponentType::ScriptData, Parent)
@@ -62,7 +63,8 @@ void ScriptSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedVa
 {
     ComponentBase::SetPropertyFromPatch(Key, Value);
 
-    if (Key == static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource)) {
+    if (Key == static_cast<uint32_t>(ScriptComponentPropertyKeys::ScriptSource))
+    {
         // CSP_LOG_WARN_FORMAT("ScriptSpaceComponent::SetPropertyFromPatch '%s'", Value.GetString().c_str());
 
         Parent->GetScript()->Bind();

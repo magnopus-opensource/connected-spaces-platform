@@ -20,11 +20,13 @@
 #include <string>
 #include <vector>
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class FiducialMarkerSpaceComponent;
 
-class FiducialMarkerSpaceComponentScriptInterface : public ComponentScriptInterface {
+class FiducialMarkerSpaceComponentScriptInterface : public ComponentScriptInterface
+{
 public:
     FiducialMarkerSpaceComponentScriptInterface(FiducialMarkerSpaceComponent* InComponent = nullptr);
 

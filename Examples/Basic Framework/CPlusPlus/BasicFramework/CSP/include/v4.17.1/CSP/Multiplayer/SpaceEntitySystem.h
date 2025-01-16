@@ -26,11 +26,13 @@
 #include <mutex>
 #include <set>
 
-namespace signalr {
+namespace signalr
+{
 class value;
 }
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 class ClientElectionManager;
 
 class SignalRConnection;
@@ -38,7 +40,8 @@ class SignalRConnection;
 } // namespace csp::multiplayer
 
 /// @brief Namespace that encompasses everything in the multiplayer system
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 class MultiplayerConnection;
 class SpaceTransform;
@@ -50,7 +53,8 @@ class SpaceEntity;
 /// It manages things like queueing updated entities and triggering tick events. Callbacks
 /// can be registered for certain events that occur within the entity system so clients can
 /// react appropriately.
-class CSP_API CSP_NO_DISPOSE SpaceEntitySystem {
+class CSP_API CSP_NO_DISPOSE SpaceEntitySystem
+{
     /** @cond DO_NOT_DOCUMENT */
     friend class MultiplayerConnection;
     friend class SpaceEntityEventHandler;

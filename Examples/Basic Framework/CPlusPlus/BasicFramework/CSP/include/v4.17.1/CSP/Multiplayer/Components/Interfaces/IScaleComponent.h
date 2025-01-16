@@ -19,10 +19,12 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Vector.h"
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 /// @brief Controls the 3D scale of the component.
-CSP_INTERFACE class CSP_API IScaleComponent {
+CSP_INTERFACE class CSP_API IScaleComponent
+{
 public:
     /// @brief Gets the scale of the origin of this component in world space.
     /// @note The coordinate system used follows the glTF 2.0 specification.

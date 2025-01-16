@@ -21,7 +21,8 @@
 
 #include <iostream>
 
-namespace {
+namespace
+{
 constexpr char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
 constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 
@@ -36,12 +37,15 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
     std::optional<std::string> LoginPassword, const std::optional<std::string>& Endpoint, const std::optional<std::string>& SpaceId,
     const std::optional<int>& TimeoutInSeconds)
 {
-    if (!LoginEmail.has_value() && !LoginPassword.has_value()) {
+    if (!LoginEmail.has_value() && !LoginPassword.has_value())
+    {
         std::cout << "Credentials not provided, attempting to find credentials file.\n";
         Utils::TestAccountCredentials credentials = Utils::LoadTestAccountCredentials();
         LoginEmail = credentials.DefaultLoginEmail;
         LoginPassword = credentials.DefaultLoginPassword;
-    } else if (!LoginEmail.has_value() || !LoginPassword.has_value()) {
+    }
+    else if (!LoginEmail.has_value() || !LoginPassword.has_value())
+    {
         // If only one of the email/password pair has been provided, error out entirely, it's probably a mistake
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR,
             "Both email and password must be provided together. Missing one likely indicates a mistake. Omit both if you "
@@ -50,9 +54,12 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
 
     CLIArgs::RunnerSettings settings;
     // Test identifiers need to be valid, and are not optional. An incorrect one is grounds to abort.
-    try {
+    try
+    {
         settings.TestIdentifier = MultiplayerTestRunner::TestIdentifiers::StringToTestIdentifier(TestIdentifier);
-    } catch (std::exception& exception) {
+    }
+    catch (std::exception& exception)
+    {
         // The reason this rethrow is here is an annoying quirk of `StringToTestIdentifier` being a public method.
         throw Utils::ExceptionWithCode(MultiplayerTestRunner::ErrorCodes::INVALID_TEST_SPECIFIER, exception.what());
     }
@@ -66,7 +73,8 @@ CLIArgs::RunnerSettings ValidateInvocationArgs(const std::string& TestIdentifier
 }
 } // namespace
 
-namespace CLIArgs {
+namespace CLIArgs
+{
 RunnerSettings ProcessCLI(int argc, char* argv[])
 {
     // Build the CLI
@@ -94,13 +102,18 @@ RunnerSettings ProcessCLI(int argc, char* argv[])
     App.add_option("-o,--timeout", TimeoutInSeconds, "How long until the process self-terminates, in seconds. If not set, defaults to 30");
     App.add_option("-c,--endpoint", Endpoint, "Cloud services endpoint. If not set, defaults to `https://ogs-internal.magnopus-dev.cloud`");
 
-    try {
+    try
+    {
         App.parse(argc, argv);
-    } catch (const CLI::Success& e) {
+    }
+    catch (const CLI::Success& e)
+    {
         // App.exit() deals with help string printing. It's an odd pattern, an exception being a "Success".
         App.exit(e);
         throw Utils::ExceptionWithCode { MultiplayerTestRunner::ErrorCodes::SUCCESS, "" };
-    } catch (const CLI::ParseError& e) {
+    }
+    catch (const CLI::ParseError& e)
+    {
         throw Utils::ExceptionWithCode { MultiplayerTestRunner::ErrorCodes::CLI_PARSE_ERROR, e.what() };
     }
 

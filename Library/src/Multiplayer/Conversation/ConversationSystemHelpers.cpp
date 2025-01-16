@@ -30,7 +30,8 @@ constexpr const char* ASSET_COLLECTION_METADATA_KEY_MESSAGE = "Message";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_RESOLVED = "Resolved";
 constexpr const char* ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM = "CameraTransform";
 
-namespace csp::multiplayer {
+namespace csp::multiplayer
+{
 
 String ConversationSystemHelpers::GetUniqueConversationContainerAssetCollectionName(const String& SpaceId, const String& CreatorUserId)
 {
@@ -64,25 +65,34 @@ MessageInfo ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(
 
     const auto Metadata = MessageAssetCollection.GetMetadataImmutable();
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME))
+    {
         MsgInfo.UserDisplayName = Metadata[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME];
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         MsgInfo.UserDisplayName = "";
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
+    {
         MsgInfo.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         MsgInfo.Message = "";
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
+    {
         MsgInfo.Edited = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED]);
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ")
         MsgInfo.Edited = false;
@@ -112,41 +122,56 @@ ConversationInfo ConversationSystemHelpers::GetConvosationInfoFromConvosationAss
 
     const auto Metadata = ConversationAssetCollection.GetMetadataImmutable();
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME))
+    {
         ConvoInfo.UserDisplayName = Metadata[ASSET_COLLECTION_METADATA_KEY_USER_DISPLAY_NAME];
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No UserDisplayName MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         ConvoInfo.UserDisplayName = "";
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_MESSAGE))
+    {
         ConvoInfo.Message = Metadata[ASSET_COLLECTION_METADATA_KEY_MESSAGE];
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No Message MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         ConvoInfo.Message = "";
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_EDITED))
+    {
         ConvoInfo.Edited = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_EDITED]);
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No Edited MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ")
         ConvoInfo.Edited = false;
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_RESOLVED)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_RESOLVED))
+    {
         ConvoInfo.Resolved = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_RESOLVED]);
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No Resolved MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         ConvoInfo.Resolved = false;
     }
 
-    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM)) {
+    if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM))
+    {
         ConvoInfo.CameraPosition = StringToSpaceTransform(Metadata[ASSET_COLLECTION_METADATA_KEY_CAMERA_TRANSFROM]);
-    } else {
+    }
+    else
+    {
         CSP_LOG_WARN_MSG("No CameraPosition MetaData found, This is likely due to the current space outdating ConversationSpaceComponent "
                          "improvements: Default metadata has automatically been created for this space as a result. ");
         ConvoInfo.CameraPosition = SpaceTransform();
