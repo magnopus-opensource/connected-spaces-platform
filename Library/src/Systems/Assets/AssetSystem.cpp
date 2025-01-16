@@ -1065,8 +1065,11 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				return;
 			}
 
+			// These are shared references to prevent going out of scope between callbacks
+			// Note: The callbacks ARE called on the main thread
 			auto DownloadedMaterials = std::make_shared<csp::common::Array<GLTFMaterial>>(AssetsToDownload);
 			auto AssetsDownloaded	 = std::make_shared<size_t>();
+			auto Failed				 = std::make_shared<bool>();
 
 			// 3. Download asset data for each material asset
 			for (size_t i = 0; i < Assets.Size(); ++i)
@@ -1075,14 +1078,20 @@ void AssetSystem::GetMaterials(const csp::common::String& SpaceId, GLTFMaterials
 				csp::common::String AssetId			  = Assets[i].Id;
 
 				auto DownloadMaterialCallback
-					= [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials, AssetsDownloaded](
+					= [this, Callback, AssetsToDownload, i, AssetCollectionId, AssetId, DownloadedMaterials, AssetsDownloaded, Failed](
 						  const AssetDataResult& DownloadResult)
 				{
+					// Return early as one of the calls has already failed
+					if (*Failed)
+					{
+						return;
+					}
+
 					if (DownloadResult.GetResultCode() != EResultCode::Success)
 					{
 						if (DownloadResult.GetResultCode() == EResultCode::Failed)
 						{
-							(*AssetsDownloaded)++;
+							*Failed = true;
 						}
 
 						Callback(GLTFMaterialsResult(DownloadResult.GetResultCode(), DownloadResult.GetHttpResultCode()));
