@@ -37,205 +37,182 @@ using namespace std::chrono_literals;
 namespace
 {
 
-bool RequestPredicate(const csp::systems::ResultBase& Result)
-{
-	return Result.GetResultCode() != csp::systems::EResultCode::InProgress;
-}
+bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANIMATED_MODEL_TESTS || RUN_ANIMATED_MODEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
-	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    {
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		EntitySystem->SetEntityCreatedCallback(
-			[](csp::multiplayer::SpaceEntity* Entity)
-			{
-			});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-		csp::common::String ObjectName = "Object 1";
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        csp::common::String ObjectName = "Object 1";
+        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-		// Create custom component
-		auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*) CreatedObject->AddComponent(ComponentType::AnimatedModel);
+        // Create custom component
+        auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
 
-		constexpr const char* TestExternalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
-		constexpr const char* TestExternalResourceAssetId			= "TestExternalResourceAssetId";
-		constexpr const char* TestMaterialPath						= "TestMaterialPath";
-		constexpr const char* TestMaterialAssetId					= "TestMaterialAssetId";
-		const csp::common::Vector3 TestPosition(1.f, 1.f, 1.f);
-		const csp::common::Vector4 TestRotation(1.f, 1.f, 1.f, 1.f);
-		const csp::common::Vector3 TestScale(2.f, 2.f, 2.f);
-		const SpaceTransform TestTransform(TestPosition, TestRotation, TestScale);
-		constexpr const bool TestIsLoopPlayback			 = true;
-		constexpr const bool TestIsPlaying				 = true;
-		constexpr const int TestAnimationIndex			 = 1;
-		constexpr const bool TestIsVisible				 = false;
-		constexpr const bool TestIsARVisible			 = false;
-		constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
-		constexpr const bool TestIsShadowCaster			 = false;
+        constexpr const char* TestExternalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
+        constexpr const char* TestExternalResourceAssetId = "TestExternalResourceAssetId";
+        constexpr const char* TestMaterialPath = "TestMaterialPath";
+        constexpr const char* TestMaterialAssetId = "TestMaterialAssetId";
+        const csp::common::Vector3 TestPosition(1.f, 1.f, 1.f);
+        const csp::common::Vector4 TestRotation(1.f, 1.f, 1.f, 1.f);
+        const csp::common::Vector3 TestScale(2.f, 2.f, 2.f);
+        const SpaceTransform TestTransform(TestPosition, TestRotation, TestScale);
+        constexpr const bool TestIsLoopPlayback = true;
+        constexpr const bool TestIsPlaying = true;
+        constexpr const int TestAnimationIndex = 1;
+        constexpr const bool TestIsVisible = false;
+        constexpr const bool TestIsARVisible = false;
+        constexpr const char* TestThirdPartyComponentRef = "TestThirdPartyComponentRef";
+        constexpr const bool TestIsShadowCaster = false;
 
-		// Test defaults
-		EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "");
-		EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), "");
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
-		EXPECT_EQ(AnimatedModelComponent->GetPosition(), csp::common::Vector3::Zero());
-		EXPECT_EQ(AnimatedModelComponent->GetRotation(), csp::common::Vector4::Identity());
-		EXPECT_EQ(AnimatedModelComponent->GetScale(), csp::common::Vector3::One());
-		EXPECT_EQ(AnimatedModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
-		EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), false);
-		EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), false);
-		EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), -1);
-		EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), true);
-		EXPECT_EQ(AnimatedModelComponent->GetIsARVisible(), true);
-		EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), "");
-		EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), true);
+        // Test defaults
+        EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "");
+        EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), "");
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(AnimatedModelComponent->GetPosition(), csp::common::Vector3::Zero());
+        EXPECT_EQ(AnimatedModelComponent->GetRotation(), csp::common::Vector4::Identity());
+        EXPECT_EQ(AnimatedModelComponent->GetScale(), csp::common::Vector3::One());
+        EXPECT_EQ(AnimatedModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
+        EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), false);
+        EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), false);
+        EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), -1);
+        EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), true);
+        EXPECT_EQ(AnimatedModelComponent->GetIsARVisible(), true);
+        EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), "");
+        EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), true);
 
-		AnimatedModelComponent->SetExternalResourceAssetCollectionId(TestExternalResourceAssetCollectionId);
-		AnimatedModelComponent->SetExternalResourceAssetId(TestExternalResourceAssetId);
-		AnimatedModelComponent->AddMaterialOverride(TestMaterialPath, TestMaterialAssetId);
-		AnimatedModelComponent->SetPosition(TestPosition);
-		AnimatedModelComponent->SetRotation(TestRotation);
-		AnimatedModelComponent->SetScale(TestScale);
-		AnimatedModelComponent->SetIsLoopPlayback(TestIsLoopPlayback);
-		AnimatedModelComponent->SetIsPlaying(TestIsPlaying);
-		AnimatedModelComponent->SetAnimationIndex(TestAnimationIndex);
-		AnimatedModelComponent->SetIsVisible(TestIsVisible);
-		AnimatedModelComponent->SetIsARVisible(TestIsARVisible);
-		AnimatedModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
-		AnimatedModelComponent->SetIsShadowCaster(TestIsShadowCaster);
+        AnimatedModelComponent->SetExternalResourceAssetCollectionId(TestExternalResourceAssetCollectionId);
+        AnimatedModelComponent->SetExternalResourceAssetId(TestExternalResourceAssetId);
+        AnimatedModelComponent->AddMaterialOverride(TestMaterialPath, TestMaterialAssetId);
+        AnimatedModelComponent->SetPosition(TestPosition);
+        AnimatedModelComponent->SetRotation(TestRotation);
+        AnimatedModelComponent->SetScale(TestScale);
+        AnimatedModelComponent->SetIsLoopPlayback(TestIsLoopPlayback);
+        AnimatedModelComponent->SetIsPlaying(TestIsPlaying);
+        AnimatedModelComponent->SetAnimationIndex(TestAnimationIndex);
+        AnimatedModelComponent->SetIsVisible(TestIsVisible);
+        AnimatedModelComponent->SetIsARVisible(TestIsARVisible);
+        AnimatedModelComponent->SetThirdPartyComponentRef(TestThirdPartyComponentRef);
+        AnimatedModelComponent->SetIsShadowCaster(TestIsShadowCaster);
 
-		// Test new values
-		EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), TestExternalResourceAssetCollectionId);
-		EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), TestExternalResourceAssetId);
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 1);
-		EXPECT_TRUE(AnimatedModelComponent->GetMaterialOverrides().HasKey(TestMaterialPath));
-		EXPECT_EQ(AnimatedModelComponent->GetPosition(), TestPosition);
-		EXPECT_EQ(AnimatedModelComponent->GetRotation(), TestRotation);
-		EXPECT_EQ(AnimatedModelComponent->GetScale(), TestScale);
-		EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), TestIsLoopPlayback);
-		EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), TestIsPlaying);
-		EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), TestAnimationIndex);
-		EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), TestIsVisible);
-		EXPECT_EQ(AnimatedModelComponent->GetIsARVisible(), TestIsARVisible);
-		EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
-		EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
+        // Test new values
+        EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), TestExternalResourceAssetCollectionId);
+        EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), TestExternalResourceAssetId);
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 1);
+        EXPECT_TRUE(AnimatedModelComponent->GetMaterialOverrides().HasKey(TestMaterialPath));
+        EXPECT_EQ(AnimatedModelComponent->GetPosition(), TestPosition);
+        EXPECT_EQ(AnimatedModelComponent->GetRotation(), TestRotation);
+        EXPECT_EQ(AnimatedModelComponent->GetScale(), TestScale);
+        EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), TestIsLoopPlayback);
+        EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), TestIsPlaying);
+        EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), TestAnimationIndex);
+        EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), TestIsVisible);
+        EXPECT_EQ(AnimatedModelComponent->GetIsARVisible(), TestIsARVisible);
+        EXPECT_EQ(AnimatedModelComponent->GetThirdPartyComponentRef(), TestThirdPartyComponentRef);
+        EXPECT_EQ(AnimatedModelComponent->GetIsShadowCaster(), TestIsShadowCaster);
 
-		// Test transform separately, as this just sets position, rotation, scale
-		AnimatedModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
+        // Test transform separately, as this just sets position, rotation, scale
+        AnimatedModelComponent->SetTransform(csp::multiplayer::SpaceTransform());
 
-		EXPECT_EQ(AnimatedModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
+        EXPECT_EQ(AnimatedModelComponent->GetTransform(), csp::multiplayer::SpaceTransform());
 
-		AnimatedModelComponent->SetTransform(TestTransform);
+        AnimatedModelComponent->SetTransform(TestTransform);
 
-		EXPECT_EQ(AnimatedModelComponent->GetTransform(), TestTransform);
+        EXPECT_EQ(AnimatedModelComponent->GetTransform(), TestTransform);
 
-		// Also test we can remove a material override
-		AnimatedModelComponent->RemoveMaterialOverride(TestMaterialPath);
+        // Also test we can remove a material override
+        AnimatedModelComponent->RemoveMaterialOverride(TestMaterialPath);
 
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
 
-		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-	}
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ANIMATED_MODEL_TESTS || RUN_ANIMATED_MODEL_SCRIPT_INTERFACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
-	const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-	EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-	EntitySystem->SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	// Create object to represent the fog
-	csp::common::String ObjectName = "Object 1";
-	SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-	auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+    // Create object to represent the fog
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-	// Create fog component
-	auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*) CreatedObject->AddComponent(ComponentType::AnimatedModel);
+    // Create fog component
+    auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
 
-	CreatedObject->QueueUpdate();
-	EntitySystem->ProcessPendingEntityOperations();
+    CreatedObject->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	// Setup script
-	const std::string AnimatedModelScriptText = R"xx(
+    // Setup script
+    const std::string AnimatedModelScriptText = R"xx(
 		var model = ThisEntity.getAnimatedModelComponents()[0];
 		model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
 		model.externalResourceAssetId = "TestExternalResourceAssetId";
@@ -248,160 +225,150 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 		model.animationIndex = 1;
     )xx";
 
-	CreatedObject->GetScript()->SetScriptSource(AnimatedModelScriptText.c_str());
-	CreatedObject->GetScript()->Invoke();
+    CreatedObject->GetScript()->SetScriptSource(AnimatedModelScriptText.c_str());
+    CreatedObject->GetScript()->Invoke();
 
-	EntitySystem->ProcessPendingEntityOperations();
+    EntitySystem->ProcessPendingEntityOperations();
 
-	// Test new values
-	EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
-	EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
-	EXPECT_EQ(AnimatedModelComponent->GetPosition(), csp::common::Vector3::One());
-	EXPECT_EQ(AnimatedModelComponent->GetRotation(), csp::common::Vector4::One());
-	EXPECT_EQ(AnimatedModelComponent->GetScale(), csp::common::Vector3(2, 2, 2));
-	EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), false);
-	EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), false);
-	EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), false);
-	EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), 1);
+    // Test new values
+    EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetCollectionId(), "TestExternalResourceAssetCollectionId");
+    EXPECT_EQ(AnimatedModelComponent->GetExternalResourceAssetId(), "TestExternalResourceAssetId");
+    EXPECT_EQ(AnimatedModelComponent->GetPosition(), csp::common::Vector3::One());
+    EXPECT_EQ(AnimatedModelComponent->GetRotation(), csp::common::Vector4::One());
+    EXPECT_EQ(AnimatedModelComponent->GetScale(), csp::common::Vector3(2, 2, 2));
+    EXPECT_EQ(AnimatedModelComponent->GetIsLoopPlayback(), false);
+    EXPECT_EQ(AnimatedModelComponent->GetIsPlaying(), false);
+    EXPECT_EQ(AnimatedModelComponent->GetIsVisible(), false);
+    EXPECT_EQ(AnimatedModelComponent->GetAnimationIndex(), 1);
 
-	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_ANIMATED_MODEL_ENTER_SPACE_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceTest)
 {
-	SetRandSeed();
+    SetRandSeed();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
-	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
-	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
-	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
-	const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG";
+    const char* TestSpaceDescription = "CSP-UNITTEST-SPACEDESC-MAG";
 
-	char UniqueSpaceName[256];
-	SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Create space
-	csp::systems::Space Space;
-	CreateSpace(SpaceSystem,
-				UniqueSpaceName,
-				TestSpaceDescription,
-				csp::systems::SpaceAttributes::Private,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				Space);
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
-	csp::common::String ObjectName = "Object 1";
+    csp::common::String ObjectName = "Object 1";
 
-	{
-		auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    {
+        auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
-		EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+        EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
 
-		EntitySystem->SetEntityCreatedCallback(
-			[](csp::multiplayer::SpaceEntity* Entity)
-			{
-			});
+        EntitySystem->SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-		SpaceTransform ObjectTransform = {csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One()};
-		auto [CreatedObject]		   = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+        SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+        auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
 
-		// Create animated model component
-		auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*) CreatedObject->AddComponent(ComponentType::AnimatedModel);
-		AnimatedModelComponent->AddMaterialOverride("TestKey", "TestValue");
+        // Create animated model component
+        auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)CreatedObject->AddComponent(ComponentType::AnimatedModel);
+        AnimatedModelComponent->AddMaterialOverride("TestKey", "TestValue");
 
-		CreatedObject->QueueUpdate();
-		EntitySystem->ProcessPendingEntityOperations();
+        CreatedObject->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
 
-		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-	}
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
 
-	{
-		// Re-enter space
-		bool EntitiesCreated = false;
+    {
+        // Re-enter space
+        bool EntitiesCreated = false;
 
-		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
-		{
-			EntitiesCreated = true;
-			EXPECT_TRUE(Success);
-		};
+        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+        {
+            EntitiesCreated = true;
+            EXPECT_TRUE(Success);
+        };
 
-		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 
-		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
-		EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+        EXPECT_TRUE(EntitiesCreated);
 
-		SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
-		EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+        EXPECT_TRUE(FoundEntity != nullptr);
 
-		auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*) FoundEntity->GetComponent(0);
-		EXPECT_TRUE(AnimatedModelComponent != nullptr);
+        auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)FoundEntity->GetComponent(0);
+        EXPECT_TRUE(AnimatedModelComponent != nullptr);
 
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 1);
-		EXPECT_TRUE(AnimatedModelComponent->GetMaterialOverrides().HasKey("TestKey"));
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 1);
+        EXPECT_TRUE(AnimatedModelComponent->GetMaterialOverrides().HasKey("TestKey"));
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
 
-		// Delete material override
-		AnimatedModelComponent->RemoveMaterialOverride("TestKey");
+        // Delete material override
+        AnimatedModelComponent->RemoveMaterialOverride("TestKey");
 
-		FoundEntity->QueueUpdate();
-		EntitySystem->ProcessPendingEntityOperations();
+        FoundEntity->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
 
-		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-	}
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
 
-	{
-		// Re-enter space
-		bool EntitiesCreated = false;
+    {
+        // Re-enter space
+        bool EntitiesCreated = false;
 
-		auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
-		{
-			EntitiesCreated = true;
-			EXPECT_TRUE(Success);
-		};
+        auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+        {
+            EntitiesCreated = true;
+            EXPECT_TRUE(Success);
+        };
 
-		EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+        EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
 
-		auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
-		EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+        auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+        EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
-		WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
-		EXPECT_TRUE(EntitiesCreated);
+        WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+        EXPECT_TRUE(EntitiesCreated);
 
-		SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
-		EXPECT_TRUE(FoundEntity != nullptr);
+        SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+        EXPECT_TRUE(FoundEntity != nullptr);
 
-		auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*) FoundEntity->GetComponent(0);
-		EXPECT_TRUE(AnimatedModelComponent != nullptr);
+        auto* AnimatedModelComponent = (AnimatedModelSpaceComponent*)FoundEntity->GetComponent(0);
+        EXPECT_TRUE(AnimatedModelComponent != nullptr);
 
-		EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(AnimatedModelComponent->GetMaterialOverrides().Size(), 0);
 
-		auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-	}
+        auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    }
 
-	// Delete space
-	DeleteSpace(SpaceSystem, Space.Id);
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
 
-	// Log out
-	LogOut(UserSystem);
+    // Log out
+    LogOut(UserSystem);
 }
 #endif
