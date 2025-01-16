@@ -172,13 +172,13 @@ CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, MapTest)
 
 CSP_INTERNAL_TEST(CSPEngine, NewFeatureTests, GetDeviceIdTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     auto DeviceId1 = csp::CSPFoundation::GetDeviceId();
 
     // Shutdown and re-initialise Foundation to verify we get the same DeviceID
     csp::CSPFoundation::Shutdown();
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     auto DeviceId2 = csp::CSPFoundation::GetDeviceId();
 

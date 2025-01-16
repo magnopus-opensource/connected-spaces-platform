@@ -25,7 +25,7 @@ void PublicTestBase::SetUp()
 {
     ::testing::Test::SetUp();
 
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 

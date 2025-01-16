@@ -33,7 +33,7 @@ using namespace csp::multiplayer::msgpack_typeids;
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisationTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     SignalRMsgPackEntitySerialiser Serialiser;
     auto User = CSP_NEW SpaceEntity();
@@ -151,7 +151,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRSerialisa
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeserialisationTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     SignalRMsgPackEntitySerialiser Serialiser;
     auto User = CSP_NEW SpaceEntity();
@@ -201,7 +201,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityUserSignalRDeseriali
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSerialisationTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     SignalRMsgPackEntitySerialiser Serialiser;
     auto Object = CSP_NEW SpaceEntity();
@@ -316,7 +316,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRSeriali
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeserialisationTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     // Current default properties:
     // - ComponentName
@@ -372,7 +372,7 @@ CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, SpaceEntityObjectSignalRDeseria
 
 CSP_INTERNAL_TEST(CSPEngine, SerialisationTests, MapDeserialisationTest)
 {
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
     SpaceEntity* MySpaceEntity = new SpaceEntity();
     MySpaceEntity->Type = SpaceEntityType::Object;

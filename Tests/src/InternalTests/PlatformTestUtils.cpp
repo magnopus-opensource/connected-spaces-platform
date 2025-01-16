@@ -34,7 +34,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-void InitialiseFoundationInternal() { InitialiseFoundationWithUserAgentInfo(EndpointBaseURI); }
+void InitialiseFoundationInternal() { InitialiseFoundationWithUserAgentInfo(EndpointBaseURI()); }
 } // namespace
 
 void PlatformTestWait(bool& finished)
