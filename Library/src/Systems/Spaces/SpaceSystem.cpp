@@ -18,6 +18,7 @@
 
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
@@ -75,11 +76,11 @@ void CreateSpace(chs::GroupApi* GroupAPI,
 namespace csp::systems
 {
 
-SpaceSystem::SpaceSystem() : SystemBase(), GroupAPI(nullptr), SpaceAPI(nullptr)
+SpaceSystem::SpaceSystem() : SystemBase(nullptr, nullptr), GroupAPI(nullptr), SpaceAPI(nullptr)
 {
 }
 
-SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient), CurrentSpace()
+SpaceSystem::SpaceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr), CurrentSpace()
 {
 	GroupAPI = CSP_NEW chs::GroupApi(InWebClient);
 	SpaceAPI = CSP_NEW chsaggregation::SpaceApi(InWebClient);
@@ -1044,6 +1045,7 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 		if (Result.GetResultCode() == EResultCode::Success)
 		{
 			Map<String, Map<String, String>> SpacesMetadata;
+			Map<String, Array<String>> SpacesTags;
 			const auto& AssetCollections = Result.GetAssetCollections();
 
 			for (int i = 0; i < AssetCollections.Size(); ++i)
@@ -1053,9 +1055,11 @@ void SpaceSystem::GetSpacesMetadata(const Array<String>& SpaceIds, SpacesMetadat
 				auto SpaceId = SpaceSystemHelpers::GetSpaceIdFromMetadataAssetCollectionName(AssetCollection.Name);
 
 				SpacesMetadata[SpaceId] = systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection);
+				SpacesTags[SpaceId]		= AssetCollection.Tags;
 			}
 
 			InternalResult.SetMetadata(SpacesMetadata);
+			InternalResult.SetTags(SpacesTags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);
@@ -1084,6 +1088,7 @@ void SpaceSystem::GetSpaceMetadata(const String& SpaceId, SpaceMetadataResultCal
 			const auto& AssetCollection = Result.GetAssetCollection();
 
 			InternalResult.SetMetadata(systems::SpaceSystemHelpers::LegacyAssetConversion(AssetCollection));
+			InternalResult.SetTags(AssetCollection.Tags);
 		}
 
 		INVOKE_IF_NOT_NULL(Callback, InternalResult);

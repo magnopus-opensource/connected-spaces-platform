@@ -275,7 +275,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -354,10 +354,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceInvalidKeyTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -428,10 +430,12 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoItemsTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
+	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -483,7 +487,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, CreateSequenceNoSpaceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create sequence
 	csp::common::Array<csp::common::String> SequenceItems {"Hotspot1", "Hotspot2", "Hotspot3"};
@@ -516,7 +520,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -576,7 +580,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequenceInvalidKeyTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -644,7 +648,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -704,7 +708,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, UpdateSequenceInvalidKeyTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -788,7 +792,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -849,7 +853,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RenameSequenceInvalidKeyTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -938,7 +942,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -1042,7 +1046,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetSequencesByCriteriaInvalidKey
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -1117,10 +1121,11 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* SequenceSystem = SystemsManager.GetSequenceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -1158,7 +1163,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(CreateCallback);
+	SequenceSystem->SetSequenceChangedCallback(CreateCallback);
 
 	csp::systems::Sequence Sequence;
 	CreateSequence(SequenceSystem, UniqueSequenceName, "GroupId", Space.Id, SequenceItems, {}, Sequence);
@@ -1179,7 +1184,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(UpdateCallback);
+	SequenceSystem->SetSequenceChangedCallback(UpdateCallback);
 	CallbackCalled = false;
 
 	csp::systems::Sequence UpdatedSequence;
@@ -1197,7 +1202,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, RegisterSequenceUpdatedTest)
 		CallbackCalled = true;
 	};
 
-	Connection->SetSequenceChangedCallback(DeleteCallback);
+	SequenceSystem->SetSequenceChangedCallback(DeleteCallback);
 	CallbackCalled = false;
 
 	DeleteSequences(SequenceSystem, {UpdatedSequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
@@ -1228,7 +1233,8 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	csp::systems::Profile DefaultUser = CreateTestUser();
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -1262,7 +1268,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 	LogOut(UserSystem);
 
 	// Login with another user
-	LogIn(UserSystem, UserId, AlternativeLoginEmail, AlternativeLoginPassword, true);
+	LogInAsNewTestUser(UserSystem, UserId, true);
 
 	// Ensure we can still get the sequence from a space we are not an editor of
 	csp::systems::Sequence RetrievedSequence;
@@ -1305,7 +1311,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, SequencePermissionsTest)
 	LogOut(UserSystem);
 
 	// Login again with the original user the cleanup
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, DefaultUser.Email, GeneratedTestAccountPassword);
 
 	// Delete sequence
 	DeleteSequences(SequenceSystem, {Sequence.Key}, csp::systems::EResultCode::Success, csp::systems::ERequestFailureReason::None, 204);
@@ -1330,7 +1336,7 @@ CSP_PUBLIC_TEST(CSPEngine, SequenceSystemTests, GetAllSequencesContainingItemsTe
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";

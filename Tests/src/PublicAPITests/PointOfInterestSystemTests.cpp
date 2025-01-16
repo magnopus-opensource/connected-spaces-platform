@@ -183,7 +183,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOITest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::PointOfInterest PointOfInterest;
 	CreatePointOfInterest(POISystem, nullptr, nullptr, nullptr, PointOfInterest);
@@ -205,7 +205,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, CreatePOIWithTagsTest)
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::common::Optional<csp::common::Array<csp::common::String>> Tags(2);
 	(*Tags)[0] = "POITag1";
@@ -231,7 +231,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetPOIInsideCircularAreaT
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	csp::systems::GeoLocation POILocation;
 	POILocation.Latitude  = 45.0;
@@ -303,7 +303,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, GetAssetCollectionFromPOI
 
 	csp::common::String UserId;
 
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	const char* TestSpaceName			= "OLY-UNITTEST-SPACE-REWIND";
 	const char* TestSpaceDescription	= "OLY-UNITTEST-SPACEDESC-REWIND";
@@ -358,7 +358,7 @@ CSP_PUBLIC_TEST(CSPEngine, PointOfInterestSystemTests, QuerySpacePOITest)
 	auto* POISystem		 = SystemsManager.GetPointOfInterestSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	const char* TestSpaceName			= "CSP-TEST-SPACE";
 	const char* TestSpaceDescription	= "CSP-TEST-SPACEDESC";

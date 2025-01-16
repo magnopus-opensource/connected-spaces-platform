@@ -20,13 +20,14 @@
 #include "CSP/Common/Array.h"
 #include "CSP/Common/CancellationToken.h"
 #include "CSP/Common/Optional.h"
+#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
-
 
 namespace csp::services
 {
@@ -43,6 +44,12 @@ class RemoteFileManager;
 
 } // namespace csp::web
 
+namespace csp::multiplayer
+{
+
+class EventBus;
+
+} // namespace csp::multiplayer
 
 namespace csp::memory
 {
@@ -286,9 +293,31 @@ public:
 	CSP_ASYNC_RESULT void
 		GetMaterial(const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback);
 
+	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
+	typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+
+	// Callback to receive material changes, contains a MaterialChangedParams with the details.
+	typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
+
+	/// @brief Sets a callback for an asset changed event.
+	/// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
+	CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
+
+	/// @brief Sets a callback for a material changed event.
+	/// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
+	CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
+
+	/// @brief Registers the system to listen for the named event.
+	void RegisterSystemCallback() override;
+	/// @brief Deregisters the system from listening for the named event.
+	void DeregisterSystemCallback() override;
+	/// @brief Deserialises the event values of the system.
+	/// @param EventValues std::vector<signalr::value> : event values to deserialise
+	CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+
 private:
 	AssetSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient);
+	CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
 	~AssetSystem();
 
 	CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
@@ -299,6 +328,9 @@ private:
 	csp::services::ApiBase* AssetDetailAPI;
 
 	csp::web::RemoteFileManager* FileManager;
+
+	AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
+	MaterialChangedCallbackHandler MaterialChangedCallback;
 };
 
 } // namespace csp::systems

@@ -15,6 +15,7 @@
  */
 #include "ClientElectionManager.h"
 
+#include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
@@ -487,29 +488,29 @@ bool ClientElectionManager::IsConnected() const
 
 void ClientElectionManager::BindNetworkEvents()
 {
-	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
-	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	EventBus* EventBus	 = SystemsManager.GetEventBus();
 
-	Connection->ListenNetworkEvent(ClientElectionMessage,
-								   [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
-								   {
-									   this->OnClientElectionEvent(Data);
-								   });
+	EventBus->ListenNetworkEvent(ClientElectionMessage,
+								 [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
+								 {
+									 this->OnClientElectionEvent(Data);
+								 });
 
-	Connection->ListenNetworkEvent(RemoteRunScriptMessage,
-								   [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
-								   {
-									   this->OnRemoteRunScriptEvent(Data);
-								   });
+	EventBus->ListenNetworkEvent(RemoteRunScriptMessage,
+								 [this](bool ok, const csp::common::Array<ReplicatedValue>& Data)
+								 {
+									 this->OnRemoteRunScriptEvent(Data);
+								 });
 }
 
 void ClientElectionManager::UnBindNetworkEvents()
 {
-	auto& SystemsManager			  = csp::systems::SystemsManager::Get();
-	MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	EventBus* EventBus	 = SystemsManager.GetEventBus();
 
-	Connection->StopListenNetworkEvent(ClientElectionMessage);
-	Connection->StopListenNetworkEvent(RemoteRunScriptMessage);
+	EventBus->StopListenNetworkEvent(ClientElectionMessage);
+	EventBus->StopListenNetworkEvent(RemoteRunScriptMessage);
 }
 
 void ClientElectionManager::OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data)

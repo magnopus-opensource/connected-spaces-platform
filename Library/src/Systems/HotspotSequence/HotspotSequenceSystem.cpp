@@ -16,10 +16,12 @@
 
 #include "CSP/Systems/HotspotSequence/HotspotSequenceSystem.h"
 
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/Sequence/SequenceSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "Debug/Logging.h"
+#include "Multiplayer/EventSerialisation.h"
 
 #include <regex>
 #include <string>
@@ -89,10 +91,15 @@ void UpdateSequences(const std::vector<systems::Sequence>& Sequences,
 
 } // namespace
 
-HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem, csp::systems::SpaceSystem* SpaceSystem)
+HotspotSequenceSystem::HotspotSequenceSystem(csp::systems::SequenceSystem* SequenceSystem,
+											 csp::systems::SpaceSystem* SpaceSystem,
+											 csp::multiplayer::EventBus* EventBus)
+	: SystemBase(EventBus)
 {
 	this->SequenceSystem = SequenceSystem;
 	this->SpaceSystem	 = SpaceSystem;
+
+	RegisterSystemCallback();
 }
 
 void HotspotSequenceSystem::CreateHotspotGroup(const csp::common::String& GroupName,
@@ -269,6 +276,8 @@ HotspotSequenceSystem::~HotspotSequenceSystem()
 {
 	SpaceSystem	   = nullptr;
 	SequenceSystem = nullptr;
+
+	DeregisterSystemCallback();
 }
 
 void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& ItemName, csp::systems::NullResultCallback Callback)
@@ -318,9 +327,54 @@ void HotspotSequenceSystem::RemoveItemFromGroups(const csp::common::String& Item
 	SequenceSystem->GetAllSequencesContainingItems({ItemCopy}, "GroupId", {SpaceSystem->GetCurrentSpace().Id}, GetSequencesCallback);
 }
 
-HotspotSequenceSystem::HotspotSequenceSystem()
+HotspotSequenceSystem::HotspotSequenceSystem() : SystemBase(nullptr, nullptr)
 {
 	SpaceSystem	   = nullptr;
 	SequenceSystem = nullptr;
 }
+
+void HotspotSequenceSystem::SetHotspotSequenceChangedCallback(HotspotSequenceChangedCallbackHandler Callback)
+{
+	HotspotSequenceChangedCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void HotspotSequenceSystem::RegisterSystemCallback()
+{
+	if (!HotspotSequenceChangedCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenNetworkEvent("SequenceChanged", this);
+}
+
+void HotspotSequenceSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+	{
+		EventBusPtr->StopListenNetworkEvent("SequenceChanged");
+	}
+}
+
+void HotspotSequenceSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+	csp::multiplayer::SequenceChangedEventDeserialiser SequenceDeserialiser;
+	SequenceDeserialiser.Parse(EventValues);
+
+	// There are a variety of sequence types.
+	// Other CSP callbacks may also need to fire if the sequence change relates to a particular sequence type.
+	const csp::common::String Key		   = SequenceDeserialiser.GetEventParams().Key;
+	const csp::common::String SequenceType = csp::multiplayer::GetSequenceKeyIndex(Key, 0);
+	if (SequenceType == "Hotspots")
+	{
+		if (HotspotSequenceChangedCallback)
+		{
+			csp::multiplayer::SequenceHotspotChangedEventDeserialiser HotspotDeserialiser;
+			HotspotDeserialiser.Parse(EventValues);
+			HotspotSequenceChangedCallback(HotspotDeserialiser.GetEventParams());
+		}
+	}
+}
+
 } // namespace csp::systems

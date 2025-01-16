@@ -56,7 +56,7 @@ void LogFormatLevelTest(
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -173,7 +173,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogMessageTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -293,7 +293,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogFormatTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_ERROR_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -374,7 +374,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorMessageTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_WARN_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -455,7 +455,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnMessageTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_WARN_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -539,7 +539,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogWarnFormatTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_LOG_ERROR_FORMAT_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -623,7 +623,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, LogErrorFormatTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_PROFILE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto& LogSystem		 = *SystemsManager.GetLogSystem();
@@ -698,7 +698,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, ProfileTest)
 #if RUN_ALL_UNIT_TESTS || RUN_LOGSYSTEM_TESTS || RUN_LOGSYSTEM_FAILURE_MESSAGE_TEST
 CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 {
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();

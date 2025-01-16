@@ -29,12 +29,12 @@ namespace chs = csp::systems::maintenanceservice;
 namespace csp::systems
 {
 
-MaintenanceSystem::MaintenanceSystem() : SystemBase(), MaintenanceAPI(nullptr)
+MaintenanceSystem::MaintenanceSystem() : SystemBase(nullptr, nullptr), MaintenanceAPI(nullptr)
 {
 	AllowMaintenanceInfoRequests = true;
 }
 
-MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient)
+MaintenanceSystem::MaintenanceSystem(csp::web::WebClient* InWebClient) : SystemBase(InWebClient, nullptr)
 {
 	MaintenanceAPI				 = CSP_NEW chs::MaintenanceApi(InWebClient);
 	AllowMaintenanceInfoRequests = true;

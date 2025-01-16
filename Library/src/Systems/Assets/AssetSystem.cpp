@@ -19,6 +19,7 @@
 #include "CallHelpers.h"
 #include "Common/Algorithm.h"
 #include "LODHelpers.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Services/PrototypeService/Api.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/RemoteFileManager.h"
@@ -169,16 +170,18 @@ csp::common::String CreateUniqueMaterialFileName(const csp::common::String& Name
 namespace csp::systems
 {
 
-AssetSystem::AssetSystem() : SystemBase(), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
+AssetSystem::AssetSystem() : SystemBase(nullptr, nullptr), PrototypeAPI(nullptr), AssetDetailAPI(nullptr), FileManager(nullptr)
 {
 }
 
-AssetSystem::AssetSystem(web::WebClient* InWebClient) : SystemBase(InWebClient)
+AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InEventBus) : SystemBase(InWebClient, InEventBus)
 {
 	PrototypeAPI   = CSP_NEW chs::PrototypeApi(InWebClient);
 	AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
 
 	FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+
+	RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
@@ -187,6 +190,8 @@ AssetSystem::~AssetSystem()
 
 	CSP_DELETE(AssetDetailAPI);
 	CSP_DELETE(PrototypeAPI);
+
+	DeregisterSystemCallback();
 }
 
 void AssetSystem::DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback)
@@ -475,8 +480,12 @@ void AssetSystem::UpdateAssetCollectionMetadata(const AssetCollection& AssetColl
 												const Optional<Array<String>>& Tags,
 												AssetCollectionResultCallback Callback)
 {
-	auto PrototypeInfo
-		= CreatePrototypeDto(AssetCollection.SpaceId, AssetCollection.ParentId, AssetCollection.Name, NewMetadata, AssetCollection.Type, Tags);
+	auto PrototypeInfo = CreatePrototypeDto(AssetCollection.SpaceId,
+											AssetCollection.ParentId,
+											AssetCollection.Name,
+											NewMetadata,
+											AssetCollection.Type,
+											Tags.HasValue() ? Tags : AssetCollection.Tags);
 
 	services::ResponseHandlerPtr ResponseHandler
 		= PrototypeAPI->CreateHandler<AssetCollectionResultCallback, AssetCollectionResult, void, chs::PrototypeDto>(Callback, nullptr);
@@ -1181,6 +1190,71 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
 	};
 
 	GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
+}
+
+CSP_EVENT void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+{
+	AssetDetailBlobChangedCallback = Callback;
+
+	// If MaterialChangedCallback has been registered, we dont need to register again
+	if (MaterialChangedCallback)
+	{
+		RegisterSystemCallback();
+	}
+}
+
+void AssetSystem::SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback)
+{
+	MaterialChangedCallback = Callback;
+
+	// If AssetDetailBlobChangedCallback has been registered, we dont need to register again
+	if (AssetDetailBlobChangedCallback)
+	{
+		RegisterSystemCallback();
+	}
+}
+
+void AssetSystem::RegisterSystemCallback()
+{
+	EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
+}
+
+void AssetSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+	{
+		EventBusPtr->StopListenNetworkEvent("AssetDetailBlobChanged");
+	}
+}
+
+void AssetSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+	if (!AssetDetailBlobChangedCallback)
+		if (!AssetDetailBlobChangedCallback && !MaterialChangedCallback)
+		{
+			return;
+		}
+
+	csp::multiplayer::AssetChangedEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	AssetDetailBlobChangedCallback(Deserialiser.GetEventParams());
+
+	const csp::multiplayer::AssetDetailBlobParams& AssetParams = Deserialiser.GetEventParams();
+
+	if (AssetDetailBlobChangedCallback)
+	{
+		AssetDetailBlobChangedCallback(AssetParams);
+	}
+
+	if (AssetParams.AssetType == systems::EAssetType::MATERIAL && MaterialChangedCallback)
+	{
+		csp::multiplayer::MaterialChangedParams MaterialParams;
+		MaterialParams.ChangeType			= AssetParams.ChangeType;
+		MaterialParams.MaterialCollectionId = AssetParams.AssetCollectionId;
+		MaterialParams.MaterialId			= AssetParams.AssetId;
+
+		MaterialChangedCallback(MaterialParams);
+	}
 }
 
 } // namespace csp::systems

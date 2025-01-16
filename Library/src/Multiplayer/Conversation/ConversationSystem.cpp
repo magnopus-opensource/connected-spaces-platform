@@ -15,14 +15,18 @@
  */
 #include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 
+#include "CSP/Multiplayer/EventBus.h"
+#include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
+#include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "CallHelpers.h"
 #include "ConversationSystemHelpers.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/EventSerialisation.h"
 #include "Systems/ResultHelpers.h"
 #include "Web/HttpResponse.h"
 
@@ -30,8 +34,14 @@
 namespace csp::multiplayer
 {
 
-ConversationSystem::ConversationSystem(MultiplayerConnection* Connection) : MultiPlayerConnection(Connection), Connection(nullptr)
+ConversationSystem::ConversationSystem(MultiplayerConnection* Connection) : Connection(nullptr), SystemBase(Connection->EventBusPtr)
 {
+	RegisterSystemCallback();
+}
+
+ConversationSystem::~ConversationSystem()
+{
+	DeregisterSystemCallback();
 }
 
 void ConversationSystem::SetConnection(csp::multiplayer::SignalRConnection* InConnection)
@@ -287,9 +297,9 @@ void ConversationSystem::AddMessageToConversation(const csp::common::String& Con
 			INVOKE_IF_NOT_NULL(Callback, MessageResultCallbackResult);
 		};
 
-		MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-												{ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
-												signalRCallback);
+		EventBusPtr->SendNetworkEvent("ConversationSystem",
+									  {ReplicatedValue((int64_t) ConversationMessageType::NewMessage), ConversationId},
+									  signalRCallback);
 	};
 
 	StoreConversationMessage(ConversationId, CurrentSpace, UserId, SenderDisplayName, Message, MessageResultCallback);
@@ -416,9 +426,9 @@ void ConversationSystem::SetMessageInformation(const csp::common::String& Messag
 				INVOKE_IF_NOT_NULL(Callback, Result);
 			};
 
-			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-													{ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
-													signalRCallback);
+			EventBusPtr->SendNetworkEvent("ConversationSystem",
+										  {ReplicatedValue((int64_t) ConversationMessageType::MessageInformation), MessageId},
+										  signalRCallback);
 		};
 
 		if (GetMessageResult.GetResultCode() == csp::systems::EResultCode::InProgress)
@@ -571,9 +581,9 @@ void ConversationSystem::DeleteConversation(const csp::common::String& Conversat
 				INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
 			};
 
-			MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-													{ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
-													signalRCallback);
+			EventBusPtr->SendNetworkEvent("ConversationSystem",
+										  {ReplicatedValue((int64_t) ConversationMessageType::DeleteConversation), ConversationId},
+										  signalRCallback);
 		};
 
 		const auto& Messages = GetMessagesResult.GetAssetCollections();
@@ -609,9 +619,9 @@ void ConversationSystem::DeleteMessage(const csp::common::String& MessageId, csp
 			INVOKE_IF_NOT_NULL(Callback, NullCallbackResult);
 		};
 
-		MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-												{ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
-												signalRCallback);
+		EventBusPtr->SendNetworkEvent("ConversationSystem",
+									  {ReplicatedValue((int64_t) ConversationMessageType::DeleteMessage), MessageId},
+									  signalRCallback);
 	};
 
 	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
@@ -700,9 +710,9 @@ void ConversationSystem::SetConversationInformation(const csp::common::String& C
 					INVOKE_IF_NOT_NULL(Callback, Result);
 				};
 
-				MultiPlayerConnection->SendNetworkEvent("ConversationSystem",
-														{ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
-														signalRCallback);
+				EventBusPtr->SendNetworkEvent("ConversationSystem",
+											  {ReplicatedValue((int64_t) ConversationMessageType::ConversationInformation), ConversationId},
+											  signalRCallback);
 			};
 
 			ConversationInfo NewConversationData(ConversationData);
@@ -753,6 +763,42 @@ void ConversationSystem::GetConversationInformation(const csp::common::String& C
 	};
 
 	AssetSystem->GetAssetCollectionById(ConversationId, GetConversationCallback);
+}
+
+CSP_EVENT void ConversationSystem::SetConversationSystemCallback(ConversationSystemCallbackHandler Callback)
+{
+	ConversationSystemCallback = Callback;
+	RegisterSystemCallback();
+}
+
+void ConversationSystem::RegisterSystemCallback()
+{
+	if (!ConversationSystemCallback)
+	{
+		return;
+	}
+
+	EventBusPtr->ListenNetworkEvent("ConversationSystem", this);
+}
+
+void ConversationSystem::DeregisterSystemCallback()
+{
+	if (EventBusPtr)
+	{
+		EventBusPtr->StopListenNetworkEvent("ConversationSystem");
+	}
+}
+
+void ConversationSystem::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+	if (!ConversationSystemCallback)
+	{
+		return;
+	}
+
+	ConversationEventDeserialiser Deserialiser;
+	Deserialiser.Parse(EventValues);
+	ConversationSystemCallback(Deserialiser.GetEventParams());
 }
 
 } // namespace csp::multiplayer

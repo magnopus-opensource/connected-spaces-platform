@@ -18,6 +18,7 @@
 #include "CSP/Systems/Settings/SettingsSystem.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/UserSystem.h"
 #include "SpaceSystemTestHelpers.h"
 #include "TestHelpers.h"
@@ -42,13 +43,8 @@ bool RequestPredicate(const csp::systems::ResultBase& Result)
 } // namespace
 
 
-csp::common::String DefaultLoginEmail;
-csp::common::String DefaultLoginPassword;
-csp::common::String AlternativeLoginEmail;
-csp::common::String AlternativeLoginPassword;
 csp::common::String SuperUserLoginEmail;
 csp::common::String SuperUserLoginPassword;
-
 
 void LoadTestAccountCredentials()
 {
@@ -75,12 +71,47 @@ void LoadTestAccountCredentials()
 				 "<AlternativeLoginPassword>\n<SuperUserLoginEmail> <SuperUserLoginPassword>");
 	}
 
-	DefaultLoginEmail		 = _DefaultLoginEmail.c_str();
-	DefaultLoginPassword	 = _DefaultLoginPassword.c_str();
-	AlternativeLoginEmail	 = _AlternativeLoginEmail.c_str();
-	AlternativeLoginPassword = _AlternativeLoginPassword.c_str();
-	SuperUserLoginEmail		 = _SuperUserLoginEmail.c_str();
-	SuperUserLoginPassword	 = _SuperUserLoginPassword.c_str();
+	SuperUserLoginEmail	   = _SuperUserLoginEmail.c_str();
+	SuperUserLoginPassword = _SuperUserLoginPassword.c_str();
+}
+
+csp::systems::Profile CreateTestUser()
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	const char* TestUserName	= "CSP-TEST-NAME";
+	const char* TestDisplayName = "CSP-TEST-DISPLAY";
+
+	std::string UniqueUserName = TestUserName + GetUniqueString();
+
+	char UniqueEmail[256];
+	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
+
+	// Create new user
+	auto [Result] = AWAIT_PRE(UserSystem,
+							  CreateUser,
+							  RequestPredicate,
+							  UniqueUserName.c_str(),
+							  TestDisplayName,
+							  UniqueEmail,
+							  GeneratedTestAccountPassword,
+							  false,
+							  true,
+							  nullptr,
+							  nullptr);
+
+	SCOPED_TRACE("Failed to create temporary test user in CreateTestUser.");
+	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+	const auto& CreatedProfile = Result.GetProfile();
+
+	SCOPED_TRACE("CreateTestUser returned unexpected details for temporary test user.");
+	EXPECT_EQ(CreatedProfile.UserName, UniqueUserName.c_str());
+	EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
+	EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
+
+	return CreatedProfile;
 }
 
 void LogIn(csp::systems::UserSystem* UserSystem,
@@ -113,6 +144,17 @@ void LogInAsGuest(csp::systems::UserSystem* UserSystem, csp::common::String& Out
 	{
 		OutUserId = Result.GetLoginState().UserId;
 	}
+}
+
+void LogInAsNewTestUser(csp::systems::UserSystem* UserSystem,
+						csp::common::String& OutUserId,
+						bool AgeVerified,
+						csp::systems::EResultCode ExpectedResultCode,
+						csp::systems::ERequestFailureReason ExpectedResultFailureCode)
+{
+	csp::systems::Profile NewTestUser = CreateTestUser();
+
+	LogIn(UserSystem, OutUserId, NewTestUser.Email, GeneratedTestAccountPassword, AgeVerified, ExpectedResultCode, ExpectedResultFailureCode);
 }
 
 void LogOut(csp::systems::UserSystem* UserSystem, csp::systems::EResultCode ExpectedResultCode)
@@ -234,7 +276,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, ResetPasswordBadTokenTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	auto [Result] = AWAIT_PRE(UserSystem, UserSystem::ResetUserPassword, RequestPredicate, "badtoken", UserId, "NewPassword");
 
@@ -250,8 +292,27 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+	// Log out
+	LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_LOGINASNEWTESTUSER_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LogInAsNewTestUserTest)
+{
+	auto& SystemsManager = csp::systems::SystemsManager::Get();
+	auto* UserSystem	 = SystemsManager.GetUserSystem();
+
+	csp::common::String UserId;
+
+	// Log in
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Log out
 	LogOut(UserSystem);
@@ -283,7 +344,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadTokenLogInTest)
 	csp::common::String UserId;
 
 	// Log in to get UserId
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Log out
 	LogOut(UserSystem);
@@ -317,11 +378,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, BadDualLoginTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
 
 	// Attempt to log in again
-	LogIn(UserSystem, UserId, DefaultLoginEmail, DefaultLoginPassword, true, csp::systems::EResultCode::Failed);
+	LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, csp::systems::EResultCode::Failed);
 
 	// Log out
 	LogOut(UserSystem);
@@ -340,7 +404,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, LoginErrorTest)
 	LogIn(UserSystem, UserId, "invalidlogin@rewind.co", "", true, csp::systems::EResultCode::Failed);
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Log out
 	LogOut(UserSystem);
@@ -356,7 +420,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, RefreshTest)
 	csp::common::String UserId;
 
 	// Log in
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Tokens are issued with a 30 min expiry but may be accepted up to 5 mins after their expiry.
 	// We set at 40 mins to make sure we're definitely dealing with a fully expired token that will
@@ -378,10 +442,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameTest)
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("TEST") + GetUniqueString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST") + GetUniqueString().substr(0, 16).c_str();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Update display name
 	{
@@ -428,10 +492,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingBlankSpace
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("TEST ") + GetUniqueString().c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("TEST ") + GetUniqueString().substr(0, 16).c_str();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Update display name
 	{
@@ -460,10 +524,10 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, UpdateDisplayNameIncludingSymbolsTes
 	auto& SystemsManager = csp::systems::SystemsManager::Get();
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 
-	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueString(8).c_str();
+	csp::common::String UniqueTestDisplayName = csp::common::String("()= - ") + GetUniqueString().substr(0, 8).c_str();
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Update display name
 	{
@@ -509,7 +573,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserTest)
 	const char* TestDisplayName = "CSP-TEST-DISPLAY";
 
 	char UniqueUserName[256];
-	SPRINTF(UniqueUserName, "%s-%s-%s", TestUserName, GetUniqueString().c_str(), GetUniqueString().c_str());
+	SPRINTF(UniqueUserName, "%s-%s", TestUserName, GetUniqueString().c_str());
 
 	char UniqueEmail[256];
 	SPRINTF(UniqueEmail, GeneratedTestAccountEmailFormat, GetUniqueString().c_str());
@@ -582,33 +646,13 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	csp::common::String CreatedUserId;
 
 	// Create new user
-	{
-		auto [Result] = AWAIT_PRE(UserSystem,
-								  CreateUser,
-								  RequestPredicate,
-								  UniqueUserName,
-								  TestDisplayName,
-								  UniqueEmail,
-								  GeneratedTestAccountPassword,
-								  true,
-								  true,
-								  nullptr,
-								  nullptr);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-		const auto& CreatedProfile = Result.GetProfile();
-		CreatedUserId			   = CreatedProfile.UserId;
-
-		EXPECT_EQ(CreatedProfile.UserName, UniqueUserName);
-		EXPECT_EQ(CreatedProfile.DisplayName, TestDisplayName);
-		EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
-	}
+	csp::systems::Profile CreatedProfile = CreateTestUser();
+	CreatedUserId						 = CreatedProfile.UserId;
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
-	// Whilst logged in as default test account attempt (and fail) to delete original user
+	// Whilst logged in as new test account attempt (and fail) to delete original user
 	{
 		auto [Result] = AWAIT_PRE(UserSystem, DeleteUser, RequestPredicate, CreatedUserId);
 
@@ -618,7 +662,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, DeleteUserTest)
 	LogOut(UserSystem);
 
 	csp::common::String OriginalUserId;
-	LogIn(UserSystem, OriginalUserId, UniqueEmail, GeneratedTestAccountPassword);
+	LogIn(UserSystem, OriginalUserId, CreatedProfile.Email, GeneratedTestAccountPassword);
 
 	// Whilst logged in as created account attempt to delete self
 	{
@@ -648,30 +692,12 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, CreateUserEmptyUsernameDisplaynameTe
 
 	// Create new user
 	{
-		auto [Result] = AWAIT_PRE(UserSystem,
-								  CreateUser,
-								  RequestPredicate,
-								  nullptr,
-								  nullptr,
-								  UniqueEmail,
-								  GeneratedTestAccountPassword,
-								  false,
-								  true,
-								  nullptr,
-								  nullptr);
-
-		EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
-
-		auto CreatedProfile = Result.GetProfile();
-		CreatedUserId		= CreatedProfile.UserId;
-
-		EXPECT_TRUE(CreatedProfile.UserName.IsEmpty());
-		EXPECT_FALSE(CreatedProfile.DisplayName.IsEmpty());
-		EXPECT_EQ(CreatedProfile.Email, UniqueEmail);
+		csp::systems::Profile CreatedProfile = CreateTestUser();
+		CreatedUserId						 = CreatedProfile.UserId;
 	}
 
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Retrieve the lite profile
 	{
@@ -978,7 +1004,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAgoraUserTokenTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1046,11 +1072,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  false,
 		  csp::systems::EResultCode::Failed,
 		  csp::systems::ERequestFailureReason::UserAgeNotVerified);
@@ -1058,7 +1087,7 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	// null Log in
 	// does not use login helper function as the login helper function defaults to false.
 	auto [Result]
-		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", DefaultLoginEmail, DefaultLoginPassword, nullptr).Await(RequestPredicate);
+		= Awaitable(&csp::systems::UserSystem::Login, UserSystem, "", TestUser.Email, GeneratedTestAccountPassword, nullptr).Await(RequestPredicate);
 
 	EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
@@ -1069,8 +1098,8 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, AgeNotVerifiedTest)
 	// true Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);
@@ -1089,11 +1118,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCustomerPortalUrlTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);
@@ -1117,11 +1149,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 
 	csp::common::String UserId;
 
+	// Create test user
+	csp::systems::Profile TestUser = CreateTestUser();
+
 	// False Log in
 	LogIn(UserSystem,
 		  UserId,
-		  DefaultLoginEmail,
-		  DefaultLoginPassword,
+		  TestUser.Email,
+		  GeneratedTestAccountPassword,
 		  true,
 		  csp::systems::EResultCode::Success,
 		  csp::systems::ERequestFailureReason::None);

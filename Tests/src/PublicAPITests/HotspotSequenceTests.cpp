@@ -189,7 +189,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -217,7 +217,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	// Validate sequence creation events.
 	bool CallbackCalled = false;
 	auto* Connection	= SystemsManager.GetMultiplayerConnection();
-	Connection->SetHotspotSequenceChangedCallback(
+	HotspotSystem->SetHotspotSequenceChangedCallback(
 		[&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
 		{
 			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Create);
@@ -233,7 +233,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 	CallbackCalled = false;
 
 	// Validate sequence deletion events.
-	Connection->SetHotspotSequenceChangedCallback(
+	HotspotSystem->SetHotspotSequenceChangedCallback(
 		[&CallbackCalled, &Space, &TestGroupName](const csp::multiplayer::SequenceHotspotChangedParams& Params)
 		{
 			EXPECT_EQ(Params.UpdateType, csp::multiplayer::ESequenceUpdateType::Delete);
@@ -247,7 +247,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, CreateHotspotGroupTest)
 
 	// Clear out the callback as we have validated what we came here for.
 	WaitForCallback(CallbackCalled);
-	Connection->SetHotspotSequenceChangedCallback(nullptr);
+	HotspotSystem->SetHotspotSequenceChangedCallback(nullptr);
 
 
 	auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
@@ -272,7 +272,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -327,7 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, UpdateHotspotGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -391,7 +391,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -429,7 +429,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameHotspotGroupTest)
 
 	auto* Connection = SystemsManager.GetMultiplayerConnection();
 
-	Connection->SetHotspotSequenceChangedCallback(
+	HotspotSystem->SetHotspotSequenceChangedCallback(
 		[&ReceivedUpdateCallback, &ReceivedRenameCallback, &Space, &OldTestGroupName, &NewTestGroupName](
 			const csp::multiplayer::SequenceHotspotChangedParams& Params)
 		{
@@ -478,7 +478,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, RenameFailHotspotGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	const char* TestSpaceName		 = "CSP-UNITTEST-SPACE-MAG";
@@ -536,7 +536,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotNoGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -585,7 +585,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GetHotspotsGroupsTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -659,7 +659,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotNoGroupTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -704,7 +704,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, GenerateSequenceKeyTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	char UniqueSpaceName[256];
@@ -752,6 +752,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
@@ -763,7 +764,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -865,7 +866,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteHotspotComponentTest)
 			SequencesUpdated = SequenceDeleted & SequenceUpdate;
 		};
 
-		Connection->SetHotspotSequenceChangedCallback(CB);
+		HotspotSystem->SetHotspotSequenceChangedCallback(CB);
 
 		CreatedObject->RemoveComponent(HotspotComponent->GetId());
 		CreatedObject->QueueUpdate();
@@ -908,6 +909,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
@@ -919,7 +921,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;
@@ -1021,7 +1023,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, DeleteEntityWithHotspotComponen
 			SequencesUpdated = SequenceDeleted & SequenceUpdate;
 		};
 
-		Connection->SetHotspotSequenceChangedCallback(CB);
+		HotspotSystem->SetHotspotSequenceChangedCallback(CB);
 
 		CreatedObject->Destroy(
 			[](bool Success)
@@ -1065,6 +1067,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 	auto* HotspotSystem	 = SystemsManager.GetHotspotSequenceSystem();
 
@@ -1076,7 +1079,7 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotSequenceTests, SequencePersistenceTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

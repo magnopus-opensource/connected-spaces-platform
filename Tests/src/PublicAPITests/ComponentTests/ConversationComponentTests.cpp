@@ -53,6 +53,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 	auto* UserSystem	 = SystemsManager.GetUserSystem();
 	auto* SpaceSystem	 = SystemsManager.GetSpaceSystem();
 	auto* Connection	 = SystemsManager.GetMultiplayerConnection();
+	auto* EventBus		 = SystemsManager.GetEventBus();
 	auto* EntitySystem	 = SystemsManager.GetSpaceEntitySystem();
 
 	const char* TestSpaceName		 = "OLY-UNITTEST-SPACE-REWIND";
@@ -69,7 +70,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
@@ -251,14 +252,14 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 		}
 
 		auto TestMessage = "test123";
-		Connection->ListenNetworkEvent("ConversationSystem:NewMessage",
-									   [=](bool ok, csp::common::Array<ReplicatedValue> Data)
-									   {
-										   EXPECT_TRUE(ok);
+		EventBus->ListenNetworkEvent("ConversationSystem:NewMessage",
+									 [=](bool ok, csp::common::Array<ReplicatedValue> Data)
+									 {
+										 EXPECT_TRUE(ok);
 
-										   ConversationId == Data[0].GetString();
-										   std::cerr << "Test Event Received " << ok << std::endl;
-									   });
+										 ConversationId == Data[0].GetString();
+										 std::cerr << "Test Event Received " << ok << std::endl;
+									 });
 
 		{
 			auto [Result] = AWAIT_PRE(ConversationComponent, AddMessage, RequestPredicate, TestMessage);
@@ -329,7 +330,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentMoveTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 	const auto UserDisplayName = GetFullProfileByUserId(UserSystem, UserId).DisplayName;
 
 	// Create space
@@ -482,7 +483,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
 	// Log in
 	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+	LogInAsNewTestUser(UserSystem, UserId);
 
 	// Create space
 	csp::systems::Space Space;

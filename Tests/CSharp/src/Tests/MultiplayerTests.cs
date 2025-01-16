@@ -725,6 +725,7 @@ namespace CSPEngine
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
+            var eventBus = systemsManager.GetEventBus();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             entitySystem.OnEntityCreated += (s, e) => { };
@@ -733,7 +734,7 @@ namespace CSPEngine
             var assetDetailBlobChangedCallbackCalled = false;
             var callbackAssetId = "";
 
-            connection.OnAssetDetailBlobChanged += (s, p) =>
+            assetSystem.OnAssetDetailBlobChanged += (s, p) =>
             {
                 if (assetDetailBlobChangedCallbackCalled)
                 {
@@ -2361,6 +2362,7 @@ namespace CSPEngine
 
             var systemsManager = Systems.SystemsManager.Get();
             var connection = systemsManager.GetMultiplayerConnection();
+            var bus = systemsManager.GetEventBus();
             var entitySystem = systemsManager.GetSpaceEntitySystem();
 
             bool gotEvent = false;
@@ -2384,8 +2386,8 @@ namespace CSPEngine
                 gotEvent = true;
             }
 
-            // Listen for network event
-            connection.ListenNetworkEvent("TestEvent", ListenDelegate);
+            // Listen for event
+            bus.ListenNetworkEvent("TestEvent", ListenDelegate);
 
             // Send Network event to self
             using var TestString = new Multiplayer.ReplicatedValue("TestString");
@@ -2395,7 +2397,7 @@ namespace CSPEngine
             Params[0] = TestString;
             Params[1] = TestFloat;
 
-            connection.SendNetworkEventToClient("TestEvent", Params, connection.GetClientId());
+            bus.SendNetworkEventToClient("TestEvent", Params, connection.GetClientId());
 
             while (!gotEvent)
                 Thread.Sleep(10);
