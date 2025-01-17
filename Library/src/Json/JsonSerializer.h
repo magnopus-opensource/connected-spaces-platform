@@ -141,7 +141,7 @@ public:
     /// This will return true if the given key exists
     /// @param Key const char* : The key to check
     /// @return bool : Returns true if the key exists in this object
-    bool HasProperty(const char* Key) const { return Doc.HasMember(Key); }
+    bool HasProperty(const char* Key) const { return ValueStack.top()->HasMember(Key); }
 
 private:
     JsonDeserializer(const char* Data) { Doc.Parse(Data); }

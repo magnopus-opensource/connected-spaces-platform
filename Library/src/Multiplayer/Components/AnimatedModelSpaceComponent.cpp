@@ -28,6 +28,8 @@ AnimatedModelSpaceComponent::AnimatedModelSpaceComponent(SpaceEntity* Parent)
 {
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetId)] = "";
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+    Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides)]
+        = csp::common::Map<csp::common::String, csp::multiplayer::ReplicatedValue>();
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Position)] = csp::common::Vector3 { 0, 0, 0 };
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Rotation)] = csp::common::Vector4 { 0, 0, 0, 1 };
     Properties[static_cast<uint32_t>(AnimatedModelPropertyKeys::Scale)] = csp::common::Vector3 { 1, 1, 1 };
@@ -135,6 +137,44 @@ int64_t AnimatedModelSpaceComponent::GetAnimationIndex() const
 void AnimatedModelSpaceComponent::SetAnimationIndex(int64_t Value)
 {
     SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::AnimationIndex), Value);
+}
+
+csp::common::Map<csp::common::String, csp::common::String> AnimatedModelSpaceComponent::GetMaterialOverrides() const
+{
+    // Convert replicated values map to string values
+    common::Map<common::String, multiplayer::ReplicatedValue> ReplicatedOverrides
+        = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+
+    csp::common::Map<common::String, common::String> Overrides;
+
+    auto Deleter = [](const common::Array<common::String>* Ptr) { CSP_DELETE(Ptr); };
+
+    std::unique_ptr<common::Array<common::String>, decltype(Deleter)> Keys(
+        const_cast<common::Array<common::String>*>(ReplicatedOverrides.Keys()), Deleter);
+
+    for (size_t i = 0; i < Keys->Size(); ++i)
+    {
+        const auto& CurrentKey = (*Keys)[i];
+        Overrides[CurrentKey] = ReplicatedOverrides[CurrentKey].GetString();
+    }
+
+    return Overrides;
+}
+
+void AnimatedModelSpaceComponent::AddMaterialOverride(const csp::common::String& ModelPath, const csp::common::String& MaterialId)
+{
+    auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+    ReplicatedOverrides[ModelPath] = MaterialId;
+
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
+}
+
+void AnimatedModelSpaceComponent::RemoveMaterialOverride(const csp::common::String& ModelPath)
+{
+    auto ReplicatedOverrides = GetStringMapProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides));
+    ReplicatedOverrides.Remove(ModelPath);
+
+    SetProperty(static_cast<uint32_t>(AnimatedModelPropertyKeys::MaterialOverrides), ReplicatedOverrides);
 }
 
 /* IVisibleComponent */

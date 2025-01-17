@@ -94,8 +94,7 @@ namespace msgpack_typeids
         UINT16_ARRAY,
         NULLABLE_UINT16_ARRAY,
         UINT16_DICTIONARY,
-        STRING_DICTIONARY,
-        GENERIC_MAP
+        STRING_DICTIONARY
     };
 
 } // namespace msgpack_typeids
