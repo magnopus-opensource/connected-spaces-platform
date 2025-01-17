@@ -21,7 +21,6 @@
 #include "CSP/Systems/Assets/AssetCollection.h"
 #include "CSP/Systems/WebService.h"
 
-
 namespace csp::services
 {
 
@@ -38,10 +37,10 @@ class Space;
 
 enum class SpaceUserRole
 {
-	Owner,
-	Moderator,
-	User,
-	Invalid
+    Owner,
+    Moderator,
+    User,
+    Invalid
 };
 
 /// @ingroup Space System
@@ -49,11 +48,11 @@ enum class SpaceUserRole
 class CSP_API UserRoleInfo
 {
 public:
-	UserRoleInfo()							= default;
-	UserRoleInfo(const UserRoleInfo& Other) = default;
+    UserRoleInfo() = default;
+    UserRoleInfo(const UserRoleInfo& Other) = default;
 
-	csp::common::String UserId;
-	SpaceUserRole UserRole;
+    csp::common::String UserId;
+    SpaceUserRole UserRole;
 };
 
 /// @ingroup Space System
@@ -61,11 +60,11 @@ public:
 class CSP_API InviteUserRoleInfo
 {
 public:
-	InviteUserRoleInfo()								= default;
-	InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
+    InviteUserRoleInfo() = default;
+    InviteUserRoleInfo(const InviteUserRoleInfo& Other) = default;
 
-	csp::common::String UserEmail;
-	SpaceUserRole UserRole;
+    csp::common::String UserEmail;
+    SpaceUserRole UserRole;
 };
 
 /// @ingroup Space System
@@ -73,39 +72,39 @@ public:
 class CSP_API InviteUserRoleInfoCollection
 {
 public:
-	InviteUserRoleInfoCollection()											= default;
-	InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
+    InviteUserRoleInfoCollection() = default;
+    InviteUserRoleInfoCollection(const InviteUserRoleInfoCollection& Other) = default;
 
-	csp::common::String EmailLinkUrl;
-	csp::common::String SignupUrl;
-	csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
+    csp::common::String EmailLinkUrl;
+    csp::common::String SignupUrl;
+    csp::common::Array<InviteUserRoleInfo> InviteUserRoleInfos;
 };
-
 
 /// @ingroup Space System
 /// @brief Data class used to contain information when attempting to get an array of User Roles information.
 class CSP_API UserRoleCollectionResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SpaceSystem;
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SpaceSystem;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	csp::common::Array<UserRoleInfo>& GetUsersRoles();
-	const csp::common::Array<UserRoleInfo>& GetUsersRoles() const;
+    csp::common::Array<UserRoleInfo>& GetUsersRoles();
+    const csp::common::Array<UserRoleInfo>& GetUsersRoles() const;
 
 private:
-	UserRoleCollectionResult(void*) {};
-	UserRoleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode) : csp::systems::ResultBase(ResCode, HttpResCode) {};
-	UserRoleCollectionResult() {};
+    UserRoleCollectionResult(void*) {};
+    UserRoleCollectionResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode) {};
+    UserRoleCollectionResult() {};
 
-	void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);
+    void FillUsersRoles(const Space& Space, const csp::common::Array<csp::common::String> RequestedUserIds);
 
-	csp::common::Array<UserRoleInfo> UserRoles;
+    csp::common::Array<UserRoleInfo> UserRoles;
 };
 
 typedef std::function<void(const UserRoleCollectionResult& Result)> UserRoleCollectionCallback;

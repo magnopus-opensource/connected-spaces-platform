@@ -20,95 +20,95 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/ReflectionSpaceComponentScriptInterface.h"
 
-
 namespace csp::multiplayer
 {
 
-ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::Reflection, Parent)
+ReflectionSpaceComponent::ReflectionSpaceComponent(SpaceEntity* Parent)
+    : ComponentBase(ComponentType::Reflection, Parent)
 {
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED)]		  = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)]	  = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)]	  = "";
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)]				  = csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Scale)]				  = csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)]		  = static_cast<int64_t>(ReflectionShape::UnitBox);
-	Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED)] = "";
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId)] = "";
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId)] = "";
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Position)] = csp::common::Vector3::Zero();
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::Scale)] = csp::common::Vector3::One();
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)] = static_cast<int64_t>(ReflectionShape::UnitBox);
+    Properties[static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef)] = "";
 
-	SetScriptInterface(CSP_NEW ReflectionSpaceComponentScriptInterface(this));
+    SetScriptInterface(CSP_NEW ReflectionSpaceComponentScriptInterface(this));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetReflectionAssetId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId));
+    return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId));
 }
 
 void ReflectionSpaceComponent::SetReflectionAssetId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId), Value);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionAssetId), Value);
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetAssetCollectionId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId));
+    return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId));
 }
 
 void ReflectionSpaceComponent::SetAssetCollectionId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::AssetCollectionId), Value);
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetName() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED));
+    return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED));
 }
 
 void ReflectionSpaceComponent::SetName(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED), Value);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Name_DEPRECATED), Value);
 }
 
 /* IPositionComponent */
 
 const csp::common::Vector3& ReflectionSpaceComponent::GetPosition() const
 {
-	return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Position));
+    return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Position));
 }
 
 void ReflectionSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Position), Value);
 }
 
 /* IScaleComponent */
 
 const csp::common::Vector3& ReflectionSpaceComponent::GetScale() const
 {
-	return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Scale));
+    return GetVector3Property(static_cast<uint32_t>(ReflectionPropertyKeys::Scale));
 }
 
 void ReflectionSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::Scale), Value);
 }
 
 ReflectionShape ReflectionSpaceComponent::GetReflectionShape() const
 {
-	return static_cast<ReflectionShape>(GetIntegerProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)));
+    return static_cast<ReflectionShape>(GetIntegerProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape)));
 }
 
 void ReflectionSpaceComponent::SetReflectionShape(ReflectionShape Value)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape), static_cast<int64_t>(Value));
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ReflectionShape), static_cast<int64_t>(Value));
 }
 
 const csp::common::String& ReflectionSpaceComponent::GetThirdPartyComponentRef() const
 {
-	return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef));
+    return GetStringProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef));
 }
 
 void ReflectionSpaceComponent::SetThirdPartyComponentRef(const csp::common::String& InValue)
 {
-	SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef), InValue);
+    SetProperty(static_cast<uint32_t>(ReflectionPropertyKeys::ThirdPartyComponentRef), InValue);
 }
 
 } // namespace csp::multiplayer

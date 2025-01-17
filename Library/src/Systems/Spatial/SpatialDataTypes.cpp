@@ -20,21 +20,15 @@
 namespace csp::systems
 {
 
-bool GeoLocation::IsValid() const
-{
-	return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Latitude <= 180.0;
-}
+bool GeoLocation::IsValid() const { return Latitude >= -90.0 && Latitude <= 90.0 && Longitude >= -180.0 && Latitude <= 180.0; }
 
 bool GeoLocation::operator==(const GeoLocation& Other) const
 {
-	const auto LatitudeDiff	 = std::fabs(Latitude - Other.Latitude);
-	const auto LongitudeDiff = std::fabs(Longitude - Other.Longitude);
-	return LatitudeDiff <= 0.0000001 && LongitudeDiff <= 0.0000001;
+    const auto LatitudeDiff = std::fabs(Latitude - Other.Latitude);
+    const auto LongitudeDiff = std::fabs(Longitude - Other.Longitude);
+    return LatitudeDiff <= 0.0000001 && LongitudeDiff <= 0.0000001;
 }
 
-bool GeoLocation::operator!=(const GeoLocation& Other) const
-{
-	return !operator==(Other);
-}
+bool GeoLocation::operator!=(const GeoLocation& Other) const { return !operator==(Other); }
 
 } // namespace csp::systems

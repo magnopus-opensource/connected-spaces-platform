@@ -28,19 +28,19 @@ class ExternalLinkSpaceComponent;
 class ExternalLinkSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	ExternalLinkSpaceComponentScriptInterface(ExternalLinkSpaceComponent* InComponent = nullptr);
+    ExternalLinkSpaceComponentScriptInterface(ExternalLinkSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
-	DECLARE_SCRIPT_PROPERTY(std::string, LinkUrl);
-	DECLARE_SCRIPT_PROPERTY(std::string, DisplayText);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(std::string, LinkUrl);
+    DECLARE_SCRIPT_PROPERTY(std::string, DisplayText);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-	DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsARVisible);
 };
 
 } // namespace csp::multiplayer

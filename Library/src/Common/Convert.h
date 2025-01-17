@@ -24,7 +24,6 @@
 #include <optional>
 #include <vector>
 
-
 namespace csp::common
 {
 
@@ -33,15 +32,15 @@ namespace csp::common
 /// return std::vector<T>
 template <typename T> std::vector<T> Convert(const Array<T>& In)
 {
-	std::vector<T> Out;
-	Out.reserve(In.Size());
+    std::vector<T> Out;
+    Out.reserve(In.Size());
 
-	for (size_t idx = 0; idx < In.Size(); ++idx)
-	{
-		Out.push_back({In[idx]});
-	}
+    for (size_t idx = 0; idx < In.Size(); ++idx)
+    {
+        Out.push_back({ In[idx] });
+    }
 
-	return Out;
+    return Out;
 }
 
 /// @brief Converts std::vector to csp::common::Array.
@@ -49,46 +48,46 @@ template <typename T> std::vector<T> Convert(const Array<T>& In)
 /// return Array<T>
 template <typename T> Array<T> Convert(const std::vector<T>& In)
 {
-	Array<T> Out(In.size());
+    Array<T> Out(In.size());
 
-	for (size_t idx = 0; idx < In.size(); ++idx)
-	{
-		Out[idx] = In[idx];
-	}
+    for (size_t idx = 0; idx < In.size(); ++idx)
+    {
+        Out[idx] = In[idx];
+    }
 
-	return Out;
+    return Out;
 }
 /// @brief Converts std::Map to csp::common::Map.
 /// @param In const std::map<T1, T2>&
 /// return Map<T1,T2>
 template <typename T1, typename T2> Map<T1, T2> Convert(const std::map<T1, T2>& In)
 {
-	Map<T1, T2> Out;
+    Map<T1, T2> Out;
 
-	for (auto const& pair : In)
-	{
-		Out[pair.first] = pair.second;
-	}
+    for (auto const& pair : In)
+    {
+        Out[pair.first] = pair.second;
+    }
 
-	return Out;
+    return Out;
 }
 /// @brief Converts csp::common::Map to std::map.
 /// @param In const Map<T1, T2>&
 /// @return std::map<T1, T2>
 template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& In)
 {
-	std::map<T1, T2> Out;
+    std::map<T1, T2> Out;
 
-	auto* Keys = In.Keys();
+    auto* Keys = In.Keys();
 
-	for (auto idx = 0; idx < Keys->Size(); ++idx)
-	{
-		auto Key   = (*Keys)[idx];
-		auto Value = In[Key];
-		Out.insert(std::pair<T1, T2>(Key, Value));
-	}
+    for (auto idx = 0; idx < Keys->Size(); ++idx)
+    {
+        auto Key = (*Keys)[idx];
+        auto Value = In[Key];
+        Out.insert(std::pair<T1, T2>(Key, Value));
+    }
 
-	return Out;
+    return Out;
 }
 
 /// @brief Converts csp::common::Optional to std::optional.
@@ -96,14 +95,14 @@ template <typename T1, typename T2> std::map<T1, T2> Convert(const Map<T1, T2>& 
 /// @return std::optional<T>
 template <typename T> std::optional<T> Convert(const Optional<T>& In)
 {
-	std::optional<T> Out;
+    std::optional<T> Out;
 
-	if (In.HasValue())
-	{
-		Out = *In;
-	}
+    if (In.HasValue())
+    {
+        Out = *In;
+    }
 
-	return Out;
+    return Out;
 }
 
 /// @brief Converts csp::common::Optional<csp::common::Array> to std::optional<std::vector>.
@@ -111,14 +110,14 @@ template <typename T> std::optional<T> Convert(const Optional<T>& In)
 /// @return std::optional<std::vector<T>>
 template <typename T> std::optional<std::vector<T>> Convert(const Optional<Array<T>>& In)
 {
-	std::optional<std::vector<T>> Out;
+    std::optional<std::vector<T>> Out;
 
-	if (In.HasValue())
-	{
-		Out = Convert(*In);
-	}
+    if (In.HasValue())
+    {
+        Out = Convert(*In);
+    }
 
-	return Out;
+    return Out;
 }
 
 /// @brief Converts csp::common::Optional<csp::map> to std::optional<std::map>.
@@ -126,15 +125,14 @@ template <typename T> std::optional<std::vector<T>> Convert(const Optional<Array
 /// @return std::optional<std::map<T1, T2>>
 template <typename T1, typename T2> std::optional<std::map<T1, T2>> Convert(const Optional<Map<T1, T2>>& In)
 {
-	std::optional<std::map<T1, T2>> Out;
+    std::optional<std::map<T1, T2>> Out;
 
-	if (In.HasValue())
-	{
-		Out = Convert(*In);
-	}
+    if (In.HasValue())
+    {
+        Out = Convert(*In);
+    }
 
-	return Out;
+    return Out;
 }
-
 
 } // namespace csp::common

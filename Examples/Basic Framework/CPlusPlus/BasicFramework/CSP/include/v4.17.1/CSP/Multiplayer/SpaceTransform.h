@@ -25,23 +25,23 @@ namespace csp::multiplayer
 class CSP_API SpaceTransform
 {
 public:
-	/// @brief Default constuctor for the SpaceTransform
-	SpaceTransform();
+    /// @brief Default constuctor for the SpaceTransform
+    SpaceTransform();
 
-	/// @brief Custom constructor for the SpaceTransform.
-	/// @param Position csp::common::Vector3 : The position value for the transform.
-	/// @param Rotation csp::common::Vector4 : The rotation value for the transform.
-	/// @param Scale csp::common::Vector3 : The scale value for the transform.
-	SpaceTransform(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation, const csp::common::Vector3& Scale);
+    /// @brief Custom constructor for the SpaceTransform.
+    /// @param Position csp::common::Vector3 : The position value for the transform.
+    /// @param Rotation csp::common::Vector4 : The rotation value for the transform.
+    /// @param Scale csp::common::Vector3 : The scale value for the transform.
+    SpaceTransform(const csp::common::Vector3& Position, const csp::common::Vector4& Rotation, const csp::common::Vector3& Scale);
 
-	/// @brief The position value for the transform.
-	csp::common::Vector3 Position;
+    /// @brief The position value for the transform.
+    csp::common::Vector3 Position;
 
-	/// @brief The rotation value for the transform.
-	csp::common::Vector4 Rotation;
+    /// @brief The rotation value for the transform.
+    csp::common::Vector4 Rotation;
 
-	/// @brief The scale value for the transform.
-	csp::common::Vector3 Scale;
+    /// @brief The scale value for the transform.
+    csp::common::Vector3 Scale;
 };
 
 } // namespace csp::multiplayer

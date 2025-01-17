@@ -28,16 +28,16 @@ class FiducialMarkerSpaceComponent;
 class FiducialMarkerSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	FiducialMarkerSpaceComponentScriptInterface(FiducialMarkerSpaceComponent* InComponent = nullptr);
+    FiducialMarkerSpaceComponentScriptInterface(FiducialMarkerSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
-	DECLARE_SCRIPT_PROPERTY(std::string, MarkerAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(std::string, MarkerAssetId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 };
 
 } // namespace csp::multiplayer

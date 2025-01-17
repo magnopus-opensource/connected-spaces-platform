@@ -19,85 +19,66 @@
 #include "Services/ApiBase/ApiBase.h"
 #include "Services/UserService/Dto.h"
 
-
 namespace chs = csp::services::generated::userservice;
-
 
 namespace
 {
 
 void SettingsDtoToSettingsCollection(const chs::SettingsDto& Dto, csp::systems::SettingsCollection& SettingsCollection)
 {
-	if (Dto.HasUserId())
-	{
-		SettingsCollection.UserId = Dto.GetUserId();
-	}
+    if (Dto.HasUserId())
+    {
+        SettingsCollection.UserId = Dto.GetUserId();
+    }
 
-	if (Dto.HasContext())
-	{
-		SettingsCollection.Context = Dto.GetContext();
-	}
+    if (Dto.HasContext())
+    {
+        SettingsCollection.Context = Dto.GetContext();
+    }
 
-	if (Dto.HasSettings())
-	{
-		const auto& Settings = Dto.GetSettings();
+    if (Dto.HasSettings())
+    {
+        const auto& Settings = Dto.GetSettings();
 
-		for (auto& Pair : Settings)
-		{
-			SettingsCollection.Settings[Pair.first] = Pair.second;
-		}
-	}
+        for (auto& Pair : Settings)
+        {
+            SettingsCollection.Settings[Pair.first] = Pair.second;
+        }
+    }
 }
 
 } // namespace
 
-
 namespace csp::systems
 {
 
-AvatarType AvatarInfoResult::GetAvatarType() const
-{
-	return Type;
-}
+AvatarType AvatarInfoResult::GetAvatarType() const { return Type; }
 
-const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const
-{
-	return Identifier;
-}
+const csp::common::String& AvatarInfoResult::GetAvatarIdentifier() const { return Identifier; }
 
-void AvatarInfoResult::SetAvatarType(AvatarType InValue)
-{
-	Type = InValue;
-}
+void AvatarInfoResult::SetAvatarType(AvatarType InValue) { Type = InValue; }
 
-void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue)
-{
-	Identifier = InValue;
-}
+void AvatarInfoResult::SetAvatarIdentifier(const csp::common::String& InValue) { Identifier = InValue; }
 
-
-const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const
-{
-	return SettingsCollection;
-}
+const SettingsCollection& SettingsCollectionResult::GetSettingsCollection() const { return SettingsCollection; }
 
 void SettingsCollectionResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
 {
-	ResultBase::OnResponse(ApiResponse);
+    ResultBase::OnResponse(ApiResponse);
 
-	auto* SettingsResponse				   = static_cast<chs::SettingsDto*>(ApiResponse->GetDto());
-	const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+    auto* SettingsResponse = static_cast<chs::SettingsDto*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
 
-	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
-	{
-		if (Response->GetPayload().GetContent().Length() > 0)
-		{
-			// Build the Dto from the response Json
-			SettingsResponse->FromJson(Response->GetPayload().GetContent());
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        if (Response->GetPayload().GetContent().Length() > 0)
+        {
+            // Build the Dto from the response Json
+            SettingsResponse->FromJson(Response->GetPayload().GetContent());
 
-			SettingsDtoToSettingsCollection(*SettingsResponse, SettingsCollection);
-		}
-	}
+            SettingsDtoToSettingsCollection(*SettingsResponse, SettingsCollection);
+        }
+    }
 }
 
 } // namespace csp::systems

@@ -44,130 +44,103 @@ template <typename T> inline void Delete(T* Ptr);
 template <typename T> inline void Delete(const T* Ptr);
 template <typename T> inline void Delete(T* Ptr, csp::memory::Allocator* Allocator);
 template <typename T> inline void Delete(const T* Ptr, csp::memory::Allocator* Allocator);
-template <typename T, typename std::enable_if_t<std::is_integral_v<T> >* = nullptr> inline void DeleteArray(const T* Ptr);
-template <typename T, typename std::enable_if_t<!std::is_integral_v<T> >* = nullptr> inline void DeleteArray(const T* Ptr);
+template <typename T, typename std::enable_if_t<std::is_integral_v<T>>* = nullptr> inline void DeleteArray(const T* Ptr);
+template <typename T, typename std::enable_if_t<!std::is_integral_v<T>>* = nullptr> inline void DeleteArray(const T* Ptr);
 
-inline void* Allocate(size_t size)
-{
-	return MemoryManager::GetDefaultAllocator().Allocate(size);
-}
+inline void* Allocate(size_t size) { return MemoryManager::GetDefaultAllocator().Allocate(size); }
 
-inline void* Allocate(size_t size, std::align_val_t alignment)
-{
-	return MemoryManager::GetDefaultAllocator().Allocate(size, alignment);
-}
+inline void* Allocate(size_t size, std::align_val_t alignment) { return MemoryManager::GetDefaultAllocator().Allocate(size, alignment); }
 
-inline void* Allocate(size_t size, std::align_val_t alignment, csp::memory::Allocator* Allocator)
-{
-	return Allocator->Allocate(size, alignment);
-}
+inline void* Allocate(size_t size, std::align_val_t alignment, csp::memory::Allocator* Allocator) { return Allocator->Allocate(size, alignment); }
 
-inline void* Reallocate(void* Ptr, size_t size)
-{
-	return MemoryManager::GetDefaultAllocator().Reallocate(Ptr, size);
-}
+inline void* Reallocate(void* Ptr, size_t size) { return MemoryManager::GetDefaultAllocator().Reallocate(Ptr, size); }
 
 inline void* Reallocate(void* Ptr, size_t size, std::align_val_t alignment)
 {
-	return MemoryManager::GetDefaultAllocator().Reallocate(Ptr, size, alignment);
+    return MemoryManager::GetDefaultAllocator().Reallocate(Ptr, size, alignment);
 }
 
 inline void* Reallocate(void* Ptr, size_t size, std::align_val_t alignment, csp::memory::Allocator* Allocator)
 {
-	return Allocator->Reallocate(Ptr, size, alignment);
+    return Allocator->Reallocate(Ptr, size, alignment);
 }
 
-inline void Deallocate(void* Ptr)
-{
-	csp::memory::MemoryManager::GetDefaultAllocator().Deallocate(Ptr);
-}
+inline void Deallocate(void* Ptr) { csp::memory::MemoryManager::GetDefaultAllocator().Deallocate(Ptr); }
 
-inline void Deallocate(void* Ptr, size_t Size)
-{
-	csp::memory::MemoryManager::GetDefaultAllocator().Deallocate(Ptr, Size);
-}
+inline void Deallocate(void* Ptr, size_t Size) { csp::memory::MemoryManager::GetDefaultAllocator().Deallocate(Ptr, Size); }
 
-inline void Deallocate(void* Ptr, csp::memory::Allocator* Allocator)
-{
-	Allocator->Deallocate(Ptr);
-}
+inline void Deallocate(void* Ptr, csp::memory::Allocator* Allocator) { Allocator->Deallocate(Ptr); }
 
-inline void Deallocate(void* Ptr, size_t Size, csp::memory::Allocator* Allocator)
-{
-	Allocator->Deallocate(Ptr, Size);
-}
+inline void Deallocate(void* Ptr, size_t Size, csp::memory::Allocator* Allocator) { Allocator->Deallocate(Ptr, Size); }
 
 template <typename T> inline void Delete(T* Ptr)
 {
-	if (Ptr != nullptr)
-	{
-		Ptr->~T();
-		Deallocate(Ptr, sizeof(T));
-	}
+    if (Ptr != nullptr)
+    {
+        Ptr->~T();
+        Deallocate(Ptr, sizeof(T));
+    }
 }
 
 template <typename T> inline void Delete(const T* Ptr)
 {
-	if (Ptr != nullptr)
-	{
-		T* NonConstPtr = (T*) Ptr;
-		NonConstPtr->~T();
-		Deallocate(NonConstPtr, sizeof(T));
-	}
+    if (Ptr != nullptr)
+    {
+        T* NonConstPtr = (T*)Ptr;
+        NonConstPtr->~T();
+        Deallocate(NonConstPtr, sizeof(T));
+    }
 }
 
 template <typename T> inline void Delete(T* Ptr, csp::memory::Allocator* Allocator)
 {
-	if (Ptr != nullptr)
-	{
-		Ptr->~T();
-		Deallocate(Ptr, sizeof(T), Allocator);
-	}
+    if (Ptr != nullptr)
+    {
+        Ptr->~T();
+        Deallocate(Ptr, sizeof(T), Allocator);
+    }
 }
 
 template <typename T> inline void Delete(const T* Ptr, csp::memory::Allocator* Allocator)
 {
-	if (Ptr != nullptr)
-	{
-		T* NonConstPtr = (T*) Ptr;
-		NonConstPtr->~T();
-		Deallocate(NonConstPtr, sizeof(T), Allocator);
-	}
+    if (Ptr != nullptr)
+    {
+        T* NonConstPtr = (T*)Ptr;
+        NonConstPtr->~T();
+        Deallocate(NonConstPtr, sizeof(T), Allocator);
+    }
 }
 
-template <typename T, typename std::enable_if_t<std::is_integral_v<T> >*> inline void DeleteArray(const T* Ptr)
+template <typename T, typename std::enable_if_t<std::is_integral_v<T>>*> inline void DeleteArray(const T* Ptr)
 {
-	if (Ptr != nullptr)
-	{
-		auto& Allocator	 = csp::memory::MemoryManager::GetDefaultAllocator();
-		auto RealPointer = (char*) Ptr - sizeof(size_t);
-		auto BufferSize	 = *(size_t*) RealPointer;
-		Deallocate(RealPointer, BufferSize, &Allocator);
-	}
+    if (Ptr != nullptr)
+    {
+        auto& Allocator = csp::memory::MemoryManager::GetDefaultAllocator();
+        auto RealPointer = (char*)Ptr - sizeof(size_t);
+        auto BufferSize = *(size_t*)RealPointer;
+        Deallocate(RealPointer, BufferSize, &Allocator);
+    }
 }
 
-template <typename T, typename std::enable_if_t<!std::is_integral_v<T> >*> inline void DeleteArray(const T* Ptr)
+template <typename T, typename std::enable_if_t<!std::is_integral_v<T>>*> inline void DeleteArray(const T* Ptr)
 {
-	if (Ptr != nullptr)
-	{
-		auto& Allocator	 = csp::memory::MemoryManager::GetDefaultAllocator();
-		auto RealPointer = (char*) Ptr - sizeof(size_t);
-		auto BufferSize	 = *(size_t*) RealPointer;
-		auto Count		 = BufferSize / sizeof(T);
+    if (Ptr != nullptr)
+    {
+        auto& Allocator = csp::memory::MemoryManager::GetDefaultAllocator();
+        auto RealPointer = (char*)Ptr - sizeof(size_t);
+        auto BufferSize = *(size_t*)RealPointer;
+        auto Count = BufferSize / sizeof(T);
 
-		for (int i = 0; i < Count; ++i)
-		{
-			(Ptr + i)->~T();
-		}
+        for (int i = 0; i < Count; ++i)
+        {
+            (Ptr + i)->~T();
+        }
 
-		Deallocate(RealPointer, BufferSize, &Allocator);
-	}
+        Deallocate(RealPointer, BufferSize, &Allocator);
+    }
 }
 
-inline Allocator* DefaultAllocator()
-{
-	return &MemoryManager::GetDefaultAllocator();
-}
+inline Allocator* DefaultAllocator() { return &MemoryManager::GetDefaultAllocator(); }
 
 } // namespace csp::memory
 
@@ -175,58 +148,55 @@ inline Allocator* DefaultAllocator()
 
 // These are variations of the macros and overrides below that pass __FILE__ and __LINE__ to allow for allocation and leak tracking
 
-	#define CSP_ALLOC(size)								  csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator(), __FILE__, __LINE__)
-	#define CSP_ALLOC_ALIGN(size, alignment)			  csp::memory::Allocate(size, alignment, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
-	#define CSP_ALLOC_P(allocator, size)				  csp::memory::Allocate(size, std::align_val_t(16), allocator, __FILE__, __LINE__)
-	#define CSP_ALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Allocate(size, alignment, allocator, __FILE__, __LINE__)
+#define CSP_ALLOC(size) csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_ALLOC_ALIGN(size, alignment) csp::memory::Allocate(size, alignment, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_ALLOC_P(allocator, size) csp::memory::Allocate(size, std::align_val_t(16), allocator, __FILE__, __LINE__)
+#define CSP_ALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Allocate(size, alignment, allocator, __FILE__, __LINE__)
 
-	#define CSP_REALLOC(ptr, size)							csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator(), __FILE__, __LINE__)
-	#define CSP_REALLOC_ALIGN(ptr, size, alignment)			csp::memory::Reallocate(ptr, size, alignment, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
-	#define CSP_REALLOC_P(allocator, size)					csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator, __FILE__, __LINE__)
-	#define CSP_REALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Reallocate(ptr, size, alignment, allocator, __FILE__, __LINE__)
+#define CSP_REALLOC(ptr, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_REALLOC_ALIGN(ptr, size, alignment) csp::memory::Reallocate(ptr, size, alignment, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_REALLOC_P(allocator, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator, __FILE__, __LINE__)
+#define CSP_REALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Reallocate(ptr, size, alignment, allocator, __FILE__, __LINE__)
 
-	#define CSP_NEW								  new (csp::memory::DefaultAllocator(), __FILE__, __LINE__)
-	#define CSP_NEW_P(allocator)				  new (allocator, __FILE__, __LINE__)
-	#define CSP_NEW_ALIGN_P(allocator, alignment) new (alignment, allocator, __FILE__, __LINE__)
+#define CSP_NEW new (csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_NEW_P(allocator) new (allocator, __FILE__, __LINE__)
+#define CSP_NEW_ALIGN_P(allocator, alignment) new (alignment, allocator, __FILE__, __LINE__)
 
-	#define CSP_FREE(ptr)			   csp::memory::Deallocate(ptr, __FILE__, __LINE__)
-	#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator, __FILE__, __LINE__)
+#define CSP_FREE(ptr) csp::memory::Deallocate(ptr, __FILE__, __LINE__)
+#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator, __FILE__, __LINE__)
 
-	#define CSP_DELETE(ptr)				 csp::memory::Delete(ptr, __FILE__, __LINE__)
-	#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator, __FILE__, __LINE__)
-	#define CSP_DELETE_ARRAY(ptr)		 delete[](ptr, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
+#define CSP_DELETE(ptr) csp::memory::Delete(ptr, __FILE__, __LINE__)
+#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator, __FILE__, __LINE__)
+#define CSP_DELETE_ARRAY(ptr) delete[] (ptr, csp::memory::DefaultAllocator(), __FILE__, __LINE__)
 
 #else
 
-	#define CSP_ALLOC(size)								  csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_ALLOC_ALIGN(size, alignment)			  csp::memory::Allocate(size, alignment, csp::memory::DefaultAllocator())
-	#define CSP_ALLOC_P(allocator, size)				  csp::memory::Allocate(size, std::align_val_t(16), allocator)
-	#define CSP_ALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Allocate(size, alignment, allocator)
+#define CSP_ALLOC(size) csp::memory::Allocate(size, std::align_val_t(16), csp::memory::DefaultAllocator())
+#define CSP_ALLOC_ALIGN(size, alignment) csp::memory::Allocate(size, alignment, csp::memory::DefaultAllocator())
+#define CSP_ALLOC_P(allocator, size) csp::memory::Allocate(size, std::align_val_t(16), allocator)
+#define CSP_ALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Allocate(size, alignment, allocator)
 
-	#define CSP_REALLOC(ptr, size)							csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
-	#define CSP_REALLOC_ALIGN(ptr, size, alignment)			csp::memory::Reallocate(ptr, size, alignment, csp::memory::DefaultAllocator())
-	#define CSP_REALLOC_P(allocator, size)					csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator)
-	#define CSP_REALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Reallocate(ptr, size, alignment, allocator)
+#define CSP_REALLOC(ptr, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), csp::memory::DefaultAllocator())
+#define CSP_REALLOC_ALIGN(ptr, size, alignment) csp::memory::Reallocate(ptr, size, alignment, csp::memory::DefaultAllocator())
+#define CSP_REALLOC_P(allocator, size) csp::memory::Reallocate(ptr, size, std::align_val_t(16), allocator)
+#define CSP_REALLOC_ALIGN_P(allocator, size, alignment) csp::memory::Reallocate(ptr, size, alignment, allocator)
 
-	#define CSP_NEW								  new (csp::memory::DefaultAllocator())
-	#define CSP_NEW_P(allocator)				  new (allocator)
-	#define CSP_NEW_ALIGN_P(allocator, alignment) new (alignment, allocator)
+#define CSP_NEW new (csp::memory::DefaultAllocator())
+#define CSP_NEW_P(allocator) new (allocator)
+#define CSP_NEW_ALIGN_P(allocator, alignment) new (alignment, allocator)
 
-	#define CSP_FREE(ptr)			   csp::memory::Deallocate(ptr)
-	#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator)
+#define CSP_FREE(ptr) csp::memory::Deallocate(ptr)
+#define CSP_FREE_P(ptr, allocator) csp::memory::Deallocate(ptr, allocator)
 
-	#define CSP_DELETE(ptr)				 csp::memory::Delete(ptr)
-	#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator)
-	#define CSP_DELETE_ARRAY(ptr)		 csp::memory::DeleteArray(ptr)
+#define CSP_DELETE(ptr) csp::memory::Delete(ptr)
+#define CSP_DELETE_P(ptr, allocator) csp::memory::Delete(ptr, allocator)
+#define CSP_DELETE_ARRAY(ptr) csp::memory::DeleteArray(ptr)
 
 #endif // #if !CSP_MEMORY_TRACKING_ENABLED
 
 template <class T> struct OlyDeleter
 {
-	void operator()(T* Ptr)
-	{
-		CSP_DELETE(Ptr);
-	}
+    void operator()(T* Ptr) { CSP_DELETE(Ptr); }
 };
 
 #if CSP_MEMORY_OVERRIDE_GLOBAL_NEW
@@ -255,11 +225,5 @@ void operator delete[](void* Ptr, std::align_val_t Alignment, csp::memory::Alloc
 
 // For EASTL
 void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
-void* operator new[](size_t size,
-					 size_t alignment,
-					 size_t alignmentOffset,
-					 const char* pName,
-					 int flags,
-					 unsigned debugFlags,
-					 const char* file,
-					 int line);
+void* operator new[](
+    size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags, unsigned debugFlags, const char* file, int line);

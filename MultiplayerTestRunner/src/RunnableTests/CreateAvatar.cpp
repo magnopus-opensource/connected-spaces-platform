@@ -27,46 +27,36 @@ namespace CreateAvatar
 
 void RunTest()
 {
-	using namespace csp::multiplayer;
+    using namespace csp::multiplayer;
 
-	// Create space
-	csp::systems::Space Space;
+    // Create space
+    csp::systems::Space Space;
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto& SpaceSystem	 = *SystemsManager.GetSpaceSystem();
-	auto& EntitySystem	 = *SystemsManager.GetSpaceEntitySystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto& SpaceSystem = *SystemsManager.GetSpaceSystem();
+    auto& EntitySystem = *SystemsManager.GetSpaceEntitySystem();
 
-	constexpr const char* UniqueSpaceName	   = "MakeThisReallyUniqueBeforeCommit";
-	constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
+    constexpr const char* UniqueSpaceName = "MakeThisReallyUniqueBeforeCommit";
+    constexpr const char* TestSpaceDescription = "Test space from the CSP multiplayer test runner";
 
-	// Create avater
-	csp::common::String UserName = "Player 1";
-	SpaceTransform UserTransform
-		= {csp::common::Vector3 {1.452322f, 2.34f, 3.45f}, csp::common::Vector4 {4.1f, 5.1f, 6.1f, 7.1f}, csp::common::Vector3 {1, 1, 1}};
-	AvatarState UserAvatarState		  = AvatarState::Idle;
-	csp::common::String UserAvatarId  = "MyCoolAvatar";
-	AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
+    // Create avater
+    csp::common::String UserName = "Player 1";
+    SpaceTransform UserTransform
+        = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
+    AvatarState UserAvatarState = AvatarState::Idle;
+    csp::common::String UserAvatarId = "MyCoolAvatar";
+    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
 
-	EntitySystem.SetEntityCreatedCallback(
-		[](csp::multiplayer::SpaceEntity* Entity)
-		{
-		});
+    EntitySystem.SetEntityCreatedCallback([](csp::multiplayer::SpaceEntity* Entity) {});
 
-	std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
-	std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
+    std::promise<csp::multiplayer::SpaceEntity*> ResultPromise;
+    std::future<csp::multiplayer::SpaceEntity*> ResultFuture = ResultPromise.get_future();
 
-	EntitySystem.CreateAvatar(UserName,
-							  UserTransform,
-							  UserAvatarState,
-							  UserAvatarId,
-							  UserAvatarPlayMode,
-							  [&ResultPromise](csp::multiplayer::SpaceEntity* Result)
-							  {
-								  ResultPromise.set_value(Result);
-							  });
+    EntitySystem.CreateAvatar(UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode,
+        [&ResultPromise](csp::multiplayer::SpaceEntity* Result) { ResultPromise.set_value(Result); });
 
-	csp::multiplayer::SpaceEntity* Avatar = ResultFuture.get();
+    csp::multiplayer::SpaceEntity* Avatar = ResultFuture.get();
 
-	EntitySystem.ProcessPendingEntityOperations();
+    EntitySystem.ProcessPendingEntityOperations();
 }
 } // namespace CreateAvatar
