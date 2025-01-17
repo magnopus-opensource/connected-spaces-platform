@@ -59,9 +59,6 @@ public:
     void WriteInt64(int64_t Value) override;
     void WriteUInt64(uint64_t Value) override;
     void WriteString(const csp::common::String& Value) override;
-    void WriteVector2(const csp::common::Vector2& Value) override;
-    void WriteVector3(const csp::common::Vector3& Value) override;
-    void WriteVector4(const csp::common::Vector4& Value) override;
     void WriteNull() override;
     void BeginComponents() override;
     void EndComponents() override;
