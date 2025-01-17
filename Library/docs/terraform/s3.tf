@@ -2,20 +2,6 @@ resource "aws_s3_bucket" "main" {
   bucket = var.bucket_name
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
-  rule {
-    id = "tmp_expire"
-    filter {
-      prefix = "tmp/"
-    }
-    expiration {
-      days = 1
-    }
-    status = "Enabled"
-  }
-}
-
 resource "aws_s3_bucket_policy" "main" {
   bucket = aws_s3_bucket.main.id
   policy = data.aws_iam_policy_document.main.json
@@ -54,4 +40,13 @@ resource "aws_s3_bucket_cors_configuration" "main" {
     expose_headers  = []
     max_age_seconds = 0
   }
+}
+
+resource "aws_s3_object" "files" {
+  for_each    = fileset(local.build_artifacts_dir, "**/*")
+  bucket      = aws_s3_bucket.main.bucket
+  key         = each.key
+  source      = "${local.build_artifacts_dir}/${each.value}"
+  source_hash = filemd5("${local.build_artifacts_dir}/${each.value}")
+  acl         = "private"
 }
