@@ -70,6 +70,9 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
         return;
     }
 
+    // Log to our Connected Spaces Platform file system.
+    LogToFile(InMessage);
+
     if (Callbacks->LogCallback != nullptr)
     {
         // Send message to clients to display the log on the client side.
@@ -84,9 +87,6 @@ void LogSystem::LogMsg(const csp::systems::LogLevel Level, const csp::common::St
 #if defined(CSP_ANDROID)
         __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str());
 #endif
-
-        // Log to our Connected Spaces Platform file system.
-        LogToFile(InMessage);
     }
 }
 
