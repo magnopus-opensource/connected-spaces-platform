@@ -24,6 +24,7 @@
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
@@ -240,12 +241,51 @@ public:
     CSP_ASYNC_RESULT_WITH_PROGRESS void RegisterAssetToLODChain(
         const AssetCollection& AssetCollection, const Asset& Asset, int LODLevel, AssetResultCallback Callback);
 
+    /// @brief Creates a new material backed by an AssetCollection/Asset.
+    /// @param Name const csp::common::String& : The name of the new material.
+    /// @param SpaceId const csp::common::String& : The space id this material is associated with.
+    /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
+
+    /// @brief Updates an existing material's properties.
+    /// The material should be retrieved through GetMaterials or GetMaterial.
+    /// If the material doesn't exist, EResultCode::Failed will be returned.
+    /// If the material hasn't changed, EResultCode::Success will still be returned.
+    /// @param Material const GLTFMaterial& : The material to update
+    /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
+
+    /// @brief Deletes a given material.
+    /// The material should be retrieved through GetMaterials or GetMaterial.
+    /// @param Material const GLTFMaterial& : The material to delete
+    /// @param Callback NullResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void DeleteMaterial(const GLTFMaterial& Material, NullResultCallback Callback);
+
+    /// @brief Gets all materials associated with the given space.
+    /// @param SpaceId const csp::common::String& : The space id the material is associated with.
+    /// @param Callback GLTFMaterialsResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void GetMaterials(const csp::common::String& SpaceId, GLTFMaterialsResultCallback Callback);
+
+    /// @brief Gets a material using its AssetCollection and Asset Id.
+    /// @param AssetCollectionId const csp::common::String& : The asset collection id this material is associated with.
+    /// @param AssetId const csp::common::String& : The asset id this material is associated with.
+    /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void GetMaterial(
+        const csp::common::String& AssetCollectionId, const csp::common::String& AssetId, GLTFMaterialResultCallback Callback);
+
     // The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
     typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
+
+    // Callback to receive material changes, contains a MaterialChangedParams with the details.
+    typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
 
     /// @brief Sets a callback for an asset changed event.
     /// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
     CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
+
+    /// @brief Sets a callback for a material changed event.
+    /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
+    CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;
@@ -260,12 +300,17 @@ private:
     CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
     ~AssetSystem();
 
+    CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteAssetById(
+        const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
+
     csp::services::ApiBase* PrototypeAPI;
     csp::services::ApiBase* AssetDetailAPI;
 
     csp::web::RemoteFileManager* FileManager;
 
     AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
+    MaterialChangedCallbackHandler MaterialChangedCallback;
 };
 
 } // namespace csp::systems

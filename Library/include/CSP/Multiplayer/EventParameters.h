@@ -129,4 +129,18 @@ public:
     csp::common::String NewName;
 };
 
+class CSP_API MaterialChangedParams
+{
+public:
+    /// @brief The collection id for the material
+    /// This will be redundant in the future
+    csp::common::String MaterialCollectionId;
+
+    /// @brief The id for the material
+    csp::common::String MaterialId;
+
+    /// @brief The type of change this material has undergone.
+    EAssetChangeType ChangeType;
+};
+
 } // namespace csp::multiplayer
