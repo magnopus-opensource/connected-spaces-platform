@@ -98,6 +98,9 @@ namespace
 
             break;
         }
+        case ReplicatedValueType::InvalidType:
+            CSP_LOG_ERROR_MSG("Received Invalid Type as SignalR Replicated Value");
+            return std::make_pair(ValueType, signalr::value {});
         }
 
         return std::make_pair(ValueType, NewValue);
@@ -248,24 +251,24 @@ void SignalRMsgPackEntitySerialiser::WriteVector2(const csp::common::Vector2& Va
 {
     assert(CurrentState == SerialiserState::InEntity && "WriteVector2() function not supported in current state!");
 
-    double ArrayValue[] = { Value.X, Value.Y };
-    Fields.push_back(signalr::value(ArrayValue));
+    std::vector<signalr::value> ArrayValue { Value.X, Value.Y };
+    Fields.push_back(std::move(ArrayValue));
 }
 
 void SignalRMsgPackEntitySerialiser::WriteVector3(const csp::common::Vector3& Value)
 {
     assert(CurrentState == SerialiserState::InEntity && "WriteVector3() function not supported in current state!");
 
-    double ArrayValue[] = { Value.X, Value.Y, Value.Z };
-    Fields.push_back(signalr::value(ArrayValue));
+    std::vector<signalr::value> ArrayValue { Value.X, Value.Y, Value.Z };
+    Fields.push_back(std::move(ArrayValue));
 }
 
 void SignalRMsgPackEntitySerialiser::WriteVector4(const csp::common::Vector4& Value)
 {
     assert(CurrentState == SerialiserState::InEntity && "WriteVector4() function not supported in current state!");
 
-    double ArrayValue[] = { Value.X, Value.Y, Value.Z, Value.W };
-    Fields.push_back(signalr::value(ArrayValue));
+    std::vector<signalr::value> ArrayValue { Value.X, Value.Y, Value.Z, Value.W };
+    Fields.push_back(std::move(ArrayValue));
 }
 
 void SignalRMsgPackEntitySerialiser::WriteNull()

@@ -360,7 +360,7 @@ String String::ToLower() const
 
     for (int i = 0; i < Length; ++i)
     {
-        Text[i] = std::tolower(Text[i]);
+        Text[i] = static_cast<char>(std::tolower(Text[i]));
     }
 
     return Copy;

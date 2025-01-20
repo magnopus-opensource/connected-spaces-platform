@@ -43,7 +43,8 @@ csp::multiplayer::SpaceTransform csp::multiplayer::SpaceTransform::operator*(con
     glm::quat Orientation { Rotation.X, Rotation.Y, Rotation.Z, Rotation.W };
     glm::quat OtherOrientation { Transform.Rotation.X, Transform.Rotation.Y, Transform.Rotation.Z, Transform.Rotation.W };
     glm::quat FinalOrientation = OtherOrientation * Orientation;
-    glm::normalize(FinalOrientation);
+    // Temporarily supress the unused variable warning
+    [[maybe_unused]] auto temporary = glm::normalize(FinalOrientation);
     return SpaceTransform(
         Position + Transform.Position, { FinalOrientation.x, FinalOrientation.y, FinalOrientation.z, FinalOrientation.w }, Scale * Transform.Scale);
 }

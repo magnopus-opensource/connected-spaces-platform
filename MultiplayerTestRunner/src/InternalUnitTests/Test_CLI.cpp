@@ -26,7 +26,7 @@ TEST(CLITest, AllArgsBasic)
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
     std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123",
         "--space", "space-id-123", "--timeout", "60", "--endpoint", "https://example.com" };
-    CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+    CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
 
     EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");
     EXPECT_EQ(Settings.LoginEmailAndPassword.second, "password123");
@@ -43,7 +43,7 @@ TEST(CLITest, TestIdentifierRequired)
 
     try
     {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {
@@ -63,7 +63,7 @@ TEST(CLITest, WhenInvalidTestIdentiferThenExceptionThrow)
 
     try
     {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {
@@ -81,7 +81,7 @@ TEST(CLITest, DefaultsSet)
     using namespace MultiplayerTestRunner::TestIdentifiers;
     std::string TestID = TestIdentifierToString(TestIdentifier::CREATE_AVATAR);
     std::vector<char*> args = { "MultiplayerTestRunner", "--test", TestID.data(), "--email", "test@example.com", "--password", "password123" };
-    CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+    CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
 
     // We don't want to go to the credentials file for the defaults, so we provide a user/password
     EXPECT_EQ(Settings.LoginEmailAndPassword.first, "test@example.com");
@@ -101,7 +101,7 @@ TEST(CLITest, WhenNoEmailThenError)
 
     try
     {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {
@@ -126,7 +126,7 @@ TEST(CLITest, WhenNoPasswordThenError)
 
     try
     {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
     }
     catch (const Utils::ExceptionWithCode& Exception)
     {
@@ -150,7 +150,7 @@ TEST(CLITest, WhenNoCredentialsOnCLIThenCredentialsFileIsQueried)
 
     try
     {
-        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(args.size(), args.data());
+        CLIArgs::RunnerSettings Settings = CLIArgs::ProcessCLI(static_cast<int>(args.size()), args.data());
         // If there is a credentials file, we'll now have a username and a password
         EXPECT_TRUE(Settings.LoginEmailAndPassword.first.length() > 0);
         EXPECT_TRUE(Settings.LoginEmailAndPassword.second.length() > 0);

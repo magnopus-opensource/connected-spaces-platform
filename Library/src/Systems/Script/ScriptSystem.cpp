@@ -34,9 +34,6 @@
 #include <map>
 #include <sstream>
 
-// For safer printfs
-constexpr int MAX_SCRIPT_FUNCTION_LEN = 256;
-
 // Template specializations for some custom csp types we want to use
 template <> struct qjs::js_property_traits<csp::common::String>
 {

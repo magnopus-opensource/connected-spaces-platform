@@ -55,7 +55,6 @@ void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySy
     AvatarState UserAvatarState = AvatarState::Idle;
     const csp::common::String& UserAvatarId = "MyCoolAvatar";
     AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-    LocomotionModel UserAvatarLocomotionModel = LocomotionModel::Grounded;
 
     auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
     EXPECT_NE(Avatar, nullptr);
