@@ -176,8 +176,6 @@ std::map<uint64_t, signalr::value> GetEntityTransformComponents(const SpaceEntit
 
 class DirtyComponent;
 
-static constexpr uint64_t ALL_ENTITIES_ID = -1;
-
 using namespace std::chrono;
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)

@@ -136,6 +136,10 @@ void ClientProxy::HandleEvent(int64_t EventType, int64_t ClientId)
         break;
     case ClientElectionMessageType::ElectionNotifyLeader:
         HandleElectionNotifyLeaderEvent(ClientId);
+        break;
+    case ClientElectionMessageType::NumElectionMessages:
+        // Do nothing
+        break;
     }
 }
 
@@ -191,7 +195,6 @@ void ClientProxy::SendElectionLeaderEvent(int64_t TargetClientId)
 void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t ClientId)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
     EventBus* EventBus = SystemsManager.GetEventBus();
 
     const int64_t MessageId = Eid++;
@@ -213,7 +216,6 @@ void ClientProxy::SendEvent(int64_t TargetClientId, int64_t EventType, int64_t C
 void ClientProxy::SendRemoteRunScriptEvent(int64_t TargetClientId, int64_t ContextId, const csp::common::String& ScriptText)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
-    MultiplayerConnection* Connection = SystemsManager.GetMultiplayerConnection();
     EventBus* EventBus = SystemsManager.GetEventBus();
 
     const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [](ErrorCode Error)
