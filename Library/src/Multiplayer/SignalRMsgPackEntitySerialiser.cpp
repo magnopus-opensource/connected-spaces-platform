@@ -247,30 +247,6 @@ void SignalRMsgPackEntitySerialiser::WriteString(const csp::common::String& Valu
     Fields.push_back(signalr::value(Value));
 }
 
-void SignalRMsgPackEntitySerialiser::WriteVector2(const csp::common::Vector2& Value)
-{
-    assert(CurrentState == SerialiserState::InEntity && "WriteVector2() function not supported in current state!");
-
-    std::vector<signalr::value> ArrayValue { Value.X, Value.Y };
-    Fields.push_back(std::move(ArrayValue));
-}
-
-void SignalRMsgPackEntitySerialiser::WriteVector3(const csp::common::Vector3& Value)
-{
-    assert(CurrentState == SerialiserState::InEntity && "WriteVector3() function not supported in current state!");
-
-    std::vector<signalr::value> ArrayValue { Value.X, Value.Y, Value.Z };
-    Fields.push_back(std::move(ArrayValue));
-}
-
-void SignalRMsgPackEntitySerialiser::WriteVector4(const csp::common::Vector4& Value)
-{
-    assert(CurrentState == SerialiserState::InEntity && "WriteVector4() function not supported in current state!");
-
-    std::vector<signalr::value> ArrayValue { Value.X, Value.Y, Value.Z, Value.W };
-    Fields.push_back(std::move(ArrayValue));
-}
-
 void SignalRMsgPackEntitySerialiser::WriteNull()
 {
     switch (CurrentState)
