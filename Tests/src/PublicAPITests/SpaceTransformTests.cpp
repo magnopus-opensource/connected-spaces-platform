@@ -95,7 +95,7 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityTransformT
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
 {
     const csp::multiplayer::SpaceTransform Identity;
-    // An angle-axis rotation equivilent to a 90 degree rotation along the (1,1,0) axis.
+    // An angle-axis rotation equivalent to a 90 degree rotation along the (1,1,0) axis.
     // This should produce a final (euler) rotation of approx 90, 45, 45
     const csp::common::Vector4 NinetyDegAroundXYAxisNormalizedQuat { 0.5f, 0.5f, 0.0f, 0.7071055f };
 
