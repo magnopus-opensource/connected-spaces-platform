@@ -19,24 +19,22 @@
 #include <stdio.h>
 #include <string>
 
-
 #ifdef _MSC_VER
 
-	#define STRNCPY(Dest, Len, Src, Count) (strncpy_s(Dest, Len, Src, Count), Dest)
-	#define STRCPY(Dest, Len, Src)		   (strcpy_s(Dest, Len, Src), Dest)
-
+#define STRNCPY(Dest, Len, Src, Count) (strncpy_s(Dest, Len, Src, Count), Dest)
+#define STRCPY(Dest, Len, Src) (strcpy_s(Dest, Len, Src), Dest)
 
 inline FILE* FOPEN(const char* FileName, const char* Mode)
 {
-	FILE* File;
+    FILE* File;
 
-	return (fopen_s(&File, FileName, Mode) == 0) ? File : nullptr;
+    return (fopen_s(&File, FileName, Mode) == 0) ? File : nullptr;
 }
 
 #else
 
-	#define STRNCPY(Dest, Len, Src, Count) strncpy(Dest, Src, Count)
-	#define STRCPY(Dest, Len, Src)		   strcpy(Dest, Src)
-	#define FOPEN(FileName, Mode)		   fopen(FileName, Mode)
+#define STRNCPY(Dest, Len, Src, Count) strncpy(Dest, Src, Count)
+#define STRCPY(Dest, Len, Src) strcpy(Dest, Src)
+#define FOPEN(FileName, Mode) fopen(FileName, Mode)
 
 #endif

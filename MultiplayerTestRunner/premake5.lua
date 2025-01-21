@@ -28,7 +28,8 @@ if not MultiplayerTestRunner then
 			"%{prj.location}/thirdparty/**.hpp",
 			"%{prj.location}/thirdparty/**.h",
             "%{wks.location}/Library/include", --CSP
-			"%{wks.location}/ThirdParty/googletest/include"
+			"%{wks.location}/ThirdParty/googletest/include",
+			"%{wks.location}/ThirdParty/uuid-v4"
 		}
 
         debugdir "%{prj.location}/Binaries/%{cfg.platform}/%{cfg.buildcfg}"
@@ -38,10 +39,12 @@ if not MultiplayerTestRunner then
         libdirs {"%{wks.location}/Library/Binaries/%{cfg.platform}/%{cfg.buildcfg}"}
 		links {"ConnectedSpacesPlatform"}
 		defines {"USING_CSP_DLL"}
+		
+		filter "platforms:x64"
+            linkoptions { "/ignore:4099"} --Complains about no PDB for googletest, don't care.
 			   
 		 -- Conditionally link google test, not the standard _d stuff so we need to do it per config
 	   filter "configurations:*Debug*"
-		  defines { "RUN_MULTIPLAYER_RUNNER_TESTS" } -- Run tests by default in debug configs
 		  links { "gtestd_md" } -- Debug versions
 		  libdirs {"%{wks.location}/ThirdParty/googletest/lib/%{cfg.platform}/Debug"}
 		  staticruntime "off"

@@ -15,9 +15,25 @@
  */
 
 #pragma once
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+
+namespace
+{
+
+/*
+ * Construct a new string from the input that is lower cased (via std::tolower)
+ */
+std::string ToLowerCaseString(const std::string& input)
+{
+    std::string output = input;
+    std::transform(input.cbegin(), input.cend(), output.begin(), [](const unsigned char c) { return std::tolower(c); });
+    return output;
+}
+
+} // namespace
 
 namespace MultiplayerTestRunner::TestIdentifiers
 {
@@ -34,21 +50,21 @@ namespace MultiplayerTestRunner::TestIdentifiers
  */
 enum class TestIdentifier
 {
-	CREATE_AVATAR //"CreateAvatar"
+    CREATE_AVATAR //"CreateAvatar"
 };
 
-inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap {{TestIdentifier::CREATE_AVATAR, "CreateAvatar"}};
+inline const std::unordered_map<TestIdentifier, std::string> TestIdentifierStringMap { { TestIdentifier::CREATE_AVATAR, "CreateAvatar" } };
 
 /*
  * Use `TestIdentifierStringMap` to convert a string to a test identifier, if valid.
  */
 inline std::string TestIdentifierToString(TestIdentifier identifier)
 {
-	if (TestIdentifierStringMap.count(identifier))
-	{
-		return TestIdentifierStringMap.at(identifier);
-	}
-	throw std::invalid_argument("Invalid TestIdentifier value in TestIdentifierToString: " + std::to_string(static_cast<int>(identifier)));
+    if (TestIdentifierStringMap.count(identifier))
+    {
+        return TestIdentifierStringMap.at(identifier);
+    }
+    throw std::invalid_argument("Invalid TestIdentifier value in TestIdentifierToString: " + std::to_string(static_cast<int>(identifier)));
 }
 
 /*
@@ -56,25 +72,21 @@ inline std::string TestIdentifierToString(TestIdentifier identifier)
  */
 inline TestIdentifier StringToTestIdentifier(std::string identifier)
 {
-	// Find the key based on the value, case insensitive. There's probably a better data structure for this but performance don't matter here.
-	auto it = std::find_if(TestIdentifierStringMap.begin(),
-						   TestIdentifierStringMap.end(),
-						   [&identifier](const auto& pair)
-						   {
-							   return Utils::ToLowerCaseString(pair.second) == Utils::ToLowerCaseString(identifier);
-						   });
+    // Find the key based on the value, case insensitive. There's probably a better data structure for this but performance don't matter here.
+    auto it = std::find_if(TestIdentifierStringMap.begin(), TestIdentifierStringMap.end(),
+        [&identifier](const auto& pair) { return ToLowerCaseString(pair.second) == ToLowerCaseString(identifier); });
 
-	if (it != TestIdentifierStringMap.end())
-	{
-		return it->first;
-	}
+    if (it != TestIdentifierStringMap.end())
+    {
+        return it->first;
+    }
 
-	/*
-	 * Design question here, don't want to throw an internal exception because these
-	 * are public functions, but also, the String->Enum path probably isn't needed externally.
-	 * There's an argument that this implementation should be moved so an internal exception can be thrown.
-	 * However, it'd odd if it's not together with the Enum->String variant, makes maintainance harder.
-	 */
-	throw std::invalid_argument("String `" + identifier + "` does not match any TestIdentifier");
+    /*
+     * Design question here, don't want to throw an internal exception because these
+     * are public functions, but also, the String->Enum path probably isn't needed externally.
+     * There's an argument that this implementation should be moved so an internal exception can be thrown.
+     * However, it'd odd if it's not together with the Enum->String variant, makes maintainance harder.
+     */
+    throw std::invalid_argument("String `" + identifier + "` does not match any TestIdentifier");
 }
 } // namespace MultiplayerTestRunner::TestIdentifiers

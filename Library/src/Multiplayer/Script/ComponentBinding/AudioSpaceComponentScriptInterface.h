@@ -24,17 +24,17 @@ class AudioSpaceComponent;
 class AudioSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent = nullptr);
+    AudioSpaceComponentScriptInterface(AudioSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
-	DECLARE_SCRIPT_PROPERTY(int64_t, AudioType);
-	DECLARE_SCRIPT_PROPERTY(std::string, AudioAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
-	DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);
-	DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
-	DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
-	DECLARE_SCRIPT_PROPERTY(float, Volume);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
+    DECLARE_SCRIPT_PROPERTY(int64_t, AudioType);
+    DECLARE_SCRIPT_PROPERTY(std::string, AudioAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);
+    DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
+    DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
+    DECLARE_SCRIPT_PROPERTY(float, Volume);
 };
 
 } // namespace csp::multiplayer

@@ -27,8 +27,8 @@ namespace csp::services
 
 namespace utility
 {
-using string_t = csp::common::String;
-using datetime = csp::common::String;
+    using string_t = csp::common::String;
+    using datetime = csp::common::String;
 } // namespace utility
 
 /// @brief Abstract base class for Dto objects
@@ -39,33 +39,21 @@ using datetime = csp::common::String;
 class DtoBase
 {
 public:
-	DtoBase()
-	{
-	}
-	virtual ~DtoBase()
-	{
-	}
+    DtoBase() { }
+    virtual ~DtoBase() { }
 
-	virtual utility::string_t ToJson() const;
-	virtual void FromJson(const utility::string_t& Json)
-	{
-	}
+    virtual utility::string_t ToJson() const;
+    virtual void FromJson(const utility::string_t& Json) { }
 };
 
 class EnumBase
 {
 public:
-	EnumBase()
-	{
-	}
-	virtual ~EnumBase()
-	{
-	}
+    EnumBase() { }
+    virtual ~EnumBase() { }
 
-	virtual utility::string_t ToJson() const;
-	virtual void FromJson(const utility::string_t& Json)
-	{
-	}
+    virtual utility::string_t ToJson() const;
+    virtual void FromJson(const utility::string_t& Json) { }
 };
 
 /// @brief Null Dto object
@@ -75,17 +63,11 @@ public:
 class NullDto : public DtoBase
 {
 public:
-	NullDto()
-	{
-	}
-	virtual ~NullDto()
-	{
-	}
+    NullDto() { }
+    virtual ~NullDto() { }
 
-	utility::string_t ToJson() const override;
-	void FromJson(const utility::string_t& Json) override
-	{
-	}
+    utility::string_t ToJson() const override;
+    void FromJson(const utility::string_t& Json) override { }
 };
 
 } // namespace csp::services

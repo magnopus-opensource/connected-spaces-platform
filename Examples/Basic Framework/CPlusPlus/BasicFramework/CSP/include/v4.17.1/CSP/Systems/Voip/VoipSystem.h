@@ -17,7 +17,6 @@
 
 #include "CSP/CSPCommon.h"
 
-
 namespace csp::web
 {
 
@@ -25,29 +24,28 @@ class WebClient;
 
 }
 
-
 namespace csp::systems
 {
 
 /// @brief System class for handling VOIP. Provides Connected Spaces Platform specific overidden functionality.
 class CSP_API CSP_NO_DISPOSE VoipSystem
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    /** @endcond */
 
 public:
-	~VoipSystem();
+    ~VoipSystem();
 
-	/// @brief Mutes a local user. Not implemented.
-	/// @param IsMuted
-	void MuteLocalUser(bool IsMuted);
-	/// @brief Checks if the user is muted. Not implemented.
-	/// @return Is the user muted.
-	bool IsLocalUserMuted() const;
+    /// @brief Mutes a local user. Not implemented.
+    /// @param IsMuted
+    void MuteLocalUser(bool IsMuted);
+    /// @brief Checks if the user is muted. Not implemented.
+    /// @return Is the user muted.
+    bool IsLocalUserMuted() const;
 
 private:
-	VoipSystem();
+    VoipSystem();
 };
 
 } // namespace csp::systems

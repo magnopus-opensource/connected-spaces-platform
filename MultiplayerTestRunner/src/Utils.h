@@ -25,20 +25,20 @@ namespace csp
 {
 namespace systems
 {
-class ResultBase;
+    class ResultBase;
 }
 namespace common
 {
-class String;
+    class String;
 }
 } // namespace csp
 
 namespace Utils
 {
 // Assert a type is move capable
-#define ASSERT_MOVE_CAPABLE(Type)                                                           \
-	static_assert(std::is_move_constructible_v<Type>, #Type " must be move constructible"); \
-	static_assert(std::is_move_assignable_v<Type>, #Type " must be move assignable")
+#define ASSERT_MOVE_CAPABLE(Type)                                                                                                                    \
+    static_assert(std::is_move_constructible_v<Type>, #Type " must be move constructible");                                                          \
+    static_assert(std::is_move_assignable_v<Type>, #Type " must be move assignable")
 
 /*
  * Internal exception type that adds an error code.
@@ -46,10 +46,12 @@ namespace Utils
  */
 struct ExceptionWithCode : public std::runtime_error
 {
-	ExceptionWithCode(int errorCode, const std::string& message) : std::runtime_error(message), ErrorCode(errorCode)
-	{
-	}
-	const int ErrorCode;
+    ExceptionWithCode(int errorCode, const std::string& message)
+        : std::runtime_error(message)
+        , ErrorCode(errorCode)
+    {
+    }
+    const int ErrorCode;
 };
 
 /*
@@ -57,12 +59,12 @@ struct ExceptionWithCode : public std::runtime_error
  */
 struct TestAccountCredentials
 {
-	std::string DefaultLoginEmail;
-	std::string DefaultLoginPassword;
-	std::string AlternativeLoginEmail;
-	std::string AlternativeLoginPassword;
-	std::string SuperUserLoginEmail;
-	std::string SuperUserLoginPassword;
+    std::string DefaultLoginEmail;
+    std::string DefaultLoginPassword;
+    std::string AlternativeLoginEmail;
+    std::string AlternativeLoginPassword;
+    std::string SuperUserLoginEmail;
+    std::string SuperUserLoginPassword;
 };
 ASSERT_MOVE_CAPABLE(TestAccountCredentials);
 
@@ -78,13 +80,8 @@ TestAccountCredentials LoadTestAccountCredentials();
  */
 void InitialiseCSPWithUserAgentInfo(const csp::common::String& EndpointRootURI);
 
-/*
- * Construct a new string from the input that is lower cased (via std::tolower)
- */
-std::string ToLowerCaseString(const std::string& input);
-
-constexpr char* DEFAULT_TEST_ENDPOINT			= "https://ogs-internal.magnopus-dev.cloud";
-constexpr int DEFAULT_TIMEOUT_IN_SECONDS		= 30;
+constexpr char* DEFAULT_TEST_ENDPOINT = "https://ogs-internal.magnopus-dev.cloud";
+constexpr int DEFAULT_TIMEOUT_IN_SECONDS = 30;
 constexpr bool DEFAULT_EMIT_PROCESS_DESCRIPTORS = true;
 
 } // namespace Utils

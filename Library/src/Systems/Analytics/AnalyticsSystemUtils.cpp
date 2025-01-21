@@ -22,77 +22,54 @@ namespace csp::systems
 
 void AnalyticsEvent::AddInt(csp::common::String Key, int64_t Value)
 {
-	MetricValue Metric;
-	Metric.SetInt(Value);
+    MetricValue Metric;
+    Metric.SetInt(Value);
 
-	Parameters[Key] = Metric;
+    Parameters[Key] = Metric;
 }
 
 void AnalyticsEvent::AddString(csp::common::String Key, const csp::common::String& Value)
 {
-	MetricValue Metric;
-	Metric.SetString(Value);
+    MetricValue Metric;
+    Metric.SetString(Value);
 
-	Parameters[Key] = Metric;
+    Parameters[Key] = Metric;
 }
 
 void AnalyticsEvent::AddFloat(csp::common::String Key, float Value)
 {
-	MetricValue Metric;
-	Metric.SetFloat(Value);
+    MetricValue Metric;
+    Metric.SetFloat(Value);
 
-	Parameters[Key] = Metric;
+    Parameters[Key] = Metric;
 }
 
 void AnalyticsEvent::AddBool(csp::common::String Key, bool Value)
 {
-	MetricValue Metric;
-	Metric.SetBool(Value);
+    MetricValue Metric;
+    Metric.SetBool(Value);
 
-	Parameters[Key] = Metric;
+    Parameters[Key] = Metric;
 }
 
-const int64_t AnalyticsEvent::GetInt(csp::common::String Key) const
-{
-	return Parameters[Key].GetInt();
-}
+const int64_t AnalyticsEvent::GetInt(csp::common::String Key) const { return Parameters[Key].GetInt(); }
 
-const csp::common::String& AnalyticsEvent::GetString(csp::common::String Key) const
-{
-	return Parameters[Key].GetString();
-}
+const csp::common::String& AnalyticsEvent::GetString(csp::common::String Key) const { return Parameters[Key].GetString(); }
 
-const float AnalyticsEvent::GetFloat(csp::common::String Key) const
-{
-	return Parameters[Key].GetFloat();
-}
+const float AnalyticsEvent::GetFloat(csp::common::String Key) const { return Parameters[Key].GetFloat(); }
 
-bool AnalyticsEvent::GetBool(csp::common::String Key) const
-{
-	return Parameters[Key].GetBool();
-}
+bool AnalyticsEvent::GetBool(csp::common::String Key) const { return Parameters[Key].GetBool(); }
 
-const csp::common::String& AnalyticsEvent::GetTag() const
-{
-	return Tag;
-}
+const csp::common::String& AnalyticsEvent::GetTag() const { return Tag; }
 
-const csp::common::Map<csp::common::String, MetricValue>& AnalyticsEvent::GetParams() const
-{
-	return Parameters;
-}
+const csp::common::Map<csp::common::String, MetricValue>& AnalyticsEvent::GetParams() const { return Parameters; }
 
-AnalyticsEvent::AnalyticsEvent(const csp::common::String& Tag) : Tag {Tag}
+AnalyticsEvent::AnalyticsEvent(const csp::common::String& Tag)
+    : Tag { Tag }
 {
 }
 
-AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag)
-{
-	return CSP_NEW AnalyticsEvent(Tag);
-}
+AnalyticsEvent* AnalyticsEventInitialiser::Initialise(const csp::common::String Tag) { return CSP_NEW AnalyticsEvent(Tag); }
 
-void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event)
-{
-	CSP_DELETE(Event);
-}
+void AnalyticsEventInitialiser::DeInitialise(AnalyticsEvent* Event) { CSP_DELETE(Event); }
 } // namespace csp::systems

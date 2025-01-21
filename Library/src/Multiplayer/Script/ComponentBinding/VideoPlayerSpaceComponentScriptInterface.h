@@ -28,33 +28,33 @@ class VideoPlayerSpaceComponent;
 class VideoPlayerSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent = nullptr);
+    VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, Name);
+    DECLARE_SCRIPT_PROPERTY(std::string, Name);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, VideoAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, VideoAssetURL);
-	DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(std::string, VideoAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, VideoAssetURL);
+    DECLARE_SCRIPT_PROPERTY(std::string, AssetCollectionId);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsStateShared);
-	DECLARE_SCRIPT_PROPERTY(bool, IsAutoPlay);
-	DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
-	DECLARE_SCRIPT_PROPERTY(bool, IsAutoResize);
-	DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);
+    DECLARE_SCRIPT_PROPERTY(bool, IsStateShared);
+    DECLARE_SCRIPT_PROPERTY(bool, IsAutoPlay);
+    DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
+    DECLARE_SCRIPT_PROPERTY(bool, IsAutoResize);
+    DECLARE_SCRIPT_PROPERTY(float, AttenuationRadius);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
-	DECLARE_SCRIPT_PROPERTY(float, CurrentPlayheadPosition);
-	DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
+    DECLARE_SCRIPT_PROPERTY(int64_t, PlaybackState);
+    DECLARE_SCRIPT_PROPERTY(float, CurrentPlayheadPosition);
+    DECLARE_SCRIPT_PROPERTY(float, TimeSincePlay);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, VideoPlayerSourceType);
+    DECLARE_SCRIPT_PROPERTY(int64_t, VideoPlayerSourceType);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
+    DECLARE_SCRIPT_PROPERTY(bool, IsEnabled);
 };
 
 } // namespace csp::multiplayer

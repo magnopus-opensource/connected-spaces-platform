@@ -15,16 +15,11 @@
  */
 #pragma once
 
-
 #include "Memory/Memory.h"
-
 
 namespace csp::memory
 {
 
-template <class T> void ObjectDeleter(T* Obj)
-{
-	CSP_DELETE(Obj);
-}
+template <class T> void ObjectDeleter(T* Obj) { CSP_DELETE(Obj); }
 
 } // namespace csp::memory

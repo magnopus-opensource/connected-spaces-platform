@@ -30,14 +30,14 @@ class SpaceEntitySystem;
 class EntityScriptBinding : public csp::systems::IScriptBinding
 {
 public:
-	EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
-	virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
+    EntityScriptBinding(SpaceEntitySystem* InEntitySystem);
+    virtual void Bind(int64_t ContextId, class csp::systems::ScriptSystem* ScriptSystem) override;
 
-	static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
-	static void RemoveBinding(EntityScriptBinding* InEntityBinding);
+    static EntityScriptBinding* BindEntitySystem(SpaceEntitySystem* InEntitySystem);
+    static void RemoveBinding(EntityScriptBinding* InEntityBinding);
 
 private:
-	SpaceEntitySystem* EntitySystem;
+    SpaceEntitySystem* EntitySystem;
 };
 
 } // namespace csp::multiplayer

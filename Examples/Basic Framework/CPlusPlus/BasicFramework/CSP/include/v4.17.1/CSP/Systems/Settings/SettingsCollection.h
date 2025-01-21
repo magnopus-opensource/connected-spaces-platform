@@ -24,7 +24,6 @@
 
 #include <functional>
 
-
 namespace csp::services
 {
 
@@ -36,8 +35,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
-
 namespace csp::systems
 {
 
@@ -46,38 +43,35 @@ namespace csp::systems
 class CSP_API SettingsCollection
 {
 public:
-	SettingsCollection() = default;
+    SettingsCollection() = default;
 
-	csp::common::String UserId;
-	csp::common::String Context;
-	csp::common::Map<csp::common::String, csp::common::String> Settings;
+    csp::common::String UserId;
+    csp::common::String Context;
+    csp::common::Map<csp::common::String, csp::common::String> Settings;
 };
-
-
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
 class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the settings collection result.
-	/// @return SettingsCollection : const ref of settings collection class
-	const SettingsCollection& GetSettingsCollection() const;
+    /// @brief Retrieves the settings collection result.
+    /// @return SettingsCollection : const ref of settings collection class
+    const SettingsCollection& GetSettingsCollection() const;
 
 private:
-	SettingsCollectionResult(void*) {};
+    SettingsCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	SettingsCollection SettingsCollection;
+    SettingsCollection SettingsCollection;
 };
-
 
 /// @brief Callback containing Settings collection.
 /// @param Result SettingsCollectionResult : result class

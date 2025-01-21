@@ -22,7 +22,6 @@
 #include <chrono>
 #include <functional>
 
-
 namespace csp::systems
 {
 
@@ -49,7 +48,6 @@ class HotspotSequenceSystem;
 
 } // namespace csp::systems
 
-
 namespace csp
 {
 
@@ -57,14 +55,12 @@ class CSPFoundation;
 
 } // namespace csp
 
-
 namespace csp::web
 {
 
 class WebClient;
 
 } // namespace csp::web
-
 
 namespace csp::memory
 {
@@ -82,126 +78,129 @@ namespace csp::systems
 /// @brief Interface used to access each of the systems.
 class CSP_API SystemsManager
 {
-	CSP_START_IGNORE
-	/** @cond DO_NOT_DOCUMENT */
-	friend class csp::CSPFoundation;
-	friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
-	/** @endcond */
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::CSPFoundation;
+    friend void csp::memory::Delete<SystemsManager>(SystemsManager* Ptr);
+    /** @endcond */
+    CSP_END_IGNORE
 
 public:
-	static SystemsManager& Get();
+    static SystemsManager& Get();
 
-	/// @brief Retrieves user system.
-	/// @return SpaceSystem : pointer to the user system class
-	UserSystem* GetUserSystem();
+    /// @brief Retrieves user system.
+    /// @return SpaceSystem : pointer to the user system class
+    UserSystem* GetUserSystem();
 
-	/// @brief Retrieves space system.
-	/// @return SpaceSystem : pointer to the space system class
-	SpaceSystem* GetSpaceSystem();
+    /// @brief Retrieves space system.
+    /// @return SpaceSystem : pointer to the space system class
+    SpaceSystem* GetSpaceSystem();
 
-	/// @brief Retrieves asset system.
-	/// @return SpaceSystem : pointer to the asset system class
-	AssetSystem* GetAssetSystem();
+    /// @brief Retrieves asset system.
+    /// @return SpaceSystem : pointer to the asset system class
+    AssetSystem* GetAssetSystem();
 
-	/// @brief Retrieves voip system.
-	/// @return SpaceSystem : pointer to the voip system class
-	VoipSystem* GetVoipSystem();
+    /// @brief Retrieves voip system.
+    /// @return SpaceSystem : pointer to the voip system class
+    VoipSystem* GetVoipSystem();
 
-	/// @brief Retrieves script system.
-	/// @return ScriptingSystem : pointer to the script system class
-	ScriptSystem* GetScriptSystem();
+    /// @brief Retrieves script system.
+    /// @return ScriptingSystem : pointer to the script system class
+    ScriptSystem* GetScriptSystem();
 
-	/// @brief Retrieves the Point Of Interest system.
-	/// @return PointOfInterestSystem : pointer to the POI system class
-	PointOfInterestSystem* GetPointOfInterestSystem();
+    /// @brief Retrieves the Point Of Interest system.
+    /// @return PointOfInterestSystem : pointer to the POI system class
+    PointOfInterestSystem* GetPointOfInterestSystem();
 
-	/// @brief Retrieves the Anchor system.
-	/// @return AnchorSystem : pointer to the Anchor system class
-	AnchorSystem* GetAnchorSystem();
+    /// @brief Retrieves the Anchor system.
+    /// @return AnchorSystem : pointer to the Anchor system class
+    AnchorSystem* GetAnchorSystem();
 
-	/// @brief Retrieves the Log system.
-	/// @return LogSystem : pointer to the Log system class
-	LogSystem* GetLogSystem();
+    /// @brief Retrieves the Log system.
+    /// @return LogSystem : pointer to the Log system class
+    LogSystem* GetLogSystem();
 
-	/// @brief Retrieves the Settings system.
-	/// @return SettingsSystem : pointer to the Settings system class
-	SettingsSystem* GetSettingsSystem();
+    /// @brief Retrieves the Settings system.
+    /// @return SettingsSystem : pointer to the Settings system class
+    SettingsSystem* GetSettingsSystem();
 
-	/// @brief Retrieves the GraphQL system.
-	/// @return GraphQLSystem : pointer to the GraphQL system class
-	GraphQLSystem* GetGraphQLSystem();
+    /// @brief Retrieves the GraphQL system.
+    /// @return GraphQLSystem : pointer to the GraphQL system class
+    GraphQLSystem* GetGraphQLSystem();
 
-	/// @brief Retrieves the Analytics system.
-	/// @return AnalyticsSystem : pointer to the Analytics system class
-	AnalyticsSystem* GetAnalyticsSystem();
+    /// @brief Retrieves the Analytics system.
+    /// @return AnalyticsSystem : pointer to the Analytics system class
+    AnalyticsSystem* GetAnalyticsSystem();
 
-	/// @brief Retrieves the Maintenance system.
-	/// @return MaintenanceSystem : pointer to the Maintenance system class
-	MaintenanceSystem* GetMaintenanceSystem();
+    /// @brief Retrieves the Maintenance system.
+    /// @return MaintenanceSystem : pointer to the Maintenance system class
+    MaintenanceSystem* GetMaintenanceSystem();
 
-	/// @brief Retrieves the Event Ticketing system.
-	/// @return EventTicketingSystem : pointer to the Event Ticketing system class
-	EventTicketingSystem* GetEventTicketingSystem();
+    /// @brief Retrieves the Event Ticketing system.
+    /// @return EventTicketingSystem : pointer to the Event Ticketing system class
+    EventTicketingSystem* GetEventTicketingSystem();
 
-	/// @brief Retrieves the ECommerce system.
-	/// @return ECommerceSystem : pointer to the ECommerce system class
-	ECommerceSystem* GetECommerceSystem();
+    /// @brief Retrieves the ECommerce system.
+    /// @return ECommerceSystem : pointer to the ECommerce system class
+    ECommerceSystem* GetECommerceSystem();
 
-	/// @brief Retrieves the Quota system.
-	/// @return QuotaSystem : pointer to the Quota system class
-	QuotaSystem* GetQuotaSystem();
+    /// @brief Retrieves the Quota system.
+    /// @return QuotaSystem : pointer to the Quota system class
+    QuotaSystem* GetQuotaSystem();
 
-	/// @brief Retrieves the Organization system.
-	/// @return OrganizationSystem : pointer to the Organization system class
-	OrganizationSystem* GetOrganizationSystem();
+    /// @brief Retrieves the Organization system.
+    /// @return OrganizationSystem : pointer to the Organization system class
+    OrganizationSystem* GetOrganizationSystem();
 
-	/// @brief Retrieves the Sequence system.
-	/// @return SequenceSystem : pointer to the Sequence system class
-	SequenceSystem* GetSequenceSystem();
+    /// @brief Retrieves the Sequence system.
+    /// @return SequenceSystem : pointer to the Sequence system class
+    SequenceSystem* GetSequenceSystem();
 
-	/// @brief Retrieves the HotspotSequenceSystem system.
-	/// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
-	HotspotSequenceSystem* GetHotspotSequenceSystem();
+    /// @brief Retrieves the HotspotSequenceSystem system.
+    /// @return HotspotSequenceSystem : pointer to the HotspotSequenceSystem system class
+    HotspotSequenceSystem* GetHotspotSequenceSystem();
 
-	csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
+    csp::multiplayer::SpaceEntitySystem* GetSpaceEntitySystem();
 
-	csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
+    csp::multiplayer::MultiplayerConnection* GetMultiplayerConnection();
+
+    csp::multiplayer::EventBus* GetEventBus();
 
 private:
-	SystemsManager();
-	~SystemsManager();
+    SystemsManager();
+    ~SystemsManager();
 
-	static void Instantiate();
-	static void Destroy();
+    static void Instantiate();
+    static void Destroy();
 
-	static SystemsManager* Instance;
+    static SystemsManager* Instance;
 
-	void CreateSystems();
-	void DestroySystems();
+    void CreateSystems();
+    void DestroySystems();
 
-	csp::web::WebClient* WebClient;
+    csp::web::WebClient* WebClient;
 
-	csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
-	csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
-	UserSystem* UserSystem;
-	SpaceSystem* SpaceSystem;
-	AssetSystem* AssetSystem;
-	ScriptSystem* ScriptSystem;
-	VoipSystem* VoipSystem;
-	PointOfInterestInternalSystem* PointOfInterestSystem;
-	AnchorSystem* AnchorSystem;
-	LogSystem* LogSystem;
-	SettingsSystem* SettingsSystem;
-	GraphQLSystem* GraphQLSystem;
-	AnalyticsSystem* AnalyticsSystem;
-	MaintenanceSystem* MaintenanceSystem;
-	EventTicketingSystem* EventTicketingSystem;
-	ECommerceSystem* ECommerceSystem;
-	QuotaSystem* QuotaSystem;
-	OrganizationSystem* OrganizationSystem;
-	SequenceSystem* SequenceSystem;
-	HotspotSequenceSystem* HotspotSequenceSystem;
+    csp::multiplayer::MultiplayerConnection* MultiplayerConnection;
+    csp::multiplayer::EventBus* EventBus;
+    csp::multiplayer::SpaceEntitySystem* SpaceEntitySystem;
+    UserSystem* UserSystem;
+    SpaceSystem* SpaceSystem;
+    AssetSystem* AssetSystem;
+    ScriptSystem* ScriptSystem;
+    VoipSystem* VoipSystem;
+    PointOfInterestInternalSystem* PointOfInterestSystem;
+    AnchorSystem* AnchorSystem;
+    LogSystem* LogSystem;
+    SettingsSystem* SettingsSystem;
+    GraphQLSystem* GraphQLSystem;
+    AnalyticsSystem* AnalyticsSystem;
+    MaintenanceSystem* MaintenanceSystem;
+    EventTicketingSystem* EventTicketingSystem;
+    ECommerceSystem* ECommerceSystem;
+    QuotaSystem* QuotaSystem;
+    OrganizationSystem* OrganizationSystem;
+    SequenceSystem* SequenceSystem;
+    HotspotSequenceSystem* HotspotSequenceSystem;
 };
 
 } // namespace csp::systems

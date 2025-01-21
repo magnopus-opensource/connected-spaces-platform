@@ -22,8 +22,6 @@
 #include "CSP/Systems/Spatial/SpatialDataTypes.h"
 #include "CSP/Systems/WebService.h"
 
-
-
 namespace csp::services
 {
 
@@ -33,14 +31,12 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
-
 namespace csp::systems
 {
 
 enum class EPointOfInterestType
 {
-	DEFAULT,
+    DEFAULT,
     SPACE
 };
 
@@ -49,74 +45,74 @@ enum class EPointOfInterestType
 class CSP_API PointOfInterest
 {
 public:
-	PointOfInterest();
+    PointOfInterest();
 
-	/** @name Data Values
-	 *   A Point of Interest contains some basic information that define it
-	 *
-	 *   @{ */
-	csp::common::String Id;
-	csp::common::String CreatedBy;
-	csp::common::String CreatedAt;
-	csp::common::Map<csp::common::String, csp::common::String> Title;
-	csp::common::Map<csp::common::String, csp::common::String> Description;
-	csp::common::String Name;
-	EPointOfInterestType Type;
-	csp::common::Array<csp::common::String> Tags;
-	csp::common::String Owner;
-	csp::systems::GeoLocation Location;
-	csp::common::String AssetCollectionId;
+    /** @name Data Values
+     *   A Point of Interest contains some basic information that define it
+     *
+     *   @{ */
+    csp::common::String Id;
+    csp::common::String CreatedBy;
+    csp::common::String CreatedAt;
+    csp::common::Map<csp::common::String, csp::common::String> Title;
+    csp::common::Map<csp::common::String, csp::common::String> Description;
+    csp::common::String Name;
+    EPointOfInterestType Type;
+    csp::common::Array<csp::common::String> Tags;
+    csp::common::String Owner;
+    csp::systems::GeoLocation Location;
+    csp::common::String AssetCollectionId;
     csp::common::String SpaceId;
-	/** @} */
+    /** @} */
 };
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information after creating or retrieving a POI.
 class CSP_API POIResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	PointOfInterest& GetPointOfInterest();
-	const PointOfInterest& GetPointOfInterest() const;
+    PointOfInterest& GetPointOfInterest();
+    const PointOfInterest& GetPointOfInterest() const;
 
 private:
-	POIResult(void*) {};
+    POIResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	PointOfInterest POI;
+    PointOfInterest POI;
 };
 
 /// @ingroup Point Of Interest System
 /// @brief Data class used to contain information when attempting to get an array of POIs.
 class CSP_API POICollectionResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the POIs array being stored.
-	/// @return csp::common::Array<PointOfInterest> : reference to POIs array
-	csp::common::Array<PointOfInterest>& GetPOIs();
+    /// @brief Retrieves the POIs array being stored.
+    /// @return csp::common::Array<PointOfInterest> : reference to POIs array
+    csp::common::Array<PointOfInterest>& GetPOIs();
 
-	/// @brief Retrieves the POIs array being stored.
-	/// @return csp::common::Array<PointOfInterest> : reference to POIs array
-	const csp::common::Array<PointOfInterest>& GetPOIs() const;
+    /// @brief Retrieves the POIs array being stored.
+    /// @return csp::common::Array<PointOfInterest> : reference to POIs array
+    const csp::common::Array<PointOfInterest>& GetPOIs() const;
 
 private:
-	POICollectionResult(void*) {};
+    POICollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	csp::common::Array<PointOfInterest> POIs;
+    csp::common::Array<PointOfInterest> POIs;
 };
 
 /// @brief Callback containing a Point Of Interest and enum result used when creating or retrieving a POI.

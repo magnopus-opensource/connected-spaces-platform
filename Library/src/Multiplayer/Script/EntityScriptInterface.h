@@ -33,63 +33,76 @@ class VideoPlayerSpaceComponentScriptInterface;
 class EntityScriptInterface
 {
 public:
-	EntityScriptInterface(SpaceEntity* InEntity = nullptr);
+    EntityScriptInterface(SpaceEntity* InEntity = nullptr);
 
-	using Vector3 = std::vector<float>;
-	using Vector4 = std::vector<float>;
+    using Vector3 = std::vector<float>;
+    using Vector4 = std::vector<float>;
 
-	Vector3 GetPosition() const;
-	void SetPosition(Vector3 Pos);
+    Vector3 GetPosition() const;
+    void SetPosition(Vector3 Pos);
 
-	Vector3 GetScale() const;
-	void SetScale(Vector3 Scale);
+    Vector3 GetGlobalPosition() const;
 
-	Vector4 GetRotation() const;
-	void SetRotation(Vector4 Rot);
+    Vector3 GetScale() const;
+    void SetScale(Vector3 Scale);
 
-	const std::string GetName() const;
-	int64_t GetId() const;
+    Vector3 GetGlobalScale() const;
 
-	void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
+    Vector4 GetRotation() const;
+    void SetRotation(Vector4 Rot);
 
-	void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
-	void PostMessageToScript(std::string Message, std::string MessageParamsJson);
+    Vector4 GetGlobalRotation() const;
 
-	void ClaimScriptOwnership();
+    int64_t GetParentId();
+    void SetParentId(int64_t ParentId);
 
-	std::vector<ComponentScriptInterface*> GetComponents();
+    void RemoveParentEntity();
 
-	template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
+    SpaceEntity* GetParentEntity() const;
+
+    const std::string GetName() const;
+    int64_t GetId() const;
+
+    void SubscribeToPropertyChange(int32_t ComponentId, int32_t PropertyKey, std::string Message);
+
+    void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
+    void PostMessageToScript(std::string Message, std::string MessageParamsJson);
+
+    void ClaimScriptOwnership();
+
+    std::vector<ComponentScriptInterface*> GetComponents();
+
+    template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> GetComponentsOfType();
 
 private:
-	SpaceEntity* Entity;
+    SpaceEntity* Entity;
 };
 
 template <typename ScriptInterface, ComponentType Type> std::vector<ScriptInterface*> EntityScriptInterface::GetComponentsOfType()
 {
-	std::vector<ScriptInterface*> Components;
+    std::vector<ScriptInterface*> Components;
 
-	if (Entity)
-	{
-		const ComponentType ThisType = Type;
+    if (Entity)
+    {
+        const ComponentType ThisType = Type;
 
-		const auto& ComponentMap = *Entity->GetComponents();
-		const auto ComponentKeys = ComponentMap.Keys();
+        const auto& ComponentMap = *Entity->GetComponents();
+        const auto ComponentKeys = ComponentMap.Keys();
 
-		for (int i = 0; i < ComponentKeys->Size(); ++i)
-		{
-			ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
+        for (int i = 0; i < ComponentKeys->Size(); ++i)
+        {
+            ComponentBase* Component = ComponentMap[ComponentKeys->operator[](i)];
 
-			if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
-			{
-				Components.push_back((ScriptInterface*) Component->GetScriptInterface());
-			}
-		}
+            if ((Component != nullptr) && (Component->GetComponentType() == ThisType) && (Component->GetScriptInterface() != nullptr))
+            {
+                Components.push_back((ScriptInterface*)Component->GetScriptInterface());
+            }
+        }
 
-		CSP_DELETE(ComponentKeys);
-	}
+        CSP_DELETE(ComponentKeys);
+    }
 
-	return Components;
+    return Components;
 }
 
 } // namespace csp::multiplayer

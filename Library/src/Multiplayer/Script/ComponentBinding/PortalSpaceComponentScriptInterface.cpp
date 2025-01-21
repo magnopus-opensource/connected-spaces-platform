@@ -22,7 +22,7 @@ namespace csp::multiplayer
 {
 
 csp::multiplayer::PortalSpaceComponentScriptInterface::PortalSpaceComponentScriptInterface(PortalSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

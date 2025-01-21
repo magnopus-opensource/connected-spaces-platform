@@ -16,43 +16,43 @@
 
 #ifndef SKIP_INTERNAL_TESTS
 
-#include "TestHelpers.h"
 #include "Common/Encode.h"
+#include "TestHelpers.h"
 
 #include "gtest/gtest.h"
 
 CSP_INTERNAL_TEST(CSPEngine, EncodeTests, EncodeURI)
 {
-	{
-		// Encoding a string with no reserved characters should produce the same string.
-		const csp::common::String StringWithNoReservedCharacters = "abcdefghijzlmnopqrstuvwxyz";
-		csp::common::String EncodedString = csp::common::Encode::URI(StringWithNoReservedCharacters);
-		EXPECT_EQ(EncodedString, StringWithNoReservedCharacters);
-	}
+    {
+        // Encoding a string with no reserved characters should produce the same string.
+        const csp::common::String StringWithNoReservedCharacters = "abcdefghijzlmnopqrstuvwxyz";
+        csp::common::String EncodedString = csp::common::Encode::URI(StringWithNoReservedCharacters);
+        EXPECT_EQ(EncodedString, StringWithNoReservedCharacters);
+    }
 
-	{
-		// Encoding a string with reserved characters should produce a version of the string that uses the standard URI character encoding scheme.
-		const csp::common::String StringWithReservedCharacters = " *";
-		csp::common::String EncodedString = csp::common::Encode::URI(StringWithReservedCharacters);
-		EXPECT_NE(EncodedString, StringWithReservedCharacters);
-		EXPECT_EQ(EncodedString, "%20%2A");
-	}
+    {
+        // Encoding a string with reserved characters should produce a version of the string that uses the standard URI character encoding scheme.
+        const csp::common::String StringWithReservedCharacters = " *";
+        csp::common::String EncodedString = csp::common::Encode::URI(StringWithReservedCharacters);
+        EXPECT_NE(EncodedString, StringWithReservedCharacters);
+        EXPECT_EQ(EncodedString, "%20%2A");
+    }
 
-	{
-		// Encoding a string with reserved characters and then decoding it should produce a result equal to the original string.
-		const csp::common::String OriginalURL("abc defghij*zlmnopqrst#uvwxyz");
-		csp::common::String EncodedString = csp::common::Encode::URI(OriginalURL);
-		csp::common::String DecodedString = csp::common::Decode::URI(EncodedString);
-		EXPECT_EQ(DecodedString, OriginalURL);
-	}
+    {
+        // Encoding a string with reserved characters and then decoding it should produce a result equal to the original string.
+        const csp::common::String OriginalURL("abc defghij*zlmnopqrst#uvwxyz");
+        csp::common::String EncodedString = csp::common::Encode::URI(OriginalURL);
+        csp::common::String DecodedString = csp::common::Decode::URI(EncodedString);
+        EXPECT_EQ(DecodedString, OriginalURL);
+    }
 
-	{
-		// Double encoding and double decoding should produce the same end-result.
-		const csp::common::String OriginalURL("abc defghij*zlmnopqrst#uvwxyz");
-		csp::common::String EncodedString = csp::common::Encode::URI(OriginalURL, true);
-		csp::common::String DecodedString = csp::common::Decode::URI(EncodedString, true);
-		EXPECT_EQ(DecodedString, OriginalURL);
-	}
+    {
+        // Double encoding and double decoding should produce the same end-result.
+        const csp::common::String OriginalURL("abc defghij*zlmnopqrst#uvwxyz");
+        csp::common::String EncodedString = csp::common::Encode::URI(OriginalURL, true);
+        csp::common::String DecodedString = csp::common::Decode::URI(EncodedString, true);
+        EXPECT_EQ(DecodedString, OriginalURL);
+    }
 }
 
 #endif

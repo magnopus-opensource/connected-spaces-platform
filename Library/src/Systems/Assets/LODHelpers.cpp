@@ -23,85 +23,74 @@
 namespace csp::systems
 {
 
-csp::common::String CreateLODStyleVar(int LODLevel)
-{
-	return std::string("lod:" + std::to_string(LODLevel)).c_str();
-}
+csp::common::String CreateLODStyleVar(int LODLevel) { return std::string("lod:" + std::to_string(LODLevel)).c_str(); }
 
 int GetLODLevelFromStylesArray(const csp::common::Array<csp::common::String>& Styles)
 {
-	for (size_t i = 0; i < Styles.Size(); ++i)
-	{
-		std::string Style = Styles[i].c_str();
-		size_t Pos		  = Style.find("lod:");
+    for (size_t i = 0; i < Styles.Size(); ++i)
+    {
+        std::string Style = Styles[i].c_str();
+        size_t Pos = Style.find("lod:");
 
-		if (Pos != std::string::npos)
-		{
-			return std::stoi(Style.substr(4, 1));
-		}
-	}
+        if (Pos != std::string::npos)
+        {
+            return std::stoi(Style.substr(4, 1));
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 LODChain CreateLODChainFromAssets(const csp::common::Array<Asset>& Assets, const csp::common::String& AssetCollectionId)
 {
-	LODChain Chain;
-	Chain.AssetCollectionId = AssetCollectionId;
+    LODChain Chain;
+    Chain.AssetCollectionId = AssetCollectionId;
 
-	csp::common::List<LODAsset> AssetList;
+    csp::common::List<LODAsset> AssetList;
 
-	if (Assets.Size() == 1)
-	{
-		int LODLevel = csp::systems::GetLODLevelFromStylesArray(Assets[0].Styles);
+    if (Assets.Size() == 1)
+    {
+        int LODLevel = csp::systems::GetLODLevelFromStylesArray(Assets[0].Styles);
 
-		if (LODLevel == -1)
-		{
-			// As there is only 1 asset, return this as LOD 0
-			LODLevel = 0;
-		}
+        if (LODLevel == -1)
+        {
+            // As there is only 1 asset, return this as LOD 0
+            LODLevel = 0;
+        }
 
-		AssetList.Append(csp::systems::LODAsset {Assets[0], LODLevel});
-	}
-	else
-	{
-		for (int i = 0; i < Assets.Size(); ++i)
-		{
-			const csp::systems::Asset& Asset = Assets[i];
-			int LODLevel					 = csp::systems::GetLODLevelFromStylesArray(Asset.Styles);
+        AssetList.Append(csp::systems::LODAsset { Assets[0], LODLevel });
+    }
+    else
+    {
+        for (int i = 0; i < Assets.Size(); ++i)
+        {
+            const csp::systems::Asset& Asset = Assets[i];
+            int LODLevel = csp::systems::GetLODLevelFromStylesArray(Asset.Styles);
 
-			if (LODLevel != -1)
-			{
-				AssetList.Append(csp::systems::LODAsset {Asset, LODLevel});
-			}
-		}
-	}
+            if (LODLevel != -1)
+            {
+                AssetList.Append(csp::systems::LODAsset { Asset, LODLevel });
+            }
+        }
+    }
 
-	Chain.LODAssets = csp::common::Array<LODAsset>(AssetList.Size());
+    Chain.LODAssets = csp::common::Array<LODAsset>(AssetList.Size());
 
-	for (int i = 0; i < Chain.LODAssets.Size(); ++i)
-	{
-		Chain.LODAssets[i] = std::move(AssetList[i]);
-	}
+    for (int i = 0; i < Chain.LODAssets.Size(); ++i)
+    {
+        Chain.LODAssets[i] = std::move(AssetList[i]);
+    }
 
-	csp::common::Sort(Chain.LODAssets,
-					  [](const LODAsset& Asset1, const LODAsset& Asset2)
-					  {
-						  return Asset1.Level < Asset2.Level;
-					  });
+    csp::common::Sort(Chain.LODAssets, [](const LODAsset& Asset1, const LODAsset& Asset2) { return Asset1.Level < Asset2.Level; });
 
-	return Chain;
+    return Chain;
 }
 
 bool ValidateNewLODLevelForChain(const LODChain& Chain, int LODLevel)
 {
-	// Ensure LODLevel doesnt already exist
-	int Index = csp::common::FindIf(Chain.LODAssets,
-									[LODLevel](const LODAsset& LODAsset)
-									{
-										return LODAsset.Level == LODLevel;
-									});
+    // Ensure LODLevel doesnt already exist
+    int Index = csp::common::FindIf(Chain.LODAssets, [LODLevel](const LODAsset& LODAsset) { return LODAsset.Level == LODLevel; });
 
-	return Index == -1;
+    return Index == -1;
 }
 } // namespace csp::systems

@@ -13,6 +13,7 @@ if not POCO.NETSSL_OpenSSL then
         kind "StaticLib"
         language "C++"
         cppdialect "C++17"
+		warnings "Off"
 
         files {
             "%{prj.location}/**.h",

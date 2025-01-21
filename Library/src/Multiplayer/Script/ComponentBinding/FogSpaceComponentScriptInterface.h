@@ -25,26 +25,26 @@ class FogSpaceComponent;
 class FogSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent = nullptr);
+    FogSpaceComponentScriptInterface(FogSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, FogMode);
+    DECLARE_SCRIPT_PROPERTY(int64_t, FogMode);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
 
-	DECLARE_SCRIPT_PROPERTY(float, StartDistance);
-	DECLARE_SCRIPT_PROPERTY(float, EndDistance);
+    DECLARE_SCRIPT_PROPERTY(float, StartDistance);
+    DECLARE_SCRIPT_PROPERTY(float, EndDistance);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Color);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Color);
 
-	DECLARE_SCRIPT_PROPERTY(float, Density);
-	DECLARE_SCRIPT_PROPERTY(float, HeightFalloff);
-	DECLARE_SCRIPT_PROPERTY(float, MaxOpacity);
+    DECLARE_SCRIPT_PROPERTY(float, Density);
+    DECLARE_SCRIPT_PROPERTY(float, HeightFalloff);
+    DECLARE_SCRIPT_PROPERTY(float, MaxOpacity);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVolumetric);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVolumetric);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 };
 
 } // namespace csp::multiplayer

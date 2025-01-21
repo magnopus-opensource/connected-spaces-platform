@@ -14,90 +14,95 @@
  * limitations under the License.
  */
 
-#ifdef RUN_PLATFORM_TESTS
+#include "../PublicAPITests/UserSystemTestHelpers.h"
+#include "CSP/CSPFoundation.h"
+#include "CSP/Systems/SystemsManager.h"
+#include "CSP/Systems/Users/UserSystem.h"
+#include "PlatformTestUtils.h"
+#include "TestHelpers.h"
 
-	#include "../PublicAPITests/UserSystemTestHelpers.h"
-	#include "CSP/CSPFoundation.h"
-	#include "CSP/Systems/SystemsManager.h"
-	#include "CSP/Systems/Users/UserSystem.h"
-	#include "PlatformTestUtils.h"
-	#include "TestHelpers.h"
-
-	#include "gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace csp::multiplayer;
 
+// The WebSocketClientTests will be reviewed as part of OF-1532.
+
 const csp::common::String MULTIPLAYER_URL = "wss://ogs-multiplayer-internal.magnopus-dev.cloud/mag-multiplayer/hubs/v1/multiplayer";
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_START_STOP_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientStartStopTest)
 {
-	// Initialise
-	InitialiseFoundation();
+    // Initialise
+    InitialiseFoundation();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Start
-	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    // Start
+    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
-	// Stop
-	WebSocketStop(WebSocket);
+    // Stop
+    WebSocketStop(WebSocket);
 
-	// Logout
-	LogOut(UserSystem);
+    // Logout
+    LogOut(UserSystem);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendTest)
 {
-	// Initialise
-	InitialiseFoundation();
+    // Initialise
+    InitialiseFoundation();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Start
-	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    // Start
+    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
-	// Send
-	WebSocketSend(WebSocket, "test");
+    // Send
+    WebSocketSend(WebSocket, "test");
 
-	// Stop
-	WebSocketStop(WebSocket);
+    // Stop
+    WebSocketStop(WebSocket);
 
-	// Logout
-	LogOut(UserSystem);
+    // Logout
+    LogOut(UserSystem);
 }
+#endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_SIGNALR_CLIENT_SEND_RECEIVE_TEST
 CSP_INTERNAL_TEST(CSPEngine, WebSocketClientTests, SignalRClientSendReceiveTest)
 {
-	// Initialise
-	InitialiseFoundation();
+    // Initialise
+    InitialiseFoundation();
 
-	auto& SystemsManager = csp::systems::SystemsManager::Get();
-	auto* UserSystem	 = SystemsManager.GetUserSystem();
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
 
-	// Log in
-	csp::common::String UserId;
-	LogIn(UserSystem, UserId);
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
 
-	// Start
-	auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
+    // Start
+    auto* WebSocket = WebSocketStart(MULTIPLAYER_URL);
 
-	// Receive
-	WebSocketSendReceive(WebSocket);
+    // Receive
+    WebSocketSendReceive(WebSocket);
 
-	// Stop
-	WebSocketStop(WebSocket);
+    // Stop
+    WebSocketStop(WebSocket);
 
-	// Logout
-	LogOut(UserSystem);
+    // Logout
+    LogOut(UserSystem);
 }
 #endif
