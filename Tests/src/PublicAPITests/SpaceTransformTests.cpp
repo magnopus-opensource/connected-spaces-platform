@@ -67,7 +67,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityAxiomTest)
 {
     // Two identity matrices should be identity
     const csp::multiplayer::SpaceTransform Identity;
-    const auto result = Identity * Identity;
     EXPECT_EQ((Identity * Identity), Identity);
 }
 #endif
