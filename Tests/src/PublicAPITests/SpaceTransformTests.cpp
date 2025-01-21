@@ -108,9 +108,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
     glm::vec3 Euler = glm::eulerAngles(glm::normalize(glm::quat { Output.Rotation.W, Output.Rotation.X, Output.Rotation.Y, Output.Rotation.Z }));
 
     const float epsilon = 1e-5f; // Matrix operations involving euler conversions arn't terribly stable at the floating point level cross platform.
-    EXPECT_NEAR(Euler.x, 1.57080138f, epsilon); // 90 degrees
-    EXPECT_NEAR(Euler.y, 0.785398126f, epsilon); // 45 degrees
-    EXPECT_NEAR(Euler.z, 0.785398126f, epsilon); // 45 degrees
+    EXPECT_NEAR(Euler.x, glm::radians(90.0f), epsilon); // 90 degrees
+    EXPECT_NEAR(Euler.y, glm::radians(45.0f), epsilon); // 45 degrees
+    EXPECT_NEAR(Euler.z, glm::radians(45.0f), epsilon); // 45 degrees
 
     EXPECT_EQ(Output.Scale, (csp::common::Vector3 { 2.0f, 1.0f, 4.0f }));
 }
@@ -134,9 +134,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTestNonNormalQu
     glm::vec3 Euler = glm::eulerAngles(glm::normalize(glm::quat { Output.Rotation.W, Output.Rotation.X, Output.Rotation.Y, Output.Rotation.Z }));
 
     const float epsilon = 1e-5f; // Matrix operations involving euler conversions arn't terribly stable at the floating point level cross platform.
-    EXPECT_NEAR(Euler.x, 1.57080138f, epsilon); // 90 degrees
-    EXPECT_NEAR(Euler.y, 0.785398126f, epsilon); // 45 degrees
-    EXPECT_NEAR(Euler.z, 0.785398126f, epsilon); // 45 degrees
+    EXPECT_NEAR(Euler.x, glm::radians(90.0f), epsilon); // 90 degrees
+    EXPECT_NEAR(Euler.y, glm::radians(45.0f), epsilon); // 45 degrees
+    EXPECT_NEAR(Euler.z, glm::radians(45.0f), epsilon); // 45 degrees
 
     EXPECT_EQ(Output.Scale, (csp::common::Vector3 { 2.0f, 1.0f, 4.0f }));
 }
