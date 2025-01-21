@@ -17,7 +17,6 @@
 #include "CSP/Multiplayer/SpaceTransform.h"
 
 #define GLM_ENABLE_EXPERIMENTAL // glm::decompose is still technically an experimental feature, but better than a hand-rolled solution in my opinion.
-#include "glm/gtx/string_cast.hpp"
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/quaternion.hpp>

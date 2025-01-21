@@ -22,8 +22,6 @@
 
 #include "gtest/gtest.h"
 
-using namespace csp::common;
-
 #if RUN_ALL_UNIT_TESTS || RUN_SPACETRANSFORM_TESTS || RUN_SPACETRANSFORM_DEFAULT_CONSTRUCT_TEST
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, DefaultConstructTest)
 {
