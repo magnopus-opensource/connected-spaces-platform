@@ -1,12 +1,3 @@
-variable "aws_region" {
-  type = string
-}
-
-variable "aws_profile" {
-  type    = string
-  default = "default"
-}
-
 variable "project" {
   type = string
 }
