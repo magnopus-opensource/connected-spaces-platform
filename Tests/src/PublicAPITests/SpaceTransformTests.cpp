@@ -75,7 +75,9 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityAxiomTest)
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityTransformTest)
 {
     const csp::multiplayer::SpaceTransform Identity;
-    const csp::common::Vector4 NinetyDegAroundXNormalizedQuat { 0.7071068f, 0.0f, 0.0f, 0.7071068f };
+    // For mathy trig reasons, this is quaternion languge for "ninety degrees" (not really ... sort of)
+    const float SqrtTwoOverTwo = std::sqrt(2.0f) / 2.0f;
+    const csp::common::Vector4 NinetyDegAroundXNormalizedQuat { SqrtTwoOverTwo, 0.0f, 0.0f, SqrtTwoOverTwo };
 
     // An identity matrix multiplied into another matrix (in either order) should just be the other matrix
     const csp::multiplayer::SpaceTransform Translated { { 1.0f, 2.0f, 3.0f }, { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f } };
@@ -95,9 +97,12 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationIdentityTransformT
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
 {
     const csp::multiplayer::SpaceTransform Identity;
+    // For mathy trig reasons, this is quaternion languge for "ninety degrees" (not really ... sort of)
+    const float SqrtTwoOverTwo = std::sqrt(2.0f) / 2.0f;
+
     // An angle-axis rotation equivalent to a 90 degree rotation along the (1,1,0) axis.
     // This should produce a final (euler) rotation of approx 90, 45, 45
-    const csp::common::Vector4 NinetyDegAroundXYAxisNormalizedQuat { 0.5f, 0.5f, 0.0f, 0.7071055f };
+    const csp::common::Vector4 NinetyDegAroundXYAxisNormalizedQuat { 0.5f, 0.5f, 0.0f, SqrtTwoOverTwo };
 
     // Apply a complicated transform to the identity.
     const csp::multiplayer::SpaceTransform Transformation { { 1.0f, 0.0f, 1.0f }, NinetyDegAroundXYAxisNormalizedQuat, { 2.0f, 1.0f, 4.0f } };
@@ -120,10 +125,13 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTest)
 CSP_PUBLIC_TEST(CSPEngine, SpaceTransformTests, MulitplicationTRSTestNonNormalQuat)
 {
     const csp::multiplayer::SpaceTransform Identity;
+    // For mathy trig reasons, this is quaternion languge for "ninety degrees" (not really ... sort of)
+    const float SqrtTwoOverTwo = std::sqrt(2.0f) / 2.0f;
+
     // An angle-axis rotation equivilent to a 90 degree rotation along the (1,1,0) axis.
     // This should produce a final (euler) rotation of approx 90, 45, 45
     // Scale by an arbitrary factor to make this non-normal, to test that the transformation code can handle that.
-    const csp::common::Vector4 NinetyDegAroundXYAxisNonNormalizedQuat { 0.5f * 2.5f, 0.5f * 2.5f, 0.0f * 2.5f, 0.7071055f * 2.5f };
+    const csp::common::Vector4 NinetyDegAroundXYAxisNonNormalizedQuat { 0.5f * 2.5f, 0.5f * 2.5f, 0.0f * 2.5f, SqrtTwoOverTwo * 2.5f };
 
     // Apply a complicated transform to the identity.
     const csp::multiplayer::SpaceTransform Transformation { { 1.0f, 0.0f, 1.0f }, NinetyDegAroundXYAxisNonNormalizedQuat, { 2.0f, 1.0f, 4.0f } };
