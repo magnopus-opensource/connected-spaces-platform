@@ -111,4 +111,14 @@ resource "aws_cloudfront_distribution" "main" {
     minimum_protocol_version = "TLSv1.2_2021"
     ssl_support_method       = "sni-only"
   }
+
+  dynamic "custom_error_response" {
+    for_each = [403, 404]
+    content {
+      error_caching_min_ttl = 10
+      error_code            = custom_error_response.value
+      response_code         = custom_error_response.value
+      response_page_path    = "/index.html"
+    }
+  }
 }
