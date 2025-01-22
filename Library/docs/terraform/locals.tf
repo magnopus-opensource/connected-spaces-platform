@@ -1,3 +1,3 @@
 locals {
-  build_artifacts_dir = "./DocumentationArtifacts/html"
+  build_artifacts_dir = "../build/html"
 }
