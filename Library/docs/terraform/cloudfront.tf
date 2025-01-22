@@ -1,5 +1,9 @@
-data "aws_cloudfront_origin_access_identity" "main" {
-  id = var.aws_cloudfront_origin_access_identity_id
+resource "aws_cloudfront_origin_access_control" "main" {
+  name                              = var.bucket_name
+  description                       = "Cloudfront Origin Access Control (${var.bucket_name})"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 resource "aws_cloudfront_response_headers_policy" "main" {
@@ -55,12 +59,9 @@ resource "aws_cloudfront_response_headers_policy" "main" {
 
 resource "aws_cloudfront_distribution" "main" {
   origin {
-    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
-    origin_id   = "S3-${aws_s3_bucket.main.id}"
-
-    s3_origin_config {
-      origin_access_identity = "origin-access-identity/cloudfront/${data.aws_cloudfront_origin_access_identity.main.id}"
-    }
+    domain_name              = aws_s3_bucket.main.bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.main.id
+    origin_id                = "S3-${aws_s3_bucket.main.id}"
   }
 
   enabled         = true

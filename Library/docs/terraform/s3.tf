@@ -2,9 +2,32 @@ resource "aws_s3_bucket" "main" {
   bucket = var.bucket_name
 }
 
-resource "aws_s3_bucket_policy" "main" {
+resource "aws_s3_bucket_policy" "bucket" {
   bucket = aws_s3_bucket.main.id
-  policy = data.aws_iam_policy_document.main.json
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Id": "PolicyForCloudFrontPrivateContent",
+  "Statement": [
+    {
+      "Sid": "AllowCloudFrontServicePrincipalReadOnly",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+      },
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Resource": "arn:aws:s3:::${var.bucket_name}/*",
+      "Condition": {
+        "StringEquals": {
+          "AWS:SourceArn": "${aws_cloudfront_distribution.main.arn}"
+        }
+      }
+    }
+  ]
+}
+POLICY
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
