@@ -15,6 +15,8 @@
  */
 #pragma once
 
+#include "Common/ReplicatedValueImpl.h"
+
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/Array.h"
 #include "CSP/Common/Map.h"
@@ -41,6 +43,8 @@ enum class ReplicatedValueType
     Vector2 = 7,
     StringMap = 8
 };
+
+class ReplicatedValueImpl;
 
 /// @brief ReplicatedValue is an intermediate class that enables clients to pack data into types that are supported by Connected Spaces Platform
 /// replication systems.
@@ -232,24 +236,8 @@ public:
 
 private:
     ReplicatedValueType ReplicatedType;
+    ReplicatedValueImpl* Impl;
 
-    CSP_START_IGNORE
-    union InternalValue
-    {
-        InternalValue();
-        ~InternalValue();
-
-        bool Bool;
-        float Float;
-        int64_t Int;
-        csp::common::String String;
-        csp::common::Vector2 Vector2;
-        csp::common::Vector3 Vector3;
-        csp::common::Vector4 Vector4;
-        csp::common::Map<csp::common::String, ReplicatedValue> StringMap;
-    };
-
-    InternalValue Value;
     CSP_END_IGNORE
 };
 

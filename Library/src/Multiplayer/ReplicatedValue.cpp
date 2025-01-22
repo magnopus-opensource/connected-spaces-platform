@@ -24,305 +24,135 @@ static const csp::common::Vector3 InvalidVector3 = csp::common::Vector3();
 static const csp::common::Vector4 InvalidVector4 = csp::common::Vector4();
 static const csp::common::Map<csp::common::String, ReplicatedValue> InvalidStringMap = csp::common::Map<csp::common::String, ReplicatedValue>();
 
-ReplicatedValue::ReplicatedValue() { ReplicatedType = ReplicatedValueType::InvalidType; }
-
-ReplicatedValue::~ReplicatedValue()
+ReplicatedValue::ReplicatedValue()
 {
-    if (ReplicatedType == ReplicatedValueType::String)
-    {
-        Value.String.~String();
-    }
-    else if (ReplicatedType == ReplicatedValueType::StringMap)
-    {
-        Value.StringMap.~Map();
-    }
+    ReplicatedType = ReplicatedValueType::InvalidType;
+    Impl = CSP_NEW ReplicatedValueImpl();
 }
+
+ReplicatedValue::~ReplicatedValue() { }
 
 ReplicatedValue::ReplicatedValue(bool InValue)
     : ReplicatedType(ReplicatedValueType::Boolean)
 {
-    Value.Bool = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(float InValue)
     : ReplicatedType(ReplicatedValueType::Float)
 {
-    Value.Float = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(int64_t InValue)
     : ReplicatedType(ReplicatedValueType::Integer)
 {
-    Value.Int = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const char* InValue)
     : ReplicatedType(ReplicatedValueType::String)
 {
-    Value.String = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::String& InValue)
     : ReplicatedType(ReplicatedValueType::String)
 {
-    Value.String = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector2& InValue)
     : ReplicatedType(ReplicatedValueType::Vector2)
 {
-    Value.Vector2 = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector3& InValue)
     : ReplicatedType(ReplicatedValueType::Vector3)
 {
-    Value.Vector3 = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Vector4& InValue)
     : ReplicatedType(ReplicatedValueType::Vector4)
 {
-    Value.Vector4 = InValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InValue);
 }
 
 ReplicatedValue::ReplicatedValue(const csp::common::Map<csp::common::String, ReplicatedValue>& InMapValue)
     : ReplicatedType(ReplicatedValueType::StringMap)
 {
-    Value.StringMap = InMapValue;
+    Impl = CSP_NEW ReplicatedValueImpl(InMapValue);
 }
 
-ReplicatedValue::ReplicatedValue(const ReplicatedValue& OtherValue) { *this = OtherValue; }
-
-ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue)
+ReplicatedValue::ReplicatedValue(const ReplicatedValue& OtherValue)
 {
-    switch (InValue.GetReplicatedValueType())
-    {
-    case ReplicatedValueType::Boolean:
-    {
-        SetBool(InValue.GetBool());
-        break;
-    }
-    case ReplicatedValueType::Integer:
-    {
-        SetInt(InValue.GetInt());
-        break;
-    }
-    case ReplicatedValueType::Float:
-    {
-        SetFloat(InValue.GetFloat());
-        break;
-    }
-    case ReplicatedValueType::String:
-    {
-        SetString(InValue.GetString());
-        break;
-    }
-    case ReplicatedValueType::Vector2:
-    {
-        SetVector2(InValue.GetVector2());
-        break;
-    }
-    case ReplicatedValueType::Vector3:
-    {
-        SetVector3(InValue.GetVector3());
-        break;
-    }
-    case ReplicatedValueType::Vector4:
-    {
-        SetVector4(InValue.GetVector4());
-        break;
-    }
-    case ReplicatedValueType::StringMap:
-    {
-        SetStringMap(InValue.GetStringMap());
-        break;
-    }
-    case ReplicatedValueType::InvalidType:
-    {
-        ReplicatedType = ReplicatedValueType::InvalidType;
-        break;
-    }
-    default:
-    {
-        assert(0 && "Unhandled replicated value type!");
-        break;
-    }
-    }
-
-    return *this;
+    this->ReplicatedType = OtherValue.ReplicatedType;
+    this->Impl = CSP_NEW ReplicatedValueImpl(OtherValue.Impl);
 }
 
-bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const
-{
-    bool IsEqual = GetReplicatedValueType() == OtherValue.GetReplicatedValueType();
-    if (IsEqual)
-    {
-        switch (OtherValue.GetReplicatedValueType())
-        {
-        case ReplicatedValueType::Boolean:
-        {
-            IsEqual = GetBool() == OtherValue.GetBool();
-            break;
-        }
-        case ReplicatedValueType::Integer:
-        {
-            IsEqual = GetInt() == OtherValue.GetInt();
-            break;
-        }
-        case ReplicatedValueType::Float:
-        {
-            IsEqual = GetFloat() == OtherValue.GetFloat();
-            break;
-        }
-        case ReplicatedValueType::String:
-        {
-            IsEqual = GetString() == OtherValue.GetString();
-            break;
-        }
-        case ReplicatedValueType::Vector2:
-        {
-            IsEqual = GetVector2() == OtherValue.GetVector2();
-            break;
-        }
-        case ReplicatedValueType::Vector3:
-        {
-            IsEqual = GetVector3() == OtherValue.GetVector3();
-            break;
-        }
-        case ReplicatedValueType::Vector4:
-        {
-            IsEqual = GetVector4() == OtherValue.GetVector4();
-            break;
-        }
-        case ReplicatedValueType::StringMap:
-        {
-            IsEqual = GetStringMap() == OtherValue.GetStringMap();
-            break;
-        }
-        default:
-        {
-            assert(0 && "Unhandled replicated value type!");
-            break;
-        }
-        }
-    }
-    return IsEqual;
-}
+ReplicatedValue& ReplicatedValue::operator=(const ReplicatedValue& InValue) { return *this; }
+
+bool ReplicatedValue::operator==(const ReplicatedValue& OtherValue) const { return (*Impl) == OtherValue.Impl; }
 bool ReplicatedValue::operator!=(const ReplicatedValue& OtherValue) const { return (*this == OtherValue) == false; }
 
-bool ReplicatedValue::operator<(const ReplicatedValue& OtherValue) const
-{
-    switch (OtherValue.GetReplicatedValueType())
-    {
-    case ReplicatedValueType::Boolean:
-    {
-        return GetBool() < OtherValue.GetBool();
-    }
-    case ReplicatedValueType::Integer:
-    {
-        return GetInt() < OtherValue.GetInt();
-    }
-    case ReplicatedValueType::Float:
-    {
-        return GetFloat() < OtherValue.GetFloat();
-    }
-    case ReplicatedValueType::String:
-    {
-        return GetString() < OtherValue.GetString();
-    }
-    default:
-    {
-        assert(0 && "Unhandled replicated value type!");
-        break;
-    }
-    }
+bool ReplicatedValue::operator<(const ReplicatedValue& OtherValue) const { return (*Impl) < OtherValue.Impl; }
 
-    return false;
-}
-
-bool ReplicatedValue::operator>(const ReplicatedValue& OtherValue) const
-{
-    switch (OtherValue.GetReplicatedValueType())
-    {
-    case ReplicatedValueType::Boolean:
-    {
-        return GetBool() > OtherValue.GetBool();
-    }
-    case ReplicatedValueType::Integer:
-    {
-        return GetInt() > OtherValue.GetInt();
-    }
-    case ReplicatedValueType::Float:
-    {
-        return GetFloat() > OtherValue.GetFloat();
-    }
-    case ReplicatedValueType::String:
-    {
-        return GetString() > OtherValue.GetString();
-    }
-    default:
-    {
-        assert(0 && "Unhandled replicated value type!");
-        break;
-    }
-    }
-
-    return false;
-}
+bool ReplicatedValue::operator>(const ReplicatedValue& OtherValue) const { return (*Impl) > OtherValue.Impl; }
 
 void ReplicatedValue::SetBool(bool InValue)
 {
     ReplicatedType = ReplicatedValueType::Boolean;
-    Value.Bool = InValue;
+    Impl->Set(InValue);
 }
 
 bool ReplicatedValue::GetBool() const
 {
     assert(ReplicatedType == ReplicatedValueType::Boolean);
-    return Value.Bool;
+    return Impl->Get<bool>();
 }
 
 void ReplicatedValue::SetFloat(float InValue)
 {
     ReplicatedType = ReplicatedValueType::Float;
-    Value.Float = InValue;
+    Impl->Set(InValue);
 }
 
 float ReplicatedValue::GetFloat() const
 {
     assert(ReplicatedType == ReplicatedValueType::Float);
-    return Value.Float;
+    return Impl->Get<float>();
 }
 
 void ReplicatedValue::SetInt(int64_t InValue)
 {
     ReplicatedType = ReplicatedValueType::Integer;
-    Value.Int = InValue;
+    Impl->Set(InValue);
 }
 
 int64_t ReplicatedValue::GetInt() const
 {
     assert(ReplicatedType == ReplicatedValueType::Integer);
-    return Value.Int;
+    return Impl->Get<int64_t>();
 }
 
 void ReplicatedValue::SetString(const char* InValue)
 {
     ReplicatedType = ReplicatedValueType::String;
-    Value.String = InValue;
+    Impl->Set(InValue);
 }
 
 void ReplicatedValue::SetString(const csp::common::String& InValue)
 {
     ReplicatedType = ReplicatedValueType::String;
-    Value.String = InValue;
+    Impl->Set(InValue.c_str());
 }
 
 const csp::common::String& ReplicatedValue::GetString() const
 {
     assert(ReplicatedType == ReplicatedValueType::String);
-    return Value.String;
+    return Impl->Get<csp::common::String>();
 }
 
 const csp::common::String& ReplicatedValue::GetDefaultString()
@@ -334,13 +164,13 @@ const csp::common::String& ReplicatedValue::GetDefaultString()
 void ReplicatedValue::SetVector2(const csp::common::Vector2& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector2;
-    Value.Vector2 = InValue;
+    Impl->Set(InValue);
 }
 
 const csp::common::Vector2& ReplicatedValue::GetVector2() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector2);
-    return Value.Vector2;
+    return Impl->Get<csp::common::Vector2>();
 }
 
 const csp::common::Vector2& ReplicatedValue::GetDefaultVector2() { return InvalidVector2; }
@@ -348,13 +178,13 @@ const csp::common::Vector2& ReplicatedValue::GetDefaultVector2() { return Invali
 void ReplicatedValue::SetVector3(const csp::common::Vector3& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector3;
-    Value.Vector3 = InValue;
+    Impl->Set(InValue);
 }
 
 const csp::common::Vector3& ReplicatedValue::GetVector3() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector3);
-    return Value.Vector3;
+    return Impl->Get<csp::common::Vector3>();
 }
 
 const csp::common::Vector3& ReplicatedValue::GetDefaultVector3() { return InvalidVector3; }
@@ -362,13 +192,13 @@ const csp::common::Vector3& ReplicatedValue::GetDefaultVector3() { return Invali
 void ReplicatedValue::SetVector4(const csp::common::Vector4& InValue)
 {
     ReplicatedType = ReplicatedValueType::Vector4;
-    Value.Vector4 = InValue;
+    Impl->Set(InValue);
 }
 
 const csp::common::Vector4& ReplicatedValue::GetVector4() const
 {
     assert(ReplicatedType == ReplicatedValueType::Vector4);
-    return Value.Vector4;
+    return Impl->Get<csp::common::Vector4>();
 }
 
 const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return InvalidVector4; }
@@ -376,21 +206,17 @@ const csp::common::Vector4& ReplicatedValue::GetDefaultVector4() { return Invali
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetStringMap() const
 {
     assert(ReplicatedType == ReplicatedValueType::StringMap);
-    return Value.StringMap;
+    return Impl->Get<csp::common::Map<csp::common::String, ReplicatedValue>>();
 }
 
 void ReplicatedValue::SetStringMap(const csp::common::Map<csp::common::String, ReplicatedValue>& InValue)
 {
     ReplicatedType = ReplicatedValueType::StringMap;
-    Value.StringMap = InValue;
+    Impl->Set(InValue);
 }
 
 const csp::common::Map<csp::common::String, ReplicatedValue>& ReplicatedValue::GetDefaultStringMap() { return InvalidStringMap; }
 
-size_t ReplicatedValue::GetSizeOfInternalValue() { return sizeof(InternalValue); }
-
-ReplicatedValue::InternalValue::InternalValue() { memset(this, 0x0, sizeof(InternalValue)); }
-
-ReplicatedValue::InternalValue::~InternalValue() { }
+size_t ReplicatedValue::GetSizeOfInternalValue() { return 0; }
 
 } // namespace csp::multiplayer
