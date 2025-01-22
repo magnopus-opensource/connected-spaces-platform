@@ -30,3 +30,7 @@ variable "aws_cloudfront_origin_access_identity_id" {
 variable "aws_wafv2_web_acl_arn" {
   type = string
 }
+
+variable "build_dir" {
+  type = string
+}
