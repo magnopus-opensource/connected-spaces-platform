@@ -1,4 +1,4 @@
-# Assets
+#Assets
 
 Assets form the foundation of any space in CSP. They bring visual elements to life and add interactivity. By combining various assets, you can create detailed environments where users can explore, interact, and engage with each other in real-time.
 
@@ -54,11 +54,12 @@ An asset collection is a group of related assets that can be managed together. T
 * **Step 3:** Confirm the collection was successfully created.
 
 ```
-void CreateAssetCollection(const std::string& AssetCollectionName) {
+void CreateAssetCollection(const std::string& AssetCollectionName)
+{
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    
-    AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(),
-        nullptr, csp::systems::EAssetCollectionType::DEFAULT, nullptr,
+
+    AssetSystem->CreateAssetCollection(CurrentSpaceId, nullptr, AssetCollectionName.c_str(), nullptr, csp::systems::EAssetCollectionType::DEFAULT,
+        nullptr,
         [&](const csp::systems::AssetCollectionResult Result)
         {
             if (Result.GetResultCode() == csp::systems::EResultCode::Success)
@@ -88,22 +89,22 @@ Assets, such as images or models, must be created within an asset collection. Th
 * **Step 3:** Confirm the asset creation.
 
 ```
-void CreateImageAsset(const std::string& AssetName) {
+void CreateImageAsset(const std::string& AssetName)
+{
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr,
-    csp::systems::EAssetType::IMAGE, [](const csp::systems::AssetResult Result)
-    {
-        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+    AssetSystem->CreateAsset(AssetCollection, AssetName.c_str(), nullptr, nullptr, csp::systems::EAssetType::IMAGE,
+        [](const csp::systems::AssetResult Result)
         {
-            auto Asset = Result.GetAsset();
-            cout << "Created a new Asset called " << Asset.Name
-            << ". Id: " << Asset.Id << endl;
-        }
-        else
-        {
-            cout << "Error: Could not create a new Asset. " << Result.GetResponseBody() << endl;
-        }
-    });
+            if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+            {
+                auto Asset = Result.GetAsset();
+                cout << "Created a new Asset called " << Asset.Name << ". Id: " << Asset.Id << endl;
+            }
+            else
+            {
+                cout << "Error: Could not create a new Asset. " << Result.GetResponseBody() << endl;
+            }
+        });
 }
 ```
 
@@ -121,18 +122,18 @@ In CSP, you can upload assets either via a `FileAssetDataSource` or a `BufferAss
 
     ```
     csp::systems::BufferAssetDataSource MyAssetBuffer;
-    MyAssetBuffer.Buffer = imageData;
-    MyAssetBuffer.BufferLength = sizeof(imageData);
-    MyAssetBuffer.SetMimeType("image/png");
-    ```
+MyAssetBuffer.Buffer = imageData;
+MyAssetBuffer.BufferLength = sizeof(imageData);
+MyAssetBuffer.SetMimeType("image/png");
+```
 
-2. **FileAssetDataSource**  
-    This method uses a file path to upload an asset directly from a local file. It is suitable when the asset exists as a separate file and can be easily referenced.  
+    2.
+    * *FileAssetDataSource** This method uses a file path to upload an asset directly from a local
+           file.It is suitable when the asset exists as a separate file and can be easily referenced.  
 
-    ```
-    csp::systems::FileAssetDataSource MyAssetFile;
-    MyAssetFile.FilePath = "path/to/asset.png";
-    MyAssetFile.SetMimeType("image/png");
+    ``` csp::systems::FileAssetDataSource MyAssetFile;
+MyAssetFile.FilePath = "path/to/asset.png";
+MyAssetFile.SetMimeType("image/png");
     ```
 
 #### Step-by-Step Guide
@@ -144,69 +145,75 @@ The following example demonstrates an entire flow for uploading an asset from a 
 
 ```
 void UploadAsset()
-{
-    promise<void> CallbackPromise;
-    future<void> CallbackFuture = CallbackPromise.get_future();
-
-    //Create Asset Data Source from file
-    csp::systems::FileAssetDataSource AssetDataSource;
-    AssetDataSource.FilePath = "TestAsset/TestImage.png";
-    AssetDataSource.SetMimeType("image/png");
-
-    //Upload Asset
-    csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource, [&CallbackPromise](const csp::systems::UriResult& Result)
     {
-        if(Result.GetResultCode() == csp::systems::EResultCode::Success)
-        {
-            cout << "Uploaded Test Asset from path: " << AssetDataSource.FilePath << endl;
-            CallbackPromise.set_value();
-        }
-        else
-        {
-            cout << "Error: Could not upload Test Asset. " << Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
+        promise<void> CallbackPromise;
+        future<void> CallbackFuture = CallbackPromise.get_future();
 
-    CallbackFuture.wait();
-}
-```
+        // Create Asset Data Source from file
+        csp::systems::FileAssetDataSource AssetDataSource;
+        AssetDataSource.FilePath = "TestAsset/TestImage.png";
+        AssetDataSource.SetMimeType("image/png");
 
-**Explanation:**  
-This function handles the file upload process. It first defines the file path, assigns the correct MIME type, and uploads the asset data to the server. Once completed, it confirms the upload or shows an error message.
+        // Upload Asset
+        csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+        AssetSystem->UploadAssetData(AssetCollection, Asset, AssetDataSource,
+            [&CallbackPromise](const csp::systems::UriResult& Result)
+            {
+                if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+                {
+                    cout << "Uploaded Test Asset from path: " << AssetDataSource.FilePath << endl;
+                    CallbackPromise.set_value();
+                }
+                else
+                {
+                    cout << "Error: Could not upload Test Asset. " << Result.GetResponseBody() << endl;
+                    CallbackPromise.set_value();
+                }
+            });
 
-### Deleting an Asset
+        CallbackFuture.wait();
+    }
+    ```
 
-Assets can be deleted from a collection if they are no longer needed. The following example demonstrates the deletion process.
+        ** Explanation : **This function handles the file upload process.It first defines the file path,
+        assigns the correct MIME type, and uploads the asset data to the server.Once completed,
+        it confirms the upload
+        or shows an error message
+                .
 
-**Step-by-Step Guide:**
+            ## #Deleting an Asset
 
-* **Step 1:** Call the `DeleteAsset` function.  
-* **Step 2:** Confirm that the asset has been successfully deleted.
+                Assets can be deleted from a collection if they are no longer needed.The following example demonstrates the deletion process.
 
-```
-void DeleteAsset() {
-    promise<void> CallbackPromise;
-    future<void> CallbackFuture = CallbackPromise.get_future();
+                    ** Step
+            - by
+            - Step Guide : **
 
-    csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    AssetSystem->DeleteAsset(AssetCollection, Asset, [&CallbackPromise](const csp::systems::NullResult Result)
+                           ***Step 1 : **Call the `DeleteAsset` function.*** Step 2 : **Confirm that the asset has been successfully deleted.
+
+``` void DeleteAsset()
     {
-        if(Result.GetResultCode() == csp::systems::EResultCode::Success)
-        {
-            cout << "Deleted Asset called " << Asset.Name << ". Id: " << Asset.Id << endl;
-            CallbackPromise.set_value();
-        }
-        else
-        {
-            cout << "Error: Could not delete Asset. " << Result.GetResponseBody() << endl;
-            CallbackPromise.set_value();
-        }
-    });
-    
-    CallbackFuture.wait();
-}
+        promise<void> CallbackPromise;
+        future<void> CallbackFuture = CallbackPromise.get_future();
+
+        csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+        AssetSystem->DeleteAsset(AssetCollection, Asset,
+            [&CallbackPromise](const csp::systems::NullResult Result)
+            {
+                if (Result.GetResultCode() == csp::systems::EResultCode::Success)
+                {
+                    cout << "Deleted Asset called " << Asset.Name << ". Id: " << Asset.Id << endl;
+                    CallbackPromise.set_value();
+                }
+                else
+                {
+                    cout << "Error: Could not delete Asset. " << Result.GetResponseBody() << endl;
+                    CallbackPromise.set_value();
+                }
+            });
+
+        CallbackFuture.wait();
+    }
 ```
 
 **Explanation:**  
@@ -245,10 +252,11 @@ To manage assets effectively, you can query them based on different attributes l
 
     ```
     csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    
-    AssetSystem->GetAssetsInCollection(AssetCollection, [](const csp::systems::AssetsResult& Result)
+
+AssetSystem->GetAssetsInCollection(AssetCollection,
+    [](const csp::systems::AssetsResult& Result)
     {
-        if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
             for (size_t i = 0; i < Result.GetAssets().Size(); i++)
             {
@@ -260,22 +268,25 @@ To manage assets effectively, you can query them based on different attributes l
             cout << "Error retrieving assets: " << Result.GetResponseBody() << endl;
         }
     });
-    ```
-    
-    **Explanation:**  
-    This code queries all assets in a specified asset collection and prints their names and Ids. It provides a straightforward way to retrieve and manage assets associated with a particular collection.
+```
 
-2. **Querying a Single Asset by Id**  
-    This method retrieves a specific asset using its unique Id. It is ideal when you need to access a known asset quickly.
+    ** Explanation : ** This code queries all assets in a specified asset collection and prints their
+                         names and Ids.It provides a straightforward way to retrieve and manage assets associated with a particular collection
+                             .
 
-    ```
-    csp::systems::AssetSystem* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
-    
-    AssetSystem->GetAssetById(AssetCollectionId, AssetId, [](const csp::systems::AssetResult& Result)
+                     2. ** Querying a Single Asset by Id** This method retrieves a specific asset using its unique
+                         Id.It is ideal when you need to access a known asset quickly.
+
+    ``` csp::systems::AssetSystem* AssetSystem
+    = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+AssetSystem->GetAssetById(AssetCollectionId, AssetId,
+    [](const csp::systems::AssetResult& Result)
     {
-        if(Result.GetResultCode() == csp::systems::EResultCode::Success)
+        if (Result.GetResultCode() == csp::systems::EResultCode::Success)
         {
-            cout << "Asset found: " << Result.GetAsset().Name << " (Id: " << Result.GetAsset().Id << ")" << endl; }
+            cout << "Asset found: " << Result.GetAsset().Name << " (Id: " << Result.GetAsset().Id << ")" << endl;
+        }
         else
         {
             cout << "Error retrieving asset: " << Result.GetResponseBody() << endl;
