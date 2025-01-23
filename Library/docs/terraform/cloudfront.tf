@@ -64,9 +64,10 @@ resource "aws_cloudfront_distribution" "main" {
     origin_id                = "S3-${aws_s3_bucket.main.id}"
   }
 
-  enabled         = true
-  is_ipv6_enabled = false # Using IPv4 only to mitigate VPN routing issues
-  web_acl_id      = var.aws_wafv2_web_acl_arn
+  enabled             = true
+  is_ipv6_enabled     = false # Using IPv4 only to mitigate VPN routing issues
+  web_acl_id          = var.aws_wafv2_web_acl_arn
+  default_root_object = "index.html"
 
   aliases = concat(["${var.project_shortname}.${data.aws_route53_zone.canonical.name}"], var.alias_aws_public_zone_id != null ? [data.aws_route53_zone.alias[0].name] : [])
 
