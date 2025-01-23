@@ -1278,6 +1278,49 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_ESTABLISHED_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionEstablishedTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Setup Connection callback
+    bool ConnectionCallbackCalled = false;
+    csp::common::String ConnectionMessage;
+
+    auto ConnectionCallback = [&ConnectionCallbackCalled, &ConnectionMessage](csp::common::String Message)
+    {
+        if (ConnectionCallbackCalled)
+        {
+            return;
+        }
+
+        ConnectionMessage = Message;
+        ConnectionCallbackCalled = true;
+    };
+    Connection->SetConnectionCallback(ConnectionCallback);
+
+    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Disconnected);
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    WaitForCallback(ConnectionCallbackCalled);
+
+    EXPECT_TRUE(ConnectionCallbackCalled);
+    EXPECT_EQ(ConnectionMessage, "Success");
+    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Connected);
+
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_DELETE_MULTIPLE_ENTITIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, DeleteMultipleEntitiesTest)
 {

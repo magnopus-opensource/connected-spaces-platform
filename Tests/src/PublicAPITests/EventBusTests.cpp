@@ -108,6 +108,12 @@ public:
 
     void RegisterSystemCallback()
     {
+        if (!EventBusPtr)
+        {
+            CSP_LOG_ERROR_MSG("Error: Failed to register TestSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+            return;
+        }
+
         if (!TestCallback)
         {
             return;
@@ -447,7 +453,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback1Called = false;
 
     // Test that registering a system when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.\n";
+    TestMsg = "Error: there is already a system registered for TestEvent.";
     TestSystem2->SetSystemCallback(TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
@@ -470,7 +476,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback2Called = false;
 
     // Test that registering a callback when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.\n";
+    TestMsg = "Error: there is already a system registered for TestEvent.";
     TestCallback1Called = false; // clean up
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
@@ -494,7 +500,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback1Called = false;
 
     // Test that registering a system when there already is a registered callback does not work
-    TestMsg = "Error: there is already a callback registered for TestEvent.\n";
+    TestMsg = "Error: there is already a callback registered for TestEvent.";
     TestSystem1->SetSystemCallback(TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
@@ -518,7 +524,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 
     // Test that registering a callback when there already is a registered callback does not work
     EventBus->StopListenNetworkEvent("TestEvent"); // clean up
-    TestMsg = "Error: there is already a callback registered for TestEvent.\n";
+    TestMsg = "Error: there is already a callback registered for TestEvent.";
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->ListenNetworkEvent("TestEvent", TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);

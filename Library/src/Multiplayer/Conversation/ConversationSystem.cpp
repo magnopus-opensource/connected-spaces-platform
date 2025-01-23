@@ -712,6 +712,12 @@ CSP_EVENT void ConversationSystem::SetConversationSystemCallback(ConversationSys
 
 void ConversationSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register ConversationSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!ConversationSystemCallback)
     {
         return;

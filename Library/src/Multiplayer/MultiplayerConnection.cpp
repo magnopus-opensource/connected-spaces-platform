@@ -205,6 +205,7 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
             }
 
             Connected = true;
+            INVOKE_IF_NOT_NULL(ConnectionCallback, "Success");
 
             DeleteOwnedEntities(
                 [this, Callback](ErrorCode Error)

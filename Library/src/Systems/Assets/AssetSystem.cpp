@@ -1136,29 +1136,35 @@ void AssetSystem::GetMaterial(const csp::common::String& AssetCollectionId, cons
     GetAssetCollectionById(AssetCollectionId, GetAssetCollectionCB);
 }
 
-CSP_EVENT void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
+void AssetSystem::SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback)
 {
     AssetDetailBlobChangedCallback = Callback;
 
-    // If MaterialChangedCallback hasn't been registered, we need to register
-    if (!MaterialChangedCallback)
-    {
-        RegisterSystemCallback();
-    }
+    RegisterSystemCallback();
 }
 
 void AssetSystem::SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback)
 {
     MaterialChangedCallback = Callback;
 
-    // If AssetDetailBlobChangedCallback hasn't been registered, we need to register
-    if (!AssetDetailBlobChangedCallback)
-    {
-        RegisterSystemCallback();
-    }
+    RegisterSystemCallback();
 }
 
-void AssetSystem::RegisterSystemCallback() { EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this); }
+void AssetSystem::RegisterSystemCallback()
+{
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register AssetSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
+    if (!MaterialChangedCallback && !AssetDetailBlobChangedCallback)
+    {
+        return;
+    }
+
+    EventBusPtr->ListenNetworkEvent("AssetDetailBlobChanged", this);
+}
 
 void AssetSystem::DeregisterSystemCallback()
 {
