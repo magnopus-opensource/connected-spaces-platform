@@ -62,16 +62,6 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
     return SequenceUpdateType;
 }
 
-std::string RemoveIdPrefix(const std::string& Id)
-{
-    if (Id.size() > 5)
-    {
-        return Id.substr(5);
-    }
-
-    return Id;
-}
-
 csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
