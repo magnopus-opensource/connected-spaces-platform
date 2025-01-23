@@ -52,6 +52,42 @@ enum class ConversationPropertyKeys
 	Num
 };
 
+/// @ingroup ConversationSpaceComponent
+/// @brief Data class used to contain information for GetNumberOfReplies.
+class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
+{
+	/** @cond DO_NOT_DOCUMENT */
+	friend class ConversationSpaceComponent;
+
+	CSP_START_IGNORE
+	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+	CSP_END_IGNORE
+	/** @endcond */
+
+public:
+	/// @brief Gets the number of replies from the result
+	/// @return : The number of replies
+	uint64_t GetCount() const;
+
+protected:
+	NumberOfRepliesResult() = delete;
+	NumberOfRepliesResult(void*) : Count {0} {};
+
+private:
+	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+	void SetCount(uint64_t Value);
+
+	CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
+		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()), Count {0} {};
+
+	uint64_t Count;
+};
+
+/// @brief Callback containing number of replies.
+/// @param Result NumberOfRepliesResult : result class
+typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
+
 
 /// @ingroup ConversationSpaceComponent
 /// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
@@ -112,6 +148,10 @@ public:
 	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
+	/// @brief Gets the Number Of Replies of the conversation.
+	/// @param Callback NumberOfRepliesResultCallback : callback when asynchronous task finishes
+	CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
+
 	/// \addtogroup IPositionComponent
 	/// @{
 	/// @copydoc IPositionComponent::GetPosition()
@@ -151,10 +191,6 @@ public:
 	/// @brief Gets the value for the camera position of the conversation.
 	/// @return The camera view position.
 	const csp::common::Vector3& GetConversationCameraPosition() const;
-
-	/// @brief Gets the Number Of Replies of the conversation.
-	/// TODO: comment
-	const void GetNumberOfReplies(csp::systems::UInt64Result Callback) const;
 
 private:
 	void SetConversationId(const csp::common::String& Value);

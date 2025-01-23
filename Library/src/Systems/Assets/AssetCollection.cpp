@@ -112,10 +112,10 @@ void PrototypeDtoToAssetCollection(const chs::PrototypeDto& Dto, csp::systems::A
 		AssetCollection.IsUnique = Dto.GetHighlander();
 	}
 
-    if (Dto.HasOrganizationId())
+	if (Dto.HasOrganizationId())
 	{
 		AssetCollection.OrganizationId = Dto.GetOrganizationId();
-    }
+	}
 }
 
 } // namespace
@@ -264,6 +264,22 @@ void AssetCollectionsResult::FillResultTotalCount(const csp::common::String& Jso
 				ResultTotalCount = ConvertedTotalCount;
 			}
 		}
+	}
+}
+uint64_t AssetCollectionCountResult::GetCount() const
+{
+	return Count;
+}
+void AssetCollectionCountResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+
+	const auto* Response = ApiResponse->GetResponse();
+	const auto& Headers	 = Response->GetPayload().GetHeaders();
+
+	if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+	{
+		Count = std::stoull(Response->GetPayload().GetContent().c_str());
 	}
 }
 } // namespace csp::systems

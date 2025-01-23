@@ -314,36 +314,6 @@ private:
 	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 };
 
-/// @ingroup Asset System
-/// @brief Data class used to contain information for GetAssetCollectionCount.
-class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
-{
-	/** @cond DO_NOT_DOCUMENT */
-	friend class AssetSystem;
-
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
-
-public:
-	/// TODO: comment
-	uint64_t GetCount() const;
-
-protected:
-	NumberOfRepliesResult() = delete;
-	NumberOfRepliesResult(void*) : Count {0} {};
-
-private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
-
-	CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
-		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()), Count {0} {};
-
-	uint64_t Count;
-};
-
-
 /// @brief Callback containing asset.
 /// @param Result CreateAssetResult : result class
 typedef std::function<void(const AssetResult& Result)> AssetResultCallback;
@@ -359,9 +329,5 @@ typedef std::function<void(const UriResult& Result)> UriResultCallback;
 /// @brief Callback containing asset data.
 /// @param Result GetAssetsResult : result class
 typedef std::function<void(const AssetDataResult& Result)> AssetDataResultCallback;
-
-/// @brief Callback containing number of replies.
-/// @param Result NumberOfRepliesResult : result class
-typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
 
 } // namespace csp::systems

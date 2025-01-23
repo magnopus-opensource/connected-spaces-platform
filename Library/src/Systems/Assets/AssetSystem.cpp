@@ -493,7 +493,7 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
 										  const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
 										  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 										  const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
-										  csp::systems::NumberOfRepliesResultCallback Callback)
+										  csp::systems::AssetCollectionCountResultCallback Callback)
 {
 	std::optional<std::vector<String>> PrototypeIds	  = Convert(Ids);
 	std::optional<String> ParentPrototypeId			  = Convert(ParentId);
@@ -517,8 +517,8 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
 	std::optional<std::vector<String>> PrototypeTags = Convert(Tags);
 	std::optional<std::vector<String>> GroupIds		 = Convert(SpaceIds);
 
-	services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<csp::systems::NumberOfRepliesResultCallback,
-																			   csp::systems::NumberOfRepliesResult,
+	services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<csp::systems::AssetCollectionCountResultCallback,
+																			   csp::systems::AssetCollectionCountResult,
 																			   void,
 																			   services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
 

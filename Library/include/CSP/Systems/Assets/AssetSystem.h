@@ -156,14 +156,21 @@ public:
 														const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 														AssetCollectionResultCallback Callback);
 
-	/// TODO: comment
+	/// @brief Retrieves the number asset collections based on the specified search criteria.
+	/// @param ParentId csp::common::String : optional asset collection parent id to get asset collections associated with it
+	/// @param Names csp::common::Optional<csp::common::Array<csp::common::String>> : optional array of strings representing asset
+	/// @param Types EAssetCollectionType : type of the asset collection
+	/// @param Tags csp::common::Array<csp::common::String> : optional array of strings representing asset collection tags
+	/// collection names
+	/// @param SpaceIds csp::common::Array<csp::common::String> : optional space ids to get asset collections associated with them
+	/// @param Callback AssetCollectionCountResultCallback : callback when asynchronous task finishes
 	CSP_ASYNC_RESULT void GetAssetCollectionCount(const csp::common::Optional<csp::common::Array<csp::common::String>>& Ids,
 												  const csp::common::Optional<csp::common::String>& ParentId,
 												  const csp::common::Optional<csp::common::Array<csp::common::String>>& Names,
 												  const csp::common::Optional<csp::common::Array<EAssetCollectionType>>& Types,
 												  const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
 												  const csp::common::Optional<csp::common::Array<csp::common::String>>& SpaceIds,
-												  csp::systems::NumberOfRepliesResultCallback Callback);
+												  csp::systems::AssetCollectionCountResultCallback Callback);
 
 	/// @brief Creates a new asset.
 	/// @param AssetCollection AssetCollection : the parent collection for the asset to be associated with

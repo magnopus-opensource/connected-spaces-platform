@@ -731,9 +731,21 @@ const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPos
 	return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
 }
 
-const void ConversationSpaceComponent::GetNumberOfReplies(UInt64Result Callback) const
+void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallback Callback)
 {
-	return void();
+	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+	auto GetMessageCountCallback = [Callback, this](const csp::systems::AssetCollectionCountResult& GetMessageResult)
+	{
+		NumberOfRepliesResult Result(GetMessageResult);
+		Result.SetCount(GetMessageResult.GetCount());
+		Callback(Result);
+	};
+
+	auto ConversationId													  = GetConversationId();
+	static const Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::COMMENT};
+
+	AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
@@ -826,6 +838,21 @@ void ConversationSpaceComponent::DeleteMessages(csp::common::Array<csp::systems:
 	const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
 	AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
+}
+
+uint64_t NumberOfRepliesResult::GetCount() const
+{
+	return Count;
+}
+
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+	ResultBase::OnResponse(ApiResponse);
+}
+
+void NumberOfRepliesResult::SetCount(uint64_t Value)
+{
+	Count = Value;
 }
 
 } // namespace csp::multiplayer
