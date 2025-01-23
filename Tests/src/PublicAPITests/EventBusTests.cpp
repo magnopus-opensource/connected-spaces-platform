@@ -453,7 +453,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback1Called = false;
 
     // Test that registering a system when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.";
+    TestMsg = "Error: there is already a system registered for TestEvent. Deregister it first.";
     TestSystem2->SetSystemCallback(TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
