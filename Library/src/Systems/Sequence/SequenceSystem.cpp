@@ -107,7 +107,7 @@ void SequenceSystem::UpdateSequence(const String& SequenceKey, const String& Ref
         = SequenceAPI->CreateHandler<SequenceResultCallback, SequenceResult, void, chs::SequenceDto>(Callback, nullptr);
 
     static_cast<chs::SequenceApi*>(SequenceAPI)
-        ->apiV1SequencesPut(SequenceKey, // NewKey
+        ->apiV1SequencesPut(csp::common::Encode::URI(SequenceKey), // NewKey
             SequenceInfo, // Dto
             ResponseHandler, // ResponseHandler
             CancellationToken::Dummy() // CancellationToken
