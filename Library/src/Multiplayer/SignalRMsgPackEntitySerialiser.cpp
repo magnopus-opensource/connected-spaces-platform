@@ -419,12 +419,12 @@ void SignalRMsgPackEntitySerialiser::AddViewComponent(uint16_t Id, const Replica
 signalr::value SignalRMsgPackEntitySerialiser::Finalise() { return signalr::value(Fields); }
 
 SignalRMsgPackEntityDeserialiser::SignalRMsgPackEntityDeserialiser(const signalr::value& Object)
-    : CurrentState(SerialiserState::Initial)
-    , Object(&Object)
+    : Object(&Object)
+    , CurrentState(SerialiserState::Initial)
     , Fields(nullptr)
+    , CurrentArray(nullptr)
     , Components(nullptr)
     , ComponentPropertyCount(0)
-    , CurrentArray(nullptr)
 {
 }
 
