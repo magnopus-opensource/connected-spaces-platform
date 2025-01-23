@@ -71,5 +71,6 @@ resource "aws_s3_object" "files" {
   key         = each.key
   source      = "${var.build_dir}/${each.value}"
   source_hash = filemd5("${var.build_dir}/${each.value}")
+  content_type = lookup(local.mime_types, regex("\\.[^.]+$", each.value), null)
   acl         = "private"
 }
