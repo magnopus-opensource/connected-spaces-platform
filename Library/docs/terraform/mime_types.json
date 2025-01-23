@@ -23,6 +23,7 @@
     ".class": "application/x-java-applet",
     ".cpio": "application/x-cpio",
     ".crx": "application/x-chrome-extension",
+    ".css": "text/css",
     ".csv": "text/csv",
     ".dae": "model/vnd.collada+xml",
     ".dbf": "application/x-dbf",
