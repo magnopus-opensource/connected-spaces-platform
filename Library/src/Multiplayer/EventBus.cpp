@@ -42,13 +42,6 @@ EventBus::EventBus(MultiplayerConnection* InMultiplayerConnection)
 
 void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::systems::SystemBase* System)
 {
-    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
-    {
-        std::string ErrorMessage = "Error: Multiplayer connection is not available.";
-        CSP_LOG_ERROR_FORMAT("%s", ErrorMessage.c_str());
-        return;
-    }
-
     if (!System)
     {
         std::string ErrorMessage = "Error: Expected non-null system.";
@@ -84,13 +77,6 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, csp::sys
 
 void EventBus::ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback)
 {
-    if (MultiplayerConnectionInst->Connection == nullptr || !MultiplayerConnectionInst->Connected)
-    {
-        std::string ErrorMessage = "Error: Multiplayer connection is not available.";
-        CSP_LOG_ERROR_FORMAT("%s", ErrorMessage.c_str());
-        return;
-    }
-
     if (!Callback)
     {
         std::string ErrorMessage = "Error: Expected non-null callback.";
