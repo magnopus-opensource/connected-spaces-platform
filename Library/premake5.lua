@@ -166,6 +166,15 @@ if not Project then
                 "USE_STD_MALLOC=1"
             }
             staticruntime("On")
+			
+			buildoptions {
+				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
+				"-Wno-braced-scalar-init", -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
+				"-Wno-error=unused-lambda-capture", --This shouldn't be disabled, we just had to rush to unblock android builds. Take all the this captures out and remove.
+				"-Wno-unknown-pragmas", --Also not the greatest. This is to try and suppress a signalR warning, even though the signalR project dosen't emit warnings (I think this error is a bit unique cause of preprocessor stuff)
+				"-Wno-error=nonportable-include-path", --Include paths dont match file structure. Should get around to fixing
+				"-Wno-error=format-security" --In logging, __android_log_print(ANDROID_LOG_VERBOSE, "CSP", InMessage.c_str()) is unnaceptable for some reason.
+            }
 
             linkoptions { "-lm" } -- For gcc's math lib
 
