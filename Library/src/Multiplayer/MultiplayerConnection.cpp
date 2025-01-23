@@ -45,6 +45,7 @@
 #include <exception>
 #include <future>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <thread>
 
@@ -107,7 +108,7 @@ ErrorCode ParseError(std::exception_ptr Exception)
     return ErrorCode::Unknown;
 }
 
-constexpr const uint64_t ALL_ENTITIES_ID = -1;
+constexpr const uint64_t ALL_ENTITIES_ID = std::numeric_limits<uint64_t>::max();
 constexpr const uint32_t KEEP_ALIVE_INTERVAL = 15;
 
 /// @brief MultiplayerConnection

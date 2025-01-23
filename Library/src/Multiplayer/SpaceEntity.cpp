@@ -620,7 +620,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 
         Deserialiser.EnterComponents();
         {
-            auto ComponentCount = Deserialiser.GetNumComponents();
+            [[maybe_unused]] auto ComponentCount = Deserialiser.GetNumComponents();
             auto RealComponentCount = Deserialiser.GetNumRealComponents();
 
             assert(ComponentCount >= 3 && "SpaceObject should have at least 4 components!");
@@ -1208,7 +1208,6 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents) const
 {
-    auto& CheckComponents = *GetComponents();
     const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
     ComponentBase* LocatedComponent = nullptr;
 

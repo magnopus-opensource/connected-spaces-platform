@@ -23,6 +23,9 @@ namespace csp::memory
 {
 
 #if defined(CSP_WINDOWS)
+// (initializers put in library initialization area) Not at all sure why this is here, hopefully we can delete the custom memory management because no
+// one really understands it.
+#pragma warning(disable : 4073)
 #pragma init_seg(lib)
 #else
 __attribute__((init_priority(101)))

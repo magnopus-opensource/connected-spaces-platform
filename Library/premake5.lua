@@ -122,7 +122,7 @@ if not Project then
         
         -- Needed for dynamic_cast
         rtti("On")
-        
+		
         -- Config for platforms
         filter "platforms:x64"
             defines { 
@@ -199,6 +199,12 @@ if not Project then
             libdirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/lib/Mac"
             }
+			
+			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
+			-- These disables are to do with warnings in generated code that we should get around to dealing with.
+			xcodebuildsettings {
+				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init"
+			}
 
             links { 
                 "ssl",
@@ -214,6 +220,12 @@ if not Project then
             externalincludedirs {
                 "%{wks.location}/ThirdParty/OpenSSL/1.1.1k/include/platform/ios"
             }
+			
+			-- Could not manage to get xcode to co-operate in any other less specific manner of setting the flags.
+			-- These disables are to do with warnings in generated code that we should get around to dealing with.
+			xcodebuildsettings {
+				["WARNING_CFLAGS"] = "-Wno-error=deprecated-declarations -Wno-braced-scalar-init"
+			}
 
             links {
                 "ssl",            
@@ -226,11 +238,13 @@ if not Project then
                 "CSP_WASM",
                 "USE_STD_MALLOC=1"
             }
-
+			
             buildoptions {
                 "--no-entry",           -- remove default library entry point
                 "-pthread",             -- enable threading
-                "-fwasm-exceptions"     -- enable native wasm exceptions
+                "-fwasm-exceptions",     -- enable native wasm exceptions
+				"-Wno-error=deprecated-declarations", --Don't error on deprecation warnings, this is because we use Uri a lot in our services generated code, which has deprecation warnings for some unused but still generated endpoints.
+				"-Wno-braced-scalar-init" -- Don't warn against doing stuff like `return {0}`, which we do in the interop output.
             }
 
             linkoptions { 

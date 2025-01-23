@@ -838,7 +838,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, CreateManyAvatarTest)
 
         if (Status == std::future_status::timeout)
         {
-            FAIL("CreateAvatar process timed out before it was ready for assertions.");
+            FAIL() << "CreateAvatar process timed out before it was ready for assertions.";
         }
     }
 
@@ -1253,7 +1253,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
-    float TestTime = 0;
+    long long TestTime = 0;
 
     // Interrupt connection here
     while (!Interrupted && TestTime < 60)
@@ -1676,7 +1676,6 @@ void RunParentEntityReplicationTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -2039,10 +2038,10 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalRotationTest)
     csp::common::String ChildEntityName = "ChildEntity";
     // Parent has a position [0,0,0], and 1.507 radian (90 degree) rotation around the y axis
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
 
@@ -2140,11 +2139,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalScaleTest)
     // Create a parent, positioned at the origin, rotated 90 degrees, with a scale of -0.5 on x axis and 0.5 on Y/Z axes
     // child created at a position of [1,0,0], no rotation, and scale of 1
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
     SpaceTransform ObjectTransformChild = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 1, 1, 1 } };
 
-    SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, -0.5 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
+    SpaceTransform ObjectTransformExpected = { csp::common::Vector3 { 0, 0, -0.5f }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f },
+        csp::common::Vector3 { -0.5f, 0.5f, 0.5f } };
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
 
@@ -2239,11 +2238,11 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, EntityGlobalTransformTest)
     csp::common::String ParentEntityName = "ParentEntity";
     csp::common::String ChildEntityName = "ChildEntity";
     SpaceTransform ObjectTransformParent
-        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 1, 1, 1 } };
+        = { csp::common::Vector3 { 0, 0, 0 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 1, 1, 1 } };
     SpaceTransform ObjectTransformChild
         = { csp::common::Vector3 { 1, 0, 0 }, csp::common::Vector4 { 0, 0, 0, 1 }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
     SpaceTransform ObjectTransformExpected
-        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081, 0, 0.7071055 }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
+        = { csp::common::Vector3 { 0, 0, 1 }, csp::common::Vector4 { 0, -0.7071081f, 0, 0.7071055f }, csp::common::Vector3 { 0.5f, 0.5f, 0.5f } };
 
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
 
@@ -2432,7 +2431,6 @@ void RunParentChildDeletionTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -2672,7 +2670,6 @@ void RunParentDeletionTest(bool Local)
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
-    auto* AssetSystem = SystemsManager.GetAssetSystem();
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 

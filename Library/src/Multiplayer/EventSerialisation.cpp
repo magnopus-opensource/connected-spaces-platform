@@ -85,7 +85,7 @@ csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::Str
     const std::string SequenceKeyString(SequenceKey.c_str());
     // Match item after second ':' to get our parent Id.
     // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
-    const std::regex Expression("^(?:[^:]*\:){" + std::to_string(Index) + "}([^:]*)");
+    const std::regex Expression(R"(^(?:[^:]*\:){)" + std::to_string(Index) + R"(}([^:]*))");
     std::smatch Match;
     const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 
