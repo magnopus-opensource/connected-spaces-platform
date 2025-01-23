@@ -22,13 +22,14 @@
 #include "Multiplayer/EventSerialisation.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "NetworkEventManagerImpl.h"
+#include <limits>
 
 namespace csp::multiplayer
 {
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
+constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 EventBus::~EventBus() { }
 

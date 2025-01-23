@@ -186,7 +186,7 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraComponentFovTest
     CinematicCamera->SetAspectRatio(16.0f / 9.0f);
     CinematicCamera->SetFocalLength(0.150f);
     CinematicCamera->SetSensorSize(csp::common::Vector2(0.02703f, 0.01425f));
-    EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.16848914); // ~9 degrees
+    EXPECT_FLOAT_EQ(CinematicCamera->GetFov(), 0.16848914f); // ~9 degrees
 
     CinematicCamera->SetAspectRatio(21.0f / 9.0f);
     CinematicCamera->SetFocalLength(0.018f);

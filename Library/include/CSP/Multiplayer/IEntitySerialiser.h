@@ -63,18 +63,6 @@ public:
     /// @param Value csp::common::String : The value to write.
     virtual void WriteString(const csp::common::String& Value) = 0;
 
-    /// @brief Write a vector2 field of the entity.
-    /// @param Value Vector2 : The value to write.
-    virtual void WriteVector2(const csp::common::Vector2& Value) = 0;
-
-    /// @brief Write a vector3 field of the entity.
-    /// @param Value Vector3 : The value to write.
-    virtual void WriteVector3(const csp::common::Vector3& Value) = 0;
-
-    /// @brief Write a vector4 field of the entity.
-    /// @param Value Vector4 : The value to write.
-    virtual void WriteVector4(const csp::common::Vector4& Value) = 0;
-
     /// @brief Write a null field of the entity.
     virtual void WriteNull() = 0;
 

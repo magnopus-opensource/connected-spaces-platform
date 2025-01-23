@@ -829,7 +829,8 @@ void SettingsSystem::SetAvatarInfo(AvatarType InType, const String& InIdentifier
     rapidjson::Document Json;
     Json.SetObject();
     Json.AddMember("type", static_cast<int>(InType), Json.GetAllocator());
-    Json.AddMember("identifier", rapidjson::Value(InIdentifier.c_str(), InIdentifier.Length()), Json.GetAllocator());
+    Json.AddMember(
+        "identifier", rapidjson::Value(InIdentifier.c_str(), static_cast<rapidjson::SizeType>(InIdentifier.Length())), Json.GetAllocator());
     rapidjson::StringBuffer Buffer;
     rapidjson::Writer<rapidjson::StringBuffer> Writer(Buffer);
     Json.Accept(Writer);

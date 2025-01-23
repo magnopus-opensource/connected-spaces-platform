@@ -248,7 +248,7 @@ CSP_INTERNAL_TEST(CSPEngine, CommonArrayTests, ArrayOutOfBoundsTest)
     try
     {
         Array<Optional<int>> Instance(ARRAY_SIZE);
-        auto& Element = Instance[ARRAY_SIZE];
+        [[maybe_unused]] auto& Element = Instance[ARRAY_SIZE];
     }
     catch (const std::out_of_range&)
     {

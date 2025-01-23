@@ -25,6 +25,8 @@ if not WrapperGenerator then
         dotnetframework "4.7.1"
         csversion "8.0"
         clr "unsafe"
+		disablewarnings { "CS0109" } -- Error CS0109: The member 'HotspotSequenceSystem.Dispose()' does not hide an accessible member. The new keyword is not required.
+									 -- Suppressing during the warnings-as-errors effort, don't want to modify the generators.
         
         -- We only include this project for the C# build configs as it is not needed by the pure-C++ variants
         filter "configurations:not *CSharp*"
