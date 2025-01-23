@@ -67,7 +67,7 @@ resource "aws_cloudfront_distribution" "main" {
   enabled             = true
   is_ipv6_enabled     = false # Using IPv4 only to mitigate VPN routing issues
   web_acl_id          = var.aws_wafv2_web_acl_arn
-  default_root_object = "index.html"
+  default_root_object = "/index.html"
 
   aliases = concat(["${var.project_shortname}.${data.aws_route53_zone.canonical.name}"], var.alias_aws_public_zone_id != null ? [data.aws_route53_zone.alias[0].name] : [])
 
@@ -118,7 +118,7 @@ resource "aws_cloudfront_distribution" "main" {
     content {
       error_caching_min_ttl = 10
       error_code            = custom_error_response.value
-      response_code         = custom_error_response.value
+      response_code         = 200
       response_page_path    = "/index.html"
     }
   }
