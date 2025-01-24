@@ -327,7 +327,7 @@ void MultiplayerConnection::InternalDeleteEntity(uint64_t EntityId, ErrorCodeCal
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -405,7 +405,7 @@ void MultiplayerConnection::SetScopes(csp::common::String InSpaceId, ErrorCodeCa
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -439,7 +439,7 @@ void MultiplayerConnection::ResetScopes(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -466,7 +466,7 @@ void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -493,7 +493,7 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {

@@ -23,8 +23,8 @@ namespace csp::memory
 {
 
 SimpleRingBuffer::SimpleRingBuffer(size_t BufferSize)
-    : BufferSize(BufferSize)
-    , Buffer(CSP_NEW unsigned char[BufferSize])
+    : Buffer(CSP_NEW unsigned char[BufferSize])
+    , BufferSize(BufferSize)
     , ReadPosition(0)
     , WritePosition(0)
     , AvailableDataLength(0)

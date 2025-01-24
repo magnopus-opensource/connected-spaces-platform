@@ -31,8 +31,8 @@ namespace csp::web
 
 WebClient::WebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh)
     : RootPort(InPort)
-    , LoginState(nullptr)
     , UserSystem(nullptr)
+    , LoginState(nullptr)
     , RefreshNeeded(false)
     , RefreshStarted(false)
     , AutoRefreshEnabled(AutoRefresh)

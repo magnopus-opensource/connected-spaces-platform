@@ -30,7 +30,6 @@ ClientProxy::ClientProxy(ClientId Id, ClientElectionManager* ElectionManager)
     , HighestResponseId(0)
     , Eid(0)
     , PendingElections(0)
-    , CancellationToken(nullptr)
 {
 }
 
