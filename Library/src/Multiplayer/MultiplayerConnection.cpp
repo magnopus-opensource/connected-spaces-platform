@@ -466,7 +466,7 @@ void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
         return;
     }
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback, this](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {
@@ -476,6 +476,7 @@ void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
             return;
         }
 
+        INVOKE_IF_NOT_NULL(ConnectionCallback, "Success");
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
