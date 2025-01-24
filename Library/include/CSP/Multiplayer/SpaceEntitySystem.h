@@ -312,6 +312,9 @@ public:
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
+    using SpaceEntitySet = std::set<SpaceEntity*>;
+    SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
+
 protected:
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -332,7 +335,6 @@ private:
 
     using SpaceEntityQueue = std::deque<SpaceEntity*>;
     using PatchMessageQueue = std::deque<signalr::value*>;
-    using SpaceEntitySet = std::set<SpaceEntity*>;
 
     EntityCreatedCallback SpaceEntityCreatedCallback;
     CallbackHandler InitialEntitiesRetrievedCallback;
@@ -384,7 +386,6 @@ private:
 
     SpaceEntityQueue* PendingAdds;
     SpaceEntityQueue* PendingRemoves;
-    SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
     PatchMessageQueue* PendingIncomingUpdates;
 
     bool EnableEntityTick;

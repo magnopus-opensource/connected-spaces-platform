@@ -278,6 +278,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
         CreatedObject->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
+        std::cout << EntitySystem->PendingOutgoingUpdateUniqueSet->size() << "\n";
+
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 
@@ -314,6 +316,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 
         FoundEntity->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
+
+        std::cout << EntitySystem->PendingOutgoingUpdateUniqueSet->size() << "\n";
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
