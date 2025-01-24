@@ -476,6 +476,7 @@ void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
         }
 
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
+        INVOKE_IF_NOT_NULL(ConnectionCallback, "Connected");
     };
 
     CSP_LOG_MSG(csp::systems::LogLevel::Verbose, "Calling StartListening");
