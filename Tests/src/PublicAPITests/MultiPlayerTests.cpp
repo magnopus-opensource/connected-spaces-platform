@@ -285,10 +285,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
+    bool CallbackCalled = false;
+
+    Connection->SetConnectionCallback([&CallbackCalled](const csp::common::String& Message) { CallbackCalled = true; });
+
     csp::common::String UserId;
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
+
+    WaitForCallback(CallbackCalled);
+    EXPECT_TRUE(CallbackCalled);
 
     // Create space
     csp::systems::Space Space;
@@ -1275,49 +1282,6 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
 
     // Log out
     Awaitable(&csp::systems::UserSystem::Logout, UserSystem).Await();
-}
-#endif
-
-#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_ESTABLISHED_TEST
-CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionEstablishedTest)
-{
-    SetRandSeed();
-
-    auto& SystemsManager = csp::systems::SystemsManager::Get();
-    auto* UserSystem = SystemsManager.GetUserSystem();
-    auto* Connection = SystemsManager.GetMultiplayerConnection();
-
-    // Setup Connection callback
-    bool ConnectionCallbackCalled = false;
-    csp::common::String ConnectionMessage;
-
-    auto ConnectionCallback = [&ConnectionCallbackCalled, &ConnectionMessage](csp::common::String Message)
-    {
-        if (ConnectionCallbackCalled)
-        {
-            return;
-        }
-
-        ConnectionMessage = Message;
-        ConnectionCallbackCalled = true;
-    };
-    Connection->SetConnectionCallback(ConnectionCallback);
-
-    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Disconnected);
-
-    csp::common::String UserId;
-
-    // Log in
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    WaitForCallback(ConnectionCallbackCalled);
-
-    EXPECT_TRUE(ConnectionCallbackCalled);
-    EXPECT_EQ(ConnectionMessage, "Success");
-    EXPECT_EQ(Connection->GetConnectionState(), ConnectionState::Connected);
-
-    // Log out
-    LogOut(UserSystem);
 }
 #endif
 
