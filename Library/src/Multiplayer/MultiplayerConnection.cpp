@@ -476,7 +476,7 @@ void MultiplayerConnection::StartListening(ErrorCodeCallbackHandler Callback)
             return;
         }
 
-        INVOKE_IF_NOT_NULL(ConnectionCallback, "Connected");
+        INVOKE_IF_NOT_NULL(ConnectionCallback, "Success");
         INVOKE_IF_NOT_NULL(Callback, ErrorCode::None);
     };
 
