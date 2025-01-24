@@ -1160,6 +1160,8 @@ void AssetSystem::RegisterSystemCallback()
 
     if (!MaterialChangedCallback && !AssetDetailBlobChangedCallback)
     {
+        CSP_LOG_ERROR_MSG("Error: Neither MaterialChangedCallback nor AssetDetailBlobChangedCallback were set, not registering AssetSystem to "
+                          "AssetDetailBlobChanged.\nPlease set either callback before registering.");
         return;
     }
 
