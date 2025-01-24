@@ -312,8 +312,10 @@ public:
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
+    CSP_START_IGNORE
     using SpaceEntitySet = std::set<SpaceEntity*>;
     SpaceEntitySet* PendingOutgoingUpdateUniqueSet;
+    CSP_END_IGNORE
 
 protected:
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
