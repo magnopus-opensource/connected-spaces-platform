@@ -476,7 +476,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     TestCallback2Called = false;
 
     // Test that registering a callback when there already is a registered system does not work
-    TestMsg = "Error: there is already a system registered for TestEvent.";
+    TestMsg = "Error: there is already a system registered for TestEvent. Deregister the system before registering a callback.";
     TestCallback1Called = false; // clean up
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
@@ -522,18 +522,18 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     WaitForCallback(TestCallback1Called);
     EXPECT_FALSE(TestCallback1Called);
 
-    // Test that registering a callback when there already is a registered callback does not work
+    // Test that registering a callback when there already is a registered callback works
     EventBus->StopListenNetworkEvent("TestEvent"); // clean up
-    TestMsg = "Error: there is already a callback registered for TestEvent.";
+    TestMsg = "The callback set for TestEvent was overwritten with a new callback.";
     EventBus->ListenNetworkEvent("TestEvent", TestCallback1);
     EventBus->ListenNetworkEvent("TestEvent", TestCallback2);
     EventBus->SendNetworkEventToClient("TestEvent", {}, Connection->GetClientId(), ErrorCallback);
     WaitForCallback(TestCallback1Called);
-    EXPECT_TRUE(TestCallback1Called);
-    EXPECT_EQ(TestCallbackId, 1111);
-    TestCallback1Called = false;
+    EXPECT_FALSE(TestCallback1Called);
     WaitForCallback(TestCallback2Called);
-    EXPECT_FALSE(TestCallback2Called);
+    EXPECT_TRUE(TestCallback2Called);
+    EXPECT_EQ(TestCallbackId, 2222);
+    TestCallback2Called = false;
     EXPECT_TRUE(LogConfirmed);
     TestMsg = "";
     LogConfirmed = false;

@@ -84,20 +84,21 @@ void EventBus::ListenNetworkEvent(const csp::common::String& EventName, Paramete
         return;
     }
 
+    if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()
+        && SystemsNetworkEventMap[EventName])
+    {
+        CSP_LOG_ERROR_FORMAT(
+            "Error: there is already a system registered for %s. Deregister the system before registering a callback.", EventName.c_str());
+        return;
+    }
+
     if (!CallbacksNetworkEventMap.empty() && CallbacksNetworkEventMap.find(EventName) != CallbacksNetworkEventMap.end())
     {
         if (CallbacksNetworkEventMap[EventName])
         {
-            CSP_LOG_ERROR_FORMAT("Error: there is already a callback registered for %s.", EventName.c_str());
-            return;
+            // We cannot compare callbacks, so we can't know whether it is the same callback that is already set. Therefore, we always update it
+            CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "The callback set for %s was overwritten with a new callback.", EventName.c_str());
         }
-    }
-
-    if (!SystemsNetworkEventMap.empty() && SystemsNetworkEventMap.find(EventName) != SystemsNetworkEventMap.end()
-        && SystemsNetworkEventMap[EventName])
-    {
-        CSP_LOG_ERROR_FORMAT("Error: there is already a system registered for %s.", EventName.c_str());
-        return;
     }
 
     CallbacksNetworkEventMap[EventName] = Callback;
