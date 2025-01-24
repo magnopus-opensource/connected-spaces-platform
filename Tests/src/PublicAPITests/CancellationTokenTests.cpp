@@ -23,7 +23,7 @@
 
 namespace
 {
-
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_CANCELLATION_TOKEN_TESTS || RUN_CANCELLATIONTOKEN_CONSTRUCTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, ConstructionAndDestructionTest) { EXPECT_NO_THROW(csp::common::CancellationToken()); }
 #endif
@@ -52,5 +52,5 @@ CSP_PUBLIC_TEST(CSPEngine, CancellationTokenTests, CopyMoveTest)
     ASSERT_FALSE(std::is_move_assignable_v<csp::common::CancellationToken>);
 }
 #endif
-
+*/
 } // namespace

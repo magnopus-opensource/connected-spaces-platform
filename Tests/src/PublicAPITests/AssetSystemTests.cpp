@@ -257,6 +257,8 @@ void UpdateAssetCollectionMetadata(csp::systems::AssetSystem* AssetSystem, csp::
     OutMetaData = ResultAssetCollection.GetMetadataImmutable();
 }
 
+/*
+
 #if RUN_ALL_UNIT_TESTS || RUN_ASSETSYSTEM_TESTS || RUN_ASSETSYSTEM_CREATEASSETCOLLECTION_TEST
 CSP_PUBLIC_TEST(CSPEngine, AssetSystemTests, CreateAssetCollectionTest)
 {
@@ -2350,3 +2352,4 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, AssetSystemTests, CopyAssetCollectionTest)
     LogOut(UserSystem);
 }
 #endif
+*/

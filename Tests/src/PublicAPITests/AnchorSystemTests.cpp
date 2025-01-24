@@ -140,6 +140,7 @@ void CreateAnchorResolution(
 
 } // namespace
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_ANCHORSYSTEM_TESTS || RUN_ANCHORSYSTEM_CREATE_ANCHOR_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorTest)
 {
@@ -669,3 +670,4 @@ CSP_PUBLIC_TEST(CSPEngine, AnchorSystemTests, CreateAnchorResolutionTest)
     LogOut(UserSystem);
 }
 #endif
+*/

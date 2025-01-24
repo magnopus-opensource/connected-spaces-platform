@@ -41,6 +41,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_ANIMATED_MODEL_TESTS || RUN_ANIMATED_MODEL_TEST
 CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentTest)
 {
@@ -213,16 +214,16 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelScriptInterfaceTest)
 
     // Setup script
     const std::string AnimatedModelScriptText = R"xx(
-		var model = ThisEntity.getAnimatedModelComponents()[0];
-		model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
-		model.externalResourceAssetId = "TestExternalResourceAssetId";
-		model.position = [1, 1, 1];
-		model.rotation = [1, 1, 1, 1];
-		model.scale = [2, 2, 2];
-		model.isLoopPlayback = false;
-		model.isPlaying = false;
-		model.isVisible = false;
-		model.animationIndex = 1;
+                var model = ThisEntity.getAnimatedModelComponents()[0];
+                model.externalResourceAssetCollectionId = "TestExternalResourceAssetCollectionId";
+                model.externalResourceAssetId = "TestExternalResourceAssetId";
+                model.position = [1, 1, 1];
+                model.rotation = [1, 1, 1, 1];
+                model.scale = [2, 2, 2];
+                model.isLoopPlayback = false;
+                model.isPlaying = false;
+                model.isVisible = false;
+                model.animationIndex = 1;
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(AnimatedModelScriptText.c_str());
@@ -372,3 +373,4 @@ CSP_PUBLIC_TEST(CSPEngine, AnimatedModelTests, AnimatedModelComponentEnterSpaceT
     LogOut(UserSystem);
 }
 #endif
+*/

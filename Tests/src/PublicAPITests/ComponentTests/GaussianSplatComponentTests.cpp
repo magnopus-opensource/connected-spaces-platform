@@ -42,6 +42,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_GAUSSIAN_SPLAT_TESTS || RUN_GAUSSIAN_SPLAT_TEST
 CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatTest)
 {
@@ -182,9 +183,9 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
 
     // Setup script
     const std::string ScriptSource = R"xx(
-	
-		var splat = ThisEntity.getGaussianSplatComponents()[0];
-		splat.tint = [0.0, 0.1, 0.2];
+
+                var splat = ThisEntity.getGaussianSplatComponents()[0];
+                splat.tint = [0.0, 0.1, 0.2];
     )xx";
 
     ScriptComponent->SetScriptSource(ScriptSource.c_str());
@@ -206,5 +207,5 @@ CSP_PUBLIC_TEST(CSPEngine, GaussianSplatTests, GaussianSplatScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

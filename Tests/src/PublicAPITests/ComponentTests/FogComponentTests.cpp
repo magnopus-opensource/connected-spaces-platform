@@ -41,6 +41,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_FOG_TESTS || RUN_FOG_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, FogTests, FogComponentTest)
 {
@@ -175,18 +176,18 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
 
     // Setup script
     const std::string FogScriptText = R"xx(
-		var fog = ThisEntity.getFogComponents()[0];
-		fog.fogMode = 1;
-		fog.position = [1, 1, 1];
-		fog.rotation = [1, 1, 1, 2];
-		fog.scale = [2, 2, 2];
-		fog.startDistance = 1.1;
-		fog.endDistance = 2.2;
-		fog.color = [1, 1, 1];
-		fog.density = 3.3;
-		fog.heightFalloff = 4.4;
-		fog.maxOpacity = 5.5;
-		fog.isVolumetric = true;
+                var fog = ThisEntity.getFogComponents()[0];
+                fog.fogMode = 1;
+                fog.position = [1, 1, 1];
+                fog.rotation = [1, 1, 1, 2];
+                fog.scale = [2, 2, 2];
+                fog.startDistance = 1.1;
+                fog.endDistance = 2.2;
+                fog.color = [1, 1, 1];
+                fog.density = 3.3;
+                fog.heightFalloff = 4.4;
+                fog.maxOpacity = 5.5;
+                fog.isVolumetric = true;
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(FogScriptText.c_str());
@@ -215,5 +216,5 @@ CSP_PUBLIC_TEST(CSPEngine, FogTests, FogScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

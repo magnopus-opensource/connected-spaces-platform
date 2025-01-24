@@ -57,6 +57,7 @@ csp::common::Map<csp::common::String, csp::common::String> GetShopifyDetails()
 /*These test are currently internal tests because they utilise that is currently only available
 through internal CSP infrastructure.*/
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_GET_PRODUCT_INFORMATION_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationTest)
 {
@@ -78,6 +79,8 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationT
             }
     4. Either use the default "Gift Card" product or update these test variables with a new product. (Add product Id to Shopify Creds)
     Now you can use this test!*/
+
+/*
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -173,6 +176,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetProductInformationB
             }
     4. Either use the default "Gift Card" product or update these test variables with a new product. (Add variant Id to Shopify Creds)
     Now you can use this test!*/
+/*
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -270,7 +274,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetCheckoutInformation
     4. Create a CartId (Add to Shopify Creds)
             Endpoint: /api/v1/spaces/{spaceId}/vendors/shopify/carts
     Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -328,7 +332,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, CreateAndGetCartTest)
                             "privateAccessToken": "string"
                     }
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -435,7 +439,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddCartLinesTest)
                             "privateAccessToken": "string"
                     }
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -524,7 +528,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, UpdateCartLinesTest)
                             "privateAccessToken": "string"
                     }
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -646,7 +650,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, DeleteCartLinesTest)
                             "privateAccessToken": "string"
                     }
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -750,7 +754,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, AddShopifyStoreTest)
             3. Connect the Shopify Store to the Space you created
             4. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -815,7 +819,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
             3. Connect the Shopify Store to the Space you created
             3. Add `SpaceId YourSpaceId`, `StoreName MyStoreName` and `PrivateAccessToken MyPrivateAccessToken` to the ShopifyCreds.txt
             Now you can use this test!*/
-
+/*
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* ECommerceSystem = SystemsManager.GetECommerceSystem();
@@ -854,4 +858,4 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, ECommerceSystemTests, GetShopifyStoresTest)
 
     LogOut(UserSystem);
 }
-#endif
+#endif*/

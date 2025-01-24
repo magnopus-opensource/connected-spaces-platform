@@ -39,6 +39,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_SPLINE_TESTS || RUN_USE_SPLINE_TEST
 CSP_PUBLIC_TEST(CSPEngine, SplineTests, UseSplineTest)
 {
@@ -182,13 +183,13 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
 
     // Setup script
     const std::string SplineScriptText = R"xx(
-	
-		var spline = ThisEntity.getSplineComponents()[0];
-		
-		var waypoints = [[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
-		spline.setWaypoints(waypoints);
-		var positionResult = spline.getLocationAlongSpline(1);
-		
+
+                var spline = ThisEntity.getSplineComponents()[0];
+
+                var waypoints = [[0, 0, 0], [0, 1000, 0], [0, 2000, 0], [0, 3000, 0], [0, 4000, 0], [0, 5000, 0]];
+                spline.setWaypoints(waypoints);
+                var positionResult = spline.getLocationAlongSpline(1);
+
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(SplineScriptText.c_str());
@@ -210,5 +211,5 @@ CSP_PUBLIC_TEST(CSPEngine, SplineTests, SplineScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

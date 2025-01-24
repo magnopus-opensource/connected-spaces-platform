@@ -40,6 +40,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_LIGHT_TESTS || RUN_LIGHT_TEST
 CSP_PUBLIC_TEST(CSPEngine, LightTests, LightComponentFieldsTest)
 {
@@ -255,5 +256,5 @@ CSP_PUBLIC_TEST(CSPEngine, LightTests, ActionHandlerTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

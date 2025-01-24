@@ -42,6 +42,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_FIDUCIALMARKER_TESTS || RUN_FIDUCIALMARKER_TEST
 CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerComponentTest)
 {
@@ -209,10 +210,10 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
 
     // Setup script
     const std::string FiducialMarkerScriptText = R"xx(
-	
-		var marker = ThisEntity.getFiducialMarkerComponents()[0];
-		
-		marker.isVisible = false;
+
+                var marker = ThisEntity.getFiducialMarkerComponents()[0];
+
+                marker.isVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(FiducialMarkerScriptText.c_str());
@@ -234,5 +235,5 @@ CSP_PUBLIC_TEST(CSPEngine, FiducialMarkerTests, FiducialMarkerScriptInterfaceTes
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

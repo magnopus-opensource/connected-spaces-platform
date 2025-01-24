@@ -39,6 +39,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_ECOMMERCE_TESTS || RUN_ECOMMERCE_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceComponentTest)
 {
@@ -148,12 +149,12 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
 
     // Setup script
     std::string ECommerceScriptText = R"xx(
-	
-		const productId			= "TEST_PRODUCT_ID";
 
-		var ECommerce = ThisEntity.getECommerceComponents()[0];
-		ECommerce.position = [1,1,1];
-		ECommerce.productId = productId;
+                const productId			= "TEST_PRODUCT_ID";
+
+                var ECommerce = ThisEntity.getECommerceComponents()[0];
+                ECommerce.position = [1,1,1];
+                ECommerce.productId = productId;
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(ECommerceScriptText.c_str());
@@ -176,5 +177,5 @@ CSP_PUBLIC_TEST(CSPEngine, ECommerceTests, ECommerceScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

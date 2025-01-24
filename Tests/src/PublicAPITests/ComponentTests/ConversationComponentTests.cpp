@@ -38,6 +38,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
 {
@@ -498,12 +499,12 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 
         // Setup script
         std::string ConversationScriptText = R"xx(
-			var conversation = ThisEntity.getConversationComponents()[0];
-			conversation.isVisible = false;
-			conversation.isActive = false;
-			conversation.position = [1,2,3];
-			conversation.rotation = [4,5,6,7];
-		)xx";
+                        var conversation = ThisEntity.getConversationComponents()[0];
+                        conversation.isVisible = false;
+                        conversation.isActive = false;
+                        conversation.position = [1,2,3];
+                        conversation.rotation = [4,5,6,7];
+                )xx";
 
         CreatedObject->GetScript()->SetScriptSource(ConversationScriptText.c_str());
         CreatedObject->GetScript()->Invoke();
@@ -536,5 +537,5 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

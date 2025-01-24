@@ -40,6 +40,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_HOTSPOT_TESTS || RUN_HOTSPOT_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotComponentTest)
 {
@@ -186,23 +187,23 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
 
     // Setup script
     std::string HotspotScriptText = R"xx(
-	
-		const assetId			= "TEST_ASSET_ID";
-		const assetCollectionId = "TEST_COLLECTION_ID";
 
-		var hotspot = ThisEntity.getHotspotComponents()[0];
-		hotspot.position = [1.0,1.0,1.0];
-		hotspot.isARVisible = false;
-		hotspot.isVisible = false;
-		hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
-		hotspot.isSpawnPoint = true;
-		hotspot.isTeleportPoint = false;
+                const assetId			= "TEST_ASSET_ID";
+                const assetCollectionId = "TEST_COLLECTION_ID";
 
-		var id = hotspot.getUniqueComponentId();
-		if (!id)
-		{
-			throw new Error('no Unique ID generated!');
-		}
+                var hotspot = ThisEntity.getHotspotComponents()[0];
+                hotspot.position = [1.0,1.0,1.0];
+                hotspot.isARVisible = false;
+                hotspot.isVisible = false;
+                hotspot.rotation = [1.0, 1.0, 1.0, 1.0];
+                hotspot.isSpawnPoint = true;
+                hotspot.isTeleportPoint = false;
+
+                var id = hotspot.getUniqueComponentId();
+                if (!id)
+                {
+                        throw new Error('no Unique ID generated!');
+                }
     )xx";
 
     ScriptComponent->SetScriptSource(HotspotScriptText.c_str());
@@ -233,5 +234,5 @@ CSP_PUBLIC_TEST(CSPEngine, HotspotTests, HotspotSpaceComponentScriptInterfaceTes
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

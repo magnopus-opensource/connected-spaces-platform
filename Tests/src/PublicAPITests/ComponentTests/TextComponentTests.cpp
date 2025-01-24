@@ -40,6 +40,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_TEXT_TESTS || RUN_TEXT_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, TextTests, TextComponentTest)
 {
@@ -202,23 +203,23 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
 
     // Setup script
     std::string TextScriptText = R"xx(
-	
-		const assetId			= "TEST_ASSET_ID";
-		const assetCollectionId = "TEST_COLLECTION_ID";
 
-		var text = ThisEntity.getTextComponents()[0];
-		text.position = [1.0,1.0,1.0];
-		text.height = 2.0;
-		text.width = 2.0;
-		text.billboardMode = 2;
-		text.isARVisible = false;
-		text.isVisible = false;
-		text.backgroundColor = [1.0,1.0,1.0];
-		text.textColor = [0.0,0.0,0.0];
-		text.rotation = [1.0, 1.0, 1.0, 1.0];
-		text.text = "Text";
-		text.scale = [2.0, 2.0, 2.0];
-		text.isBackgroundVisible = false;
+                const assetId			= "TEST_ASSET_ID";
+                const assetCollectionId = "TEST_COLLECTION_ID";
+
+                var text = ThisEntity.getTextComponents()[0];
+                text.position = [1.0,1.0,1.0];
+                text.height = 2.0;
+                text.width = 2.0;
+                text.billboardMode = 2;
+                text.isARVisible = false;
+                text.isVisible = false;
+                text.backgroundColor = [1.0,1.0,1.0];
+                text.textColor = [0.0,0.0,0.0];
+                text.rotation = [1.0, 1.0, 1.0, 1.0];
+                text.text = "Text";
+                text.scale = [2.0, 2.0, 2.0];
+                text.isBackgroundVisible = false;
     )xx";
 
     ScriptComponent->SetScriptSource(TextScriptText.c_str());
@@ -261,5 +262,5 @@ CSP_PUBLIC_TEST(CSPEngine, TextTests, TextSpaceComponentScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

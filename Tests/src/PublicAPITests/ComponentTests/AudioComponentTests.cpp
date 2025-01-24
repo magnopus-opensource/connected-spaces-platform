@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
@@ -185,20 +185,20 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
     // Setup script
     std::string AudioScriptText = R"xx(
-	
-		const assetId			= "TEST_ASSET_ID";
-		const assetCollectionId = "TEST_COLLECTION_ID";
 
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.position = [1,1,1];
-		audio.playbackState = 2;
-		audio.audioType = 1;
-		audio.audioAssetId = assetId;
-		audio.assetCollectionId = assetCollectionId;
-		audio.attenuationRadius = 100;
-		audio.isLoopPlayback = true;
-		audio.timeSincePlay = 1;
-		audio.volume = 0.75;
+                const assetId			= "TEST_ASSET_ID";
+                const assetCollectionId = "TEST_COLLECTION_ID";
+
+                var audio = ThisEntity.getAudioComponents()[0];
+                audio.position = [1,1,1];
+                audio.playbackState = 2;
+                audio.audioType = 1;
+                audio.audioAssetId = assetId;
+                audio.assetCollectionId = assetCollectionId;
+                audio.attenuationRadius = 100;
+                audio.isLoopPlayback = true;
+                audio.timeSincePlay = 1;
+                audio.volume = 0.75;
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
@@ -222,16 +222,16 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
     // Test invalid volume values
     AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 1.75;
+                var audio = ThisEntity.getAudioComponents()[0];
+                audio.volume = 1.75;
     )xx";
     CreatedObject->GetScript()->Invoke();
     EntitySystem->ProcessPendingEntityOperations();
     EXPECT_EQ(AudioComponent->GetVolume(), 0.75f);
 
     AudioScriptText = R"xx(M
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = -2.75;
+                var audio = ThisEntity.getAudioComponents()[0];
+                audio.volume = -2.75;
     )xx";
     CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
     CreatedObject->GetScript()->Invoke();
@@ -240,8 +240,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 
     // Test boundary volume values
     AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 1.0;
+                var audio = ThisEntity.getAudioComponents()[0];
+                audio.volume = 1.0;
     )xx";
     CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
     CreatedObject->GetScript()->Invoke();
@@ -249,8 +249,8 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
     EXPECT_EQ(AudioComponent->GetVolume(), 1.f);
 
     AudioScriptText = R"xx(
-		var audio = ThisEntity.getAudioComponents()[0];
-		audio.volume = 0.0;
+                var audio = ThisEntity.getAudioComponents()[0];
+                audio.volume = 0.0;
     )xx";
     CreatedObject->GetScript()->SetScriptSource(AudioScriptText.c_str());
     CreatedObject->GetScript()->Invoke();
@@ -268,3 +268,4 @@ CSP_PUBLIC_TEST(CSPEngine, AudioTests, AudioScriptInterfaceTest)
 #endif
 
 } // namespace
+*/

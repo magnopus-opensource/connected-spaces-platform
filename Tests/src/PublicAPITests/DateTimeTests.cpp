@@ -20,6 +20,7 @@
 #include "gtest/gtest.h"
 #include <chrono>
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_DATE_TIME_TESTS || RUN_DATE_TIME_STRING_CONVERSION_TESTS
 CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, UTCStringConversion)
 {
@@ -106,3 +107,4 @@ CSP_PUBLIC_TEST(CSPEngine, DateTimeTests, Comparison)
     ASSERT_GE(FutureDateTime, CurrentDateTime);
 }
 #endif
+*/

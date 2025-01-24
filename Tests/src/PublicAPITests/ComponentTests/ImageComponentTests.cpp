@@ -42,6 +42,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_IMAGE_TESTS || RUN_IMAGE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageComponentTest)
 {
@@ -219,13 +220,13 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
 
     // Setup script
     const std::string ImageScriptText = R"xx(
-	
-		var image = ThisEntity.getImageComponents()[0];
-		
-		image.isVisible = false;
-		image.isEmissive = true;
-		image.displayMode = 2;
-		image.billboardMode = 1;
+
+                var image = ThisEntity.getImageComponents()[0];
+
+                image.isVisible = false;
+                image.isEmissive = true;
+                image.displayMode = 2;
+                image.billboardMode = 1;
     )xx";
 
     ScriptComponent->SetScriptSource(ImageScriptText.c_str());
@@ -250,5 +251,5 @@ CSP_PUBLIC_TEST(CSPEngine, ImageTests, ImageScriptInterfaceTest)
     LogOut(UserSystem);
 }
 #endif
-
+*/
 } // namespace

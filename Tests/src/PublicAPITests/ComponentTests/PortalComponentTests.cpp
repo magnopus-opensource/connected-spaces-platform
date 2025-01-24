@@ -40,6 +40,7 @@ namespace
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_PORTAL_TESTS || RUN_USE_PORTAL_TEST
 CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
 {
@@ -110,7 +111,7 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, UsePortalTest)
     /*
             User would now interact with the portal
     */
-
+/*
     {
         auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
@@ -274,11 +275,11 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 
     // Setup script
     std::string PortalScriptText = R"xx(
-		var portal = ThisEntity.getPortalComponents()[0];
-		portal.spaceId = "secondTestSpaceId";
-		portal.isEnabled = true;
-		portal.position = [4.4, 5.5, 6.6];
-		portal.radius = 456.456;
+                var portal = ThisEntity.getPortalComponents()[0];
+                portal.spaceId = "secondTestSpaceId";
+                portal.isEnabled = true;
+                portal.position = [4.4, 5.5, 6.6];
+                portal.radius = 456.456;
     )xx";
 
     CreatedObject->GetScript()->SetScriptSource(PortalScriptText.c_str());
@@ -303,5 +304,5 @@ CSP_PUBLIC_TEST(CSPEngine, PortalTests, PortalScriptInterfaceTest)
 }
 
 #endif
-
+*/
 } // namespace

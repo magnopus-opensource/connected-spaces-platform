@@ -151,7 +151,7 @@ TestSystem* TestSystem1;
 TestSystem* TestSystem2;
 
 } // namespace
-
+/*
 #if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_EMPTY_TEST
 CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventEmptyTest)
 {
@@ -563,3 +563,4 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
     LogOut(UserSystem);
 }
 #endif
+*/

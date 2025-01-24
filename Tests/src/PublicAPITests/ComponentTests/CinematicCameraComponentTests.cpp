@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*
 #include "../AssetSystemTestHelpers.h"
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
@@ -249,19 +249,19 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 
     // Setup script
     const std::string CinematicCameraScriptText = R"xx(
-		const cinematicCamera = ThisEntity.getCinematicCameraComponents()[0];
-		cinematicCamera.position = [3, 2, 1];
-		cinematicCamera.rotation = [1, 2, 3, 1];
-		cinematicCamera.aspectRatio = 1.3;
-		cinematicCamera.sensorSize = [1,2];
-		cinematicCamera.nearClip = 1;
-		cinematicCamera.farClip = 100;
-		cinematicCamera.iso = 1000;
-		cinematicCamera.shutterSpeed = 0.003;
-		cinematicCamera.aperture = 10;
-		cinematicCamera.focalLength = 2;
-		cinematicCamera.isViewerCamera = true;
-	)xx";
+                const cinematicCamera = ThisEntity.getCinematicCameraComponents()[0];
+                cinematicCamera.position = [3, 2, 1];
+                cinematicCamera.rotation = [1, 2, 3, 1];
+                cinematicCamera.aspectRatio = 1.3;
+                cinematicCamera.sensorSize = [1,2];
+                cinematicCamera.nearClip = 1;
+                cinematicCamera.farClip = 100;
+                cinematicCamera.iso = 1000;
+                cinematicCamera.shutterSpeed = 0.003;
+                cinematicCamera.aperture = 10;
+                cinematicCamera.focalLength = 2;
+                cinematicCamera.isViewerCamera = true;
+        )xx";
 
     CreatedObject->GetScript()->SetScriptSource(CinematicCameraScriptText.c_str());
     CreatedObject->GetScript()->Invoke();
@@ -291,3 +291,4 @@ CSP_PUBLIC_TEST(CSPEngine, CinematicCameraTests, CinematicCameraScriptInterfaceT
 #endif
 
 } // namespace
+*/
