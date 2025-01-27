@@ -315,6 +315,8 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
         FoundEntity->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
+        std::this_thread::sleep_for(5000ms);
+
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
 

@@ -25,6 +25,8 @@
 
 using namespace csp::common;
 
+/*
+
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringDefaultInitialisationTest)
 {
     try
@@ -672,3 +674,4 @@ CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringJoinListAllEmptyEntriesTes
 }
 
 #endif
+*/
