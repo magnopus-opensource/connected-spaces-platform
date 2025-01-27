@@ -180,8 +180,6 @@ AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InE
     AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
 
     FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
-
-    RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
