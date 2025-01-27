@@ -123,3 +123,13 @@ resource "aws_cloudfront_distribution" "main" {
     }
   }
 }
+
+resource "null_resource" "cloudfront_cache_invalidation" {
+  provisioner "local-exec" {
+    command = "aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.main.id} --paths /'*'"
+  }
+
+  triggers = { for file in fileset(var.build_dir, "**/*") : file => filemd5("${var.build_dir}/${file}") }
+
+  depends_on = [aws_s3_object.files]
+}
