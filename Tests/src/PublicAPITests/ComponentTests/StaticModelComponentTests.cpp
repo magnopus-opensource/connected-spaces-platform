@@ -42,7 +42,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_TEST
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentTest)
+CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentTest)
 {
     SetRandSeed();
 
