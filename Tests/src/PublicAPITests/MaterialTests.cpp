@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "AssetSystemTestHelpers.h"
 #include "Awaitable.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 #include "CSP/Systems/Assets/AssetSystem.h"
@@ -23,6 +24,7 @@
 #include "UserSystemTestHelpers.h"
 
 #include "gtest/gtest.h"
+#include <filesystem>
 
 using namespace csp::systems;
 
@@ -73,7 +75,6 @@ void GetMaterial(AssetSystem* AssetSystem, const csp::common::String& AssetColle
 
     OutMaterial = Result.GetGLTFMaterial();
 }
-
 // #if RUN_ALL_UNIT_TESTS || RUN_MATERIAL_TESTS || RUN_MATERIAL_CREATEMATERIAL_TEST
 //
 // CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
