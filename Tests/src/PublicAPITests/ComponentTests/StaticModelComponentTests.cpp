@@ -319,6 +319,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
     }
 
     {
+        //
         // Re-enter space
         bool EntitiesCreated = false;
 
