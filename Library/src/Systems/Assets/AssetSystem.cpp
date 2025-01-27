@@ -498,8 +498,6 @@ void AssetSystem::GetAssetCollectionCount(const csp::common::Optional<csp::commo
 	std::optional<std::vector<String>> PrototypeIds	  = Convert(Ids);
 	std::optional<String> ParentPrototypeId			  = Convert(ParentId);
 	std::optional<std::vector<String>> PrototypeNames = Convert(Names);
-
-
 	std::optional<std::vector<String>> PrototypeTypes;
 
 	if (Types.HasValue())
