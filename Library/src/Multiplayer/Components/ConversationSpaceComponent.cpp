@@ -735,7 +735,7 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
 {
 	auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
-	auto GetMessageCountCallback = [Callback, this](const csp::systems::AssetCollectionCountResult& GetMessageResult)
+	auto GetMessageCountCallback = [Callback](const csp::systems::AssetCollectionCountResult& GetMessageResult)
 	{
 		NumberOfRepliesResult Result(GetMessageResult);
 		Result.SetCount(GetMessageResult.GetCount());
