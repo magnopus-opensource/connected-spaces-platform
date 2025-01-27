@@ -137,7 +137,7 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
 void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCallback Callback)
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
@@ -252,7 +252,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 
 void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, MessageResultCallback Callback)
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
@@ -391,7 +391,7 @@ void ConversationSpaceComponent::GetMessagesFromConversation(const csp::common::
 															 const csp::common::Optional<int>& ResultsMaxNumber,
 															 MessageCollectionResultCallback Callback)
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
@@ -445,7 +445,7 @@ void ConversationSpaceComponent::GetMessagesFromConversation(const csp::common::
 
 void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
@@ -483,7 +483,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 
 void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback)
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
@@ -742,7 +742,7 @@ void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallbac
 		Callback(Result);
 	};
 
-	auto ConversationId													  = GetConversationId();
+	const auto ConversationId											  = GetConversationId();
 	static const Array<csp::systems::EAssetCollectionType> PrototypeTypes = {csp::systems::EAssetCollectionType::COMMENT};
 
 	AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
@@ -768,7 +768,7 @@ void ConversationSpaceComponent::StoreConversationMessage(const csp::systems::Sp
 														  const csp::common::String& Message,
 														  MessageResultCallback Callback) const
 {
-	auto ConversationId = GetConversationId();
+	const auto ConversationId = GetConversationId();
 
 	if (ConversationId.IsEmpty())
 	{
