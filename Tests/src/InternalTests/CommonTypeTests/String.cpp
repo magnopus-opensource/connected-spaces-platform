@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/*
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_STRING_TESTS)
 
 #include "CSP/Common/String.h"
@@ -25,7 +25,6 @@
 
 using namespace csp::common;
 
-/*
 
 CSP_INTERNAL_TEST(CSPEngine, CommonStringTests, StringDefaultInitialisationTest)
 {
