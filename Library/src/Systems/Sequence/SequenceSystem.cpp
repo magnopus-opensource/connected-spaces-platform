@@ -311,6 +311,12 @@ void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler C
 
 void SequenceSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!SequenceChangedCallback)
     {
         return;

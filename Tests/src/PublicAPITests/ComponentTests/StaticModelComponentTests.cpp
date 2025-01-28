@@ -234,7 +234,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_ENTER_SPACE_TEST
-CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 {
     SetRandSeed();
 

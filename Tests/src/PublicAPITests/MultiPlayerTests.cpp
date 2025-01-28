@@ -285,10 +285,17 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ManualConnectionTest)
     char UniqueAssetCollectionName[256];
     SPRINTF(UniqueAssetCollectionName, "%s-%s", TestAssetCollectionName, GetUniqueString().c_str());
 
+    bool CallbackCalled = false;
+
+    Connection->SetConnectionCallback([&CallbackCalled](const csp::common::String& Message) { CallbackCalled = true; });
+
     csp::common::String UserId;
 
     // Log in
     LogInAsNewTestUser(UserSystem, UserId);
+
+    WaitForCallback(CallbackCalled);
+    EXPECT_TRUE(CallbackCalled);
 
     // Create space
     csp::systems::Space Space;
