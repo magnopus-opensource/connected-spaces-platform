@@ -31,7 +31,7 @@ EventBus->ListenNetworkEvent("CustomEventName", [](const Parameters& params) {
 });
 ```
 
-This setup allows developers to tailor client responses to unique scenarios, from contextual triggers to user actions, ensuring a highly interactive space.
+This setup allows developers to tailor client responses to unique scenarios, from contextual triggers to user actions, ensuring a highly interactive space. 
 
 ### Sending Custom Events
 
