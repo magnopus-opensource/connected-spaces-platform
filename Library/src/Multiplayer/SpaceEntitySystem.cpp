@@ -179,11 +179,11 @@ class DirtyComponent;
 using namespace std::chrono;
 
 SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnection)
-    : MultiplayerConnectionInst(InMultiplayerConnection)
+    : EntitiesLock(CSP_NEW std::recursive_mutex)
+    , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
     , EventHandler(CSP_NEW SpaceEntityEventHandler(this))
     , ElectionManager(nullptr)
-    , EntitiesLock(CSP_NEW std::recursive_mutex)
     , TickEntitiesLock(CSP_NEW std::mutex)
     , PendingAdds(CSP_NEW(SpaceEntityQueue))
     , PendingRemoves(CSP_NEW(SpaceEntityQueue))

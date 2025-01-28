@@ -754,6 +754,12 @@ void UserSystem::SetUserPermissionsChangedCallback(UserPermissionsChangedCallbac
 
 void UserSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register UserSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!UserPermissionsChangedCallback)
     {
         return;

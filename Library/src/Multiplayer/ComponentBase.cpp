@@ -29,18 +29,18 @@ namespace csp::multiplayer
 static const ReplicatedValue InvalidValue = ReplicatedValue();
 
 ComponentBase::ComponentBase()
-    : Id(0)
+    : Parent(nullptr)
+    , Id(0)
     , Type(ComponentType::Invalid)
-    , Parent(nullptr)
     , ScriptInterface(nullptr)
 {
     InitialiseProperties();
 }
 
 ComponentBase::ComponentBase(ComponentType Type, SpaceEntity* Parent)
-    : Id(0)
+    : Parent(Parent)
+    , Id(0)
     , Type(Type)
-    , Parent(Parent)
     , ScriptInterface(nullptr)
 {
     InitialiseProperties();

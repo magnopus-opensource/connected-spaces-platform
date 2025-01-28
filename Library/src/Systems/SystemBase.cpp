@@ -69,7 +69,7 @@ void SystemBase::OnEvent(const std::vector<signalr::value>& EventValues)
     SystemCallback(true, Deserialiser.GetEventData());
 }
 
-CSP_EVENT void SystemBase::SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
+void SystemBase::SetSystemCallback(csp::multiplayer::EventBus::ParameterisedCallbackHandler Callback)
 {
     SystemCallback = Callback;
     RegisterSystemCallback();
