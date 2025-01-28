@@ -282,7 +282,7 @@ public:
     /// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
     CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
 
-    /// @brief Sets a callback for a material changed event.
+    /// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified.
     /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
     CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
 
