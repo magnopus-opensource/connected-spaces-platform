@@ -8,17 +8,17 @@ One critical aspect of CSP's multiplayer design is its ability to handle **real-
 
 SignalR ensures that updates to space entities, user actions, and events are transmitted immediately, creating a responsive multi-user environment.
 
-When used in conjunction with MCS, the multiplayer system within CSP's architecture supports service-level features like **persistence**, **global scalability**, **load balancing**, and **regional deployment**. These ensure that multiplayer interactions are not only real-time but also reliable and scalable, accommodating many users across different regions.
+When used in conjunction with MCS, the multiplayer system within CSP's architecture supports service-level features like **persistence**, **global scalability**, **load balancing**, and **regional deployment**. These ensure that multiplayer interactions are not only real time but also reliable and scalable, accommodating many users across different regions.
 
 Understanding this architectural design is crucial for anyone working on multi-user projects with CSP, as it underpins how spaces are created, managed, and interacted with in real-time. This section will explore the key components of the multiplayer stack, how SignalR facilitates communication, and why multiplayer communication is distinct from RESTful API patterns elsewhere in CSP.
 
 ## Event-Driven Design
 
-In real-time multi-user environments, an  **event-driven design** is necessary. Events such as user movements, object interactions, or system updates must instantly propagate to all users, and they happen all the time. An event-driven design ensures that each user receives updates as soon as they occur.
+In real time multi-user environments, an  **event-driven design** is necessary. Events such as user movements, object interactions, or system updates must instantly propagate to all users, and they happen all the time. An event-driven design ensures that each user receives updates as soon as they occur.
 
-**State Synchronization** is another critical feature in multi-user real-time environments. The system must coordinate the coherence of all connected clients and the shared space itself. State synchronization ensures that all clients are in sync, meaning they all see the same state at the same time.
+**State Synchronization** is another critical feature in multi-user real time environments. The system must coordinate the coherence of all connected clients and the shared space itself. State synchronization ensures that all clients are in sync, meaning they all see the same state at the same time.
 
-**Efficiency** is required in order to support many users being copresent within the same space. By maintaining a continuous connection which transmits *only those states which have changed* for a given entity, CSP minimises overhead and latency. This makes it much more efficient for handling the rapid, continuous updates essential in real-time applications.
+**Efficiency** is required in order to support many users being copresent within the same space. By maintaining a continuous connection which transmits *only those states which have changed* for a given entity, CSP minimises overhead and latency. This makes it much more efficient for handling the rapid, continuous updates essential in real time applications.
 
 ## SignalR
 
@@ -32,7 +32,7 @@ While WebSockets enables bidirectional, long-lived communication channels, Signa
 
 In CSP's multiplayer architecture, SignalR handles real-time data transmission for users' actions, events, and state synchronization (both inside and outside of spaces).
 
-For instance, when a user moves or interacts within a space, the information is transferred via SignalR to ensure that other users within the space immediately receive the updates. This process happens in real-time, so all users see a synchronized and consistent state with minimal lag or data loss.
+For instance, when a user moves or interacts within a space, the information is transferred via SignalR to ensure that other users within the space immediately receive the updates. This process happens in real time, so all users see a synchronized and consistent state with minimal lag or data loss.
 
 Instead of traditional polling, where clients must constantly request updates from the server, SignalR pushes updates as soon as changes occur.
 
@@ -52,13 +52,13 @@ In CSP, there are two primary communication methods that serve distinct purposes
 
 **RESTful APIs** in CSP follow a request-response model. This pattern is typically used for non-real-time transactional interactions such as login, retrieving user data, or submitting changes to the system. RESTful APIs are stateless, meaning each request from a client to the server is independent of previous interactions. The server processes the request, performs the necessary action, and returns the result. This makes it ideal for tasks that do not require continuous communication between the server and the client.
 
-**SignalR**, on the other hand, is designed specifically for real-time, continuous, event-driven updates. It operates in a persistent connection model, which means that once a connection is established, the server and client can exchange data continuously without the need to open and close connections for each interaction. This type of communication keeps all connected clients in sync by pushing updates as soon as they happen, ensuring that every user sees the same version of the shared environment at all times.
+**SignalR**, on the other hand, is designed specifically for real time, continuous, event-driven updates. It operates in a persistent connection model, which means that once a connection is established, the server and client can exchange data continuously without the need to open and close connections for each interaction. This type of communication keeps all connected clients in sync by pushing updates as soon as they happen, ensuring that every user sees the same version of the shared environment at all times.
 
 ###  RESTful API Pattern in CSP
 
 The RESTful API pattern in CSP is used for operations that don't require immediate feedback or live updates. For instance, user authentication typically uses RESTful APIs. When users log into the system, they send a login request that includes their credentials. The server processes the request, validates the credentials, and responds with the necessary authentication token or error message. The client then uses this token to access the system's resources.
 
-Another common use case for RESTful APIs in CSP is data retrieval. Users can send a GET request to the server if they want to fetch information about a space, like metadata or the assets contained within. The server processes the request and returns the requested data. Because this operation doesn't need to occur in real-time, the slight delay that comes with the request-response cycle is acceptable. RESTful APIs are great because they're efficient, stateless, and scalable. Each interaction stands alone, and the server doesn't need to maintain an ongoing connection to the client once the request is fulfilled.
+Another common use case for RESTful APIs in CSP is data retrieval. Users can send a GET request to the server if they want to fetch information about a space, like metadata or the assets contained within. The server processes the request and returns the requested data. Because this operation doesn't need to occur in real time, the slight delay that comes with the request-response cycle is acceptable. RESTful APIs are great because they're efficient, stateless, and scalable. Each interaction stands alone, and the server doesn't need to maintain an ongoing connection to the client once the request is fulfilled.
 
 ### SignalR
 
@@ -70,7 +70,7 @@ Unlike RESTful APIs, which rely on separate requests and responses for each inte
 
 * **RESTful API Flow**: In a RESTful API flow, the client sends a request to the server, such as logging in or retrieving data. The server processes the request and sends a response. This interaction is transactional, meaning it's complete once the response is received. There is no continuous communication, and each request is separate from the others.
 
-* **Multiplayer Service Flow**: In Multiplayer Service Communication, the server maintains a continuous connection with all connected clients. When an event occurs, such as avatar movement or object interaction, the server updates all clients. This ensures that all users see the same version of the environment in real-time. Unlike RESTful APIs, Multiplayer Service Communication supports ongoing interaction and updates, ensuring real-time synchronization across all clients.
+* **Multiplayer Service Flow**: In Multiplayer Service Communication, the server maintains a continuous connection with all connected clients. When an event occurs, such as avatar movement or object interaction, the server updates all clients. This ensures that all users see the same version of the environment in real time. Unlike RESTful APIs, Multiplayer Service Communication supports ongoing interaction and updates, ensuring real-time synchronization across all clients.
 
 
 ## High-Level Abstractions
@@ -95,7 +95,7 @@ The interaction between these systems ensures:
 
 In this section, we covered essential concepts surrounding the multiplayer architecture in CSP. You now have a high-level understanding of how the architecture supports real-time, interactive experiences by efficiently managing multiple users in shared spaces. We explored the use of the SignalR protocol, which is crucial for enabling low-latency, real-time communication between the server and clients.
 
-We also distinguished between the roles of multiplayer service communication and RESTful APIs. While RESTful APIs are ideal for transactional operations like logging in or retrieving data, multiplayer service communication is optimized for real-time, event-driven updates that require continuous synchronization.
+We also distinguished between the roles of multiplayer service communication and RESTful APIs. While RESTful APIs are ideal for transactional operations like logging in or retrieving data, multiplayer service communication is optimized for real time, event-driven updates that require continuous synchronization.
 
 By grasping these core principles, you can better appreciate how CSP creates scalable, dynamic, and interactive multiplayer experiences.
 

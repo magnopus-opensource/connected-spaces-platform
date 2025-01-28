@@ -6,7 +6,7 @@ Event and messaging systems drive multiplayer communication and entity synchroni
 CSP supports this through the :class:`csp::multiplayer::EventBus`, which manages **SignalR Multiplayer Events**. Together, these enable real-time communication across various components and clients.
 ```
 
-* The EventBus manages internal and remote events within the CSP infrastructure, allowing various subsystems to share updates, notify the client application, and maintain a coordinated state.  
+* The EventBus manages internal and remote events within the CSP infrastructure, allowing various subsystems to share updates, notify client applications, and maintain a coordinated state.  
 * SignalR Multiplayer Events are the medium through which CSP notifies other remote client applications, facilitating the transfer of messages and data across the network in a shared multi-user environment.
 
 ## Custom Events
@@ -52,7 +52,7 @@ By using `SendNetworkEvent`, developers can ensure that every user in the space 
 ### Targeted Custom Events
 
 ```eval_rst
-Sometimes, an event should only reach a specific client rather than all users. CSP allows targeted event delivery using the :func:`csp::multiplayer::EventBus::SendNetworkEventToClient` method. Developers can send custom events to individual clients by specifying a client ID. This feature is helpful for private messages, individual user updates, or tailored instructions.
+Sometimes, an event should only reach a specific client rather than all users. CSP allows targeted event delivery using the :func:`csp::multiplayer::EventBus::SendNetworkEventToClient` method. Developers can send custom events to individual clients by specifying a client Id. This feature is helpful for private messages, individual user updates, or tailored instructions.
 ```
 
 Example:
@@ -90,7 +90,7 @@ By registering to these callbacks, developers can ensure that client application
 
 ### Execution Flow for Predefined Events
 
-When CSP receives a predefined event, it processes it through a the following sequence before passing it on to clients:
+When CSP receives a predefined event, it processes it through the following sequence before passing it on to clients:
 
 1. **Event Reception**: CSP receives the event from the server and identifies it as a special case in the EventBus.
 
