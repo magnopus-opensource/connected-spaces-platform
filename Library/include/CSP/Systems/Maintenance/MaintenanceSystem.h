@@ -21,7 +21,6 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-
 namespace csp::services
 {
 
@@ -29,14 +28,12 @@ class ApiBase;
 
 } // namespace csp::services
 
-
 namespace csp::web
 {
 
 class WebClient;
 
 } // namespace csp::web
-
 
 namespace csp::memory
 {
@@ -47,7 +44,6 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-
 namespace csp::systems
 {
 
@@ -57,25 +53,25 @@ namespace csp::systems
 /// and can also be used to check for up coming maintenances outages
 class CSP_API MaintenanceSystem : public SystemBase
 {
-	CSP_START_IGNORE
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	friend void csp::memory::Delete<MaintenanceSystem>(MaintenanceSystem* Ptr);
-	/** @endcond */
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    friend void csp::memory::Delete<MaintenanceSystem>(MaintenanceSystem* Ptr);
+    /** @endcond */
+    CSP_END_IGNORE
 
 public:
-	/// @brief Receives information on planned maintenances outages schedules for the future
-	/// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback);
+    /// @brief Receives information on planned maintenances outages schedules for the future
+    /// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetMaintenanceInfo(const csp::common::String& MaintenanceURL, MaintenanceInfoCallback Callback);
 
 private:
-	MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
-	~MaintenanceSystem();
+    MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
+    ~MaintenanceSystem();
 
-	csp::services::ApiBase* MaintenanceAPI;
-	bool AllowMaintenanceInfoRequests;
+    csp::services::ApiBase* MaintenanceAPI;
+    bool AllowMaintenanceInfoRequests;
 };
 
 } // namespace csp::systems

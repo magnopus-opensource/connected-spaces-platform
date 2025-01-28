@@ -20,7 +20,6 @@
 #include "CSP/Multiplayer/SpaceEntitySystem.h"
 #include "ClientProxy.h"
 
-
 namespace csp::multiplayer
 {
 
@@ -28,97 +27,95 @@ class IClientSelectionCriteria;
 class SpaceEntitySystem;
 class SpaceEntity;
 
-
 enum class ElectionState
 {
-	Idle,
-	Requested,
-	Electing,
+    Idle,
+    Requested,
+    Electing,
 };
-
 
 class ClientElectionManager
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class ClientProxy;
-	friend class SpaceEntitySystem;
-	friend class ClientElectionEventHandler;
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class ClientProxy;
+    friend class SpaceEntitySystem;
+    friend class ClientElectionEventHandler;
+    /** @endcond */
 
 public:
-	ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem);
-	~ClientElectionManager();
+    ClientElectionManager(SpaceEntitySystem* InSpaceEntitySystem);
+    ~ClientElectionManager();
 
-	void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
-	void OnDisconnect();
+    void OnConnect(const SpaceEntitySystem::SpaceEntityList& Avatars, const SpaceEntitySystem::SpaceEntityList& Objects);
+    void OnDisconnect();
 
-	void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
+    void OnLocalClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
 
-	void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
-	void OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
-	void OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
-	void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
+    void OnClientAdd(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
+    void OnClientRemove(const SpaceEntity* ClientAvatar, const SpaceEntitySystem::SpaceEntityList& Avatars);
+    void OnObjectAdd(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
+    void OnObjectRemove(const SpaceEntity* Object, const SpaceEntitySystem::SpaceEntityList& Objects);
 
-	void Update();
+    void Update();
 
-	SpaceEntitySystem* GetSpaceEntitySystem();
+    SpaceEntitySystem* GetSpaceEntitySystem();
 
-	bool IsLocalClientLeader() const;
+    bool IsLocalClientLeader() const;
 
-	ClientProxy* GetLeader() const;
-
-private:
-	void BindNetworkEvents();
-	void UnBindNetworkEvents();
-
-	void OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data);
-	void OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data);
-
-	ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar);
-	void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);
-	ClientProxy* FindClientUsingAvatar(const SpaceEntity* ClientAvatar);
-
-	ClientProxy* AddClientUsingId(int64_t ClientId);
-	void RemoveClientUsingId(int64_t ClientId);
-	ClientProxy* FindClientUsingId(int64_t ClientId);
-
-	bool IsConnected() const;
-
-	void SetLeader(ClientProxy* Client);
-	void CheckLeaderIsValid();
-	void OnLeaderRemoved();
-
-	// void UpdateClientStates();
-
-	// Election state handlers
-	void HandleElectionStateIdle();
-	void HandleElectionStateRequested();
-	void HandleElectionStateElecting();
-
-	void OnElectionComplete(int64_t LeaderId);
-	void OnLeaderNotification(int64_t LeaderId);
-
-	// Async functions that may take a while as they initiate network events between all clients
-	void AsyncNegotiateLeader();
-
-	void SetElectionState(ElectionState NewState);
-
-	void SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback);
+    ClientProxy* GetLeader() const;
 
 private:
-	SpaceEntitySystem* SpaceEntitySystemPtr;
-	class ClientElectionEventHandler* EventHandler;
+    void BindNetworkEvents();
+    void UnBindNetworkEvents();
 
-	ClientMap Clients;
+    void OnClientElectionEvent(const csp::common::Array<ReplicatedValue>& Data);
+    void OnRemoteRunScriptEvent(const csp::common::Array<ReplicatedValue>& Data);
 
-	ConnectionState TheConnectionState;
-	std::atomic<ElectionState> TheElectionState;
+    ClientProxy* AddClientUsingAvatar(const SpaceEntity* ClientAvatar);
+    void RemoveClientUsingAvatar(const SpaceEntity* ClientAvatar);
+    ClientProxy* FindClientUsingAvatar(const SpaceEntity* ClientAvatar);
 
-	ClientProxy* LocalClient;
+    ClientProxy* AddClientUsingId(int64_t ClientId);
+    void RemoveClientUsingId(int64_t ClientId);
+    ClientProxy* FindClientUsingId(int64_t ClientId);
 
-	ClientProxy* Leader;
+    bool IsConnected() const;
 
-	csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
+    void SetLeader(ClientProxy* Client);
+    void CheckLeaderIsValid();
+    void OnLeaderRemoved();
+
+    // void UpdateClientStates();
+
+    // Election state handlers
+    void HandleElectionStateIdle();
+    void HandleElectionStateRequested();
+    void HandleElectionStateElecting();
+
+    void OnElectionComplete(int64_t LeaderId);
+    void OnLeaderNotification(int64_t LeaderId);
+
+    // Async functions that may take a while as they initiate network events between all clients
+    void AsyncNegotiateLeader();
+
+    void SetElectionState(ElectionState NewState);
+
+    void SetScriptSystemReadyCallback(csp::multiplayer::SpaceEntitySystem::CallbackHandler InScriptSystemReadyCallback);
+
+private:
+    SpaceEntitySystem* SpaceEntitySystemPtr;
+    class ClientElectionEventHandler* EventHandler;
+
+    ClientMap Clients;
+
+    ConnectionState TheConnectionState;
+    std::atomic<ElectionState> TheElectionState;
+
+    ClientProxy* LocalClient;
+
+    ClientProxy* Leader;
+
+    csp::multiplayer::SpaceEntitySystem::CallbackHandler ScriptSystemReadyCallback;
 };
 
 } // namespace csp::multiplayer

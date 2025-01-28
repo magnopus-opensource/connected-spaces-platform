@@ -21,45 +21,39 @@
 #include "CSP/Systems/SystemsManager.h"
 #include "TestHelpers.h"
 
-
 void PublicTestBase::SetUp()
 {
-	::testing::Test::SetUp();
+    ::testing::Test::SetUp();
 
-	InitialiseFoundationWithUserAgentInfo(EndpointBaseURI);
+    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback(
-		[](csp::common::String Message)
-		{
-			fprintf(stderr, "%s\n", Message.c_str());
-		});
+    csp::systems::SystemsManager::Get().GetLogSystem()->SetLogCallback([](csp::common::String Message) { fprintf(stderr, "%s\n", Message.c_str()); });
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation initialised!");
 
-	auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-	AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 }
 
 void PublicTestBase::TearDown()
 {
-	::testing::Test::TearDown();
+    ::testing::Test::TearDown();
 
-	auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
+    auto Connection = csp::systems::SystemsManager::Get().GetMultiplayerConnection();
 
-	AWAIT(Connection, SetAllowSelfMessagingFlag, false);
+    AWAIT(Connection, SetAllowSelfMessagingFlag, false);
 
-	if (!csp::CSPFoundation::GetIsInitialised())
-	{
-		fprintf(stderr,
-				"%s\n",
-				"csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
+    if (!csp::CSPFoundation::GetIsInitialised())
+    {
+        fprintf(stderr, "%s\n",
+            "csp::CSPFoundation::Shutdown() already called! Please remove any explicit calls to Initialise() and Shutdown() from this test.");
 
-		return;
-	}
+        return;
+    }
 
-	csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
-	csp::CSPFoundation::Shutdown();
+    csp::systems::SystemsManager::Get().GetLogSystem()->LogMsg(csp::systems::LogLevel::Verbose, "Foundation shutdown!");
+    csp::CSPFoundation::Shutdown();
 }

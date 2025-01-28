@@ -17,6 +17,6 @@
 
 namespace csp::systems
 {
-inline const char* SCRIPT_NAMESPACE		= "OKO";
+inline const char* SCRIPT_NAMESPACE = "OKO";
 inline const char* OLD_SCRIPT_NAMESPACE = "CSP";
 } // namespace csp::systems

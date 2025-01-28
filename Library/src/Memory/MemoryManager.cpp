@@ -19,30 +19,24 @@
 #include "CSP/CSPCommon.h"
 #include "Memory.h"
 
-
 namespace csp::memory
 {
 
 #if defined(CSP_WINDOWS)
-	#pragma init_seg(lib)
+// (initializers put in library initialization area) Not at all sure why this is here, hopefully we can delete the custom memory management because no
+// one really understands it.
+#pragma warning(disable : 4073)
+#pragma init_seg(lib)
 #else
 __attribute__((init_priority(101)))
 #endif
 
 MemoryManager::MultiThreadStandardAllocator MemoryManager::OlyDefaultAllocator;
 
-void MemoryManager::Initialise()
-{
-}
+void MemoryManager::Initialise() { }
 
-void MemoryManager::Shutdown()
-{
-}
+void MemoryManager::Shutdown() { }
 
-csp::memory::Allocator& MemoryManager::GetDefaultAllocator()
-{
-	return OlyDefaultAllocator;
-}
-
+csp::memory::Allocator& MemoryManager::GetDefaultAllocator() { return OlyDefaultAllocator; }
 
 } // namespace csp::memory

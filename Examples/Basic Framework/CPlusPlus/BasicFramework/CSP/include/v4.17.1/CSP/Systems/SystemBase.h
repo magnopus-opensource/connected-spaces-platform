@@ -17,7 +17,6 @@
 
 #include "CSP/CSPCommon.h"
 
-
 namespace csp::web
 {
 
@@ -25,17 +24,18 @@ class WebClient;
 
 }
 
-
 namespace csp::systems
 {
 /// @brief Base class for all Connected Spaces Platform Systems, which enforces passing of a WebClient instance in the constructor of each System.
 class CSP_API CSP_NO_DISPOSE SystemBase
 {
 protected:
-	SystemBase() : WebClient(nullptr) {};
-	CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient) : WebClient(InWebClient) {};
+    SystemBase()
+        : WebClient(nullptr) {};
+    CSP_NO_EXPORT SystemBase(csp::web::WebClient* InWebClient)
+        : WebClient(InWebClient) {};
 
-	csp::web::WebClient* WebClient;
+    csp::web::WebClient* WebClient;
 };
 
 } // namespace csp::systems

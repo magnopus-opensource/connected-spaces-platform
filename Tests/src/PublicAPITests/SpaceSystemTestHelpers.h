@@ -18,25 +18,17 @@
 #include "CSP/Common/String.h"
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 
-
-
-void CreateSpace(csp::systems::SpaceSystem* SpaceSystem,
-				 const csp::common::String& Name,
-				 const csp::common::String& Description,
-				 csp::systems::SpaceAttributes SpaceAttributes,
-				 const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-				 const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
-				 const csp::common::Optional<csp::systems::FileAssetDataSource>& Thumbnail,
-				 const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-				 csp::systems::Space& OutSpace);
-void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem,
-						   const csp::common::String& Name,
-						   const csp::common::String& Description,
-						   csp::systems::SpaceAttributes SpaceAttributes,
-						   const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
-						   const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
-						   csp::systems::BufferAssetDataSource& Thumbnail,
-						   const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags,
-						   csp::systems::Space& OutSpace);
+void CreateSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& Name, const csp::common::String& Description,
+    csp::systems::SpaceAttributes SpaceAttributes,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
+    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers,
+    const csp::common::Optional<csp::systems::FileAssetDataSource>& Thumbnail,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, csp::systems::Space& OutSpace);
+void CreateSpaceWithBuffer(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& Name, const csp::common::String& Description,
+    csp::systems::SpaceAttributes SpaceAttributes,
+    const csp::common::Optional<csp::common::Map<csp::common::String, csp::common::String>>& SpaceMetadata,
+    const csp::common::Optional<csp::systems::InviteUserRoleInfoCollection>& InviteUsers, csp::systems::BufferAssetDataSource& Thumbnail,
+    const csp::common::Optional<csp::common::Array<csp::common::String>>& Tags, csp::systems::Space& OutSpace);
 void DeleteSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId);
 void GetSpace(csp::systems::SpaceSystem* SpaceSystem, const csp::common::String& SpaceId, csp::systems::Space& OutSpace);
+void CreateDefaultTestSpace(csp::systems::SpaceSystem* SpaceSystem, csp::systems::Space& OutSpace);

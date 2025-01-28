@@ -20,7 +20,6 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/SystemsResult.h"
 
-
 namespace csp::services
 {
 
@@ -28,14 +27,12 @@ class ApiBase;
 
 }
 
-
 namespace csp::web
 {
 
 class WebClient;
 
 }
-
 
 namespace csp::systems
 {
@@ -46,22 +43,22 @@ namespace csp::systems
 /// and can also be used to check for up coming maintenances outages
 class CSP_API CSP_NO_DISPOSE MaintenanceSystem : public SystemBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    /** @endcond */
 
 public:
-	~MaintenanceSystem();
+    ~MaintenanceSystem();
 
-	/// @brief Receives information on planned maintenances outages schedules for the future
-	/// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetMaintenanceInfo(MaintenanceInfoCallback Callback);
+    /// @brief Receives information on planned maintenances outages schedules for the future
+    /// @param Callback MaintenanceInfoCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetMaintenanceInfo(MaintenanceInfoCallback Callback);
 
 private:
-	MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
-	CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
+    MaintenanceSystem(); // This constructor is only provided to appease the wrapper generator and should not be used
+    CSP_NO_EXPORT MaintenanceSystem(csp::web::WebClient* InWebClient);
 
-	csp::services::ApiBase* MaintenanceAPI;
+    csp::services::ApiBase* MaintenanceAPI;
 };
 
 } // namespace csp::systems

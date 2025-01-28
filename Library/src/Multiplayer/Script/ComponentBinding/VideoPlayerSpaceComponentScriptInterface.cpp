@@ -25,11 +25,11 @@ namespace csp::multiplayer
 {
 
 VideoPlayerSpaceComponentScriptInterface::VideoPlayerSpaceComponentScriptInterface(VideoPlayerSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
-DEFINE_SCRIPT_PROPERTY_STRING(VideoPlayerSpaceComponent, Name);
+DEFINE_SCRIPT_PROPERTY_STRING_ADAPTNAME(VideoPlayerSpaceComponent, Name, ComponentName);
 
 DEFINE_SCRIPT_PROPERTY_VEC3(VideoPlayerSpaceComponent, Scale);
 DEFINE_SCRIPT_PROPERTY_VEC3(VideoPlayerSpaceComponent, Position);

@@ -17,24 +17,12 @@
 
 namespace csp::systems
 {
-const LODChain& LODChainResult::GetLODChain() const
-{
-	return Chain;
-}
+const LODChain& LODChainResult::GetLODChain() const { return Chain; }
 
-void LODChainResult::SetLODChain(const LODChain& InChain)
-{
-	Chain = InChain;
-}
+void LODChainResult::SetLODChain(const LODChain& InChain) { Chain = InChain; }
 
-void LODChainResult::SetLODChain(LODChain&& InChain)
-{
-	Chain = std::move(InChain);
-}
+void LODChainResult::SetLODChain(LODChain&& InChain) { Chain = std::move(InChain); }
 
-void LODChainResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
-{
-	ResultBase::OnResponse(ApiResponse);
-}
+void LODChainResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
 
 } // namespace csp::systems

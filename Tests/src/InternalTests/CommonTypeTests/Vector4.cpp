@@ -16,131 +16,129 @@
 
 #if !defined(SKIP_INTERNAL_TESTS) || defined(RUN_COMMONTYPE_TESTS) || defined(RUN_COMMONTYPE_VECTOR4_TESTS)
 
-	#include "CSP/Common/Vector.h"
+#include "CSP/Common/Vector.h"
 
-	#include "TestHelpers.h"
+#include "TestHelpers.h"
 
-	#include <gtest/gtest.h>
-
+#include <gtest/gtest.h>
 
 using namespace csp::common;
 
-
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector43DefaultInitialisationTest)
 {
-	try
-	{
-		Vector4 Instance;
+    try
+    {
+        Vector4 Instance;
 
-		EXPECT_EQ(Instance.X, 0);
-		EXPECT_EQ(Instance.Y, 0);
-		EXPECT_EQ(Instance.Z, 0);
-		EXPECT_EQ(Instance.W, 0);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 0);
+        EXPECT_EQ(Instance.Y, 0);
+        EXPECT_EQ(Instance.Z, 0);
+        EXPECT_EQ(Instance.W, 0);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4ValueInitialisationTest)
 {
-	try
-	{
-		Vector4 Instance(1, 2, 3, 4);
+    try
+    {
+        Vector4 Instance(1, 2, 3, 4);
 
-		EXPECT_EQ(Instance.X, 1);
-		EXPECT_EQ(Instance.Y, 2);
-		EXPECT_EQ(Instance.Z, 3);
-		EXPECT_EQ(Instance.W, 4);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 1);
+        EXPECT_EQ(Instance.Y, 2);
+        EXPECT_EQ(Instance.Z, 3);
+        EXPECT_EQ(Instance.W, 4);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4EqualityTest)
 {
-	try
-	{
-		Vector4 Instance1(1, 2, 3, 4);
-		Vector4 Instance2(1, 2, 3, 4);
+    try
+    {
+        Vector4 Instance1(1, 2, 3, 4);
+        Vector4 Instance2(1, 2, 3, 4);
 
-		EXPECT_TRUE(Instance1 == Instance2);
-		EXPECT_FALSE(Instance1 != Instance2);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_TRUE(Instance1 == Instance2);
+        EXPECT_FALSE(Instance1 != Instance2);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4NonEqualityTest)
 {
-	try
-	{
-		Vector4 Instance1(1, 2, 3, 4);
-		Vector4 Instance2(4, 3, 2, 1);
+    try
+    {
+        Vector4 Instance1(1, 2, 3, 4);
+        Vector4 Instance2(4, 3, 2, 1);
 
-		EXPECT_FALSE(Instance1 == Instance2);
-		EXPECT_TRUE(Instance1 != Instance2);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_FALSE(Instance1 == Instance2);
+        EXPECT_TRUE(Instance1 != Instance2);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4ZeroTest)
 {
-	try
-	{
-		Vector4 Instance = Vector4::Zero();
+    try
+    {
+        Vector4 Instance = Vector4::Zero();
 
-		EXPECT_EQ(Instance.X, 0);
-		EXPECT_EQ(Instance.Y, 0);
-		EXPECT_EQ(Instance.Z, 0);
-		EXPECT_EQ(Instance.W, 0);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 0);
+        EXPECT_EQ(Instance.Y, 0);
+        EXPECT_EQ(Instance.Z, 0);
+        EXPECT_EQ(Instance.W, 0);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4OneTest)
 {
-	try
-	{
-		Vector4 Instance = Vector4::One();
+    try
+    {
+        Vector4 Instance = Vector4::One();
 
-		EXPECT_EQ(Instance.X, 1);
-		EXPECT_EQ(Instance.Y, 1);
-		EXPECT_EQ(Instance.Z, 1);
-		EXPECT_EQ(Instance.W, 1);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 1);
+        EXPECT_EQ(Instance.Y, 1);
+        EXPECT_EQ(Instance.Z, 1);
+        EXPECT_EQ(Instance.W, 1);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 CSP_INTERNAL_TEST(CSPEngine, CommonVectorTests, Vector4IdentityTest)
 {
-	try
-	{
-		Vector4 Instance = Vector4::Identity();
+    try
+    {
+        Vector4 Instance = Vector4::Identity();
 
-		EXPECT_EQ(Instance.X, 0);
-		EXPECT_EQ(Instance.Y, 0);
-		EXPECT_EQ(Instance.Z, 0);
-		EXPECT_EQ(Instance.W, 1);
-	}
-	catch (...)
-	{
-		FAIL();
-	}
+        EXPECT_EQ(Instance.X, 0);
+        EXPECT_EQ(Instance.Y, 0);
+        EXPECT_EQ(Instance.Z, 0);
+        EXPECT_EQ(Instance.W, 1);
+    }
+    catch (...)
+    {
+        FAIL();
+    }
 }
 
 #endif

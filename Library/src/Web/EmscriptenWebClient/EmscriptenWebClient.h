@@ -17,14 +17,12 @@
 
 #include "Web/WebClient.h"
 
-
 namespace csp::systems
 {
 
 class SystemsManager;
 
 }
-
 
 namespace csp::multiplayer
 {
@@ -33,38 +31,30 @@ class CSPHttpClient;
 
 }
 
-
 namespace csp::web
 {
 
 class EmscriptenWebClient : public WebClient
 {
-	friend class csp::systems::SystemsManager;
-	friend class csp::multiplayer::CSPHttpClient;
+    friend class csp::systems::SystemsManager;
+    friend class csp::multiplayer::CSPHttpClient;
 
 public:
-	virtual ~EmscriptenWebClient() {};
+    virtual ~EmscriptenWebClient() {};
 
-	std::string MD5Hash(const void* Data, const size_t Size) override;
-	void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType) override;
-	void SetFileUploadContentFromString(HttpPayload* Payload,
-										const csp::common::String& StringSource,
-										const csp::common::String& FileName,
-										const char* Version,
-										const csp::common::String& MediaType) override;
-	void SetFileUploadContentFromBuffer(HttpPayload* Payload,
-										const char* Buffer,
-										size_t BufferLength,
-										const csp::common::String& FileName,
-										const char* Version,
-										const csp::common::String& MediaType) override;
+    std::string MD5Hash(const void* Data, const size_t Size) override;
+    void SetFileUploadContentFromFile(HttpPayload* Payload, const char* FilePath, const char* Version, const csp::common::String& MediaType) override;
+    void SetFileUploadContentFromString(HttpPayload* Payload, const csp::common::String& StringSource, const csp::common::String& FileName,
+        const char* Version, const csp::common::String& MediaType) override;
+    void SetFileUploadContentFromBuffer(HttpPayload* Payload, const char* Buffer, size_t BufferLength, const csp::common::String& FileName,
+        const char* Version, const csp::common::String& MediaType) override;
 
 protected:
-	// Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
-	EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh = true);
+    // Instances of EmscriptenWebClient should not be created. You should instead rely on the instance that `csp::systems::SystemsManager` holds.
+    EmscriptenWebClient(const Port InPort, const ETransferProtocol Tp, bool AutoRefresh = true);
 
 private:
-	void Send(HttpRequest& Request) override;
+    void Send(HttpRequest& Request) override;
 };
 
 } // namespace csp::web
