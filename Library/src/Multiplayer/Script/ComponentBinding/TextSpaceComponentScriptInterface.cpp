@@ -40,8 +40,8 @@ DEFINE_SCRIPT_PROPERTY_VEC3(TextSpaceComponent, BackgroundColor);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsBackgroundVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, BillboardMode, int64_t, BillboardMode);
-DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, uint32_t, uint32_t, Width);
-DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, uint32_t, uint32_t, Height);
+DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, float, uint32_t, Width);
+DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, float, uint32_t, Height);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsVisible);
 DEFINE_SCRIPT_PROPERTY_TYPE(TextSpaceComponent, bool, bool, IsARVisible);
 

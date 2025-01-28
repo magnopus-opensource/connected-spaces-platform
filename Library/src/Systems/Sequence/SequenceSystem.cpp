@@ -182,7 +182,7 @@ void SequenceSystem::GetSequencesByCriteria(const Array<String>& InSequenceKeys,
         Regex = csp::common::Encode::URI(*InKeyRegex);
     }
 
-    if (InReferenceType.HasValue() && InReferenceIds.IsEmpty() || !InReferenceIds.IsEmpty() && !InReferenceType.HasValue())
+    if ((InReferenceType.HasValue() && InReferenceIds.IsEmpty()) || (!InReferenceIds.IsEmpty() && !InReferenceType.HasValue()))
     {
         CSP_LOG_ERROR_MSG("InReferenceType and InReferenceIds need to be used together");
         INVOKE_IF_NOT_NULL(Callback, MakeInvalid<SequencesResult>(csp::systems::ERequestFailureReason::InvalidSequenceKey));
@@ -311,6 +311,12 @@ void SequenceSystem::SetSequenceChangedCallback(SequenceChangedCallbackHandler C
 
 void SequenceSystem::RegisterSystemCallback()
 {
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register SequenceSystem. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
     if (!SequenceChangedCallback)
     {
         return;

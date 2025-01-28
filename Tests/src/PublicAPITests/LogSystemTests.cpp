@@ -695,7 +695,7 @@ CSP_INTERNAL_TEST(CSPEngine, LogSystemTests, FailureMessageTest)
 
     auto Start = std::chrono::steady_clock::now();
     auto Current = std::chrono::steady_clock::now();
-    float TestTime = 0;
+    long long TestTime = 0;
 
     while (!LogConfirmed && TestTime < 20)
     {

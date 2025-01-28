@@ -37,8 +37,8 @@ namespace csp::multiplayer
 {
 
 CSPWebSocketClientPOCO::CSPWebSocketClientPOCO() noexcept
-    : StopFlag(false)
-    , PocoWebSocket(nullptr)
+    : PocoWebSocket(nullptr)
+    , StopFlag(false)
 {
 }
 

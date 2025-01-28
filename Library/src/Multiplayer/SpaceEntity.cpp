@@ -89,7 +89,13 @@ SpaceEntity::SpaceEntity()
     , IsTransferable(true)
     , IsPersistant(true)
     , OwnerId(0)
+    , ParentId(nullptr)
+    , ShouldUpdateParent(false)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
+    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
+    , ThirdPartyRef("")
+    , SelectedId(0)
+    , Parent(nullptr)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(CSP_NEW EntityScript(this, nullptr))
     , ScriptInterface(CSP_NEW EntityScriptInterface(this))
@@ -97,13 +103,7 @@ SpaceEntity::SpaceEntity()
     , ComponentsLock(CSP_NEW std::mutex)
     , PropertiesLock(CSP_NEW std::mutex)
     , RefCount(CSP_NEW std::atomic_int(0))
-    , SelectedId(0)
-    , ParentId(nullptr)
-    , ShouldUpdateParent(false)
-    , ThirdPartyRef("")
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , TimeOfLastPatch(0)
-    , Parent(nullptr)
 {
 }
 
@@ -114,7 +114,13 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , IsTransferable(true)
     , IsPersistant(true)
     , OwnerId(0)
+    , ParentId(nullptr)
+    , ShouldUpdateParent(false)
     , Transform { { 0, 0, 0 }, { 0, 0, 0, 1 }, { 1, 1, 1 } }
+    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
+    , ThirdPartyRef("")
+    , SelectedId(0)
+    , Parent(nullptr)
     , NextComponentId(COMPONENT_KEY_START_COMPONENTS)
     , Script(CSP_NEW EntityScript(this, InEntitySystem))
     , ScriptInterface(CSP_NEW EntityScriptInterface(this))
@@ -122,13 +128,7 @@ SpaceEntity::SpaceEntity(SpaceEntitySystem* InEntitySystem)
     , ComponentsLock(CSP_NEW std::mutex)
     , PropertiesLock(CSP_NEW std::mutex)
     , RefCount(CSP_NEW std::atomic_int(0))
-    , SelectedId(0)
-    , ParentId(nullptr)
-    , ShouldUpdateParent(false)
-    , ThirdPartyRef("")
-    , ThirdPartyPlatform(csp::systems::EThirdPartyPlatform::NONE)
     , TimeOfLastPatch(0)
-    , Parent(nullptr)
 {
 }
 
@@ -620,7 +620,7 @@ void SpaceEntity::Deserialise(IEntityDeserialiser& Deserialiser)
 
         Deserialiser.EnterComponents();
         {
-            auto ComponentCount = Deserialiser.GetNumComponents();
+            [[maybe_unused]] auto ComponentCount = Deserialiser.GetNumComponents();
             auto RealComponentCount = Deserialiser.GetNumRealComponents();
 
             assert(ComponentCount >= 3 && "SpaceObject should have at least 4 components!");
@@ -1208,7 +1208,6 @@ void SpaceEntity::DestroyComponent(uint16_t Key)
 
 ComponentBase* SpaceEntity::FindFirstComponentOfType(ComponentType Type, bool SearchDirtyComponents) const
 {
-    auto& CheckComponents = *GetComponents();
     const csp::common::Array<uint16_t>* ComponentKeys = Components.Keys();
     ComponentBase* LocatedComponent = nullptr;
 

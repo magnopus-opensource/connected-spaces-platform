@@ -24,13 +24,14 @@
 #include "Multiplayer/SignalR/SignalRConnection.h"
 
 #include <iostream>
+#include <limits>
 
 namespace csp::multiplayer
 {
 
 extern ErrorCode ParseError(std::exception_ptr Exception);
 
-constexpr const uint64_t ALL_CLIENTS_ID = -1;
+constexpr const uint64_t ALL_CLIENTS_ID = std::numeric_limits<uint64_t>::max();
 
 NetworkEventManagerImpl::NetworkEventManagerImpl(MultiplayerConnection* InMultiplayerConnection)
     : MultiplayerConnectionInst(InMultiplayerConnection)
@@ -52,7 +53,7 @@ void NetworkEventManagerImpl::SendNetworkEvent(const csp::common::String& EventN
 
     csp::multiplayer::SignalRConnection* SignalRConnectionPtr = static_cast<csp::multiplayer::SignalRConnection*>(Connection);
 
-    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [this, Callback](signalr::value Result, std::exception_ptr Except)
+    std::function<void(signalr::value, std::exception_ptr)> LocalCallback = [Callback](signalr::value Result, std::exception_ptr Except)
     {
         if (Except != nullptr)
         {

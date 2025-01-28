@@ -62,16 +62,6 @@ ESequenceUpdateType ESequenceUpdateIntToUpdateType(uint64_t UpdateType)
     return SequenceUpdateType;
 }
 
-std::string RemoveIdPrefix(const std::string& Id)
-{
-    if (Id.size() > 5)
-    {
-        return Id.substr(5);
-    }
-
-    return Id;
-}
-
 csp::common::String DecodeSequenceKey(csp::multiplayer::ReplicatedValue& RawValue)
 {
     // Sequence keys are URI encoded to support reserved characters.
@@ -85,7 +75,7 @@ csp::common::String csp::multiplayer::GetSequenceKeyIndex(const csp::common::Str
     const std::string SequenceKeyString(SequenceKey.c_str());
     // Match item after second ':' to get our parent Id.
     // See CreateKey in HotSpotSequenceSystem for more info on the pattern.
-    const std::regex Expression("^(?:[^:]*\:){" + std::to_string(Index) + "}([^:]*)");
+    const std::regex Expression(R"(^(?:[^:]*\:){)" + std::to_string(Index) + R"(}([^:]*))");
     std::smatch Match;
     const bool Found = std::regex_search(std::begin(SequenceKeyString), std::end(SequenceKeyString), Match, Expression);
 

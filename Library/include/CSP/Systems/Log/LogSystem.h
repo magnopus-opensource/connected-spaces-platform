@@ -70,7 +70,7 @@ public:
     CSP_EVENT void SetLogCallback(LogCallbackHandler InLogCallback);
 
     /// @brief Set a callback for handling an event log. Can be used to debug Connected Spaces Platform within a client application.
-    /// @param InEventCallback The callback to execute when an evvent log occurs.
+    /// @param InEventCallback The callback to execute when an event log occurs.
     CSP_EVENT void SetEventCallback(EventCallbackHandler InEventCallback);
 
     /// @brief Set a callback for handling a begin marker event. Can be used to debug Connected Spaces Platform within a client application.

@@ -40,7 +40,7 @@ String& MimeTypeHelper::GetMimeType(const String& FilePath)
 
     for (auto i = 0; i < Length; ++i)
     {
-        LowerChars[i] = std::tolower(Chars[i]);
+        LowerChars[i] = static_cast<char>(std::tolower(Chars[i]));
     }
 
     String LowerExtension(LowerChars.get(), Length);
