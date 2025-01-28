@@ -1,16 +1,16 @@
-# Architecture
+# Multiplayer Architecture
 
-The multiplayer architecture in the Connected Spaces Platform (CSP) is designed to enable real-time, interactive, and scalable experiences across different virtual spaces. It relies on a robust tech stack to ensure seamless communication between clients and servers, allowing many users to engage within the same space.
+The multiplayer architecture in the Connected Spaces Platform (CSP) is designed to enable real-time, interactive, and scalable experiences in any given space. It relies on a robust tech stack to ensure seamless communication between clients and servers, allowing many users to engage within the same space.
 
-In service of this, various systems within CSP manage key components, including **spaces, entities, scripted behavior, assets, multiplayer services**, and **space anchoring**. These systems work together to handle the state and behavior of objects in the virtual space, synchronizing them across all connected clients.
+In service of this, various systems within CSP manage key components, including **spaces, entities, scripted behavior, assets and space anchoring**. These systems work together to handle the state and behavior of objects in the virtual space, synchronizing them across all connected clients.
 
 One critical aspect of CSP's multiplayer design is its ability to handle **real-time communication** efficiently. It leverages the **SignalR protocol**, which enables continuous two-way communication between servers and clients, unlike traditional **RESTful APIs** that rely on request-response patterns.
 
 SignalR ensures that updates to space entities, user actions, and events are transmitted immediately, creating a responsive multi-user environment.
 
-The multiplayer system within CSP's architecture supports service-level features like **persistence**, **global scalability**, **load balancing**, and **regional deployment**. These ensure that multiplayer interactions are not only real-time but also reliable and scalable, accommodating many users across different regions.
+When used in conjunction with MCS, the multiplayer system within CSP's architecture supports service-level features like **persistence**, **global scalability**, **load balancing**, and **regional deployment**. These ensure that multiplayer interactions are not only real-time but also reliable and scalable, accommodating many users across different regions.
 
-Understanding this architectural design is crucial for anyone working on multiplayer projects in CSP, as it underpins how spaces are created, managed, and interacted with in real-time. This section will explore the key components of the multiplayer stack, how SignalR facilitates communication, and why multiplayer communication is distinct from RESTful API patterns elsewhere in CSP.
+Understanding this architectural design is crucial for anyone working on multi-user projects with CSP, as it underpins how spaces are created, managed, and interacted with in real-time. This section will explore the key components of the multiplayer stack, how SignalR facilitates communication, and why multiplayer communication is distinct from RESTful API patterns elsewhere in CSP.
 
 ## Event-Driven Design
 
@@ -70,12 +70,12 @@ Unlike RESTful APIs, which rely on separate requests and responses for each inte
 
 * **RESTful API Flow**: In a RESTful API flow, the client sends a request to the server, such as logging in or retrieving data. The server processes the request and sends a response. This interaction is transactional, meaning it's complete once the response is received. There is no continuous communication, and each request is separate from the others.
 
-* **Multiplayer Service Flow**: In Multiplayer Service Communication, the server maintains a continuous connection with all connected clients. When an event occurs, such as a avatar movement or object interaction, the server updates all clients. This ensures that all users see the same version of the environment in real-time. Unlike RESTful APIs, Multiplayer Service Communication supports ongoing interaction and updates, ensuring real-time synchronization across all clients.
+* **Multiplayer Service Flow**: In Multiplayer Service Communication, the server maintains a continuous connection with all connected clients. When an event occurs, such as avatar movement or object interaction, the server updates all clients. This ensures that all users see the same version of the environment in real-time. Unlike RESTful APIs, Multiplayer Service Communication supports ongoing interaction and updates, ensuring real-time synchronization across all clients.
 
 
 ## High-Level Abstractions
 
-The multiplayer tech stack in CSP is built to support real-time, scalable, and interactive virtual spaces. This section introduces the key high-level abstractions of the multiplayer architecture that client application developers can expect to interact with.
+The multiplayer system in CSP is built to support real-time, scalable, and interactive virtual spaces. This section introduces the key high-level abstractions of the multiplayer architecture that client application developers can expect to interact with.
 
 1. **SpaceEntitySystem**  
    The `SpaceEntitySystem` handles all multiplayer network traffic related to updates for Space Entities and their components. It ensures that changes to entities, avatars, and interactive objects are synchronized across all connected clients in real time. This system is essential for maintaining the consistency of shared spaces and ensuring that all users experience the same state of the environment.

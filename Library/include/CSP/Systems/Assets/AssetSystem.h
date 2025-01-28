@@ -263,7 +263,7 @@ public:
 	// The callback for receiving asset detail changes, contains an AssetDetailBlobParams with the details.
 	typedef std::function<void(const csp::multiplayer::AssetDetailBlobParams&)> AssetDetailBlobChangedCallbackHandler;
 
-	/// @brief Sets a callback for an asset changed event.
+	/// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified.
 	/// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
 	CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
 
