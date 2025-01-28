@@ -24,6 +24,7 @@
 #include "CSP/Multiplayer/EventParameters.h"
 #include "CSP/Systems/Assets/Asset.h"
 #include "CSP/Systems/Assets/AssetCollection.h"
+#include "CSP/Systems/Assets/GLTFMaterial.h"
 #include "CSP/Systems/Assets/LOD.h"
 #include "CSP/Systems/Spaces/Space.h"
 #include "CSP/Systems/SystemBase.h"
@@ -278,11 +279,11 @@ public:
     // Callback to receive material changes, contains a MaterialChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
 
-    /// @brief Sets a callback for an asset changed event.
+    /// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified
     /// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
     CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
 
-    /// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified.
+    /// @brief Sets a callback for a material changed event.
     /// @param Callback MaterialChangedCallbackHandler: Callback to receive data for the material that has been changed.
     CSP_EVENT void SetMaterialChangedCallback(MaterialChangedCallbackHandler Callback);
 
@@ -299,12 +300,17 @@ private:
     CSP_NO_EXPORT AssetSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
     ~AssetSystem();
 
+    CSP_ASYNC_RESULT void DeleteAssetCollectionById(const csp::common::String& AssetCollectionId, NullResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteAssetById(
+        const csp::common::String& AsseCollectiontId, const csp::common::String& AssetId, NullResultCallback Callback);
+
     csp::services::ApiBase* PrototypeAPI;
     csp::services::ApiBase* AssetDetailAPI;
 
     csp::web::RemoteFileManager* FileManager;
 
     AssetDetailBlobChangedCallbackHandler AssetDetailBlobChangedCallback;
+    MaterialChangedCallbackHandler MaterialChangedCallback;
 };
 
 } // namespace csp::systems
