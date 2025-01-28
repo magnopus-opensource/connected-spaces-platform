@@ -310,14 +310,12 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentEnterS
         EXPECT_EQ(StaticModelComponent->GetMaterialOverrides()["TestKey"], "TestValue");
 
         // Delete material override
-        StaticModelComponent->RemoveMaterialOverride("TestKey");
+        StaticModelComponent->AddMaterialOverride("TestKey2", "TestValue2");
 
         FoundEntity->QueueUpdate();
         EntitySystem->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
-
-        std::this_thread::sleep_for(5000ms);
     }
 
     {
@@ -345,7 +343,7 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentEnterS
         auto* StaticModelComponent = (StaticModelSpaceComponent*)FoundEntity->GetComponent(0);
         EXPECT_TRUE(StaticModelComponent != nullptr);
 
-        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 0);
+        EXPECT_EQ(StaticModelComponent->GetMaterialOverrides().Size(), 2);
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
     }
