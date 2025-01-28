@@ -896,7 +896,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
     };
 
     const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
-    Array<String> AssetTag = { "Material" };
+    Array<String> AssetTag = { "material" };
 
     CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, nullptr, EAssetCollectionType::DEFAULT, AssetTag, CreateAssetCollectionCB);
 }
