@@ -138,7 +138,7 @@ Effective error handling in event callbacks is critical for maintaining a stable
 Example:
 
 ```
-MultiplayerConnection::SendNetworkEvent("UpdatePosition", eventPayload, [](ErrorCode error) {
+EventBus->SendNetworkEvent("UpdatePosition", eventPayload, [](ErrorCode error) {
     if (error != ErrorCode::Success) {
         // Log error for debugging
         DebugLog("Event send failure: ", error);
@@ -154,7 +154,9 @@ Security is vital in multi-user environments, where data frequently passes betwe
 
 2. Avoid sharing sensitive data through public events.
 
-3. Implementing a whitelist for acceptable event types is also recommended, as it limits interactions to predefined events and minimizes the risk of unauthorized event handling. Example:
+3. Implementing a whitelist for acceptable event types is also recommended, as it limits interactions to predefined events and minimizes the risk of unauthorized event handling.
+
+Example:
 
 ```
 // Verify event type before processing

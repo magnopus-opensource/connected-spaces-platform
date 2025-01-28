@@ -77,14 +77,13 @@ Unlike RESTful APIs, which rely on separate requests and responses for each inte
 
 The multiplayer system in CSP is built to support real-time, scalable, and interactive virtual spaces. This section introduces the key high-level abstractions of the multiplayer architecture that client application developers can expect to interact with.
 
-1. **SpaceEntitySystem**  
-   The `SpaceEntitySystem` handles all multiplayer network traffic related to updates for Space Entities and their components. It ensures that changes to entities, avatars, and interactive objects are synchronized across all connected clients in real time. This system is essential for maintaining the consistency of shared spaces and ensuring that all users experience the same state of the environment.
+```eval_rst
+1. :class:`csp::systems::SpaceEntitySystem` handles all multiplayer network traffic related to updates for Space Entities and their components. It ensures that changes to entities, avatars, and interactive objects are synchronized across all connected clients in real time. This system is essential for maintaining the consistency of shared spaces and ensuring that all users experience the same state of the environment.
 
-2. **MultiplayerConnection**  
-   The `MultiplayerConnection` manages the actual connection between the server and clients. It is responsible for establishing and maintaining the network link that supports real-time communication. This system also handles the communication of transient events that can be sent and received via the CSP Event Bus.
+2. :class:`csp::multiplayer::MultiplayerConnection` manages the actual connection between the server and clients. It is responsible for establishing and maintaining the network link that supports real-time communication. This system also handles the communication of transient events that can be sent and received via the CSP Event Bus.
 
-3. **Entities and Components**  
-   Entities and components are foundational to spaces in CSP. An entity could represent a user, a 3D object, or any other element within the space. All entities have movement capabilities, and an avatar is represented by an entity with an Avatar Component by default.
+3. :class:`csp::multiplayer::SpaceEntity` and the components it may own are foundational to spaces in CSP. An entity could represent a user, a 3D object, or any other element within the space. All entities have movement capabilities, and an avatar is represented by an entity with an Avatar Component by default.
+```
 
 The interaction between these systems ensures:
 

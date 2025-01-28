@@ -151,21 +151,3 @@ By the end of this module, you will learn how to use various tools for spatial p
    physical_digital_realities/anchoring
    physical_digital_realities/fiducial_markers
 ```
-
-## Multiplayer
-
-Multiplayer functionality is essential for creating collaborative and interactive experiences within the CSP.
-
-This module focuses on the architectural design, event handling, and scripting systems that support multiplayer in CSP.
-
-You'll learn how entities, components, and avatars work together to provide a seamless multiplayer experience, distinct from other communication models like RESTful APIs.
-
-By the end of this module, you will understand how multiplayer is built and managed in CSP and how to implement and interact with multiplayer entities effectively.
-
-```eval_rst
-.. toctree::
-   :maxdepth: 1
-   :titlesonly:
-
-   
-```
