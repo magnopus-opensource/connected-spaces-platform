@@ -835,7 +835,7 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
 }
 
 void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId,
-    csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String> AssetTags,
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
     GLTFMaterialResultCallback Callback)
 {
     // 1. Create asset collection
