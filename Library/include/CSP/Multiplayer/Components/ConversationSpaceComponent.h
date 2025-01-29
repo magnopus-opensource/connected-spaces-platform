@@ -32,177 +32,174 @@
 
 #include <optional>
 
-
 namespace csp::multiplayer
 {
 
 /// @brief Enumerates the list of properties that can be replicated for a conversation component.
 enum class ConversationPropertyKeys
 {
-	ConversationId = 0,
-	IsVisible,
-	IsActive,
-	Position,
-	Rotation,
-	Title,
-	Date_DEPRECATED,
-	NumberOfReplies_DEPRECATED,
-	Resolved,
-	ConversationCameraPosition,
-	Num
+    ConversationId = 0,
+    IsVisible,
+    IsActive,
+    Position,
+    Rotation,
+    Title,
+    Date_DEPRECATED,
+    NumberOfReplies_DEPRECATED,
+    Resolved,
+    ConversationCameraPosition,
+    Num
 };
 
 /// @ingroup ConversationSpaceComponent
 /// @brief Data class used to contain information for GetNumberOfReplies.
 class CSP_API NumberOfRepliesResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class ConversationSpaceComponent;
+    /** @cond DO_NOT_DOCUMENT */
+    friend class ConversationSpaceComponent;
 
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Gets the number of replies from the result
-	/// @return : The number of replies
-	uint64_t GetCount() const;
+    /// @brief Gets the number of replies from the result
+    /// @return : The number of replies
+    uint64_t GetCount() const;
 
 protected:
-	NumberOfRepliesResult() = delete;
-	NumberOfRepliesResult(void*) : Count {0} {};
+    NumberOfRepliesResult() = delete;
+    NumberOfRepliesResult(void*)
+        : Count { 0 } {};
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	void SetCount(uint64_t Value);
+    void SetCount(uint64_t Value);
 
-	CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
-		: csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()), Count {0} {};
+    CSP_NO_EXPORT NumberOfRepliesResult(const csp::systems::ResultBase& InResult)
+        : csp::systems::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode())
+        , Count { 0 } {};
 
-	uint64_t Count;
+    uint64_t Count;
 };
 
 /// @brief Callback containing number of replies.
 /// @param Result NumberOfRepliesResult : result class
 typedef std::function<void(const NumberOfRepliesResult& Result)> NumberOfRepliesResultCallback;
 
-
 /// @ingroup ConversationSpaceComponent
 /// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
 class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
 {
 public:
-	/// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
-	/// @param Parent The Space entity that owns this component.
-	ConversationSpaceComponent(SpaceEntity* Parent);
+    /// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
+    /// @param Parent The Space entity that owns this component.
+    ConversationSpaceComponent(SpaceEntity* Parent);
 
-	/// @brief Create a new conversation
-	/// @param Message csp::common::String : the message to be stored.
-	/// @param Callback StringResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
+    /// @brief Create a new conversation
+    /// @param Message csp::common::String : the message to be stored.
+    /// @param Callback StringResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
 
-	/// @brief Deletes all the messages that are part of the conversation
-	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void DeleteConversation(csp::systems::NullResultCallback Callback);
+    /// @brief Deletes all the messages that are part of the conversation
+    /// @param Callback NullResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void DeleteConversation(csp::systems::NullResultCallback Callback);
 
-	/// @brief Adds a message to conversation
-	/// Make sure that the user has entered a space through SpaceSystem::EnterSpace() before calling this.
-	/// @param Message csp::common::String : the message to be stored.
-	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void AddMessage(const csp::common::String& Message, MessageResultCallback Callback);
+    /// @brief Adds a message to conversation
+    /// Make sure that the user has entered a space through SpaceSystem::EnterSpace() before calling this.
+    /// @param Message csp::common::String : the message to be stored.
+    /// @param Callback MessageResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void AddMessage(const csp::common::String& Message, MessageResultCallback Callback);
 
-	/// @brief Deletes a particular message
-	/// @param MessageId csp::common::String : if of the message that will be deleted
-	/// @param Callback NullResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, MessageResultCallback Callback);
+    /// @brief Deletes a particular message
+    /// @param MessageId csp::common::String : if of the message that will be deleted
+    /// @param Callback NullResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, MessageResultCallback Callback);
 
-	/// @brief Retrieves messages that are linked to the Conversation ID present in the component.
-	/// @param ResultsSkipNumber Optional<int> : Optional parameter representing the number of result entries that will be skipped from the result.
-	/// For no skip pass nullptr.
-	/// @param ResultsMaxNumber Optional<int> : Optional parameter representing the maximum number of result entries to be retrieved. For all
-	/// available result entries pass nullptr.
-	/// @param Callback MessageCollectionResultCallback : Callback when asynchronous task finishes.
-	CSP_ASYNC_RESULT void GetMessagesFromConversation(const csp::common::Optional<int>& ResultsSkipNumber,
-													  const csp::common::Optional<int>& ResultsMaxNumber,
-													  MessageCollectionResultCallback Callback);
+    /// @brief Retrieves messages that are linked to the Conversation ID present in the component.
+    /// @param ResultsSkipNumber Optional<int> : Optional parameter representing the number of result entries that will be skipped from the result.
+    /// For no skip pass nullptr.
+    /// @param ResultsMaxNumber Optional<int> : Optional parameter representing the maximum number of result entries to be retrieved. For all
+    /// available result entries pass nullptr.
+    /// @param Callback MessageCollectionResultCallback : Callback when asynchronous task finishes.
+    CSP_ASYNC_RESULT void GetMessagesFromConversation(const csp::common::Optional<int>& ResultsSkipNumber,
+        const csp::common::Optional<int>& ResultsMaxNumber, MessageCollectionResultCallback Callback);
 
-	/// @brief Get Conversation MessageInfo
-	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback Callback);
+    /// @brief Get Conversation MessageInfo
+    /// @param Callback ConversationResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetConversationInfo(ConversationResultCallback Callback);
 
-	/// @brief Set Conversation MessageInfo
-	/// @param ConversationData MessageInfo : MessageInfo class for conversation information
-	/// @param Callback ConversationResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
+    /// @brief Set Conversation MessageInfo
+    /// @param ConversationData MessageInfo : MessageInfo class for conversation information
+    /// @param Callback ConversationResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback);
 
-	/// @brief Get Message Info
-	/// @param MessageId csp::common::String : message Id
-	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback);
+    /// @brief Get Message Info
+    /// @param MessageId csp::common::String : message Id
+    /// @param Callback MessageResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetMessageInfo(const csp::common::String& MessageId, MessageResultCallback Callback);
 
-	/// @brief Set Message Info
-	/// @param MessageId csp::common::String : message Id
-	/// @param MessageData MessageInfo : Conversation Information
-	/// @param Callback MessageResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
+    /// @brief Set Message Info
+    /// @param MessageId csp::common::String : message Id
+    /// @param MessageData MessageInfo : Conversation Information
+    /// @param Callback MessageResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
 
-	/// @brief Gets the Number Of Replies of the conversation.
-	/// @param Callback NumberOfRepliesResultCallback : callback when asynchronous task finishes
-	CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
+    /// @brief Gets the Number Of Replies of the conversation.
+    /// @param Callback NumberOfRepliesResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetNumberOfReplies(NumberOfRepliesResultCallback Callback);
 
-	/// \addtogroup IPositionComponent
-	/// @{
-	/// @copydoc IPositionComponent::GetPosition()
-	const csp::common::Vector3& GetPosition() const override;
-	/// @copydoc IPositionComponent::SetPosition()
-	void SetPosition(const csp::common::Vector3& InValue) override;
-	/// @}
+    /// \addtogroup IPositionComponent
+    /// @{
+    /// @copydoc IPositionComponent::GetPosition()
+    const csp::common::Vector3& GetPosition() const override;
+    /// @copydoc IPositionComponent::SetPosition()
+    void SetPosition(const csp::common::Vector3& InValue) override;
+    /// @}
 
-	/// \addtogroup IRotationComponent
-	/// @{
-	/// @copydoc IRotationComponent::GetRotation()
-	const csp::common::Vector4& GetRotation() const override;
-	/// @copydoc IRotationComponent::SetRotation()
-	void SetRotation(const csp::common::Vector4& InValue) override;
-	/// @}
+    /// \addtogroup IRotationComponent
+    /// @{
+    /// @copydoc IRotationComponent::GetRotation()
+    const csp::common::Vector4& GetRotation() const override;
+    /// @copydoc IRotationComponent::SetRotation()
+    void SetRotation(const csp::common::Vector4& InValue) override;
+    /// @}
 
-	bool GetIsVisible() const;
-	void SetIsVisible(bool Value);
-	bool GetIsActive() const;
-	void SetIsActive(bool Value);
+    bool GetIsVisible() const;
+    void SetIsVisible(bool Value);
+    bool GetIsActive() const;
+    void SetIsActive(bool Value);
 
-	/// @brief Sets the Title of the conversation.
-	/// @param Value - The new title.
-	void SetTitle(const csp::common::String& Value);
-	/// @brief Gets the Title of the conversation.
-	const csp::common::String& GetTitle() const;
+    /// @brief Sets the Title of the conversation.
+    /// @param Value - The new title.
+    void SetTitle(const csp::common::String& Value);
+    /// @brief Gets the Title of the conversation.
+    const csp::common::String& GetTitle() const;
 
-	/// @brief Sets the resolved value for indicating that a conversation is resolved.
-	/// @param Value - The resolved state.
-	void SetResolved(bool Value);
-	/// @brief Gets the resolved value of the conversation.
-	bool GetResolved() const;
+    /// @brief Sets the resolved value for indicating that a conversation is resolved.
+    /// @param Value - The resolved state.
+    void SetResolved(bool Value);
+    /// @brief Gets the resolved value of the conversation.
+    bool GetResolved() const;
 
-	/// @brief Sets the value for the camera position used to view the conversation.
-	/// @param InValue The position for the camera.
-	void SetConversationCameraPosition(const csp::common::Vector3& InValue);
-	/// @brief Gets the value for the camera position of the conversation.
-	/// @return The camera view position.
-	const csp::common::Vector3& GetConversationCameraPosition() const;
+    /// @brief Sets the value for the camera position used to view the conversation.
+    /// @param InValue The position for the camera.
+    void SetConversationCameraPosition(const csp::common::Vector3& InValue);
+    /// @brief Gets the value for the camera position of the conversation.
+    /// @return The camera view position.
+    const csp::common::Vector3& GetConversationCameraPosition() const;
 
 private:
-	void SetConversationId(const csp::common::String& Value);
-	void RemoveConversationId();
-	const csp::common::String& GetConversationId() const;
+    void SetConversationId(const csp::common::String& Value);
+    void RemoveConversationId();
+    const csp::common::String& GetConversationId() const;
 
-	void StoreConversationMessage(const csp::systems::Space& Space,
-								  const csp::common::String& UserId,
-								  const csp::common::String& Message,
-								  MessageResultCallback Callback) const;
+    void StoreConversationMessage(const csp::systems::Space& Space, const csp::common::String& UserId, const csp::common::String& Message,
+        MessageResultCallback Callback) const;
 
-	void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
+    void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
 };
 
 } // namespace csp::multiplayer
