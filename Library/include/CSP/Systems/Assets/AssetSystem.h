@@ -248,7 +248,8 @@ public:
     /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
     /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
     CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId,
-        csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String> AssetTags,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::
+        common::Array<csp::common::String>& AssetTags,
         GLTFMaterialResultCallback Callback);
 
     /// @brief Updates an existing material's properties.
