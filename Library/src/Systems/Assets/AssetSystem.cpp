@@ -834,7 +834,9 @@ CSP_ASYNC_RESULT_WITH_PROGRESS void AssetSystem::RegisterAssetToLODChain(
     GetAssetsByCriteria({ InAsset.AssetCollectionId }, nullptr, nullptr, Array<EAssetType> { EAssetType::MODEL }, GetAssetsCallback);
 }
 
-void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback)
+void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId,
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
+    GLTFMaterialResultCallback Callback)
 {
     // 1. Create asset collection
     auto CreateAssetCollectionCB = [this, Callback, Name, SpaceId](const AssetCollectionResult& CreateAssetCollectionResult)
@@ -897,7 +899,7 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 
     const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
 
-    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, nullptr, EAssetCollectionType::DEFAULT, nullptr, CreateAssetCollectionCB);
+    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, Metadata, EAssetCollectionType::DEFAULT, AssetTags, CreateAssetCollectionCB);
 }
 
 void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback)

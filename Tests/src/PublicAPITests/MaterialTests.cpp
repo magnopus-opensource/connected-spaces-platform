@@ -35,9 +35,11 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 
 } // namespace
 
-void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterial& OutMaterial)
+void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::common::String& SpaceId,
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
+    GLTFMaterial& OutMaterial)
 {
-    auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, SpaceId);
+    auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, SpaceId, Metadata, AssetTags);
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
 
     const GLTFMaterial& Material = Result.GetGLTFMaterial();
@@ -96,7 +98,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, CreateMaterialTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
 
     // Cleanup
     DeleteMaterial(AssetSystem, CreatedMaterial);
@@ -127,7 +129,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, UpdateMaterialTest)
 
     // Create a material associated with the space
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
 
     // Ensure the material can be updated
     EXPECT_NE(CreatedMaterial.GetAlphaCutoff(), 1);
@@ -204,15 +206,15 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMultipleMaterialsTest)
     // Create 3 materials
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial CreatedMaterial1;
-    CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, CreatedMaterial1);
+    CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, {}, {}, CreatedMaterial1);
 
     constexpr const char* TestMaterialName2 = "TestMaterial2";
     GLTFMaterial CreatedMaterial2;
-    CreateMaterial(AssetSystem, TestMaterialName2, Space.Id, CreatedMaterial2);
+    CreateMaterial(AssetSystem, TestMaterialName2, Space.Id, {}, {}, CreatedMaterial2);
 
     constexpr const char* TestMaterialName3 = "TestMaterial3";
     GLTFMaterial CreatedMaterial3;
-    CreateMaterial(AssetSystem, TestMaterialName3, Space.Id, CreatedMaterial3);
+    CreateMaterial(AssetSystem, TestMaterialName3, Space.Id, {}, {}, CreatedMaterial3);
 
     // Attempt to find the 3 materials that have been created
     csp::common::Array<GLTFMaterial> FoundMaterials;
@@ -286,7 +288,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetMaterialTest)
 
     // Create a material associated with the space
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
 
     // Get the material to ensure it can be found
     GLTFMaterial FoundMaterial;
@@ -325,7 +327,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, GetInvalidMaterialTest)
 
     // Create a material so we have one in this space
     GLTFMaterial CreatedMaterial;
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
 
     // Attempt to get an invalid material
     GLTFMaterial FoundMaterial;
@@ -361,11 +363,11 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, DeleteMaterialTest)
     // Create 2 materials
     constexpr const char* TestMaterialName1 = "TestMaterial1";
     GLTFMaterial CreatedMaterial1;
-    CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, CreatedMaterial1);
+    CreateMaterial(AssetSystem, TestMaterialName1, Space.Id, {}, {}, CreatedMaterial1);
 
     constexpr const char* TestMaterialName2 = "TestMaterial2";
     GLTFMaterial CreatedMaterial2;
-    CreateMaterial(AssetSystem, TestMaterialName2, Space.Id, CreatedMaterial2);
+    CreateMaterial(AssetSystem, TestMaterialName2, Space.Id, {}, {}, CreatedMaterial2);
 
     // Delete first material
     DeleteMaterial(AssetSystem, CreatedMaterial1);
@@ -433,7 +435,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialEventTest)
         AssetSystem->SetMaterialChangedCallback(CB);
 
         // Create a material associated with the space
-        CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+        CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
         WaitForCallback(CallbackCalled);
 
         EXPECT_TRUE(CallbackCalled);
@@ -584,7 +586,7 @@ CSP_PUBLIC_TEST(CSPEngine, MaterialTests, MaterialAssetEventTest)
     EXPECT_EQ(CallbackAssetId, Asset.Id);
 
     // Create a material associated with the space
-    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, CreatedMaterial);
+    CreateMaterial(AssetSystem, "TestMaterial", Space.Id, {}, {}, CreatedMaterial);
     WaitForCallback(CallbackCalled);
 
     EXPECT_TRUE(CallbackCalled);
