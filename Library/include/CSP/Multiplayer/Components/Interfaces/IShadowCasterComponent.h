@@ -21,7 +21,6 @@
 #include "CSP/CSPCommon.h"
 #include "CSP/Common/String.h"
 
-
 namespace csp::multiplayer
 {
 
@@ -29,16 +28,16 @@ namespace csp::multiplayer
 CSP_INTERFACE class CSP_API IShadowCasterComponent
 {
 public:
-	/// @brief Checks if the mesh casts shadows.
-	/// @return True if the mesh casts shadows.
-	virtual bool GetIsShadowCaster() const = 0;
+    /// @brief Checks if the mesh casts shadows.
+    /// @return True if the mesh casts shadows.
+    virtual bool GetIsShadowCaster() const = 0;
 
-	/// @brief Sets if the mesh casts shadows.
-	/// @param InValue True to set the mesh to casts shadows.
-	virtual void SetIsShadowCaster(bool InValue) = 0;
+    /// @brief Sets if the mesh casts shadows.
+    /// @param InValue True to set the mesh to casts shadows.
+    virtual void SetIsShadowCaster(bool InValue) = 0;
 
 protected:
-	virtual ~IShadowCasterComponent() = default;
+    virtual ~IShadowCasterComponent() = default;
 };
 
 } // namespace csp::multiplayer

@@ -17,7 +17,6 @@
 
 #include <cstddef>
 
-
 namespace csp::memory
 {
 
@@ -26,30 +25,24 @@ namespace csp::memory
 class SimpleRingBuffer
 {
 public:
-	SimpleRingBuffer(size_t BufferSize);
-	~SimpleRingBuffer();
+    SimpleRingBuffer(size_t BufferSize);
+    ~SimpleRingBuffer();
 
-	inline bool IsDataAvailable()
-	{
-		return AvailableDataLength > 0;
-	}
+    inline bool IsDataAvailable() { return AvailableDataLength > 0; }
 
-	inline const size_t GetAvailableDataLength()
-	{
-		return AvailableDataLength;
-	}
+    inline const size_t GetAvailableDataLength() { return AvailableDataLength; }
 
-	size_t Read(void* OutBuffer, size_t Length);
-	void Write(const void* InBuffer, size_t Length);
-	void Skip(size_t ByteCount);
-	void Rewind(size_t ByteCount);
+    size_t Read(void* OutBuffer, size_t Length);
+    void Write(const void* InBuffer, size_t Length);
+    void Skip(size_t ByteCount);
+    void Rewind(size_t ByteCount);
 
 private:
-	unsigned char* Buffer;
-	size_t BufferSize;
-	size_t ReadPosition;
-	size_t WritePosition;
-	size_t AvailableDataLength;
+    unsigned char* Buffer;
+    size_t BufferSize;
+    size_t ReadPosition;
+    size_t WritePosition;
+    size_t AvailableDataLength;
 };
 
 } // namespace csp::memory

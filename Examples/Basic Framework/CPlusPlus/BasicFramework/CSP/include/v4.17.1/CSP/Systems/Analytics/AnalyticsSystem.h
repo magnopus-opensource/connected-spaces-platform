@@ -38,31 +38,31 @@ class AnalyticsSystemImpl;
 class CSP_API CSP_NO_DISPOSE AnalyticsSystem
 {
 public:
-	AnalyticsSystem();
-	~AnalyticsSystem();
+    AnalyticsSystem();
+    ~AnalyticsSystem();
 
-	CSP_START_IGNORE
-	AnalyticsSystem(const AnalyticsSystem&) = delete;
-	AnalyticsSystem(AnalyticsSystem&&)		= delete;
+    CSP_START_IGNORE
+    AnalyticsSystem(const AnalyticsSystem&) = delete;
+    AnalyticsSystem(AnalyticsSystem&&) = delete;
 
-	AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
-	AnalyticsSystem& operator=(AnalyticsSystem&&)	   = delete;
-	CSP_END_IGNORE
+    AnalyticsSystem& operator=(const AnalyticsSystem&) = delete;
+    AnalyticsSystem& operator=(AnalyticsSystem&&) = delete;
+    CSP_END_IGNORE
 
-	/// @brief Send an event
-	/// @param Event AnalyticsEvent
-	void Log(AnalyticsEvent* Event);
+    /// @brief Send an event
+    /// @param Event AnalyticsEvent
+    void Log(AnalyticsEvent* Event);
 
-	CSP_START_IGNORE
-	void RegisterProvider(IAnalyticsProvider* Provider);
-	void DeregisterProvider(IAnalyticsProvider* Provider);
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    void RegisterProvider(IAnalyticsProvider* Provider);
+    void DeregisterProvider(IAnalyticsProvider* Provider);
+    CSP_END_IGNORE
 
-	CSP_START_IGNORE
-	static const int QueueSize = 1024;
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    static const int QueueSize = 1024;
+    CSP_END_IGNORE
 
 private:
-	AnalyticsSystemImpl* Impl;
+    AnalyticsSystemImpl* Impl;
 };
 } // namespace csp::systems

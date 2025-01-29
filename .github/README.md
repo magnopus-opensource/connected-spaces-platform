@@ -23,13 +23,13 @@ It comes in the form of an open-source client-side library, effectively encoding
 
 ## 📖 Learn
 
-The official documentation for CSP can be found [here](https://builds.magnoboard.com/connected-spaces-platform/index.html).
+The official documentation for CSP can be found [here](https://connected-spaces-platform.net/index.html).
 
-* The [Learn](https://builds.magnoboard.com/connected-spaces-platform/learn/learn.html) section includes a range of modules that explain topics ranging from the basic tenets of CSP through to more advanced usage.
+* The [Learn](https://connected-spaces-platform.net/learn/learn.html) section includes a range of modules that explain topics ranging from the basic tenets of CSP through to more advanced usage.
 
-* The [Manual](https://builds.magnoboard.com/connected-spaces-platform/manual/manual.html) covers quick start guides, tutorials, plus how to build and debug CSP locally.
+* The [Manual](https://connected-spaces-platform.net/manual/manual.html) covers quick start guides, tutorials, plus how to build and debug CSP locally.
 
-* The [API Documentation](https://builds.magnoboard.com/connected-spaces-platform/api/library_root.html) covers the API itself (this documentation can also be found inline in the CSP public API source).
+* The [API Documentation](https://connected-spaces-platform.net/api/library_root.html) covers the API itself (this documentation can also be found inline in the CSP public API source).
 
 ## 📦 Install
 

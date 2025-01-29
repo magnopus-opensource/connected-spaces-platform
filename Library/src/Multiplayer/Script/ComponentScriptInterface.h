@@ -31,26 +31,26 @@ constexpr int64_t INVALID_COMPONENT_ID = -1;
 class CSP_API ComponentScriptInterface
 {
 public:
-	using Vector2 = std::vector<float>;
-	using Vector3 = std::vector<float>;
-	using Vector4 = std::vector<float>;
+    using Vector2 = std::vector<float>;
+    using Vector3 = std::vector<float>;
+    using Vector4 = std::vector<float>;
 
-	ComponentScriptInterface(ComponentBase* InComponent = nullptr);
-	virtual ~ComponentScriptInterface() = default;
+    ComponentScriptInterface(ComponentBase* InComponent = nullptr);
+    virtual ~ComponentScriptInterface() = default;
 
-	void SubscribeToPropertyChange(int32_t PropertyKey, std::string Message);
-	void InvokeAction(std::string ActionId, std::string ActionParams);
+    void SubscribeToPropertyChange(int32_t PropertyKey, std::string Message);
+    void InvokeAction(std::string ActionId, std::string ActionParams);
 
-	int64_t GetComponentId() const;
-	int64_t GetComponentType() const;
+    int64_t GetComponentId() const;
+    int64_t GetComponentType() const;
 
-	void SetComponentName(std::string name);
-	std::string GetComponentName() const;
+    void SetComponentName(std::string name);
+    std::string GetComponentName() const;
 
-	void SendPropertyUpdate();
+    void SendPropertyUpdate();
 
 protected:
-	ComponentBase* Component;
+    ComponentBase* Component;
 };
 
 } // namespace csp::multiplayer

@@ -25,7 +25,7 @@ namespace csp::multiplayer
 {
 
 FiducialMarkerSpaceComponentScriptInterface::FiducialMarkerSpaceComponentScriptInterface(FiducialMarkerSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

@@ -25,14 +25,14 @@ namespace csp::web
 
 template <> inline rapidjson::Value TypeToJsonValue(const csp::web::HttpPayload& Value, RapidJsonAlloc& Allocator)
 {
-	assert(false && "This function is just a stub. Please flesh it out!");
+    assert(false && "This function is just a stub. Please flesh it out!");
 
-	return rapidjson::Value("", Allocator);
+    return rapidjson::Value("", Allocator);
 }
 
 template <> inline void JsonValueToType(const rapidjson::Value& Value, csp::web::HttpPayload& Type)
 {
-	assert(false && "This function is just a stub. Please flesh it out!");
+    assert(false && "This function is just a stub. Please flesh it out!");
 }
 
 } // namespace csp::web

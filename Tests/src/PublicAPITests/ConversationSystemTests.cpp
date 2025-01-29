@@ -1175,6 +1175,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, UpdateConversationInfo)
                                 nullptr,
                                 Space);
 
+    // Setup Asset callback
+    bool ConversationConversationInfocallbackCalled = false;
+    csp::common::String ConversationId;
+    csp::common::String MessageId;
 
         // Setup Asset callback
         bool ConversationConversationInfocallbackCalled = false;

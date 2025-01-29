@@ -24,17 +24,14 @@ namespace csp::events
 EventId::EventId(const char* InEventNamespace, const char* InEventName)
 {
 #if DEBUG
-	STRNCPY(EventNamespaceDebug, sizeof(EventNamespaceDebug), InEventNamespace, sizeof(EventNamespaceDebug));
-	STRNCPY(EventNameDebug, sizeof(EventNameDebug), InEventName, sizeof(EventNameDebug));
+    STRNCPY(EventNamespaceDebug, sizeof(EventNamespaceDebug), InEventNamespace, sizeof(EventNamespaceDebug));
+    STRNCPY(EventNameDebug, sizeof(EventNameDebug), InEventName, sizeof(EventNameDebug));
 #endif
 
-	EventNamespace = std::hash<std::string> {}(InEventNamespace);
-	EventName	   = std::hash<std::string> {}(InEventName);
+    EventNamespace = std::hash<std::string> {}(InEventNamespace);
+    EventName = std::hash<std::string> {}(InEventName);
 }
 
-bool EventId::operator==(const EventId& other) const
-{
-	return (EventName == other.EventName && EventNamespace == other.EventNamespace);
-}
+bool EventId::operator==(const EventId& other) const { return (EventName == other.EventName && EventNamespace == other.EventNamespace); }
 
 } // namespace csp::events

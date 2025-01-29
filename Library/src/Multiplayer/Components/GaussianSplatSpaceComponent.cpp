@@ -20,137 +20,127 @@
 #include "Memory/Memory.h"
 #include "Multiplayer/Script/ComponentBinding/GaussianSplatSpaceComponentScriptInterface.h"
 
-
 namespace csp::multiplayer
 {
 
-GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent) : ComponentBase(ComponentType::GaussianSplat, Parent)
+GaussianSplatSpaceComponent::GaussianSplatSpaceComponent(SpaceEntity* Parent)
+    : ComponentBase(ComponentType::GaussianSplat, Parent)
 {
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)]			= "";
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)] = "";
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Position)]							= csp::common::Vector3::Zero();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation)]							= csp::common::Vector4::Identity();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)]								= csp::common::Vector3::One();
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)]							= true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)]						= true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)]					= true;
-	Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)]								= csp::common::Vector3::One();
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId)] = "";
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId)] = "";
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Position)] = csp::common::Vector3::Zero();
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation)] = csp::common::Vector4::Identity();
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale)] = csp::common::Vector3::One();
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)] = true;
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)] = true;
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster)] = true;
+    Properties[static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint)] = csp::common::Vector3::One();
 
-	SetScriptInterface(CSP_NEW GaussianSplatSpaceComponentScriptInterface(this));
+    SetScriptInterface(CSP_NEW GaussianSplatSpaceComponentScriptInterface(this));
 }
-
 
 /* IExternalResourceComponent */
 
 const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAssetId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId));
+    return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId));
 }
 
 void GaussianSplatSpaceComponent::SetExternalResourceAssetId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetId), Value);
 }
 
 const csp::common::String& GaussianSplatSpaceComponent::GetExternalResourceAssetCollectionId() const
 {
-	return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId));
+    return GetStringProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId));
 }
 
 void GaussianSplatSpaceComponent::SetExternalResourceAssetCollectionId(const csp::common::String& Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::ExternalResourceAssetCollectionId), Value);
 }
 
 /* ITransformComponent */
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetPosition() const
 {
-	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position));
+    return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position));
 }
 
 void GaussianSplatSpaceComponent::SetPosition(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Position), Value);
 }
 
 const csp::common::Vector4& GaussianSplatSpaceComponent::GetRotation() const
 {
-	return GetVector4Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation));
+    return GetVector4Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation));
 }
 
 void GaussianSplatSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Rotation), Value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetScale() const
 {
-	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale));
+    return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale));
 }
 
 void GaussianSplatSpaceComponent::SetScale(const csp::common::Vector3& Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Scale), Value);
 }
 
 SpaceTransform GaussianSplatSpaceComponent::GetTransform() const
 {
-	SpaceTransform Transform;
-	Transform.Position = GetPosition();
-	Transform.Rotation = GetRotation();
-	Transform.Scale	   = GetScale();
+    SpaceTransform Transform;
+    Transform.Position = GetPosition();
+    Transform.Rotation = GetRotation();
+    Transform.Scale = GetScale();
 
-	return Transform;
+    return Transform;
 }
 
 void GaussianSplatSpaceComponent::SetTransform(const SpaceTransform& InValue)
 {
-	SetPosition(InValue.Position);
-	SetRotation(InValue.Rotation);
-	SetScale(InValue.Scale);
+    SetPosition(InValue.Position);
+    SetRotation(InValue.Rotation);
+    SetScale(InValue.Scale);
 }
 
 /* IVisibleComponent */
 
-bool GaussianSplatSpaceComponent::GetIsVisible() const
-{
-	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible));
-}
+bool GaussianSplatSpaceComponent::GetIsVisible() const { return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible)); }
 
-void GaussianSplatSpaceComponent::SetIsVisible(bool InValue)
-{
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible), InValue);
-}
+void GaussianSplatSpaceComponent::SetIsVisible(bool InValue) { SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsVisible), InValue); }
 
-bool GaussianSplatSpaceComponent::GetIsARVisible() const
-{
-	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible));
-}
+bool GaussianSplatSpaceComponent::GetIsARVisible() const { return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible)); }
 
 void GaussianSplatSpaceComponent::SetIsARVisible(bool InValue)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsARVisible), InValue);
 }
 
 bool GaussianSplatSpaceComponent::GetIsShadowCaster() const
 {
-	return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
+    return GetBooleanProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster));
 }
 
 void GaussianSplatSpaceComponent::SetIsShadowCaster(bool Value)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster), Value);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::IsShadowCaster), Value);
 }
 
 const csp::common::Vector3& GaussianSplatSpaceComponent::GetTint() const
 {
-	return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint));
+    return GetVector3Property(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint));
 }
 
 void GaussianSplatSpaceComponent::SetTint(const csp::common::Vector3& TintValue)
 {
-	SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint), TintValue);
+    SetProperty(static_cast<uint32_t>(GaussianSplatPropertyKeys::Tint), TintValue);
 }
 
 } // namespace csp::multiplayer

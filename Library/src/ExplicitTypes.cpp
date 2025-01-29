@@ -30,13 +30,11 @@
 #include "CSP/Systems/Users/Profile.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
-
 /*
  * This file contains explicit template type instantiations so that types will be wrapped in C # or JS
  * without being stripped out, and to ensure that clients use Connected Spaces Platform's allocator for
  * template instances.
  */
-
 
 // csp::common::Array
 template class CSP_API csp::common::Array<csp::common::Map<csp::common::String, csp::common::String>>;
@@ -61,18 +59,15 @@ template class CSP_API csp::common::Array<csp::systems::Site>;
 template class CSP_API csp::common::Array<csp::systems::Space>;
 template class CSP_API csp::common::Array<csp::systems::UserRoleInfo>;
 
-
 // csp::common::List
 template class CSP_API csp::common::List<csp::common::String>;
 template class CSP_API csp::common::List<csp::common::Vector3>;
-
 
 // csp::common::Map
 template class CSP_API csp::common::Map<uint16_t, csp::multiplayer::ComponentBase*>;
 template class CSP_API csp::common::Map<uint32_t, csp::multiplayer::ReplicatedValue>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::Map<csp::common::String, csp::common::String>>;
 template class CSP_API csp::common::Map<csp::common::String, csp::common::String>;
-
 
 // csp::common::Optional
 template class CSP_API csp::common::Optional<bool>;

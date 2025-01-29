@@ -3,8 +3,6 @@
 #include "Olympus/Common/String.h"
 #include "Olympus/OlympusCommon.h"
 
-
-
 namespace oly
 {
 

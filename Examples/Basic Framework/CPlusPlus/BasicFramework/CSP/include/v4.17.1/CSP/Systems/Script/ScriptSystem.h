@@ -23,68 +23,67 @@
 #include <string>
 #include <vector>
 
-
 namespace csp::systems
 {
 
 class IScriptBinding
 {
 public:
-	virtual ~IScriptBinding()												 = default;
-	virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
+    virtual ~IScriptBinding() = default;
+    virtual void Bind(int64_t ContextId, class ScriptSystem* InScriptSystem) = 0;
 };
 
 /// @brief A JavaScript based scripting system that can be used to create advanced behaviours and interactions between entities in spaces.
 class CSP_API CSP_NO_DISPOSE ScriptSystem
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	friend class ScriptContext;
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    friend class ScriptContext;
+    /** @endcond */
 
 public:
-	~ScriptSystem();
+    ~ScriptSystem();
 
-	/// @brief Starts up the JavaScript runtime context.
-	void Initialise();
-	/// @brief Shuts down and deletes the JavaScript runtime context.
-	void Shutdown();
+    /// @brief Starts up the JavaScript runtime context.
+    void Initialise();
+    /// @brief Shuts down and deletes the JavaScript runtime context.
+    void Shutdown();
 
-	/// @brief Attempts to execute a script in a given context.
-	/// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
-	/// @param ScriptText : The script to execute.
-	/// @return a boolean representing success running the script.
-	bool RunScript(int64_t ContextId, const csp::common::String& ScriptText);
-	/// @brief Attempts to execute a script from a given file path in the given context.
-	/// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
-	/// @param ScriptFilePath  : The file path of the script to execute.
-	/// @return a boolean representing success running the script.
-	bool RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath);
+    /// @brief Attempts to execute a script in a given context.
+    /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
+    /// @param ScriptText : The script to execute.
+    /// @return a boolean representing success running the script.
+    bool RunScript(int64_t ContextId, const csp::common::String& ScriptText);
+    /// @brief Attempts to execute a script from a given file path in the given context.
+    /// @param ContextId  : The context in which to run the script. If the provided context does not exist, the script run will fail.
+    /// @param ScriptFilePath  : The file path of the script to execute.
+    /// @return a boolean representing success running the script.
+    bool RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath);
 
-	// Experimental binding interface (not exposed to wrappergen)
-	CSP_START_IGNORE
-	bool CreateContext(int64_t ContextId);
-	bool DestroyContext(int64_t ContextId);
-	bool BindContext(int64_t ContextId);
-	bool ResetContext(int64_t ContextId);
-	bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
-	void* GetContext(int64_t ContextId);
-	void* GetModule(int64_t ContextId, const csp::common::String& ModuleName);
-	void RegisterScriptBinding(IScriptBinding* ScriptBinding);
-	void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
-	void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source);
-	void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
-	bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
-	void ClearModuleSource(csp::common::String ModuleUrl);
-	csp::common::String GetModuleSource(csp::common::String ModuleUrl);
-	size_t GetNumImportedModules(int64_t ContextId) const;
-	const char* GetImportedModule(int64_t ContextId, size_t Index) const;
-	CSP_END_IGNORE
+    // Experimental binding interface (not exposed to wrappergen)
+    CSP_START_IGNORE
+    bool CreateContext(int64_t ContextId);
+    bool DestroyContext(int64_t ContextId);
+    bool BindContext(int64_t ContextId);
+    bool ResetContext(int64_t ContextId);
+    bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
+    void* GetContext(int64_t ContextId);
+    void* GetModule(int64_t ContextId, const csp::common::String& ModuleName);
+    void RegisterScriptBinding(IScriptBinding* ScriptBinding);
+    void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
+    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source);
+    void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
+    bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
+    void ClearModuleSource(csp::common::String ModuleUrl);
+    csp::common::String GetModuleSource(csp::common::String ModuleUrl);
+    size_t GetNumImportedModules(int64_t ContextId) const;
+    const char* GetImportedModule(int64_t ContextId, size_t Index) const;
+    CSP_END_IGNORE
 
 private:
-	ScriptSystem();
+    ScriptSystem();
 
-	class ScriptRuntime* TheScriptRuntime;
+    class ScriptRuntime* TheScriptRuntime;
 };
 
 } // namespace csp::systems

@@ -26,45 +26,46 @@ namespace oly_systems
 class OLY_API LODAsset
 {
 public:
-	Asset Asset;
-	int Level = 0;
+    Asset Asset;
+    int Level = 0;
 };
 
 class OLY_API LODChain
 {
 public:
-	oly_common::String AssetCollectionId;
-	oly_common::Array<LODAsset> LODAssets;
+    oly_common::String AssetCollectionId;
+    oly_common::Array<LODAsset> LODAssets;
 };
 
 /// @ingroup Asset System
 /// @brief Data class used to contain information when attempting to download LOD chain data.
 class OLY_API LODChainResult : public oly_services::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class AssetSystem;
+    /** @cond DO_NOT_DOCUMENT */
+    friend class AssetSystem;
 
-	OLY_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
-	OLY_END_IGNORE
-	/** @endcond */
+    OLY_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class oly_services::ApiResponseHandler;
+    OLY_END_IGNORE
+    /** @endcond */
 
 public:
-	const LODChain& GetLODChain() const;
+    const LODChain& GetLODChain() const;
 
 protected:
 private:
-	LODChainResult(void*) {};
-	LODChainResult(oly_services::EResultCode ResCode, uint16_t HttpResCode) : oly_services::ResultBase(ResCode, HttpResCode) {};
-	OLY_NO_EXPORT LODChainResult(const oly_services::ResultBase& InResult)
-		: oly_services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
+    LODChainResult(void*) {};
+    LODChainResult(oly_services::EResultCode ResCode, uint16_t HttpResCode)
+        : oly_services::ResultBase(ResCode, HttpResCode) {};
+    OLY_NO_EXPORT LODChainResult(const oly_services::ResultBase& InResult)
+        : oly_services::ResultBase(InResult.GetResultCode(), InResult.GetHttpResultCode()) {};
 
-	void SetLODChain(const LODChain& Chain);
-	void SetLODChain(LODChain&& Chain);
+    void SetLODChain(const LODChain& Chain);
+    void SetLODChain(LODChain&& Chain);
 
-	void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const oly_services::ApiResponseBase* ApiResponse) override;
 
-	LODChain Chain;
+    LODChain Chain;
 };
 
 /// @brief Callback containing LOD chain data.

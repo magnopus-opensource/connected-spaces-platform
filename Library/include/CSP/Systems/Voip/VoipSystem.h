@@ -17,14 +17,12 @@
 
 #include "CSP/CSPCommon.h"
 
-
 namespace csp::web
 {
 
 class WebClient;
 
 } // namespace csp::web
-
 
 namespace csp::memory
 {
@@ -35,31 +33,30 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-
 namespace csp::systems
 {
 
 /// @brief System class for handling VOIP. Provides Connected Spaces Platform specific overidden functionality.
 class CSP_API VoipSystem
 {
-	CSP_START_IGNORE
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SystemsManager;
-	friend void csp::memory::Delete<VoipSystem>(VoipSystem* Ptr);
-	/** @endcond */
-	CSP_END_IGNORE
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SystemsManager;
+    friend void csp::memory::Delete<VoipSystem>(VoipSystem* Ptr);
+    /** @endcond */
+    CSP_END_IGNORE
 
 public:
-	/// @brief Mutes a local user. Not implemented.
-	/// @param IsMuted
-	void MuteLocalUser(bool IsMuted);
-	/// @brief Checks if the user is muted. Not implemented.
-	/// @return Is the user muted.
-	bool IsLocalUserMuted() const;
+    /// @brief Mutes a local user. Not implemented.
+    /// @param IsMuted
+    void MuteLocalUser(bool IsMuted);
+    /// @brief Checks if the user is muted. Not implemented.
+    /// @return Is the user muted.
+    bool IsLocalUserMuted() const;
 
 private:
-	VoipSystem();
-	~VoipSystem();
+    VoipSystem();
+    ~VoipSystem();
 };
 
 } // namespace csp::systems

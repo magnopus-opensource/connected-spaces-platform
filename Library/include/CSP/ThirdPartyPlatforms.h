@@ -23,8 +23,8 @@ namespace csp::systems
 /// Any other value indicates it will only work with this platform.
 enum class EThirdPartyPlatform
 {
-	NONE,
-	UNREAL,
-	UNITY
+    NONE,
+    UNREAL,
+    UNITY
 };
 } // namespace csp::systems

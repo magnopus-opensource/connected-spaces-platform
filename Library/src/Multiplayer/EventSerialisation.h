@@ -34,98 +34,77 @@ csp::common::String GetSequenceKeyIndex(const csp::common::String& SequenceKey, 
 class EventDeserialiser
 {
 public:
-	// Creates an empty event deserialiser.
-	EventDeserialiser();
+    // Creates an empty event deserialiser.
+    EventDeserialiser();
 
-	// The generic means to populate this deserialiser's members given a set of event values.
-	virtual void Parse(const std::vector<signalr::value>& EventValues);
+    // The generic means to populate this deserialiser's members given a set of event values.
+    virtual void Parse(const std::vector<signalr::value>& EventValues);
 
-	// Returns a string describing the type of event.
-	csp::common::String GetEventType() const
-	{
-		return EventType;
-	}
+    // Returns a string describing the type of event.
+    csp::common::String GetEventType() const { return EventType; }
 
-	// Returns the unique integer identifer for the client from which the event was invoked.
-	uint64_t GetSenderClientId() const
-	{
-		return SenderClientId;
-	}
+    // Returns the unique integer identifer for the client from which the event was invoked.
+    uint64_t GetSenderClientId() const { return SenderClientId; }
 
-	// Returns the event data that has been synthesised from the parsed event
-	// values that were parsed.
-	const csp::common::Array<csp::multiplayer::ReplicatedValue>& GetEventData() const
-	{
-		return EventData;
-	}
+    // Returns the event data that has been synthesised from the parsed event
+    // values that were parsed.
+    const csp::common::Array<csp::multiplayer::ReplicatedValue>& GetEventData() const { return EventData; }
 
 protected:
-	void ParseCommon(const std::vector<signalr::value>& EventValues);
+    void ParseCommon(const std::vector<signalr::value>& EventValues);
 
-	csp::multiplayer::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
+    csp::multiplayer::ReplicatedValue ParseSignalRComponent(uint64_t TypeId, const signalr::value& Component) const;
 
-	csp::common::String EventType;
-	uint64_t SenderClientId;
-	csp::common::Array<csp::multiplayer::ReplicatedValue> EventData;
+    csp::common::String EventType;
+    uint64_t SenderClientId;
+    csp::common::Array<csp::multiplayer::ReplicatedValue> EventData;
 };
 
 // A specialised deserialiser for handling events triggered when an asset referenced by the space changes.
 class AssetChangedEventDeserialiser : public EventDeserialiser
 {
 public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	const AssetDetailBlobParams& GetEventParams() const
-	{
-		return EventParams;
-	}
+    const AssetDetailBlobParams& GetEventParams() const { return EventParams; }
 
 private:
-	AssetDetailBlobParams EventParams;
+    AssetDetailBlobParams EventParams;
 };
 
 // A specialised deserialiser for handling events triggered when a conversation event happens.
 class ConversationEventDeserialiser : public EventDeserialiser
 {
 public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	const ConversationSystemParams& GetEventParams() const
-	{
-		return EventParams;
-	}
+    const ConversationSystemParams& GetEventParams() const { return EventParams; }
 
 private:
-	ConversationSystemParams EventParams;
+    ConversationSystemParams EventParams;
 };
 
 // A specialised deserialiser for handling events triggered when a user in the space's access permissions change.
 class UserPermissionsChangedEventDeserialiser : public EventDeserialiser
 {
 public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	const UserPermissionsParams& GetEventParams() const
-	{
-		return EventParams;
-	}
+    const UserPermissionsParams& GetEventParams() const { return EventParams; }
 
 private:
-	UserPermissionsParams EventParams;
+    UserPermissionsParams EventParams;
 };
 
 class SequenceChangedEventDeserialiser : public EventDeserialiser
 {
 public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	const SequenceChangedParams& GetEventParams() const
-	{
-		return EventParams;
-	}
+    const SequenceChangedParams& GetEventParams() const { return EventParams; }
 
 private:
-	SequenceChangedParams EventParams;
+    SequenceChangedParams EventParams;
 };
 
 /// A deserialiser for getting SequenceHotspot data from an event:
@@ -136,15 +115,12 @@ private:
 class SequenceHotspotChangedEventDeserialiser : public EventDeserialiser
 {
 public:
-	virtual void Parse(const std::vector<signalr::value>& EventValues) override;
+    virtual void Parse(const std::vector<signalr::value>& EventValues) override;
 
-	const SequenceHotspotChangedParams& GetEventParams() const
-	{
-		return EventParams;
-	}
+    const SequenceHotspotChangedParams& GetEventParams() const { return EventParams; }
 
 private:
-	SequenceHotspotChangedParams EventParams;
+    SequenceHotspotChangedParams EventParams;
 };
 
 } // namespace csp::multiplayer

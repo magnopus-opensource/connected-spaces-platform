@@ -19,28 +19,28 @@
 
 int main(int argc, char* argv[])
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
 #ifdef CSP_WASM
-	auto& Listeners = testing::UnitTest::GetInstance()->listeners();
+    auto& Listeners = testing::UnitTest::GetInstance()->listeners();
 
-	// Prevent googletest from writing to stdout to ensure the output xml isn't corrupted
-	Listeners.Release(Listeners.default_result_printer());
+    // Prevent googletest from writing to stdout to ensure the output xml isn't corrupted
+    Listeners.Release(Listeners.default_result_printer());
 
-	// Default xml writer hangs on wasm, so we need to add a custom one that writes to stdout
-	auto* Listener = new TestListener();
-	Listeners.Append(Listener);
+    // Default xml writer hangs on wasm, so we need to add a custom one that writes to stdout
+    auto* Listener = new TestListener();
+    Listeners.Append(Listener);
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_ORGANIZATIONSYSTEM_TESTS
-	LoadTestAccountCredentials(); // Needed as long as we cannot create superuser credentials on the fly
+    LoadTestAccountCredentials(); // Needed as long as we cannot create superuser credentials on the fly
 #endif
 
-	int res = RUN_ALL_TESTS();
+    int res = RUN_ALL_TESTS();
 
 #ifdef CSP_WASM
-	emscripten_force_exit(res);
+    emscripten_force_exit(res);
 #endif
 
-	return res;
+    return res;
 }

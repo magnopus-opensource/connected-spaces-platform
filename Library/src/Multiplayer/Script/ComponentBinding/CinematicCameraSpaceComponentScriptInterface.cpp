@@ -25,14 +25,11 @@ namespace csp::multiplayer
 {
 
 CinematicCameraSpaceComponentScriptInterface::CinematicCameraSpaceComponentScriptInterface(CinematicCameraSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 
-float CinematicCameraSpaceComponentScriptInterface::GetFov()
-{
-	return static_cast<CinematicCameraSpaceComponent*>(Component)->GetFov();
-}
+float CinematicCameraSpaceComponentScriptInterface::GetFov() { return static_cast<CinematicCameraSpaceComponent*>(Component)->GetFov(); }
 
 DEFINE_SCRIPT_PROPERTY_VEC3(CinematicCameraSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(CinematicCameraSpaceComponent, Rotation);

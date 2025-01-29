@@ -50,6 +50,8 @@ csp::systems::EAssetType ConvertDTOAssetDetailType(const csp::common::String& DT
         return csp::systems::EAssetType::AUDIO;
     else if (DTOAssetDetailType == "GaussianSplat")
         return csp::systems::EAssetType::GAUSSIAN_SPLAT;
+    else if (DTOAssetDetailType == "Material")
+        return csp::systems::EAssetType::MATERIAL;
     else
     {
         CSP_LOG_MSG(LogLevel::Error, "Unsupported Asset Type!");
@@ -284,7 +286,6 @@ void UriResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
     ResultBase::OnResponse(ApiResponse);
 
     const auto* Response = ApiResponse->GetResponse();
-    const auto& Headers = Response->GetPayload().GetHeaders();
 
     if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
     {

@@ -36,41 +36,41 @@ class IScriptBinding;
 class ScriptRuntime
 {
 public:
-	using ContextMap	  = std::map<int64_t, ScriptContext*>;
-	using BindingList	  = std::list<IScriptBinding*>;
-	using ModuleSourceMap = std::map<std::string, std::string>;
-	using UrlAliasMap	  = std::map<std::string, std::string>;
+    using ContextMap = std::map<int64_t, ScriptContext*>;
+    using BindingList = std::list<IScriptBinding*>;
+    using ModuleSourceMap = std::map<std::string, std::string>;
+    using UrlAliasMap = std::map<std::string, std::string>;
 
-	ScriptRuntime(ScriptSystem* InScriptSystem);
-	~ScriptRuntime();
+    ScriptRuntime(ScriptSystem* InScriptSystem);
+    ~ScriptRuntime();
 
-	bool AddContext(int64_t ContextId);
-	bool RemoveContext(int64_t ContextId);
-	bool BindContext(int64_t ContextId);
-	bool ResetContext(int64_t ContextId);
-	ScriptContext* GetContext(int64_t ContextId);
+    bool AddContext(int64_t ContextId);
+    bool RemoveContext(int64_t ContextId);
+    bool BindContext(int64_t ContextId);
+    bool ResetContext(int64_t ContextId);
+    ScriptContext* GetContext(int64_t ContextId);
 
-	bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
+    bool ExistsInContext(int64_t ContextId, const csp::common::String& ObjectName);
 
-	void RegisterScriptBinding(IScriptBinding* ScriptBinding);
-	void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
+    void RegisterScriptBinding(IScriptBinding* ScriptBinding);
+    void UnregisterScriptBinding(IScriptBinding* ScriptBinding);
 
-	void BindContext(ScriptContext* Context);
-	void ResetContext(ScriptContext* Context);
+    void BindContext(ScriptContext* Context);
+    void ResetContext(ScriptContext* Context);
 
-	void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source);
-	void ClearModuleSource(csp::common::String ModuleUrl);
-	csp::common::String GetModuleSource(csp::common::String ModuleUrl);
-	void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
-	bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
+    void SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source);
+    void ClearModuleSource(csp::common::String ModuleUrl);
+    csp::common::String GetModuleSource(csp::common::String ModuleUrl);
+    void AddModuleUrlAlias(const csp::common::String& ModuleUrl, const csp::common::String& ModuleUrlAlias);
+    bool GetModuleUrlAlias(const csp::common::String& ModuleUrl, csp::common::String& OutModuleUrlAlias);
 
-	ScriptSystem* TheScriptSystem;
-	qjs::Runtime* Runtime;
+    ScriptSystem* TheScriptSystem;
+    qjs::Runtime* Runtime;
 
-	ContextMap Contexts;
-	BindingList Bindings;
-	ModuleSourceMap Modules;
-	UrlAliasMap UrlAliases;
+    ContextMap Contexts;
+    BindingList Bindings;
+    ModuleSourceMap Modules;
+    UrlAliasMap UrlAliases;
 };
 
 } // namespace csp::systems
