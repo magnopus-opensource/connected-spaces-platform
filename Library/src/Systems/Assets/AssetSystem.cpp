@@ -897,8 +897,9 @@ void AssetSystem::CreateMaterial(const csp::common::String& Name, const csp::com
 
     const csp::common::String MaterialCollectionName = CreateUniqueMaterialAssetCollectionName(Name, SpaceId);
     Array<String> AssetTag = { "material" };
+    csp::common::Map<csp::common::String, csp::common::String> Metadata = { { "AssetType", "Material" } };
 
-    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, nullptr, EAssetCollectionType::DEFAULT, AssetTag, CreateAssetCollectionCB);
+    CreateAssetCollection(SpaceId, nullptr, MaterialCollectionName, Metadata, EAssetCollectionType::DEFAULT, AssetTag, CreateAssetCollectionCB);
 }
 
 void AssetSystem::UpdateMaterial(const GLTFMaterial& Material, NullResultCallback Callback)
