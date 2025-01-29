@@ -231,6 +231,10 @@ public:
     typedef std::function<void(const csp::multiplayer::UserPermissionsParams&)> UserPermissionsChangedCallbackHandler;
 
     /// @brief Sets a callback for an access control changed event.
+    ///
+    /// Occurs when a user's permissions are altered, impacting their ability to interact with specific spaces.
+    /// Clients can use this event to reflect access levels in real time.
+    ///
     /// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
     CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
 
@@ -247,7 +251,8 @@ private:
     UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::EventBus* InEventBus);
     ~UserSystem();
 
-    [[nodiscard]] bool EmailCheck(const std::string& Email) const;
+    [[nodiscard]]
+    bool EmailCheck(const std::string& Email) const;
 
     void NotifyRefreshTokenHasChanged();
     void ResetAuthenticationState();
