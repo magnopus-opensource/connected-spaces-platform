@@ -244,8 +244,12 @@ public:
     /// @brief Creates a new material backed by an AssetCollection/Asset.
     /// @param Name const csp::common::String& : The name of the new material.
     /// @param SpaceId const csp::common::String& : The space id this material is associated with.
+    /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created asset colection.
+    /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created asset collection.
     /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId,
+        csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String> AssetTags,
+        GLTFMaterialResultCallback Callback);
 
     /// @brief Updates an existing material's properties.
     /// The material should be retrieved through GetMaterials or GetMaterial.
