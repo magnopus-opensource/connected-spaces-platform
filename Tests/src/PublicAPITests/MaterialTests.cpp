@@ -36,7 +36,7 @@ bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.Ge
 } // namespace
 
 void CreateMaterial(AssetSystem* AssetSystem, const csp::common::String& Name, const csp::common::String& SpaceId,
-    csp::common::Map<csp::common::String, csp::common::String> Metadata, const csp::common::Array<csp::common::String> AssetTags,
+    const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::common::Array<csp::common::String>& AssetTags,
     GLTFMaterial& OutMaterial)
 {
     auto [Result] = AWAIT_PRE(AssetSystem, CreateMaterial, RequestPredicate, Name, SpaceId, Metadata, AssetTags);
