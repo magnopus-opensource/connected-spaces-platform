@@ -22,172 +22,132 @@
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::TextureInfo& Obj)
 {
-	if (Obj.SourceType == csp::systems::ETextureResourceType::ImageAsset)
-	{
-		// If the resource type is an ImageAsset, we only need to serialize
-		// AssetCollectionId and AssetId
-		Serializer.SerializeMember("assetCollectionId", Obj.AssetCollectionId);
-		Serializer.SerializeMember("assetId", Obj.AssetId);
-	}
-	else
-	{
-		// If the resource type is a Component, we only need to serialize
-		// EntityComponentId
-		Serializer.SerializeMember("entityComponentId", Obj.EntityComponentId);
-	}
+    if (Obj.SourceType == csp::systems::ETextureResourceType::ImageAsset)
+    {
+        // If the resource type is an ImageAsset, we only need to serialize
+        // AssetCollectionId and AssetId
+        Serializer.SerializeMember("assetCollectionId", Obj.AssetCollectionId);
+        Serializer.SerializeMember("assetId", Obj.AssetId);
+    }
+    else
+    {
+        // If the resource type is a Component, we only need to serialize
+        // EntityComponentId
+        Serializer.SerializeMember("entityComponentId", Obj.EntityComponentId);
+    }
 
-	Serializer.SerializeMember("sourceType", static_cast<uint32_t>(Obj.SourceType));
-	Serializer.SerializeMember("uvOffset", csp::common::Array<float> {Obj.UVOffset.X, Obj.UVOffset.Y});
-	Serializer.SerializeMember("uvRotation", Obj.UVRotation);
-	Serializer.SerializeMember("uvScale", csp::common::Array<float> {Obj.UVScale.X, Obj.UVScale.Y});
-	Serializer.SerializeMember("texCoord", Obj.TexCoord);
+    Serializer.SerializeMember("sourceType", static_cast<uint32_t>(Obj.SourceType));
+    Serializer.SerializeMember("uvOffset", csp::common::Array<float> { Obj.UVOffset.X, Obj.UVOffset.Y });
+    Serializer.SerializeMember("uvRotation", Obj.UVRotation);
+    Serializer.SerializeMember("uvScale", csp::common::Array<float> { Obj.UVScale.X, Obj.UVScale.Y });
+    Serializer.SerializeMember("texCoord", Obj.TexCoord);
 }
 
 void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::TextureInfo& Obj)
 {
-	// Deserialize the source type first to get the necessary information
-	uint32_t SourceType;
-	Deserializer.DeserializeMember("sourceType", SourceType);
+    // Deserialize the source type first to get the necessary information
+    uint32_t SourceType;
+    Deserializer.DeserializeMember("sourceType", SourceType);
 
-	Obj.SourceType = static_cast<csp::systems::ETextureResourceType>(SourceType);
+    Obj.SourceType = static_cast<csp::systems::ETextureResourceType>(SourceType);
 
-	if (Obj.SourceType == csp::systems::ETextureResourceType::ImageAsset)
-	{
-		// If the resource type is an ImageAsset, we only need to deserialize
-		// AssetCollectionId and AssetId
-		Deserializer.DeserializeMember("assetCollectionId", Obj.AssetCollectionId);
-		Deserializer.DeserializeMember("assetId", Obj.AssetId);
-	}
-	else
-	{
-		// If the resource type is a Component, we only need to deserialize
-		// EntityComponentId
-		Deserializer.DeserializeMember("entityComponentId", Obj.EntityComponentId);
-	}
+    if (Obj.SourceType == csp::systems::ETextureResourceType::ImageAsset)
+    {
+        // If the resource type is an ImageAsset, we only need to deserialize
+        // AssetCollectionId and AssetId
+        Deserializer.DeserializeMember("assetCollectionId", Obj.AssetCollectionId);
+        Deserializer.DeserializeMember("assetId", Obj.AssetId);
+    }
+    else
+    {
+        // If the resource type is a Component, we only need to deserialize
+        // EntityComponentId
+        Deserializer.DeserializeMember("entityComponentId", Obj.EntityComponentId);
+    }
 
-	csp::common::Array<float> UVOffsetArray;
-	Deserializer.DeserializeMember("uvOffset", UVOffsetArray);
+    csp::common::Array<float> UVOffsetArray;
+    Deserializer.DeserializeMember("uvOffset", UVOffsetArray);
 
-	Obj.UVOffset = csp::common::Vector2(UVOffsetArray[0], UVOffsetArray[1]);
+    Obj.UVOffset = csp::common::Vector2(UVOffsetArray[0], UVOffsetArray[1]);
 
-	Deserializer.DeserializeMember("uvRotation", Obj.UVRotation);
+    Deserializer.DeserializeMember("uvRotation", Obj.UVRotation);
 
-	csp::common::Array<float> UVScaleArray;
-	Deserializer.DeserializeMember("uvScale", UVScaleArray);
+    csp::common::Array<float> UVScaleArray;
+    Deserializer.DeserializeMember("uvScale", UVScaleArray);
 
-	Obj.UVScale = csp::common::Vector2(UVScaleArray[0], UVScaleArray[1]);
+    Obj.UVScale = csp::common::Vector2(UVScaleArray[0], UVScaleArray[1]);
 
-	Deserializer.DeserializeMember("texCoord", Obj.TexCoord);
+    Deserializer.DeserializeMember("texCoord", Obj.TexCoord);
 }
 
 namespace csp::systems
 {
 TextureInfo::TextureInfo()
-	: AssetCollectionId("")
-	, AssetId("")
-	, EntityComponentId("")
-	, SourceType(ETextureResourceType::ImageAsset)
-	, UVOffset(0.f, 0.f)
-	, UVRotation(0.f)
-	, UVScale(1.f, 1.f)
-	, TexCoord(0)
-	, Set(true)
+    : AssetCollectionId("")
+    , AssetId("")
+    , EntityComponentId("")
+    , SourceType(ETextureResourceType::ImageAsset)
+    , UVOffset(0.f, 0.f)
+    , UVRotation(0.f)
+    , UVScale(1.f, 1.f)
+    , TexCoord(0)
+    , Set(true)
 {
 }
 
-TextureInfo::TextureInfo(const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId) : TextureInfo()
+TextureInfo::TextureInfo(const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
+    : TextureInfo()
 {
-	AssetCollectionId = InAssetCollectionId;
-	AssetId			  = InAssetId;
-	SourceType		  = ETextureResourceType::ImageAsset;
+    AssetCollectionId = InAssetCollectionId;
+    AssetId = InAssetId;
+    SourceType = ETextureResourceType::ImageAsset;
 }
 
-TextureInfo::TextureInfo(const csp::common::String& ComponentId) : TextureInfo()
+TextureInfo::TextureInfo(const csp::common::String& ComponentId)
+    : TextureInfo()
 {
-	EntityComponentId = ComponentId;
-	SourceType		  = ETextureResourceType::Component;
+    EntityComponentId = ComponentId;
+    SourceType = ETextureResourceType::Component;
 }
 
 void TextureInfo::SetCollectionAndAssetId(const csp::common::String& InAssetCollectionId, const csp::common::String& InAssetId)
 {
-	AssetCollectionId = InAssetCollectionId;
-	AssetId			  = InAssetId;
-	SourceType		  = ETextureResourceType::ImageAsset;
+    AssetCollectionId = InAssetCollectionId;
+    AssetId = InAssetId;
+    SourceType = ETextureResourceType::ImageAsset;
 }
 
-const csp::common::String& TextureInfo::GetAssetCollectionId() const
-{
-	return AssetCollectionId;
-}
+const csp::common::String& TextureInfo::GetAssetCollectionId() const { return AssetCollectionId; }
 
-const csp::common::String& TextureInfo::GetAssetId() const
-{
-	return AssetId;
-}
+const csp::common::String& TextureInfo::GetAssetId() const { return AssetId; }
 
 void TextureInfo::SetEntityComponentId(const csp::common::String& ComponentId)
 {
-	EntityComponentId = ComponentId;
-	SourceType		  = ETextureResourceType::Component;
+    EntityComponentId = ComponentId;
+    SourceType = ETextureResourceType::Component;
 }
 
-const csp::common::String& TextureInfo::GetEntityComponentId() const
-{
-	return EntityComponentId;
-}
+const csp::common::String& TextureInfo::GetEntityComponentId() const { return EntityComponentId; }
 
-ETextureResourceType TextureInfo::GetSourceType() const
-{
-	return SourceType;
-}
+ETextureResourceType TextureInfo::GetSourceType() const { return SourceType; }
 
-void TextureInfo::SetUVOffset(csp::common::Vector2 Offset)
-{
-	UVOffset = Offset;
-}
+void TextureInfo::SetUVOffset(csp::common::Vector2 Offset) { UVOffset = Offset; }
 
-csp::common::Vector2 TextureInfo::GetUVOffset() const
-{
-	return UVOffset;
-}
+csp::common::Vector2 TextureInfo::GetUVOffset() const { return UVOffset; }
 
-void TextureInfo::SetUVRotation(float Rotation)
-{
-	UVRotation = Rotation;
-}
+void TextureInfo::SetUVRotation(float Rotation) { UVRotation = Rotation; }
 
-float TextureInfo::GetUVRotation() const
-{
-	return UVRotation;
-}
+float TextureInfo::GetUVRotation() const { return UVRotation; }
 
-void TextureInfo::SetUVScale(csp::common::Vector2 Scale)
-{
-	UVScale = Scale;
-}
+void TextureInfo::SetUVScale(csp::common::Vector2 Scale) { UVScale = Scale; }
 
-csp::common::Vector2 TextureInfo::GetUVScale() const
-{
-	return UVScale;
-}
+csp::common::Vector2 TextureInfo::GetUVScale() const { return UVScale; }
 
-void TextureInfo::SetTexCoord(int Coord)
-{
-	TexCoord = Coord;
-}
+void TextureInfo::SetTexCoord(int Coord) { TexCoord = Coord; }
 
-int TextureInfo::GetTexCoord() const
-{
-	return TexCoord;
-}
+int TextureInfo::GetTexCoord() const { return TexCoord; }
 
-bool TextureInfo::IsSet() const
-{
-	return Set;
-}
+bool TextureInfo::IsSet() const { return Set; }
 
-void TextureInfo::SetTexture(bool Value)
-{
-	Set = Value;
-}
+void TextureInfo::SetTexture(bool Value) { Set = Value; }
 } // namespace csp::systems

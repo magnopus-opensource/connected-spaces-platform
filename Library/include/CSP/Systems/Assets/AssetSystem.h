@@ -244,8 +244,13 @@ public:
     /// @brief Creates a new material backed by an AssetCollection/Asset.
     /// @param Name const csp::common::String& : The name of the new material.
     /// @param SpaceId const csp::common::String& : The space id this material is associated with.
+    /// @param Metadata csp::common::Map<csp::common::String, csp::common::String>& : The metadata to be associated with the created material.
+    /// @param AssetTags csp::common::Array<csp::common::String>& : Tags to be associated with the created material.
     /// @param Callback GLTFMaterialResultCallback : Callback when asynchronous task finishes.
-    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId, GLTFMaterialResultCallback Callback);
+    CSP_ASYNC_RESULT void CreateMaterial(const csp::common::String& Name, const csp::common::String& SpaceId,
+        const csp::common::Map<csp::common::String, csp::common::String>& Metadata, const csp::
+        common::Array<csp::common::String>& AssetTags,
+        GLTFMaterialResultCallback Callback);
 
     /// @brief Updates an existing material's properties.
     /// The material should be retrieved through GetMaterials or GetMaterial.
@@ -279,7 +284,7 @@ public:
     // Callback to receive material changes, contains a MaterialChangedParams with the details.
     typedef std::function<void(const csp::multiplayer::MaterialChangedParams&)> MaterialChangedCallbackHandler;
 
-    /// @brief Sets a callback for an asset changed event.
+    /// @brief Sets a callback for an asset changed event. Triggered when assets, such as textures or meshes, are modified
     /// @param Callback AssetDetailBlobChangedCallbackHandler: Callback to receive data for the asset that has been changed.
     CSP_EVENT void SetAssetDetailBlobChangedCallback(AssetDetailBlobChangedCallbackHandler Callback);
 
