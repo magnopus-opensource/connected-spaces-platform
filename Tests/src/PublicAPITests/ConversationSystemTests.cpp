@@ -265,6 +265,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, GetMessagesTest)
 
     LogOut(UserSystem);
 
+    // Ensure component data has been written to database by chs before entering the space again
+    std::this_thread::sleep_for(3s);
+
     // Log in with the second account
     csp::common::String SecondTestUserId;
     LogIn(UserSystem, SecondTestUserId, AlternativeTestUser.Email, GeneratedTestAccountPassword);
@@ -548,6 +551,9 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationSystemTests, TwoConversationsTest)
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
     LogOut(UserSystem);
+
+    // Ensure component data has been written to database by chs before entering the space again
+    std::this_thread::sleep_for(3s);
 
     // Log in with the second account
     csp::common::String SecondTestUserId;
