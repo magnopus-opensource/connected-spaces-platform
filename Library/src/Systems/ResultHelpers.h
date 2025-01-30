@@ -16,17 +16,16 @@
 
 #pragma once
 
-
 template <typename T> const inline T MakeInvalid()
 {
-	static T Instance(csp::systems::EResultCode::Failed, 0);
+    static T Instance(csp::systems::EResultCode::Failed, 0);
 
-	return Instance;
+    return Instance;
 }
 
 template <typename T> const inline T MakeInvalid(csp::systems::ERequestFailureReason Reason)
 {
-	static T Instance(csp::systems::EResultCode::Failed, 0, Reason);
+    static T Instance(csp::systems::EResultCode::Failed, 0, Reason);
 
-	return Instance;
+    return Instance;
 }

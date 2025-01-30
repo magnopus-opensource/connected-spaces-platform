@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-
 namespace csp::multiplayer
 {
 
@@ -30,21 +29,21 @@ class AnimatedModelSpaceComponent;
 class AnimatedModelSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	AnimatedModelSpaceComponentScriptInterface(AnimatedModelSpaceComponent* InComponent = nullptr);
+    AnimatedModelSpaceComponentScriptInterface(AnimatedModelSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
-	DECLARE_SCRIPT_PROPERTY(bool, IsPlaying);
+    DECLARE_SCRIPT_PROPERTY(bool, IsLoopPlayback);
+    DECLARE_SCRIPT_PROPERTY(bool, IsPlaying);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 
-	DECLARE_SCRIPT_PROPERTY(int64_t, AnimationIndex);
+    DECLARE_SCRIPT_PROPERTY(int64_t, AnimationIndex);
 };
 
 } // namespace csp::multiplayer

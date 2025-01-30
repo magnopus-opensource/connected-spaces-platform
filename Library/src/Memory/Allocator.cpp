@@ -18,5 +18,4 @@
 namespace csp::memory
 {
 
-
 } // namespace csp::memory

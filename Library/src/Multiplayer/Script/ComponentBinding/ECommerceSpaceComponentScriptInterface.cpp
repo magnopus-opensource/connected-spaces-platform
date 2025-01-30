@@ -20,7 +20,7 @@
 namespace csp::multiplayer
 {
 csp::multiplayer::ECommerceSpaceComponentScriptInterface::ECommerceSpaceComponentScriptInterface(ECommerceSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

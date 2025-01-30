@@ -39,7 +39,6 @@ CSP_END_IGNORE
 
 } // namespace csp::memory
 
-
 /// @brief Namespace that encompasses everything in the multiplayer system
 namespace csp::multiplayer
 {
@@ -52,64 +51,62 @@ enum class ErrorCode;
 class CSP_API EventBus
 {
 public:
-	/** @cond DO_NOT_DOCUMENT */
-	friend class csp::systems::SpaceSystem;
-	friend class csp::systems::SystemsManager;
-	friend class MultiplayerConnection;
-	friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::SpaceSystem;
+    friend class csp::systems::SystemsManager;
+    friend class MultiplayerConnection;
+    friend void csp::memory::Delete<EventBus>(EventBus* Ptr);
+    /** @endcond */
 
-	typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
+    typedef std::function<void(csp::multiplayer::ErrorCode)> ErrorCodeCallbackHandler;
 
-	// The callback used to register to listen to events.
-	typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
+    // The callback used to register to listen to events.
+    typedef std::function<void(bool, const csp::common::Array<ReplicatedValue>&)> ParameterisedCallbackHandler;
 
-	/// @brief Sends a network event by EventName to all currently connected clients.
-	/// @param EventName csp::common::String : The identifying name for the event.
-	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void
-		SendNetworkEvent(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
+    /// @brief Sends a network event by EventName to all currently connected clients.
+    /// @param EventName csp::common::String : The identifying name for the event.
+    /// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
+    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    CSP_ASYNC_RESULT void SendNetworkEvent(
+        const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args, ErrorCodeCallbackHandler Callback);
 
-	/// @brief Sends a network event by EventName, to TargetClientId.
-	/// @param EventName csp::common::String : The identifying name for the event.
-	/// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
-	/// @param TargetClientId uint64_t : The client ID to send the event to.
-	/// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
-	CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName,
-												   const csp::common::Array<ReplicatedValue>& Args,
-												   uint64_t TargetClientId,
-												   ErrorCodeCallbackHandler Callback);
+    /// @brief Sends a network event by EventName, to TargetClientId.
+    /// @param EventName csp::common::String : The identifying name for the event.
+    /// @param Args csp::common::Array<ReplicatedValue> : An array of arguments (ReplicatedValue) to be passed as part of the event payload.
+    /// @param TargetClientId uint64_t : The client ID to send the event to.
+    /// @param Callback ErrorCodeCallbackHandler : a callback with failure state.
+    CSP_ASYNC_RESULT void SendNetworkEventToClient(const csp::common::String& EventName, const csp::common::Array<ReplicatedValue>& Args,
+        uint64_t TargetClientId, ErrorCodeCallbackHandler Callback);
 
-	/// @brief Registers a system to listen for the named event, where the system can define its
-	/// @brief own callback and deserialiser.
-	/// @param EventName csp::common::String : The identifying name for the event to listen for.
-	/// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
-	CSP_NO_EXPORT void ListenNetworkEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
+    /// @brief Registers a system to listen for the named event, where the system can define its
+    /// @brief own callback and deserialiser.
+    /// @param EventName csp::common::String : The identifying name for the event to listen for.
+    /// @param System csp::systems::SystemBase* : A pointer to the system which wants to register for the event.
+    CSP_NO_EXPORT void ListenNetworkEvent(const csp::common::String& EventName, csp::systems::SystemBase* System);
 
-	/// @brief Registers a callback to listen for the named event
-	/// @param EventName csp::common::String : The identifying name for the event to listen for.
-	/// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
-	void ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
+    /// @brief Registers a callback to listen for the named event
+    /// @param EventName csp::common::String : The identifying name for the event to listen for.
+    /// @param Callback ParameterisedCallbackHandler : A callback to register for the event which contains the parameter payload data.
+    void ListenNetworkEvent(const csp::common::String& EventName, ParameterisedCallbackHandler Callback);
 
-	/// @brief Stops the event bus from listening for a particular event, for any system or callback
-	/// @brief that were registered.
-	/// @param EventName csp::common::String : The identifying name for the event to stop listening for.
-	void StopListenNetworkEvent(const csp::common::String& EventName);
+    /// @brief Stops the event bus from listening for a particular event, for any system or callback
+    /// @brief that were registered.
+    /// @param EventName csp::common::String : The identifying name for the event to stop listening for.
+    void StopListenNetworkEvent(const csp::common::String& EventName);
 
-	/// @brief Instructs the event bus to start listening to messages
-	void StartEventMessageListening();
+    /// @brief Instructs the event bus to start listening to messages
+    void StartEventMessageListening();
 
 private:
-	EventBus();
-	~EventBus();
+    EventBus();
+    ~EventBus();
 
-	EventBus(MultiplayerConnection* InMultiplayerConnection);
+    EventBus(MultiplayerConnection* InMultiplayerConnection);
 
-	class MultiplayerConnection* MultiplayerConnectionInst;
+    class MultiplayerConnection* MultiplayerConnectionInst;
 
-	std::map<csp::common::String, ParameterisedCallbackHandler> CallbacksNetworkEventMap;
-	std::map<csp::common::String, csp::systems::SystemBase*> SystemsNetworkEventMap;
+    std::map<csp::common::String, ParameterisedCallbackHandler> CallbacksNetworkEventMap;
+    std::map<csp::common::String, csp::systems::SystemBase*> SystemsNetworkEventMap;
 };
 
 } // namespace csp::multiplayer

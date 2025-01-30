@@ -26,11 +26,11 @@ namespace csp::systems
 /// Note2: make sure to keep all enum values *above* Num
 enum EThirdPartyAuthenticationProviders
 {
-	Google = 0,
-	Discord,
-	Apple,
-	Num,
-	Invalid = Num
+    Google = 0,
+    Discord,
+    Apple,
+    Num,
+    Invalid = Num
 };
 
 /// @ingroup User System
@@ -38,32 +38,32 @@ enum EThirdPartyAuthenticationProviders
 class CSP_API ThirdPartyProviderDetails
 {
 public:
-	csp::common::String ProviderName;
-	csp::common::String ProviderClientId;
-	csp::common::Array<csp::common::String> ProviderAuthScopes;
-	csp::common::String AuthoriseURL;
+    csp::common::String ProviderName;
+    csp::common::String ProviderClientId;
+    csp::common::Array<csp::common::String> ProviderAuthScopes;
+    csp::common::String AuthoriseURL;
 };
 
 /// @brief Result structure for a third party auth provider details request
 class CSP_API ProviderDetailsResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	friend class UserSystem;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    friend class UserSystem;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	ProviderDetailsResult() = default;
-	ProviderDetailsResult(void*) {};
+    ProviderDetailsResult() = default;
+    ProviderDetailsResult(void*) {};
 
-	[[nodiscard]] ThirdPartyProviderDetails& GetDetails();
-	[[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
+    [[nodiscard]] ThirdPartyProviderDetails& GetDetails();
+    [[nodiscard]] const ThirdPartyProviderDetails& GetDetails() const;
 
 private:
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	ThirdPartyProviderDetails ProviderDetails;
+    ThirdPartyProviderDetails ProviderDetails;
 };
 
 typedef std::function<void(const ProviderDetailsResult& Result)> ProviderDetailsResultCallback;

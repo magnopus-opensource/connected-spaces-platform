@@ -21,7 +21,6 @@
 #include <string>
 #include <vector>
 
-
 namespace csp::multiplayer
 {
 
@@ -30,16 +29,16 @@ class StaticModelSpaceComponent;
 class StaticModelSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	StaticModelSpaceComponentScriptInterface(StaticModelSpaceComponent* InComponent = nullptr);
+    StaticModelSpaceComponentScriptInterface(StaticModelSpaceComponent* InComponent = nullptr);
 
-	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
-	DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
+    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetId);
+    DECLARE_SCRIPT_PROPERTY(std::string, ExternalResourceAssetCollectionId);
 
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 };
 
 } // namespace csp::multiplayer

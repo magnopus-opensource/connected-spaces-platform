@@ -18,23 +18,19 @@
 namespace csp::web
 {
 
-HttpProgress::HttpProgress() : Progress(0)
+HttpProgress::HttpProgress()
+    : Progress(0)
 {
 }
 
-HttpProgress::~HttpProgress()
-{
-}
+HttpProgress::~HttpProgress() { }
 
-void HttpProgress::SetProgressPercentage(float InProgress)
-{
-	Progress = uint32_t(InProgress * 1000.0f);
-}
+void HttpProgress::SetProgressPercentage(float InProgress) { Progress = uint32_t(InProgress * 1000.0f); }
 
 float HttpProgress::GetProgressPercentage() const
 {
-	float FloatProgress = float(Progress) / 1000.0f;
-	return FloatProgress;
+    float FloatProgress = float(Progress) / 1000.0f;
+    return FloatProgress;
 }
 
 } // namespace csp::web

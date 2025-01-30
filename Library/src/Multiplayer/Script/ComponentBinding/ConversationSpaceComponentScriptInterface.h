@@ -28,17 +28,17 @@ class ConversationSpaceComponent;
 class ConversationSpaceComponentScriptInterface : public ComponentScriptInterface
 {
 public:
-	ConversationSpaceComponentScriptInterface(ConversationSpaceComponent* InComponent = nullptr);
+    ConversationSpaceComponentScriptInterface(ConversationSpaceComponent* InComponent = nullptr);
 
-	// TODO ASYNC FUNCTIONS
+    // TODO ASYNC FUNCTIONS
 
-	DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
-	DECLARE_SCRIPT_PROPERTY(bool, IsActive);
-	DECLARE_SCRIPT_PROPERTY(Vector3, Position);
-	DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
-	DECLARE_SCRIPT_PROPERTY(std::string, Title);
-	DECLARE_SCRIPT_PROPERTY(bool, Resolved);
-	DECLARE_SCRIPT_PROPERTY(Vector3, ConversationCameraPosition);
+    DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
+    DECLARE_SCRIPT_PROPERTY(bool, IsActive);
+    DECLARE_SCRIPT_PROPERTY(Vector3, Position);
+    DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
+    DECLARE_SCRIPT_PROPERTY(std::string, Title);
+    DECLARE_SCRIPT_PROPERTY(bool, Resolved);
+    DECLARE_SCRIPT_PROPERTY(Vector3, ConversationCameraPosition);
 };
 
 } // namespace csp::multiplayer

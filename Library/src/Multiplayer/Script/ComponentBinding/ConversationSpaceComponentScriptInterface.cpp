@@ -18,13 +18,12 @@
 #include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 
-
 using namespace csp::systems;
 namespace csp::multiplayer
 {
 
 ConversationSpaceComponentScriptInterface::ConversationSpaceComponentScriptInterface(ConversationSpaceComponent* InComponent)
-	: ComponentScriptInterface(InComponent)
+    : ComponentScriptInterface(InComponent)
 {
 }
 

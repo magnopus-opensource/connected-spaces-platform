@@ -26,7 +26,6 @@
 
 #include <functional>
 
-
 namespace csp::services
 {
 
@@ -38,7 +37,6 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
-
 namespace csp::systems
 {
 
@@ -47,76 +45,73 @@ namespace csp::systems
 class CSP_API SettingsCollection
 {
 public:
-	SettingsCollection() = default;
+    SettingsCollection() = default;
 
-	csp::common::String UserId;
-	csp::common::String Context;
-	csp::common::Map<csp::common::String, csp::common::String> Settings;
+    csp::common::String UserId;
+    csp::common::String Context;
+    csp::common::Map<csp::common::String, csp::common::String> Settings;
 };
-
 
 /// @ingroup Settings System
 /// @brief Data class used to contain information when creating a Settings collection.
 class CSP_API SettingsCollectionResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	CSP_START_IGNORE
-	template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
-	CSP_END_IGNORE
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
 
 public:
-	/// @brief Retrieves the settings collection result.
-	/// @return SettingsCollection : const ref of settings collection class
-	const SettingsCollection& GetSettingsCollection() const;
+    /// @brief Retrieves the settings collection result.
+    /// @return SettingsCollection : const ref of settings collection class
+    const SettingsCollection& GetSettingsCollection() const;
 
 private:
-	SettingsCollectionResult(void*) {};
+    SettingsCollectionResult(void*) {};
 
-	void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
 
-	SettingsCollection SettingsCollection;
+    SettingsCollection SettingsCollection;
 };
-
 
 /// @brief Used to specify the type of the user's avatar
 enum class AvatarType
 {
-	None,
-	Premade,
-	ReadyPlayerMe,
-	Custom,
+    None,
+    Premade,
+    ReadyPlayerMe,
+    Custom,
 };
-
 
 /// @brief A result handler that is used to notify a user of an error while passing a String value.
 class CSP_API AvatarInfoResult : public csp::systems::ResultBase
 {
-	/** @cond DO_NOT_DOCUMENT */
-	friend class SettingsSystem;
-	/** @endcond */
+    /** @cond DO_NOT_DOCUMENT */
+    friend class SettingsSystem;
+    /** @endcond */
 
 public:
-	/// @brief A getter which returns the String passed via the result.
-	[[nodiscard]]
-	AvatarType GetAvatarType() const;
-	[[nodiscard]]
-	const csp::common::String& GetAvatarIdentifier() const;
+    /// @brief A getter which returns the String passed via the result.
+    [[nodiscard]] AvatarType GetAvatarType() const;
+    [[nodiscard]] const csp::common::String& GetAvatarIdentifier() const;
 
-	CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
-		: csp::systems::ResultBase(ResCode, HttpResCode), Type(AvatarType::None) {};
+    CSP_NO_EXPORT AvatarInfoResult(csp::systems::EResultCode ResCode, uint16_t HttpResCode)
+        : csp::systems::ResultBase(ResCode, HttpResCode)
+        , Type(AvatarType::None) {};
 
 private:
-	AvatarInfoResult() : Type(AvatarType::None) {};
-	AvatarInfoResult(void*) : Type(AvatarType::None) {};
+    AvatarInfoResult()
+        : Type(AvatarType::None) {};
+    AvatarInfoResult(void*)
+        : Type(AvatarType::None) {};
 
-	void SetAvatarType(AvatarType InValue);
-	void SetAvatarIdentifier(const csp::common::String& InValue);
+    void SetAvatarType(AvatarType InValue);
+    void SetAvatarIdentifier(const csp::common::String& InValue);
 
-	AvatarType Type;
-	csp::common::String Identifier;
+    AvatarType Type;
+    csp::common::String Identifier;
 };
-
 
 /// @brief Callback containing Settings collection.
 /// @param Result SettingsCollectionResult : result class

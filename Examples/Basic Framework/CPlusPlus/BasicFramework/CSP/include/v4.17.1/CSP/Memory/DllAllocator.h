@@ -44,10 +44,7 @@ CSP_API void DllFree(void* Ptr);
 /// @brief Struct wrapper for csp::memory::DllFree.
 template <typename T> struct DllDeleter
 {
-	constexpr void operator()(T* Ptr)
-	{
-		csp::memory::DllFree((void*) Ptr);
-	}
+    constexpr void operator()(T* Ptr) { csp::memory::DllFree((void*)Ptr); }
 };
 
 } // namespace csp::memory

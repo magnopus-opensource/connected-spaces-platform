@@ -22,106 +22,102 @@
 #include <thread>
 #include <vector>
 
-
 namespace csp
 {
 
 class ITaskQueue
 {
 public:
-	ITaskQueue()		  = default;
-	virtual ~ITaskQueue() = default;
+    ITaskQueue() = default;
+    virtual ~ITaskQueue() = default;
 
-	virtual void Enqueue(std::function<void*(void*)> Work) = 0;
-	virtual void Shutdown()								   = 0;
+    virtual void Enqueue(std::function<void*(void*)> Work) = 0;
+    virtual void Shutdown() = 0;
 };
-
 
 class ThreadPool : public ITaskQueue
 {
 public:
-	explicit ThreadPool(size_t Size) : ShutdownFlag(false)
-	{
-		while (Size)
-		{
-			Threads.emplace_back(Worker(*this));
-			Size--;
-		}
-	}
+    explicit ThreadPool(size_t Size)
+        : ShutdownFlag(false)
+    {
+        while (Size)
+        {
+            Threads.emplace_back(Worker(*this));
+            Size--;
+        }
+    }
 
-	ThreadPool(const ThreadPool&) = delete;
-	~ThreadPool() override		  = default;
+    ThreadPool(const ThreadPool&) = delete;
+    ~ThreadPool() override = default;
 
-	void Enqueue(std::function<void*(void*)> Work) override
-	{
-		std::unique_lock<std::mutex> Lock(Mutex);
-		Jobs.push_back(std::move(Work));
-		Cond.notify_one();
-	}
+    void Enqueue(std::function<void*(void*)> Work) override
+    {
+        std::unique_lock<std::mutex> Lock(Mutex);
+        Jobs.push_back(std::move(Work));
+        Cond.notify_one();
+    }
 
-	void Shutdown() override
-	{
-		// Stop all worker threads...
-		{
-			std::unique_lock<std::mutex> Lock(Mutex);
-			ShutdownFlag = true;
-		}
+    void Shutdown() override
+    {
+        // Stop all worker threads...
+        {
+            std::unique_lock<std::mutex> Lock(Mutex);
+            ShutdownFlag = true;
+        }
 
-		Cond.notify_all();
+        Cond.notify_all();
 
-		// Join...
-		for (auto& T : Threads)
-		{
-			T.join();
-		}
-	}
+        // Join...
+        for (auto& T : Threads)
+        {
+            T.join();
+        }
+    }
 
 private:
-	struct Worker
-	{
-		explicit Worker(ThreadPool& InPool) : Pool(InPool)
-		{
-		}
+    struct Worker
+    {
+        explicit Worker(ThreadPool& InPool)
+            : Pool(InPool)
+        {
+        }
 
-		void operator()()
-		{
-			for (;;)
-			{
-				std::function<void*(void*)> Work;
-				{
-					std::unique_lock<std::mutex> Lock(Pool.Mutex);
+        void operator()()
+        {
+            for (;;)
+            {
+                std::function<void*(void*)> Work;
+                {
+                    std::unique_lock<std::mutex> Lock(Pool.Mutex);
 
-					Pool.Cond.wait(Lock,
-								   [&]
-								   {
-									   return !Pool.Jobs.empty() || Pool.ShutdownFlag;
-								   });
+                    Pool.Cond.wait(Lock, [&] { return !Pool.Jobs.empty() || Pool.ShutdownFlag; });
 
-					if (Pool.ShutdownFlag && Pool.Jobs.empty())
-					{
-						break;
-					}
+                    if (Pool.ShutdownFlag && Pool.Jobs.empty())
+                    {
+                        break;
+                    }
 
-					Work = Pool.Jobs.front();
-					Pool.Jobs.pop_front();
-				}
+                    Work = Pool.Jobs.front();
+                    Pool.Jobs.pop_front();
+                }
 
-				Work(nullptr);
-			}
-		}
+                Work(nullptr);
+            }
+        }
 
-		ThreadPool& Pool;
-	};
+        ThreadPool& Pool;
+    };
 
-	friend struct Worker;
+    friend struct Worker;
 
-	std::vector<std::thread> Threads;
-	std::list<std::function<void*(void*)> > Jobs;
+    std::vector<std::thread> Threads;
+    std::list<std::function<void*(void*)>> Jobs;
 
-	bool ShutdownFlag;
+    bool ShutdownFlag;
 
-	std::condition_variable Cond;
-	std::mutex Mutex;
+    std::condition_variable Cond;
+    std::mutex Mutex;
 };
 
 } // namespace csp

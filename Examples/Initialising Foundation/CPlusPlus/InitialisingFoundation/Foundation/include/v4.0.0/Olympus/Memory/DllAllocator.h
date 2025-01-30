@@ -16,10 +16,7 @@ OLY_API void DllFree(void* Ptr);
 
 template <typename T> struct DllDeleter
 {
-	constexpr void operator()(T* Ptr)
-	{
-		oly_memory::DllFree((void*) Ptr);
-	}
+    constexpr void operator()(T* Ptr) { oly_memory::DllFree((void*)Ptr); }
 };
 
 } // namespace oly_memory

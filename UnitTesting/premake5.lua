@@ -59,7 +59,7 @@ project "UnitTestingBinary"
         "%{prj.location}/../Library/include",
         "%{prj.location}/../Library/src"
     }
-    
+
     filter "platforms:x64"
         targetname "ConnectedSpacesPlatform_D"
         kind "SharedLib"
@@ -80,6 +80,10 @@ project "UnitTestingBinary"
         links {
             "mimalloc"
         }
+		
+		disablewarnings { "4251" } -- C4251 is a warning about not having a dll interface for a declspec export class.
+		                           -- Docs state "You can ignore C4251 if your class is derived from a type in the C++ Standard Library", which we are (std::optional)
+		
     filter "platforms:wasm"
         targetname "ConnectedSpacesPlatform_WASM.js"
         kind "None"
