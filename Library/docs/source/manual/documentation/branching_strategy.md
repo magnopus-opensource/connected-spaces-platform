@@ -60,3 +60,4 @@ Below are some example scenarios illustrating how the process and workflow works
 4. Await for PR build checks to validate the change is stable
 5. Gain approval from two members of the Connected Spaces platform team
 6. Merge to `main`
+7. Once merged into `main`, a tag is applied to mark the version, and builds are made of the associated packages.
