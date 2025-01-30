@@ -234,7 +234,7 @@ CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelScriptInterfaceTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_STATIC_MODEL_TESTS || RUN_STATIC_MODEL_ENTER_SPACE_TEST
-CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
+CSP_PUBLIC_TEST(CSPEngine, StaticModelTests, StaticModelComponentEnterSpaceTest)
 {
     SetRandSeed();
 
@@ -316,6 +316,9 @@ CSP_PUBLIC_TEST(DISABLED_CSPEngine, StaticModelTests, StaticModelComponentEnterS
         EntitySystem->ProcessPendingEntityOperations();
 
         auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+        // Ensure component data has been written to database by chs before entering the space again
+        std::this_thread::sleep_for(3s);
     }
 
     {
