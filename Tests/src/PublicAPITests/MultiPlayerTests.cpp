@@ -1302,6 +1302,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
 
+    // Wait 2 seconds for the CHS database to update
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
     WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
     EXPECT_TRUE(EntitiesCreated);
 
