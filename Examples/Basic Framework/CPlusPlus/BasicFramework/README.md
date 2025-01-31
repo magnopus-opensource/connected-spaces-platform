@@ -17,7 +17,7 @@ Open the solution and build and run as either Debug or Release. This application
 The first time you run through the example you will likely not have a valid account for the **CSP_HELLO_WORLD** example tenant. The console application will ask you whether you already have an account to which you should enter **N** for no. It will then ask you to enter a valid email address and password. At this point you will be directed to close the console application and to respond to a **Welcome to OKO!** email. Once you have clicked the **Verify email now** link contained you will be able to restart the console application, this time entering **Y** for yes when asked if you already have an account. You will then be able to proceed with the console application example.
 
 ## Files
-All source is contained in a single file - [BasicFramwork.cpp](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Examples/Basic%20Framework/CPlusPlus/BasicFramework/BasicFramework/BasicFramework.cpp)
+All source is contained in a single file - [BasicFramwork.cpp](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/Examples/Basic%20Framework/CPlusPlus/BasicFramework/BasicFramework/BasicFramework.cpp)
 
 ## ©️ License
-[Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+[Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/LICENSE)

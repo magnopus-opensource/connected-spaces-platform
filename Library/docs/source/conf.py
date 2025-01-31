@@ -89,7 +89,7 @@ html_context = {
     'display_github': True,
     'github_user': 'magnopus-opensource',
     'github_repo': 'connected-spaces-platform',
-    'github_version': 'develop/Library/docs/source/',
+    'github_version': 'main/Library/docs/source/',
 }
 
 html_static_path = ['_static']

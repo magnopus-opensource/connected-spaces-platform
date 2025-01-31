@@ -65,11 +65,13 @@ A View Component is essentially a core property, present for any every Space Ent
 * Rotation
 * Scale
 
- View components are represented by _specific_ keys in the Component map, which are 1024 reserved keys at the end of the component map. These keys can be seen in [SpaceEntityKeys.h](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Library/src/Multiplayer/SpaceEntityKeys.h).
+ View components are represented by _specific_ keys in the Component map, which are 1024 reserved keys at the end of the component map. These keys can be seen in [SpaceEntityKeys.h](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/Library/src/Multiplayer/SpaceEntityKeys.h).
 
 ### CSP Components
 
-CSP components are the components that inherit from [ComponentBase](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/Library/include/CSP/Multiplayer/ComponentBase.h) (such as `StaticModelSpaceComponent`), and they utilise the component keys starting from zero and incrementing as new components are added to an entity.
+```eval_rst
+CSP components are the components that inherit from :class:`csp::multiplayer::ComponentBase` (such as `StaticModelSpaceComponent`), and they utilise the component keys starting from zero and incrementing as new components are added to an entity.
+```
 
 In order to serialise these components, we iterate over the `DirtyComponents` map, which contains pointers to all the components we've marked as dirty.
 
