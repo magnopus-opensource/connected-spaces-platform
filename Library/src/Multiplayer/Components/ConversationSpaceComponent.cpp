@@ -162,21 +162,12 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
             return;
         }
 
-        const csp::systems::NullResultCallback DeleteMessagesCallback
-            = [Callback, ConversationId, this](const csp::systems::NullResult& DeleteMessagesResult)
+        const csp::systems::NullResultCallback NullResultCallback
+            = [Callback, ConversationId, this](const csp::systems::NullResult& NullResultCallbackResult)
         {
-            if (DeleteMessagesResult.GetResultCode() == csp::systems::EResultCode::Failed)
-            {
-                CSP_LOG_FORMAT(csp::systems::LogLevel::Log, "Not all Message asset collections were deleted. ResCode: %d, HttpResCode: %d",
-                    (int)DeleteMessagesResult.GetResultCode(), DeleteMessagesResult.GetHttpResultCode());
-
-                INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
-
-                return;
-            }
-
             const csp::multiplayer::MessageResultCallback DeleteConversationAssetCollectionCallback
-                = [Callback](const csp::multiplayer::MessageResult& DeleteConversationAssetCollectionResult)
+                = [Callback, ConversationId, NullResultCallbackResult, this](
+                      const csp::multiplayer::MessageResult& DeleteConversationAssetCollectionResult)
             {
                 if (DeleteConversationAssetCollectionResult.GetResultCode() == csp::systems::EResultCode::InProgress)
                 {
@@ -194,7 +185,23 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
                     return;
                 }
 
-                INVOKE_IF_NOT_NULL(Callback, DeleteConversationAssetCollectionResult);
+                const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error)
+                {
+                    if (Error != ErrorCode::None)
+                    {
+                        CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
+
+                        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
+
+                        return;
+                    }
+
+                    INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
+                };
+
+                auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
+                EventBus->SendNetworkEvent(
+                    "ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::DeleteConversation), ConversationId }, SignalRCallback);
             };
 
             // Delete also the conversation asset collection
@@ -202,28 +209,6 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
             ConversationAssetCollection.Id = ConversationId;
 
             DeleteMessage(ConversationId, DeleteConversationAssetCollectionCallback);
-        };
-
-        const csp::systems::NullResultCallback NullResultCallback
-            = [Callback, ConversationId, this](const csp::systems::NullResult& NullResultCallbackResult)
-        {
-            const MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback = [Callback, NullResultCallbackResult](ErrorCode Error)
-            {
-                if (Error != ErrorCode::None)
-                {
-                    CSP_LOG_ERROR_MSG("DeleteConversation: SignalR connection: Error");
-
-                    INVOKE_IF_NOT_NULL(Callback, MakeInvalid<csp::systems::NullResult>());
-
-                    return;
-                }
-
-                INVOKE_IF_NOT_NULL(Callback, NullResultCallbackResult);
-            };
-
-            auto EventBus = csp::systems::SystemsManager::Get().GetEventBus();
-            EventBus->SendNetworkEvent(
-                "ConversationSystem", { ReplicatedValue((int64_t)ConversationMessageType::DeleteConversation), ConversationId }, SignalRCallback);
         };
 
         auto Messages = GetMessagesResult.GetAssetCollections();
@@ -761,6 +746,12 @@ void ConversationSpaceComponent::DeleteMessages(
     const auto AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
 
     AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
+}
+
+void ConversationSpaceComponent::OnLocalDelete()
+{
+    const auto Callback = [](const NullResult& Result) {};
+    DeleteConversation(Callback);
 }
 
 } // namespace csp::multiplayer
