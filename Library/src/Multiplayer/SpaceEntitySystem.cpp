@@ -36,6 +36,7 @@
 #include "Multiplayer/SignalR/SignalRClient.h"
 #include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SignalRMsgPackEntitySerialiser.h"
+#include "Json/JsonSerializer.h"
 
 #ifdef CSP_WASM
 #include "Multiplayer/SignalR/EmscriptenSignalRClient/EmscriptenSignalRClient.h"
@@ -45,8 +46,12 @@
 
 #include <chrono>
 #include <exception>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
+#include <thread>
 #include <unordered_set>
 #include <utility>
 
@@ -56,6 +61,10 @@ namespace
 {
 
 const csp::common::String SequenceTypeName = "EntityHierarchy";
+
+std::unique_ptr<std::thread> AnalyticsThread;
+std::chrono::steady_clock::time_point StartAnalyticsTime;
+bool Closing = false;
 
 uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
 {
@@ -1449,6 +1458,48 @@ void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, 
     Connection->Invoke("GenerateObjectIds", Params, LocalIDCallback);
 }
 
+void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent* Avatar)
+{
+    csp::systems::LoginState State = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
+    csp::common::String UserId = State.UserId;
+
+    // Find client avatar entity
+    csp::multiplayer::SpaceEntity* AvatarEntity = nullptr;
+    size_t AvatarSize = GetNumAvatars();
+
+    Session.UserId = UserId;
+    Closing = false;
+
+    AnalyticsThread.reset(new std::thread(
+        [this, UserId, Entity, Avatar]()
+        {
+            std::vector<csp::systems::UserAnalyticFrame> Frames;
+            while (!Closing)
+            {
+                auto CurrentAnalyticsTime = std::chrono::steady_clock::now();
+
+                csp::systems::UserAnalyticFrame Frame;
+                Frame.StartTimeOffsetMS
+                    = static_cast<int32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(CurrentAnalyticsTime - StartAnalyticsTime).count());
+                Frame.Position = Entity->GetPosition();
+                Frame.HeadRotation = Avatar->GetHeadRotation();
+                Frames.push_back(Frame);
+
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+
+            Session.AnalyticFrames = csp::common::Array<csp::systems::UserAnalyticFrame>(Frames.size());
+
+            size_t Index = 0;
+
+            for (const auto& Frame : Frames)
+            {
+                Session.AnalyticFrames[Index] = Frame;
+                Index++;
+            }
+        }));
+}
+
 void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
 {
     SignalRMsgPackEntityDeserialiser Deserialiser(*EntityMessage);
@@ -1550,5 +1601,19 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
     {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "%s Exception: %s", ExceptionDescription.c_str(), e.what());
     }
+}
+
+void SpaceEntitySystem::OnExitSpace()
+{
+    Closing = true;
+    AnalyticsThread->join();
+    AnalyticsThread.reset(nullptr);
+
+    const char* Json = csp::json::JsonSerializer::Serialize(Session);
+
+    auto File = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop" / "Analytics.json";
+    std::ofstream Out(File.string());
+    Out << Json;
+    Out.close();
 }
 } // namespace csp::multiplayer

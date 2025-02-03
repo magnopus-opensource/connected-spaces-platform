@@ -25,6 +25,7 @@
 #include "CSP/Systems/SystemBase.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
+#include "CSP/Systems/Users/SpaceAnalytics.h"
 #include "CSP/Systems/Users/ThirdPartyAuthentication.h"
 
 namespace csp::web
@@ -233,6 +234,11 @@ public:
     /// @brief Sets a callback for an access control changed event.
     /// @param Callback UserPermissionsChangedCallbackHandler: Callback to receive data for the user permissions that has been changed.
     CSP_EVENT void SetUserPermissionsChangedCallback(UserPermissionsChangedCallbackHandler Callback);
+
+    /// @brief Gets the analytics session data for a space.
+    /// @param UserId csp::common::String : The space id of the analytics session to retrieve
+    /// @param Callback AnalyticsSessionResultCallback : callback when the async result has been retrieved.
+    CSP_ASYNC_RESULT void GetAnalyticsSession(const csp::common::String& SpaceId, SpaceAnalyticsResultCallback Callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;

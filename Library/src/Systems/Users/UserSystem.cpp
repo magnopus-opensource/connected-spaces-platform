@@ -727,6 +727,8 @@ void UserSystem::GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Call
     static_cast<chs_user::StripeApi*>(StripeAPI)->apiV1VendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
 };
 
+void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, SpaceAnalyticsResultCallback Callback) { }
+
 void UserSystem::NotifyRefreshTokenHasChanged()
 {
     if (RefreshTokenChangedCallback)

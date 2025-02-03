@@ -21,6 +21,7 @@
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/Components/AvatarSpaceComponent.h"
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Systems/Users/SpaceAnalytics.h"
 
 #include <deque>
 #include <functional>
@@ -312,6 +313,8 @@ public:
     /// @return A list of root entities.
     const csp::common::List<SpaceEntity*>* GetRootHierarchyEntities() const;
 
+    void OnExitSpace();
+
 protected:
     using SpaceEntityList = csp::common::List<SpaceEntity*>;
 
@@ -376,6 +379,8 @@ private:
     void CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent, const SpaceTransform& InSpaceTransform,
         EntityCreatedCallback Callback);
 
+    void SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent* Avatar);
+
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
     class ClientElectionManager* ElectionManager;
@@ -396,6 +401,8 @@ private:
     bool EntityPatchRateLimitEnabled = true;
 
     bool IsInitialised = false;
+
+    csp::systems::UserAnalyticsSession Session;
 };
 
 } // namespace csp::multiplayer
