@@ -5,12 +5,7 @@ if ! test -f "../../modules/premake/README.md"; then
     git submodule update --recursive
 fi
 
-if ! test -f "../../modules/premake/bin/release/premake5"; then
-  if ! test -f "premake5"; then
-	  echo "Premake5 not installed."
-	  exit
-  fi
-fi
+
 
 read -r emsdk_version < emsdk_version.txt
 export emsdk_version=$emsdk_version;

@@ -22,6 +22,8 @@
 #include "CSP/Systems/Script/ScriptSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
+#include "quickjspp.hpp"
+
 
 namespace csp::multiplayer
 {
@@ -122,6 +124,19 @@ void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptCo
 {
     EntityScriptComponent = InEnityScriptComponent;
     ScriptSystem->CreateContext(Entity->GetId());
+    qjs::Context* context = (qjs::Context*) ScriptSystem->GetContext(Entity->GetId());
+    qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "CSP");
+
+    auto Fn = [this](const char* Str)
+    {
+        ScriptSystem->FireLocalScriptCommand(Str);
+    };
+ 
+    try {
+       Module->function("sendMessage", Fn);
+    } catch (const std::exception& e) {
+        CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called for %s", e.what());
+    }
 }
 
 csp::common::String EntityScript::GetScriptSource()

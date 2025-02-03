@@ -59,7 +59,8 @@ public:
     void Initialise();
     /// @brief Shuts down and deletes the JavaScript runtime context.
     void Shutdown();
-
+        // Callback to receive material changes, contains a MaterialChangedParams with the details.
+    typedef std::function<void(const csp::common::String&)> LocalScriptCommandCallback;
     /// @brief Attempts to execute a script in a given context.
     /// @param ContextId : The context in which to run the script. If the provided context does not exist, the script run will fail.
     /// @param ScriptText : The script to execute.
@@ -70,9 +71,15 @@ public:
     /// @param ScriptFilePath  : The file path of the script to execute.
     /// @return a boolean representing success running the script.
     bool RunScriptFile(int64_t ContextId, const csp::common::String& ScriptFilePath);
-
+    /// @brief Sets a callback for a material changed event.
+    /// @param Callback SetLocalScriptCommandCallback: Callback to receive data for the script command that has fired.
+    CSP_EVENT void SetLocalScriptCommandCallback(LocalScriptCommandCallback Callback);
+    void FireLocalScriptCommand(const csp::common::String& data);
+    
     // Experimental binding interface (not exposed to wrappergen)
     CSP_START_IGNORE
+    
+
     bool CreateContext(int64_t ContextId);
     bool DestroyContext(int64_t ContextId);
     bool BindContext(int64_t ContextId);
@@ -96,6 +103,7 @@ private:
     ~ScriptSystem();
 
     class ScriptRuntime* TheScriptRuntime;
+    LocalScriptCommandCallback LocalScriptCallback;
 };
 
 } // namespace csp::systems

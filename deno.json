@@ -1,0 +1,7 @@
+{
+  "lock": true,
+  "nodeModulesDir": "none",
+  "imports": {
+    "@std/cli": "jsr:@std/cli@^1.0.10"
+  }
+}

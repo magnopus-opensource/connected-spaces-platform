@@ -112,6 +112,20 @@ void ScriptSystem::Shutdown()
     }
 }
 
+void ScriptSystem::SetLocalScriptCommandCallback(LocalScriptCommandCallback Callback)
+{
+    LocalScriptCallback = Callback;
+}
+
+void ScriptSystem::FireLocalScriptCommand(const csp::common::String& commandJson)
+{
+
+    LocalScriptCallback(commandJson);
+
+}
+
+
+
 bool ScriptSystem::RunScript(int64_t ContextId, const csp::common::String& ScriptText)
 {
     // CSP_LOG_FORMAT(LogLevel::Verbose, "RunScript: %s\n", ScriptText.c_str());
