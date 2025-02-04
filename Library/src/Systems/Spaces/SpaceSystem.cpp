@@ -352,9 +352,9 @@ void SpaceSystem::ExitSpace(NullResultCallback Callback)
 
     events::EventSystem::Get().EnqueueEvent(ExitSpaceEvent);
 
-    CurrentSpace = Space();
-
     csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->OnExitSpace();
+
+    CurrentSpace = Space();
 }
 
 bool SpaceSystem::IsInSpace() { return !CurrentSpace.Id.IsEmpty(); }

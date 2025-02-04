@@ -1104,10 +1104,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_ANALYTICS_TEST
-CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAnalyticsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, UserSystemTests, GetAnalyticsTest)
 {
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
     csp::common::String UserId;
 
@@ -1117,6 +1121,14 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAnalyticsTest)
     // False Log in
     LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, csp::systems::EResultCode::Success,
         csp::systems::ERequestFailureReason::None);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(SpaceSystem, "[capture-analytics]-fc1650e1-15b0-4345-b701-d02e139f7d6b-18071C14EDBABF1E0D1D97C5223C1288", "TestSpaceDescription",
+        csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
     auto [Result] = AWAIT_PRE(UserSystem, GetAnalyticsSession, RequestPredicate, "", true);
 

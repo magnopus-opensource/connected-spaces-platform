@@ -19,6 +19,7 @@
 #include "CSP/CSPFoundation.h"
 #include "CSP/Common/StringFormat.h"
 #include "CSP/Multiplayer/EventParameters.h"
+#include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Users/Authentication.h"
 #include "CSP/Systems/Users/Profile.h"
 #include "Common/UUIDGenerator.h"
@@ -30,6 +31,7 @@
 #include "Json/JsonSerializer.h"
 
 #include <CallHelpers.h>
+#include <fstream>
 
 namespace chs_user = csp::services::generated::userservice;
 namespace chs_aggregation = csp::services::generated::aggregationservice;
@@ -732,17 +734,29 @@ void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, bool Us
 {
     if (UseTestData)
     {
-        UserAnalyticsSession Session1;
-        csp::json::JsonDeserializer::Deserialize(TestUserSession1, Session1);
+        std::string SpaceName = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Name.c_str();
+        std::string FileName = "space-analytics-" + SpaceName + ".json";
+        std::ifstream In(FileName);
 
-        UserAnalyticsSession Session2;
-        csp::json::JsonDeserializer::Deserialize(TestUserSession2, Session2);
+        if (In.is_open() == false)
+        {
+            CSP_LOG_ERROR_MSG("Failed to open analytics file :'(");
+            return;
+        }
+
+        std::ostringstream ss;
+        ss << In.rdbuf();
+
+        std::string Json = ss.str();
 
         AnalyticsSession Session;
-        Session.SpaceId = "testSpaceId";
-        Session.UserAnalyticsData = csp::common::Array<UserAnalyticsSession>(2);
-        Session.UserAnalyticsData[0] = Session1;
-        Session.UserAnalyticsData[1] = Session2;
+        bool Success = csp::json::JsonDeserializer::Deserialize(Json.c_str(), Session);
+
+        if (Success == false)
+        {
+            CSP_LOG_ERROR_MSG("Failed to Deserialize json data :'(");
+            return;
+        }
 
         SpaceAnalyticsResult Res(EResultCode::Success, 200);
         Res.Session = Session;

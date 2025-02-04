@@ -26,6 +26,7 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "Common/UUIDGenerator.h"
 #include "Debug/Logging.h"
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
@@ -328,7 +329,13 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
                 ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
             }
 
-            SetupAnalytics(NewAvatar, AvatarComponent);
+            std::string SpaceName = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Name.c_str();
+            size_t Position = SpaceName.find("[capture-analytics]");
+
+            if (Position != std::string::npos)
+            {
+                SetupAnalytics(NewAvatar, AvatarComponent);
+            }
 
             Callback(NewAvatar);
         };
@@ -1468,7 +1475,9 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
     csp::systems::LoginState State = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
     csp::common::String UserId = State.UserId;
 
-    Session.UserId = UserId;
+    Session.UserAnalyticsData = csp::common::Array<csp::systems::UserAnalyticsSession>(1);
+    auto& UserSession = Session.UserAnalyticsData[0];
+    UserSession.UserId = UserId;
     Closing = false;
 
     StartAnalyticsTime = std::chrono::system_clock::now();
@@ -1478,10 +1487,10 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
 
     char buffer[16];
     std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M", &now_tm);
-    Session.StartTime = std::string(buffer).c_str();
+    UserSession.StartTime = std::string(buffer).c_str();
 
     AnalyticsThread.reset(new std::thread(
-        [this, Entity, Avatar]()
+        [this, Entity, Avatar, &UserSession]()
         {
             std::vector<csp::systems::UserAnalyticFrame> Frames;
             while (!Closing)
@@ -1498,13 +1507,13 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
 
-            Session.AnalyticFrames = csp::common::Array<csp::systems::UserAnalyticFrame>(Frames.size());
+            UserSession.AnalyticFrames = csp::common::Array<csp::systems::UserAnalyticFrame>(Frames.size());
 
             size_t Index = 0;
 
             for (const auto& Frame : Frames)
             {
-                Session.AnalyticFrames[Index] = Frame;
+                UserSession.AnalyticFrames[Index] = Frame;
                 Index++;
             }
 
@@ -1515,7 +1524,7 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
 
             char buffer[16];
             std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M", &now_tm);
-            Session.EndTime = std::string(buffer).c_str();
+            UserSession.EndTime = std::string(buffer).c_str();
         }));
 }
 
@@ -1635,9 +1644,13 @@ void SpaceEntitySystem::OnExitSpace()
 
     AnalyticsThread.reset(nullptr);
 
-    common::String Json = csp::json::JsonSerializer::Serialize(Session);
+    Session.SpaceId = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Id;
 
-    auto File = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop" / "Analytics.json";
+    common::String Json = csp::json::JsonSerializer::Serialize(Session);
+    std::string SpaceName = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Name.c_str();
+    std::string FileName = "Analytics-" + SpaceName + "-" + csp::GenerateUUID() + ".json";
+
+    auto File = std::filesystem::path(FileName);
     std::ofstream Out(File.string());
     Out << Json;
     Out.close();

@@ -402,7 +402,7 @@ private:
 
     bool IsInitialised = false;
 
-    csp::systems::UserAnalyticsSession Session;
+    csp::systems::AnalyticsSession Session;
 };
 
 } // namespace csp::multiplayer
