@@ -733,10 +733,10 @@ void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, bool Us
     if (UseTestData)
     {
         UserAnalyticsSession Session1;
-        bool Success = csp::json::JsonDeserializer::Deserialize(TestUserSession1, Session1);
+        csp::json::JsonDeserializer::Deserialize(TestUserSession1, Session1);
 
         UserAnalyticsSession Session2;
-        bool Success2 = csp::json::JsonDeserializer::Deserialize(TestUserSession2, Session2);
+        csp::json::JsonDeserializer::Deserialize(TestUserSession2, Session2);
 
         AnalyticsSession Session;
         Session.SpaceId = "testSpaceId";
