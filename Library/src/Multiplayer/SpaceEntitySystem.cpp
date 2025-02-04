@@ -1468,10 +1468,6 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
     csp::systems::LoginState State = csp::systems::SystemsManager::Get().GetUserSystem()->GetLoginState();
     csp::common::String UserId = State.UserId;
 
-    // Find client avatar entity
-    csp::multiplayer::SpaceEntity* AvatarEntity = nullptr;
-    size_t AvatarSize = GetNumAvatars();
-
     Session.UserId = UserId;
     Closing = false;
 
@@ -1485,7 +1481,7 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
     Session.StartTime = std::string(buffer).c_str();
 
     AnalyticsThread.reset(new std::thread(
-        [this, UserId, Entity, Avatar]()
+        [this, Entity, Avatar]()
         {
             std::vector<csp::systems::UserAnalyticFrame> Frames;
             while (!Closing)
