@@ -52,6 +52,7 @@
 #include <map>
 #include <memory>
 #include <thread>
+#include <time.h>
 #include <unordered_set>
 #include <utility>
 
@@ -63,7 +64,7 @@ namespace
 const csp::common::String SequenceTypeName = "EntityHierarchy";
 
 std::unique_ptr<std::thread> AnalyticsThread;
-std::chrono::steady_clock::time_point StartAnalyticsTime;
+std::chrono::system_clock::time_point StartAnalyticsTime;
 bool Closing = false;
 
 uint64_t ParseGenerateObjectIDsResult(const signalr::value& Result)
@@ -300,7 +301,8 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
 
         const std::vector InvokeArguments = { SerialisedUser };
 
-        const std::function LocalSendCallback = [this, Callback, NewAvatar](const signalr::value& /*Result*/, const std::exception_ptr& Except)
+        const std::function LocalSendCallback
+            = [this, Callback, NewAvatar, AvatarComponent](const signalr::value& /*Result*/, const std::exception_ptr& Except)
         {
             try
             {
@@ -325,6 +327,9 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
             {
                 ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
             }
+
+            SetupAnalytics(NewAvatar, AvatarComponent);
+
             Callback(NewAvatar);
         };
 
@@ -1470,13 +1475,22 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
     Session.UserId = UserId;
     Closing = false;
 
+    StartAnalyticsTime = std::chrono::system_clock::now();
+
+    std::time_t now_time = std::chrono::system_clock::to_time_t(StartAnalyticsTime);
+    std::tm now_tm = *std::localtime(&now_time);
+
+    char buffer[16];
+    std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M", &now_tm);
+    Session.StartTime = std::string(buffer).c_str();
+
     AnalyticsThread.reset(new std::thread(
         [this, UserId, Entity, Avatar]()
         {
             std::vector<csp::systems::UserAnalyticFrame> Frames;
             while (!Closing)
             {
-                auto CurrentAnalyticsTime = std::chrono::steady_clock::now();
+                auto CurrentAnalyticsTime = std::chrono::system_clock::now();
 
                 csp::systems::UserAnalyticFrame Frame;
                 Frame.StartTimeOffsetMS
@@ -1497,6 +1511,15 @@ void SpaceEntitySystem::SetupAnalytics(SpaceEntity* Entity, AvatarSpaceComponent
                 Session.AnalyticFrames[Index] = Frame;
                 Index++;
             }
+
+            auto EndAnalyticsTime = std::chrono::system_clock::now();
+
+            std::time_t now_time = std::chrono::system_clock::to_time_t(EndAnalyticsTime);
+            std::tm now_tm = *std::localtime(&now_time);
+
+            char buffer[16];
+            std::strftime(buffer, sizeof(buffer), "%Y%m%d%H%M", &now_tm);
+            Session.EndTime = std::string(buffer).c_str();
         }));
 }
 
@@ -1605,11 +1628,18 @@ void SpaceEntitySystem::HandleException(const std::exception_ptr& Except, const 
 
 void SpaceEntitySystem::OnExitSpace()
 {
+    if (AnalyticsThread == nullptr)
+    {
+        return;
+    }
+
     Closing = true;
+
     AnalyticsThread->join();
+
     AnalyticsThread.reset(nullptr);
 
-    const char* Json = csp::json::JsonSerializer::Serialize(Session);
+    common::String Json = csp::json::JsonSerializer::Serialize(Session);
 
     auto File = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop" / "Analytics.json";
     std::ofstream Out(File.string());

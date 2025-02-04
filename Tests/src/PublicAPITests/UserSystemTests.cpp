@@ -1102,3 +1102,24 @@ CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetCheckoutSessionUrlTest)
     EXPECT_NE(Result.GetValue(), "");
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_USERSYSTEM_TESTS || RUN_USERSYSTEM_ANALYTICS_TEST
+CSP_PUBLIC_TEST(CSPEngine, UserSystemTests, GetAnalyticsTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+
+    csp::common::String UserId;
+
+    // Create test user
+    csp::systems::Profile TestUser = CreateTestUser();
+
+    // False Log in
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword, true, csp::systems::EResultCode::Success,
+        csp::systems::ERequestFailureReason::None);
+
+    auto [Result] = AWAIT_PRE(UserSystem, GetAnalyticsSession, RequestPredicate, "", true);
+
+    LogOut(UserSystem);
+}
+#endif

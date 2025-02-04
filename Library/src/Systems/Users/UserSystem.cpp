@@ -27,6 +27,7 @@
 #include "Services/AggregationService/Api.h"
 #include "Services/UserService/Api.h"
 #include "Systems/Users/Authentication.h"
+#include "Json/JsonSerializer.h"
 
 #include <CallHelpers.h>
 
@@ -727,7 +728,36 @@ void UserSystem::GetCheckoutSessionUrl(TierNames Tier, StringResultCallback Call
     static_cast<chs_user::StripeApi*>(StripeAPI)->apiV1VendorsStripeCheckoutSessionsPost(CheckoutSessionInfo, ResponseHandler);
 };
 
-void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, SpaceAnalyticsResultCallback Callback) { }
+void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, bool UseTestData, SpaceAnalyticsResultCallback Callback)
+{
+    if (UseTestData)
+    {
+        UserAnalyticsSession Session1;
+        bool Success = csp::json::JsonDeserializer::Deserialize(TestUserSession1, Session1);
+
+        UserAnalyticsSession Session2;
+        bool Success2 = csp::json::JsonDeserializer::Deserialize(TestUserSession2, Session2);
+
+        AnalyticsSession Session;
+        Session.SpaceId = "testSpaceId";
+        Session.UserAnalyticsData = csp::common::Array<UserAnalyticsSession>(2);
+        Session.UserAnalyticsData[0] = Session1;
+        Session.UserAnalyticsData[1] = Session2;
+
+        SpaceAnalyticsResult Res(EResultCode::Success, 200);
+        Res.Session = Session;
+        Callback(Res);
+
+        return;
+    }
+
+    SpaceAnalyticsResult Res(EResultCode::Failed, 200);
+    Callback(Res);
+
+    /* csp::services::ResponseHandlerPtr ResponseHandler
+        = ProfileAPI->CreateHandler<SpaceAnalyticsResultCallback, SpaceAnalyticsResult, void, csp::services::NullDto>(Callback, nullptr);
+    static_cast<chs_user::ProfileApi*>(ProfileAPI)->apiV1UsersAnalyticsSessionGet(SpaceId, ResponseHandler);*/
+}
 
 void UserSystem::NotifyRefreshTokenHasChanged()
 {

@@ -238,7 +238,7 @@ public:
     /// @brief Gets the analytics session data for a space.
     /// @param UserId csp::common::String : The space id of the analytics session to retrieve
     /// @param Callback AnalyticsSessionResultCallback : callback when the async result has been retrieved.
-    CSP_ASYNC_RESULT void GetAnalyticsSession(const csp::common::String& SpaceId, SpaceAnalyticsResultCallback Callback);
+    CSP_ASYNC_RESULT void GetAnalyticsSession(const csp::common::String& SpaceId, bool UseTestData, SpaceAnalyticsResultCallback Callback);
 
     /// @brief Registers the system to listen for the named event.
     void RegisterSystemCallback() override;

@@ -143,12 +143,9 @@ void FromJson(const csp::json::JsonDeserializer& Deserializer, csp::systems::Use
 namespace csp::systems
 {
 
-SpaceAnalyticsResult::SpaceAnalyticsResult()
-    : Session(nullptr)
-{
-}
+SpaceAnalyticsResult::SpaceAnalyticsResult() { }
 
-const AnalyticsSession& SpaceAnalyticsResult::GetAnalyticsSession() const { return *Session; }
+const AnalyticsSession& SpaceAnalyticsResult::GetAnalyticsSession() const { return Session; }
 
 void SpaceAnalyticsResult::OnResponse(const services::ApiResponseBase* ApiResponse)
 {
