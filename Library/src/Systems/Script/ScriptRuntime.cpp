@@ -156,7 +156,7 @@ void ScriptRuntime::ResetContext(ScriptContext* Context) { Context->Reset(); }
 
 void ScriptRuntime::SetModuleSource(csp::common::String ModuleUrl, csp::common::String Source)
 {
-    CSP_LOG_FORMAT(LogLevel::Log, "ScriptRuntime::SetModuleSource!!! %s\n", ModuleUrl.c_str());
+    CSP_LOG_FORMAT(LogLevel::Log, "ScriptRuntime::SetModuleSource %s\n", ModuleUrl.c_str());
     Modules[ModuleUrl.c_str()] = Source.c_str();
 }
 

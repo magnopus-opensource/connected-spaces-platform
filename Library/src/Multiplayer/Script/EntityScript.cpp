@@ -20,6 +20,7 @@
 #include "CSP/Multiplayer/Script/EntityScriptMessages.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/Script/ScriptSystem.h"
+#include "CSP/Systems/Script/localscript-libs/eventbus.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "Debug/Logging.h"
 #include "quickjspp.hpp"
@@ -137,6 +138,15 @@ void EntityScript::SetScriptSpaceComponent(ScriptSpaceComponent* InEnityScriptCo
     } catch (const std::exception& e) {
         CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called for %s", e.what());
     }
+    
+    qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
+    ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
+    JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
+    if (JS_IsException(module)) {
+    // Handle error
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called%s","");
+
+    }
 }
 
 csp::common::String EntityScript::GetScriptSource()
@@ -196,9 +206,30 @@ void EntityScript::OnSourceChanged(const csp::common::String& InScriptSource)
 
         ScriptSystem->ResetContext(Entity->GetId());
         HasBinding = false; // we've reset the context which means this script is no longer bound
+        
+        ScriptSystem->SetModuleSource(Entity->GetName(), InScriptSource); 
+        qjs::Context* context = (qjs::Context*) ScriptSystem->GetContext(Entity->GetId());
+        qjs::Context::Module* Module = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "CSP");
 
-        ScriptSystem->SetModuleSource(Entity->GetName(), InScriptSource);
-
+        auto Fn = [this](const char* Str)
+        {
+            ScriptSystem->FireLocalScriptCommand(Str);
+        };
+    
+        try {
+            Module->function("sendMessage", Fn);
+        } catch (const std::exception& e) {
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called for %s", e.what());
+        }
+        
+        qjs::Context::Module* CommonModule = (qjs::Context::Module*)ScriptSystem->GetModule(Entity->GetId(), "common");
+        ScriptSystem->SetModuleSource("common", csp::localscripts::EventBusScript.c_str());
+        JSValue module = context->eval(csp::localscripts::EventBusScript.c_str(), "common", JS_EVAL_TYPE_MODULE);
+        if (JS_IsException(module))
+        {
+            // Handle error
+            CSP_LOG_FORMAT(csp::systems::LogLevel::Error, "EntityScript::Exception called%s","");
+        }
         Bind();
     }
 }
