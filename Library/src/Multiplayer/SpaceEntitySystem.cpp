@@ -1647,10 +1647,18 @@ void SpaceEntitySystem::OnExitSpace()
     Session.SpaceId = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Id;
 
     common::String Json = csp::json::JsonSerializer::Serialize(Session);
+
+    auto Path = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop" / "space-analytics";
+
+    if (std::filesystem::exists(Path) == false)
+    {
+        std::filesystem::create_directory(Path);
+    }
+
     std::string SpaceName = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Name.c_str();
     std::string FileName = "Analytics-" + SpaceName + "-" + csp::GenerateUUID() + ".json";
 
-    auto File = std::filesystem::path(FileName);
+    auto File = std::filesystem::path((Path / FileName).string());
     std::ofstream Out(File.string());
     Out << Json;
     Out.close();

@@ -31,6 +31,7 @@
 #include "Json/JsonSerializer.h"
 
 #include <CallHelpers.h>
+#include <filesystem>
 #include <fstream>
 
 namespace chs_user = csp::services::generated::userservice;
@@ -734,9 +735,17 @@ void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, bool Us
 {
     if (UseTestData)
     {
+        auto Path = std::filesystem::path(std::getenv("USERPROFILE")) / "Desktop" / "space-analytics";
+
+        if (std::filesystem::exists(Path) == false)
+        {
+            std::filesystem::create_directory(Path);
+        }
+
         std::string SpaceName = csp::systems::SystemsManager::Get().GetSpaceSystem()->GetCurrentSpace().Name.c_str();
         std::string FileName = "space-analytics-" + SpaceName + ".json";
-        std::ifstream In(FileName);
+
+        std::ifstream In((Path / FileName).string());
 
         if (In.is_open() == false)
         {
