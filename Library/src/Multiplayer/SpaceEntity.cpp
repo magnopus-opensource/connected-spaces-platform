@@ -1298,7 +1298,6 @@ void SpaceEntity::ResolveParentChildRelationship()
 
 csp::multiplayer::EntityScriptInterface* SpaceEntity::GetScriptInterface() { return ScriptInterface; }
 
-void SpaceEntity::ClaimScriptOwnership() { EntitySystem->ClaimScriptOwnership(this); }
 
 void SpaceEntity::OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey)
 {

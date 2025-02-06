@@ -58,7 +58,7 @@ public:
 
     /// @brief Run a script with the given source rather than the stored source.
     ///
-    /// Will be run locally or remotely depending on leader election.
+    /// Will be run locally.
     ///
     /// @param ScriptSource csp::common::String : The source to use.
     void RunScript(const csp::common::String& ScriptSource);

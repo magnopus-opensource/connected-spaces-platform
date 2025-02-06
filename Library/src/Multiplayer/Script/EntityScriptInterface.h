@@ -68,7 +68,7 @@ public:
     void SubscribeToMessage(std::string Message, std::string OnMessageCallback);
     void PostMessageToScript(std::string Message, std::string MessageParamsJson);
 
-    void ClaimScriptOwnership();
+
 
     std::vector<ComponentScriptInterface*> GetComponents();
 

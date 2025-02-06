@@ -221,8 +221,6 @@ void EntityScriptInterface::PostMessageToScript(std::string Message, std::string
     Entity->GetScript()->PostMessageToScript(Message.c_str(), MessageParamsJson.c_str());
 }
 
-void EntityScriptInterface::ClaimScriptOwnership() { Entity->ClaimScriptOwnership(); }
-
 std::vector<ComponentScriptInterface*> EntityScriptInterface::GetComponents()
 {
     std::vector<ComponentScriptInterface*> Components;

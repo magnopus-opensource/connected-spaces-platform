@@ -83,22 +83,7 @@ bool EntityScript::Invoke()
 
 void EntityScript::RunScript(const csp::common::String& ScriptSource)
 {
-    bool RunScriptLocally = true;
-
-    if (SpaceEntitySystemPtr)
-    {
-        RunScriptLocally = SpaceEntitySystemPtr->CheckIfWeShouldRunScriptsLocally();
-    }
-
-    if (RunScriptLocally)
-    {
-        ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
-    }
-    else
-    {
-
-        SpaceEntitySystemPtr->RunScriptRemotely(Entity->GetId(), ScriptSource);
-    }
+    ScriptSystem->RunScript(Entity->GetId(), ScriptSource);
 }
 
 void EntityScript::SetScriptSource(const csp::common::String& InScriptSource)

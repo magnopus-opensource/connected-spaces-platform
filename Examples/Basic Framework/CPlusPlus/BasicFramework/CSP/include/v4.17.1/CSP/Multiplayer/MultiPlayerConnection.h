@@ -39,7 +39,6 @@ namespace csp::multiplayer
 class ReplicatedValue;
 class SpaceEntitySystem;
 class ConversationSystem;
-class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
 
@@ -61,8 +60,6 @@ public:
     friend class SpaceEntitySystem;
     friend class ConversationSystem;
     friend class SpaceEntityEventHandler;
-    friend class ClientElectionManager;
-    friend class ClientElectionEventHandler;
     friend class csp::systems::SpaceSystem;
     /** @endcond */
 

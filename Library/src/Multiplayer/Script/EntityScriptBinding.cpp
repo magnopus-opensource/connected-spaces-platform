@@ -537,7 +537,6 @@ void EntityScriptBinding::Bind(int64_t ContextId, csp::systems::ScriptSystem* Sc
         .fun<&EntityScriptInterface::SubscribeToPropertyChange>("subscribeToPropertyChange")
         .fun<&EntityScriptInterface::SubscribeToMessage>("subscribeToMessage")
         .fun<&EntityScriptInterface::PostMessageToScript>("postMessage")
-        .fun<&EntityScriptInterface::ClaimScriptOwnership>("claimScriptOwnership")
         .fun<&EntityScriptInterface::GetComponents>("getComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<LightSpaceComponentScriptInterface, ComponentType::Light>>("getLightComponents")
         .fun<&EntityScriptInterface::GetComponentsOfType<ButtonSpaceComponentScriptInterface, ComponentType::Button>>("getButtonComponents")

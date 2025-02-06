@@ -57,7 +57,6 @@ class SequenceSystem;
 namespace csp::multiplayer
 {
 
-class ClientElectionManager;
 class MultiplayerConnection;
 class SignalRConnection;
 class SpaceEntity;
@@ -77,7 +76,6 @@ class CSP_API SpaceEntitySystem
     friend class csp::systems::SpaceSystem;
     friend class MultiplayerConnection;
     friend class SpaceEntityEventHandler;
-    friend class ClientElectionManager;
     friend class EntityScript;
     friend class SpaceEntity;
     friend void csp::memory::Delete<SpaceEntitySystem>(SpaceEntitySystem* Ptr);
@@ -230,9 +228,6 @@ public:
     // TODO: OF-1005 This should not be a part of the public API
     void BindNewEntityToScript(SpaceEntity* NewEntity);
 
-    /// @brief Sets the script owner for the given entity to the current client
-    /// @param Entity SpaceEntity : A pointer to the entity
-    void ClaimScriptOwnership(SpaceEntity* Entity) const;
 
     /// @brief Adds the entity to a list of entities to be updated on tick
     /// @param Entity SpaceEntity : A pointer to the entity to be added
@@ -270,19 +265,6 @@ public:
     /// @return True if a selection state change has occurred, false if no change was made (due to one of the above criteria not being met).
     bool SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity);
 
-    /// @brief Enable Leader Election feature.
-    void EnableLeaderElection();
-
-    /// @brief Disable Leader Election feature.
-    void DisableLeaderElection();
-
-    /// @brief Check if the Leader Election feature is enabled.
-    /// @return true if enabled, false otherwise.
-    bool IsLeaderElectionEnabled() const;
-
-    /// @brief Debug helper to get the id of the currently elected script leader.
-    /// @return The id of the leader.
-    uint64_t GetLeaderId() const;
 
     /// @brief Finds a component by the given id.
     ///
@@ -363,8 +345,6 @@ private:
     void ResolveEntityHierarchy(SpaceEntity* Entity);
     bool EntityIsInRootHierarchy(SpaceEntity* Entity);
 
-    void ClaimScriptOwnershipFromClient(uint64_t ClientId);
-    bool CheckIfWeShouldRunScriptsLocally() const;
     void RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText);
     void TickEntityScripts();
 
@@ -378,7 +358,6 @@ private:
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
-    class ClientElectionManager* ElectionManager;
 
     std::mutex* TickEntitiesLock;
 

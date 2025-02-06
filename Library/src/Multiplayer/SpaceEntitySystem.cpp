@@ -30,7 +30,6 @@
 #include "Events/EventListener.h"
 #include "Events/EventSystem.h"
 #include "Memory/Memory.h"
-#include "Multiplayer/Election/ClientElectionManager.h"
 #include "Multiplayer/MultiplayerConstants.h"
 #include "Multiplayer/Script/EntityScriptBinding.h"
 #include "Multiplayer/SignalR/SignalRClient.h"
@@ -183,7 +182,6 @@ SpaceEntitySystem::SpaceEntitySystem(MultiplayerConnection* InMultiplayerConnect
     , MultiplayerConnectionInst(InMultiplayerConnection)
     , Connection(nullptr)
     , EventHandler(CSP_NEW SpaceEntityEventHandler(this))
-    , ElectionManager(nullptr)
     , TickEntitiesLock(CSP_NEW std::mutex)
     , PendingAdds(CSP_NEW(SpaceEntityQueue))
     , PendingRemoves(CSP_NEW(SpaceEntityQueue))
@@ -218,8 +216,6 @@ void SpaceEntitySystem::Initialise()
         return;
     }
 
-    EnableLeaderElection();
-
     ScriptBinding = EntityScriptBinding::BindEntitySystem(this);
 
     csp::events::EventSystem::Get().RegisterListener(csp::events::FOUNDATION_TICK_EVENT_ID, EventHandler);
@@ -235,7 +231,6 @@ void SpaceEntitySystem::Shutdown()
         return;
     }
 
-    DisableLeaderElection();
     LocalDestroyAllEntities();
 
     EntityScriptBinding::RemoveBinding(ScriptBinding);
@@ -312,10 +307,7 @@ void SpaceEntitySystem::CreateAvatar(const csp::common::String& InName, const Sp
             Avatars.Append(NewAvatar);
             NewAvatar->ApplyLocalPatch(false);
 
-            if (ElectionManager != nullptr)
-            {
-                ElectionManager->OnLocalClientAdd(NewAvatar, Avatars);
-            }
+
             Callback(NewAvatar);
         };
 
@@ -535,11 +527,6 @@ void SpaceEntitySystem::SetScriptSystemReadyCallback(CallbackHandler Callback)
     }
 
     ScriptSystemReadyCallback = std::move(Callback);
-
-    if (ElectionManager)
-    {
-        ElectionManager->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-    }
 }
 
 static SpaceEntity* CreateRemotelyRetrievedEntity(const signalr::value& EntityMessage, SpaceEntitySystem* EntitySystem)
@@ -841,19 +828,7 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
         EntityScript* Script = Entities[i]->GetScript();
         Script->PostMessageToScript(SCRIPT_MSG_ENTITIES_LOADED);
     }
-
-    if (IsLeaderElectionEnabled())
-    {
-        // Start listening for election events
-        //
-        // If we are the first client to connect then this
-        // will also set this client as the leader
-        ElectionManager->OnConnect(Avatars, Objects);
-    }
-    else
-    {
-        DetermineScriptOwners();
-    }
+    
 
     // Enable entity tick events
     EnableEntityTick = true;
@@ -864,23 +839,7 @@ void SpaceEntitySystem::OnAllEntitiesCreated()
     }
 }
 
-// @brief Simple script ownership
-//
-// Simple MVP script ownership for testing:
-// * Everyone 'claims' ownership of scripts on connection
-// * Last person to do so 'wins'
-//
-// @note this does not currently handle when the owner leaves the session
-// when the owner will need to be re-assigned, although ownership will also
-// be claimed by anyone who interacts with an object
-//
-void SpaceEntitySystem::DetermineScriptOwners()
-{
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        ClaimScriptOwnership(Entities[i]);
-    }
-}
+
 
 void SpaceEntitySystem::ResolveParentChildForDeletion(SpaceEntity* Deletion)
 {
@@ -934,17 +893,6 @@ bool SpaceEntitySystem::EntityIsInRootHierarchy(SpaceEntity* Entity)
     return false;
 }
 
-void SpaceEntitySystem::ClaimScriptOwnershipFromClient(uint64_t ClientId)
-{
-    for (size_t i = 0; i < Entities.Size(); ++i)
-    {
-        if (Entities[i]->GetScript()->GetOwnerId() == ClientId)
-        {
-            ClaimScriptOwnership(Entities[i]);
-        }
-    }
-}
-
 void SpaceEntitySystem::TickEntityScripts()
 {
     std::scoped_lock EntitiesLocker(*EntitiesLock);
@@ -955,26 +903,12 @@ void SpaceEntitySystem::TickEntityScripts()
 
     const csp::common::String DeltaTimeJSON = JSONStringFromDeltaTime(static_cast<double>(DeltaTimeMS));
 
-    if (IsLeaderElectionEnabled())
-    {
-        if (ElectionManager->IsLocalClientLeader())
-        {
-            for (size_t i = 0; i < Entities.Size(); ++i)
-            {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
-        }
-    }
-    else
     {
         const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
 
         for (size_t i = 0; i < Entities.Size(); ++i)
         {
-            if (ClientId == Entities[i]->GetScript()->GetOwnerId())
-            {
-                Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
-            }
+            Entities[i]->GetScript()->PostMessageToScript(SCRIPT_MSG_ENTITY_TICK, DeltaTimeJSON);
         }
     }
 }
@@ -1010,37 +944,6 @@ bool SpaceEntitySystem::SetSelectionStateOfEntity(const bool SelectedState, Spac
     return false;
 }
 
-void SpaceEntitySystem::EnableLeaderElection()
-{
-    if (ElectionManager == nullptr)
-    {
-        ElectionManager = CSP_NEW ClientElectionManager(this);
-    }
-}
-
-void SpaceEntitySystem::DisableLeaderElection()
-{
-    if (ElectionManager != nullptr)
-    {
-        CSP_DELETE(ElectionManager);
-        ElectionManager = nullptr;
-    }
-}
-
-bool SpaceEntitySystem::IsLeaderElectionEnabled() const { return (ElectionManager != nullptr); }
-
-uint64_t SpaceEntitySystem::GetLeaderId() const
-{
-    if (ElectionManager != nullptr && ElectionManager->GetLeader() != nullptr)
-    {
-        return ElectionManager->GetLeader()->GetId();
-    }
-    else
-    {
-        return 0;
-    }
-}
-
 ComponentBase* SpaceEntitySystem::FindComponentById(uint16_t Id)
 {
     // Search for component id across all entites
@@ -1065,40 +968,6 @@ void SpaceEntitySystem::SetEntityPatchRateLimitEnabled(bool Enabled) { EntityPat
 
 const csp::common::List<SpaceEntity*>* SpaceEntitySystem::GetRootHierarchyEntities() const { return &RootHierarchyEntities; }
 
-bool SpaceEntitySystem::CheckIfWeShouldRunScriptsLocally() const
-{
-    if (!IsLeaderElectionEnabled())
-    {
-        // Retain existing behavior if feature disabled
-        // (Run scripts locally if client is object owner)
-        return true;
-    }
-    else
-    {
-        // Only run script locally if we are the Leader
-        return ElectionManager->IsLocalClientLeader();
-    }
-}
-
-void SpaceEntitySystem::RunScriptRemotely(int64_t ContextId, const csp::common::String& ScriptText)
-{
-    // Run script on a remote leader...
-    CSP_LOG_FORMAT(csp::systems::LogLevel::VeryVerbose, "RunScriptRemotely Script='%s'", ScriptText.c_str());
-
-    ClientProxy* LeaderProxy = ElectionManager->GetLeader();
-
-    if (LeaderProxy)
-    {
-        LeaderProxy->RunScript(ContextId, ScriptText);
-    }
-}
-
-void SpaceEntitySystem::ClaimScriptOwnership(SpaceEntity* Entity) const
-{
-    const uint64_t ClientId = MultiplayerConnectionInst->GetClientId();
-    EntityScript* Script = Entity->GetScript();
-    Script->SetOwnerId(ClientId);
-}
 
 void SpaceEntitySystem::LockEntityUpdate() const { EntitiesLock->lock(); }
 
@@ -1234,7 +1103,6 @@ void SpaceEntitySystem::ProcessPendingEntityOperations()
 
                 // since we are aiming to mutate the data for this entity remotely, we need to claim ownership over it
                 PendingEntity->OwnerId = MultiplayerConnectionInst->GetClientId();
-                ClaimScriptOwnership(PendingEntity);
 
                 PendingEntities.Append(PendingEntity);
 
@@ -1341,36 +1209,22 @@ void SpaceEntitySystem::RemovePendingEntity(SpaceEntity* EntityToRemove)
 
 void SpaceEntitySystem::OnAvatarAdd(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
 {
-    if (ElectionManager != nullptr)
-    {
-        // Note we are assuming Avatar==Client,
-        // which is true now but may not be in the future
-        ElectionManager->OnClientAdd(Avatar, Avatars);
-    }
+
 }
 
 void SpaceEntitySystem::OnAvatarRemove(const SpaceEntity* Avatar, const SpaceEntityList& Avatars)
 {
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnClientRemove(Avatar, Avatars);
-    }
+
 }
 
 void SpaceEntitySystem::OnObjectAdd(const SpaceEntity* Object, const SpaceEntityList& Objects)
 {
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnObjectAdd(Object, Objects);
-    }
+
 }
 
 void SpaceEntitySystem::OnObjectRemove(const SpaceEntity* Object, const SpaceEntityList& Objects)
 {
-    if (ElectionManager != nullptr)
-    {
-        ElectionManager->OnObjectRemove(Object, Objects);
-    }
+
 }
 
 void SpaceEntitySystem::CreateObjectInternal(const csp::common::String& InName, csp::common::Optional<uint64_t> InParent,
@@ -1491,10 +1345,7 @@ void SpaceEntitySystem::ApplyIncomingPatch(const signalr::value* EntityMessage)
                 {
                     if (Entity->GetEntityType() == SpaceEntityType::Avatar)
                     {
-                        // All clients will take ownership of deleted avatars scripts
-                        // Last client which receives patch will end up with ownership
-                        ClaimScriptOwnershipFromClient(Entity->GetOwnerId());
-
+            
                         // Loop through all entities and check if the deleted avatar owned any of them. If they did, deselect them.
                         // This covers disconnected clients as their avatar gets cleaned up after timing out.
                         for (int j = 0; j < Entities.Size(); ++j)

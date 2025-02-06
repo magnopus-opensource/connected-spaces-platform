@@ -326,7 +326,7 @@ private:
     void OnPropertyChanged(ComponentBase* DirtyComponent, int32_t PropertyKey);
     oly_multiplayer::EntityScriptInterface* GetScriptInterface();
 
-    void ClaimScriptOwnership();
+
     void MarkForUpdate();
 
     // Do NOT call directly, always call either Select() Deselect() or SpaceEntitySystem::InternalSetSelectionStateOfEntity()

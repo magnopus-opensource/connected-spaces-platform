@@ -53,7 +53,6 @@ namespace csp::multiplayer
 class ReplicatedValue;
 class SpaceEntitySystem;
 class ConversationSystem;
-class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
 class EventBus;
@@ -89,8 +88,6 @@ public:
     friend class csp::systems::UserSystem;
     friend class SpaceEntityEventHandler;
     friend class SpaceEntitySystem;
-    friend class ClientElectionManager;
-    friend class ClientElectionEventHandler;
     friend class EventBus;
     friend void csp::memory::Delete<MultiplayerConnection>(MultiplayerConnection* Ptr);
     /** @endcond */

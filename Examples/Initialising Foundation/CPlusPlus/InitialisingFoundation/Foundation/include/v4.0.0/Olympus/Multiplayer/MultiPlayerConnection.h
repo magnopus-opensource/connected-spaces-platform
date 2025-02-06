@@ -17,7 +17,6 @@ class SpaceSystem;
 }
 namespace oly_multiplayer
 {
-class ClientElectionManager;
 class SignalRConnection;
 class IWebSocketClient;
 
@@ -76,8 +75,6 @@ public:
     friend class SpaceEntitySystem;
     friend class ConversationSystem;
     friend class SpaceEntityEventHandler;
-    friend class ClientElectionManager;
-    friend class ClientElectionEventHandler;
     friend class oly_systems::SpaceSystem;
     /** @endcond */
     [[deprecated("Multiplayer construction at the client layer will soon be removed. Please migrate your multiplayer connection related code to "

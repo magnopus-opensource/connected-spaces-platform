@@ -47,34 +47,6 @@ SpaceEntitySystem* EntitySystem;
 
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
 
-void CreateAvatarForLeaderElection(csp::multiplayer::SpaceEntitySystem* EntitySystem)
-{
-    const csp::common::String& UserName = "Player 1";
-    const SpaceTransform& UserTransform
-        = { csp::common::Vector3 { 1.452322f, 2.34f, 3.45f }, csp::common::Vector4 { 4.1f, 5.1f, 6.1f, 7.1f }, csp::common::Vector3 { 1, 1, 1 } };
-    AvatarState UserAvatarState = AvatarState::Idle;
-    const csp::common::String& UserAvatarId = "MyCoolAvatar";
-    AvatarPlayMode UserAvatarPlayMode = AvatarPlayMode::Default;
-
-    auto [Avatar] = AWAIT(EntitySystem, CreateAvatar, UserName, UserTransform, UserAvatarState, UserAvatarId, UserAvatarPlayMode);
-    EXPECT_NE(Avatar, nullptr);
-
-    std::cout << "CreateAvatar Local Callback" << std::endl;
-
-    EXPECT_EQ(Avatar->GetEntityType(), SpaceEntityType::Avatar);
-
-    if (Avatar->GetEntityType() == SpaceEntityType::Avatar)
-    {
-        EXPECT_EQ(Avatar->GetComponents()->Size(), 1);
-
-        auto* AvatarComponent = Avatar->GetComponent(0);
-
-        EXPECT_EQ(AvatarComponent->GetComponentType(), ComponentType::AvatarData);
-
-        std::cout << "OnUserCreated" << std::endl;
-    }
-}
-
 } // namespace
 
 #if RUN_ALL_UNIT_TESTS || RUN_SCRIPTSYSTEM_TESTS || RUN_UPDATE_SPACE_ENTITY_GLOBAL_POSITION_TEST
@@ -120,8 +92,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalPositionTest
     EntitySystem->SetEntityCreatedCallback([](SpaceEntity* Entity) {});
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
-
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		
@@ -264,7 +234,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalRotationTest
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		
@@ -407,7 +376,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityGlobalScaleTest)
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		
@@ -550,7 +518,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, UpdateSpaceEntityParentIdTest)
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		
@@ -692,7 +659,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, RemoveSpaceEntityParentTest)
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		
@@ -832,7 +798,6 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceEntityTests, GetRootHierarchyEntitiesTest)
 
     EntitySystem->SetScriptSystemReadyCallback(ScriptSystemReadyCallback);
 
-    CreateAvatarForLeaderElection(EntitySystem);
 
     const std::string ScriptText = R"xx(
 		

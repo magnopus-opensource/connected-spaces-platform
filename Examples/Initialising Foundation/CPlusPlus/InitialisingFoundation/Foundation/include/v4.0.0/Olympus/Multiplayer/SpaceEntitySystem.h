@@ -18,7 +18,6 @@ class value;
 
 namespace oly_multiplayer
 {
-class ClientElectionManager;
 
 class SignalRConnection;
 
@@ -36,7 +35,6 @@ class OLY_API OLY_NO_DISPOSE SpaceEntitySystem
     /** @cond DO_NOT_DOCUMENT */
     friend class MultiplayerConnection;
     friend class SpaceEntityEventHandler;
-    friend class ClientElectionManager;
     friend class EntityScript;
     /** @endcond */
 
@@ -195,8 +193,6 @@ public:
     // TODO: Add documentation comment
     void BindNewEntityToScript(SpaceEntity* NewEntity);
     // TODO: Add documentation comment
-    void ClaimScriptOwnership(SpaceEntity* Entity) const;
-    // TODO: Add documentation comment
     void MarkEntityForUpdate(SpaceEntity* Entity);
 
     /**
@@ -227,17 +223,6 @@ public:
      */
     bool SetSelectionStateOfEntity(const bool SelectedState, SpaceEntity* Entity);
 
-    /**
-     * Enable Leader Election feature
-     */
-    void EnableLeaderElection();
-    void DisableLeaderElection();
-    bool IsLeaderElectionEnabled() const;
-
-    /**
-            Debug helper to get the id of the currently elected script leader
-    */
-    uint64_t GetLeaderId() const;
 
     /*
      * @brief Finds a component by the given id
@@ -287,9 +272,6 @@ private:
 
     void OnAllEntitiesCreated();
     void DetermineScriptOwners();
-
-    void ClaimScriptOwnershipFromClient(uint64_t ClientId);
-    bool CheckIfWeShouldRunScriptsLocally() const;
     void RunScriptRemotely(int64_t ContextId, const oly_common::String& ScriptText);
     void TickEntityScripts();
 
@@ -300,7 +282,6 @@ private:
 
     class EntityScriptBinding* ScriptBinding;
     class SpaceEntityEventHandler* EventHandler;
-    class ClientElectionManager* ElectionManager;
 
     std::mutex* TickEntitiesLock;
 
