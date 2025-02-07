@@ -25,7 +25,8 @@ void PublicTestBase::SetUp()
 {
     ::testing::Test::SetUp();
 
-    InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+    // InitialiseFoundationWithUserAgentInfo(EndpointBaseURI());
+    InitialiseFoundationWithUserAgentInfo("https://ogs-internal.magnopus-sbx.cloud");
 
     csp::systems::SystemsManager::Get().GetLogSystem()->SetSystemLevel(csp::systems::LogLevel::VeryVerbose);
 

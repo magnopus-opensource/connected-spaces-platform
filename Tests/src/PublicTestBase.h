@@ -28,7 +28,7 @@ const char* GetEnvironmentVariableOrDefault(const char* EnvironmentKey, const ch
 }
 } // namespace
 
-inline const char* EndpointBaseURI() { return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-dev.cloud"); }
+inline const char* EndpointBaseURI() { return GetEnvironmentVariableOrDefault(EndpointEnvironmentName, "https://ogs-internal.magnopus-sbx.cloud"); }
 
 class PublicTestBase : public ::testing::Test
 {

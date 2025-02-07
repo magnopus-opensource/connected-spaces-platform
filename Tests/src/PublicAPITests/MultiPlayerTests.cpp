@@ -1211,7 +1211,7 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
-    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND-[capture-analytics]";
+    const char* TestSpaceName = "CSP-UNITTEST-SPACE-MAG-[analytics]";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
     const char* TestAssetCollectionName = "OLY-UNITTEST-ASSETCOLLECTION-REWIND";
 
@@ -1274,6 +1274,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ConnectionInterruptTest)
     EXPECT_TRUE(Interrupted);
 
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Get the Analytics
+    auto [SpaceAnalytics] = AWAIT_PRE(UserSystem, GetAnalyticsSession, RequestPredicate, Space.Id, false);
 
     // Delete space
     Awaitable(&csp::systems::SpaceSystem::DeleteSpace, SpaceSystem, Space.Id).Await();
