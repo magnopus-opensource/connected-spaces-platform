@@ -265,6 +265,7 @@ private:
     csp::services::ApiBase* PingAPI;
     csp::services::ApiBase* ExternalServiceProxyApi;
     csp::services::ApiBase* StripeAPI;
+    csp::services::ApiBase* GroupAPI;
 
     LoginState CurrentLoginState;
 

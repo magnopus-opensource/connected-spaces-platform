@@ -88,6 +88,7 @@ UserSystem::UserSystem()
     , ProfileAPI(nullptr)
     , PingAPI(nullptr)
     , ExternalServiceProxyApi(nullptr)
+    , GroupAPI(nullptr)
 {
 }
 
@@ -100,6 +101,7 @@ UserSystem::UserSystem(csp::web::WebClient* InWebClient, csp::multiplayer::Event
     PingAPI = CSP_NEW chs_user::PingApi(InWebClient);
     ExternalServiceProxyApi = CSP_NEW chs_aggregation::ExternalServiceProxyApi(InWebClient);
     StripeAPI = CSP_NEW chs_user::StripeApi(InWebClient);
+    GroupAPI = CSP_NEW chs_user::GroupApi(InWebClient);
 
     RegisterSystemCallback();
 }
@@ -111,6 +113,7 @@ UserSystem::~UserSystem()
     CSP_DELETE(AuthenticationAPI);
     CSP_DELETE(ExternalServiceProxyApi);
     CSP_DELETE(StripeAPI);
+    CSP_DELETE(GroupAPI);
 
     DeregisterSystemCallback();
 }
@@ -774,12 +777,9 @@ void UserSystem::GetAnalyticsSession(const csp::common::String& SpaceId, bool Us
         return;
     }
 
-    SpaceAnalyticsResult Res(EResultCode::Failed, 200);
-    Callback(Res);
-
-    /* csp::services::ResponseHandlerPtr ResponseHandler
-        = ProfileAPI->CreateHandler<SpaceAnalyticsResultCallback, SpaceAnalyticsResult, void, csp::services::NullDto>(Callback, nullptr);
-    static_cast<chs_user::ProfileApi*>(ProfileAPI)->apiV1UsersAnalyticsSessionGet(SpaceId, ResponseHandler);*/
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = GroupAPI->CreateHandler<SpaceAnalyticsResultCallback, SpaceAnalyticsResult, void, chs_user::AnalyticsSessionDto>(Callback, nullptr);
+    static_cast<chs_user::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdAnalyticsGet(SpaceId.c_str(), ResponseHandler);
 }
 
 void UserSystem::NotifyRefreshTokenHasChanged()

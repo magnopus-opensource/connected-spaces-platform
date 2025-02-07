@@ -34,32 +34,34 @@ using namespace csp::common;
 
 namespace chs_users = csp::services::generated::userservice;
 
-/*
-void ConvertDtoToAnalyticsSession(const chs_users::AuthDto& Dto, csp::systems::AnalyticsSession& Session)
+void ConvertDtoToAnalyticsSession(const chs_users::AnalyticsSessionDto& Dto, csp::systems::AnalyticsSession& Session)
 {
     Session.SpaceId = Dto.GetSpaceId();
 
     auto& AnalyticsData = Dto.GetUserAnalyticsData();
     Session.UserAnalyticsData = csp::common::Array<systems::UserAnalyticsSession>(AnalyticsData.size());
 
-     for (size_t i = 0; i < AnalyticsData.size(); ++i)
+    for (size_t i = 0; i < AnalyticsData.size(); ++i)
     {
         Session.UserAnalyticsData[i].UserId = AnalyticsData[i]->GetUserId();
         Session.UserAnalyticsData[i].StartTime = AnalyticsData[i]->GetStartTime();
         Session.UserAnalyticsData[i].EndTime = AnalyticsData[i]->GetEndTime();
 
-        auto& AnalyticFrames = AnalyticsData[i]->GetAnalyticFrames();
-        Session.UserAnalyticsData[i].AnalyticFrames = csp::common::Array<systems::UserAnalyticFrame>(AnalyticFrames.size());
+        auto& AnalyticsFrames = AnalyticsData[i]->GetAnalyticsFrames();
+        Session.UserAnalyticsData[i].AnalyticFrames = csp::common::Array<systems::UserAnalyticFrame>(AnalyticsFrames.size());
 
-        for (size_t j = 0; j < AnalyticFrames.size(); ++j)
+        for (size_t j = 0; j < AnalyticsFrames.size(); ++j)
         {
-            Session.UserAnalyticsData[i].AnalyticFrames[i].Position = AnalyticFrames->GetPosition;
-            Session.UserAnalyticsData[i].AnalyticFrames[i].HeadRotation = AnalyticFrames->GetHeadRotation;
-            Session.UserAnalyticsData[i].AnalyticFrames[i].StartTimeOffsetMS = AnalyticFrames->GetStartTimeOffset;
+            Session.UserAnalyticsData[i].AnalyticFrames[i].Position.X = AnalyticsFrames[i]->GetPosition()->GetX();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].Position.Y = AnalyticsFrames[i]->GetPosition()->GetY();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].Position.Z = AnalyticsFrames[i]->GetPosition()->GetZ();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].HeadRotation.X = AnalyticsFrames[i]->GetRotation()->GetX();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].HeadRotation.Y = AnalyticsFrames[i]->GetRotation()->GetY();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].HeadRotation.Z = AnalyticsFrames[i]->GetRotation()->GetZ();
+            Session.UserAnalyticsData[i].AnalyticFrames[i].StartTimeOffsetMS = AnalyticsFrames[i]->GetStartTimeOffsetMS();
         }
     }
 }
-*/
 
 void ToJson(csp::json::JsonSerializer& Serializer, const csp::systems::AnalyticsSession& Obj)
 {
@@ -151,7 +153,7 @@ void SpaceAnalyticsResult::OnResponse(const services::ApiResponseBase* ApiRespon
 {
     ResultBase::OnResponse(ApiResponse);
 
-    auto AnalyticsResponse = static_cast<chs_users::AuthDto*>(ApiResponse->GetDto());
+    auto AnalyticsResponse = static_cast<chs_users::AnalyticsSessionDto*>(ApiResponse->GetDto());
     const web::HttpResponse* Response = ApiResponse->GetResponse();
 
     if (ApiResponse->GetResponseCode() == services::EResponseCode::ResponseSuccess)
@@ -159,8 +161,7 @@ void SpaceAnalyticsResult::OnResponse(const services::ApiResponseBase* ApiRespon
         // Build the Dto from the response Json
         AnalyticsResponse->FromJson(Response->GetPayload().GetContent());
 
-        // Commenting this out until we have the Dto from CHS
-        // ConvertDtoToAnalyticsSession(*AnalyticsResponse, *Session);
+        ConvertDtoToAnalyticsSession(*AnalyticsResponse, Session);
     }
 }
 
