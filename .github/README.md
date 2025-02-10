@@ -85,4 +85,4 @@ PRs are welcome! If have any ideas you would like to contribute please see our [
 
 ## ©️ License
 
-[Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/develop/LICENSE)
+[Apache-2.0](https://github.com/magnopus-opensource/connected-spaces-platform/blob/main/LICENSE)
