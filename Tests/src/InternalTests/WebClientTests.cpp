@@ -463,3 +463,16 @@ CSP_INTERNAL_TEST(DISABLED_CSPEngine, WebClientTests, HttpFail403Test)
     csp::CSPFoundation::Shutdown();
 }
 #endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_PLATFORM_TESTS || RUN_HTTP_HEADER_TEST
+CSP_INTERNAL_TEST(CSPEngine, WebClientTests, HttpHeaderTest)
+{
+    InitialiseFoundation();
+
+    HttpPayload Payload;
+    auto Headers = Payload.GetHeaders();
+    ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
+
+    csp::CSPFoundation::Shutdown();
+}
+#endif

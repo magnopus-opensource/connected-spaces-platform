@@ -28,6 +28,10 @@
 #include <map>
 #include <vector>
 
+CSP_START_IGNORE
+class CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
+CSP_END_IGNORE
+
 namespace csp::systems
 {
 
@@ -92,6 +96,7 @@ public:
     friend class ClientElectionManager;
     friend class ClientElectionEventHandler;
     friend class EventBus;
+    friend class ::CSPEngine_MultiplayerTests_SignalRConnectionTest_Test;
     friend void csp::memory::Delete<MultiplayerConnection>(MultiplayerConnection* Ptr);
     /** @endcond */
 
