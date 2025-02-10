@@ -1289,6 +1289,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
     // Exit space and enter again, making sure the entities have been created
     auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
 
+    // Wait a few seconds for the CHS database to update
+    std::this_thread::sleep_for(std::chrono::seconds(8));
+
     bool EntitiesCreated = false;
 
     auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
@@ -1301,9 +1304,6 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpa
 
     auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
     EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
-
-    // Wait a few seconds for the CHS database to update
-    std::this_thread::sleep_for(std::chrono::seconds(8));
 
     WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
     EXPECT_TRUE(EntitiesCreated);
