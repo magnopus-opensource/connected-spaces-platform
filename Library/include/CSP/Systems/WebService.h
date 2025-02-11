@@ -79,6 +79,7 @@ enum class ERequestFailureReason
     UserShopifyLimitReached,
     UserTokenRefreshFailed,
     InvalidSequenceKey,
+    RequestTimedOut,
 };
 
 /// @brief Base class for a HTTP request result.
@@ -90,6 +91,11 @@ public:
 
     /// @brief Virtual destructor.
     virtual ~ResultBase() = default;
+
+    // @brief Equality operator
+    bool operator==(const ResultBase& other) const;
+    // @brief Inequality operator
+    bool operator!=(const ResultBase& other) const;
 
     /// @brief Called when progress has been updated.
     /// @param ApiResponse const ApiResponseBase* : Response received from the request
