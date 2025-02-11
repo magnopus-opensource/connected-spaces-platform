@@ -24,6 +24,7 @@ if not Tests then
         externalincludedirs { 
             "%{prj.location}/src",
             "%{wks.location}/ThirdParty/googletest/include",
+			"%{wks.location}/ThirdParty/googlemock/include",
             "%{wks.location}/ThirdParty/uuid-v4",
 			"%{wks.location}/ThirdParty/tiny-process-library/install/include",
 			"%{wks.location}/MultiplayerTestRunner/include"
@@ -140,17 +141,14 @@ if not Tests then
         filter "configurations:*DLL*"
             links {
                 "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_main_md",
-                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_md"
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_md",
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gmock_md"
             }
         filter "configurations:*Static*"
             links {
                 "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_main_mt",
-                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_mt"
-            }
-        filter "platforms:wasm"
-            links {
-                "%{wks.location}/ThirdParty/googletest/lib/wasm/gtest_main",
-                "%{wks.location}/ThirdParty/googletest/lib/wasm/gtest"
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gtest_mt",
+                "%{wks.location}/ThirdParty/googletest/lib/x64/Release/gmock_mt"
             }
         filter {}
 
