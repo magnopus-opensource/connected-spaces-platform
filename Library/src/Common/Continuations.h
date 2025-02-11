@@ -162,5 +162,49 @@ template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& Inv
         }
     };
 }
+//"Private" namespace for testing, to allow us not to link async++ in tests,
+// for the few tests where we want to stricly test mechanisms.
+namespace detail
+{
+    namespace testing
+    {
+        /* These chains spawned to be able to test InvokeIfExceptionIsInChain
+         * Normally, I might make the argument that this is testing our dependencies, but
+         * this seems like it might become so essential to our foundational structuring
+         * that you'll forgive me for being a little paranoid.
+         */
+        template <typename ExceptionHandlerCallable>
+        inline void SpawnChainThatThrowsNoExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
+        {
+            async::spawn(async::inline_scheduler(), []() { return; })
+                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+        }
 
+        template <typename ExceptionHandlerCallable>
+        inline void SpawnChainThatThrowsGeneralExceptionWithHandlerAtEnd(ExceptionHandlerCallable&& ExceptionHandler)
+        {
+            async::spawn(async::inline_scheduler(), []() { throw std::runtime_error(""); })
+                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+        }
+
+        template <typename ExceptionHandlerCallable>
+        inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithHandlerAtEnd(
+            ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
+        {
+            async::spawn(async::inline_scheduler(),
+                [ResultCallback]() { LogErrorAndCancelContinuation(ResultCallback, "", EResultCode::Failed, 0, ERequestFailureReason::Unknown); })
+                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+        }
+
+        template <typename IntermediateStepCallable, typename ExceptionHandlerCallable>
+        inline void SpawnChainThatCallsLogErrorAndCancelContinuationWithIntermediateStepAndHandlerAtEnd(
+            IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
+        {
+            async::spawn(async::inline_scheduler(),
+                [ResultCallback]() { LogErrorAndCancelContinuation(ResultCallback, "", EResultCode::Failed, 0, ERequestFailureReason::Unknown); })
+                .then(async::inline_scheduler(), std::forward<IntermediateStepCallable>(IntermediateStep))
+                .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
+        }
+    }
+}
 } // namespace csp::common::continuations
