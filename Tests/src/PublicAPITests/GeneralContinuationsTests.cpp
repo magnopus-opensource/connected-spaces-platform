@@ -66,7 +66,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestReportSuccess)
     ::testing::MockFunction<void(const NullResult& Result)> MockResultCallback;
     // Expect that the callback is called with the result constructed as expected.
     EXPECT_CALL(MockResultCallback, Call(ExpectedResult)).Times(1);
-    // Expect that we log the error message
+    // Expect that we log the success message
     EXPECT_CALL(MockLogger.MockLogCallback, Call(SuccessMsg)).Times(1);
 
     csp::common::continuations::ReportSuccess(MockResultCallback.AsStdFunction(), SuccessMsg.c_str())();
