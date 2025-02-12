@@ -72,8 +72,6 @@ enum class ComponentType
     CinematicCamera = 27,
     // spare values
     Delete = 56
-    // the value 56 is a requirement that comes from MessagePack - see:
-    // https://github.com/magnopus/Magnopus.Services/blob/8a376c4454c5c082794bceb940f3f79b8ee0d1db/Source/Magnopus.Service.Multiplayer.MessagePack/ItemComponentDataResolver.cs#L86
 };
 
 /// @brief The base class for all components, provides mechanisms for dirtying properties and subscribing to events on property changes.
