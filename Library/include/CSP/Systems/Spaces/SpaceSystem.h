@@ -369,8 +369,12 @@ private:
     // EnterSpace Continuations
     auto AddUserToSpaceIfNeccesary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
     auto FireEnterSpaceEvent(Space& OutCurrentSpace);
+    // Wraps RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
     auto RefreshMultiplayerScopes();
 
+    /* Stop the multiplayer connetion, change scope, start listening again
+       Not ideal, we'd rather not have to go to all this effort.
+       Used in EnterSpace. */
     void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
         std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
 

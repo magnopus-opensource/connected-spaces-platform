@@ -20,7 +20,7 @@
  *  - Raw nested callbacks were becoming unreadable and causing bugs
  *  - Via using common continuations, we can move towards standardised error handling
  * If you're wondering why we go to the effort of integrate an async lib rather than
- * simply using a standard blocking future/promise interface, it's because of WASM.
+ * simply using a standard blocking future/promise approach, it's because of WASM.
  * WASM in browsers does not allow you to block the main thread, ever.
  *
  * For more info on the specifics of continuations : https://github.com/Amanieu/asyncplusplus/wiki/Tasks
@@ -84,6 +84,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
     {
         if (Result.GetResultCode() != EResultCode::Success)
         {
+            // Error Case
             auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
             auto HTTPResultCodeToUse = HttpResultCode.value_or(Result.GetHttpResultCode());
             auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
@@ -91,6 +92,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
         }
         else
         {
+            // Success Case
             CSP_LOG_MSG(csp::systems::LogLevel::Log, SuccessMsg.c_str());
         }
         return Result;
@@ -112,14 +114,15 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback
     {
         if (ErrorCode.has_value())
         {
+            // Error Case. We have an error message, abort
             constexpr auto GENERIC_UNKNOWN_ERROR_CODE = 500;
-            // We have an error message, abort
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
             LogErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
                 HttpResultCode.value_or(GENERIC_UNKNOWN_ERROR_CODE), FailureReason.value_or(ERequestFailureReason::Unknown), LogLevel);
         }
         else
         {
+            // Success Case
             CSP_LOG_MSG(csp::systems::LogLevel::Log, SuccessMsg.c_str());
         }
     };
@@ -142,7 +145,7 @@ inline auto ReportSuccess(NullResultCallback Callback, std::string SuccessMsg)
  * Intended to be placed at the end of an async++ continuation chain.
  * If the chain throws an unhandled exception, this will attempt to unwrap it,
  * and call a passed in callable, (probably a state-reset or cleanup function of some sort).
- * The callable is perfectly forwarded, ownership will be taken if appropriate.
+ * The callable is perfectly forwarded.
  */
 template <typename Callable> inline auto InvokeIfExceptionInChain(Callable&& InvokeIfExceptionCallable)
 {

@@ -242,7 +242,7 @@ auto SpaceSystem::RefreshMultiplayerScopes()
  * RefreshMultiplayerScopes
  * AssertRequestSuccessOrErrorFromErrorCode (RefreshMultiplayerScopes Validation)
  * ReportSuccess
- * ResetJoinStateIfChainHasThrown
+ * InvokeIfExceptionInChain (Handle any errors from the above Assert methods in chain, resets state)
  */
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
