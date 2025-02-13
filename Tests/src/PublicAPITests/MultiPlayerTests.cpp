@@ -1203,6 +1203,133 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTest)
 }
 #endif
 
+#if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_OBJECT_REMOVECOMPONENTREENTERSPACE_TEST
+CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, ObjectRemoveComponentTestReenterSpace)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::common::String UserId;
+
+    // Log in
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(EnterResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    const csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+
+    auto [Object] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    bool PatchPending = true;
+    Object->SetPatchSentCallback([&PatchPending](bool ok) { PatchPending = false; });
+
+    auto* ComponentToKeep = (StaticModelSpaceComponent*)Object->AddComponent(ComponentType::StaticModel);
+    ComponentToKeep->SetComponentName("ComponentNameKeep");
+    auto KeepKey = ComponentToKeep->GetId();
+    auto* ComponentToDelete = (ImageSpaceComponent*)Object->AddComponent(ComponentType::Image);
+    ComponentToDelete->SetComponentName("ComponentNameDelete");
+    auto DeleteKey = ComponentToDelete->GetId();
+    Object->QueueUpdate();
+
+    while (PatchPending)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+
+    PatchPending = true;
+
+    // Ensure values are set correctly
+    EXPECT_EQ(ComponentToKeep->GetComponentName(), "ComponentNameKeep");
+    EXPECT_EQ(ComponentToDelete->GetComponentName(), "ComponentNameDelete");
+
+    auto& Components = *Object->GetComponents();
+
+    EXPECT_EQ(Components.Size(), 2);
+    EXPECT_TRUE(Components.HasKey(KeepKey));
+    EXPECT_TRUE(Components.HasKey(DeleteKey));
+
+    // Delete component
+    Object->RemoveComponent(ComponentToDelete->GetId());
+    Object->QueueUpdate();
+    while (PatchPending)
+    {
+        EntitySystem->ProcessPendingEntityOperations();
+        std::this_thread::sleep_for(10ms);
+    }
+    EXPECT_FALSE(PatchPending);
+
+    // Check deletion has happened
+    auto& RealComponents = *Object->GetComponents();
+
+    EXPECT_EQ(RealComponents.Size(), 1);
+    EXPECT_TRUE(RealComponents.HasKey(KeepKey));
+    EXPECT_FALSE(RealComponents.HasKey(DeleteKey));
+
+    // Exit space and enter again, making sure the entities have been created
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Wait a few seconds for the CHS database to update
+    std::this_thread::sleep_for(std::chrono::seconds(8));
+
+    bool EntitiesCreated = false;
+
+    auto EntitiesReadyCallback = [&EntitiesCreated](bool Success)
+    {
+        EntitiesCreated = true;
+        EXPECT_TRUE(Success);
+    };
+
+    EntitySystem->SetInitialEntitiesRetrievedCallback(EntitiesReadyCallback);
+
+    auto [EnterResult2] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    EXPECT_EQ(EnterResult2.GetResultCode(), csp::systems::EResultCode::Success);
+
+    WaitForCallbackWithUpdate(EntitiesCreated, EntitySystem);
+    EXPECT_TRUE(EntitiesCreated);
+
+    // Retrieve components in space
+    SpaceEntity* FoundEntity = EntitySystem->FindSpaceObject(ObjectName);
+    EXPECT_TRUE(FoundEntity != nullptr);
+    auto& FoundComponents = *FoundEntity->GetComponents();
+
+    // Check the right component has been deleted
+    EXPECT_EQ(FoundComponents.Size(), 1);
+    EXPECT_TRUE(FoundComponents.HasKey(KeepKey));
+    EXPECT_FALSE(FoundComponents.HasKey(DeleteKey));
+    EXPECT_EQ(FoundEntity->GetComponent(0)->GetComponentName(), "ComponentNameKeep");
+
+    // Exit space
+    auto [ExitSpaceResult2] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    // Log out
+    LogOut(UserSystem);
+}
+#endif
+
 // This test currently requires manual steps and will be reviewed as part of OF-1535.
 #if RUN_ALL_UNIT_TESTS || RUN_MULTIPLAYER_TESTS || RUN_MULTIPLAYER_CONNECTION_INTERRUPT_TEST
 CSP_PUBLIC_TEST(DISABLED_CSPEngine, MultiplayerTests, ConnectionInterruptTest)
