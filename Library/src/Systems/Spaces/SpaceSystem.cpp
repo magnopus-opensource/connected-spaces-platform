@@ -23,6 +23,7 @@
 #include "CSP/Systems/Assets/AssetSystem.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 #include "CallHelpers.h"
 #include "Common/Continuations.h"
 #include "Debug/Logging.h"
@@ -167,10 +168,9 @@ auto SpaceSystem::AddUserToSpaceIfNeccesary(NullResultCallback Callback, SpaceSy
         /* If we need permissions, check that the user has permission to enter this specific space */
         if (JoiningSpaceRequiresInvite && !UserIsRecognizedBySpace)
         {
-            constexpr auto BAD_PERMISSIONS_HTTP_CODE = 403;
             csp::common::continuations::LogErrorAndCancelContinuation(Callback,
-                "Logged in user does not have permission to join this space. Failed to add to space.", EResultCode::Failed, BAD_PERMISSIONS_HTTP_CODE,
-                ERequestFailureReason::UserSpaceAccessDenied);
+                "Logged in user does not have permission to join this space. Failed to add to space.", EResultCode::Failed,
+                csp::web::EResponseCodes::ResponseForbidden, ERequestFailureReason::UserSpaceAccessDenied);
         }
 
         /* By this point,you should be allowed to join the space
@@ -247,7 +247,6 @@ auto SpaceSystem::RefreshMultiplayerScopes()
 void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
 {
     CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::EnterSpace");
-    constexpr auto GENERIC_UNKNOWN_ERROR_CODE = 500;
 
     GetSpace(SpaceId)
         .then(async::inline_scheduler(),
@@ -263,8 +262,8 @@ void SpaceSystem::EnterSpace(const String& SpaceId, NullResultCallback Callback)
         .then(async::inline_scheduler(), RefreshMultiplayerScopes())
         .then(async::inline_scheduler(),
             csp::common::continuations::AssertRequestSuccessOrErrorFromErrorCode(Callback,
-                "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed, GENERIC_UNKNOWN_ERROR_CODE,
-                ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
+                "SpaceSystem: EnterSpace, successfully refreshed multiplayer scopes", EResultCode::Failed,
+                csp::web::EResponseCodes::ResponseInternalServerError, ERequestFailureReason::Unknown, csp::systems::LogLevel::Error))
         .then(async::inline_scheduler(), csp::common::continuations::ReportSuccess(Callback, "Successfully entered space."))
         .then(
             async::inline_scheduler(), csp::common::continuations::InvokeIfExceptionInChain([&CurrentSpace = CurrentSpace]() { CurrentSpace = {}; }));

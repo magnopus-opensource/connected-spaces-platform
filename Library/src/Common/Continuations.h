@@ -59,8 +59,8 @@ using namespace csp::systems;
  * Print an error with provided error context objects, and throw a cancellation error.
  * Calls the main callback as an error before throwing.
  */
-inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::string ErrorMsg, EResultCode ResultCode, uint16_t HttpResultCode,
-    ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
+inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::string ErrorMsg, EResultCode ResultCode,
+    csp::web::EResponseCodes HttpResultCode, ERequestFailureReason FailureReason, csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     CSP_LOG_MSG(LogLevel, ErrorMsg.c_str());
     NullResult FailureResult(ResultCode, HttpResultCode, FailureReason);
@@ -76,7 +76,7 @@ inline void LogErrorAndCancelContinuation(NullResultCallback Callback, std::stri
  */
 template <typename ResultT>
 inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, std::string SuccessMsg, std::string ErrorMsg,
-    std::optional<EResultCode> ResultCode, std::optional<uint16_t> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
+    std::optional<EResultCode> ResultCode, std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ErrorMsg = std::move(ErrorMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](
@@ -86,7 +86,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
         {
             // Error Case
             auto ResultCodeToUse = ResultCode.value_or(Result.GetResultCode());
-            auto HTTPResultCodeToUse = HttpResultCode.value_or(Result.GetHttpResultCode());
+            auto HTTPResultCodeToUse = HttpResultCode.value_or(static_cast<csp::web::EResponseCodes>(Result.GetHttpResultCode()));
             auto FailureReasonToUse = FailureReason.value_or(Result.GetFailureReason());
             LogErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCodeToUse, HTTPResultCodeToUse, FailureReasonToUse, LogLevel);
         }
@@ -106,7 +106,7 @@ inline auto AssertRequestSuccessOrErrorFromResult(NullResultCallback Callback, s
  * Error context objects are optional, if unset, default values Failed, 500, and Unknown are used
  */
 inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback, std::string SuccessMsg, std::optional<EResultCode> ResultCode,
-    std::optional<uint16_t> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
+    std::optional<csp::web::EResponseCodes> HttpResultCode, std::optional<ERequestFailureReason> FailureReason,
     csp::systems::LogLevel LogLevel = csp::systems::LogLevel::Log)
 {
     return [Callback, SuccessMsg = std::move(SuccessMsg), ResultCode, HttpResultCode, FailureReason, LogLevel](
@@ -115,10 +115,10 @@ inline auto AssertRequestSuccessOrErrorFromErrorCode(NullResultCallback Callback
         if (ErrorCode.has_value())
         {
             // Error Case. We have an error message, abort
-            constexpr auto GENERIC_UNKNOWN_ERROR_CODE = 500;
             std::string ErrorMsg = std::string("Operation errored with error code: ") + csp::multiplayer::ErrorCodeToString(ErrorCode.value());
             LogErrorAndCancelContinuation(Callback, std::move(ErrorMsg), ResultCode.value_or(EResultCode::Failed),
-                HttpResultCode.value_or(GENERIC_UNKNOWN_ERROR_CODE), FailureReason.value_or(ERequestFailureReason::Unknown), LogLevel);
+                HttpResultCode.value_or(csp::web::EResponseCodes::ResponseInternalServerError),
+                FailureReason.value_or(ERequestFailureReason::Unknown), LogLevel);
         }
         else
         {
@@ -135,8 +135,7 @@ inline auto ReportSuccess(NullResultCallback Callback, std::string SuccessMsg)
     {
         /* We joined the space and refreshed the multiplayer connection to change scopes. We're done! */
         CSP_LOG_MSG(LogLevel::Log, SuccessMsg.c_str());
-        constexpr auto SUCCESS_HTTP_CODE = 200;
-        NullResult SuccessResult(EResultCode::Success, SUCCESS_HTTP_CODE, ERequestFailureReason::None);
+        NullResult SuccessResult(EResultCode::Success, csp::web::EResponseCodes::ResponseOK, ERequestFailureReason::None);
         INVOKE_IF_NOT_NULL(Callback, SuccessResult);
     };
 }
@@ -195,7 +194,10 @@ namespace detail
             ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
             async::spawn(async::inline_scheduler(),
-                [ResultCallback]() { LogErrorAndCancelContinuation(ResultCallback, "", EResultCode::Failed, 0, ERequestFailureReason::Unknown); })
+                [ResultCallback]() {
+                    LogErrorAndCancelContinuation(
+                        ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
+                })
                 .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
 
@@ -204,7 +206,10 @@ namespace detail
             IntermediateStepCallable&& IntermediateStep, ExceptionHandlerCallable&& ExceptionHandler, NullResultCallback ResultCallback)
         {
             async::spawn(async::inline_scheduler(),
-                [ResultCallback]() { LogErrorAndCancelContinuation(ResultCallback, "", EResultCode::Failed, 0, ERequestFailureReason::Unknown); })
+                [ResultCallback]() {
+                    LogErrorAndCancelContinuation(
+                        ResultCallback, "", EResultCode::Failed, csp::web::EResponseCodes::ResponseInit, ERequestFailureReason::Unknown);
+                })
                 .then(async::inline_scheduler(), std::forward<IntermediateStepCallable>(IntermediateStep))
                 .then(async::inline_scheduler(), InvokeIfExceptionInChain(std::forward<ExceptionHandlerCallable>(ExceptionHandler)));
         }
