@@ -475,6 +475,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
     // Log out
     LogOut(UserSystem);
 }
+#endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
