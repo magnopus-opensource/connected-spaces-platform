@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "../AssetSystemTestHelpers.h"
 #include "../SpaceSystemTestHelpers.h"
 #include "../UserSystemTestHelpers.h"
 #include "Awaitable.h"
@@ -362,11 +363,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_NUMBER_OF_REPLIES_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepliesTest)
 {
-    SetRandSeed();
-
     auto& SystemsManager = csp::systems::SystemsManager::Get();
     auto* UserSystem = SystemsManager.GetUserSystem();
     auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
@@ -376,12 +376,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
-    // Log in
-    csp::common::String UserId;
-    LogInAsNewTestUser(UserSystem, UserId);
-
-    // Create space
-    csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
@@ -478,7 +472,92 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
 
     // Delete space
     DeleteSpace(SpaceSystem, Space.Id);
+    // Log out
+    LogOut(UserSystem);
+}
 
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
+{
+
+    SetRandSeed();
+
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    auto* AssetSystem = SystemsManager.GetAssetSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter space
+    auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    // Create object to represent the conversation
+    csp::common::String ObjectName = "Object 1";
+    SpaceTransform ObjectTransform = { csp::common::Vector3::Zero(), csp::common::Vector4::Zero(), csp::common::Vector3::One() };
+    auto [CreatedObject] = AWAIT(EntitySystem, CreateObject, ObjectName, ObjectTransform);
+
+    csp::common::String ConversationId;
+
+    // Create conversation component
+    {
+        auto* ConversationComponent = (ConversationSpaceComponent*)CreatedObject->AddComponent(ComponentType::Conversation);
+
+        CreatedObject->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        auto [ConversationResult] = AWAIT(ConversationComponent, CreateConversation, "DefaultConversation");
+        EXPECT_EQ(ConversationResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+        ConversationId = ConversationResult.GetValue();
+    }
+
+    // Ensure that the conversations asset collection exists
+    {
+        csp::common::Array<csp::systems::AssetCollection> Collections;
+        GetAssetCollectionsByIds(AssetSystem, { ConversationId }, Collections);
+
+        EXPECT_EQ(Collections.Size(), 1);
+    }
+
+    // Delete the component to internally call DeleteConversation
+    {
+        bool CallbackCalled = false;
+
+        AssetSystem->SetAssetDetailBlobChangedCallback(
+            [ConversationId, &CallbackCalled](const csp::multiplayer::AssetDetailBlobParams& Params)
+            {
+                EXPECT_EQ(Params.ChangeType, csp::multiplayer::EAssetChangeType::Deleted);
+                EXPECT_EQ(Params.AssetCollectionId, ConversationId);
+                CallbackCalled = true;
+            });
+
+        CreatedObject->Destroy([](bool Success) {});
+
+        CreatedObject->QueueUpdate();
+        EntitySystem->ProcessPendingEntityOperations();
+
+        WaitForCallback(CallbackCalled);
+
+        csp::common::Array<csp::systems::AssetCollection> Collections;
+        GetAssetCollectionsByIds(AssetSystem, { ConversationId }, Collections);
+
+        EXPECT_EQ(Collections.Size(), 0);
+    }
+
+    auto [ExitSpaceResult] = AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+
+    // Delete space
+    DeleteSpace(SpaceSystem, Space.Id);
     // Log out
     LogOut(UserSystem);
 }

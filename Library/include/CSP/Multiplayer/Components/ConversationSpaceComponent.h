@@ -200,6 +200,8 @@ private:
         MessageResultCallback Callback) const;
 
     void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
+
+    void OnLocalDelete() override;
 };
 
 } // namespace csp::multiplayer
