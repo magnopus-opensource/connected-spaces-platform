@@ -17,6 +17,7 @@
 #include "Common/Continuations.h"
 
 #include "CSP/Systems/SystemsResult.h"
+#include "CSP/Web/HTTPResponseCodes.h"
 #include "Services/ApiBase/ApiBase.h"
 #include "TestHelpers.h"
 
@@ -58,7 +59,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestReportSuccess)
     /* Specific values are irrelevent */
     csp::common::String SuccessMsg = "Mock Success Msg";
     EResultCode ResultCode = EResultCode::Success;
-    uint16_t HttpResultCode = 200;
+    csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseOK;
     ERequestFailureReason FailureReason = ERequestFailureReason::None;
 
     NullResult ExpectedResult(ResultCode, HttpResultCode, FailureReason);
@@ -81,7 +82,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestLogErrorAndCancel)
     /* Specific values are irrelevent */
     csp::common::String ErrorMsg = "Mock Error Msg";
     EResultCode ResultCode = EResultCode::Failed;
-    uint16_t HttpResultCode = 1;
+    csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
     ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
 
     NullResult ExpectedResult(ResultCode, HttpResultCode, FailureReason);
@@ -129,7 +130,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     csp::common::String ErrorMsg = "Mock Error Msg";
     csp::common::String SuccessMsg = "Mock Success Msg";
     EResultCode ResultCode = EResultCode::Failed;
-    uint16_t HttpResultCode = 1;
+    csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
     ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
     NullResult ExpectedFailureResult(ResultCode, HttpResultCode, FailureReason);
 
@@ -153,7 +154,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
         // When we pass full optionals, we expect the values from the optionals to be used to construct the result passed in the callback //
 
         EResultCode ResultCodeExplicit = EResultCode::InProgress;
-        uint16_t HttpResultCodeExplicit = 2;
+        csp::web::EResponseCodes HttpResultCodeExplicit = csp::web::EResponseCodes::ResponseProcessing;
         ERequestFailureReason FailureReasonExplicit = ERequestFailureReason::AssetAudioVideoLimitReached;
         NullResult ExpectedFailureResultExplicit(ResultCodeExplicit, HttpResultCodeExplicit,
             FailureReasonExplicit); // Note not passed to function invocation, to check that the optionals are used.
@@ -194,7 +195,7 @@ CSP_PUBLIC_TEST(CSPEngine, GeneralContinuationsTests, TestAssertRequestSuccessOr
     /* Specific values are irrelevent */
     csp::common::String SuccessMsg = "Mock Success Msg";
     EResultCode ResultCode = EResultCode::Failed;
-    uint16_t HttpResultCode = 1;
+    csp::web::EResponseCodes HttpResultCode = csp::web::EResponseCodes::ResponseContinue;
     ERequestFailureReason FailureReason = ERequestFailureReason::SpacePublicNameDuplicate;
     NullResult ExpectedFailureResult(ResultCode, HttpResultCode, FailureReason);
 
