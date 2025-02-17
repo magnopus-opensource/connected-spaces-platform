@@ -78,7 +78,7 @@ public:
     /// @brief Deletes a particular message
     /// @param MessageId csp::common::String : if of the message that will be deleted
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
-    CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, MessageResultCallback Callback);
+    CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
     /// @brief Retrieves messages that are linked to the Conversation ID present in the component.
     /// @param ResultsSkipNumber Optional<int> : Optional parameter representing the number of result entries that will be skipped from the result.
