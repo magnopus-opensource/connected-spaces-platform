@@ -131,7 +131,7 @@ void ConversationSpaceComponent::CreateConversation(const csp::common::String& M
 
 void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCallback Callback)
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -225,7 +225,7 @@ void ConversationSpaceComponent::DeleteConversation(csp::systems::NullResultCall
 
 void ConversationSpaceComponent::AddMessage(const csp::common::String& Message, MessageResultCallback Callback)
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -352,7 +352,7 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
 void ConversationSpaceComponent::GetMessagesFromConversation(
     const csp::common::Optional<int>& ResultsSkipNumber, const csp::common::Optional<int>& ResultsMaxNumber, MessageCollectionResultCallback Callback)
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -397,7 +397,7 @@ void ConversationSpaceComponent::GetMessagesFromConversation(
 
 void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback Callback)
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -435,7 +435,7 @@ void ConversationSpaceComponent::GetConversationInfo(ConversationResultCallback 
 
 void ConversationSpaceComponent::SetConversationInfo(const MessageInfo& ConversationData, ConversationResultCallback Callback)
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -662,10 +662,21 @@ const csp::common::Vector3& ConversationSpaceComponent::GetConversationCameraPos
     return GetVector3Property(static_cast<uint32_t>(ConversationPropertyKeys::ConversationCameraPosition));
 }
 
-const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
+void ConversationSpaceComponent::GetNumberOfReplies(NumberOfRepliesResultCallback Callback)
 {
-    // TODO: Implement getNumberOfReplies - OF-1385
-    return 0;
+    auto* AssetSystem = csp::systems::SystemsManager::Get().GetAssetSystem();
+
+    auto GetMessageCountCallback = [Callback](const csp::systems::AssetCollectionCountResult& GetMessageResult)
+    {
+        NumberOfRepliesResult Result(GetMessageResult);
+        Result.SetCount(GetMessageResult.GetCount());
+        Callback(Result);
+    };
+
+    const auto ConversationId = GetConversationId();
+    static const Array<csp::systems::EAssetCollectionType> PrototypeTypes = { csp::systems::EAssetCollectionType::COMMENT };
+
+    AssetSystem->GetAssetCollectionCount(nullptr, ConversationId, nullptr, PrototypeTypes, nullptr, nullptr, GetMessageCountCallback);
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)
@@ -683,7 +694,7 @@ const csp::common::String& ConversationSpaceComponent::GetConversationId() const
 void ConversationSpaceComponent::StoreConversationMessage(
     const csp::systems::Space& Space, const csp::common::String& UserId, const csp::common::String& Message, MessageResultCallback Callback) const
 {
-    auto ConversationId = GetConversationId();
+    const auto ConversationId = GetConversationId();
 
     if (ConversationId.IsEmpty())
     {
@@ -748,6 +759,11 @@ void ConversationSpaceComponent::DeleteMessages(
     AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
 }
 
+uint64_t NumberOfRepliesResult::GetCount() const { return Count; }
+
+void NumberOfRepliesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse) { ResultBase::OnResponse(ApiResponse); }
+
+void NumberOfRepliesResult::SetCount(uint64_t Value) { Count = Value; }
 void ConversationSpaceComponent::OnLocalDelete()
 {
     const auto Callback = [](const NullResult& Result) {};
