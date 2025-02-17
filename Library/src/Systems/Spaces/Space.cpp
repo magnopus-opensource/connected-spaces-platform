@@ -123,6 +123,13 @@ void GroupDtoToSpace(const chs_users::GroupDto& Dto, csp::systems::Space& Space)
 namespace csp::systems
 {
 
+bool Space::UserIsKnownToSpace(const csp::common::String UserId) const
+{
+    return std::any_of(UserIds.cbegin(), UserIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || std::any_of(ModeratorIds.cbegin(), ModeratorIds.cend(), [UserId](const csp::common::String& id) { return id == UserId; })
+        || UserId == OwnerId;
+}
+
 const Space& SpaceResult::GetSpace() const { return Space; }
 
 const csp::common::String& SpaceResult::GetSpaceCode() const { return SpaceCode; }

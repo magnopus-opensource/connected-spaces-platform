@@ -38,6 +38,15 @@ ResultBase::ResultBase(csp::systems::EResultCode ResCode, uint16_t HttpResCode, 
 {
 }
 
+bool ResultBase::operator==(const ResultBase& other) const
+{
+    return GetResultCode() == other.GetResultCode() && GetHttpResultCode() == other.GetHttpResultCode()
+        && GetRequestProgress() == other.GetRequestProgress() && GetResponseProgress() == other.GetResponseProgress()
+        && GetFailureReason() == other.GetFailureReason() && GetResponseBody() == other.GetResponseBody();
+}
+
+bool ResultBase::operator!=(const ResultBase& other) const { return !(*this == other); }
+
 void ResultBase::OnProgress(const services::ApiResponseBase* ApiResponse)
 {
     if (ApiResponse)
