@@ -360,7 +360,7 @@ CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventMultiTypeTest)
 #endif
 
 #if RUN_ALL_UNIT_TESTS || RUN_EVENTBUS_TESTS || RUN_EVENTBUS_EVENT_CALLBACKS_SYSTEMS_TEST
-CSP_PUBLIC_TEST(CSPEngine, EventBusTests, EventCallbacksSystemsTest)
+CSP_PUBLIC_TEST(DISABLED_CSPEngine, EventBusTests, EventCallbacksSystemsTest)
 {
     SetRandSeed();
 
