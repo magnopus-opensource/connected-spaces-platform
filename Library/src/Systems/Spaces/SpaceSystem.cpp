@@ -224,7 +224,7 @@ auto SpaceSystem::RefreshMultiplayerScopes()
         CSP_LOG_MSG(csp::systems::LogLevel::Log, "SpaceSystem::RefreshMultiplayerScopes");
 
         /* Refresh the multiplayer connection to force the scopes to change */
-        /* This is wrapping an as yet non-refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
+        /* This is wrapping not-yet refactored method that uses nested callbacks, hence the event, and shared pointer for lifetime */
         auto RefreshMultiplayerConnectionEvent = std::make_shared<async::event_task<std::optional<csp::multiplayer::ErrorCode>>>();
         auto RefreshMultiplayerConnectionContinuation = RefreshMultiplayerConnectionEvent->get_task();
         RefreshMultiplayerConnectionToEnactScopeChange(SpaceResult.GetSpace().Id, RefreshMultiplayerConnectionEvent);
