@@ -35,8 +35,6 @@ CSP_END_IGNORE
 namespace csp::multiplayer
 {
 
-class AssetCollection;
-
 /// @ingroup Conversation System
 /// @brief Data representation of a message, whether it's the start of a conversation, or a message within one.
 class CSP_API MessageInfo
