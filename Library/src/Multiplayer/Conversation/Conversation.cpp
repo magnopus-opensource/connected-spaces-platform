@@ -15,7 +15,7 @@
  */
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 
-#include "ConversationSystemHelpers.h"
+#include "Systems/Conversation/ConversationSystemHelpers.h"
 #include "Web/HttpResponse.h"
 
 namespace csp::multiplayer
@@ -84,7 +84,7 @@ MessageInfo::MessageInfo()
 {
 }
 
-MessageInfo::MessageInfo(const csp::common::String& ConversationId, const bool IsConversation, const csp::common::String& CreatedTimestamp,
+MessageInfo::MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& CreatedTimestamp,
     const csp::common::String& EditedTimestamp, const csp::common::String& UserId, const csp::common::String& Message,
     const csp::common::String& MessageId)
     : ConversationId(ConversationId)
@@ -112,7 +112,7 @@ void MessageResult::FillMessageInfo(const csp::systems::AssetCollection& Message
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
+    MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessageAssetCollection);
 }
 
 csp::common::Array<MessageInfo>& MessageCollectionResult::GetMessages() { return ConversationMessages; }
@@ -133,7 +133,7 @@ void MessageCollectionResult::FillMessageInfoCollection(const csp::common::Array
 
     for (auto idx = 0; idx < MessagesAssetCollections.Size(); ++idx)
     {
-        MsgInfo = ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
+        MsgInfo = systems::ConversationSystemHelpers::GetMessageInfoFromMessageAssetCollection(MessagesAssetCollections[idx]);
         ConversationMessages[idx] = MsgInfo;
     }
 }
@@ -146,6 +146,6 @@ void ConversationResult::FillConversationInfo(const csp::systems::AssetCollectio
 {
     SetResult(csp::systems::EResultCode::Success, static_cast<uint16_t>(csp::web::EResponseCodes::ResponseOK));
 
-    ConvoInfo = ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
+    ConvoInfo = systems::ConversationSystemHelpers::GetConversationInfoFromConversationAssetCollection(ConversationAssetCollection);
 }
 } // namespace csp::multiplayer
