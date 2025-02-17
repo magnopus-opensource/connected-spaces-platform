@@ -593,47 +593,10 @@ void SpaceSystem::DeleteSpace(const csp::common::String& SpaceId, NullResultCall
 {
     CSP_PROFILE_SCOPED();
 
-    const String InGroupId = SpaceId;
+    csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
+        Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
 
-    // Delete space metadata AssetCollection first, as users without super-user will not be able to do so after the space is deleted
-    NullResultCallback RemoveMetadataCallback = [Callback, InGroupId, this](const NullResult& RemoveMetadataResult)
-    {
-        if (RemoveMetadataResult.GetResultCode() == EResultCode::InProgress)
-        {
-            return;
-        }
-
-        if (RemoveMetadataResult.GetResultCode() == EResultCode::Failed)
-        {
-            INVOKE_IF_NOT_NULL(Callback, RemoveMetadataResult);
-
-            return;
-        }
-
-        NullResultCallback RemoveSpaceThumbnailCallback = [Callback, InGroupId, this](const NullResult& RemoveSpaceThumbnailResult)
-        {
-            if (RemoveSpaceThumbnailResult.GetResultCode() == EResultCode::InProgress)
-            {
-                return;
-            }
-
-            if (RemoveSpaceThumbnailResult.GetResultCode() == EResultCode::Failed)
-            {
-                INVOKE_IF_NOT_NULL(Callback, RemoveSpaceThumbnailResult);
-
-                return;
-            }
-
-            csp::services::ResponseHandlerPtr ResponseHandler = GroupAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::NullDto>(
-                Callback, nullptr, csp::web::EResponseCodes::ResponseNoContent);
-
-            static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(InGroupId, ResponseHandler);
-        };
-
-        RemoveSpaceThumbnail(InGroupId, RemoveSpaceThumbnailCallback);
-    };
-
-    RemoveMetadata(InGroupId, RemoveMetadataCallback);
+    static_cast<chsaggregation::SpaceApi*>(SpaceAPI)->apiV1SpacesSpaceIdDelete(SpaceId, ResponseHandler);
 }
 
 void SpaceSystem::GetSpaces(SpacesResultCallback Callback)
