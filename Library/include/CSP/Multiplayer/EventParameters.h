@@ -64,14 +64,11 @@ public:
 };
 
 /// @brief Class used to provide details of a conversation message that has been received whilst the client application is connected to a space.
-class CSP_API ConversationSystemParams
+class CSP_API ConversationEventParams
 {
 public:
-    /// @brief The type of conversation message event.
-    ConversationMessageType MessageType;
-
-    /// @brief The conversation message itself.
-    csp::common::String MessageValue;
+    ConversationEventType MessageType;
+    MessageInfo MessageInfo;
 };
 
 /// @brief Class used to provide details of a permission change that has happened to a user whilst the client application is connected to a space.

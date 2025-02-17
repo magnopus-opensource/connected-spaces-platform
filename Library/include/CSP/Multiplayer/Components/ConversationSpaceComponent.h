@@ -23,14 +23,13 @@
 #undef GetMessage
 
 #include "CSP/CSPCommon.h"
+#include "CSP/Common/Optional.h"
 #include "CSP/Common/String.h"
 #include "CSP/Multiplayer/ComponentBase.h"
 #include "CSP/Multiplayer/Components/Interfaces/IPositionComponent.h"
 #include "CSP/Multiplayer/Components/Interfaces/IRotationComponent.h"
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
-
-#include <optional>
 
 namespace csp::multiplayer
 {
@@ -70,7 +69,6 @@ public:
     CSP_ASYNC_RESULT void DeleteConversation(csp::systems::NullResultCallback Callback);
 
     /// @brief Adds a message to conversation
-    /// Make sure that the user has entered a space through SpaceSystem::EnterSpace() before calling this.
     /// @param Message csp::common::String : the message to be stored.
     /// @param Callback MessageResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void AddMessage(const csp::common::String& Message, MessageResultCallback Callback);
@@ -108,6 +106,10 @@ public:
     /// @param MessageData MessageInfo : Conversation Information
     /// @param Callback MessageResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void SetMessageInfo(const csp::common::String& MessageId, const MessageInfo& MessageData, MessageResultCallback Callback);
+
+    typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
+
+    CSP_ASYNC_RESULT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback);
 
     /// \addtogroup IPositionComponent
     /// @{
@@ -157,12 +159,7 @@ private:
     void RemoveConversationId();
     const csp::common::String& GetConversationId() const;
 
-    void StoreConversationMessage(const csp::systems::Space& Space, const csp::common::String& UserId, const csp::common::String& Message,
-        MessageResultCallback Callback) const;
-
-    void DeleteMessages(csp::common::Array<csp::systems::AssetCollection>& Messages, csp::systems::NullResultCallback Callback);
-
-    void OnLocalDelete() override;
+    ConversationUpdateCallbackHandler ConversationUpdateCallback;
 };
 
 } // namespace csp::multiplayer

@@ -32,24 +32,44 @@ CSP_END_IGNORE
 
 } // namespace csp::services
 
+namespace csp::systems
+{
+class ConversationSystemInternal;
+}
+
 namespace csp::multiplayer
 {
+
+class AssetCollection;
 
 /// @ingroup Conversation System
 /// @brief Data representation of a message, whether it's the start of a conversation, or a message within one.
 class CSP_API MessageInfo
 {
 public:
+    /// @brief The id of the conversation.
     csp::common::String ConversationId;
+
+    /// @brief TODO: Whether this is the root message
     bool IsConversation;
+
+    /// @brief The time the message was created
     csp::common::String CreatedTimestamp;
+
+    /// @brief The time the message was last edited
     csp::common::String EditedTimestamp;
+
+    /// @brief The user id that triggered the event
     csp::common::String UserId;
+
+    /// @brief The message contents
     csp::common::String Message;
+
+    /// @brief The unique identifier of the message
     csp::common::String MessageId;
 
     MessageInfo();
-    MessageInfo(const csp::common::String& ConversationId, const bool IsConversation, const csp::common::String& CreatedTimestamp,
+    MessageInfo(const csp::common::String& ConversationId, bool IsConversation, const csp::common::String& CreatedTimestamp,
         const csp::common::String& EditedTimestamp, const csp::common::String& UserId, const csp::common::String& Message,
         const csp::common::String& MessageId);
     MessageInfo(const MessageInfo& MessageData);
@@ -114,13 +134,15 @@ private:
 };
 
 /// @brief Enum used to specify the type of a conversation system network event.
-enum class ConversationMessageType
+enum class ConversationEventType
 {
     NewMessage,
     DeleteMessage,
     DeleteConversation,
     ConversationInformation,
-    MessageInformation
+    MessageInformation,
+    SetAnnotation,
+    DeleteAnnotation
 };
 
 /// @ingroup Conversation System
@@ -128,6 +150,7 @@ enum class ConversationMessageType
 class CSP_API MessageResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
     friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
@@ -161,6 +184,7 @@ private:
 class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
     friend class ConversationSpaceComponent;
 
     CSP_START_IGNORE
@@ -207,7 +231,7 @@ private:
 class CSP_API ConversationResult : public csp::systems::ResultBase
 {
     /** @cond DO_NOT_DOCUMENT */
-    friend class ConversationSpaceComponent;
+    friend class csp::systems::ConversationSystemInternal;
 
     CSP_START_IGNORE
     template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
