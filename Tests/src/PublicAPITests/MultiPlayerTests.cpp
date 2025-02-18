@@ -28,6 +28,7 @@
 #include "CSP/Systems/Users/UserSystem.h"
 #include "Debug/Logging.h"
 #include "Memory/Memory.h"
+#include "Multiplayer/SignalR/SignalRConnection.h"
 #include "Multiplayer/SpaceEntityKeys.h"
 #include "MultiplayerTestRunnerProcess.h"
 #include "SpaceSystemTestHelpers.h"
@@ -360,6 +361,9 @@ CSP_PUBLIC_TEST(CSPEngine, MultiplayerTests, SignalRConnectionTest)
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
     InitialiseTestingConnection();
+
+    auto Headers = Connection->Connection->config.get_http_headers();
+    ASSERT_NE(Headers.find("X-DeviceUDID"), Headers.end());
 
     // Enter space
     auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
