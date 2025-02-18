@@ -26,12 +26,6 @@ When leaving review comments, mark your comment with a tag demonstrating what th
 - **[Nit]** is for nitpicks, stylistic or otherwise. Authors may choose to address these, or close the conversation with no action.
 - **[Comment]** is similar to a nit, but does not even imply a desired change. These will almost always just be resolved by the PR author.
 
-### Link Commits to Conversations
-After having made a change in response to a suggestion by a reviewer, this change should be linked to the relevant conversation, so that the reviewer may evaluate the change.
-This prevents reviewers from having to search through large changesets in order to validate whether or not particular comments have been addressed.
-
-![image](https://github.com/user-attachments/assets/749326a2-7f21-4836-b635-4de2dd36898f)
-
 ### Clean Commit History
 Keep a clean, noise-free commit history when making a pull request. The following in particular are highly frowned upon when appearing in a changeset.
 - Merge commits
@@ -43,6 +37,16 @@ Remember, you are walking the reviewer through the changeset, try to tell them a
 > [!TIP]
 > A simple, albeit crude way of curating your history is to perform `git reset SHA_OF_INITIAL_BRANCH_COMMIT --soft`, which will reset your branch to before you made any changes, whilst keeping all your changes locally.
 > You may then stage them in a way that best tells the story of the change. Remember to take a backup/stash first, just to play it safe.
+
+### Link Commits to Conversations
+After having made a change in response to a suggestion by a reviewer, this change should be linked to the relevant conversation, so that the reviewer may evaluate the change.
+This prevents reviewers from having to search through large changesets in order to validate whether or not particular comments have been addressed.
+
+![image](https://github.com/user-attachments/assets/749326a2-7f21-4836-b635-4de2dd36898f)
+
+> [!WARNING]  
+> Once people have started reviewing a PR, the author should try to avoid force-pushing, as this breaks conversation links.
+> Be sure to do all your history rewriting before marking the PR as ready to review.
 
 ### Merge via Squash
 To keep things simple, all PRs are merged into main via squash. GitHub should only give you this option, so no need to think about it!
