@@ -28,7 +28,7 @@ When leaving review comments, mark your comment with a tag demonstrating what th
 
 ### Link Commits to Conversations
 After having made a change in response to a suggestion by a reviewer, this change should be linked to the relevant conversation, so that the reviewer may evaluate the change.
-This prevents reviewers having to search through large changesets in order to validate whether or not particular comments have been addressed.
+This prevents reviewers from having to search through large changesets in order to validate whether or not particular comments have been addressed.
 
 ![image](https://github.com/user-attachments/assets/749326a2-7f21-4836-b635-4de2dd36898f)
 
