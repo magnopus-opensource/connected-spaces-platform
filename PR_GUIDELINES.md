@@ -3,7 +3,7 @@
 When making, or engaging with a new pull request against main, please attempt to follow these guidelines.
 
 > [!NOTE]
-> All of these policys are general guidelines, and we acknowledge that exceptions to every rule exists. Use your best judgement, always.
+> All of these policies are general guidelines, and we acknowledge that exceptions to every rule exist. Use your best judgement, always.
 
 
 ### Comment Ladder
