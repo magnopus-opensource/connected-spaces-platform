@@ -27,6 +27,8 @@
 #include "CSP/Systems/Spaces/UserRoles.h"
 #include "CSP/Systems/SystemBase.h"
 
+#include <optional>
+
 namespace csp::services
 {
 
@@ -40,6 +42,14 @@ namespace csp::web
 class WebClient;
 
 } // namespace csp::web
+
+namespace async
+{
+CSP_START_IGNORE
+template <typename T> class event_task;
+template <typename T> class task;
+CSP_END_IGNORE
+}
 
 namespace csp::memory
 {
@@ -73,6 +83,8 @@ public:
     /// @brief Enter a space if you have permission to, based on the Space settings.
     /// This includes setting scopes (and toggling event listening in order to set the scope).
     /// It also retrieves all entities in the space. Ensure Connect is called prior to this.
+    /// If user does not have permission to discover or enter the space, callback will be called with EResultCode::Failed and
+    /// ERequestFailureReason::UserSpaceAccessDenied
     /// @param Space Space : space to enter into
     /// @param Callback EnterSpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void EnterSpace(const csp::common::String& SpaceId, NullResultCallback Callback);
@@ -174,6 +186,7 @@ public:
     /// @param SpaceId csp::common::String : unique ID of Space
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetSpace(const csp::common::String& SpaceId, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> GetSpace(const csp::common::String& SpaceId);
 
     /// @brief Invites a given email to a specific space.
     /// @param Space Space : space to invite to
@@ -210,6 +223,7 @@ public:
     /// @param UserId csp::common::String : unique ID of user
     /// @param Callback SpaceResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId, SpaceResultCallback Callback);
+    CSP_NO_EXPORT async::task<SpaceResult> AddUserToSpace(const csp::common::String& SpaceId, const csp::common::String& UserId);
 
     /// @brief Creates new Site information and associates it with the Space.
     /// @param Space Space : Space to associate the Site information with
@@ -351,6 +365,18 @@ private:
     void RemoveSpaceThumbnail(const csp::common::String& SpaceId, NullResultCallback Callback);
 
     void GetSpaceGeoLocationInternal(const csp::common::String& SpaceId, SpaceGeoLocationResultCallback Callback);
+
+    // EnterSpace Continuations
+    auto AddUserToSpaceIfNeccesary(NullResultCallback Callback, SpaceSystem& SpaceSystem);
+    auto FireEnterSpaceEvent(Space& OutCurrentSpace);
+    // Wraps RefreshMultiplayerConnectionToEnactScopeChange as a continuation.
+    auto RefreshMultiplayerScopes();
+
+    /* Stop the multiplayer connetion, change scope, start listening again
+       Not ideal, we'd rather not have to go to all this effort.
+       Used in EnterSpace. */
+    void RefreshMultiplayerConnectionToEnactScopeChange(csp::common::String SpaceId,
+        std::shared_ptr<async::event_task<std::optional<csp::multiplayer::ErrorCode>>> RefreshMultiplayerContinuationEvent);
 
     csp::services::ApiBase* GroupAPI;
     csp::services::ApiBase* SpaceAPI;

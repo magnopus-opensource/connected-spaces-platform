@@ -121,6 +121,11 @@ public:
     csp::common::Array<csp::common::String> BannedUserIds;
     csp::common::String OrganizationId;
     /** @} */
+
+    /// @brief Whether or not the user is "known" to the space. That being defined by whether the userID is contained in the UserIds, ModeratorIds or
+    /// is the Creator. Banned users do not count as known.
+    /// @return Whether or not the user is known to the space
+    CSP_NO_EXPORT [[nodiscard]] bool UserIsKnownToSpace(const csp::common::String UserId) const;
 };
 
 /// @ingroup Space System

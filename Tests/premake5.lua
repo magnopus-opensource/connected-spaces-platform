@@ -48,6 +48,9 @@ if not Tests then
 
         -- Compile support for MessagePack
         defines { "USE_MSGPACK" }
+		
+		-- We're building LibAsync statically and need this
+		defines { "LIBASYNC_STATIC" }
        
         -- If we're running on a build agent, we want to run *all* the tests
         if CSP.IsRunningOnTeamCityAgent() and not CSP.IsWebAssemblyGeneration() then

@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "CSP/Systems/Spaces/Space.h"
 #include <gtest/gtest.h>
 
 namespace
@@ -36,3 +37,14 @@ protected:
     void SetUp() override;
     void TearDown() override;
 };
+
+// For parameterized (data driven) tests
+template <typename T> class PublicTestBaseWithParam : public ::testing::TestWithParam<T>
+{
+protected:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+// If you want to use a new parameterized test structure, you need to explicitly instantiate here (and in the .cpp)
+extern template class PublicTestBaseWithParam<std::tuple<csp::systems::SpaceAttributes, csp::systems::EResultCode, std::string>>;
