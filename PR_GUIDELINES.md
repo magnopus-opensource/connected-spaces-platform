@@ -20,7 +20,7 @@ When leaving review comments, mark your comment with a tag demonstrating what th
 | [Nit]  | ❌  | ❌  | ✔️  |
 | [Comment]  | ❌  | ❌  | ✔️  |
 
-- **[Fix]** comments must be addressed, either by a change, or by the author convincing the reviewer that the change is not neccesary. Once the change is made, the reviewer should evaluate the change, and resolve the conversation if it is acceptable.
+- **[Fix]** comments must be addressed, either by a change, or by the author convincing the reviewer that the change is not necessary. Once the change is made, the reviewer should evaluate the change, and resolve the conversation if it is acceptable.
 - **[Consider]** comments are meaningful suggestions. They may be ignored, but the author should respond with justification as to why. This justification need not be accepted by the commenter, the reviewer is free to resolve the conversation.
 - **[Questions]** mandate a response, and the reviewer should either follow up, or resolve the conversation with a satisfactory answer.
 - **[Nit]** is for nitpicks, stylistic or otherwise. Authors may choose to address these, or close the conversation with no action.
@@ -49,7 +49,7 @@ To keep things simple, all PR's are merged into main via squash. Github should o
 
 ### Reviewer Assignment
 When making a pull-request, github should automatically assign two reviewers from the connected-spaces-platform team.
-If, as a pull-request author, you are aware of a particular reviewer who really should be involved in this particular change, you are free to remove one of the auto-assigned reviewers and manually assign the neccesary specialist.
+If, as a pull-request author, you are aware of a particular reviewer who really should be involved in this particular change, you are free to remove one of the auto-assigned reviewers and manually assign the necessary specialist.
 
 ### Review Timeframe
 Maintainers should attempt to look at any PR assigned to them within a 24 hour working period. If they are unable to do so, they should contact the PR author informing them that they will not be able to provide a review in a timely manner.
