@@ -22,7 +22,7 @@ When leaving review comments, mark your comment with a tag demonstrating what th
 
 - **[Fix]** comments must be addressed, either by a change, or by the author convincing the reviewer that the change is not necessary. Once the change is made, the reviewer should evaluate the change, and resolve the conversation if it is acceptable.
 - **[Consider]** comments are meaningful suggestions. They may be ignored, but the author should respond with justification as to why. This justification need not be accepted by the commenter, the reviewer is free to resolve the conversation.
-- **[Questions]** mandate a response, and the reviewer should either follow up, or resolve the conversation with a satisfactory answer.
+- **[Question]** mandates a response, and the reviewer should either follow up, or resolve the conversation with a satisfactory answer.
 - **[Nit]** is for nitpicks, stylistic or otherwise. Authors may choose to address these, or close the conversation with no action.
 - **[Comment]** is similar to a nit, but does not even imply a desired change. These will almost always just be resolved by the PR author.
 
