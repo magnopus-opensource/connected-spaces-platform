@@ -33,7 +33,7 @@ This prevents reviewers from having to search through large changesets in order 
 ![image](https://github.com/user-attachments/assets/749326a2-7f21-4836-b635-4de2dd36898f)
 
 ### Clean Commit History
-Keep a clean, noise free commit history when making a pull request. The following in particular are highly frowned upon when appearing in a changeset.
+Keep a clean, noise-free commit history when making a pull request. The following in particular are highly frowned upon when appearing in a changeset.
 - Merge commits
 - "Undo" commits. (Ie, commits that undo changes made earlier in the changeset)
 - Changes that are already in main
