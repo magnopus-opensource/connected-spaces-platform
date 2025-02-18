@@ -48,7 +48,7 @@ Remember, you are walking the reviewer through the changeset, try to tell them a
 To keep things simple, all PRs are merged into main via squash. GitHub should only give you this option, so no need to think about it!
 
 ### Reviewer Assignment
-When making a pull-request, GitHub should automatically assign two reviewers from the connected-spaces-platform team.
+When making a pull request, GitHub should automatically assign two reviewers from the connected-spaces-platform team.
 If, as a pull-request author, you are aware of a particular reviewer who really should be involved in this particular change, you are free to remove one of the auto-assigned reviewers and manually assign the necessary specialist.
 
 ### Review Timeframe
