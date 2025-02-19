@@ -16,7 +16,6 @@
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
 #include "CSP/CSPFoundation.h"
-#include "CSP/Multiplayer/Conversation/ConversationSystem.h"
 #include "CSP/Multiplayer/EventBus.h"
 #include "CSP/Multiplayer/ReplicatedValue.h"
 #include "CSP/Multiplayer/SpaceEntity.h"
@@ -120,7 +119,6 @@ MultiplayerConnection::MultiplayerConnection()
     , Connected(false)
 {
     EventBusPtr = CSP_NEW EventBus(this);
-    ConversationSystemPtr = CSP_NEW ConversationSystem(this);
 }
 
 MultiplayerConnection::~MultiplayerConnection()
@@ -141,7 +139,6 @@ MultiplayerConnection::~MultiplayerConnection()
         CSP_DELETE(Connection);
         CSP_DELETE(WebSocketClient);
         CSP_DELETE(NetworkEventManager);
-        CSP_DELETE(ConversationSystemPtr);
         CSP_DELETE(EventBusPtr);
     }
 }
@@ -151,7 +148,6 @@ MultiplayerConnection::MultiplayerConnection(const MultiplayerConnection& InBoun
     Connection = InBoundConnection.Connection;
     WebSocketClient = InBoundConnection.WebSocketClient;
     NetworkEventManager = InBoundConnection.NetworkEventManager;
-    ConversationSystemPtr = InBoundConnection.ConversationSystemPtr;
     ClientId = InBoundConnection.ClientId;
     DisconnectionCallback = InBoundConnection.DisconnectionCallback;
     ConnectionCallback = InBoundConnection.ConnectionCallback;
@@ -184,7 +180,6 @@ void MultiplayerConnection::Connect(ErrorCodeCallbackHandler Callback)
     Connection = CSP_NEW csp::multiplayer::SignalRConnection(csp::CSPFoundation::GetEndpoints().MultiplayerServiceURI.c_str(), KEEP_ALIVE_INTERVAL,
         std::make_shared<csp::multiplayer::CSPWebsocketClient>());
     NetworkEventManager->SetConnection(Connection);
-    ConversationSystemPtr->SetConnection(Connection);
     csp::systems::SystemsManager::Get().GetSpaceEntitySystem()->SetConnection(Connection);
 
     EventBusPtr->StartEventMessageListening();
@@ -513,8 +508,6 @@ void MultiplayerConnection::StopListening(ErrorCodeCallbackHandler Callback)
 }
 
 uint64_t MultiplayerConnection::GetClientId() const { return ClientId; }
-
-ConversationSystem* MultiplayerConnection::GetConversationSystem() const { return ConversationSystemPtr; }
 
 ConnectionState MultiplayerConnection::GetConnectionState() const
 {

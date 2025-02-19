@@ -15,6 +15,7 @@
  */
 
 #include "Common/Encode.h"
+
 #include <string>
 
 namespace csp::common

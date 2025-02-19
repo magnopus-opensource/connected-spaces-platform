@@ -180,6 +180,8 @@ AssetSystem::AssetSystem(web::WebClient* InWebClient, multiplayer::EventBus* InE
     AssetDetailAPI = CSP_NEW chs::AssetDetailApi(InWebClient);
 
     FileManager = CSP_NEW web::RemoteFileManager(InWebClient);
+
+    RegisterSystemCallback();
 }
 
 AssetSystem::~AssetSystem()
@@ -242,7 +244,53 @@ void AssetSystem::CreateAssetCollection(const Optional<String>& InSpaceId, const
 
 void AssetSystem::DeleteAssetCollection(const AssetCollection& AssetCollection, NullResultCallback Callback)
 {
-    DeleteAssetCollectionById(AssetCollection.Id, Callback);
+    const String PrototypeId = AssetCollection.Id;
+
+    if (PrototypeId.IsEmpty())
+    {
+        CSP_LOG_MSG(LogLevel::Error, "A delete of an asset collection was issued without an ID. You have to provide an asset collection ID.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+
+        return;
+    }
+
+    services::ResponseHandlerPtr ResponseHandler = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, services::NullDto>(
+        Callback, nullptr, web::EResponseCodes::ResponseNoContent);
+
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)->apiV1PrototypesIdDelete(PrototypeId, ResponseHandler);
+}
+
+void AssetSystem::DeleteMultipleAssetCollections(csp::common::Array<AssetCollection>& SourceAssetCollectionIDs, NullResultCallback Callback)
+{
+    if (SourceAssetCollectionIDs.Size() == 0)
+    {
+        CSP_LOG_MSG(LogLevel::Error, "No source asset collections were provided whilst attempting to delete.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        return;
+    }
+
+    std::vector<csp::common::String> AssetCollectionIds;
+
+    for (size_t i = 0; i < SourceAssetCollectionIDs.Size(); ++i)
+    {
+        AssetCollectionIds.emplace_back(SourceAssetCollectionIDs[i].Id);
+    }
+
+    if (AssetCollectionIds.size() == 0)
+    {
+        CSP_LOG_MSG(LogLevel::Error, "No asset collections could be converted to to required format to delete.");
+
+        INVOKE_IF_NOT_NULL(Callback, MakeInvalid<NullResult>());
+        return;
+    }
+
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = PrototypeAPI->CreateHandler<NullResultCallback, NullResult, void, csp::services::DtoArray<chs::PrototypeDto>>(Callback, nullptr);
+
+    static_cast<chs::PrototypeApi*>(PrototypeAPI)
+        ->apiV1PrototypesDelete(AssetCollectionIds, ResponseHandler, csp::common::CancellationToken::Dummy());
 }
 
 void AssetSystem::CopyAssetCollectionsToSpace(csp::common::Array<AssetCollection>& SourceAssetCollections, const csp::common::String& DestSpaceId,
