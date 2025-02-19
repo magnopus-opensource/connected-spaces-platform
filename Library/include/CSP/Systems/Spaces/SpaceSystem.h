@@ -212,6 +212,11 @@ public:
     /// @param Callback PendingInvitesResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void GetPendingUserInvites(const csp::common::String& SpaceId, PendingInvitesResultCallback Callback);
 
+    /// @brief Returns an array of ids of users that accepted the space invite
+    /// @param Space Space : Space for which the invites where sent
+    /// @param Callback AcceptedInvitesResultCallback : callback when asynchronous task finishes
+    CSP_ASYNC_RESULT void GetAcceptedUserInvites(const csp::common::String& SpaceId, AcceptedInvitesResultCallback Callback);
+
     /// @brief Removes a user from a space by the user's unique ID.
     /// @param Space Space : space to remove user from
     /// @param UserId csp::common::String : unique ID of user
