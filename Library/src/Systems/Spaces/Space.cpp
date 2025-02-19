@@ -293,6 +293,33 @@ void PendingInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiR
     }
 }
 
+Array<String>& AcceptedInvitesResult::GetAcceptedInvitesEmails() { return AcceptedInvitesEmailAddresses; }
+
+const Array<String>& AcceptedInvitesResult::GetAcceptedInvitesEmails() const { return AcceptedInvitesEmailAddresses; }
+
+void AcceptedInvitesResult::OnResponse(const csp::services::ApiResponseBase* ApiResponse)
+{
+    ResultBase::OnResponse(ApiResponse);
+
+    auto* AcceptedInvitesResponse = static_cast<csp::services::DtoArray<chs_users::GroupInviteDto>*>(ApiResponse->GetDto());
+    const csp::web::HttpResponse* Response = ApiResponse->GetResponse();
+
+    if (ApiResponse->GetResponseCode() == csp::services::EResponseCode::ResponseSuccess)
+    {
+        // Build the Dto from the response Json
+        AcceptedInvitesResponse->FromJson(Response->GetPayload().GetContent());
+
+        // Extract data from response in our accepted invites array
+        std::vector<chs_users::GroupInviteDto>& AcceptedInvitesArray = AcceptedInvitesResponse->GetArray();
+        AcceptedInvitesEmailAddresses = Array<String>(AcceptedInvitesArray.size());
+
+        for (auto idx = 0; idx < AcceptedInvitesArray.size(); ++idx)
+        {
+            AcceptedInvitesEmailAddresses[idx] = AcceptedInvitesArray[idx].GetEmail();
+        }
+    }
+}
+
 const Map<String, Map<String, String>>& SpacesMetadataResult::GetMetadata() const { return Metadata; }
 
 const Map<String, Array<String>>& SpacesMetadataResult::GetTags() const { return Tags; }

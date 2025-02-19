@@ -369,6 +369,33 @@ private:
 };
 
 /// @ingroup Space System
+/// @brief Data class used to contain the obfuscated email addresses of the users that have accepted the space invites
+class CSP_API AcceptedInvitesResult : public csp::systems::ResultBase
+{
+    /** @cond DO_NOT_DOCUMENT */
+    CSP_START_IGNORE
+    template <typename T, typename U, typename V, typename W> friend class csp::services::ApiResponseHandler;
+    CSP_END_IGNORE
+    /** @endcond */
+
+public:
+    /// @brief Retrieves the stored obfuscated email addresses
+    /// @return csp::common::Array<csp::common::String> : reference to the emails array
+    csp::common::Array<csp::common::String>& GetAcceptedInvitesEmails();
+
+    /// @brief Retrieves the stored obfuscated email addresses
+    /// @return csp::common::Array<csp::common::String> : reference to the emails array
+    const csp::common::Array<csp::common::String>& GetAcceptedInvitesEmails() const;
+
+private:
+    AcceptedInvitesResult(void*) {};
+
+    void OnResponse(const csp::services::ApiResponseBase* ApiResponse) override;
+
+    csp::common::Array<csp::common::String> AcceptedInvitesEmailAddresses;
+};
+
+/// @ingroup Space System
 /// @brief Data class used to contain the outcome of space geo location operations.
 /// The result can be successful and still return no geo location if one does not exist.
 class CSP_API SpaceGeoLocationResult : public csp::systems::ResultBase
@@ -435,6 +462,7 @@ typedef std::function<void(const SpaceMetadataResult& Result)> SpaceMetadataResu
 typedef std::function<void(const SpacesMetadataResult& Result)> SpacesMetadataResultCallback;
 
 typedef std::function<void(const PendingInvitesResult& Result)> PendingInvitesResultCallback;
+typedef std::function<void(const AcceptedInvitesResult& Result)> AcceptedInvitesResultCallback;
 
 typedef std::function<void(const SpaceGeoLocationResult& Result)> SpaceGeoLocationResultCallback;
 typedef std::function<void(const SpaceGeoLocationCollectionResult& Result)> SpaceGeoLocationCollectionResultCallback;

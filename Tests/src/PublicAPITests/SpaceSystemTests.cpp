@@ -1859,6 +1859,14 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
     ::Space Space;
     CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
+    // auto [GetInvitesResultBefore] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
+
+    // EXPECT_EQ(GetInvitesResultBefore.GetResultCode(), csp::systems::EResultCode::Success);
+
+    // auto& PendingInvitesBefore = GetInvitesResultBefore.GetPendingInvitesEmails();
+
+    // EXPECT_EQ(PendingInvitesBefore.Size(), 0);
+
     auto [Result] = AWAIT_PRE(SpaceSystem, InviteToSpace, RequestPredicate, Space.Id, TestUserEmail, nullptr, TestEmailLinkUrl, TestSignupUrl);
 
     EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
@@ -1871,10 +1879,105 @@ CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetPendingUserInvitesTest)
 
     EXPECT_EQ(PendingInvites.Size(), 1);
 
+    EXPECT_EQ(PendingInvites[0], TestUserEmail);
+
+    DeleteSpace(SpaceSystem, Space.Id);
+
+    LogOut(UserSystem);
+}
+#endif
+
+#if RUN_ALL_UNIT_TESTS || RUN_SPACESYSTEM_TESTS || RUN_SPACESYSTEM_GET_ACCEPTED_INVITES_TEST
+CSP_PUBLIC_TEST(CSPEngine, SpaceSystemTests, GetAcceptedUserInvitesTest)
+{
+    SetRandSeed();
+
+    auto& SystemsManager = ::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    // Create users
+    String SpaceCreatorUserId;
+    csp::systems::Profile SpaceCreatorUser = CreateTestUser();
+
+    String User1Id, User2Id;
+    csp::systems::Profile User1 = CreateTestUser();
+    csp::systems::Profile User2 = CreateTestUser();
+
+    // Create invite users
+    InviteUserRoleInfo InviteUser1;
+    InviteUser1.UserEmail = User1.Email;
+    InviteUser1.UserRole = SpaceUserRole::User;
+
+    InviteUserRoleInfo InviteUser2;
+    InviteUser2.UserEmail = User2.Email;
+    InviteUser2.UserRole = SpaceUserRole::User;
+
+    InviteUserRoleInfoCollection InviteUsers;
+    InviteUsers.InviteUserRoleInfos = { InviteUser1, InviteUser2 };
+    InviteUsers.EmailLinkUrl = "https://dev.magnoverse.space";
+    InviteUsers.SignupUrl = "https://dev.magnoverse.space";
+
+    // Log in as Space Creator and create space
+    LogIn(UserSystem, SpaceCreatorUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
+
+    ::Space Space;
+    CreateSpace(SpaceSystem, UniqueSpaceName, TestSpaceDescription, SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Invite User1 and User2 to the space
+    auto [Result] = AWAIT_PRE(SpaceSystem, BulkInviteToSpace, RequestPredicate, Space.Id, InviteUsers);
+
+    EXPECT_EQ(Result.GetResultCode(), csp::systems::EResultCode::Success);
+
+    _sleep(12000);
+
+    // Check the pending invites are recorded correctly
+    auto [GetInvitesResult] = AWAIT_PRE(SpaceSystem, GetPendingUserInvites, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(GetInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    auto& PendingInvites = GetInvitesResult.GetPendingInvitesEmails();
+
+    EXPECT_EQ(PendingInvites.Size(), 2);
+
     for (auto idx = 0; idx < PendingInvites.Size(); ++idx)
     {
-        std::cerr << "Pending space invite for email: " << PendingInvites[idx] << std::endl;
+        EXPECT_TRUE(PendingInvites[idx] == User1.Email || PendingInvites[idx] == User2.Email);
     }
+
+    // Log out as space creator
+    LogOut(UserSystem);
+
+    // Accept the invite for User1 by logging in and entering the space
+    LogIn(UserSystem, User1Id, User1.Email, GeneratedTestAccountPassword);
+    auto [EnterSpaceResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    ASSERT_EQ(EnterSpaceResult.GetResultCode(), csp::systems::EResultCode::Success);
+    LogOut(UserSystem);
+
+    // Log back in as space creator
+    LogIn(UserSystem, SpaceCreatorUserId, SpaceCreatorUser.Email, GeneratedTestAccountPassword);
+
+    // Check the accepted invites are recorded correctly
+    auto [GetAcceptedInvitesResult] = AWAIT_PRE(SpaceSystem, GetAcceptedUserInvites, RequestPredicate, Space.Id);
+
+    EXPECT_EQ(GetAcceptedInvitesResult.GetResultCode(), csp::systems::EResultCode::Success);
+
+    auto& AcceptedInvites = GetAcceptedInvitesResult.GetAcceptedInvitesEmails();
+
+    EXPECT_EQ(AcceptedInvites.Size(), 1);
+    EXPECT_EQ(AcceptedInvites[0], User1.Email);
+
+    // Check the pending invites have been updated accordingly
+    auto& PendingInvites2 = GetInvitesResult.GetPendingInvitesEmails();
+
+    EXPECT_EQ(PendingInvites2.Size(), 1);
+    EXPECT_EQ(PendingInvites2[0], User2.Email);
 
     DeleteSpace(SpaceSystem, Space.Id);
 
