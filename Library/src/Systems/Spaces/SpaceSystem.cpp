@@ -759,6 +759,15 @@ void SpaceSystem::GetPendingUserInvites(const String& SpaceId, PendingInvitesRes
     static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesGet(SpaceId, ResponseHandler);
 }
 
+void SpaceSystem::GetAcceptedUserInvites(const String& SpaceId, AcceptedInvitesResultCallback Callback)
+{
+    csp::services::ResponseHandlerPtr ResponseHandler
+        = GroupAPI->CreateHandler<AcceptedInvitesResultCallback, AcceptedInvitesResult, void, csp::services::DtoArray<chs::GroupInviteDto>>(
+            Callback, nullptr);
+
+    static_cast<chs::GroupApi*>(GroupAPI)->apiV1GroupsGroupIdEmailInvitesAcceptedGet(SpaceId, ResponseHandler);
+}
+
 void SpaceSystem::AddUserToSpace(const csp::common::String& SpaceId, const String& UserId, SpaceResultCallback Callback)
 {
     // This function right here is the only place in the whole of CSP that needs to use group code.
