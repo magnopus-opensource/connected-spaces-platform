@@ -5,6 +5,9 @@
 #include "CSP/Systems/Spaces/SpaceSystem.h"
 #include "CSP/Systems/Users/UserSystem.h"
 
+#include "CSP/Multiplayer/Components/ConversationSpaceComponent.h"
+#include "Multiplayer/EventSerialisation.h"
+
 #include "CallHelpers.h"
 #include "Debug/Logging.h"
 #include "Systems/ResultHelpers.h"
@@ -52,7 +55,10 @@ ConversationSystemInternal::ConversationSystemInternal(
     , UserSystem { UserSystem }
     , EventBus { EventBus }
 {
+    RegisterSystemCallback();
 }
+
+ConversationSystemInternal::~ConversationSystemInternal() { DeregisterSystemCallback(); }
 
 void ConversationSystemInternal::CreateConversation(const common::String& Message, StringResultCallback Callback)
 {
@@ -78,7 +84,7 @@ void ConversationSystemInternal::CreateConversation(const common::String& Messag
         {
             if (Error != multiplayer::ErrorCode::None)
             {
-                CSP_LOG_ERROR_MSG("AddMessage: SignalR connection: Error");
+                CSP_LOG_ERROR_MSG("Create Conversation: SignalR connection: Error");
 
                 INVOKE_IF_NOT_NULL(Callback, MakeInvalid<StringResult>());
                 return;
@@ -145,7 +151,7 @@ void ConversationSystemInternal::AddMessage(
     const common::String& UserId = UserSystem->GetLoginState().UserId;
 
     const multiplayer::MessageResultCallback MessageResultCallback
-        = [this, Callback, ConversationId, UserId](const multiplayer::MessageResult& MessageResultCallbackResult)
+        = [this, Callback, ConversationId, UserId, Message](const multiplayer::MessageResult& MessageResultCallbackResult)
     {
         if (HandleConversationResult(MessageResultCallbackResult, "Failed to store conversation message.", Callback) == false)
         {
@@ -166,7 +172,8 @@ void ConversationSystemInternal::AddMessage(
             INVOKE_IF_NOT_NULL(Callback, MessageResultCallbackResult);
         };
 
-        const multiplayer::MessageInfo MessageInfo(ConversationId, true, "", "", UserId, "", "");
+        const multiplayer::MessageInfo MessageInfo(
+            ConversationId, false, "", "", UserId, Message, MessageResultCallbackResult.GetMessageInfo().MessageId);
         SendConversationEvent(multiplayer::ConversationEventType::NewMessage, MessageInfo, EventBus, SignalRCallback);
     };
 
@@ -206,7 +213,7 @@ void ConversationSystemInternal::DeleteMessage(const common::String& Conversatio
         this->AssetSystem->DeleteAssetCollection(MessageAssetCollection, DeleteAssetCollectionCallback);
     };
 
-    multiplayer::MessageInfo MessageInfo(ConversationId, true, "", "", "", "", MessageId);
+    multiplayer::MessageInfo MessageInfo(ConversationId, false, "", "", "", "", MessageId);
     SendConversationEvent(multiplayer::ConversationEventType::DeleteMessage, MessageInfo, EventBus, SignalRCallback);
 }
 
@@ -267,7 +274,6 @@ void ConversationSystemInternal::SetConversationInfo(
 
         // 2. Update the conversations asset collection
         AssetCollectionResultCallback GetUpdatedConversationCallback = [this, Callback](const AssetCollectionResult& GetUpdatedConversationResult)
-
         {
             if (HandleConversationResult(GetUpdatedConversationResult, "The Update of Conversation asset collections was not successful.", Callback)
                 == false)
@@ -348,17 +354,20 @@ void ConversationSystemInternal::SetMessageInfo(const common::String& Conversati
 
         // 2. Update asset collections metadata
         AssetCollectionResultCallback GetUpdatedMessageCallback
-            = [this, Callback, MessageId, GetMessageResult, MessageData](const AssetCollectionResult& GetUpdatedMessageResult)
+            = [this, Callback, MessageId, MessageData](const AssetCollectionResult& GetUpdatedMessageResult)
 
         {
-            if (HandleConversationResult(GetMessageResult, "The Update of Message asset collections was not successful.", Callback) == false)
+            if (HandleConversationResult(GetUpdatedMessageResult, "The Update of Message asset collections was not successful.", Callback) == false)
             {
                 return;
             }
 
+            multiplayer::MessageResult Result(GetUpdatedMessageResult.GetResultCode(), GetUpdatedMessageResult.GetHttpResultCode());
+            Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection());
+
             // 3. Send multiplayer event
             const multiplayer::MultiplayerConnection::ErrorCodeCallbackHandler SignalRCallback
-                = [Callback, GetUpdatedMessageResult, MessageData](multiplayer::ErrorCode Error)
+                = [Callback, GetUpdatedMessageResult, MessageData, Result](multiplayer::ErrorCode Error)
             {
                 if (Error != multiplayer::ErrorCode::None)
                 {
@@ -368,12 +377,10 @@ void ConversationSystemInternal::SetMessageInfo(const common::String& Conversati
                     return;
                 }
 
-                multiplayer::MessageResult Result(GetUpdatedMessageResult.GetResultCode(), GetUpdatedMessageResult.GetHttpResultCode());
-                Result.FillMessageInfo(GetUpdatedMessageResult.GetAssetCollection());
                 INVOKE_IF_NOT_NULL(Callback, Result);
             };
 
-            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, MessageData, EventBus, SignalRCallback);
+            SendConversationEvent(multiplayer::ConversationEventType::MessageInformation, Result.GetMessageInfo(), EventBus, SignalRCallback);
         };
 
         multiplayer::MessageInfo NewMessageData(MessageData);
@@ -436,4 +443,78 @@ void ConversationSystemInternal::DeleteMessages(
 
     AssetSystem->DeleteMultipleAssetCollections(Messages, Callback);
 }
+
+void ConversationSystemInternal::RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component)
+{
+    Components.insert(Component);
+    FlushEvents();
+}
+void ConversationSystemInternal::DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component) { Components.erase(Component); }
+
+void ConversationSystemInternal::RegisterSystemCallback()
+{
+    if (!EventBusPtr)
+    {
+        CSP_LOG_ERROR_MSG("Error: Failed to register ConversationSystemInternal. EventBus must be instantiated in the MultiplayerConnection first.");
+        return;
+    }
+
+    EventBusPtr->ListenNetworkEvent("Conversation", this);
+}
+
+void ConversationSystemInternal::DeregisterSystemCallback()
+{
+    if (EventBusPtr)
+    {
+        EventBusPtr->StopListenNetworkEvent("Conversation");
+    }
+}
+
+void ConversationSystemInternal::OnEvent(const std::vector<signalr::value>& EventValues)
+{
+    csp::multiplayer::ConversationEventDeserialiser Deserialiser;
+    Deserialiser.Parse(EventValues);
+
+    const multiplayer::ConversationEventParams& Params = Deserialiser.GetEventParams();
+
+    if (TrySendEvent(Params) == false)
+    {
+        // If component doesn't exist, add it to the queue for processing later
+        Events.push_back(Params);
+    }
+}
+
+void ConversationSystemInternal::FlushEvents()
+{
+    for (auto It = std::begin(Events); It != std::end(Events);)
+    {
+        if (TrySendEvent(*It))
+        {
+            // Event has now been processed, so remove
+            Events.erase(It);
+        }
+        else
+        {
+            ++It;
+        }
+    }
+}
+
+bool ConversationSystemInternal::TrySendEvent(const csp::multiplayer::ConversationEventParams& Params)
+{
+    for (const auto& Component : Components)
+    {
+        if (Component->GetConversationId() == Params.MessageInfo.ConversationId)
+        {
+            if (Component->ConversationUpdateCallback != nullptr)
+            {
+                Component->ConversationUpdateCallback(Params);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 }
