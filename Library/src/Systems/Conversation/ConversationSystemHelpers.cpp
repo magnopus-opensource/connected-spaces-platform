@@ -116,7 +116,7 @@ multiplayer::MessageInfo GetMessageInfoFromMessageAssetCollection(const csp::sys
 
     if (Metadata.HasKey(ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION))
     {
-        MsgInfo.IsConversation = Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION];
+        MsgInfo.IsConversation = StringToBool(Metadata[ASSET_COLLECTION_METADATA_KEY_ISCONVERSATION]);
     }
     else
     {

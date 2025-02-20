@@ -36,8 +36,9 @@ using namespace std::chrono_literals;
 
 namespace
 {
-
 bool RequestPredicate(const csp::systems::ResultBase& Result) { return Result.GetResultCode() != csp::systems::EResultCode::InProgress; }
+
+}
 
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentTest)
@@ -364,7 +365,6 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentScriptTest)
 #if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_DELETE_TEST
 CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 {
-
     SetRandSeed();
 
     auto& SystemsManager = csp::systems::SystemsManager::Get();
@@ -382,7 +382,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
     CreateDefaultTestSpace(SpaceSystem, Space);
 
     // Enter space
-    auto [ReEnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
 
     // Create object to represent the conversation
     csp::common::String ObjectName = "Object 1";
@@ -446,4 +446,223 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentDeleteTest)
 }
 #endif
 
-} // namespace
+// Tests that all conversation multiplayer events are correctly sent to their componenets,
+// and these events are then fired to the caller
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATION_COMPONENT_EVENT_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+    auto* Connection = SystemsManager.GetMultiplayerConnection();
+
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
+    // Create space
+    csp::systems::Space Space;
+    CreateDefaultTestSpace(SpaceSystem, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    // Allow us to receive and test our own conversation messages
+    auto [FlagSetResult] = AWAIT(Connection, SetAllowSelfMessagingFlag, true);
+
+    // Create object to represent the conversation
+    csp::multiplayer::SpaceEntity* Object = CreateTestObject(EntitySystem);
+    auto* ConversationComponent = (ConversationSpaceComponent*)Object->AddComponent(ComponentType::Conversation);
+
+    Object->QueueUpdate();
+    EntitySystem->ProcessPendingEntityOperations();
+
+    // Ensure conversation created event is fired when calling ConversationComponent::CreateConversation
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr const char* ConversationMessage = "Test Conversation";
+
+        const auto [Result] = AWAIT(ConversationComponent, CreateConversation, ConversationMessage);
+
+        // Due to the way events are registered, we sometimes receive the event before the ConversationId is set,
+        // which is needed to correctly register it to the system to receive events.
+        // Because of this, we re-register the callback which wil internally flush the event buffer.
+        // This issue will not exist in a real-world scenario, as multiplayer events aren't received locally
+        // and a system is in place to always flush the event buffer after the conversation Id is set from the patch.
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, true);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, ConversationMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
+    }
+
+    csp::common::String FirstMessageId = "";
+
+    // Ensure message created event is fired when calling ConversationComponent::AddMessage
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr const char* Message = "Test Message";
+
+        const auto [Result] = AWAIT(ConversationComponent, AddMessage, Message);
+        FirstMessageId = Result.GetMessageInfo().MessageId;
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, false);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, Message);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
+    }
+
+    // Ensure conversation information event is fired when calling ConversationComponent::SetConversationInfo
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr const char* NewMessage = "New Test Conversation";
+        csp::multiplayer::MessageInfo Info;
+        Info.Message = NewMessage;
+
+        const auto [Result] = AWAIT(ConversationComponent, SetConversationInfo, Info);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::ConversationInformation);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, true);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
+    }
+
+    // Ensure message information event is fired when calling ConversationComponent::SetMessageInfo
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        static constexpr const char* NewMessage = "New Test Message";
+        csp::multiplayer::MessageInfo Info;
+        Info.Message = NewMessage;
+
+        const auto [Result] = AWAIT(ConversationComponent, SetMessageInfo, FirstMessageId, Info);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::MessageInformation);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, false);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, UserId);
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, NewMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
+    }
+
+    // Ensure message deletion event is fired when calling ConversationComponent::DeleteMessage
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        const auto [Result] = AWAIT(ConversationComponent, DeleteMessage, FirstMessageId);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteMessage);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, false);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, FirstMessageId);
+
+        CallbackCalled = true;
+    }
+
+    // Ensure conversation deletion event is fired when calling ConversationComponent::DeleteConversation
+    {
+        csp::multiplayer::ConversationEventParams RetrievedParams;
+        bool CallbackCalled = false;
+
+        const auto Callback = [&RetrievedParams, &CallbackCalled](const csp::multiplayer::ConversationEventParams& Params)
+        {
+            RetrievedParams = Params;
+            CallbackCalled = true;
+        };
+
+        ConversationComponent->SetConversationUpdateCallback(Callback);
+
+        const auto [Result] = AWAIT(ConversationComponent, DeleteConversation);
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(CallbackCalled);
+
+        EXPECT_EQ(RetrievedParams.MessageType, csp::multiplayer::ConversationEventType::DeleteConversation);
+        EXPECT_EQ(RetrievedParams.MessageInfo.ConversationId, ConversationComponent->GetConversationId());
+        EXPECT_EQ(RetrievedParams.MessageInfo.IsConversation, true);
+        EXPECT_EQ(RetrievedParams.MessageInfo.UserId, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.Message, "");
+        EXPECT_EQ(RetrievedParams.MessageInfo.MessageId, "");
+    }
+
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+#endif

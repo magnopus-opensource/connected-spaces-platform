@@ -223,7 +223,14 @@ void ConversationSpaceComponent::SetRotation(const csp::common::Vector4& Value)
     SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::Rotation), Value);
 }
 
-void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback) { ConversationUpdateCallback = Callback; }
+void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback)
+{
+    ConversationUpdateCallback = Callback;
+
+    // Flush events now that we have a callback.
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->FlushEvents();
+}
 
 void ConversationSpaceComponent::SetIsActive(const bool Value) { SetProperty(static_cast<uint32_t>(ConversationPropertyKeys::IsActive), Value); }
 
@@ -255,6 +262,24 @@ const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 {
     // TODO: Implement getNumberOfReplies - OF-1385
     return 0;
+}
+
+void ConversationSpaceComponent::OnCreated()
+{
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->RegisterComponent(this);
+}
+
+void ConversationSpaceComponent::OnRemove()
+{
+    auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+    ConversationSystem->DeregisterComponent(this);
+}
+
+void ConversationSpaceComponent::OnLocalDelete()
+{
+    const auto Callback = [](const NullResult& Result) {};
+    DeleteConversation(Callback);
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)

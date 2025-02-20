@@ -23,6 +23,8 @@
 #include "CSP/Systems/HotspotSequence/HotspotGroup.h"
 #include "CSP/Systems/SystemBase.h"
 
+#include <unordered_set>
+
 namespace csp::memory
 {
 
@@ -31,6 +33,11 @@ template <typename T> void Delete(T* Ptr);
 CSP_END_IGNORE
 
 } // namespace csp::memory
+
+namespace csp::multiplayer
+{
+class ConversationSpaceComponent;
+}
 
 namespace csp::systems
 {
@@ -50,6 +57,8 @@ public:
 
     ConversationSystemInternal(csp::systems::AssetSystem* AssetSystem, csp::systems::SpaceSystem* SpaceSystem, csp::systems::UserSystem* UserSystem,
         csp::multiplayer::EventBus* InEventBus);
+
+    ~ConversationSystemInternal();
 
     void CreateConversation(const csp::common::String& Message, csp::systems::StringResultCallback Callback);
 
@@ -78,12 +87,32 @@ public:
     void DeleteMessages(const csp::common::String& ConversationId, csp::common::Array<csp::systems::AssetCollection>& Messages,
         csp::systems::NullResultCallback Callback);
 
+    void RegisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
+    void DeregisterComponent(csp::multiplayer::ConversationSpaceComponent* Component);
+
+    /// @brief Registers the system to listen for the named event.
+    void RegisterSystemCallback() override;
+    /// @brief Deregisters the system from listening for the named event.
+    void DeregisterSystemCallback() override;
+    /// @brief Deserialises the event values of the system.
+    /// @param EventValues std::vector<signalr::value> : event values to deserialise
+    CSP_NO_EXPORT void OnEvent(const std::vector<signalr::value>& EventValues) override;
+
+    // Attempt to flush any events that haven't been sent.
+    // They may fail to send in situtations where the conversation component hasn't been created before the creation event fires.
+    void FlushEvents();
+
 private:
+    bool TrySendEvent(const csp::multiplayer::ConversationEventParams& Params);
+
     csp::systems::AssetSystem* AssetSystem;
     csp::systems::SpaceSystem* SpaceSystem;
     csp::systems::UserSystem* UserSystem;
 
     csp::multiplayer::EventBus* EventBus;
+
+    std::unordered_set<csp::multiplayer::ConversationSpaceComponent*> Components;
+    std::vector<csp::multiplayer::ConversationEventParams> Events;
 };
 
 }

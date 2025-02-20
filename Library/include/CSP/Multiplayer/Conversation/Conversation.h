@@ -50,7 +50,7 @@ public:
     /// @brief The id of the conversation.
     csp::common::String ConversationId;
 
-    /// @brief TODO: Whether this is the root message
+    /// @brief Whether this is the root message in the conversation
     bool IsConversation;
 
     /// @brief The time the message was created

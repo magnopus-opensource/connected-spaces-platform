@@ -31,6 +31,19 @@
 #include "CSP/Multiplayer/Conversation/Conversation.h"
 #include "CSP/Multiplayer/MultiPlayerConnection.h"
 
+CSP_START_IGNORE
+#ifdef CSP_TESTS
+class CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
+class CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
+class CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
+#endif
+CSP_END_IGNORE
+
+namespace csp::systems
+{
+class ConversationSystemInternal;
+}
+
 namespace csp::multiplayer
 {
 
@@ -54,6 +67,18 @@ enum class ConversationPropertyKeys
 /// @brief Add a conversation with comment thread to your space. These conversations have a spatial representation.
 class CSP_API ConversationSpaceComponent : public ComponentBase, public IPositionComponent, public IRotationComponent
 {
+    CSP_START_IGNORE
+    /** @cond DO_NOT_DOCUMENT */
+    friend class csp::systems::ConversationSystemInternal;
+
+#ifdef CSP_TESTS
+    friend class ::CSPEngine_ConversationTests_ConversationComponentEventTest_Test;
+    friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventTest_Test;
+    friend class ::CSPEngine_ConversationSystemTests_ConversationSystemEventDelayTest_Test;
+#endif
+    /** @endcond */
+    CSP_END_IGNORE
+
 public:
     /// @brief Constructs the conversation component, and associates it with the specified Parent space entity.
     /// @param Parent The Space entity that owns this component.
@@ -74,7 +99,7 @@ public:
     CSP_ASYNC_RESULT void AddMessage(const csp::common::String& Message, MessageResultCallback Callback);
 
     /// @brief Deletes a particular message
-    /// @param MessageId csp::common::String : if of the message that will be deleted
+    /// @param MessageId csp::common::String : id of the message that will be deleted
     /// @param Callback NullResultCallback : callback when asynchronous task finishes
     CSP_ASYNC_RESULT void DeleteMessage(const csp::common::String& MessageId, csp::systems::NullResultCallback Callback);
 
@@ -109,6 +134,9 @@ public:
 
     typedef std::function<void(const csp::multiplayer::ConversationEventParams&)> ConversationUpdateCallbackHandler;
 
+    /// @brief Sets a callback for a conversation update event.
+    /// This will only receive events that match this componenets conversation id.
+    /// @param Callback ConversationUpdateCallbackHandler: Callback to receive data for the conversation that has been changed.
     CSP_ASYNC_RESULT void SetConversationUpdateCallback(ConversationUpdateCallbackHandler Callback);
 
     /// \addtogroup IPositionComponent
@@ -153,6 +181,11 @@ public:
 
     /// @brief Gets the Number Of Replies of the conversation.
     const int64_t GetNumberOfReplies() const;
+
+protected:
+    void OnCreated() override;
+    void OnRemove() override;
+    void OnLocalDelete() override;
 
 private:
     void SetConversationId(const csp::common::String& Value);
