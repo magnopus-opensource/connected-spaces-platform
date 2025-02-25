@@ -25,6 +25,7 @@
 #include "CSP/Multiplayer/SpaceEntity.h"
 #include "CSP/Systems/SystemsManager.h"
 #include "CSP/Systems/Users/UserSystem.h"
+#include "MultiplayerTestRunnerProcess.h"
 #include "TestHelpers.h"
 
 #include "gtest/gtest.h"
@@ -665,4 +666,122 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentEventTest)
     DeleteSpace(SpaceSystem, Space.Id);
     LogOut(UserSystem);
 }
+#endif
+
+/*
+Tests that the CreateConversaiton event is correctly received and processed by other clients.
+Due to multiplayer messages being received before the component has a valid component id, we need to ensure that the event is stored and processed
+correctly when receiving the component property from a patch, which has been created by the ConversationSpaceComponent::CreateConversation call.
+*/
+#if RUN_ALL_UNIT_TESTS || RUN_CONVERSATION_TESTS || RUN_CONVERSATIONCOMPONENT_SECOND_CLIENT_EVENT_DELAY_TEST
+CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentSecondClientEventDelayTest)
+{
+    auto& SystemsManager = csp::systems::SystemsManager::Get();
+    auto* UserSystem = SystemsManager.GetUserSystem();
+    auto* SpaceSystem = SystemsManager.GetSpaceSystem();
+    auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
+
+    // Create user
+    auto TestUser = CreateTestUser();
+
+    // Log in
+    csp::common::String UserId;
+    LogIn(UserSystem, UserId, TestUser.Email, GeneratedTestAccountPassword);
+
+    // Create space
+    const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
+    const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
+
+    char UniqueSpaceName[256];
+    SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
+
+    csp::systems::Space Space;
+    CreateSpace(
+        SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Unlisted, nullptr, nullptr, nullptr, nullptr, Space);
+
+    // Enter space
+    auto [EnterResult] = AWAIT_PRE(SpaceSystem, EnterSpace, RequestPredicate, Space.Id);
+
+    // Get conversation component created by other client
+    SpaceEntity* Entity = nullptr;
+    ConversationSpaceComponent* ConversationComponent = nullptr;
+
+    // Create multiplayer test runner to create a conversation
+    MultiplayerTestRunnerProcess CreateConversationRunner
+        = MultiplayerTestRunnerProcess(MultiplayerTestRunner::TestIdentifiers::TestIdentifier::CREATE_CONVERSATION)
+              .SetSpaceId(Space.Id.c_str())
+              .SetLoginEmail(TestUser.Email.c_str())
+              .SetPassword(GeneratedTestAccountPassword)
+              .SetTimeoutInSeconds(60);
+
+    std::future<void> ReadyForAssertionsFuture = CreateConversationRunner.ReadyForAssertionsFuture();
+
+    // Run the test runner and wait for the entity created callback
+    {
+        bool CallbackCalled = false;
+
+        EntitySystem->SetEntityCreatedCallback(
+            [EntitySystem, &CallbackCalled, &Entity](csp::multiplayer::SpaceEntity* NewEntity)
+            {
+                Entity = NewEntity;
+                CallbackCalled = true;
+            });
+
+        // Start other client
+        CreateConversationRunner.StartProcess();
+
+        WaitForCallback(CallbackCalled);
+        EXPECT_TRUE(Entity != nullptr);
+    }
+
+    // Wait for the component creation patch
+    {
+        bool ComponentCreated = false;
+
+        Entity->SetUpdateCallback(
+            [&ComponentCreated, &ConversationComponent](
+                SpaceEntity* Entity, SpaceEntityUpdateFlags, csp::common::Array<ComponentUpdateInfo>& Components)
+            {
+                for (size_t i = 0; i < Components.Size(); ++i)
+                {
+                    if (Components[i].UpdateType == ComponentUpdateType::Add)
+                    {
+                        ConversationComponent = static_cast<ConversationSpaceComponent*>(Entity->GetComponent(0));
+                        ComponentCreated = true;
+                    }
+                }
+            });
+
+        // We need to wait and update here, as patches require us to process updates
+        WaitForCallbackWithUpdate(ComponentCreated, EntitySystem);
+
+        EXPECT_TRUE(ComponentCreated);
+        EXPECT_TRUE(ConversationComponent != nullptr);
+    }
+
+    // Ensure conversation created callback is called
+    {
+        bool CallbackCalled = false;
+
+        ConversationComponent->SetConversationUpdateCallback(
+            [&CallbackCalled](const csp::multiplayer::ConversationEventParams& Params) { CallbackCalled = true; });
+
+        WaitForCallbackWithUpdate(CallbackCalled, EntitySystem);
+        EXPECT_TRUE(CallbackCalled);
+    }
+
+    // Just being safe here, so we dont hang forever in case of catastrophe.
+    auto Status = ReadyForAssertionsFuture.wait_for(std::chrono::seconds(20));
+
+    if (Status == std::future_status::timeout)
+    {
+        FAIL() << "CreateAvatar process timed out before it was ready for assertions.";
+    }
+
+    // Cleanup
+    AWAIT_PRE(SpaceSystem, ExitSpace, RequestPredicate);
+    DeleteSpace(SpaceSystem, Space.Id);
+    LogOut(UserSystem);
+}
+
 #endif

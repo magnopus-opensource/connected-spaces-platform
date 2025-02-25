@@ -227,7 +227,7 @@ void ConversationSpaceComponent::SetConversationUpdateCallback(ConversationUpdat
 {
     ConversationUpdateCallback = Callback;
 
-    // Flush events now that we have a callback.
+    // Flush events now that we have a callback, as we may have events stored for us.
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
     ConversationSystem->FlushEvents();
 }
@@ -266,20 +266,39 @@ const int64_t ConversationSpaceComponent::GetNumberOfReplies() const
 
 void ConversationSpaceComponent::OnCreated()
 {
+    // Register component to the ConversationSystem to receive conversation events
+    // now that the component has been created.
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
     ConversationSystem->RegisterComponent(this);
 }
 
 void ConversationSpaceComponent::OnRemove()
 {
+    // Deregister component from the ConversationSystem to stop receiving conversation events
+    // now that the component has been removed.
     auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
     ConversationSystem->DeregisterComponent(this);
 }
 
 void ConversationSpaceComponent::OnLocalDelete()
 {
+    // The component has been deleted by this client,
+    // also delete the conversation
     const auto Callback = [](const NullResult& Result) {};
     DeleteConversation(Callback);
+}
+
+void ConversationSpaceComponent::SetPropertyFromPatch(uint32_t Key, const ReplicatedValue& Value)
+{
+    ComponentBase::SetPropertyFromPatch(Key, Value);
+
+    if (Key == static_cast<uint32_t>(ConversationPropertyKeys::ConversationId) && Value.GetString() != "")
+    {
+        // If the conversaiton id has been updated, flush the event buffer to send any queued events to this component, because
+        // the conversation system looks up the corrosponding events components using this id
+        auto* ConversationSystem = SystemsManager::Get().GetConversationSystem();
+        ConversationSystem->FlushEvents();
+    }
 }
 
 void ConversationSpaceComponent::SetConversationId(const csp::common::String& Value)

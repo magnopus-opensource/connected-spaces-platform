@@ -805,6 +805,7 @@ void SpaceEntity::DeserialiseFromPatch(IEntityDeserialiser& Deserialiser)
                                 }
 
                                 Components[ComponentKey] = Component;
+                                Component->OnCreated();
                             }
                             break;
                         }
