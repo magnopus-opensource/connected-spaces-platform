@@ -30,7 +30,7 @@ class LightSpaceComponentScriptInterface : public ComponentScriptInterface
 public:
     LightSpaceComponentScriptInterface(LightSpaceComponent* InComponent = nullptr);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, LightType);
+    DECLARE_SCRIPT_PROPERTY(int32_t, LightType);
     DECLARE_SCRIPT_PROPERTY(float, Intensity);
     DECLARE_SCRIPT_PROPERTY(float, Range);
     DECLARE_SCRIPT_PROPERTY(float, InnerConeAngle);
@@ -43,7 +43,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(bool, IsVisible);
 
     DECLARE_SCRIPT_PROPERTY(std::string, LightCookieAssetId);
-    DECLARE_SCRIPT_PROPERTY(int64_t, LightCookieType);
+    DECLARE_SCRIPT_PROPERTY(int32_t, LightCookieType);
 };
 
 } // namespace csp::multiplayer

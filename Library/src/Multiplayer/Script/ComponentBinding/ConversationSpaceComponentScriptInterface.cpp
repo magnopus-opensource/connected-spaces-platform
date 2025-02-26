@@ -33,6 +33,6 @@ DEFINE_SCRIPT_PROPERTY_VEC3(ConversationSpaceComponent, Position);
 DEFINE_SCRIPT_PROPERTY_VEC4(ConversationSpaceComponent, Rotation);
 DEFINE_SCRIPT_PROPERTY_STRING(ConversationSpaceComponent, Title);
 DEFINE_SCRIPT_PROPERTY_STRING(ConversationSpaceComponent, Date);
-DEFINE_SCRIPT_PROPERTY_TYPE(ConversationSpaceComponent, int64_t, int64_t, NumberOfReplies);
+DEFINE_SCRIPT_PROPERTY_TYPE(ConversationSpaceComponent, int32_t, int32_t, NumberOfReplies);
 
 } // namespace csp::multiplayer

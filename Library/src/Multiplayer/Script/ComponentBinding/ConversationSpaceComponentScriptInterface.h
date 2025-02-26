@@ -38,7 +38,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector4, Rotation);
     DECLARE_SCRIPT_PROPERTY(std::string, Title);
     DECLARE_SCRIPT_PROPERTY(std::string, Date);
-    DECLARE_SCRIPT_PROPERTY(int64_t, NumberOfReplies);
+    DECLARE_SCRIPT_PROPERTY(int32_t, NumberOfReplies);
 };
 
 } // namespace csp::multiplayer
