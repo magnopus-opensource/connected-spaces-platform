@@ -370,6 +370,10 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
     auto* Connection = SystemsManager.GetMultiplayerConnection();
     auto* EntitySystem = SystemsManager.GetSpaceEntitySystem();
 
+    // Log in
+    csp::common::String UserId;
+    LogInAsNewTestUser(UserSystem, UserId);
+
     const char* TestSpaceName = "OLY-UNITTEST-SPACE-REWIND";
     const char* TestSpaceDescription = "OLY-UNITTEST-SPACEDESC-REWIND";
 
