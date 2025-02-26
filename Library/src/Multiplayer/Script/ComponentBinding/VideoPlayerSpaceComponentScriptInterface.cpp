@@ -45,11 +45,11 @@ DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsLoopPlaybac
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsAutoResize);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, AttenuationRadius);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerPlaybackState, int64_t, PlaybackState);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerPlaybackState, int32_t, PlaybackState);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, CurrentPlayheadPosition);
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, float, float, TimeSincePlay);
 
-DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerSourceType, int64_t, VideoPlayerSourceType);
+DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, csp::multiplayer::VideoPlayerSourceType, int32_t, VideoPlayerSourceType);
 
 DEFINE_SCRIPT_PROPERTY_TYPE(VideoPlayerSpaceComponent, bool, bool, IsVisible);
 

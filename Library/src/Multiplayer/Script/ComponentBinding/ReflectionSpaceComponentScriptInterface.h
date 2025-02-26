@@ -37,7 +37,7 @@ public:
     DECLARE_SCRIPT_PROPERTY(Vector3, Position);
     DECLARE_SCRIPT_PROPERTY(Vector3, Scale);
 
-    DECLARE_SCRIPT_PROPERTY(int64_t, ReflectionShape);
+    DECLARE_SCRIPT_PROPERTY(int32_t, ReflectionShape);
 };
 
 } // namespace csp::multiplayer
