@@ -42,15 +42,15 @@ namespace csp::multiplayer
 
 class AssetCollection;
 
-/// @ingroup Conversation System
-/// @brief Data representation of a message, whether it's the start of a conversation, or a message within one.
+/// @ingroup Conversation
+/// @brief Contains information about a conversation message.
 class CSP_API MessageInfo
 {
 public:
     /// @brief The id of the conversation.
     csp::common::String ConversationId;
 
-    /// @brief Whether this is the root message in the conversation
+    /// @brief Whether this is the root message of the conversation
     bool IsConversation;
 
     /// @brief The time the message was created
@@ -75,7 +75,7 @@ public:
     MessageInfo(const MessageInfo& MessageData);
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data for an Annotation, used to help display the annotation in a consistent way to all end users.
 class CSP_API AnnotationData
 {
@@ -145,7 +145,7 @@ enum class ConversationEventType
     DeleteAnnotation
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when a message is being retrieved
 class CSP_API MessageResult : public csp::systems::ResultBase
 {
@@ -179,7 +179,7 @@ private:
     MessageInfo MsgInfo;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a collection of messages
 class CSP_API MessageCollectionResult : public csp::systems::ResultBase
 {
@@ -226,7 +226,7 @@ private:
     uint64_t ResultTotalCount = 0;
 };
 
-/// @ingroup Conversation System
+/// @ingroup Conversation
 /// @brief Data class used to contain information when retrieving a conversation.
 class CSP_API ConversationResult : public csp::systems::ResultBase
 {

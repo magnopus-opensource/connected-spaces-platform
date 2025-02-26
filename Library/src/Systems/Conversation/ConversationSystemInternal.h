@@ -45,6 +45,10 @@ class AssetSystem;
 class SpaceSystem;
 class UserSystem;
 
+/*
+This is an internal system used by ConversationComponent
+Read the documentation for ConversationComponent for more information
+*/
 class CSP_API ConversationSystemInternal : public SystemBase
 {
 public:
