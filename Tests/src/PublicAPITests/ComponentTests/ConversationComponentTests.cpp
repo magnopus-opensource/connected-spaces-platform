@@ -376,6 +376,7 @@ CSP_PUBLIC_TEST(CSPEngine, ConversationTests, ConversationComponentNumberOfRepli
     char UniqueSpaceName[256];
     SPRINTF(UniqueSpaceName, "%s-%s", TestSpaceName, GetUniqueString().c_str());
 
+    csp::systems::Space Space;
     CreateSpace(
         SpaceSystem, UniqueSpaceName, TestSpaceDescription, csp::systems::SpaceAttributes::Private, nullptr, nullptr, nullptr, nullptr, Space);
 
