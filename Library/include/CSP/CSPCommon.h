@@ -18,6 +18,8 @@
 // Enable this define if you are using the CSP library in DLL form
 // #define USING_CSP_DLL
 
+// test
+
 #if defined(_WIN32) && !defined(CSP_WINDOWS)
 #define CSP_WINDOWS
 #elif defined(__APPLE__) && !defined(CSP_MACOSX) && !defined(CSP_IOS)
